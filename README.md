@@ -1,4 +1,4 @@
-# iOS 14 Radar Widget
+# iOS 14 Rain Radar Widget
 This iOS App adds a weather radar app in a rather hacky way to your home screen. This is my first iOS app, should not be used in production and is far from perfect or done.
 
 Because widgets can only display static text or images, and I struggled using MKSnapshotter of a MKMapView with an overlay, the radar image for the widget gets served by an api. When an api call happens, a screenshot of a local website with a map and a rain overlay is created and served as the api response. I know, I know, don't judge me... 🤫
