@@ -20,18 +20,26 @@
     <script>
         const queryString = window.location.search;
         const param = new URLSearchParams(queryString);
+        const mapTypes = {
+            1: [L.tileLayer("https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png")],
+            2: [L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png")],
+            3: [L.tileLayer("http://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"), L.tileLayer("http://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}")],
+            4: [L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"), L.tileLayer("http://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}")],
+            5: [L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}.png")]
+        };
         let map = L.map(document.getElementById("mapid"), {
-            zoom: 11,
+            //zoom: 8.5,
+            zoom: 8,
             center: [param.get('lat'), param.get('lon')],
             attributionControl: false,
             controls: false,
-            layers: [L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}.png")]
+            layers: mapTypes[param.get('mapType')]
         });
         map.removeControl(map.zoomControl);
         fetch("https://api.rainviewer.com/public/maps.json")
             .then(result => result.json())
             .then(data => {
-                L.tileLayer('https://tilecache.rainviewer.com/v2/radar/{ts}/{size}/{z}/{x}/{y}/{color}/{options}.png', { ts: data[data.length - 1], size: 256, color: 8, options: "1_0", opacity: 0.6 }).addTo(map);//, {attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'}).addTo(map);
+                L.tileLayer('https://tilecache.rainviewer.com/v2/radar/{ts}/{size}/{z}/{x}/{y}/{color}/{options}.png', { ts: data[data.length - 1], size: 256, color: param.get('radarColor'), options: "1_0", opacity: 0.9 }).addTo(map);//, {attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'}).addTo(map);
                 dateObj = new Date(data[data.length - 1] * 1000);
                 utcString = dateObj.toLocaleString();
                 console.log(utcString);
