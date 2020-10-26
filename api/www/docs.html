@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation</title>
+</head>
+<body>
+    <h1>API Documentation (preliminary)</h1>
+    Short description of all API routes and all its options.
+    <h2>Get Mapshot</h2>
+    <code>/api/v2/mapshot?lat=52.41&lon=12.55&map=3&color=8&key=KEY</code>
+    <br><br>
+    Cached: TRUE, 10 minutes
+    <h3>Options</h3>
+    Obligatory: 
+    <ul>
+        <li>lat: latitude of position</li>
+        <li>lon: longitude of position</li>
+        <li>key: your api key</li>
+    </ul>
+    Optional: 
+    <ul>
+    <li>
+        map: map type
+        <ul>
+            <li>1: Original</li>
+            <li>2: Universal Blue</li>
+            <li>3: TITAN</li>
+            <li>4: The Weather Channel</li>
+            <li>5: Meteored</li>
+            <li>6: NEXRAD Level III</li>
+            <li>7: Rainbow @ SELEX-IS</li>
+            <li>8: Dark Sky (standard)</li>
+        </ul>
+    </li>
+    <li>
+        color: color of rain radar
+        <ul>
+            <li>1: hybrid map (OpenStreetMap)</li>
+            <li>2: hybrid map (CartoDB)</li>
+            <li>3: dark map (ArcGIS)</li>
+            <li>4: satellite map (ArcGIS, standard)</li>
+            <li>5: hybrid map (ArcGIS)</li>
+        </ul>
+    </li>
+    </ul>
+
+    <h2>Get Weather</h2>
+    <code>undocumented due to OpenWeatherMap API limitations</code>
+    <br><br>
+    Cached: TRUE, 15 minutes
+    <h3>Options</h3>
+    Obligatory: 
+    <ul>
+        <li>lat: latitude of position</li>
+        <li>lon: longitude of position</li>
+        <li>key: your api key</li>
+    </ul>
+</body>
+</html>
