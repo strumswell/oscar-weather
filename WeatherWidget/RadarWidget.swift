@@ -1,6 +1,6 @@
     //
-    //  WeatherWidget.swift
-    //  WeatherWidget
+    //  RadarWidget.swift
+    //  RadarWidget
     //
     //  Created by Philipp Bolte on 22.09.20.
     //
@@ -46,7 +46,7 @@
             print(locationManager.authorizationStatus.rawValue)
             locationManager.requestAlwaysAuthorization()
             
-            guard let url = URL(string: "https://.../mapshot/\(coordinate.latitude)/\(coordinate.longitude)/mapshot.png") else { return }
+            guard let url = URL(string: "https://radar.bolte.cloud/api/v2/mapshot?lat=\(coordinate.latitude)&lon=\(coordinate.longitude)&map=3&key=") else { return }
             
             UIImage.loadFrom(url: url) { image in
                 if let image = image {
@@ -80,7 +80,7 @@
         let image: Image
     }
     
-    struct WeatherWidgetEntryView : View {
+    struct RadarWidgetEntryView : View {
         var entry: Provider.Entry
         
         var body: some View {
@@ -99,47 +99,25 @@
                                 .frame(width: 10, height: 10)
                         }
                     )
-                /*
-                GeometryReader { geometry in
-                    HStack {
-                        Spacer()
-                        VStack {
-                            Spacer()
-                            ZStack {
-                                Capsule()
-                                    .fill(Color.white)
-                                    .opacity(0.8)
-                                    .frame(width: 50, height: 25)
-                                Text("15:45")
-                                    .font(.footnote)
-                                    .fontWeight(.light)
-                                    .padding()
-                            }
-                        }
-                    }
-                    .padding(.trailing, geometry.size.width * 0.03)
-                }
-                */
             }
         }
     }
     
-    @main
-    struct WeatherWidget: Widget {
+    struct RadarWidget: Widget {
         let kind: String = "WeatherWidget"
         
         var body: some WidgetConfiguration {
             StaticConfiguration(kind: kind, provider: Provider()) { entry in
-                WeatherWidgetEntryView(entry: entry)
+                RadarWidgetEntryView(entry: entry)
             }
             .configurationDisplayName("Regenradar")
             .description("Regenradar für aktuellen Standort")
         }
     }
     
-    struct WeatherWidget_Previews: PreviewProvider {
+    struct RadarWidget_Previews: PreviewProvider {
         static var previews: some View {
-            WeatherWidgetEntryView(entry: RadarEntry(date: Date(), image: Image(uiImage: UIImage(named: "rain")!)))
+            RadarWidgetEntryView(entry: RadarEntry(date: Date(), image: Image(uiImage: UIImage(named: "rain")!)))
                 .previewContext(WidgetPreviewContext(family: .systemSmall))
         }
     }

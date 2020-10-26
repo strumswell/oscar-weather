@@ -3,96 +3,36 @@
 //  Weather
 //
 //  Created by Philipp Bolte on 22.09.20.
-//
+//  Weather icons by Rasmus Nielsen https://www.iconfinder.com/iconsets/weatherful
 
 import SwiftUI
 import MapKit
 
 
 struct ContentView: View {
-    @ObservedObject var locationViewModel = LocationViewModel()
+    @State var weather = WeatherResponse()
     
+    let locationManager = CLLocationManager()
+    let defaultCoordinate = CLLocationCoordinate2D.init(latitude: 52.41667, longitude: 12.55)
+
     var body: some View {
         ZStack {
             LinearGradient(gradient: Gradient(colors: [Color("gradientBlueLight"), Color("gradientBlueDark")]), startPoint: .top, endPoint: .bottom)
             VStack {
-                VStack(alignment: .center) {
-                    Text("Brandenburg an der Havel")
-                        .font(.title)
-                        .fontWeight(.regular)
-                        .padding(.bottom)
-                    Text("10°")
-                        .font(.system(size: 90))
-                        .fontWeight(.regular)
-                        .padding(.bottom)
-                    Text("Leichter Regen")
-                        .font(.title3)
-                        .padding(.bottom)
-                }
-                .padding(.top, 120)
-                
-                ScrollView(.vertical) {
+                ScrollView(.vertical, showsIndicators: false) {
+                    HeadView(weather: self.$weather)
                     VStack(alignment: .leading) {
-                        Text("Stunden")
-                            .font(.system(size: 20))
-                            .bold()
-                            .padding()
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 30) {
-                                VStack {
-                                    Text("16 Uhr")
-                                        .padding(.bottom)
-                                    Text("☁️")
-                                        .padding(.bottom)
-                                    Text("14°")
-                                }
-                                VStack {
-                                    Text("17 Uhr")
-                                        .padding(.bottom)
-                                    Text("☁️")
-                                        .padding(.bottom)
-                                    Text("13°")
-                                }
-                                VStack {
-                                    Text("18 Uhr")
-                                        .padding(.bottom)
-                                    Text("🌧️")
-                                        .padding(.bottom)
-                                    Text("10°")
-                                }
-                                VStack {
-                                    Text("19 Uhr")
-                                        .padding(.bottom)
-                                    Text("🌧️")
-                                        .padding(.bottom)
-                                    Text("8°")
-                                }
-                                VStack {
-                                    Text("20 Uhr")
-                                        .padding(.bottom)
-                                    Text("🌧️")
-                                        .padding(.bottom)
-                                    Text("8°")
-                                }
-                                VStack {
-                                    Text("21 Uhr")
-                                        .padding(.bottom)
-                                    Text("🌧️")
-                                        .padding(.bottom)
-                                    Text("7°")
-                                }
-                                VStack {
-                                    Text("22 Uhr")
-                                        .padding(.bottom)
-                                    Text("🌧️")
-                                        .padding(.bottom)
-                                    Text("8°")
-                                }
-                            }
-                            .font(.system(size: 18))
-                            .padding(.leading)
+                        RainView(weather: self.$weather)
+                        HourlyView(weather: self.$weather)
+                        DailyView(weather: self.$weather)
+                        HStack {
+                            Spacer()
+                            Text("Oscar° by Philipp Bolte")
+                                .font(.caption)
+                                .fontWeight(.light)
+                            Spacer()
                         }
-                        .frame(maxWidth: .infinity)
+                        .padding(.bottom, 25)
                     }
                 }
                 .padding(.top)
@@ -100,8 +40,37 @@ struct ContentView: View {
         }
         .foregroundColor(.white)
         .edgesIgnoringSafeArea(.all)
+        .onAppear(perform: getWeatherData)
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            getWeatherData()
+        }
+    }
+    
+    // Thanks to https://www.hackingwithswift.com/books/ios-swiftui/sending-and-receiving-codable-data-with-urlsession-and-swiftui
+    func getWeatherData() {
+        let coordinate = self.defaultCoordinate //locationManager.location?.coordinate ?? self.defaultCoordinate
+        
+        guard let url = URL(string: "https://radar.bolte.cloud/api/v2/weather/forecast?lat=\(coordinate.latitude)&lon=\(coordinate.longitude)&key=") else {
+            print("Invalid URL")
+            return
+        }
+        let request = URLRequest(url: url)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                if let decodedResponse = try? JSONDecoder().decode(WeatherResponse.self, from: data) {
+                    DispatchQueue.main.async {
+                        self.weather = decodedResponse.self
+                    }
+                    return
+                }
+            }
+            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+        }.resume()
     }
 }
+
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
