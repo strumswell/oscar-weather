@@ -33,13 +33,13 @@
             center: [param.get('lat'), param.get('lon')],
             attributionControl: false,
             controls: false,
-            layers: mapTypes[param.get('mapType')]
+            layers: mapTypes[param.get('map')]
         });
         map.removeControl(map.zoomControl);
         fetch("https://api.rainviewer.com/public/maps.json")
             .then(result => result.json())
             .then(data => {
-                L.tileLayer('https://tilecache.rainviewer.com/v2/radar/{ts}/{size}/{z}/{x}/{y}/{color}/{options}.png', { ts: data[data.length - 1], size: 256, color: param.get('radarColor'), options: "1_0", opacity: 0.9 }).addTo(map);//, {attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'}).addTo(map);
+                L.tileLayer('https://tilecache.rainviewer.com/v2/radar/{ts}/{size}/{z}/{x}/{y}/{color}/{options}.png', { ts: data[data.length - 1], size: 256, color: param.get('color'), options: "1_0", opacity: 0.9 }).addTo(map);//, {attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'}).addTo(map);
                 dateObj = new Date(data[data.length - 1] * 1000);
                 utcString = dateObj.toLocaleString();
                 console.log(utcString);
