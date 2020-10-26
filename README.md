@@ -1,16 +1,16 @@
-# iOS 14 Rain Radar Widget
-This iOS App adds a weather radar app in a rather hacky way to your home screen. This is my first iOS app, should not be used in production and is far from perfect or done.
-
-Because widgets can only display static text or images, and I struggled using MKSnapshotter of a MKMapView with an overlay, the radar image for the widget gets served by an api. When an api call happens, a screenshot of a local website with a map and a rain overlay is created and served as the api response. I know, I know, don't judge me... 🤫
+# Oscar Weather App for iOS
+This iOS weather app adds a weather radar widget in a rather hacky way (!screenshot API!) to your home screen. This is my first iOS app, should not be used in production and is far from perfect or done.
 
 What's done:
-- rain radar for your current location
-- a dummy app screen
+- rain radar widget for your current location
+- an unfinished app UI
+- OpenWeatherMap integration for fixed lat/ lon
 
 What has to be done:
-- add OpenWeatherMap support
 - finish UI
-- add input for static weather location
+- add manual input for weather location
+- add support for multiple weather locations
+- add more widgets
 
 What could be done:
 - implement radar map as snapshot (MKSnapshotter) of the MKMapView with the rain overlay. I wasn't successful with that so far, hence the screenshot api.
