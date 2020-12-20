@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct RainView: View {
-    @Binding var weather: WeatherResponse
+    @Binding var weather: WeatherResponse?
     var body: some View {
         Text("Regen")
             .font(.system(size: 20))
@@ -17,9 +17,10 @@ struct RainView: View {
         
         HStack {
             VStack(alignment: .trailing) {
-                Text("\(weather.getMaxPreci(), specifier: "%.1f") mm")                    .font(.caption2)
+                Text("\(weather?.getMaxPreci() ?? 0.0, specifier: "%.1f") mm")
+                    .font(.caption2)
                 Spacer()
-                Text("\(weather.getMaxPreci() / 2, specifier: "%.1f") mm")
+                Text("\(weather?.getMaxPreci() ?? 0.0 / 2, specifier: "%.1f") mm")
                     .font(.caption2)
                 Spacer()
                 Text("0.0 mm")
@@ -34,25 +35,25 @@ struct RainView: View {
                 HStack(alignment: .bottom, spacing: 4) {
                     Capsule()
                         .opacity(0)
-                        .frame(height: 50)
-                    ForEach(weather.minutely!, id: \.self) { n in
+                        .frame(width: 1, height: 50)
+                    ForEach(weather?.minutely! ?? [], id: \.self) { n in
                         Capsule()
                             .fill(Color.white)
-                            .frame(height: CGFloat(n.getHeight(maxHeight: 50, maxPreci: weather.getMaxPreci())) + 1)
+                            .frame(width: 1, height: CGFloat(n.getHeight(maxHeight: 50, maxPreci: weather?.getMaxPreci() ?? 0.0)) + 1)
                     }
                 }
                 .frame(height: 50)
                 
                 HStack() {
-                    Text("\(weather.minutely?.first?.getTimeString() ?? "")")
+                    Text("\(weather?.minutely?.first?.getTimeString() ?? "")")
                         .font(.footnote)
                     Spacer()
-                    if (weather.minutely!.count > 1) {
-                        Text("\(weather.minutely?[30].getTimeString() ?? "")")
+                    if (weather?.minutely!.count ?? 0 > 1) {
+                        Text("\(weather?.minutely?[30].getTimeString() ?? "")")
                             .font(.footnote)
                         Spacer()
                     }
-                    Text("\(weather.minutely?.last?.getTimeString() ?? "")")
+                    Text("\(weather?.minutely?.last?.getTimeString() ?? "")")
                         .font(.footnote)
                 }
                 Spacer()

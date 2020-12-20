@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct DailyView: View {
-    @Binding var weather: WeatherResponse
+    @Binding var weather: WeatherResponse?
     var body: some View {
         Text("7-Tage")
             .font(.system(size: 20))
@@ -16,13 +16,13 @@ struct DailyView: View {
             .padding([.leading, .top])
         HStack {
             VStack(alignment: .leading, spacing: 14) {
-                ForEach(weather.daily!, id: \.self) { day in
+                ForEach(weather?.daily! ?? [], id: \.self) { day in
                     Text(day.getWeekDay())
                 }
             }
             Spacer()
             VStack(spacing: 0.5) {
-                ForEach(weather.daily!, id: \.self) { day in
+                ForEach(weather?.daily! ?? [], id: \.self) { day in
                     Image(day.getIconString())
                         .resizable()
                         .scaledToFit()
@@ -30,22 +30,22 @@ struct DailyView: View {
                 }
             }
             VStack(alignment: .leading, spacing: 21) {
-                ForEach(weather.daily!, id: \.self) { day in
+                ForEach(weather?.daily! ?? [], id: \.self) { day in
                     Text(day.getFormattedPop() + " %")
                         .font(.caption)
                 }
             }
             Spacer()
-            VStack(alignment: .leading, spacing: 14) {
-                ForEach(weather.daily!, id: \.self) { day in
-                    Text("\(day.temp.max, specifier: "%.0f")°")
+            VStack(alignment: .trailing, spacing: 14) {
+                ForEach(weather?.daily! ?? [], id: \.self) { day in
+                    Text("\(day.temp.max, specifier: "%.0f")")
                         .fontWeight(.semibold)
                 }
             }
             Spacer()
-            VStack(alignment: .leading, spacing: 14) {
-                ForEach(weather.daily!, id: \.self) { day in
-                    Text("\(day.temp.min, specifier: "%.0f")°")
+            VStack(alignment: .trailing, spacing: 14) {
+                ForEach(weather?.daily! ?? [], id: \.self) { day in
+                    Text("\(day.temp.min, specifier: "%.0f")")
                         .fontWeight(.light)
                 }
             }

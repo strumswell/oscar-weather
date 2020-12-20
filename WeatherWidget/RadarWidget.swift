@@ -46,7 +46,7 @@
             print(locationManager.authorizationStatus.rawValue)
             locationManager.requestAlwaysAuthorization()
             
-            guard let url = URL(string: "https://radar.bolte.cloud/api/v2/mapshot?lat=\(coordinate.latitude)&lon=\(coordinate.longitude)&map=3&key=") else { return }
+            guard let url = URL(string: "https://?lat=\(coordinate.latitude)&lon=\(coordinate.longitude)&key=") else { return }
             
             UIImage.loadFrom(url: url) { image in
                 if let image = image {

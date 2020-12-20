@@ -1,5 +1,5 @@
 //
-//  WeatherModel.swift
+//  WeatherReponse.swift
 //  Weather
 //
 //  Attribution:

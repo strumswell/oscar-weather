@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct HourlyView: View {
-    @Binding var weather: WeatherResponse
+    @Binding var weather: WeatherResponse?
+    
     var body: some View {
         Text("Stündlich")
             .font(.system(size: 20))
@@ -16,7 +17,7 @@ struct HourlyView: View {
             .padding(.leading)
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 30) {
-                ForEach(weather.hourly!, id: \.self) { hour in
+                ForEach(weather?.hourly! ?? [], id: \.self) { hour in
                     VStack {
                         Text(hour.getHourString() + " Uhr")
                         Text(hour.getFormattedPop() + " %")
