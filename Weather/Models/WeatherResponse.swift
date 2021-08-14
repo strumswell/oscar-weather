@@ -38,8 +38,13 @@ public struct WeatherResponse: Codable {
         return current != nil ? current!.weatherInfo() : ""
     }
     
-    public func getMaxPreci() -> Double {
+    public func getMaxPreciLabel() -> Double {
         var maxPreci = 0.0
+        
+        guard (minutely != nil) else {
+            return 1.0
+        }
+        
         for minute in minutely! {
             if (minute.precipitation > maxPreci) {
                 maxPreci = minute.precipitation
@@ -47,6 +52,21 @@ public struct WeatherResponse: Codable {
         }
         if (maxPreci <= 1) {
             return 1.0
+        }
+        return maxPreci
+    }
+    
+    public func getMaxPreci() -> Double {
+        var maxPreci = 0.0
+        
+        guard (minutely != nil) else {
+            return 0.0
+        }
+        
+        for minute in minutely! {
+            if (minute.precipitation > maxPreci) {
+                maxPreci = minute.precipitation
+            }
         }
         return maxPreci
     }

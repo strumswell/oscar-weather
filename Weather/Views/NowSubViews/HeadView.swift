@@ -12,26 +12,36 @@ struct HeadView: View {
     @Binding var placemark: CLPlacemark?
     
     var body: some View {
-        VStack {
+        LazyVStack {
             Text(placemark?.locality ?? "...")
-                .font(.title)
-                .fontWeight(.regular)
-                .padding(.bottom)
-            HStack(alignment: .center) {
-                Image(weather?.current!.getIconString() ?? "")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 112, height: 112)
-                Text("\(weather?.current!.temp ?? 0.0, specifier: "%.0f")°")
-                    .font(.system(size: 90))
-                    .fontWeight(.regular)
-            }
-            .padding(.bottom)
-            Text("\(weather?.current!.weatherInfo() ?? "")")
-                .font(.title3)
-                .padding(.bottom)
+                .font(.title2)
+                .fontWeight(.bold)
+                .lineSpacing(/*@START_MENU_TOKEN@*/10.0/*@END_MENU_TOKEN@*/)
+                .foregroundColor(.white)
+                .padding(.bottom, 40)
+                .gradientForeground(colors: [Color("gradientBlueDark"), .white])
+
+            Image(weather?.current!.getIconString() ?? "")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 175, height: 175)
+                .padding(.bottom, -10)
+            
+            Text("\(weather?.current!.temp ?? 0.0, specifier: "%.0f")°")
+                .bold()
+                .gradientForeground(colors: [Color("gradientBlueDark"), .white])
+                .font(.system(size: 90))
         }
-        .padding(.top, 90)
-        .padding(.bottom, 50)
+        .padding(.top, 80)
+        .padding(.bottom, 100)
+    }
+}
+
+extension View {
+    public func gradientForeground(colors: [Color]) -> some View {
+        self.overlay(LinearGradient(gradient: .init(colors: colors),
+                                    startPoint: .bottom,
+                                    endPoint: .top))
+            .mask(self)
     }
 }

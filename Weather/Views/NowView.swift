@@ -6,12 +6,10 @@
 //  Weather icons by Rasmus Nielsen https://www.iconfinder.com/iconsets/weatherful
 
 import SwiftUI
-import MapKit
-
 
 struct NowView: View {
     @ObservedObject var nowViewModel: NowViewModel = NowViewModel()
-    
+
     init() {
         UITabBar.appearance().backgroundColor = .clear
     }
@@ -19,27 +17,29 @@ struct NowView: View {
     var body: some View {
         VStack {
             ScrollView(.vertical, showsIndicators: false) {
+                RefreshView(coordinateSpace: .named("RefreshView"), nowViewModel: nowViewModel)
                 HeadView(weather: $nowViewModel.weather, placemark: $nowViewModel.placemark)
+                    
                 VStack(alignment: .leading) {
+                    Spacer().frame(height: 20)
                     RainView(weather: $nowViewModel.weather)
                     HourlyView(weather: $nowViewModel.weather)
                     DailyView(weather: $nowViewModel.weather)
+                    RadarView(location: $nowViewModel.coordinates, radarMetadata: $nowViewModel.currentRadarMetadata)
                 }
-                .padding(.bottom, 80)
+                .background(Color("gradientBlueLight"))
+                .cornerRadius(25)
             }
+            .coordinateSpace(name: "RefreshView")
         }
         .padding(.top)
-        .background(LinearGradient(gradient: Gradient(colors: [Color("gradientBlueDark"), Color("gradientBlueLight")]), startPoint: .top, endPoint: .bottom))
+        .background(LinearGradient(gradient: Gradient(colors: [.black, Color("gradientBlueLight")]), startPoint: .topTrailing, endPoint: .bottom))
         .edgesIgnoringSafeArea(.all)
         .onAppear {
-            nowViewModel.fetchCurrentCoordinates()
-            nowViewModel.fetchCurrentPlacemark()
-            nowViewModel.fetchCurrentWeather()
+            nowViewModel.update()
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-            nowViewModel.fetchCurrentCoordinates()
-            nowViewModel.fetchCurrentPlacemark()
-            nowViewModel.fetchCurrentWeather()
+            nowViewModel.update()
         }
     }
 }

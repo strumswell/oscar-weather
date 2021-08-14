@@ -15,4 +15,4 @@ What has to be done:
 What could be done:
 - implement radar map as snapshot (MKSnapshotter) of the MKMapView with the rain overlay. I wasn't successful with that so far, hence the screenshot api.
 
-![www](img/radar-overview.jpg)
+![www](img/preview.png)
