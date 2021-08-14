@@ -1,18 +1,17 @@
 # Oscar Weather App for iOS
-This iOS weather app adds a weather radar widget in a rather hacky way (!screenshot API!) to your home screen. This is my first iOS app, should not be used in production and is far from perfect or done.
+This iOS weather app is written with SwiftUI. It is far from finished and should not be used in production.
 
-What's done:
-- rain radar widget for your current location
-- an unfinished app UI
-- OpenWeatherMap integration for fixed lat/ lon
+Features: 
+- Rather finished UI
+- Weather data from OpenWeatherMap of current location through my api proxy (currently, minutely rain forcast, hourly, daily)
+- Current rain radar (native in app, via snapshot api in widget -> tbc!)
 
-What has to be done:
-- finish UI
-- add manual input for weather location
-- add support for multiple weather locations
-- add more widgets
-
-What could be done:
-- implement radar map as snapshot (MKSnapshotter) of the MKMapView with the rain overlay. I wasn't successful with that so far, hence the screenshot api.
+Todo: Settings, location picker, time travel with rain radar, native rain radar widget, other widgets
 
 ![www](img/preview.png)
+
+## Acknowledgements 
+- Weather data from [OpenWeatherMap](https://openweathermap.org)
+- Rain radar tile server [RainViewer](https://www.rainviewer.com)
+- Amazing weather icons from [Hosein Bagheri](https://ui8.net/hosein_bagheri/products/3d-weather-icons40)
+- Great tutorials from [Hacking with Swift](https://www.hackingwithswift.com)
