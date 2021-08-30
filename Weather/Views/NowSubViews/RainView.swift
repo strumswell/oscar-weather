@@ -17,7 +17,7 @@ struct RainView: View {
                 .bold()
                 .foregroundColor(.white.opacity(0.8))
                 .shadow(color: .white, radius: 40)
-                .padding(.leading)
+                .padding([.leading, .top])
             
             VStack {
                 HStack {
@@ -38,12 +38,21 @@ struct RainView: View {
                             .foregroundColor(.white.opacity(0.7))
                     }
                     VStack {
-                        Chart(data: weather?.minutely!.map{$0.precipitation / (weather?.getMaxPreci() ?? 1.0)} ?? [])
-                            .chartStyle(
-                                AreaChartStyle(.quadCurve, fill:
-                                    LinearGradient(gradient: .init(colors: [Color.blue.opacity(0.6), Color.blue.opacity(0.1)]), startPoint: .top, endPoint: .bottom)
+                        if ((weather?.getMaxPreci() ?? 1.0) <= 1.0) {
+                            Chart(data: weather?.minutely!.map{$0.precipitation} ?? [])
+                                .chartStyle(
+                                    AreaChartStyle(.quadCurve, fill:
+                                        LinearGradient(gradient: .init(colors: [Color.blue.opacity(0.6), Color.blue.opacity(0.2)]), startPoint: .top, endPoint: .bottom)
+                                    )
                                 )
-                            )
+                        } else {
+                            Chart(data: weather?.minutely!.map{$0.precipitation / (weather?.getMaxPreci() ?? 1.0)} ?? [])
+                                .chartStyle(
+                                    AreaChartStyle(.quadCurve, fill:
+                                        LinearGradient(gradient: .init(colors: [Color.blue.opacity(0.6), Color.blue.opacity(0.2)]), startPoint: .top, endPoint: .bottom)
+                                    )
+                                )
+                        }
                         HStack() {
                             Text("\(weather?.minutely?.first?.getTimeString() ?? "")")
                                 .font(.footnote)
@@ -64,11 +73,11 @@ struct RainView: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 10)
-            .background(Color.black.opacity(0.2))
+            .background(Color("gradientBlueDark-7").opacity(0.3))
             .cornerRadius(10)
             .font(.system(size: 18))
             .padding([.leading, .trailing, .bottom])
-            .frame(height: 150)
+            .frame(height: 165)
         }
     }
 }

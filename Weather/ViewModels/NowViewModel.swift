@@ -9,19 +9,21 @@
 import Foundation
 import CoreLocation
 import Combine
+import SwiftUI
+import SPIndicator
+import Networking
 
 class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
+    @Published var lm: LocationManager = LocationManager()
+    @Published var cs: LocationViewModel = LocationViewModel()
+    @Published var updateDidFinish: Bool = true
     
-    private let locationManager = CLLocationManager()
-    private let defaultCoordinates = CLLocationCoordinate2D(latitude: 52.41, longitude: 12.55)
+    var anyCancellable = Set<AnyCancellable>()
+        
     let dispatchGroup =  DispatchGroup()
-    
+    private let defaultCoordinates = CLLocationCoordinate2D(latitude: 52.01, longitude: 10.77)
+        
     let objectWillChange = ObservableObjectPublisher()
-    var coordinates: CLLocationCoordinate2D? {
-        willSet {
-            objectWillChange.send()
-        }
-    }
     
     var weather: WeatherResponse? {
         willSet {
@@ -44,44 +46,64 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
     
     override init() {
         super.init()
-        self.locationManager.delegate = self
-        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        self.locationManager.requestAlwaysAuthorization()
-        self.locationManager.startUpdatingLocation()
-        self.coordinates = defaultCoordinates
+        
+        lm.objectWillChange.sink {
+            self.objectWillChange.send()
+        }
+        .store(in: &anyCancellable)
+        
+        cs.objectWillChange.sink {
+            self.objectWillChange.send()
+        }
+        .store(in: &anyCancellable)
+    
         fetchCurrentRadarMetadata(dispatchGroup: dispatchGroup)
     }
     
     func update() {
-        fetchCurrentCoordinates(dispatchGroup: dispatchGroup)
+        cs.update()
+        lm.update()
+        
         fetchCurrentPlacemark(dispatchGroup: dispatchGroup)
         fetchCurrentWeather(dispatchGroup: dispatchGroup)
         fetchCurrentRadarMetadata(dispatchGroup: dispatchGroup)
     }
-
-    /*
-     * Fetch users current coordinates
-     */
-    private func fetchCurrentCoordinates(dispatchGroup: DispatchGroup) {
-        dispatchGroup.enter()
-        if (self.locationManager.authorizationStatus == CLAuthorizationStatus.authorizedAlways || self.locationManager.authorizationStatus == CLAuthorizationStatus.authorizedWhenInUse) {
-            self.coordinates = self.locationManager.location?.coordinate ?? defaultCoordinates
+    
+    func getActiveLocation() -> CLLocationCoordinate2D {
+        var coordinates: CLLocationCoordinate2D
+        let selectedCities = cs.cities.filter{$0.selected}
+        
+        if (selectedCities.count > 0) {
+            let city = selectedCities.first!
+            coordinates = CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
+        } else {
+            let coords = lm.gpsLocation ?? defaultCoordinates
+            coordinates = CLLocationCoordinate2D(latitude: coords.latitude, longitude: coords.longitude)
         }
-        print("Fetched Coordinates")
-        dispatchGroup.leave()
+        return coordinates
     }
     
     /*
      * Fetch placemark object of users current location
      */
-    private func fetchCurrentPlacemark(dispatchGroup: DispatchGroup) {
+    func fetchCurrentPlacemark(dispatchGroup: DispatchGroup) {
         dispatchGroup.enter()
-        let coordinate = CLLocation.init(
-            latitude: self.coordinates?.latitude ?? defaultCoordinates.latitude,
-            longitude: self.coordinates?.longitude ?? defaultCoordinates.longitude
-        )
+        
+        // Get weather location
+        var location: CLLocation
+        let selectedCities = cs.cities.filter{$0.selected}
+        
+        if (selectedCities.count > 0) {
+            let city = selectedCities.first!
+            location = CLLocation(latitude: city.lat, longitude: city.lon)
+        } else {
+            let coords = lm.gpsLocation ?? defaultCoordinates
+            location = CLLocation(latitude: coords.latitude, longitude: coords.longitude)
+        }
+        
+        
         let geocoder = CLGeocoder()
-        geocoder.reverseGeocodeLocation(coordinate,
+        geocoder.reverseGeocodeLocation(location,
                                         completionHandler: {
                                             (placemarks, error) in
                                             if error == nil {
@@ -90,8 +112,9 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
                                                 print("Fetched Placemark")
                                                 dispatchGroup.leave()
                                             } else {
-                                                self.placemark = CLPlacemark()
+                                                self.updateDidFinish = false
                                                 print("Error fetching Coordinates")
+                                                
                                                 dispatchGroup.leave()
                                             }
                                         })
@@ -101,18 +124,26 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
      * Fetch weather of current user location via external service
      * Credits: https://www.hackingwithswift.com/books/ios-swiftui/sending-and-receiving-codable-data-with-urlsession-and-swiftui
      */
-    private func fetchCurrentWeather(dispatchGroup: DispatchGroup) {
+    func fetchCurrentWeather(dispatchGroup: DispatchGroup) {
         dispatchGroup.enter()
-        let coordinate = self.coordinates ?? defaultCoordinates
-        guard let url = URL(string: "https://?lat=\(coordinate.latitude)&lon=\(coordinate.longitude)&key=") else {
-            print("Invalid URL")
-            return
-        }
-        let request = URLRequest(url: url)
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data = data {
-                if let decodedResponse = try? JSONDecoder().decode(WeatherResponse.self, from: data) {
+        // Get weather location
+        var coordinates: CLLocationCoordinate2D
+        let selectedCities = cs.cities.filter{$0.selected}
+        
+        if (selectedCities.count > 0) {
+            let city = selectedCities.first!
+            coordinates = CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
+        } else {
+            let coords = lm.gpsLocation ?? defaultCoordinates
+            coordinates = CLLocationCoordinate2D(latitude: coords.latitude, longitude: coords.longitude)
+        }
+    
+        let networking = Networking(baseURL: "https://radar.bolte.cloud/api/v2")
+        networking.get("/weather/forecast?lat=\(coordinates.latitude)&lon=\(coordinates.longitude)&key=4d0ddebf-918f-495c-bc9c-fefa333a30c7") { result in
+            switch result {
+            case .success(let response):
+                if let decodedResponse = try? JSONDecoder().decode(WeatherResponse.self, from: response.data) {
                     DispatchQueue.main.async {
                         self.weather = decodedResponse.self
                         print("Fetched Weather")
@@ -120,20 +151,23 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
                     }
                     return
                 }
+            case .failure(let response):
+                self.updateDidFinish = false
+                print(response.statusCode)
+                dispatchGroup.leave()
             }
-            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
-            dispatchGroup.leave()
-        }.resume()
+        }
+
     }
     
-    private func fetchCurrentRadarMetadata(dispatchGroup: DispatchGroup) {
+    func fetchCurrentRadarMetadata(dispatchGroup: DispatchGroup) {
         dispatchGroup.enter()
-        let url = URL(string: "https://api.rainviewer.com/public/weather-maps.json")
-        let request = URLRequest(url: url!)
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data = data {
-                if let decodedResponse = try? JSONDecoder().decode(WeatherMapsResponse.self, from: data) {
+        let networking = Networking(baseURL: "https://api.rainviewer.com")
+        networking.get("/public/weather-maps.json") { result in
+            switch result {
+            case .success(let response):
+                if let decodedResponse = try? JSONDecoder().decode(WeatherMapsResponse.self, from: response.data) {
                     DispatchQueue.main.async {
                         self.currentRadarMetadata = decodedResponse.self
                         print("Fetched Radar Metadata")
@@ -141,25 +175,11 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
                     }
                     return
                 }
+            case .failure(let response):
+                print(response.statusCode)
+                self.updateDidFinish = false
+                dispatchGroup.leave()
             }
-            print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
-            dispatchGroup.leave()
-        }.resume()
-    }
-    
-    /*
-     * If the user shares its current location, update all states
-     */
-    internal func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        if status == .authorizedWhenInUse || status == .authorizedAlways {
-            fetchCurrentCoordinates(dispatchGroup: dispatchGroup)
-            fetchCurrentPlacemark(dispatchGroup: dispatchGroup)
-            fetchCurrentWeather(dispatchGroup: dispatchGroup)
-            fetchCurrentRadarMetadata(dispatchGroup: dispatchGroup)
-            
-            dispatchGroup.notify(queue: DispatchQueue.main, execute: {
-                print("Finished all requests.")
-            })
         }
     }
 }

@@ -9,8 +9,9 @@ import SwiftUI
 import MapKit
 
 struct RadarView: View {
-    @Binding var location: CLLocationCoordinate2D?
-    @Binding var radarMetadata: WeatherMapsResponse?;
+    //@Binding var location: CLLocationCoordinate2D?
+    @ObservedObject var now: NowViewModel
+    @Binding var radarMetadata: WeatherMapsResponse?
 
     var body: some View {
         Text("Radar")
@@ -20,13 +21,13 @@ struct RadarView: View {
             .shadow(color: .white, radius: 40)
             .padding([.leading, .top, .bottom])
         
-        RadarMapView(overlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.radar.past[radarMetadata!.radar.past.count-1].path ?? ""), coordinates: location!)
+        RadarMapView(overlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.radar.past[radarMetadata!.radar.past.count-1].path ?? ""), coordinates: now.getActiveLocation())
             .frame(height: 300, alignment: .center)
             .background(Color.black.opacity(0.2))
             .cornerRadius(10)
             .font(.system(size: 18))
             .padding([.leading, .trailing])
-            .padding(.bottom, 40)
+            .padding(.bottom, 30)
     }
 }
 
@@ -54,11 +55,12 @@ struct RadarMapView: UIViewRepresentable {
     func makeUIView(context: Context) -> MKMapView {
         return MKMapView()
     }
-
+    
     func updateUIView(_ mapView: MKMapView, context: Context) {
         let overlays = mapView.overlays
 
         mapView.delegate = context.coordinator
+        mapView.overrideUserInterfaceStyle = .dark
         mapView.removeOverlays(overlays)
         mapView.addOverlay(overlay)
         

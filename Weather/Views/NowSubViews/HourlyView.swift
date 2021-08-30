@@ -18,9 +18,10 @@ struct HourlyView: View {
             .shadow(color: .white, radius: 40)
             .padding(.leading)
             .padding(.bottom, -10)
+            .padding(.top)
         
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 15) {
+            LazyHStack(spacing: 14) {
                 ForEach(weather?.hourly! ?? [], id: \.self) { hour in
                     VStack {
                         Text(hour.getHourString() + " Uhr")
@@ -40,7 +41,7 @@ struct HourlyView: View {
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 10)
-                    .background(Color.black.opacity(0.2))
+                    .background(Color("gradientBlueDark-7").opacity(0.3))
                     .cornerRadius(10)
                 }
                 .padding(.vertical, 20)

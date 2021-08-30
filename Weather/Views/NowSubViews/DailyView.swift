@@ -25,12 +25,12 @@ struct DailyView: View {
             }
             .padding(.leading)
             Spacer()
-            VStack(spacing: 0.5) {
+            VStack(spacing: 5) {
                 ForEach(weather?.daily! ?? [], id: \.self) { day in
                     Image(day.getIconString())
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 35, height: 35)
+                        .frame(width: 30, height: 30)
                 }
             }
             VStack(alignment: .leading, spacing: 21) {
@@ -60,7 +60,7 @@ struct DailyView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 10)
-        .background(Color.black.opacity(0.2))
+        .background(Color("gradientBlueDark-7").opacity(0.3))
         .cornerRadius(10)
         .font(.system(size: 18))
         .padding([.leading, .trailing])

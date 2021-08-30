@@ -3,42 +3,65 @@
 //  Weather
 //
 //  Created by Philipp Bolte on 22.09.20.
-//  Weather icons by Rasmus Nielsen https://www.iconfinder.com/iconsets/weatherful
 
 import SwiftUI
 
 struct NowView: View {
     @ObservedObject var nowViewModel: NowViewModel = NowViewModel()
+    @State private var isLegalSheetPresented = false
 
-    init() {
-        UITabBar.appearance().backgroundColor = .clear
-    }
-    
     var body: some View {
         VStack {
             ScrollView(.vertical, showsIndicators: false) {
                 RefreshView(coordinateSpace: .named("RefreshView"), nowViewModel: nowViewModel)
-                HeadView(weather: $nowViewModel.weather, placemark: $nowViewModel.placemark)
-                    
+                HeadView(now: nowViewModel)
+                
                 VStack(alignment: .leading) {
                     Spacer().frame(height: 20)
                     RainView(weather: $nowViewModel.weather)
                     HourlyView(weather: $nowViewModel.weather)
                     DailyView(weather: $nowViewModel.weather)
-                    RadarView(location: $nowViewModel.coordinates, radarMetadata: $nowViewModel.currentRadarMetadata)
+                    RadarView(now: nowViewModel, radarMetadata: $nowViewModel.currentRadarMetadata)
+                    HStack {
+                        Spacer()
+                        Image(systemName: "info.circle.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
+                            .foregroundColor(.white.opacity(0.5))
+                        Text("Rechtliche\nInformationen")
+                            .foregroundColor(.white.opacity(0.5))
+                            .font(.system(size: 10))
+                            .bold()
+                        Spacer()
+                    }
+                    .padding(.bottom, 50)
+                    .onTapGesture {
+                        UIApplication.shared.playHapticFeedback()
+                        isLegalSheetPresented.toggle()
+                    }
+                    .sheet(isPresented: $isLegalSheetPresented) {
+                        LegalView()
+                    }
                 }
-                .background(Color("gradientBlueLight"))
+                .background(LinearGradient(gradient: Gradient(colors: [.clear, Color("gradientBlueLight-5").opacity(0.7)]), startPoint: .bottom, endPoint: .center))
                 .cornerRadius(25)
             }
             .coordinateSpace(name: "RefreshView")
         }
         .padding(.top)
-        .background(LinearGradient(gradient: Gradient(colors: [.black, Color("gradientBlueLight")]), startPoint: .topTrailing, endPoint: .bottom))
+        .background(LinearGradient(gradient: Gradient(colors: [.black, Color("gradientBlueDark-7")]), startPoint: .top, endPoint: .center))
         .edgesIgnoringSafeArea(.all)
         .onAppear {
             nowViewModel.update()
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            nowViewModel.update()
+        }
+        .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("ChangedLocation"), object: nil)) { _ in
+            nowViewModel.update()
+        }
+        .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("CityToggle"), object: nil)) { _ in
             nowViewModel.update()
         }
     }

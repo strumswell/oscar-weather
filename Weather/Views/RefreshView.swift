@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreHaptics
+import SPIndicator
 
 struct RefreshView: View {
     var coordinateSpace: CoordinateSpace
@@ -22,8 +23,12 @@ struct RefreshView: View {
                         if refresh == false {
                             nowViewModel.update()
                             nowViewModel.dispatchGroup.notify(queue: DispatchQueue.main, execute: {
-                                let generator = UINotificationFeedbackGenerator()
-                                generator.notificationOccurred(.success)
+                                if (nowViewModel.updateDidFinish) {
+                                    SPIndicator.present(title: "Aktualisiert", preset: .done, haptic: .success)
+                                } else {
+                                    SPIndicator.present(title: "Fehlgeschlagen", preset: .error, haptic: .error)
+                                }
+                                nowViewModel.updateDidFinish = true // reset for next refresh
                                 refresh = false
                             })
                         }

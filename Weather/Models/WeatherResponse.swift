@@ -17,9 +17,10 @@ public struct WeatherResponse: Codable {
     public let minutely: [Minutely]?
     public let hourly: [Hourly]?
     public let daily: [Daily]?
+    public let alerts: [Alert]?
     
     enum CodingKeys: String, CodingKey {
-        case lat, lon, timezone, current, minutely, hourly, daily
+        case lat, lon, timezone, current, minutely, hourly, daily, alerts
         case timezoneOffset = "timezone_offset"
     }
     
@@ -32,6 +33,7 @@ public struct WeatherResponse: Codable {
         self.minutely = []
         self.hourly = []
         self.daily = []
+        self.alerts = []
     }
     
     public func weatherInfo() -> String {
@@ -69,6 +71,30 @@ public struct WeatherResponse: Codable {
             }
         }
         return maxPreci
+    }
+}
+
+// MARK: - Alert
+public struct Alert: Codable {
+    let senderName, event: String
+    let start, end: Int
+    let alertDescription: String
+    let tags: [String]
+
+    enum CodingKeys: String, CodingKey {
+        case senderName = "sender_name"
+        case event, start, end
+        case alertDescription = "description"
+        case tags
+    }
+    
+    func getFormattedEvent() -> String {
+        switch(self.event) {
+        case "persistent rain":
+            return "DAUERREGEN"
+        default:
+            return self.event
+        }
     }
 }
 
