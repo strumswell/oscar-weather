@@ -3,10 +3,17 @@ This iOS weather app is written with SwiftUI. It is far from finished and should
 
 Features: 
 - Rather finished UI
-- Weather data from OpenWeatherMap of current location through my api proxy (currently, minutely rain forcast, hourly, daily)
+- Weather data from OpenWeatherMap through my api proxy 
+  - Current
+  - Minutely rain forcast for next hour
+  - Hourly (48h)
+  - Daily (7d)
+  - Alerts
 - Current rain radar (native in app, via snapshot api in widget -> tbc!)
+- Location picker
+- Legal information view
 
-Todo: Settings, location picker, time travel with rain radar, native rain radar widget, other widgets
+Todo: other widgets, native rain radar widget, time travel with rain radar, light mode color scheme, api security & scalability
 
 ![www](img/preview.png)
 
