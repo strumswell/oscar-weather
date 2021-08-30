@@ -2,6 +2,24 @@
   "object": {
     "pins": [
       {
+        "package": "Networking",
+        "repositoryURL": "https://github.com/3lvis/Networking",
+        "state": {
+          "branch": null,
+          "revision": "dde4d21fcc774d988da1f842bc4582ce7f9593c2",
+          "version": "5.1.0"
+        }
+      },
+      {
+        "package": "SPIndicator",
+        "repositoryURL": "https://github.com/ivanvorobei/SPIndicator",
+        "state": {
+          "branch": null,
+          "revision": "ec54c0e60a038ef7290280259638fcc22f0ceb69",
+          "version": "1.3.1"
+        }
+      },
+      {
         "package": "Charts",
         "repositoryURL": "https://github.com/spacenation/swiftui-charts",
         "state": {
