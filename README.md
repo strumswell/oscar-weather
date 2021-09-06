@@ -1,7 +1,7 @@
 # Oscar Weather App for iOS
 This iOS weather app is written with SwiftUI. It is far from finished and should not be used in production.
 
-**Wanna join the public beta? Check out [Oscar° Beta @ Testflight](https://testflight.apple.com/join/xf5iJcHh).**
+**Wanna join the public beta? Check out [Oscar° Beta @ Testflight](https://testflight.apple.com/join/xf5iJcHh) (German only).**
 
 Features: 
 - Rather finished UI
