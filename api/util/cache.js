@@ -1,28 +1,34 @@
 const mcache = require("memory-cache");
-
 const { distanceBetweenCoordinates } = require("./distance.js");
 
-let weatherCache = (duration) => {
+/**
+ * Express middleware for caching API responses in memory
+ * @param {String} topic - Topic for cache key, e.g., weather, alert, ...
+ * @param {Int} duration - Caching duration in minutes
+ */
+let responseCache = (topic, duration) => {
   return (req, res, next) => {
     let reqLat = req.query.lat;
     let reqLon = req.query.lon;
-    let key = `weather-${reqLat}-${reqLon}`;
+    let key = `${topic}-${reqLat}-${reqLon}`;
     let cachedBody = mcache.get(key);
 
     // Server identical location if available
     if (cachedBody) {
       res.send(JSON.parse(cachedBody));
+      //console.log("Served from cache.");
       return;
     } else {
       // Serve nearby location if available
       if (mcache.keys().length > 0) {
         for (let currentKey of mcache.keys()) {
           let keyData = currentKey.split("-");
-          if (keyData[0] == "weather") {
+          if (keyData[0] == topic) {
             let cords = { lat: keyData[1], lon: keyData[2] };
             let distance = distanceBetweenCoordinates(reqLat, reqLon, cords.lat, cords.lon);
             if (distance < 2) {
               res.send(JSON.parse(mcache.get(currentKey)));
+              //console.log("Served from cache. (Nearby location)");
               return;
             }
           }
@@ -39,31 +45,4 @@ let weatherCache = (duration) => {
   };
 };
 
-let mapshotCache = (duration) => {
-  return (req, res, next) => {
-    let reqLat = req.query.lat;
-    let reqLon = req.query.lon;
-    let reqMapType = req.query.map;
-    let reqRadarColor = req.query.color;
-
-    let key = `mapshot-${reqLat}-${reqLon}-${reqMapType}-${reqRadarColor}`;
-    let cachedBody = mcache.get(key);
-
-    // Server identical location if available
-    if (cachedBody) {
-      res.sendFile(cachedBody);
-      return;
-    }
-
-    // Unknown location
-    res.sendResponse = res.sendFile;
-    res.sendFile = (body) => {
-      mcache.put(key, body, duration * 60000);
-      res.sendResponse(body);
-    };
-    next();
-  };
-};
-
-exports.weatherCache = weatherCache;
-exports.mapshotCache = mapshotCache;
+exports.responseCache = responseCache;

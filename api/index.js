@@ -1,38 +1,33 @@
-require("dotenv").config();
 const express = require("express");
 const app = express();
+const auth = require("./util/auth.js");
 const owm = require("./util/owm.js");
-const mapshotter = require("./util/mapshotter.js");
 const cache = require("./util/cache");
-const auth = require("./util/authentication");
+const { OscarUsage } = require("./util/usage.js");
+const { AccuWeather } = require("./util/accuweather.js");
+const DEBUG = false;
 
-app.listen(3000, function () {
-  console.log("Listening on 3000");
-});
-
-/*
- *   N E W   R O U T E S
- */
-app.use("/api/v2/webpage", auth.accessCheck, express.static("www", { index: "index.html" }));
-app.use("/api/v2/docs", express.static("www", { index: "docs.html" }));
-
-app.get("/api/v2/weather/forecast", auth.accessCheck, cache.weatherCache(15), (req, res) => {
+app.get("/api/v2/weather/forecast", auth.accessCheck, cache.responseCache("weather", 15), (req, res) => {
   owm.getForecast(req.query).then((json) => {
     res.send(json);
   });
 });
 
-app.get("/api/v2/mapshot", auth.accessCheck, cache.mapshotCache(10), (req, res) => {
-  mapshotter.getMapshot(req.query).then((file) => {
-    res.sendFile(file);
+app.get("/api/v2/weather/alerts", auth.accessCheck, cache.responseCache("alerts", 60), (req, res) => {
+  AccuWeather.getWeatherAlerts(req.query.lat, req.query.lon).then((json) => {
+    res.send(json);
   });
 });
 
-/*
- *   L E G A C Y   R O U T E
- */
-app.get("/n1f387no1mynf81ge8qomeh781237nro-124j192/mapshot/:lat/:lon/mapshot.jpeg", function (req, res) {
-  mapshotter.getMapshot({ lat: req.params.lat, lon: req.params.lon }).then((file) => {
-    res.sendFile(file);
+app.get("/", auth.accessCheck, (req, res) => res.send("This works!"));
+app.use("/api/v2/docs", auth.accessCheck, express.static("www", { index: "docs.html" }));
+app.use("/api/v2/usage", auth.accessCheck, (req, res) => res.send(OscarUsage.stats));
+app.use("/api/v2/dashboard", auth.accessCheck, express.static("www", { index: "dashboard.html" }));
+
+if (DEBUG) {
+  app.listen(3000, () => {
+    console.log(`Example app listening at http://localhost:3000`);
   });
-});
+}
+
+module.exports = app; // For deta.sh deployment

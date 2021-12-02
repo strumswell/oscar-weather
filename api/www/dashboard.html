@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard: Forecast API</title>
+  </head>
+  <body>
+    <h1>Usage</h1>
+    <div id="result"></div>
+  </body>
+  <script>
+    fetch("https://forecast.bolte.id/api/v2/usage?key=KEY")
+      .then((response) => response.json())
+      .then((data) => {
+        const resultDOM = document.getElementById("result");
+
+        for (const key of Object.keys(data)) {
+          var heading = document.createElement("h3");
+          heading.innerHTML = key;
+          var frame = document.createElement("p");
+          frame.innerHTML =
+            "Frame: " + new Date(data[key]["currentFrame"]).toLocaleString() + " (" + data[key]["calls"] + " calls)";
+          var bar = document.createElement("progress");
+          bar.setAttribute("value", data[key]["calls"] + "");
+          bar.setAttribute("max", "100");
+          bar.setAttribute("style", "width: 80vw;");
+
+          resultDOM.appendChild(heading);
+          resultDOM.appendChild(frame);
+          resultDOM.appendChild(bar);
+        }
+      });
+  </script>
+</html>
