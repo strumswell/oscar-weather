@@ -9,19 +9,45 @@ import SwiftUI
 struct NowView: View {
     @ObservedObject var nowViewModel: NowViewModel = NowViewModel()
     @State private var isLegalSheetPresented = false
-
+    @State private var isMapSheetPresented = false
+    
     var body: some View {
-        VStack {
+        ZStack {
+            // MARK: Map Header
+            VStack {
+                ZStack {
+                    RadarView(now: nowViewModel, radarMetadata: $nowViewModel.currentRadarMetadata, showLayerSettings: false)
+                        .frame(height: 500)
+                    Rectangle()
+                        .frame(height: 500, alignment: .top)
+                        .foregroundColor(.clear)
+                        .background(LinearGradient(gradient: Gradient(colors: [Color.black.opacity(0.6), .clear]), startPoint: .top, endPoint: .center))
+                }
+                Spacer()
+            }
+
+            // MARK: Weather Sheet
             ScrollView(.vertical, showsIndicators: false) {
                 RefreshView(coordinateSpace: .named("RefreshView"), nowViewModel: nowViewModel)
-                HeadView(now: nowViewModel)
+                
+                // Proxy element to check for taps on map behind scroll view
+                Rectangle()
+                    .frame(height: 200)
+                    .foregroundColor(Color.gray.opacity(0.0001)) // No on tap for .clear
+                    .onTapGesture {
+                        UIApplication.shared.playHapticFeedback()
+                        isMapSheetPresented.toggle()
+                    }
+                    .sheet(isPresented: $isMapSheetPresented) {
+                        MapDetailView(now: nowViewModel)
+                    }
                 
                 VStack(alignment: .leading) {
                     Spacer().frame(height: 20)
+                    HeadView(now: nowViewModel)
                     RainView(weather: $nowViewModel.weather)
                     HourlyView(weather: $nowViewModel.weather)
                     DailyView(weather: $nowViewModel.weather)
-                    RadarView(now: nowViewModel, radarMetadata: $nowViewModel.currentRadarMetadata)
                     HStack {
                         Spacer()
                         Image(systemName: "info.circle.fill")
@@ -35,6 +61,7 @@ struct NowView: View {
                             .bold()
                         Spacer()
                     }
+                    .padding(.top)
                     .padding(.bottom, 50)
                     .onTapGesture {
                         UIApplication.shared.playHapticFeedback()
@@ -44,13 +71,13 @@ struct NowView: View {
                         LegalView()
                     }
                 }
-                .background(LinearGradient(gradient: Gradient(colors: [.clear, Color("gradientBlueLight-5").opacity(0.7)]), startPoint: .bottom, endPoint: .center))
+                .background(LinearGradient(gradient: Gradient(colors: [Color.black, Color("gradientBlueLight-4")]), startPoint: .bottom, endPoint: .top))
                 .cornerRadius(25)
+                .shadow(color: .black.opacity(0.5), radius: 25)
             }
             .coordinateSpace(name: "RefreshView")
         }
-        .padding(.top)
-        .background(LinearGradient(gradient: Gradient(colors: [.black, Color("gradientBlueLight-2")]), startPoint: .top, endPoint: .center))
+        .background(Color.black)
         .edgesIgnoringSafeArea(.all)
         .onAppear {
             nowViewModel.update()

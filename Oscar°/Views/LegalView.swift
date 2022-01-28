@@ -22,7 +22,7 @@ struct LegalView: View {
                                 .foregroundColor(.white)
                                 .background(Color.blue)
                                 .cornerRadius(5)
-                            Link("Datenschutz", destination: URL(string: "https://bolte.id")!)
+                            Link("Datenschutz", destination: URL(string: "https://oscars.love/")!)
                                 .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .font(.body)
                         }
@@ -32,7 +32,7 @@ struct LegalView: View {
                                 .foregroundColor(.white)
                                 .background(Color.blue)
                                 .cornerRadius(5)
-                            Link("Impressum", destination: URL(string: "https://bolte.id")!)
+                            Link("Impressum", destination: URL(string: "https://oscars.love/")!)
                                 .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .font(.body)
                         }
@@ -78,7 +78,7 @@ struct LegalView: View {
                                 .foregroundColor(.white)
                                 .background(Color.red)
                                 .cornerRadius(5)
-                            Link("Networking", destination: URL(string: "https://github.com/3lvis/Networking")!)
+                            Link("Alamofire", destination: URL(string: "https://github.com/Alamofire/Alamofire")!)
                                 .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .font(.body)
                         }

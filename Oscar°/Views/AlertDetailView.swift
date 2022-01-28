@@ -43,7 +43,8 @@ struct AlertDetailView: View {
                     .bold()
                 Spacer()
             }
-            .padding(.bottom)
+            .padding(.bottom, 1)
+            
             HStack {
                 Text(alert.area.first?.summary.components(separatedBy: "Quelle:")[0] ?? "")
                     .font(.body)
@@ -57,7 +58,6 @@ struct AlertDetailView: View {
                     .font(.subheadline)
                 Spacer()
             }
-            .padding(.top, 1)
         }
         .padding([.top, .bottom])
     }

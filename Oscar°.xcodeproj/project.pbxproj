@@ -23,14 +23,14 @@
 		25BEDCEA26CAD10B00D90D6B /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE926CAD10B00D90D6B /* SearchView.swift */; };
 		25D003C626CD490200FFF8B8 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D003C526CD490200FFF8B8 /* LocationManager.swift */; };
 		25D2645D26C7D23C00BE90A1 /* Charts in Frameworks */ = {isa = PBXBuildFile; productRef = 25D2645C26C7D23C00BE90A1 /* Charts */; };
-		25D6354E259DE3840071801B /* RadarWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D6354D259DE3840071801B /* RadarWebView.swift */; };
 		25D90A5326C40DB800128F7A /* WeatherMapsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D90A5226C40DB800128F7A /* WeatherMapsResponse.swift */; };
+		25DA7A1A27A420970062E02B /* MapDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DA7A1927A420970062E02B /* MapDetailView.swift */; };
 		25E30B2B26CD9B31007F468D /* CityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25E30B2A26CD9B31007F468D /* CityService.swift */; };
+		25ED4A4727A2F5C60050C4A9 /* HeadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED4A4627A2F5C60050C4A9 /* HeadView.swift */; };
 		25EE9F2326E4F7AF0066C362 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D003C526CD490200FFF8B8 /* LocationManager.swift */; };
 		3E22B523251D151300D86A58 /* WeatherApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB89014251A55700028FED0 /* WeatherApp.swift */; };
 		3E279B23252C755900BAAA20 /* WeatherResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E279B22252C755900BAAA20 /* WeatherResponse.swift */; };
 		3E58A6A12549CE5A00594EF8 /* WeatherResponseCC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E58A6A02549CE5A00594EF8 /* WeatherResponseCC.swift */; };
-		3E6117002544AE9B00B68120 /* HeadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6116FF2544AE9B00B68120 /* HeadView.swift */; };
 		3E6117042544B1C700B68120 /* RainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6117032544B1C700B68120 /* RainView.swift */; };
 		3E6117082544B27600B68120 /* HourlyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6117072544B27600B68120 /* HourlyView.swift */; };
 		3E61170C2544B2D300B68120 /* DailyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E61170B2544B2D300B68120 /* DailyView.swift */; };
@@ -82,12 +82,12 @@
 		25BEDCE726CAD02A00D90D6B /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		25BEDCE926CAD10B00D90D6B /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		25D003C526CD490200FFF8B8 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
-		25D6354D259DE3840071801B /* RadarWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarWebView.swift; sourceTree = "<group>"; };
 		25D90A5226C40DB800128F7A /* WeatherMapsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherMapsResponse.swift; sourceTree = "<group>"; };
+		25DA7A1927A420970062E02B /* MapDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapDetailView.swift; sourceTree = "<group>"; };
 		25E30B2A26CD9B31007F468D /* CityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityService.swift; sourceTree = "<group>"; };
+		25ED4A4627A2F5C60050C4A9 /* HeadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadView.swift; sourceTree = "<group>"; };
 		3E279B22252C755900BAAA20 /* WeatherResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherResponse.swift; sourceTree = "<group>"; };
 		3E58A6A02549CE5A00594EF8 /* WeatherResponseCC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherResponseCC.swift; sourceTree = "<group>"; };
-		3E6116FF2544AE9B00B68120 /* HeadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadView.swift; sourceTree = "<group>"; };
 		3E6117032544B1C700B68120 /* RainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainView.swift; sourceTree = "<group>"; };
 		3E6117072544B27600B68120 /* HourlyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyView.swift; sourceTree = "<group>"; };
 		3E61170B2544B2D300B68120 /* DailyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyView.swift; sourceTree = "<group>"; };
@@ -142,7 +142,7 @@
 		255C23AE258F93900066B2BD /* NowSubViews */ = {
 			isa = PBXGroup;
 			children = (
-				3E6116FF2544AE9B00B68120 /* HeadView.swift */,
+				25ED4A4627A2F5C60050C4A9 /* HeadView.swift */,
 				3E6117032544B1C700B68120 /* RainView.swift */,
 				3E6117072544B27600B68120 /* HourlyView.swift */,
 				3E61170B2544B2D300B68120 /* DailyView.swift */,
@@ -177,11 +177,11 @@
 			children = (
 				255C23AE258F93900066B2BD /* NowSubViews */,
 				3EB89016251A55700028FED0 /* NowView.swift */,
-				25D6354D259DE3840071801B /* RadarWebView.swift */,
 				25804B9526C735EE00D92241 /* RefreshView.swift */,
 				25BEDCE926CAD10B00D90D6B /* SearchView.swift */,
 				2536438026DACCB800C8A952 /* LegalView.swift */,
 				259704E42757D7E800DFCA53 /* AlertDetailView.swift */,
+				25DA7A1927A420970062E02B /* MapDetailView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -372,16 +372,16 @@
 				3E22B523251D151300D86A58 /* WeatherApp.swift in Sources */,
 				25BEDCEA26CAD10B00D90D6B /* SearchView.swift in Sources */,
 				3EB89017251A55700028FED0 /* NowView.swift in Sources */,
+				25DA7A1A27A420970062E02B /* MapDetailView.swift in Sources */,
 				25D003C626CD490200FFF8B8 /* LocationManager.swift in Sources */,
-				25D6354E259DE3840071801B /* RadarWebView.swift in Sources */,
 				25BEDCE426CACF7D00D90D6B /* DataModels.xcdatamodeld in Sources */,
 				3E6117082544B27600B68120 /* HourlyView.swift in Sources */,
 				259704E12757D19C00DFCA53 /* AlertResponse.swift in Sources */,
 				25BEDCE626CACFC900D90D6B /* PersistenceController.swift in Sources */,
 				259704E52757D7E800DFCA53 /* AlertDetailView.swift in Sources */,
+				25ED4A4727A2F5C60050C4A9 /* HeadView.swift in Sources */,
 				25D90A5326C40DB800128F7A /* WeatherMapsResponse.swift in Sources */,
 				3E279B23252C755900BAAA20 /* WeatherResponse.swift in Sources */,
-				3E6117002544AE9B00B68120 /* HeadView.swift in Sources */,
 				25A0CEDD26C4068300DD4A79 /* RadarView.swift in Sources */,
 				3E58A6A12549CE5A00594EF8 /* WeatherResponseCC.swift in Sources */,
 			);
@@ -538,17 +538,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°/Preview Content\"";
 				DEVELOPMENT_TEAM = N6J2M765XY;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "Oscar°/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.7;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -563,17 +563,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°/Preview Content\"";
 				DEVELOPMENT_TEAM = N6J2M765XY;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "Oscar°/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.7;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -587,17 +587,17 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = N6J2M765XY;
 				INFOPLIST_FILE = "Oscar°Widget/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.7;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar.OscarWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -612,17 +612,17 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = N6J2M765XY;
 				INFOPLIST_FILE = "Oscar°Widget/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.7;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar.OscarWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

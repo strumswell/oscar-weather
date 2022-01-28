@@ -42,7 +42,7 @@ struct RefreshView: View {
                 }
             }.frame(width: geo.size.width)
         }
-        .padding(.top, -50)
+        .padding(.top, -200)
         .frame(height: 10)
     }
 }

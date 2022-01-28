@@ -9,29 +9,27 @@ import SwiftUI
 import MapKit
 
 struct RadarView: View {
-    //@Binding var location: CLLocationCoordinate2D?
     @ObservedObject var now: NowViewModel
     @Binding var radarMetadata: WeatherMapsResponse?
     @State var cloudLayer: Bool = false
     @State var rainLayer: Bool = true
     @State var pressureLayer: Bool = false
     @State var tempLayer: Bool = false
+    var showLayerSettings: Bool
+
 
     var body: some View {
-        Text("Radar")
-            .font(.system(size: 20))
-            .bold()
-            .foregroundColor(.white.opacity(0.8))
-            .shadow(color: .white, radius: 40)
-            .padding([.leading, .top, .bottom])
-            .onTapGesture {
-                cloudLayer = false
-            }
-        ZStack {
-            RadarMapView(
-                overlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.radar.past[radarMetadata!.radar.past.count-1].path ?? "", color: "2", options: "1_1"),
-                cloudOverlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.satellite.infrared.last?.path ?? "", color: "0", options: "0_0"),
-                coordinates: now.getActiveLocation(), cities: now.cs.cities, cloudLayer: cloudLayer, rainLayer: rainLayer, pressureLayer: pressureLayer, tempLayer: tempLayer)
+        RadarMapView(
+            overlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.radar.past[radarMetadata!.radar.past.count-1].path ?? "", color: "2", options: "1_1"),
+            cloudOverlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.satellite.infrared.last?.path ?? "", color: "0", options: "0_0"),
+            coordinates: now.getActiveLocation(),
+            cities: now.cs.cities,
+            cloudLayer: cloudLayer,
+            rainLayer: rainLayer,
+            pressureLayer: pressureLayer,
+            tempLayer: tempLayer
+        )
+        if (showLayerSettings) {
             VStack {
                 HStack {
                     Spacer()
@@ -87,12 +85,6 @@ struct RadarView: View {
             .padding(.trailing)
             .padding(.top)
         }
-        .frame(height: 350, alignment: .center)
-        .background(Color.black.opacity(0.2))
-        .cornerRadius(10)
-        .font(.system(size: 18))
-        .padding([.leading, .trailing])
-        .padding(.bottom, 30)
     }
 }
 
@@ -146,8 +138,8 @@ struct RadarMapView: UIViewRepresentable {
 
         mapView.delegate = context.coordinator
         mapView.overrideUserInterfaceStyle = .dark
-        mapView.showsScale = true
         mapView.removeOverlays(overlays)
+        
         if (pressureLayer) {
             let overlay = MKTileOverlay(urlTemplate: "https://services.meteored.com/img/tiles/cep010/{z}/{x}/{y}/0\(String(format: "%02d",hour-2))_prsvie.png")
             mapView.addOverlay(overlay)
@@ -165,7 +157,8 @@ struct RadarMapView: UIViewRepresentable {
         }
 
         
-        let coordinateRegion = MKCoordinateRegion(center: coordinates, latitudinalMeters: 130000, longitudinalMeters: 130000)
+        // Define region to center map on -> Modify lat so selected city is visible in the map view (Map view extends down behind the weather sheet -> pull to refresh shows no blank space behind sheet
+        let coordinateRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: coordinates.latitude-0.5, longitude: coordinates.longitude), latitudinalMeters: 150000, longitudinalMeters: 150000)
         
         mapView.setRegion(coordinateRegion, animated: false)
         mapView.showsUserLocation = true
