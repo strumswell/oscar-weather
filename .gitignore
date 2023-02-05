@@ -2,3 +2,4 @@
 api/node_modules
 api/.DS_Store
 api/.env
+api/dist
