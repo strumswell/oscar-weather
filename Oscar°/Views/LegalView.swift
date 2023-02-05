@@ -38,14 +38,24 @@ struct LegalView: View {
                         }
                     }
                     
-                    Section(header: Text("Datenquellen")) {
+                    Section(header: Text("Services")) {
                         HStack {
                             Image(systemName: "sun.max.fill")
                                 .frame(width: 30, height: 30)
                                 .foregroundColor(.white)
                                 .background(Color.green)
                                 .cornerRadius(5)
-                            Link("OpenWeatherMap", destination: URL(string: "https://openweathermap.org")!)
+                            Link("OpenMeteo", destination: URL(string: "https://open-meteo.com/en")!)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .font(.body)
+                        }
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(.white)
+                                .background(Color.green)
+                                .cornerRadius(5)
+                            Link("Deutscher Wetterdienst", destination: URL(string: "https://www.dwd.de")!)
                                 .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .font(.body)
                         }
@@ -61,7 +71,7 @@ struct LegalView: View {
                         }
                     }
                     
-                    Section(header: Text("Sonstige")) {
+                    Section(header: Text("Sonstiges")) {
                         HStack {
                             Image(systemName: "chart.pie.fill")
                                 .frame(width: 30, height: 30)
@@ -103,28 +113,68 @@ struct LegalView: View {
                                 .font(.body)
                         }
                     }
-                }
-                
-                
-                HStack {
-                    Spacer()
-                    VStack {
-                        Text("Oscar° Weather")
-                            .font(.body)
-                            .bold()
-                        Text("by Philipp Bolte")
-                            .font(.caption)
-                            .padding(.bottom, 5)
-                        Text("In Gedenken an Kater Oscar von der Katzenfreiheit")
-                            .font(.caption2)
-                            .foregroundColor(.gray)
-                        Text("* 17.04.02 – † 03.08.21")
-                            .font(.caption2)
-                            .foregroundColor(.gray)
+                    
+                    Section(header: Text("Datenquellen")) {
+                        HStack {
+                            Link("ICON (Deutscher Wetterdienst)", destination: URL(string: "https://www.dwd.de")!)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .font(.body)
+                        }
+                        HStack {
+                            Link("GFS (NOAA)", destination: URL(string: "https://www.nco.ncep.noaa.gov/pmb/products/gfs/")!)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .font(.body)
+                        }
+                        HStack {
+                            Link("Arpege & Arome (MeteoFrance)", destination: URL(string: "https://meteofrance.com")!)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .font(.body)
+                        }
+                        HStack {
+                            Link("IFS (ECMWF)", destination: URL(string: "https://www.ecmwf.int/en/forecasts/datasets/open-data")!)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .font(.body)
+                        }
+                        HStack {
+
+                            Link("JMA (JMA)", destination: URL(string: "https://www.jma.go.jp/jma/en/Activities/nwp.html")!)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .font(.body)
+                        }
+                        HStack {
+
+                            Link("MET Nordic (MET Norway)", destination: URL(string: "https://github.com/metno/NWPdocs/wiki/MET-Nordic-dataset")!)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .font(.body)
+                        }
+                        HStack {
+
+                            Link("GEM (Canadian Weather Service)", destination: URL(string: "https://en.wikipedia.org/wiki/Global_Environmental_Multiscale_Model")!)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .font(.body)
+                        }
                     }
-                    Spacer()
+                    
+                    HStack {
+                        Spacer()
+                        VStack {
+                            Text("Oscar° Weather")
+                                .font(.body)
+                                .bold()
+                            Text("by Philipp Bolte")
+                                .font(.caption)
+                                .padding(.bottom, 2)
+                            Text("In Gedenken an Kater Oscar von der Katzenfreiheit")
+                                .font(.caption2)
+                                .foregroundColor(.gray)
+                            Text("* 17.04.02 – † 03.08.21")
+                                .font(.caption2)
+                                .foregroundColor(.gray)
+                        }
+                        Spacer()
+                    }
+                    .padding(.bottom, 1)
                 }
-                .padding(.bottom)
             }
             .navigationBarTitle(Text("Rechtliches"), displayMode: .inline)
             .toolbar(content: {

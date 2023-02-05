@@ -9,12 +9,13 @@ import SwiftUI
 
 struct MapDetailView: View {
     @ObservedObject var now: NowViewModel
+    @ObservedObject var settingsService: SettingService
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         NavigationView {
             ZStack {
-                RadarView(now: now, radarMetadata: $now.currentRadarMetadata, showLayerSettings: true)
+                RadarView(settingsService: settingsService, now: now, radarMetadata: $now.currentRadarMetadata, showLayerSettings: true)
             }
             .ignoresSafeArea(edges: [.bottom])
             .navigationBarTitle(Text("Karte"), displayMode: .inline)

@@ -9,7 +9,6 @@ import Foundation
 import CoreLocation
 import Combine
 import SwiftUI
-import SPIndicator
 
 class LocationManager: NSObject, CLLocationManagerDelegate, ObservableObject {
     private let manager = CLLocationManager()

@@ -8,6 +8,7 @@ import SwiftUI
 
 struct NowView: View {
     @ObservedObject var nowViewModel: NowViewModel = NowViewModel()
+    @ObservedObject var settingsService: SettingService = SettingService()
     @State private var isLegalSheetPresented = false
     @State private var isMapSheetPresented = false
     
@@ -16,12 +17,11 @@ struct NowView: View {
             // MARK: Map Header
             VStack {
                 ZStack {
-                    RadarView(now: nowViewModel, radarMetadata: $nowViewModel.currentRadarMetadata, showLayerSettings: false)
+                    RadarView(settingsService: settingsService, now: nowViewModel, radarMetadata: $nowViewModel.currentRadarMetadata, showLayerSettings: false)
                         .frame(height: 500)
                     Rectangle()
                         .frame(height: 500, alignment: .top)
                         .foregroundColor(.clear)
-                        .background(LinearGradient(gradient: Gradient(colors: [Color.black.opacity(0.6), .clear]), startPoint: .top, endPoint: .center))
                 }
                 Spacer()
             }
@@ -39,24 +39,25 @@ struct NowView: View {
                         isMapSheetPresented.toggle()
                     }
                     .sheet(isPresented: $isMapSheetPresented) {
-                        MapDetailView(now: nowViewModel)
+                        MapDetailView(now: nowViewModel, settingsService: settingsService)
                     }
                 
                 VStack(alignment: .leading) {
                     Spacer().frame(height: 20)
                     HeadView(now: nowViewModel)
-                    RainView(weather: $nowViewModel.weather)
+                    RainView(rain: $nowViewModel.rain)
                     HourlyView(weather: $nowViewModel.weather)
                     DailyView(weather: $nowViewModel.weather)
+                    AQIView(aqi: $nowViewModel.aqi)
                     HStack {
                         Spacer()
                         Image(systemName: "info.circle.fill")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 20, height: 20)
-                            .foregroundColor(.gray.opacity(0.8))
+                            .foregroundColor(Color(UIColor.label))
                         Text("Rechtliche\nInformationen")
-                            .foregroundColor(.gray.opacity(0.8))
+                            .foregroundColor(Color(UIColor.label))
                             .font(.system(size: 10))
                             .bold()
                         Spacer()
@@ -71,13 +72,12 @@ struct NowView: View {
                         LegalView()
                     }
                 }
-                .background(LinearGradient(gradient: Gradient(colors: [Color.black, Color("gradientBlueLight-4")]), startPoint: .bottom, endPoint: .top))
-                .cornerRadius(25)
-                .shadow(color: .black.opacity(0.5), radius: 25)
+                .background(Color(UIColor.secondarySystemBackground))
+                .cornerRadius(30)
             }
             .coordinateSpace(name: "RefreshView")
         }
-        .background(Color.black)
+        .background(Color(UIColor.secondarySystemBackground))
         .edgesIgnoringSafeArea(.all)
         .onAppear {
             nowViewModel.update()

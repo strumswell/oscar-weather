@@ -2,7 +2,6 @@
 //  NowViewModel.swift
 //  Weather
 //
-// TODO: I need to clean/ break this up...
 //
 //  Created by Philipp Bolte on 17.12.20.
 //
@@ -11,7 +10,6 @@ import CoreLocation
 import Combine
 import SwiftUI
 import SPIndicator
-import Networking
 import WidgetKit
 import Alamofire
 
@@ -25,11 +23,18 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
     
     var anyCancellable = Set<AnyCancellable>()
     let objectWillChange = ObservableObjectPublisher()
-    var weather: WeatherResponse? {
+    var weather: OpenMeteoResponse? {
         willSet {
             objectWillChange.send()
         }
     }
+    
+    var aqi: AQIResponse? {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
     
     var currentRadarMetadata: WeatherMapsResponse? {
         willSet {
@@ -43,7 +48,13 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
         }
     }
     
-    var alerts: [AWAlert]? {
+    var alerts: [DWDAlert]? {
+        willSet {
+            objectWillChange.send()
+        }
+    }
+    
+    var rain: RainRadarForecast? {
         willSet {
             objectWillChange.send()
         }
@@ -74,9 +85,11 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
         lm.update()
         
         fetchCurrentPlacemark(dispatchGroup: dispatchGroup)
-        fetchCurrentWeather(dispatchGroup: dispatchGroup)
+        fetchOpenMeteoData()
+        fetchCurrentRainData(dispatchGroup: dispatchGroup)
         fetchWeatherAlerts()
         fetchCurrentRadarMetadata(dispatchGroup: dispatchGroup)
+        fetchAQIData()
         WidgetCenter.shared.reloadAllTimelines()
     }
     
@@ -87,10 +100,10 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
         
         if (selectedCities.count > 0) {
             let city = selectedCities.first!
-            coordinates = CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
+            coordinates = CLLocationCoordinate2D(latitude: round(city.lat * 1000) / 1000.0, longitude: round(city.lon * 1000) / 1000.0)
         } else {
             let coords = lm.gpsLocation ?? defaultCoordinates
-            coordinates = CLLocationCoordinate2D(latitude: coords.latitude, longitude: coords.longitude)
+            coordinates = CLLocationCoordinate2D(latitude: round(coords.latitude * 1000) / 1000.0, longitude: round(coords.longitude * 1000) / 1000.0)
         }
         return coordinates
     }
@@ -154,11 +167,11 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
         dispatchGroup.enter()
         
         let coordinates = self.getCurrentCoords()
-        let url = "https://forecast.bolte.id/api/v2/weather/forecast?lat=\(coordinates.latitude)&lon=\(coordinates.longitude)&key="
-        AF.request(url).validate().responseDecodable(of: WeatherResponse.self) { response in
+        let url = "https://forecast.bolte.id/api/v3/weather/forecast?lat=\(coordinates.latitude)&lon=\(coordinates.longitude)&key=4d0ddebf-918f-495c-bc9c-fefa333a30c7"
+        AF.request(url).validate().responseDecodable(of: BrightskyResponse.self) { response in
             switch response.result {
             case .success:
-                self.weather = response.value
+                //self.weather = response.value
                 dispatchGroup.leave()
             case let .failure(error):
                 print(error)
@@ -185,14 +198,60 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
         }
     }
     
+    func fetchCurrentRainData(dispatchGroup: DispatchGroup) {
+        dispatchGroup.enter()
+        let url = "https://api.oscars.love/api/v1/rain?lat=\(getCurrentCoords().latitude.description)&lon=\(getCurrentCoords().longitude.description)"
+        // Call rainviewer and get current tile URL
+        AF.request(url).validate().responseDecodable(of: RainRadarForecast.self) { response in
+            switch response.result {
+            case .success:
+                self.rain = response.value
+                dispatchGroup.leave()
+            case let .failure(error):
+                print(error)
+                dispatchGroup.leave()
+            }
+        }
+    }
+    
     func fetchWeatherAlerts() {
-        let url: String = "https://forecast.bolte.id/api/v2/weather/alerts?key=&lat=\(getCurrentCoords().latitude.description)&lon=\(getCurrentCoords().longitude.description)"        
-        AF.request(url).validate().responseDecodable(of: AlertResponse.self) { response in
+        let url: String = "https://api.oscars.love/api/v1/alerts?lat=\(getCurrentCoords().latitude.description)&lon=\(getCurrentCoords().longitude.description)"
+        AF.request(url).validate().responseDecodable(of: DWDAlerts.self) { response in
             switch response.result {
             case .success:
                 self.alerts = response.value
             case let .failure(error):
                 print(error)
+            }
+        }
+    }
+    
+    func fetchOpenMeteoData() {
+        dispatchGroup.enter()
+        let url: String = "https://api.open-meteo.com/v1/forecast?latitude=\(getCurrentCoords().latitude.description)&longitude=\(getCurrentCoords().longitude.description)&hourly=temperature_2m,apparent_temperature,surface_pressure,precipitation,weathercode,cloudcover,windspeed_10m,winddirection_10m,soil_temperature_6cm,soil_moisture_3_9cm&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_hours,windspeed_10m_max,winddirection_10m_dominant,shortwave_radiation_sum&current_weather=true&timeformat=unixtime&timezone=auto"
+        AF.request(url).validate().responseDecodable(of: OpenMeteoResponse.self) { [self] response in
+            switch response.result {
+            case .success:
+                self.weather = response.value
+                dispatchGroup.leave()
+            case let .failure(error):
+                print(error)
+                dispatchGroup.leave()
+            }
+        }
+    }
+    
+    func fetchAQIData() {
+        dispatchGroup.enter()
+        let url: String = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=\(getCurrentCoords().latitude.description)&longitude=\(getCurrentCoords().longitude.description)&hourly=european_aqi,european_aqi_pm2_5,european_aqi_pm10,european_aqi_no2,european_aqi_o3,european_aqi_so2,uv_index&timezone=auto"
+        AF.request(url).validate().responseDecodable(of: AQIResponse.self) { [self] response in
+            switch response.result {
+            case .success:
+                self.aqi = response.value
+                dispatchGroup.leave()
+            case let .failure(error):
+                print(error)
+                dispatchGroup.leave()
             }
         }
     }

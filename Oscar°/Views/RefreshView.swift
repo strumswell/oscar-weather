@@ -24,7 +24,8 @@ struct RefreshView: View {
                             nowViewModel.update()
                             nowViewModel.dispatchGroup.notify(queue: DispatchQueue.main, execute: {
                                 if (nowViewModel.updateDidFinish) {
-                                    SPIndicator.present(title: "Aktualisiert", preset: .done, haptic: .success)
+                                    SPIndicator.present(title: "Aktualisiert", preset: .done, haptic: .none)
+                                    UIApplication.shared.playHapticFeedback()
                                 } else {
                                     SPIndicator.present(title: "Fehlgeschlagen", preset: .error, haptic: .error)
                                 }

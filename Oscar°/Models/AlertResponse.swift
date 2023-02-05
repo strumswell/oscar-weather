@@ -11,10 +11,10 @@ struct AWAlert: Codable, Hashable {
     let description: Tion
     let category: String
     let priority: Int
-    let type, typeID, alertClass, level: String
+    let type, typeID, alertClass, level: String?
     let source: String
     let sourceID: Int
-    let disclaimer: JSONNull?
+    //let disclaimer: JSONNull?
     let area: [Area]
     let haveReadyStatements: Bool
     let mobileLink, link: String
@@ -31,7 +31,7 @@ struct AWAlert: Codable, Hashable {
         case level = "Level"
         case source = "Source"
         case sourceID = "SourceId"
-        case disclaimer = "Disclaimer"
+        //case disclaimer = "Disclaimer"
         case area = "Area"
         case haveReadyStatements = "HaveReadyStatements"
         case mobileLink = "MobileLink"

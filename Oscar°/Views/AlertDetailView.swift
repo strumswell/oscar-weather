@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AlertListView: View {
-    @Binding var alerts: [AWAlert]?
+    @Binding var alerts: [DWDAlert]?
     @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
@@ -30,15 +30,15 @@ struct AlertListView: View {
 }
 
 struct AlertDetailView: View {
-    var alert: AWAlert
+    var alert: DWDAlert
     var body: some View {
         VStack {
             HStack {
                 Image(systemName: "exclamationmark.circle.fill")
                     .resizable()
-                    .foregroundColor(.red.opacity(0.7))
+                    .foregroundColor(.orange)
                     .frame(width: 15, height: 15)
-                Text(alert.description.localized)
+                Text(alert.event)
                     .font(.title3)
                     .bold()
                 Spacer()
@@ -46,15 +46,31 @@ struct AlertDetailView: View {
             .padding(.bottom, 1)
             
             HStack {
-                Text(alert.area.first?.summary.components(separatedBy: "Quelle:")[0] ?? "")
-                    .font(.body)
+                Text("Start: " + alert.getStartDate())
+                    .font(.subheadline)
                     .lineLimit(5)
                     .minimumScaleFactor(0.5)
                 Spacer()
             }
+            HStack {
+                Text("Ende: " + alert.getEndDate())
+                    .font(.subheadline)
+                    .lineLimit(5)
+                    .minimumScaleFactor(0.5)
+                Spacer()
+            }
+            .padding(.bottom, 1.5)
 
             HStack {
-                Text("Quelle: " + (alert.area.first?.summary ?? "").components(separatedBy: "Quelle:")[1])
+                Text(alert.descriptionText)
+                    .font(.subheadline)
+                    .minimumScaleFactor(0.5)
+                Spacer()
+            }
+            .padding(.bottom, 1)
+
+            HStack {
+                Text("Quelle: Deutscher Wetterdienst")
                     .font(.subheadline)
                 Spacer()
             }

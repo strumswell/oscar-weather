@@ -9,71 +9,70 @@ import SwiftUI
 import Charts
 
 struct RainView: View {
-    @Binding var weather: WeatherResponse?
+    @Binding var rain: RainRadarForecast?
     var body: some View {
-        if ((weather?.getMaxPreci() ?? 0.0) > 0.0) {
-            Text("Regen")
+        if ((rain?.getMaxPreci() ?? 0.0) > 0) {
+            Text("Radar")
                 .font(.system(size: 20))
                 .bold()
-                .foregroundColor(.white.opacity(0.8))
-                .shadow(color: .white, radius: 40)
+                .foregroundColor(Color(UIColor.label))
                 .padding([.leading, .top])
             
             VStack {
                 HStack {
                     VStack {
-                        Text("\(weather?.getMaxPreciLabel() ?? 1.0, specifier: "%.1f") mm/h")
+                        Text("\(rain?.getMaxPreci() ?? 1, specifier: "%.1f") mm/h")
                             .font(.footnote)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(Color(UIColor.label))
                         Spacer()
-                        Text("\((weather?.getMaxPreciLabel() ?? 1.0) / 2, specifier: "%.1f") mm/h")
+                        Text("\((rain?.getMaxPreci() ?? 1) / 2, specifier: "%.1f") mm/h")
                             .font(.footnote)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(Color(UIColor.label))
                         Spacer()
                         Text("0 mm/h")
                             .font(.footnote)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(Color(UIColor.label))
                         Text("")
                             .font(.footnote)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(Color(UIColor.label))
                     }
                     VStack {
-                        if ((weather?.getMaxPreci() ?? 1.0) <= 1.0) {
-                            Chart(data: weather?.minutely!.map{$0.precipitation} ?? [])
+                        if ((rain?.getMaxPreci() ?? 1) <= 1) {
+                            Chart(data: rain?.data.map{$0.mmh} ?? [])
                                 .chartStyle(
                                     AreaChartStyle(.quadCurve, fill:
-                                                    LinearGradient(gradient: .init(colors: [Color.blue.opacity(0.6), Color.blue.opacity(0.2)]), startPoint: .top, endPoint: .bottom)
+                                        LinearGradient(gradient: .init(colors: [Color.blue, Color.blue.opacity(0.5)]), startPoint: .top, endPoint: .bottom)
                                     )
                                 )
-                        } else {
-                            Chart(data: weather?.minutely!.map{$0.precipitation / (weather?.getMaxPreci() ?? 1.0)} ?? [])
+                        } else if ((rain?.data.count ?? 0) > 0) {
+                            Chart(data: rain?.data.map{$0.mmh / (rain?.getMaxPreci() ?? 1.0)} ?? [])
                                 .chartStyle(
                                     AreaChartStyle(.quadCurve, fill:
-                                                    LinearGradient(gradient: .init(colors: [Color.blue.opacity(0.6), Color.blue.opacity(0.2)]), startPoint: .top, endPoint: .bottom)
+                                        LinearGradient(gradient: .init(colors: [Color.blue, Color.blue.opacity(0.5)]), startPoint: .top, endPoint: .bottom)
                                     )
                                 )
                         }
                         HStack() {
-                            Text("\(weather?.minutely?.first?.getTimeString() ?? "")")
+                            Text("\(rain?.getStartTime() ?? "")")
                                 .font(.footnote)
-                                .foregroundColor(.white.opacity(0.7))
+                                .foregroundColor(Color(UIColor.label))
                             Spacer()
-                            if (weather?.minutely!.count ?? 0 > 1) {
-                                Text("\(weather?.minutely?[30].getTimeString() ?? "")")
+                            if (rain?.data.count ?? 0 > 1) {
+                                Text("\(rain?.getMidTime() ?? "")")
                                     .font(.footnote)
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .foregroundColor(Color(UIColor.label))
                                 Spacer()
                             }
-                            Text("\(weather?.minutely?.last?.getTimeString() ?? "")")
+                            Text("\(rain?.getEndTime() ?? "")")
                                 .font(.footnote)
-                                .foregroundColor(.white.opacity(0.7))
+                                .foregroundColor(Color(UIColor.label))
                         }
                     }
                 }
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 10)
-            .background(Color("gradientBlueDark-7").opacity(0.3))
+            .background(Color(UIColor.secondarySystemFill))
             .cornerRadius(10)
             .font(.system(size: 18))
             .padding([.leading, .trailing, .bottom])

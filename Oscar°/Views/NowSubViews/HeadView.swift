@@ -12,26 +12,17 @@ struct HeadView: View {
     @ObservedObject var searchModel: SearchViewModel = SearchViewModel()
     @ObservedObject var now: NowViewModel
     @State private var isLocationSheetPresented = false
-    @State private var isAlterSheetPresented = false
     
     var body: some View {
         HStack {
             Spacer()
             Image(systemName: "magnifyingglass")
-                .foregroundColor(.white.opacity(0.7))
-            if (now.placemark?.location?.coordinate.latitude == 52.01 && now.placemark?.location?.coordinate.longitude == 10.77) {
-                Text("Hessen")
+                .foregroundColor(Color(UIColor.label))
+            Text(now.placemark?.locality ?? "Lade...")
                     .font(.title2)
                     .fontWeight(.bold)
                     .lineSpacing(/*@START_MENU_TOKEN@*/10.0/*@END_MENU_TOKEN@*/)
-                    .foregroundColor(.white.opacity(0.7))
-            } else {
-                Text(now.placemark?.locality ?? "Lade...")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .lineSpacing(/*@START_MENU_TOKEN@*/10.0/*@END_MENU_TOKEN@*/)
-                    .foregroundColor(.white.opacity(0.7))
-            }
+                    .foregroundColor(Color(UIColor.label))
             Spacer()
         }
         .onTapGesture {
@@ -46,49 +37,46 @@ struct HeadView: View {
         .padding(.top)
         
         LazyVStack {
-            HStack {
+            VStack {
                 // MARK: Current Condition Symbol
-                Image(now.weather?.current!.getIconString() ?? "")
+                Image(now.weather?.getCurrentIcon() ?? "")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 100, height: 100)
+                    .shadow(radius: 5)
+                    .frame(width: 125, height: 125)
                     .padding(.bottom, -10)
                         
                 VStack {
                     Spacer()
                     // MARK: Current Temperature
-                    Text("\(now.weather?.current!.temp ?? 0.0, specifier: "%.0f")°")
+                    Text(now.weather?.currentWeather.getRoundedTempString() ?? "")
                         .bold()
-                        .gradientForeground(colors: [.gray, .white])
+                        .foregroundColor(Color(UIColor.label))
                         .font(.system(size: 60))
                 }
-
             }
+            HStack {
+                Spacer()
+                Image(systemName: "cloud")
+                    .frame(width: 30, height: 30)
+                    .foregroundColor(Color(UIColor.label))
+                Text("\(now.weather?.getCurrentCloudCover() ?? 0, specifier: "%.0f") %")
+                    .foregroundColor(Color(UIColor.label))
+                Image(systemName: "wind")
+                    .frame(width: 30, height: 30)
+                    .foregroundColor(Color(UIColor.label))
+                Text("\(now.weather?.currentWeather.windspeed ?? 0, specifier: "%.1f") km/h")
+                    .foregroundColor(Color(UIColor.label))
+                Image(systemName: "location")
+                    .frame(width: 30, height: 30)
+                    .foregroundColor(Color(UIColor.label))
+                Text("\(now.weather?.currentWeather.getWindDirection() ?? "N/A")")
+                Spacer()
+            }
+            .padding(.bottom)
             
-            // MARK: Weather Alert
             if ((now.alerts?.count ?? 0) > 0) {
-                HStack {
-                    Image(systemName: "exclamationmark.circle.fill")
-                        .resizable()
-                        .foregroundColor(.white.opacity(0.7))
-                        .frame(width: 15, height: 15)
-                    Text(now.alerts?.first?.description.localized.uppercased() ?? "...")
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.7))
-                        .bold()
-                }
-                .padding(.horizontal, 5)
-                .padding(.vertical, 5)
-                .background(Color.red.opacity(0.7))
-                .cornerRadius(25)
-                .onTapGesture {
-                    UIApplication.shared.playHapticFeedback()
-                    isAlterSheetPresented.toggle()
-                }
-                .sheet(isPresented: $isAlterSheetPresented) {
-                    AlertListView(alerts: $now.alerts)
-                }
-                .padding(.top, -10)
+                AlertView(alerts: $now.alerts)
             }
         }
     }

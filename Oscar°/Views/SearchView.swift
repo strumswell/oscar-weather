@@ -135,8 +135,8 @@ extension UIApplication {
     }
     
     func playHapticFeedback() {
-        let hapticFeedback = UIImpactFeedbackGenerator(style: .light)
-        hapticFeedback.impactOccurred()
+        let hapticFeedback = UIImpactFeedbackGenerator(style: .rigid)
+        hapticFeedback.impactOccurred(intensity: 0.5)
     }
 }
 

@@ -17,8 +17,6 @@ public class LocationViewModel: ObservableObject {
     private let context: NSManagedObjectContext
     private let pc = PersistenceController.shared
     private let nc = NotificationCenter.default
-    private let hapticFeedback = UIImpactFeedbackGenerator(style: .light)
-
 
     init() {
         self.cities = []
@@ -30,7 +28,7 @@ public class LocationViewModel: ObservableObject {
         do {
             try self.context.save()
             update()
-            hapticFeedback.impactOccurred()
+            UIApplication.shared.playHapticFeedback()
             nc.post(name: Notification.Name("CityToggle"), object: nil)
         } catch {
             let nsError = error as NSError
@@ -59,9 +57,7 @@ public class LocationViewModel: ObservableObject {
                 newCity.lat = coords.latitude
                 newCity.lon = coords.longitude
                 newCity.selected = false
-                
-                print("\(newCity)")
-                            
+                                            
                 self.save()
             } else {
                 self.save()

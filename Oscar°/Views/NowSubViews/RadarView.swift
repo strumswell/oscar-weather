@@ -9,25 +9,20 @@ import SwiftUI
 import MapKit
 
 struct RadarView: View {
+    @ObservedObject var settingsService: SettingService
     @ObservedObject var now: NowViewModel
     @Binding var radarMetadata: WeatherMapsResponse?
-    @State var cloudLayer: Bool = false
-    @State var rainLayer: Bool = true
-    @State var pressureLayer: Bool = false
-    @State var tempLayer: Bool = false
     var showLayerSettings: Bool
 
 
     var body: some View {
         RadarMapView(
             overlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.radar.past[radarMetadata!.radar.past.count-1].path ?? "", color: "2", options: "1_1"),
+            overlayOpacity: 0.35,
             cloudOverlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.satellite.infrared.last?.path ?? "", color: "0", options: "0_0"),
             coordinates: now.getActiveLocation(),
             cities: now.cs.cities,
-            cloudLayer: cloudLayer,
-            rainLayer: rainLayer,
-            pressureLayer: pressureLayer,
-            tempLayer: tempLayer
+            settings: settingsService.settings
         )
         if (showLayerSettings) {
             VStack {
@@ -35,36 +30,60 @@ struct RadarView: View {
                     Spacer()
                     Menu {
                         Button(action: {
-                            cloudLayer.toggle()
+                            if (settingsService.settings != nil) {
+                                settingsService.settings!.infrarotLayer.toggle()
+                                settingsService.save()
+                            }
                         }) {
-                            if (cloudLayer) {
+                            if (settingsService.settings?.infrarotLayer ?? false) {
                                 Label("Infrarot", systemImage: "checkmark")
                             } else {
                                 Text("Infrarot")
                             }
                         }
                         Button(action: {
-                            rainLayer.toggle()
+                            if (settingsService.settings != nil) {
+                                settingsService.settings!.rainviewerLayer.toggle()
+                                settingsService.save()
+                            }
                         }) {
-                            if (rainLayer) {
-                                Label("Regen", systemImage: "checkmark")
+                            if (settingsService.settings?.rainviewerLayer ?? false) {
+                                Label("Regen (Rainviewer)", systemImage: "checkmark")
                             } else {
-                                Text("Regen")
+                                Text("Regen (Rainviewer)")
                             }
                         }
                         Button(action: {
-                            tempLayer.toggle()
+                            if (settingsService.settings != nil) {
+                                settingsService.settings!.dwdLayer.toggle()
+                                settingsService.save()
+                            }
                         }) {
-                            if (tempLayer) {
+                            if (settingsService.settings?.dwdLayer ?? false) {
+                                Label("Regen (DWD)", systemImage: "checkmark")
+                            } else {
+                                Text("Regen (DWD)")
+                            }
+                        }
+                        Button(action: {
+                            if (settingsService.settings != nil) {
+                                settingsService.settings!.tempLayer.toggle()
+                                settingsService.save()
+                            }
+                        }) {
+                            if (settingsService.settings?.tempLayer ?? false) {
                                 Label("Temperatur", systemImage: "checkmark")
                             } else {
                                 Text("Temperatur")
                             }
                         }
                         Button(action: {
-                            pressureLayer.toggle()
+                            if (settingsService.settings != nil) {
+                                settingsService.settings!.druckLayer.toggle()
+                                settingsService.save()
+                            }
                         }) {
-                            if (pressureLayer) {
+                            if (settingsService.settings?.druckLayer ?? false) {
                                 Label("Wind & Druck", systemImage: "checkmark")
                             } else {
                                 Text("Wind & Druck")
@@ -73,10 +92,10 @@ struct RadarView: View {
                     } label: {
                         Image(systemName: "map.fill")
                             .resizable()
-                            .frame(width: 20, height: 20)
+                            .frame(width: 25, height: 25)
                             .foregroundColor(.gray.opacity(0.9))
                     }
-                    .frame(width: 35, height: 35)
+                    .frame(width: 40, height: 40)
                     .background(Color(.systemGray6).opacity(0.8))
                     .cornerRadius(5)
                 }
@@ -88,15 +107,22 @@ struct RadarView: View {
     }
 }
 
+struct WebMapServiceConstants {
+    static let baseUrl = "https://maps.dwd.de/geoserver/dwd/wms"
+    static let version = "1.3.0"
+    static let epsg = "4326"
+    static let format = "image/png"
+    static let tileSize = "256"
+    static let transparent = true
+}
+
 struct RadarMapView: UIViewRepresentable {
     var overlay: MKTileOverlay
+    var overlayOpacity: Double
     var cloudOverlay: MKTileOverlay
     var coordinates: CLLocationCoordinate2D
     var cities: [City]
-    var cloudLayer: Bool
-    var rainLayer: Bool
-    var pressureLayer: Bool
-    var tempLayer: Bool
+    var settings: Settings?
     
     class Coordinator: NSObject, MKMapViewDelegate {
         var parent: RadarMapView
@@ -107,9 +133,11 @@ struct RadarMapView: UIViewRepresentable {
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             let renderer = MKTileOverlayRenderer(overlay: overlay)
+            renderer.alpha = parent.overlayOpacity
             return renderer
         }
     }
+        
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -137,32 +165,57 @@ struct RadarMapView: UIViewRepresentable {
 
 
         mapView.delegate = context.coordinator
-        mapView.overrideUserInterfaceStyle = .dark
+        //mapView.overrideUserInterfaceStyle = .dark
         mapView.removeOverlays(overlays)
-        
-        if (pressureLayer) {
+                
+        if (settings?.druckLayer ?? false) {
             let overlay = MKTileOverlay(urlTemplate: "https://services.meteored.com/img/tiles/cep010/{z}/{x}/{y}/0\(String(format: "%02d",hour-2))_prsvie.png")
             mapView.addOverlay(overlay)
             //https://services.meteored.com/img/tiles/cep010/6/31/21/014_temp2m@2x.png
         }
-        if (tempLayer) {
+        if (settings?.tempLayer ?? false) {
             let overlay = MKTileOverlay(urlTemplate: "https://services.meteored.com/img/tiles/cep010/{z}/{x}/{y}/0\(String(format: "%02d",hour-2))_temp2m.png")
             mapView.addOverlay(overlay)
         }
-        if (cloudLayer) {
+        if (settings?.infrarotLayer ?? false) {
             mapView.addOverlay(cloudOverlay)
         }
-        if (rainLayer) {
+        if (settings?.rainviewerLayer ?? false) {
             mapView.addOverlay(overlay)
         }
+        if (settings?.dwdLayer ?? true) {
+            var referenceSystem = ""
+            if WebMapServiceConstants.version == "1.1.1" {
+                referenceSystem = "SRS"
+            } else {
+                referenceSystem = "CRS"
+            }
 
+            let urlLayers = "layers=dwd:Niederschlagsradar&"
+            let urlVersion = "version=\(WebMapServiceConstants.version)&"
+            let urlReferenceSystem = "\(referenceSystem)=EPSG:\(WebMapServiceConstants.epsg)&"
+            let urlWidthAndHeight = "width=\(WebMapServiceConstants.tileSize)&height=\(WebMapServiceConstants.tileSize)&"
+            let urlFormat = "format=\(WebMapServiceConstants.format)&format_options=MODE:refresh&"
+            let urlTransparent = "transparent=\(WebMapServiceConstants.transparent)&"
+
+            var useMercator = false
+            if(WebMapServiceConstants.epsg == "900913"){
+                useMercator = true
+            }
+
+            let urlString = WebMapServiceConstants.baseUrl + "?styles=&service=WMS&request=GetMap&" + urlLayers + urlVersion + urlReferenceSystem + urlWidthAndHeight + urlFormat + urlTransparent //+ "&time=" + time[index]
+            let overlay = WMSTileOverlay(urlArg: urlString, useMercator: useMercator, wmsVersion: WebMapServiceConstants.version)
+            mapView.addOverlay(overlay)
+        }
         
         // Define region to center map on -> Modify lat so selected city is visible in the map view (Map view extends down behind the weather sheet -> pull to refresh shows no blank space behind sheet
-        let coordinateRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: coordinates.latitude-0.5, longitude: coordinates.longitude), latitudinalMeters: 150000, longitudinalMeters: 150000)
+        let coordinateRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: coordinates.latitude-0.5, longitude: coordinates.longitude), latitudinalMeters: 200000, longitudinalMeters: 200000)
         
         mapView.setRegion(coordinateRegion, animated: false)
+        mapView.mapType = .standard
         mapView.showsUserLocation = true
     }
+
 }
 
 

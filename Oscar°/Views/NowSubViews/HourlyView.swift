@@ -8,40 +8,40 @@
 import SwiftUI
 
 struct HourlyView: View {
-    @Binding var weather: WeatherResponse?
+    @Binding var weather: OpenMeteoResponse?
     
     var body: some View {
         Text("Stündlich")
             .font(.system(size: 20))
             .bold()
-            .foregroundColor(.white.opacity(0.8))
-            .shadow(color: .white, radius: 40)
+            .foregroundColor(Color(UIColor.label))
             .padding(.leading)
             .padding(.bottom, -10)
             .padding(.top)
         
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 14) {
-                ForEach(weather?.hourly! ?? [], id: \.self) { hour in
+                ForEach(((weather?.getCurrentHourPos() ?? 0) ... ((weather?.getHourlySize() ?? 0) >= 60 ? 60 : (weather?.getHourlySize() ?? 0))), id: \.self) { hour in
                     VStack {
-                        Text(hour.getHourString() + " Uhr")
-                            .foregroundColor(.white.opacity(0.7))
+                        Text((weather?.getHourString(pos: hour) ?? "") + " Uhr")
+                            .foregroundColor(Color(UIColor.label))
                             .bold()
-                        Text(hour.getFormattedPop() + " %")
+                        Text("\(weather?.getHourPrec(pos: hour) ?? 0, specifier: "%.1f") mm")
                             .font(.footnote)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(Color(UIColor.label))
                             .padding(.top, 3)
-                            .padding(.bottom, -10)
-                        Image(hour.getIconString())
+                            .padding(.bottom, -5)
+                        Image(weather?.getHourIcon(pos: hour) ?? "")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 35, height: 35)
-                        Text("\(hour.temp, specifier: "%.0f")°")
-                            .foregroundColor(.white.opacity(0.6))
+                            .shadow(radius: 5)
+                        Text(weather?.getHourTemp(pos: hour) ?? "")
+                            .foregroundColor(Color(UIColor.label))
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 10)
-                    .background(Color("gradientBlueDark-7").opacity(0.3))
+                    .background(Color(UIColor.secondarySystemFill))
                     .cornerRadius(10)
                 }
                 .padding(.vertical, 20)

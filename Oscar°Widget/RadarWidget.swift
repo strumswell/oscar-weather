@@ -46,6 +46,7 @@
                             }
                         }
                         print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+                        completion("Jetzt")
                         completion(nil)
                     }.resume()
             
@@ -76,7 +77,7 @@
             let currentDate = Date()
             let coordinate = lm.gpsLocation ?? self.defaultCoordinate
             
-            guard let url = URL(string: "https://radar.bolte.cloud/api/v2/mapshot?lat=\(coordinate.latitude)&lon=\(coordinate.longitude)&map=3&color=8&key=") else { return }
+            guard let url = URL(string: "https://api.oscars.love/api/v1/mapshots/radar?lat=\(coordinate.latitude)&lon=\(coordinate.longitude)") else { return }
             
             UIImage.loadFrom(url: url) { image in
                 if let image = image {
@@ -127,7 +128,8 @@
     
     struct RadarWidgetEntryView : View {
         var entry: Provider.Entry
-        
+        @Environment(\.widgetFamily) var family
+
         var body: some View {
             ZStack {
                 entry.image
@@ -165,12 +167,14 @@
     struct RadarWidget: Widget {
         let kind: String = "WeatherWidget"
         
+        
         var body: some WidgetConfiguration {
             StaticConfiguration(kind: kind, provider: Provider()) { entry in
                 RadarWidgetEntryView(entry: entry)
             }
             .configurationDisplayName("Regenradar")
             .description("Regenradar für aktuellen Standort")
+            .supportedFamilies([.systemSmall, .systemLarge])
         }
     }
     
