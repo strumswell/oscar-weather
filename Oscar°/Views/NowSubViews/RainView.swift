@@ -18,7 +18,6 @@ struct RainView: View {
                 .foregroundColor(Color(UIColor.label))
                 .padding([.leading, .top])
             
-            VStack {
                 HStack {
                     VStack {
                         Text("\(rain?.getMaxPreci() ?? 1, specifier: "%.1f") mm/h")
@@ -68,7 +67,7 @@ struct RainView: View {
                                 .foregroundColor(Color(UIColor.label))
                         }
                     }
-                }
+                
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 10)

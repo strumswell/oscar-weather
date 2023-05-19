@@ -32,29 +32,34 @@ struct HeadView: View {
         .sheet(isPresented: $isLocationSheetPresented) {
             SearchView(searchModel: searchModel, now: now, cities: $now.cs.cities)
         }
-        .padding(.bottom)
+        .padding(.bottom, 40)
         .padding(.leading, -20)
         .padding(.top)
         
         LazyVStack {
             VStack {
                 // MARK: Current Condition Symbol
+                /**
                 Image(now.weather?.getCurrentIcon() ?? "")
                     .resizable()
                     .scaledToFit()
                     .shadow(radius: 5)
                     .frame(width: 125, height: 125)
                     .padding(.bottom, -10)
+                 */
                         
                 VStack {
                     Spacer()
                     // MARK: Current Temperature
                     Text(now.weather?.currentWeather.getRoundedTempString() ?? "")
-                        .bold()
+                        //.bold()
                         .foregroundColor(Color(UIColor.label))
-                        .font(.system(size: 60))
+                        //.font(.system(size: 60))
+                        .font(.system(size: 120))
                 }
             }
+            .padding(.bottom, 150)
+
             HStack {
                 Spacer()
                 Image(systemName: "cloud")
@@ -74,7 +79,7 @@ struct HeadView: View {
                 Spacer()
             }
             .padding(.bottom)
-            
+
             if ((now.alerts?.count ?? 0) > 0) {
                 AlertView(alerts: $now.alerts)
             }

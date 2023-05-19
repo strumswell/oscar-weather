@@ -25,6 +25,8 @@
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/serve-static": "^3.0.0",
     "cache-manager": "^4.1.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
     "nest-puppeteer": "^1.1.1",
     "p-limit": "^3.1.0",
     "puppeteer": "^19.6.3",

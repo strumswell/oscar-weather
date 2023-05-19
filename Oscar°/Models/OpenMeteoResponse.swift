@@ -12,6 +12,7 @@ import UIKit
 struct OpenMeteoResponse: Codable {
     let latitude, longitude, generationtimeMS: Double
     let utcOffsetSeconds, elevation: Int
+    let timezoneAbbreviation: String
     let currentWeather: CurrentWeather
     let hourlyUnits: HourlyUnits
     let hourly: Hourly
@@ -22,6 +23,7 @@ struct OpenMeteoResponse: Codable {
         case latitude, longitude
         case generationtimeMS = "generationtime_ms"
         case utcOffsetSeconds = "utc_offset_seconds"
+        case timezoneAbbreviation = "timezone_abbreviation"
         case elevation
         case currentWeather = "current_weather"
         case hourlyUnits = "hourly_units"
@@ -33,6 +35,15 @@ struct OpenMeteoResponse: Codable {
     public func getDate(timestamp: Double) -> Date {
         return Date(timeIntervalSince1970: TimeInterval(timestamp))
     }
+    
+    public func getWeekDay(timestamp: Double) -> String {
+        let dateFormatter = DateFormatter()
+        //dateFormatter.locale = Locale(identifier: "Europe/Istanbul")
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC\(self.timezoneAbbreviation)")
+        dateFormatter.dateFormat = "EEEE"
+        return dateFormatter.string(from: getDate(timestamp: timestamp))
+    }
+    
     
     public func getWeatherIcon(weathercode: Double, timestamp: Double, sunrise: Double, sunset: Double) -> String {
         let now = getDate(timestamp: timestamp)
@@ -123,6 +134,9 @@ struct OpenMeteoResponse: Codable {
         return hourly.precipitation[pos] ?? 0.0
     }
     
+    public func getHourPrecProbability(pos: Int) -> Int {
+        return hourly.precipitationProbability[pos] ?? 0
+    }
     
     public func getHourIcon(pos: Int) -> String {
         let timestamp = hourly.time[pos] ?? 0.0
@@ -191,7 +205,7 @@ struct CurrentWeather: Codable {
             return "04d"
         case 45, 48:
             return "50d"
-        case 51:
+        case 51, 53, 55:
             return "10d"
         case 71, 73, 75, 77:
             return "13d"
@@ -199,6 +213,32 @@ struct CurrentWeather: Codable {
             return "11d"
         default:
             return "09d"
+        }
+    }
+    
+    public func getCloudDensity() -> Cloud.Thickness {
+        switch self.weathercode {
+        case 0:
+            return Cloud.Thickness.none
+        case 1:
+            return Cloud.Thickness.light
+        case 2:
+            return Cloud.Thickness.regular
+        case 3:
+            return Cloud.Thickness.thick
+        case 45, 48, 51, 52, 55, 61, 63, 65, 66, 67, 71, 73, 75, 77, 85, 86, 95, 96, 99:
+            return Cloud.Thickness.thick
+        default:
+            return Cloud.Thickness.light
+        }
+    }
+    
+    public func getStormType() -> Storm.Contents {
+        switch self.weathercode {
+        case 51, 52, 55, 61, 63, 65, 66, 67, 71, 73, 75, 77, 85, 86, 95, 96, 99:
+            return Storm.Contents.rain
+        default:
+            return Storm.Contents.none
         }
     }
 }
@@ -209,6 +249,7 @@ struct Daily: Codable {
     let sunrise, sunset: [Double]
     let precipitationSum, precipitationHours: [Double?]
     let windspeed10MMax, winddirection10MDominant, shortwaveRadiationSum: [Double?]
+    let precipitationProbabilityMax: [Int?]
 
     enum CodingKeys: String, CodingKey {
         case time, weathercode
@@ -220,19 +261,13 @@ struct Daily: Codable {
         case windspeed10MMax = "windspeed_10m_max"
         case winddirection10MDominant = "winddirection_10m_dominant"
         case shortwaveRadiationSum = "shortwave_radiation_sum"
+        case precipitationProbabilityMax = "precipitation_probability_max"
     }
 
     public func getDate(timestamp: Double) -> Date {
         return Date(timeIntervalSince1970: TimeInterval(timestamp))
     }
-    
-    public func getWeekDay(pos: Int) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "de_DE")
-        dateFormatter.dateFormat = "EEEE"
-        return dateFormatter.string(from: getDate(timestamp: time[pos] ?? 0.0))
-    }
-    
+
     public func getRoundedMinTemp(pos: Int) -> String {
         return String(describing: (temperature2MMin[pos] ?? 0.0).rounded()).replacingOccurrences(of: ".0", with: "") + "°"
     }
@@ -268,7 +303,7 @@ struct Daily: Codable {
 struct DailyUnits: Codable {
     let time, weathercode, temperature2MMax, temperature2MMin: String
     let sunrise, sunset, precipitationSum, precipitationHours: String
-    let windspeed10MMax, winddirection10MDominant, shortwaveRadiationSum: String
+    let windspeed10MMax, winddirection10MDominant, shortwaveRadiationSum, precipitationProbabilityMax: String
 
     enum CodingKeys: String, CodingKey {
         case time, weathercode
@@ -280,6 +315,7 @@ struct DailyUnits: Codable {
         case windspeed10MMax = "windspeed_10m_max"
         case winddirection10MDominant = "winddirection_10m_dominant"
         case shortwaveRadiationSum = "shortwave_radiation_sum"
+        case precipitationProbabilityMax = "precipitation_probability_max"
     }
     
     public func getDate(timestamp: Double) -> Date {
@@ -318,6 +354,7 @@ struct Hourly: Codable {
     let time, temperature2M, apparentTemperature, surfacePressure: [Double?]
     let precipitation, weathercode, cloudcover, windspeed10M: [Double?]
     let winddirection10M, soilTemperature6CM, soilMoisture3_9CM: [Double?]
+    let precipitationProbability: [Int?]
 
     enum CodingKeys: String, CodingKey {
         case time
@@ -329,6 +366,7 @@ struct Hourly: Codable {
         case winddirection10M = "winddirection_10m"
         case soilTemperature6CM = "soil_temperature_6cm"
         case soilMoisture3_9CM = "soil_moisture_3_9cm"
+        case precipitationProbability = "precipitation_probability"
     }
 
     public func getDate(timestamp: Double) -> Date {
@@ -397,7 +435,7 @@ struct Hourly: Codable {
 struct HourlyUnits: Codable {
     let time, temperature2M, apparentTemperature, surfacePressure: String
     let precipitation, weathercode, cloudcover, windspeed10M: String
-    let winddirection10M, soilTemperature6CM, soilMoisture3_9CM: String
+    let winddirection10M, soilTemperature6CM, soilMoisture3_9CM, precipitationProbability: String
 
     enum CodingKeys: String, CodingKey {
         case time
@@ -409,5 +447,6 @@ struct HourlyUnits: Codable {
         case winddirection10M = "winddirection_10m"
         case soilTemperature6CM = "soil_temperature_6cm"
         case soilMoisture3_9CM = "soil_moisture_3_9cm"
+        case precipitationProbability = "precipitation_probability"
     }
 }

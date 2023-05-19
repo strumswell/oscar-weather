@@ -12,13 +12,13 @@ struct AQIView: View {
 
     var body: some View {
         Text("Umwelt")
-            .font(.system(size: 20))
+            .font(.title3)
             .bold()
             .foregroundColor(Color(UIColor.label))
             .padding([.leading, .bottom])
             .padding(.top, 30)
         ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack(spacing: 14) {
+            HStack(spacing: 14) {
                 VStack {
                     Text("UV")
                         .fontWeight(.semibold)

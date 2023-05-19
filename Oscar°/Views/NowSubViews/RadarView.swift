@@ -16,93 +16,95 @@ struct RadarView: View {
 
 
     var body: some View {
-        RadarMapView(
-            overlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.radar.past[radarMetadata!.radar.past.count-1].path ?? "", color: "2", options: "1_1"),
-            overlayOpacity: 0.35,
-            cloudOverlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.satellite.infrared.last?.path ?? "", color: "0", options: "0_0"),
-            coordinates: now.getActiveLocation(),
-            cities: now.cs.cities,
-            settings: settingsService.settings
-        )
-        if (showLayerSettings) {
-            VStack {
-                HStack {
-                    Spacer()
-                    Menu {
-                        Button(action: {
-                            if (settingsService.settings != nil) {
-                                settingsService.settings!.infrarotLayer.toggle()
-                                settingsService.save()
+        ZStack {
+            RadarMapView(
+                overlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.radar.past[radarMetadata!.radar.past.count-1].path ?? "", color: "2", options: "1_1"),
+                overlayOpacity: 0.7,
+                cloudOverlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.satellite.infrared.last?.path ?? "", color: "0", options: "0_0"),
+                coordinates: now.getActiveLocation(),
+                cities: now.cs.cities,
+                settings: settingsService.settings
+            )
+            if (showLayerSettings) {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Menu {
+                            Button(action: {
+                                if (settingsService.settings != nil) {
+                                    settingsService.settings!.infrarotLayer.toggle()
+                                    settingsService.save()
+                                }
+                            }) {
+                                if (settingsService.settings?.infrarotLayer ?? false) {
+                                    Label("Infrarot", systemImage: "checkmark")
+                                } else {
+                                    Text("Infrarot")
+                                }
                             }
-                        }) {
-                            if (settingsService.settings?.infrarotLayer ?? false) {
-                                Label("Infrarot", systemImage: "checkmark")
-                            } else {
-                                Text("Infrarot")
+                            Button(action: {
+                                if (settingsService.settings != nil) {
+                                    settingsService.settings!.rainviewerLayer.toggle()
+                                    settingsService.save()
+                                }
+                            }) {
+                                if (settingsService.settings?.rainviewerLayer ?? false) {
+                                    Label("Regen (Rainviewer)", systemImage: "checkmark")
+                                } else {
+                                    Text("Regen (Rainviewer)")
+                                }
                             }
+                            Button(action: {
+                                if (settingsService.settings != nil) {
+                                    settingsService.settings!.dwdLayer.toggle()
+                                    settingsService.save()
+                                }
+                            }) {
+                                if (settingsService.settings?.dwdLayer ?? false) {
+                                    Label("Regen (DWD)", systemImage: "checkmark")
+                                } else {
+                                    Text("Regen (DWD)")
+                                }
+                            }
+                            Button(action: {
+                                if (settingsService.settings != nil) {
+                                    settingsService.settings!.tempLayer.toggle()
+                                    settingsService.save()
+                                }
+                            }) {
+                                if (settingsService.settings?.tempLayer ?? false) {
+                                    Label("Temperatur", systemImage: "checkmark")
+                                } else {
+                                    Text("Temperatur")
+                                }
+                            }
+                            Button(action: {
+                                if (settingsService.settings != nil) {
+                                    settingsService.settings!.druckLayer.toggle()
+                                    settingsService.save()
+                                }
+                            }) {
+                                if (settingsService.settings?.druckLayer ?? false) {
+                                    Label("Wind & Druck", systemImage: "checkmark")
+                                } else {
+                                    Text("Wind & Druck")
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "map.fill")
+                                .resizable()
+                                .frame(width: 25, height: 25)
+                                .foregroundColor(.gray.opacity(0.9))
                         }
-                        Button(action: {
-                            if (settingsService.settings != nil) {
-                                settingsService.settings!.rainviewerLayer.toggle()
-                                settingsService.save()
-                            }
-                        }) {
-                            if (settingsService.settings?.rainviewerLayer ?? false) {
-                                Label("Regen (Rainviewer)", systemImage: "checkmark")
-                            } else {
-                                Text("Regen (Rainviewer)")
-                            }
-                        }
-                        Button(action: {
-                            if (settingsService.settings != nil) {
-                                settingsService.settings!.dwdLayer.toggle()
-                                settingsService.save()
-                            }
-                        }) {
-                            if (settingsService.settings?.dwdLayer ?? false) {
-                                Label("Regen (DWD)", systemImage: "checkmark")
-                            } else {
-                                Text("Regen (DWD)")
-                            }
-                        }
-                        Button(action: {
-                            if (settingsService.settings != nil) {
-                                settingsService.settings!.tempLayer.toggle()
-                                settingsService.save()
-                            }
-                        }) {
-                            if (settingsService.settings?.tempLayer ?? false) {
-                                Label("Temperatur", systemImage: "checkmark")
-                            } else {
-                                Text("Temperatur")
-                            }
-                        }
-                        Button(action: {
-                            if (settingsService.settings != nil) {
-                                settingsService.settings!.druckLayer.toggle()
-                                settingsService.save()
-                            }
-                        }) {
-                            if (settingsService.settings?.druckLayer ?? false) {
-                                Label("Wind & Druck", systemImage: "checkmark")
-                            } else {
-                                Text("Wind & Druck")
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "map.fill")
-                            .resizable()
-                            .frame(width: 25, height: 25)
-                            .foregroundColor(.gray.opacity(0.9))
+                        .frame(width: 40, height: 40)
+                        .background(Color(.systemGray6).opacity(0.8))
+                        .cornerRadius(5)
                     }
-                    .frame(width: 40, height: 40)
-                    .background(Color(.systemGray6).opacity(0.8))
-                    .cornerRadius(5)
+                    Spacer()
                 }
-                Spacer()
+                .padding(.trailing)
+                .padding(.top)
             }
-            .padding(.trailing)
-            .padding(.top)
         }
     }
 }
@@ -150,6 +152,7 @@ struct RadarMapView: UIViewRepresentable {
     func updateUIView(_ mapView: MKMapView, context: Context) {
         let overlays = mapView.overlays
         let hour = Calendar.current.component(.hour, from: Date())
+        
         
         mapView.removeAnnotations(mapView.annotations)
 
@@ -209,13 +212,12 @@ struct RadarMapView: UIViewRepresentable {
         }
         
         // Define region to center map on -> Modify lat so selected city is visible in the map view (Map view extends down behind the weather sheet -> pull to refresh shows no blank space behind sheet
-        let coordinateRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: coordinates.latitude-0.5, longitude: coordinates.longitude), latitudinalMeters: 200000, longitudinalMeters: 200000)
+        let coordinateRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude), latitudinalMeters: 100000, longitudinalMeters: 100000)
         
         mapView.setRegion(coordinateRegion, animated: false)
-        mapView.mapType = .standard
+        mapView.mapType = .hybridFlyover
         mapView.showsUserLocation = true
     }
-
 }
 
 

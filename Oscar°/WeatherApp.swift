@@ -14,6 +14,7 @@ struct WeatherApp: App {
         WindowGroup {
             NowView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .preferredColorScheme(.dark)
         }
     }
 }

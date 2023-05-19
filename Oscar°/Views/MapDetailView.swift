@@ -18,7 +18,7 @@ struct MapDetailView: View {
                 RadarView(settingsService: settingsService, now: now, radarMetadata: $now.currentRadarMetadata, showLayerSettings: true)
             }
             .ignoresSafeArea(edges: [.bottom])
-            .navigationBarTitle(Text("Karte"), displayMode: .inline)
+            .navigationBarTitle(Text("Regenradar"), displayMode: .inline)
             .toolbar(content: {
                 ToolbarItem(placement: .navigationBarTrailing, content: {
                     Button("Fertig", action: {

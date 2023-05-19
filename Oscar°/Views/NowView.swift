@@ -5,6 +5,7 @@
 //  Created by Philipp Bolte on 22.09.20.
 
 import SwiftUI
+import SPIndicator
 
 struct NowView: View {
     @ObservedObject var nowViewModel: NowViewModel = NowViewModel()
@@ -14,68 +15,118 @@ struct NowView: View {
     
     var body: some View {
         ZStack {
-            // MARK: Map Header
-            VStack {
-                ZStack {
-                    RadarView(settingsService: settingsService, now: nowViewModel, radarMetadata: $nowViewModel.currentRadarMetadata, showLayerSettings: false)
-                        .frame(height: 500)
-                    Rectangle()
-                        .frame(height: 500, alignment: .top)
-                        .foregroundColor(.clear)
+            ZStack {
+                if nowViewModel.updateDidFinish {
+                    StarsView()
+                        .opacity(nowViewModel.starOpacity)
+                    if nowViewModel.isRaining() {
+                        CloudsView(
+                            thickness: Cloud.Thickness.thick,
+                            topTint: nowViewModel.getCloudTopStops().interpolated(amount: nowViewModel.time),
+                            bottomTint: nowViewModel.getCloudBottomStops().interpolated(amount: nowViewModel.time)
+                        )
+                        StormView(type: Storm.Contents.rain, direction: .degrees(30), strength: 80)
+                    } else {
+                        if (nowViewModel.weather?.currentWeather.getCloudDensity() ?? Cloud.Thickness.none) != Cloud.Thickness.thick {
+                            SunView(progress: nowViewModel.time)
+                        }
+                        CloudsView(
+                            thickness: nowViewModel.weather?.currentWeather.getCloudDensity() ?? Cloud.Thickness.none,
+                            topTint: nowViewModel.getCloudTopStops().interpolated(amount: nowViewModel.time),
+                            bottomTint: nowViewModel.getCloudTopStops().interpolated(amount: nowViewModel.time)
+                        )
+                    }
                 }
-                Spacer()
             }
+            .preferredColorScheme(.dark)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(
+                LinearGradient(colors: [
+                    nowViewModel.getBackgroundTopStops().interpolated(amount: nowViewModel.time),
+                    nowViewModel.getBackgroundBottomStops().interpolated(amount: nowViewModel.time)
+                ], startPoint: .top, endPoint: .bottom)
+            )
+
+            
 
             // MARK: Weather Sheet
             ScrollView(.vertical, showsIndicators: false) {
-                RefreshView(coordinateSpace: .named("RefreshView"), nowViewModel: nowViewModel)
-                
-                // Proxy element to check for taps on map behind scroll view
-                Rectangle()
-                    .frame(height: 200)
-                    .foregroundColor(Color.gray.opacity(0.0001)) // No on tap for .clear
-                    .onTapGesture {
-                        UIApplication.shared.playHapticFeedback()
-                        isMapSheetPresented.toggle()
-                    }
-                    .sheet(isPresented: $isMapSheetPresented) {
-                        MapDetailView(now: nowViewModel, settingsService: settingsService)
-                    }
-                
-                VStack(alignment: .leading) {
-                    Spacer().frame(height: 20)
-                    HeadView(now: nowViewModel)
-                    RainView(rain: $nowViewModel.rain)
-                    HourlyView(weather: $nowViewModel.weather)
-                    DailyView(weather: $nowViewModel.weather)
-                    AQIView(aqi: $nowViewModel.aqi)
-                    HStack {
-                        Spacer()
-                        Image(systemName: "info.circle.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 20, height: 20)
-                            .foregroundColor(Color(UIColor.label))
-                        Text("Rechtliche\nInformationen")
-                            .foregroundColor(Color(UIColor.label))
-                            .font(.system(size: 10))
+                ZStack {
+                    VStack(alignment: .leading) {
+                        HeadView(now: nowViewModel)
+                            .padding(.top, 50)
+                        RainView(rain: $nowViewModel.rain)
+                        HourlyView(weather: $nowViewModel.weather)
+                        DailyView(weather: $nowViewModel.weather)
+                        
+                        Text("Radar")
+                            .font(.title3)
                             .bold()
-                        Spacer()
-                    }
-                    .padding(.top)
-                    .padding(.bottom, 50)
-                    .onTapGesture {
-                        UIApplication.shared.playHapticFeedback()
-                        isLegalSheetPresented.toggle()
-                    }
-                    .sheet(isPresented: $isLegalSheetPresented) {
-                        LegalView()
+                            .foregroundColor(Color(UIColor.label))
+                            .padding([.leading, .top])
+                                      
+                        AsyncImage(
+                            url: URL(string: "https://api.oscars.love/api/v1/mapshots/radar?lat=\(nowViewModel.getCurrentCoords().latitude)&lon=\(nowViewModel.getCurrentCoords().longitude)"),
+                            content: { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            },
+                            placeholder: {
+                                VStack(alignment: .leading) {
+                                    Spacer()
+                                    HStack {
+                                        Spacer()
+                                        ProgressView()
+                                        Spacer()
+                                    }
+                                    Spacer()
+                                }
+                                .frame(height: 350)
+                                .background(Color(UIColor.secondarySystemFill))
+                            }
+                        )
+                        .cornerRadius(10)
+                        .padding()
+                        .onTapGesture {
+                            UIApplication.shared.playHapticFeedback()
+                            isMapSheetPresented.toggle()
+                        }
+                        .sheet(isPresented: $isMapSheetPresented) {
+                            MapDetailView(now: nowViewModel, settingsService: settingsService)
+                        }
+                    
+                        AQIView(aqi: $nowViewModel.aqi)
+                                          
+                        HStack {
+                            Spacer()
+                            Image(systemName: "info.circle.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 20)
+                                .foregroundColor(Color(UIColor.label))
+                            Text("Rechtliche\nInformationen")
+                                .foregroundColor(Color(UIColor.label))
+                                .font(.system(size: 10))
+                                .bold()
+                            Spacer()
+                        }
+                        .padding(.top)
+                        .padding(.bottom, 50)
+                        .onTapGesture {
+                            UIApplication.shared.playHapticFeedback()
+                            isLegalSheetPresented.toggle()
+                        }
+                        .sheet(isPresented: $isLegalSheetPresented) {
+                            LegalView()
+                        }
                     }
                 }
-                .background(Color(UIColor.secondarySystemBackground))
-                .cornerRadius(30)
             }
-            .coordinateSpace(name: "RefreshView")
+            .padding(.top, 40)
+            .refreshable {
+                nowViewModel.update()
+            }
         }
         .background(Color(UIColor.secondarySystemBackground))
         .edgesIgnoringSafeArea(.all)

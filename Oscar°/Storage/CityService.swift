@@ -106,7 +106,6 @@ public class LocationViewModel: ObservableObject {
         
         search.start { response, error in
             let coordinates = response?.mapItems[0].placemark.coordinate ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
-            print(coordinates)
             completion(coordinates)
         }
     }

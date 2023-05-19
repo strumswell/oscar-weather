@@ -26,6 +26,14 @@ struct RainRadarForecast: Codable {
         return formatter.string(from: iso.date(from: data.middle?.time ?? "2022-01-01") ?? Date())
     }
     
+    public func getFormattedTime(time: String) -> String {
+        let iso = ISO8601DateFormatter()
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter.string(from: iso.date(from: time) ?? Date())
+    }
+    
     
     public func getEndTime() -> String {
         let iso = ISO8601DateFormatter()
@@ -52,9 +60,13 @@ struct RainRadarForecast: Codable {
     
 }
 
-struct RainRadarDatapoint: Codable {
+struct RainRadarDatapoint: Codable, Hashable {
     let time: String
     let mmh: Double
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(time)
+    }
 }
 
 

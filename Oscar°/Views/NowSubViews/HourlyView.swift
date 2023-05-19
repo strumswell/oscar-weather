@@ -6,13 +6,14 @@
 //
 
 import SwiftUI
+import Charts
 
 struct HourlyView: View {
     @Binding var weather: OpenMeteoResponse?
     
     var body: some View {
         Text("Stündlich")
-            .font(.system(size: 20))
+            .font(.title3)
             .bold()
             .foregroundColor(Color(UIColor.label))
             .padding(.leading)
@@ -20,8 +21,8 @@ struct HourlyView: View {
             .padding(.top)
         
         ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack(spacing: 14) {
-                ForEach(((weather?.getCurrentHourPos() ?? 0) ... ((weather?.getHourlySize() ?? 0) >= 60 ? 60 : (weather?.getHourlySize() ?? 0))), id: \.self) { hour in
+            HStack(spacing: 14) {
+                ForEach(((weather?.getCurrentHourPos() ?? 0) ... ((weather?.getHourlySize() ?? 0) >= 60 ? 60 : (weather?.getHourlySize() ?? 10))), id: \.self) { hour in
                     VStack {
                         Text((weather?.getHourString(pos: hour) ?? "") + " Uhr")
                             .foregroundColor(Color(UIColor.label))
@@ -30,12 +31,13 @@ struct HourlyView: View {
                             .font(.footnote)
                             .foregroundColor(Color(UIColor.label))
                             .padding(.top, 3)
-                            .padding(.bottom, -5)
+                        Text("\(weather?.getHourPrecProbability(pos: hour) ?? 0) %")
+                            .font(.footnote)
+                            .foregroundColor(Color(UIColor.secondaryLabel))
                         Image(weather?.getHourIcon(pos: hour) ?? "")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 35, height: 35)
-                            .shadow(radius: 5)
                         Text(weather?.getHourTemp(pos: hour) ?? "")
                             .foregroundColor(Color(UIColor.label))
                     }
