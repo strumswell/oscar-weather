@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2505C94D29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2505C94C29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift */; };
 		251FE39127C5674400D26F0F /* WMSTileOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251FE39027C5674400D26F0F /* WMSTileOverlay.swift */; };
 		2523367D27C3E9D500C2111A /* RainModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2523367C27C3E9D500C2111A /* RainModel.swift */; };
 		2523367F27C3EB3900C2111A /* RainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2523367E27C3EB3900C2111A /* RainView.swift */; };
@@ -18,13 +19,40 @@
 		253F70892950FA0F000BD4C0 /* RadarWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB8902F251A55950028FED0 /* RadarWidget.swift */; };
 		253F708B29510B06000BD4C0 /* AQIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 253F708A29510B06000BD4C0 /* AQIView.swift */; };
 		253F708D2951118D000BD4C0 /* AQIResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 253F708C2951118D000BD4C0 /* AQIResponse.swift */; };
+		25429BD329E5F94100D5979F /* Oscar_WatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25429BD229E5F94100D5979F /* Oscar_WatchApp.swift */; };
+		25429BD529E5F94100D5979F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25429BD429E5F94100D5979F /* ContentView.swift */; };
+		25429BD729E5F94300D5979F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 25429BD629E5F94300D5979F /* Assets.xcassets */; };
+		25429BDA29E5F94300D5979F /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 25429BD929E5F94300D5979F /* Preview Assets.xcassets */; };
+		25429BDD29E5F94300D5979F /* Oscar°Watch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 25429BD029E5F94100D5979F /* Oscar°Watch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		25429BE729E5F9B000D5979F /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3EB8902A251A55950028FED0 /* WidgetKit.framework */; };
+		25429BE829E5F9B000D5979F /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3EB8902C251A55950028FED0 /* SwiftUI.framework */; };
+		25429BEB29E5F9B000D5979F /* Oscar_WatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25429BEA29E5F9B000D5979F /* Oscar_WatchWidget.swift */; };
+		25429BEE29E5F9B300D5979F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 25429BED29E5F9B300D5979F /* Assets.xcassets */; };
+		25429BF029E5F9B300D5979F /* Oscar_WatchWidget.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 25429BEC29E5F9B000D5979F /* Oscar_WatchWidget.intentdefinition */; };
+		25429BF129E5F9B300D5979F /* Oscar_WatchWidget.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 25429BEC29E5F9B000D5979F /* Oscar_WatchWidget.intentdefinition */; };
+		25429BF429E5F9B300D5979F /* Oscar°WatchWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 25429BE629E5F9B000D5979F /* Oscar°WatchWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		25429BFA29E5FA5300D5979F /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 25429BF929E5FA5300D5979F /* Alamofire */; };
+		25429BFB29E5FAC600D5979F /* LockscreenProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2546516929E4935600D8C13D /* LockscreenProvider.swift */; };
+		25429BFC29E5FAE600D5979F /* OscarWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED4AEAF254551DD0057DF2F /* OscarWidgetsBundle.swift */; };
+		25429C0029E5FAEF00D5979F /* PrecipitationLockscreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2505C94C29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift */; };
+		25429C0129E5FAF200D5979F /* TemperatureLockscreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2546516329E4905E00D8C13D /* TemperatureLockscreenWidget.swift */; };
+		25429C0229E5FAF600D5979F /* OMDayTemperature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2546516C29E494DB00D8C13D /* OMDayTemperature.swift */; };
+		25429C0329E5FB0700D5979F /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D003C526CD490200FFF8B8 /* LocationManager.swift */; };
+		2546516429E4905E00D8C13D /* TemperatureLockscreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2546516329E4905E00D8C13D /* TemperatureLockscreenWidget.swift */; };
+		2546516729E492E500D8C13D /* RadarProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2546516629E492E500D8C13D /* RadarProvider.swift */; };
+		2546516A29E4935600D8C13D /* LockscreenProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2546516929E4935600D8C13D /* LockscreenProvider.swift */; };
+		2546516D29E494DB00D8C13D /* OMDayTemperature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2546516C29E494DB00D8C13D /* OMDayTemperature.swift */; };
 		255ED6E327A6D67800AE9696 /* BrightskyResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 255ED6E227A6D67800AE9696 /* BrightskyResponse.swift */; };
-		25804B9626C735EE00D92241 /* RefreshView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25804B9526C735EE00D92241 /* RefreshView.swift */; };
+		25761D4F29F1CC85006976BE /* Cloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799F29F1A7DE002E0AAB /* Cloud.swift */; };
+		25761D5029F1CF14006976BE /* Storm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79AA29F1A7DF002E0AAB /* Storm.swift */; };
+		25761D5129F1D083006976BE /* StormDrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79A729F1A7DF002E0AAB /* StormDrop.swift */; };
+		258B223229A81E7500E4ECCE /* Charts in Frameworks */ = {isa = PBXBuildFile; productRef = 258B223129A81E7500E4ECCE /* Charts */; };
 		2590816B28EADDB500886A0E /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 2590816A28EADDB500886A0E /* Alamofire */; };
 		2596CBBF258BE65300B1C200 /* NowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2596CBBE258BE65300B1C200 /* NowViewModel.swift */; };
 		259704DF2757CB0D00DFCA53 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 259704DE2757CB0D00DFCA53 /* Alamofire */; };
 		259704E12757D19C00DFCA53 /* AlertResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259704E02757D19C00DFCA53 /* AlertResponse.swift */; };
 		259704E52757D7E800DFCA53 /* AlertDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259704E42757D7E800DFCA53 /* AlertDetailView.swift */; };
+		259EDA6C29ABC19F00F94996 /* RainRadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259EDA6B29ABC19F00F94996 /* RainRadarView.swift */; };
 		25A0CEDD26C4068300DD4A79 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A0CEDC26C4068300DD4A79 /* RadarView.swift */; };
 		25BEDCE426CACF7D00D90D6B /* DataModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE226CACF7D00D90D6B /* DataModels.xcdatamodeld */; };
 		25BEDCE626CACFC900D90D6B /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE526CACFC900D90D6B /* PersistenceController.swift */; };
@@ -32,13 +60,27 @@
 		25BEDCEA26CAD10B00D90D6B /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE926CAD10B00D90D6B /* SearchView.swift */; };
 		25BF3F9A289FECDF008E7566 /* OpenMeteoResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BF3F99289FECDF008E7566 /* OpenMeteoResponse.swift */; };
 		25D003C626CD490200FFF8B8 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D003C526CD490200FFF8B8 /* LocationManager.swift */; };
-		25D2645D26C7D23C00BE90A1 /* Charts in Frameworks */ = {isa = PBXBuildFile; productRef = 25D2645C26C7D23C00BE90A1 /* Charts */; };
 		25D72B2727C67016001F43FC /* SettingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D72B2627C67016001F43FC /* SettingService.swift */; };
 		25D90A5326C40DB800128F7A /* WeatherMapsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D90A5226C40DB800128F7A /* WeatherMapsResponse.swift */; };
 		25DA7A1A27A420970062E02B /* MapDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DA7A1927A420970062E02B /* MapDetailView.swift */; };
 		25E0170528EAE8460037ED8C /* OpenMeteoResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BF3F99289FECDF008E7566 /* OpenMeteoResponse.swift */; };
 		25E30B2B26CD9B31007F468D /* CityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25E30B2A26CD9B31007F468D /* CityService.swift */; };
 		25ED4A4727A2F5C60050C4A9 /* HeadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED4A4627A2F5C60050C4A9 /* HeadView.swift */; };
+		25ED799529F1A7C6002E0AAB /* Color-Interpolation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799429F1A7C6002E0AAB /* Color-Interpolation.swift */; };
+		25ED79AB29F1A7DF002E0AAB /* Meteor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799629F1A7DD002E0AAB /* Meteor.swift */; };
+		25ED79AF29F1A7DF002E0AAB /* StarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799A29F1A7DD002E0AAB /* StarsView.swift */; };
+		25ED79B029F1A7DF002E0AAB /* StormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799B29F1A7DD002E0AAB /* StormView.swift */; };
+		25ED79B129F1A7DF002E0AAB /* MeteorShower.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799C29F1A7DE002E0AAB /* MeteorShower.swift */; };
+		25ED79B229F1A7DF002E0AAB /* StarField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799D29F1A7DE002E0AAB /* StarField.swift */; };
+		25ED79B329F1A7DF002E0AAB /* CloudGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799E29F1A7DE002E0AAB /* CloudGroup.swift */; };
+		25ED79B429F1A7DF002E0AAB /* Cloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799F29F1A7DE002E0AAB /* Cloud.swift */; };
+		25ED79B529F1A7DF002E0AAB /* Color-Custom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79A029F1A7DE002E0AAB /* Color-Custom.swift */; };
+		25ED79B829F1A7DF002E0AAB /* CloudsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79A329F1A7DE002E0AAB /* CloudsView.swift */; };
+		25ED79BB29F1A7DF002E0AAB /* Star.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79A629F1A7DE002E0AAB /* Star.swift */; };
+		25ED79BC29F1A7DF002E0AAB /* StormDrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79A729F1A7DF002E0AAB /* StormDrop.swift */; };
+		25ED79BD29F1A7DF002E0AAB /* SunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79A829F1A7DF002E0AAB /* SunView.swift */; };
+		25ED79BE29F1A7DF002E0AAB /* Array-GradientStop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79A929F1A7DF002E0AAB /* Array-GradientStop.swift */; };
+		25ED79BF29F1A7DF002E0AAB /* Storm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79AA29F1A7DF002E0AAB /* Storm.swift */; };
 		25EE9F2326E4F7AF0066C362 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D003C526CD490200FFF8B8 /* LocationManager.swift */; };
 		3E22B523251D151300D86A58 /* WeatherApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB89014251A55700028FED0 /* WeatherApp.swift */; };
 		3E6117082544B27600B68120 /* HourlyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6117072544B27600B68120 /* HourlyView.swift */; };
@@ -50,10 +92,24 @@
 		3EB8902D251A55950028FED0 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3EB8902C251A55950028FED0 /* SwiftUI.framework */; };
 		3EB89032251A55980028FED0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3EB89031251A55980028FED0 /* Assets.xcassets */; };
 		3EB89036251A55980028FED0 /* Oscar°WidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 3EB89028251A55950028FED0 /* Oscar°WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		3ED4AEB0254551DE0057DF2F /* WeatherWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED4AEAF254551DD0057DF2F /* WeatherWidgets.swift */; };
+		3ED4AEB0254551DE0057DF2F /* OscarWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED4AEAF254551DD0057DF2F /* OscarWidgetsBundle.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		25429BDB29E5F94300D5979F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3EB89009251A55700028FED0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 25429BCF29E5F94100D5979F;
+			remoteInfo = "Oscar°Watch Watch App";
+		};
+		25429BF229E5F9B300D5979F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3EB89009251A55700028FED0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 25429BE529E5F9B000D5979F;
+			remoteInfo = "Oscar°WatchWidgetExtension";
+		};
 		3EB89034251A55980028FED0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 3EB89009251A55700028FED0 /* Project object */;
@@ -64,6 +120,28 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		25429BDE29E5F94300D5979F /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				25429BDD29E5F94300D5979F /* Oscar°Watch Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		25429BF829E5F9B300D5979F /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				25429BF429E5F9B300D5979F /* Oscar°WatchWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3EB8903A251A55980028FED0 /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -78,6 +156,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2505C94C29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecipitationLockscreenWidget.swift; sourceTree = "<group>"; };
 		251FE39027C5674400D26F0F /* WMSTileOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WMSTileOverlay.swift; sourceTree = "<group>"; };
 		2523367C27C3E9D500C2111A /* RainModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainModel.swift; sourceTree = "<group>"; };
 		2523367E27C3EB3900C2111A /* RainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainView.swift; sourceTree = "<group>"; };
@@ -86,11 +165,25 @@
 		2536438026DACCB800C8A952 /* LegalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalView.swift; sourceTree = "<group>"; };
 		253F708A29510B06000BD4C0 /* AQIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AQIView.swift; sourceTree = "<group>"; };
 		253F708C2951118D000BD4C0 /* AQIResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AQIResponse.swift; sourceTree = "<group>"; };
+		25429BD029E5F94100D5979F /* Oscar°Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Oscar°Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		25429BD229E5F94100D5979F /* Oscar_WatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Oscar_WatchApp.swift; sourceTree = "<group>"; };
+		25429BD429E5F94100D5979F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		25429BD629E5F94300D5979F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		25429BD929E5F94300D5979F /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		25429BE629E5F9B000D5979F /* Oscar°WatchWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Oscar°WatchWidgetExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		25429BEA29E5F9B000D5979F /* Oscar_WatchWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Oscar_WatchWidget.swift; sourceTree = "<group>"; };
+		25429BEC29E5F9B000D5979F /* Oscar_WatchWidget.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = Oscar_WatchWidget.intentdefinition; sourceTree = "<group>"; };
+		25429BED29E5F9B300D5979F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		25429BEF29E5F9B300D5979F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2546516329E4905E00D8C13D /* TemperatureLockscreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureLockscreenWidget.swift; sourceTree = "<group>"; };
+		2546516629E492E500D8C13D /* RadarProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarProvider.swift; sourceTree = "<group>"; };
+		2546516929E4935600D8C13D /* LockscreenProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockscreenProvider.swift; sourceTree = "<group>"; };
+		2546516C29E494DB00D8C13D /* OMDayTemperature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OMDayTemperature.swift; sourceTree = "<group>"; };
 		255ED6E227A6D67800AE9696 /* BrightskyResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrightskyResponse.swift; sourceTree = "<group>"; };
-		25804B9526C735EE00D92241 /* RefreshView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshView.swift; sourceTree = "<group>"; };
 		2596CBBE258BE65300B1C200 /* NowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowViewModel.swift; sourceTree = "<group>"; };
 		259704E02757D19C00DFCA53 /* AlertResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertResponse.swift; sourceTree = "<group>"; };
 		259704E42757D7E800DFCA53 /* AlertDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertDetailView.swift; sourceTree = "<group>"; };
+		259EDA6B29ABC19F00F94996 /* RainRadarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainRadarView.swift; sourceTree = "<group>"; };
 		25A0CEDC26C4068300DD4A79 /* RadarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarView.swift; sourceTree = "<group>"; };
 		25BEDCE326CACF7D00D90D6B /* DataModels.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModels.xcdatamodel; sourceTree = "<group>"; };
 		25BEDCE526CACFC900D90D6B /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
@@ -103,6 +196,21 @@
 		25DA7A1927A420970062E02B /* MapDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapDetailView.swift; sourceTree = "<group>"; };
 		25E30B2A26CD9B31007F468D /* CityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityService.swift; sourceTree = "<group>"; };
 		25ED4A4627A2F5C60050C4A9 /* HeadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadView.swift; sourceTree = "<group>"; };
+		25ED799429F1A7C6002E0AAB /* Color-Interpolation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Color-Interpolation.swift"; sourceTree = "<group>"; };
+		25ED799629F1A7DD002E0AAB /* Meteor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Meteor.swift; sourceTree = "<group>"; };
+		25ED799A29F1A7DD002E0AAB /* StarsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StarsView.swift; sourceTree = "<group>"; };
+		25ED799B29F1A7DD002E0AAB /* StormView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StormView.swift; sourceTree = "<group>"; };
+		25ED799C29F1A7DE002E0AAB /* MeteorShower.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeteorShower.swift; sourceTree = "<group>"; };
+		25ED799D29F1A7DE002E0AAB /* StarField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StarField.swift; sourceTree = "<group>"; };
+		25ED799E29F1A7DE002E0AAB /* CloudGroup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CloudGroup.swift; sourceTree = "<group>"; };
+		25ED799F29F1A7DE002E0AAB /* Cloud.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cloud.swift; sourceTree = "<group>"; };
+		25ED79A029F1A7DE002E0AAB /* Color-Custom.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Color-Custom.swift"; sourceTree = "<group>"; };
+		25ED79A329F1A7DE002E0AAB /* CloudsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CloudsView.swift; sourceTree = "<group>"; };
+		25ED79A629F1A7DE002E0AAB /* Star.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Star.swift; sourceTree = "<group>"; };
+		25ED79A729F1A7DF002E0AAB /* StormDrop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StormDrop.swift; sourceTree = "<group>"; };
+		25ED79A829F1A7DF002E0AAB /* SunView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SunView.swift; sourceTree = "<group>"; };
+		25ED79A929F1A7DF002E0AAB /* Array-GradientStop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array-GradientStop.swift"; sourceTree = "<group>"; };
+		25ED79AA29F1A7DF002E0AAB /* Storm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Storm.swift; sourceTree = "<group>"; };
 		3E6117072544B27600B68120 /* HourlyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyView.swift; sourceTree = "<group>"; };
 		3E61170B2544B2D300B68120 /* DailyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyView.swift; sourceTree = "<group>"; };
 		3EB89011251A55700028FED0 /* Oscar°.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Oscar°.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -117,16 +225,33 @@
 		3EB8902F251A55950028FED0 /* RadarWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarWidget.swift; sourceTree = "<group>"; };
 		3EB89031251A55980028FED0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3EB89033251A55980028FED0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3ED4AEAF254551DD0057DF2F /* WeatherWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherWidgets.swift; sourceTree = "<group>"; };
+		3ED4AEAF254551DD0057DF2F /* OscarWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OscarWidgetsBundle.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		25429BCD29E5F94100D5979F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		25429BE329E5F9B000D5979F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				25429BFA29E5FA5300D5979F /* Alamofire in Frameworks */,
+				25429BE829E5F9B000D5979F /* SwiftUI.framework in Frameworks */,
+				25429BE729E5F9B000D5979F /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3EB8900E251A55700028FED0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				259704DF2757CB0D00DFCA53 /* Alamofire in Frameworks */,
-				25D2645D26C7D23C00BE90A1 /* Charts in Frameworks */,
+				258B223229A81E7500E4ECCE /* Charts in Frameworks */,
 				25288A0126D130E300A612AF /* SPIndicator in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -144,6 +269,63 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		25429BD129E5F94100D5979F /* Oscar°Watch Watch App */ = {
+			isa = PBXGroup;
+			children = (
+				25429BD229E5F94100D5979F /* Oscar_WatchApp.swift */,
+				25429BD429E5F94100D5979F /* ContentView.swift */,
+				25429BD629E5F94300D5979F /* Assets.xcassets */,
+				25429BD829E5F94300D5979F /* Preview Content */,
+			);
+			path = "Oscar°Watch Watch App";
+			sourceTree = "<group>";
+		};
+		25429BD829E5F94300D5979F /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				25429BD929E5F94300D5979F /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		25429BE929E5F9B000D5979F /* Oscar°WatchWidget */ = {
+			isa = PBXGroup;
+			children = (
+				25429BEA29E5F9B000D5979F /* Oscar_WatchWidget.swift */,
+				25429BEC29E5F9B000D5979F /* Oscar_WatchWidget.intentdefinition */,
+				25429BED29E5F9B300D5979F /* Assets.xcassets */,
+				25429BEF29E5F9B300D5979F /* Info.plist */,
+			);
+			path = "Oscar°WatchWidget";
+			sourceTree = "<group>";
+		};
+		2546516529E492D200D8C13D /* Radar */ = {
+			isa = PBXGroup;
+			children = (
+				3EB8902F251A55950028FED0 /* RadarWidget.swift */,
+				2546516629E492E500D8C13D /* RadarProvider.swift */,
+			);
+			path = Radar;
+			sourceTree = "<group>";
+		};
+		2546516829E4933800D8C13D /* Lockscreen */ = {
+			isa = PBXGroup;
+			children = (
+				2546516329E4905E00D8C13D /* TemperatureLockscreenWidget.swift */,
+				2546516929E4935600D8C13D /* LockscreenProvider.swift */,
+				2505C94C29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift */,
+			);
+			path = Lockscreen;
+			sourceTree = "<group>";
+		};
+		2546516B29E4941700D8C13D /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				2546516C29E494DB00D8C13D /* OMDayTemperature.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		255C23A7258F90F30066B2BD /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
@@ -178,6 +360,28 @@
 			path = Storage;
 			sourceTree = "<group>";
 		};
+		25ED799329F1A79D002E0AAB /* Backgrounds */ = {
+			isa = PBXGroup;
+			children = (
+				25ED79A929F1A7DF002E0AAB /* Array-GradientStop.swift */,
+				25ED799F29F1A7DE002E0AAB /* Cloud.swift */,
+				25ED799E29F1A7DE002E0AAB /* CloudGroup.swift */,
+				25ED79A329F1A7DE002E0AAB /* CloudsView.swift */,
+				25ED79A029F1A7DE002E0AAB /* Color-Custom.swift */,
+				25ED799629F1A7DD002E0AAB /* Meteor.swift */,
+				25ED799C29F1A7DE002E0AAB /* MeteorShower.swift */,
+				25ED79A629F1A7DE002E0AAB /* Star.swift */,
+				25ED799D29F1A7DE002E0AAB /* StarField.swift */,
+				25ED799A29F1A7DD002E0AAB /* StarsView.swift */,
+				25ED79AA29F1A7DF002E0AAB /* Storm.swift */,
+				25ED79A729F1A7DF002E0AAB /* StormDrop.swift */,
+				25ED799B29F1A7DD002E0AAB /* StormView.swift */,
+				25ED79A829F1A7DF002E0AAB /* SunView.swift */,
+				25ED799429F1A7C6002E0AAB /* Color-Interpolation.swift */,
+			);
+			path = Backgrounds;
+			sourceTree = "<group>";
+		};
 		3E279B21252C752600BAAA20 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -195,14 +399,15 @@
 		3E89BBA6252EFEC5006F7BCC /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				25ED799329F1A79D002E0AAB /* Backgrounds */,
 				255C23AE258F93900066B2BD /* NowSubViews */,
 				3EB89016251A55700028FED0 /* NowView.swift */,
-				25804B9526C735EE00D92241 /* RefreshView.swift */,
 				25BEDCE926CAD10B00D90D6B /* SearchView.swift */,
 				2536438026DACCB800C8A952 /* LegalView.swift */,
 				259704E42757D7E800DFCA53 /* AlertDetailView.swift */,
 				25DA7A1927A420970062E02B /* MapDetailView.swift */,
 				251FE39027C5674400D26F0F /* WMSTileOverlay.swift */,
+				259EDA6B29ABC19F00F94996 /* RainRadarView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -212,6 +417,8 @@
 			children = (
 				3EB89013251A55700028FED0 /* Oscar° */,
 				3EB8902E251A55950028FED0 /* Oscar°Widget */,
+				25429BD129E5F94100D5979F /* Oscar°Watch Watch App */,
+				25429BE929E5F9B000D5979F /* Oscar°WatchWidget */,
 				3EB89029251A55950028FED0 /* Frameworks */,
 				3EB89012251A55700028FED0 /* Products */,
 			);
@@ -222,6 +429,8 @@
 			children = (
 				3EB89011251A55700028FED0 /* Oscar°.app */,
 				3EB89028251A55950028FED0 /* Oscar°WidgetExtension.appex */,
+				25429BD029E5F94100D5979F /* Oscar°Watch Watch App.app */,
+				25429BE629E5F9B000D5979F /* Oscar°WatchWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -262,8 +471,10 @@
 		3EB8902E251A55950028FED0 /* Oscar°Widget */ = {
 			isa = PBXGroup;
 			children = (
-				3ED4AEAF254551DD0057DF2F /* WeatherWidgets.swift */,
-				3EB8902F251A55950028FED0 /* RadarWidget.swift */,
+				2546516B29E4941700D8C13D /* Models */,
+				2546516829E4933800D8C13D /* Lockscreen */,
+				2546516529E492D200D8C13D /* Radar */,
+				3ED4AEAF254551DD0057DF2F /* OscarWidgetsBundle.swift */,
 				3EB89031251A55980028FED0 /* Assets.xcassets */,
 				3EB89033251A55980028FED0 /* Info.plist */,
 			);
@@ -273,6 +484,45 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		25429BCF29E5F94100D5979F /* Oscar°Watch Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 25429BE129E5F94300D5979F /* Build configuration list for PBXNativeTarget "Oscar°Watch Watch App" */;
+			buildPhases = (
+				25429BCC29E5F94100D5979F /* Sources */,
+				25429BCD29E5F94100D5979F /* Frameworks */,
+				25429BCE29E5F94100D5979F /* Resources */,
+				25429BF829E5F9B300D5979F /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				25429BF329E5F9B300D5979F /* PBXTargetDependency */,
+			);
+			name = "Oscar°Watch Watch App";
+			productName = "Oscar°Watch Watch App";
+			productReference = 25429BD029E5F94100D5979F /* Oscar°Watch Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		25429BE529E5F9B000D5979F /* Oscar°WatchWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 25429BF529E5F9B300D5979F /* Build configuration list for PBXNativeTarget "Oscar°WatchWidgetExtension" */;
+			buildPhases = (
+				25429BE229E5F9B000D5979F /* Sources */,
+				25429BE329E5F9B000D5979F /* Frameworks */,
+				25429BE429E5F9B000D5979F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Oscar°WatchWidgetExtension";
+			packageProductDependencies = (
+				25429BF929E5FA5300D5979F /* Alamofire */,
+			);
+			productName = "Oscar°WatchWidgetExtension";
+			productReference = 25429BE629E5F9B000D5979F /* Oscar°WatchWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		3EB89010251A55700028FED0 /* Oscar° */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3EB89020251A55740028FED0 /* Build configuration list for PBXNativeTarget "Oscar°" */;
@@ -281,17 +531,19 @@
 				3EB8900E251A55700028FED0 /* Frameworks */,
 				3EB8900F251A55700028FED0 /* Resources */,
 				3EB8903A251A55980028FED0 /* Embed App Extensions */,
+				25429BDE29E5F94300D5979F /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				3EB89035251A55980028FED0 /* PBXTargetDependency */,
+				25429BDC29E5F94300D5979F /* PBXTargetDependency */,
 			);
 			name = "Oscar°";
 			packageProductDependencies = (
-				25D2645C26C7D23C00BE90A1 /* Charts */,
 				25288A0026D130E300A612AF /* SPIndicator */,
 				259704DE2757CB0D00DFCA53 /* Alamofire */,
+				258B223129A81E7500E4ECCE /* Charts */,
 			);
 			productName = Weather;
 			productReference = 3EB89011251A55700028FED0 /* Oscar°.app */;
@@ -323,9 +575,15 @@
 		3EB89009251A55700028FED0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1200;
+				LastSwiftUpdateCheck = 1430;
 				LastUpgradeCheck = 1200;
 				TargetAttributes = {
+					25429BCF29E5F94100D5979F = {
+						CreatedOnToolsVersion = 14.3;
+					};
+					25429BE529E5F9B000D5979F = {
+						CreatedOnToolsVersion = 14.3;
+					};
 					3EB89010251A55700028FED0 = {
 						CreatedOnToolsVersion = 12.0;
 					};
@@ -344,9 +602,9 @@
 			);
 			mainGroup = 3EB89008251A55700028FED0;
 			packageReferences = (
-				25D2645B26C7D23C00BE90A1 /* XCRemoteSwiftPackageReference "swiftui-charts" */,
 				252889FF26D130E300A612AF /* XCRemoteSwiftPackageReference "SPIndicator" */,
 				259704DD2757CB0D00DFCA53 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				258B223029A81E7500E4ECCE /* XCRemoteSwiftPackageReference "swiftui-charts" */,
 			);
 			productRefGroup = 3EB89012251A55700028FED0 /* Products */;
 			projectDirPath = "";
@@ -354,11 +612,30 @@
 			targets = (
 				3EB89010251A55700028FED0 /* Oscar° */,
 				3EB89027251A55950028FED0 /* Oscar°WidgetExtension */,
+				25429BCF29E5F94100D5979F /* Oscar°Watch Watch App */,
+				25429BE529E5F9B000D5979F /* Oscar°WatchWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		25429BCE29E5F94100D5979F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				25429BDA29E5F94300D5979F /* Preview Assets.xcassets in Resources */,
+				25429BD729E5F94300D5979F /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		25429BE429E5F9B000D5979F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				25429BEE29E5F9B300D5979F /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3EB8900F251A55700028FED0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -379,39 +656,79 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		25429BCC29E5F94100D5979F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				25429BF129E5F9B300D5979F /* Oscar_WatchWidget.intentdefinition in Sources */,
+				25429BD529E5F94100D5979F /* ContentView.swift in Sources */,
+				25429BD329E5F94100D5979F /* Oscar_WatchApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		25429BE229E5F9B000D5979F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				25429C0229E5FAF600D5979F /* OMDayTemperature.swift in Sources */,
+				25429BFC29E5FAE600D5979F /* OscarWidgetsBundle.swift in Sources */,
+				25429C0329E5FB0700D5979F /* LocationManager.swift in Sources */,
+				25429BEB29E5F9B000D5979F /* Oscar_WatchWidget.swift in Sources */,
+				25429BF029E5F9B300D5979F /* Oscar_WatchWidget.intentdefinition in Sources */,
+				25429BFB29E5FAC600D5979F /* LockscreenProvider.swift in Sources */,
+				25429C0129E5FAF200D5979F /* TemperatureLockscreenWidget.swift in Sources */,
+				25429C0029E5FAEF00D5979F /* PrecipitationLockscreenWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3EB8900D251A55700028FED0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				25804B9626C735EE00D92241 /* RefreshView.swift in Sources */,
 				251FE39127C5674400D26F0F /* WMSTileOverlay.swift in Sources */,
 				253F708B29510B06000BD4C0 /* AQIView.swift in Sources */,
 				2536438126DACCB800C8A952 /* LegalView.swift in Sources */,
 				25BEDCE826CAD02A00D90D6B /* SearchViewModel.swift in Sources */,
 				255ED6E327A6D67800AE9696 /* BrightskyResponse.swift in Sources */,
 				25BF3F9A289FECDF008E7566 /* OpenMeteoResponse.swift in Sources */,
+				25ED79BE29F1A7DF002E0AAB /* Array-GradientStop.swift in Sources */,
 				25E30B2B26CD9B31007F468D /* CityService.swift in Sources */,
 				2533940A27C43F810087C220 /* AlertView.swift in Sources */,
+				25ED79B429F1A7DF002E0AAB /* Cloud.swift in Sources */,
 				3E61170C2544B2D300B68120 /* DailyView.swift in Sources */,
 				25D72B2727C67016001F43FC /* SettingService.swift in Sources */,
+				25ED79BD29F1A7DF002E0AAB /* SunView.swift in Sources */,
+				25ED79B029F1A7DF002E0AAB /* StormView.swift in Sources */,
+				25ED79BB29F1A7DF002E0AAB /* Star.swift in Sources */,
+				25ED79BF29F1A7DF002E0AAB /* Storm.swift in Sources */,
 				2596CBBF258BE65300B1C200 /* NowViewModel.swift in Sources */,
 				2533940827C434900087C220 /* DWDAlerts.swift in Sources */,
 				3E22B523251D151300D86A58 /* WeatherApp.swift in Sources */,
 				25BEDCEA26CAD10B00D90D6B /* SearchView.swift in Sources */,
 				3EB89017251A55700028FED0 /* NowView.swift in Sources */,
+				25ED79B529F1A7DF002E0AAB /* Color-Custom.swift in Sources */,
 				25DA7A1A27A420970062E02B /* MapDetailView.swift in Sources */,
 				25D003C626CD490200FFF8B8 /* LocationManager.swift in Sources */,
 				25BEDCE426CACF7D00D90D6B /* DataModels.xcdatamodeld in Sources */,
+				25ED79AB29F1A7DF002E0AAB /* Meteor.swift in Sources */,
 				3E6117082544B27600B68120 /* HourlyView.swift in Sources */,
+				25ED79B129F1A7DF002E0AAB /* MeteorShower.swift in Sources */,
+				25ED79B829F1A7DF002E0AAB /* CloudsView.swift in Sources */,
 				259704E12757D19C00DFCA53 /* AlertResponse.swift in Sources */,
 				25BEDCE626CACFC900D90D6B /* PersistenceController.swift in Sources */,
 				259704E52757D7E800DFCA53 /* AlertDetailView.swift in Sources */,
 				25ED4A4727A2F5C60050C4A9 /* HeadView.swift in Sources */,
 				25D90A5326C40DB800128F7A /* WeatherMapsResponse.swift in Sources */,
+				25ED79B329F1A7DF002E0AAB /* CloudGroup.swift in Sources */,
 				2523367D27C3E9D500C2111A /* RainModel.swift in Sources */,
+				25ED79BC29F1A7DF002E0AAB /* StormDrop.swift in Sources */,
 				2523367F27C3EB3900C2111A /* RainView.swift in Sources */,
 				25A0CEDD26C4068300DD4A79 /* RadarView.swift in Sources */,
+				25ED79B229F1A7DF002E0AAB /* StarField.swift in Sources */,
+				25ED799529F1A7C6002E0AAB /* Color-Interpolation.swift in Sources */,
 				253F708D2951118D000BD4C0 /* AQIResponse.swift in Sources */,
+				25ED79AF29F1A7DF002E0AAB /* StarsView.swift in Sources */,
+				259EDA6C29ABC19F00F94996 /* RainRadarView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -419,17 +736,35 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				25761D5129F1D083006976BE /* StormDrop.swift in Sources */,
+				2546516D29E494DB00D8C13D /* OMDayTemperature.swift in Sources */,
 				25E0170528EAE8460037ED8C /* OpenMeteoResponse.swift in Sources */,
+				25761D4F29F1CC85006976BE /* Cloud.swift in Sources */,
+				25761D5029F1CF14006976BE /* Storm.swift in Sources */,
+				2546516429E4905E00D8C13D /* TemperatureLockscreenWidget.swift in Sources */,
 				25EE9F2326E4F7AF0066C362 /* LocationManager.swift in Sources */,
 				253F70892950FA0F000BD4C0 /* RadarWidget.swift in Sources */,
 				2535259E26DB7FDF000AA927 /* WeatherMapsResponse.swift in Sources */,
-				3ED4AEB0254551DE0057DF2F /* WeatherWidgets.swift in Sources */,
+				2546516729E492E500D8C13D /* RadarProvider.swift in Sources */,
+				3ED4AEB0254551DE0057DF2F /* OscarWidgetsBundle.swift in Sources */,
+				2505C94D29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift in Sources */,
+				2546516A29E4935600D8C13D /* LockscreenProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		25429BDC29E5F94300D5979F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 25429BCF29E5F94100D5979F /* Oscar°Watch Watch App */;
+			targetProxy = 25429BDB29E5F94300D5979F /* PBXContainerItemProxy */;
+		};
+		25429BF329E5F9B300D5979F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 25429BE529E5F9B000D5979F /* Oscar°WatchWidgetExtension */;
+			targetProxy = 25429BF229E5F9B300D5979F /* PBXContainerItemProxy */;
+		};
 		3EB89035251A55980028FED0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3EB89027251A55950028FED0 /* Oscar°WidgetExtension */;
@@ -438,6 +773,132 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		25429BDF29E5F94300D5979F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Oscar°Watch Watch App/Preview Content\"";
+				DEVELOPMENT_TEAM = N6J2M765XY;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°Watch";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = cloud.bolte.Oscar;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+			};
+			name = Debug;
+		};
+		25429BE029E5F94300D5979F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Oscar°Watch Watch App/Preview Content\"";
+				DEVELOPMENT_TEAM = N6J2M765XY;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°Watch";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = cloud.bolte.Oscar;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+			};
+			name = Release;
+		};
+		25429BF629E5F9B300D5979F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N6J2M765XY;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Oscar°WatchWidget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°WatchWidget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "cloud.bolte.Oscar.watchkitapp.Oscar-WatchWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+			};
+			name = Debug;
+		};
+		25429BF729E5F9B300D5979F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N6J2M765XY;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Oscar°WatchWidget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°WatchWidget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "cloud.bolte.Oscar.watchkitapp.Oscar-WatchWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+			};
+			name = Release;
+		};
 		3EB8901E251A55740028FED0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -562,7 +1023,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°/Preview Content\"";
 				DEVELOPMENT_TEAM = N6J2M765XY;
 				ENABLE_PREVIEWS = YES;
@@ -589,7 +1050,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°/Preview Content\"";
 				DEVELOPMENT_TEAM = N6J2M765XY;
 				ENABLE_PREVIEWS = YES;
@@ -615,8 +1076,8 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
-				DEVELOPMENT_ASSET_PATHS = "Oscar°/Models/OpenMeteoResponse.swift";
+				CURRENT_PROJECT_VERSION = 14;
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = N6J2M765XY;
 				INFOPLIST_FILE = "Oscar°Widget/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -640,8 +1101,8 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
-				DEVELOPMENT_ASSET_PATHS = "Oscar°/Models/OpenMeteoResponse.swift";
+				CURRENT_PROJECT_VERSION = 14;
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = N6J2M765XY;
 				INFOPLIST_FILE = "Oscar°Widget/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -662,6 +1123,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		25429BE129E5F94300D5979F /* Build configuration list for PBXNativeTarget "Oscar°Watch Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				25429BDF29E5F94300D5979F /* Debug */,
+				25429BE029E5F94300D5979F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		25429BF529E5F9B300D5979F /* Build configuration list for PBXNativeTarget "Oscar°WatchWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				25429BF629E5F9B300D5979F /* Debug */,
+				25429BF729E5F9B300D5979F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		3EB8900C251A55700028FED0 /* Build configuration list for PBXProject "Oscar°" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -700,20 +1179,20 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		258B223029A81E7500E4ECCE /* XCRemoteSwiftPackageReference "swiftui-charts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/spacenation/swiftui-charts";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		259704DD2757CB0D00DFCA53 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 5.0.0;
-			};
-		};
-		25D2645B26C7D23C00BE90A1 /* XCRemoteSwiftPackageReference "swiftui-charts" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/spacenation/swiftui-charts";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -724,6 +1203,16 @@
 			package = 252889FF26D130E300A612AF /* XCRemoteSwiftPackageReference "SPIndicator" */;
 			productName = SPIndicator;
 		};
+		25429BF929E5FA5300D5979F /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 259704DD2757CB0D00DFCA53 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+		258B223129A81E7500E4ECCE /* Charts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 258B223029A81E7500E4ECCE /* XCRemoteSwiftPackageReference "swiftui-charts" */;
+			productName = Charts;
+		};
 		2590816A28EADDB500886A0E /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 259704DD2757CB0D00DFCA53 /* XCRemoteSwiftPackageReference "Alamofire" */;
@@ -733,11 +1222,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 259704DD2757CB0D00DFCA53 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
-		};
-		25D2645C26C7D23C00BE90A1 /* Charts */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 25D2645B26C7D23C00BE90A1 /* XCRemoteSwiftPackageReference "swiftui-charts" */;
-			productName = Charts;
 		};
 /* End XCSwiftPackageProductDependency section */
 
