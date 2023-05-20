@@ -46,6 +46,7 @@
 		25761D4F29F1CC85006976BE /* Cloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799F29F1A7DE002E0AAB /* Cloud.swift */; };
 		25761D5029F1CF14006976BE /* Storm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79AA29F1A7DF002E0AAB /* Storm.swift */; };
 		25761D5129F1D083006976BE /* StormDrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79A729F1A7DF002E0AAB /* StormDrop.swift */; };
+		258428B82A18C5230033E5A3 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 258428B72A18C5230033E5A3 /* Launch Screen.storyboard */; };
 		258B223229A81E7500E4ECCE /* Charts in Frameworks */ = {isa = PBXBuildFile; productRef = 258B223129A81E7500E4ECCE /* Charts */; };
 		2590816B28EADDB500886A0E /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 2590816A28EADDB500886A0E /* Alamofire */; };
 		2596CBBF258BE65300B1C200 /* NowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2596CBBE258BE65300B1C200 /* NowViewModel.swift */; };
@@ -180,6 +181,7 @@
 		2546516929E4935600D8C13D /* LockscreenProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockscreenProvider.swift; sourceTree = "<group>"; };
 		2546516C29E494DB00D8C13D /* OMDayTemperature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OMDayTemperature.swift; sourceTree = "<group>"; };
 		255ED6E227A6D67800AE9696 /* BrightskyResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrightskyResponse.swift; sourceTree = "<group>"; };
+		258428B72A18C5230033E5A3 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		2596CBBE258BE65300B1C200 /* NowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowViewModel.swift; sourceTree = "<group>"; };
 		259704E02757D19C00DFCA53 /* AlertResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertResponse.swift; sourceTree = "<group>"; };
 		259704E42757D7E800DFCA53 /* AlertDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertDetailView.swift; sourceTree = "<group>"; };
@@ -447,6 +449,7 @@
 				3EB89018251A55740028FED0 /* Assets.xcassets */,
 				3EB8901D251A55740028FED0 /* Info.plist */,
 				3EB8901A251A55740028FED0 /* Preview Content */,
+				258428B72A18C5230033E5A3 /* Launch Screen.storyboard */,
 			);
 			path = "Oscar°";
 			sourceTree = "<group>";
@@ -640,6 +643,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				258428B82A18C5230033E5A3 /* Launch Screen.storyboard in Resources */,
 				3EB8901C251A55740028FED0 /* Preview Assets.xcassets in Resources */,
 				3EB89019251A55740028FED0 /* Assets.xcassets in Resources */,
 			);
@@ -1023,7 +1027,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°/Preview Content\"";
 				DEVELOPMENT_TEAM = N6J2M765XY;
 				ENABLE_PREVIEWS = YES;
@@ -1050,7 +1054,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°/Preview Content\"";
 				DEVELOPMENT_TEAM = N6J2M765XY;
 				ENABLE_PREVIEWS = YES;
