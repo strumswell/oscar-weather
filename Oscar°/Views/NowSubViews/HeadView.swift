@@ -18,7 +18,7 @@ struct HeadView: View {
             Spacer()
             Image(systemName: "magnifyingglass")
                 .foregroundColor(Color(UIColor.label))
-            Text(now.placemark?.locality ?? "Lade...")
+            Text(now.placemark ?? "...")
                     .font(.title2)
                     .fontWeight(.bold)
                     .lineSpacing(/*@START_MENU_TOKEN@*/10.0/*@END_MENU_TOKEN@*/)
@@ -38,25 +38,11 @@ struct HeadView: View {
         
         LazyVStack {
             VStack {
-                // MARK: Current Condition Symbol
-                /**
-                Image(now.weather?.getCurrentIcon() ?? "")
-                    .resizable()
-                    .scaledToFit()
-                    .shadow(radius: 5)
-                    .frame(width: 125, height: 125)
-                    .padding(.bottom, -10)
-                 */
-                        
-                VStack {
-                    Spacer()
-                    // MARK: Current Temperature
-                    Text(now.weather?.currentWeather.getRoundedTempString() ?? "")
-                        //.bold()
-                        .foregroundColor(Color(UIColor.label))
-                        //.font(.system(size: 60))
-                        .font(.system(size: 120))
-                }
+                Spacer()
+                // MARK: Current Temperature
+                Text(now.weather?.currentWeather.getRoundedTempString() ?? "")
+                    .foregroundColor(Color(UIColor.label))
+                    .font(.system(size: 120))
             }
             .padding(.bottom, 150)
 
@@ -84,14 +70,5 @@ struct HeadView: View {
                 AlertView(alerts: $now.alerts)
             }
         }
-    }
-}
-
-extension View {
-    public func gradientForeground(colors: [Color]) -> some View {
-        self.overlay(LinearGradient(gradient: .init(colors: colors),
-                                    startPoint: .bottom,
-                                    endPoint: .top))
-            .mask(self)
     }
 }

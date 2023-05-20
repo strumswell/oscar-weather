@@ -43,7 +43,7 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
         }
     }
     
-    var placemark: CLPlacemark? {
+    var placemark: String? {
         willSet {
             objectWillChange.send()
         }
@@ -150,7 +150,10 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
         
         if (selectedCities.count > 0) {
             let city = selectedCities.first!
+            self.placemark = city.label
             location = CLLocation(latitude: city.lat, longitude: city.lon)
+            dispatchGroup.leave()
+            return
         } else {
             let coords = lm.gpsLocation ?? defaultCoordinates
             location = CLLocation(latitude: coords.latitude, longitude: coords.longitude)
@@ -163,7 +166,7 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
             [self] (placemarks, error) in
                                             if error == nil {
                                                 let firstLocation = placemarks?[0]
-                                                self.placemark = firstLocation
+                                                self.placemark = firstLocation?.locality ?? "..."
                                                 dispatchGroup.leave()
                                             } else {
                                                 print("Error fetching Coordinates")
@@ -415,7 +418,7 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
                 .init(color: .lightCloudEnd, location: 0.38),
                 .init(color: .lightCloudEnd, location: 0.7),
                 .init(color: .sunsetCloudEnd, location: 0.78),
-                .init(color: .darkCloudEnd, location: 0.82),
+                .init(color: .darkCloudEnd, location: 0.92),
                 .init(color: .darkCloudEnd, location: 1)
             ]
         }

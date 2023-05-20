@@ -50,6 +50,7 @@ struct OpenMeteoResponse: Codable {
         let sunriseDate = getDate(timestamp: sunrise)
         let sunsetDate = getDate(timestamp: sunset)
         
+        
         if (now > sunriseDate && now < sunsetDate) {
             switch weathercode {
             case 0, 1:
@@ -296,7 +297,6 @@ struct Daily: Codable {
             return "09d"
         }
     }
-
 }
 
 // MARK: - DailyUnits
