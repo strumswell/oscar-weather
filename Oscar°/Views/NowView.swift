@@ -33,7 +33,7 @@ struct NowView: View {
                         CloudsView(
                             thickness: nowViewModel.weather?.currentWeather.getCloudDensity() ?? Cloud.Thickness.none,
                             topTint: nowViewModel.getCloudTopStops().interpolated(amount: nowViewModel.time),
-                            bottomTint: nowViewModel.getCloudTopStops().interpolated(amount: nowViewModel.time)
+                            bottomTint: nowViewModel.getCloudBottomStops().interpolated(amount: nowViewModel.time)
                         )
                     }
                 }
