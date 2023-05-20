@@ -10,6 +10,6 @@ An iOS weather app written with SwiftUI. You can view current and forecasted wea
 
 - Weather data from [OpenMeteo](https://open-meteo.com/)
 - Rain radar tile server from [RainViewer](https://www.rainviewer.com)
-- Rain radar tile server and weather alters for central Europe from [DWD](https://www.dwd.de/DE/Home/home_node.html)
+- Rain radar tile server and weather alerts for central Europe from [DWD](https://www.dwd.de/DE/Home/home_node.html)
 - Amazing weather icons from [Hosein Bagheri](https://ui8.net/hosein_bagheri/products/3d-weather-icons40)
 - Amazing tutorials, e.g. powering the animated weather backgrounds, from [Hacking with Swift](https://www.hackingwithswift.com)
