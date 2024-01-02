@@ -67,7 +67,7 @@ struct NowView: View {
                         HeadView(now: nowViewModel)
                             .padding(.top, 50)
                         RainView(rain: $nowViewModel.rain)
-                        HourlyView(weather: $nowViewModel.weather)
+                        HourlyView()
                         DailyView(weather: $nowViewModel.weather)
                         
                         Text("Radar")

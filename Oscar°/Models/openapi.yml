@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
   title: Open-Meteo APIs
   description: 'Open-Meteo offers free weather forecast APIs for open-source developers and non-commercial use. No API key is required.'
@@ -87,6 +87,7 @@ paths:
             - soil_moisture_3_9cm
             - soil_moisture_9_27cm
             - soil_moisture_27_81cm
+            - is_day
       - name: daily
         in: query
         schema:
@@ -206,7 +207,7 @@ paths:
                       time:
                         type: array
                         items:
-                          type: string
+                          type: number
                       temperature_2m:
                         type: array
                         items:
@@ -308,9 +309,9 @@ paths:
                         items:
                           type: number
                       precipitation_probability:
-                        type: array
+                        type: [array, null]
                         items:
-                          type: number
+                          type: [number, null]
                       weathercode:
                         type: array
                         items:
@@ -356,6 +357,10 @@ paths:
                         items:
                           type: number
                       soil_moisture_27_81cm:
+                        type: array
+                        items:
+                          type: number
+                      is_day:
                         type: array
                         items:
                           type: number
@@ -619,7 +624,7 @@ components:
         time:
           type: array
           items:
-            type: string
+            type: number
         temperature_2m_max:
           type: array
           items:
@@ -696,7 +701,7 @@ components:
         cloudcover:
           type: number
         time:
-          type: string
+          type: number
         temperature:
           type: number
         windspeed:

@@ -1,5 +1,3 @@
 generate:
   - types
   - client
-featureFlag:
-  - nullableSchemas

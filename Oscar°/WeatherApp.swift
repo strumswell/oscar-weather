@@ -19,7 +19,7 @@ class Weather {
         forecast = Operations.getForecast.Output.Ok.Body.jsonPayload.init(
             latitude: 0.0,
             longitude: 0.0,
-            current: .init(cloudcover: 0.0, time: "", temperature: 0.0, windspeed: 0.0, wind_direction_10m: 0.0, weathercode: 0.0)
+            current: .init(cloudcover: 0.0, time: 0.0, temperature: 0.0, windspeed: 0.0, wind_direction_10m: 0.0, weathercode: 0.0)
         )
         
         alerts = []
@@ -53,15 +53,17 @@ class APIClient {
     }
     
     func getForecast(coordinates: CLLocationCoordinate2D) async throws -> Operations.getForecast.Output.Ok.Body.jsonPayload {
-        let fallbackForecast: Operations.getForecast.Output.Ok.Body.jsonPayload = .init(latitude: coordinates.latitude, longitude: coordinates.longitude, current: .init(cloudcover: 0.0, time: "", temperature: 0.0, windspeed: 0.0, wind_direction_10m: 0.0, weathercode: 0.0))
+        let fallbackForecast: Operations.getForecast.Output.Ok.Body.jsonPayload = .init(latitude: coordinates.latitude, longitude: coordinates.longitude, current: .init(cloudcover: 0.0, time: 0.0, temperature: 0.0, windspeed: 0.0, wind_direction_10m: 0.0, weathercode: 0.0))
         
         let response = try await openMeteo.getForecast(.init(
             query: .init(
                 latitude: coordinates.latitude,
                 longitude: coordinates.longitude,
-                hourly: [.temperature_2m, .apparent_temperature, .precipitation, .weathercode, .cloudcover, .windspeed_10m, .winddirection_10m, .precipitation_probability],
+                hourly: [.temperature_2m, .apparent_temperature, .precipitation, .weathercode, .cloudcover, .windspeed_10m, .winddirection_10m, .precipitation_probability, .is_day],
                 current: [.cloudcover, .temperature, .wind_direction_10m, .weathercode, .windspeed],
-                timezone: "auto"
+                timeformat: .unixtime,
+                timezone: "auto",
+                forecast_days: ._14
             )
         ))
         
@@ -69,6 +71,7 @@ class APIClient {
         case let .ok(response):
             switch response.body {
             case .json(let result):
+                print(result)
                 return result
             }
         case .badRequest(_):
@@ -139,6 +142,15 @@ extension Components.Schemas.CurrentWeather {
         let directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"]
         let index = Int((self.wind_direction_10m + 22.5) / 45.0)
         return directions[min(max(index, 0), 8)]
+    }
+}
+
+extension View {
+    public func getCurrentHour() -> Int {
+        let currentDate = Date()
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: currentDate)
+        return hour
     }
 }
 
