@@ -28,38 +28,7 @@ struct NowView: View {
 
     var body: some View {
         ZStack {
-            ZStack {
-                StarsView()
-                    .opacity(nowViewModel.starOpacity)
-                if nowViewModel.isRaining() {
-                    CloudsView(
-                        thickness: Cloud.Thickness.thick,
-                        topTint: nowViewModel.getCloudTopStops().interpolated(amount: nowViewModel.time),
-                        bottomTint: nowViewModel.getCloudBottomStops().interpolated(amount: nowViewModel.time)
-                    )
-                    StormView(type: Storm.Contents.rain, direction: .degrees(30), strength: 80)
-                } else {
-                    if (nowViewModel.weather?.currentWeather.getCloudDensity() ?? Cloud.Thickness.none) != Cloud.Thickness.thick {
-                        SunView(progress: nowViewModel.time)
-                    }
-                    CloudsView(
-                        thickness: nowViewModel.weather?.currentWeather.getCloudDensity() ?? Cloud.Thickness.none,
-                        topTint: nowViewModel.getCloudTopStops().interpolated(amount: nowViewModel.time),
-                        bottomTint: nowViewModel.getCloudBottomStops().interpolated(amount: nowViewModel.time)
-                    )
-                }
-            }
-            .preferredColorScheme(.dark)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(
-                LinearGradient(colors: [
-                    nowViewModel.getBackgroundTopStops().interpolated(amount: nowViewModel.time),
-                    nowViewModel.getBackgroundBottomStops().interpolated(amount: nowViewModel.time)
-                ], startPoint: .top, endPoint: .bottom)
-            )
-
-            
-
+            WeatherSimulationView()
             // MARK: Weather Sheet
             ScrollView(.vertical, showsIndicators: false) {
                 ZStack {
@@ -68,7 +37,7 @@ struct NowView: View {
                             .padding(.top, 50)
                         RainView(rain: $nowViewModel.rain)
                         HourlyView()
-                        DailyView(weather: $nowViewModel.weather)
+                        DailyView()
                         
                         Text("Radar")
                             .font(.title3)
@@ -118,7 +87,7 @@ struct NowView: View {
                             MapDetailView(now: nowViewModel, settingsService: settingsService)
                         }
                     
-                        AQIView(aqi: $nowViewModel.aqi)
+                        AQIView()
                                           
                         HStack {
                             Spacer()
@@ -149,9 +118,6 @@ struct NowView: View {
             .refreshable {
                 await self.updateState()
             }
-            .task {
-                //await nowViewModel.update()
-            }
         }
         .background(Color(UIColor.secondarySystemBackground))
         .edgesIgnoringSafeArea(.all)
@@ -175,6 +141,10 @@ extension NowView {
             location.coordinates = locationService.getCoordinates()
             location.name = await locationService.getLocationName()
             weather.forecast = try await client.getForecast(coordinates: location.coordinates)
+            weather.air = try await client.getAirQuality(coordinates: location.coordinates)
+            weather.alerts = try await client.getAlerts(coordinates: location.coordinates)
+            weather.rain = try await client.getRainForecast(coordinates: location.coordinates)
+            weather.updateTime()
         } catch {
             print(error)
         }

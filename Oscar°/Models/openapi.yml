@@ -16,6 +16,8 @@ servers:
     description: "Public open meteo endpoint"
   - url: https://api.oscars.love
     description: "Public Oscar Weather Endpoint"
+  - url: https://air-quality-api.open-meteo.com
+    description: "Public aqi open meteo endpoint"
 paths:
   /v1/forecast:
     servers:
@@ -124,6 +126,7 @@ paths:
             - windspeed
             - wind_direction_10m
             - weathercode
+            - precipitation
       - name: temperature_unit
         in: query
         schema:
@@ -199,6 +202,8 @@ paths:
                     type: integer
                     example: 3600
                     description: Applied timezone offset from the &timezone= parameter.
+                  timezone_abbreviation:
+                    type: string
                   hourly:
                     type: object
                     required:
@@ -395,6 +400,84 @@ paths:
                     type: string
                     description: Description of the error
                     example: "Latitude must be in range of -90 to 90°. Given: 300"
+  /v1/air-quality:
+    servers:
+      - url: https://air-quality-api.open-meteo.com
+    get:
+      operationId: getAirQuality
+      tags:
+      - Weather Forecast APIs
+      parameters:
+      - name: latitude
+        in: query
+        required: true
+        description: "WGS84 coordinate"
+        schema:
+          type: number
+          format: number
+      - name: longitude
+        in: query
+        required: true
+        description: "WGS84 coordinate"
+        schema:
+          type: number
+          format: number
+      - name: timezone
+        in: query
+        description: If `timezone` is set, all timestamps are returned as local-time and data is returned starting at 0:00 local-time. Any time zone name from the [time zone database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) is supported.
+        schema:
+          type: string
+      - name: timeformat
+        in: query
+        description: If format `unixtime` is selected, all time values are returned in UNIX epoch time in seconds. Please not that all time is then in GMT+0! For daily values with unix timestamp, please apply `utc_offset_seconds` again to get the correct date.
+        schema:
+          type: string
+          default: iso8601
+          enum:
+          - iso8601
+          - unixtime
+      - name: forecast_days
+        in: query
+        schema:
+          type: integer
+          enum:
+          - 1
+      - name: hourly
+        in: query
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - time
+            - european_aqi
+            - european_aqi_pm2_5
+            - european_aqi_pm10
+            - european_aqi_no2
+            - european_aqi_o3
+            - european_aqi_so2
+            - uv_index
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  latitude:
+                    type: number
+                    example: 52.52
+                    description: WGS84 of the center of the weather grid-cell which was used to generate this forecast. This coordinate might be up to 5 km away.
+                  longitude:
+                    type: number
+                    example: 13.419.52
+                    description: WGS84 of the center of the weather grid-cell which was used to generate this forecast. This coordinate might be up to 5 km away.
+                  timezone_abbreviation:
+                    type: string
+                  hourly:
+                    $ref: '#/components/schemas/AirQuality'
   /api/v1/alerts:
     servers:
       - url: https://api.oscars.love
@@ -650,9 +733,9 @@ components:
           items:
             type: number
         precipitation_probability_max:
-          type: array
+          type: [array, null]
           items:
-            type: number
+            type: [number, null]
         weathercode:
           type: array
           items:
@@ -710,6 +793,8 @@ components:
           type: number
         weathercode:
           type: number
+        precipitation:
+          type: number
       required:
         - cloudcover
         - time
@@ -754,7 +839,41 @@ components:
       properties:
         time:
           type: string
-          format: date-time
         mmh:
           type: number
           format: double
+    AirQuality:
+      type: object
+      properties:
+        time:
+          type: array
+          items:
+            type: number
+        european_aqi:
+          type: array
+          items:
+            type: number
+        european_aqi_pm2_5:
+          type: array
+          items:
+            type: number
+        european_aqi_pm10:
+          type: array
+          items:
+            type: number
+        european_aqi_no2:
+          type: array
+          items:
+            type: number
+        european_aqi_o3:
+          type: array
+          items:
+            type: number
+        european_aqi_so2:
+          type: array
+          items:
+            type: number
+        uv_index:
+          type: array
+          items:
+            type: number

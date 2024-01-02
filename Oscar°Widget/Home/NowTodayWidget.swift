@@ -49,6 +49,7 @@ struct NowTodayEntryView: View {
                 entry.backgroundGradients.last!,
             ], startPoint: .top, endPoint: .bottom)
         )
+        .containerBackground(.clear, for: .widget)
     }
 }
 

@@ -35,7 +35,7 @@ struct HeadView: View {
         .sheet(isPresented: $isLocationSheetPresented) {
             SearchView(searchModel: searchModel, now: now, cities: $now.cs.cities)
         }
-        .padding(.bottom, 40)
+        .padding(.bottom, 35)
         .padding(.leading, -20)
         .padding(.top)
         

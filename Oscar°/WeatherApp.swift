@@ -14,15 +14,26 @@ import CoreLocation
 class Weather {
     var forecast: Operations.getForecast.Output.Ok.Body.jsonPayload
     var alerts: [Components.Schemas.Alert]
+    var air: Operations.getAirQuality.Output.Ok.Body.jsonPayload
+    var rain: Components.Schemas.RainData
+    var time: Double
     
     init() {
+        time = 0
         forecast = Operations.getForecast.Output.Ok.Body.jsonPayload.init(
             latitude: 0.0,
             longitude: 0.0,
             current: .init(cloudcover: 0.0, time: 0.0, temperature: 0.0, windspeed: 0.0, wind_direction_10m: 0.0, weathercode: 0.0)
         )
-        
         alerts = []
+        air = Operations.getAirQuality.Output.Ok.Body.jsonPayload.init(latitude: 0, longitude: 0)
+        rain = .init()
+    }
+    
+    // Update internal clock used for day simulation background
+    func updateTime() {
+        let dayBegin = self.forecast.hourly?.time.first ?? 0
+        self.time = (Date.now.timeIntervalSince1970-dayBegin)/86400.0
     }
 }
 
@@ -40,7 +51,8 @@ class Location {
 class APIClient {
     var openMeteo: Client
     var oscar: Client
-    
+    var openMeteoAqi: Client
+
     init () {
         openMeteo = Client(
             serverURL: try! Servers.server1(),
@@ -48,6 +60,10 @@ class APIClient {
         )
         oscar = Client(
             serverURL: try! Servers.server2(),
+            transport: URLSessionTransport()
+        )
+        openMeteoAqi = Client(
+            serverURL: try! Servers.server3(),
             transport: URLSessionTransport()
         )
     }
@@ -60,7 +76,8 @@ class APIClient {
                 latitude: coordinates.latitude,
                 longitude: coordinates.longitude,
                 hourly: [.temperature_2m, .apparent_temperature, .precipitation, .weathercode, .cloudcover, .windspeed_10m, .winddirection_10m, .precipitation_probability, .is_day],
-                current: [.cloudcover, .temperature, .wind_direction_10m, .weathercode, .windspeed],
+                daily: [.precipitation_probability_max, .precipitation_sum, .sunrise, .sunset, .temperature_2m_max, .temperature_2m_min, .weathercode],
+                current: [.cloudcover, .temperature, .wind_direction_10m, .weathercode, .windspeed, .precipitation],
                 timeformat: .unixtime,
                 timezone: "auto",
                 forecast_days: ._14
@@ -71,7 +88,6 @@ class APIClient {
         case let .ok(response):
             switch response.body {
             case .json(let result):
-                print(result)
                 return result
             }
         case .badRequest(_):
@@ -81,6 +97,29 @@ class APIClient {
         }
     }
     
+    func getAirQuality(coordinates: CLLocationCoordinate2D) async throws -> Operations.getAirQuality.Output.Ok.Body.jsonPayload {
+        let fallbackForecast: Operations.getAirQuality.Output.Ok.Body.jsonPayload = .init(latitude: 0, longitude: 0)
+        
+        let response = try await openMeteoAqi.getAirQuality(.init(
+            query: .init(
+                latitude: coordinates.latitude,
+                longitude: coordinates.longitude,
+                timezone: "auto", timeformat: .unixtime, forecast_days: ._1, 
+                hourly: [.european_aqi, .european_aqi_no2, .european_aqi_o3, .european_aqi_pm10, .european_aqi_pm10, .european_aqi_pm2_5, .european_aqi_so2, .uv_index]
+            )
+        ))
+        
+        switch response {
+        case let .ok(response):
+            switch response.body {
+            case .json(let result):
+                return result
+            }
+        case .undocumented(statusCode: _, _):
+            return fallbackForecast
+        }
+    }
+
     func getAlerts(coordinates: CLLocationCoordinate2D) async throws -> [Components.Schemas.Alert] {
         let response = try await oscar.getAlerts(.init(
             query: .init(
@@ -99,7 +138,26 @@ class APIClient {
             return []
         }
     }
-}
+    
+    func getRainForecast(coordinates: CLLocationCoordinate2D) async throws -> Components.Schemas.RainData {
+        let response = try await oscar.getRain(.init(
+            query: .init(
+                lat: coordinates.latitude,
+                lon: coordinates.longitude
+            )
+        ))
+        
+        switch response {
+        case let .ok(response):
+            switch response.body {
+            case .json(let result):
+                return result
+            }
+        case .undocumented:
+            return .init()
+        }
+    }
+    }
 
 @main
 struct WeatherApp: App {
@@ -122,12 +180,16 @@ struct WeatherApp: App {
                     do {
                         locationService.update()
                         location = await locationService.getLocation()
-
+                        
                         async let forecast = client.getForecast(coordinates: location.coordinates)
-
+                        async let airQuality = client.getAirQuality(coordinates: location.coordinates)
                         async let alerts = client.getAlerts(coordinates: location.coordinates)
+                        async let rain = client.getRainForecast(coordinates: location.coordinates)
                         weather.forecast = try await forecast
+                        weather.air = try await airQuality
                         weather.alerts = try await alerts
+                        weather.rain = try await rain
+                        weather.updateTime()
                     } catch {
                         print(error)
                     }

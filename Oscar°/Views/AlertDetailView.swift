@@ -13,7 +13,7 @@ struct AlertListView: View {
     
     var body: some View {
         NavigationView {
-            List(weather.alerts ?? [], id: \.self) { alert in
+            List(weather.alerts , id: \.self) { alert in
                 AlertDetailView(alert: alert)
             }
             .navigationBarTitle(Text("Unwetterwarnungen"), displayMode: .inline)

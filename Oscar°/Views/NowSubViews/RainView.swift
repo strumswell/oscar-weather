@@ -10,8 +10,10 @@ import Charts
 
 struct RainView: View {
     @Binding var rain: RainRadarForecast?
+    @Environment(Weather.self) private var weather: Weather
+
     var body: some View {
-        if ((rain?.getMaxPreci() ?? 0.0) > 0) {
+        if (getMaxPreci() > 0) {
             Text("Radar")
                 .font(.system(size: 20))
                 .bold()
@@ -20,11 +22,11 @@ struct RainView: View {
             
                 HStack {
                     VStack {
-                        Text("\(rain?.getMaxPreci() ?? 1, specifier: "%.1f") mm/h")
+                        Text("\(getMaxPreci(), specifier: "%.1f") mm/h")
                             .font(.footnote)
                             .foregroundColor(Color(UIColor.label))
                         Spacer()
-                        Text("\((rain?.getMaxPreci() ?? 1) / 2, specifier: "%.1f") mm/h")
+                        Text("\(getMaxPreci() / 2, specifier: "%.1f") mm/h")
                             .font(.footnote)
                             .foregroundColor(Color(UIColor.label))
                         Spacer()
@@ -36,15 +38,15 @@ struct RainView: View {
                             .foregroundColor(Color(UIColor.label))
                     }
                     VStack {
-                        if ((rain?.getMaxPreci() ?? 1) <= 1) {
-                            Chart(data: rain?.data.map{$0.mmh} ?? [])
+                        if (getMaxPreci() <= 1) {
+                            Chart(data: weather.rain.data?.map{$0.mmh ?? 0} ?? [])
                                 .chartStyle(
                                     AreaChartStyle(.quadCurve, fill:
                                         LinearGradient(gradient: .init(colors: [Color.blue, Color.blue.opacity(0.5)]), startPoint: .top, endPoint: .bottom)
                                     )
                                 )
-                        } else if ((rain?.data.count ?? 0) > 0) {
-                            Chart(data: rain?.data.map{$0.mmh / (rain?.getMaxPreci() ?? 1.0)} ?? [])
+                        } else if ((weather.rain.data?.count ?? 0) > 0) {
+                            Chart(data: weather.rain.data?.map{($0.mmh ?? 0) / getMaxPreci()} ?? [])
                                 .chartStyle(
                                     AreaChartStyle(.quadCurve, fill:
                                         LinearGradient(gradient: .init(colors: [Color.blue, Color.blue.opacity(0.5)]), startPoint: .top, endPoint: .bottom)
@@ -52,17 +54,17 @@ struct RainView: View {
                                 )
                         }
                         HStack() {
-                            Text("\(rain?.getStartTime() ?? "")")
+                            Text("\(getStartTime())")
                                 .font(.footnote)
                                 .foregroundColor(Color(UIColor.label))
                             Spacer()
-                            if (rain?.data.count ?? 0 > 1) {
-                                Text("\(rain?.getMidTime() ?? "")")
+                            if (weather.rain.data?.count ?? 0 > 1) {
+                                Text("\(getMidTime())")
                                     .font(.footnote)
                                     .foregroundColor(Color(UIColor.label))
                                 Spacer()
                             }
-                            Text("\(rain?.getEndTime() ?? "")")
+                            Text("\(getEndTime())")
                                 .font(.footnote)
                                 .foregroundColor(Color(UIColor.label))
                         }
@@ -71,11 +73,60 @@ struct RainView: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 10)
-            .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
+            .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
             .cornerRadius(10)
             .font(.system(size: 18))
             .padding([.leading, .trailing, .bottom])
             .frame(height: 165)
         }
+    }
+}
+
+extension RainView {
+    public func getStartTime() -> String {
+        let iso = ISO8601DateFormatter()
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter.string(from: iso.date(from: weather.rain.data?.first?.time ?? "2022-01-01") ?? Date())
+    }
+    
+    public func getMidTime() -> String {
+        let iso = ISO8601DateFormatter()
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter.string(from: iso.date(from: weather.rain.data?.middle?.time ?? "2022-01-01") ?? Date())
+    }
+    
+    public func getFormattedTime(time: String) -> String {
+        let iso = ISO8601DateFormatter()
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter.string(from: iso.date(from: time) ?? Date())
+    }
+    
+    
+    public func getEndTime() -> String {
+        let iso = ISO8601DateFormatter()
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter.string(from: iso.date(from: weather.rain.data?.last?.time ?? "2022-01-01") ?? Date())
+    }
+    
+    func getMaxPreci() -> Double {
+        var maxPreci = 0.0
+        for datapoint in weather.rain.data ?? [] {
+            if (datapoint.mmh ?? 0 > maxPreci) {
+                maxPreci = datapoint.mmh ?? 0
+            }
+        }
+        
+        if (maxPreci <= 1 && maxPreci > 0) {
+            return 1
+        }
+        return maxPreci
     }
 }

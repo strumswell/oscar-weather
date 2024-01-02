@@ -21,15 +21,14 @@ struct HourlyView: View {
             .padding(.top)
         
         ScrollView(.horizontal, showsIndicators: false) {
-            
             if ((weather.forecast.hourly == nil)) {
                 ProgressView()
                     .padding()
             } else {
-                HStack(spacing: 14) {
-                    ForEach(self.getCurrentHour() ... self.getCurrentHour() + 48, id: \.self) { index in
+                LazyHStack(spacing: 12) {
+                    ForEach(getLocalizedHourIndex() ... getLocalizedHourIndex() + 36, id: \.self) { index in
                         VStack {
-                            Text(self.getHourString(timestamp: weather.forecast.hourly?.time[index] ?? 0) + " Uhr")
+                            Text(getHourString(timestamp: weather.forecast.hourly?.time[index] ?? 0) + " Uhr")
                                 .foregroundColor(Color(UIColor.label))
                                 .bold()
                             Text("\(weather.forecast.hourly?.precipitation?[index] ?? 0, specifier: "%.1f") mm")
@@ -39,32 +38,64 @@ struct HourlyView: View {
                             Text("\(weather.forecast.hourly?.precipitation_probability?[index] ?? 0, specifier: "%.0f") %")
                                 .font(.footnote)
                                 .foregroundColor(Color(UIColor.secondaryLabel))
-                            Image(self.getWeatherIcon(
-                                weathercode: self.weather.forecast.hourly?.weathercode?[index] ?? 0,
-                                isDay: self.weather.forecast.hourly?.is_day?[index] ?? 0))
+                            Image(getWeatherIcon(
+                                weathercode: weather.forecast.hourly?.weathercode?[index] ?? 0,
+                                isDay: weather.forecast.hourly?.is_day?[index] ?? 0))
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 35, height: 35)
                             Text("\(weather.forecast.hourly?.temperature_2m?[index].rounded() ?? 0, specifier: "%.0f")°")
                                 .foregroundColor(Color(UIColor.label))
                         }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 10)
-                        .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 12)
+                        .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
                         .cornerRadius(10)
+                        .scrollTransition { content, phase in
+                            content
+                                .opacity(phase.isIdentity ? 1 : 0.5)
+                                .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                                .blur(radius: phase.isIdentity ? 0 : 2)
+                        }
                     }
                     .padding(.vertical, 20)
-                    
                 }
+                .scrollTargetLayout()
                 .font(.system(size: 18))
                 .padding(.leading)
             }
         }
+        .scrollTargetBehavior(.viewAligned)
         .frame(maxWidth: .infinity)
     }
 }
 
-extension View {
+extension HourlyView {
+    public func getLocalizedHourIndex() -> Int {
+        let currentUnixTime = weather.forecast.current?.time ?? 0
+        let hours = weather.forecast.hourly?.time ?? []
+        
+        // Initialize variables to track the closest time and its index
+        var closestTime = Double.greatestFiniteMagnitude
+        var closestIndex = -1
+        
+        for (index, time) in hours.enumerated() {
+            // Check the absolute difference between current time and each time in the array
+            let difference = abs(currentUnixTime - time)
+            if difference < closestTime {
+                closestTime = difference
+                closestIndex = index
+            }
+        }
+        
+        // Check if a closest time was found
+        if closestIndex != -1 {
+            return closestIndex
+        } else {
+            return 0
+        }
+    }
+
     public func getWeatherIcon(weathercode: Double, isDay: Double) -> String {
         if (isDay > 0) {
             switch weathercode {

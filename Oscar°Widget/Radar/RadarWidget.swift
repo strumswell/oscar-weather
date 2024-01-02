@@ -42,6 +42,7 @@
                 }
                 .padding(15)
             }
+            .containerBackground(.clear, for: .widget)
         }
     }
     

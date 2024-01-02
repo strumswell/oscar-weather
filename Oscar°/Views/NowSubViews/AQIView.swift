@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AQIView: View {
-    @Binding var aqi: AQIResponse?
+    @Environment(Weather.self) private var weather: Weather
 
     var body: some View {
         Text("Umwelt")
@@ -17,215 +17,301 @@ struct AQIView: View {
             .foregroundColor(Color(UIColor.label))
             .padding([.leading, .bottom])
             .padding(.top, 30)
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 14) {
-                VStack {
-                    Text("UV")
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.label))
-                    Gauge(value: max(100 - Double(aqi?.hourly.uvIndex[aqi?.hourly.getCurrentHour() ?? 0] ?? 0), 0), in:0...100) {
-                        Image(systemName: "heart.fill")
-                            .foregroundColor(.red)
-                    } currentValueLabel: {
-                        Text("\(Int(aqi?.hourly.uvIndex[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))")
-                            .foregroundColor(aqi?.hourly.getColorForUVI(uvi: aqi?.hourly.uvIndex[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))
-
-                    } minimumValueLabel: {
-                        Text("\(Int(11))")
-                            .foregroundColor(Color.purple)
-                    } maximumValueLabel: {
-                        Text("\(Int(0))")
-                            .foregroundColor(Color.green)
+        if ((weather.air.hourly == nil)) {
+            ProgressView()
+                .padding()
+        } else {
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(spacing: 14) {
+                    VStack {
+                        Text("UV")
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(UIColor.label))
+                        Gauge(value: max(100 - Double(weather.air.hourly?.uv_index?[getCurrentHour()] ?? 0), 0), in:0...100) {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.red)
+                        } currentValueLabel: {
+                            Text("\(Int(weather.air.hourly?.uv_index?[getCurrentHour()] ?? 0))")
+                                .foregroundColor(getColorForUVI(uvi: weather.air.hourly?.uv_index?[getCurrentHour()] ?? 0))
+                        } minimumValueLabel: {
+                            Text("\(Int(11))")
+                                .foregroundColor(Color.purple)
+                        } maximumValueLabel: {
+                            Text("\(Int(0))")
+                                .foregroundColor(Color.green)
+                        }
+                        .gaugeStyle(.accessoryCircular)
+                        .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
                     }
-                    .gaugeStyle(.accessoryCircular)
-                    .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
-                .cornerRadius(10)
-                
-                VStack {
-                    Text("AQI")
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.label))
-                    Gauge(value: max(100 - Double(aqi?.hourly.europeanAqi[aqi?.hourly.getCurrentHour() ?? 0] ?? 0), 0), in:0...100) {
-                        Image(systemName: "heart.fill")
-                            .foregroundColor(.red)
-                    } currentValueLabel: {
-                        Text("\(Int(aqi?.hourly.europeanAqi[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))")
-                            .foregroundColor(aqi?.hourly.getColorForAQI(aqi: aqi?.hourly.europeanAqi[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))
-
-                    } minimumValueLabel: {
-                        Text("\(Int(100))")
-                            .foregroundColor(Color.purple)
-                    } maximumValueLabel: {
-                        Text("\(Int(0))")
-                            .foregroundColor(Color.green)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 10)
+                    .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                    .cornerRadius(10)
+                    .scrollTransition { content, phase in
+                        content
+                            .opacity(phase.isIdentity ? 1 : 0.5)
+                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                            .blur(radius: phase.isIdentity ? 0 : 2)
                     }
-                    .gaugeStyle(.accessoryCircular)
-                    .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
-                .cornerRadius(10)
-                
-                VStack {
-                    Text("PM")
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.label))
-                    + Text("2.5")
-                        .font(.system(size: 12))
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.label))
-                    Gauge(value: max(100 - Double(aqi?.hourly.europeanAqiPm25[aqi?.hourly.getCurrentHour() ?? 0] ?? 0), 0), in:0...100) {
-                        Image(systemName: "heart.fill")
-                            .foregroundColor(.red)
-                    } currentValueLabel: {
-                        Text("\(Int(aqi?.hourly.europeanAqiPm25[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))")
-                            .foregroundColor(aqi?.hourly.getColorForAQI(aqi: aqi?.hourly.europeanAqiPm25[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))
-
-                    } minimumValueLabel: {
-                        Text("\(Int(100))")
-                            .foregroundColor(Color.purple)
-                    } maximumValueLabel: {
-                        Text("\(Int(0))")
-                            .foregroundColor(Color.green)
+                    
+                    VStack {
+                        Text("AQI")
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(UIColor.label))
+                        Gauge(value: max(100 - Double(weather.air.hourly?.european_aqi?[getCurrentHour()] ?? 0), 0), in:0...100) {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.red)
+                        } currentValueLabel: {
+                            Text("\(Int(weather.air.hourly?.european_aqi?[getCurrentHour()] ?? 0))")
+                                .foregroundColor(getColorForAQI(aqi: Int(weather.air.hourly?.european_aqi?[getCurrentHour()] ?? 0)))
+                        } minimumValueLabel: {
+                            Text("\(Int(100))")
+                                .foregroundColor(Color.purple)
+                        } maximumValueLabel: {
+                            Text("\(Int(0))")
+                                .foregroundColor(Color.green)
+                        }
+                        .gaugeStyle(.accessoryCircular)
+                        .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
                     }
-                    .gaugeStyle(.accessoryCircular)
-                    .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
-                .cornerRadius(10)
-                
-                VStack {
-                    Text("PM")
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.label))
-                    + Text("10")
-                        .font(.system(size: 12))
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.label))
-                    Gauge(value: max(100 - Double(aqi?.hourly.europeanAqiPm10[aqi?.hourly.getCurrentHour() ?? 0] ?? 0), 0), in:0...100) {
-                        Image(systemName: "heart.fill")
-                            .foregroundColor(.red)
-                    } currentValueLabel: {
-                        Text("\(Int(aqi?.hourly.europeanAqiPm10[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))")
-                            .foregroundColor(aqi?.hourly.getColorForAQI(aqi: aqi?.hourly.europeanAqiPm10[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))
-
-                    } minimumValueLabel: {
-                        Text("\(Int(100))")
-                            .foregroundColor(Color.purple)
-                    } maximumValueLabel: {
-                        Text("\(Int(0))")
-                            .foregroundColor(Color.green)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 10)
+                    .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                    .cornerRadius(10)
+                    .scrollTransition { content, phase in
+                        content
+                            .opacity(phase.isIdentity ? 1 : 0.5)
+                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                            .blur(radius: phase.isIdentity ? 0 : 2)
                     }
-                    .gaugeStyle(.accessoryCircular)
-                    .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
-                .cornerRadius(10)
-                
-                VStack {
-                    Text("NO")
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.label))
-                    + Text("2")
-                        .font(.system(size: 12))
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.label))
-                    Gauge(value: max(100 - Double(aqi?.hourly.europeanAqiNo2[aqi?.hourly.getCurrentHour() ?? 0] ?? 0), 0), in:0...100) {
-                        Image(systemName: "heart.fill")
-                            .foregroundColor(.red)
-                    } currentValueLabel: {
-                        Text("\(Int(aqi?.hourly.europeanAqiNo2[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))")
-                            .foregroundColor(aqi?.hourly.getColorForAQI(aqi: aqi?.hourly.europeanAqiNo2[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))
-
-                    } minimumValueLabel: {
-                        Text("\(Int(100))")
-                            .foregroundColor(Color.purple)
-                    } maximumValueLabel: {
-                        Text("\(Int(0))")
-                            .foregroundColor(Color.green)
+                    
+                    VStack {
+                        Text("PM")
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(UIColor.label))
+                        + Text("2.5")
+                            .font(.system(size: 12))
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(UIColor.label))
+                        Gauge(value: max(100 - Double(weather.air.hourly?.european_aqi_pm2_5?[getCurrentHour()] ?? 0), 0), in:0...100) {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.red)
+                        } currentValueLabel: {
+                            Text("\(Int(weather.air.hourly?.european_aqi_pm2_5?[getCurrentHour()] ?? 0))")
+                                .foregroundColor(getColorForAQI(aqi: Int(weather.air.hourly?.european_aqi_pm2_5?[getCurrentHour()] ?? 0)))
+                        } minimumValueLabel: {
+                            Text("\(Int(100))")
+                                .foregroundColor(Color.purple)
+                        } maximumValueLabel: {
+                            Text("\(Int(0))")
+                                .foregroundColor(Color.green)
+                        }
+                        .gaugeStyle(.accessoryCircular)
+                        .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
                     }
-                    .gaugeStyle(.accessoryCircular)
-                    .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
-                .cornerRadius(10)
-                
-                VStack {
-                    Text("O")
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.label))
-                    + Text("3")
-                        .font(.system(size: 12))
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.label))
-                    Gauge(value: max(100 - Double(aqi?.hourly.europeanAqiO3[aqi?.hourly.getCurrentHour() ?? 0] ?? 0), 0), in:0...100) {
-                        Image(systemName: "heart.fill")
-                            .foregroundColor(.red)
-                    } currentValueLabel: {
-                        Text("\(Int(aqi?.hourly.europeanAqiO3[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))")
-                            .foregroundColor(aqi?.hourly.getColorForAQI(aqi: aqi?.hourly.europeanAqiO3[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))
-
-                    } minimumValueLabel: {
-                        Text("\(Int(100))")
-                            .foregroundColor(Color.purple)
-                    } maximumValueLabel: {
-                        Text("\(Int(0))")
-                            .foregroundColor(Color.green)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 10)
+                    .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                    .cornerRadius(10)
+                    .scrollTransition { content, phase in
+                        content
+                            .opacity(phase.isIdentity ? 1 : 0.5)
+                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                            .blur(radius: phase.isIdentity ? 0 : 2)
                     }
-                    .gaugeStyle(.accessoryCircular)
-                    .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
-                .cornerRadius(10)
-                
-                VStack {
-                    Text("SO")
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.label))
-                    + Text("2")
-                        .font(.system(size: 12))
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.label))
-                    Gauge(value: max(100 - Double(aqi?.hourly.europeanAqiSo2[aqi?.hourly.getCurrentHour() ?? 0] ?? 0), 0), in:0...100) {
-                        Image(systemName: "heart.fill")
-                            .foregroundColor(.red)
-                    } currentValueLabel: {
-                        Text("\(Int(aqi?.hourly.europeanAqiSo2[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))")
-                            .foregroundColor(aqi?.hourly.getColorForAQI(aqi: aqi?.hourly.europeanAqiSo2[aqi?.hourly.getCurrentHour() ?? 0] ?? 0))
-
-                    } minimumValueLabel: {
-                        Text("\(Int(100))")
-                            .foregroundColor(Color.purple)
-                    } maximumValueLabel: {
-                        Text("\(Int(0))")
-                            .foregroundColor(Color.green)
+                                        
+                    VStack {
+                        Text("PM")
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(UIColor.label))
+                        + Text("10")
+                            .font(.system(size: 12))
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(UIColor.label))
+                        Gauge(value: max(100 - Double(weather.air.hourly?.european_aqi_pm10?[getCurrentHour()] ?? 0), 0), in:0...100) {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.red)
+                        } currentValueLabel: {
+                            Text("\(Int(weather.air.hourly?.european_aqi_pm10?[getCurrentHour()] ?? 0))")
+                                .foregroundColor(getColorForAQI(aqi: Int(weather.air.hourly?.european_aqi_pm10?[getCurrentHour()] ?? 0)))
+                        } minimumValueLabel: {
+                            Text("\(Int(100))")
+                                .foregroundColor(Color.purple)
+                        } maximumValueLabel: {
+                            Text("\(Int(0))")
+                                .foregroundColor(Color.green)
+                        }
+                        .gaugeStyle(.accessoryCircular)
+                        .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
                     }
-                    .gaugeStyle(.accessoryCircular)
-                    .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 10)
+                    .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                    .cornerRadius(10)
+                    .scrollTransition { content, phase in
+                        content
+                            .opacity(phase.isIdentity ? 1 : 0.5)
+                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                            .blur(radius: phase.isIdentity ? 0 : 2)
+                    }
+                    
+                    VStack {
+                        Text("NO")
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(UIColor.label))
+                        + Text("2")
+                            .font(.system(size: 12))
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(UIColor.label))
+                        Gauge(value: max(100 - Double(weather.air.hourly?.european_aqi_no2?[getCurrentHour()] ?? 0), 0), in:0...100) {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.red)
+                        } currentValueLabel: {
+                            Text("\(Int(weather.air.hourly?.european_aqi_no2?[getCurrentHour()] ?? 0))")
+                                .foregroundColor(getColorForAQI(aqi: Int(weather.air.hourly?.european_aqi_no2?[getCurrentHour()] ?? 0)))
+                        } minimumValueLabel: {
+                            Text("\(Int(100))")
+                                .foregroundColor(Color.purple)
+                        } maximumValueLabel: {
+                            Text("\(Int(0))")
+                                .foregroundColor(Color.green)
+                        }
+                        .gaugeStyle(.accessoryCircular)
+                        .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 10)
+                    .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                    .cornerRadius(10)
+                    .scrollTransition { content, phase in
+                        content
+                            .opacity(phase.isIdentity ? 1 : 0.5)
+                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                            .blur(radius: phase.isIdentity ? 0 : 2)
+                    }
+                    
+                    VStack {
+                        Text("O")
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(UIColor.label))
+                        + Text("3")
+                            .font(.system(size: 12))
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(UIColor.label))
+                        Gauge(value: max(100 - Double(weather.air.hourly?.european_aqi_o3?[getCurrentHour()] ?? 0), 0), in:0...100) {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.red)
+                        } currentValueLabel: {
+                            Text("\(Int(weather.air.hourly?.european_aqi_o3?[getCurrentHour()] ?? 0))")
+                                .foregroundColor(getColorForAQI(aqi: Int(weather.air.hourly?.european_aqi_o3?[getCurrentHour()] ?? 0)))
+                        } minimumValueLabel: {
+                            Text("\(Int(100))")
+                                .foregroundColor(Color.purple)
+                        } maximumValueLabel: {
+                            Text("\(Int(0))")
+                                .foregroundColor(Color.green)
+                        }
+                        .gaugeStyle(.accessoryCircular)
+                        .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 10)
+                    .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                    .cornerRadius(10)
+                    .scrollTransition { content, phase in
+                        content
+                            .opacity(phase.isIdentity ? 1 : 0.5)
+                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                            .blur(radius: phase.isIdentity ? 0 : 2)
+                    }
+                    
+                    VStack {
+                        Text("SO")
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(UIColor.label))
+                        + Text("2")
+                            .font(.system(size: 12))
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(UIColor.label))
+                        Gauge(value: max(100 - Double(weather.air.hourly?.european_aqi_so2?[getCurrentHour()] ?? 0), 0), in:0...100) {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.red)
+                        } currentValueLabel: {
+                            Text("\(Int(weather.air.hourly?.european_aqi_so2?[getCurrentHour()] ?? 0))")
+                                .foregroundColor(getColorForAQI(aqi: Int(weather.air.hourly?.european_aqi_so2?[getCurrentHour()] ?? 0)))
+                        } minimumValueLabel: {
+                            Text("\(Int(100))")
+                                .foregroundColor(Color.purple)
+                        } maximumValueLabel: {
+                            Text("\(Int(0))")
+                                .foregroundColor(Color.green)
+                        }
+                        .gaugeStyle(.accessoryCircular)
+                        .tint(Gradient(colors: [.purple, .red, .orange, .yellow, .green]))
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 10)
+                    .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                    .cornerRadius(10)
+                    .scrollTransition { content, phase in
+                        content
+                            .opacity(phase.isIdentity ? 1 : 0.5)
+                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                            .blur(radius: phase.isIdentity ? 0 : 2)
+                    }
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
-                .cornerRadius(10)
-                
+                .scrollTargetLayout()
+                .font(.system(size: 18))
+                .padding([.leading, .trailing])
             }
-            .font(.system(size: 18))
-            .padding([.leading, .trailing])
+            .scrollTargetBehavior(.viewAligned)
+            .frame(maxWidth: .infinity)
+            .padding(.bottom, 20)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.bottom, 20)
+    }
+}
+
+extension AQIView {
+    public func getCurrentHour() -> Int {
+        let now = Date()
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.hour], from: now)
+        return components.hour!
+    }
+    
+    public func getColorForAQI(aqi: Int) -> Color {
+        switch aqi {
+        case let x where x <= 20:
+            return .green
+        case let x where x > 20 && x <= 40:
+            return .orange
+        case let x where x > 40 && x <= 60:
+            return .orange
+        case let x where x > 60 && x <= 80:
+            return .red
+        case let x where x > 80:
+            return .purple
+        default:
+            return .gray
+        }
+    }
+    
+    public func getColorForUVI(uvi: Double) -> Color {
+        switch uvi {
+        case let x where x < 1:
+            return .green
+        case let x where x >= 1 && x < 2.5:
+            return .green
+        case let x where x >= 2.5 && x < 5.5:
+            return .orange
+        case let x where x >= 5.5 && x < 7.5:
+            return .orange
+        case let x where x >= 7.5 && x < 10.5:
+            return .orange
+        case let x where x >= 10.5:
+            return .purple
+        default:
+            return .gray
+        }
     }
 }

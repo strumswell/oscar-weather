@@ -22,7 +22,7 @@ struct AlertView: View {
                     .font(.caption2)
                     .foregroundColor(.orange)
                     .bold()
-            } else {
+            } else if (weather.alerts.count > 0) {
                 Text(weather.alerts.first!.getFormattedHeadline().uppercased())
                     .font(.caption2)
                     .foregroundColor(.orange)
