@@ -53,4 +53,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate, ObservableObject {
             self.gpsLocation = self.manager.location?.coordinate
         }
     }
+    
+    func getLocation() -> CLLocationCoordinate2D {
+        self.authStatus = self.manager.authorizationStatus
+        let fallbackLocation = CLLocationCoordinate2D(latitude: 0.0, longitude: 0.0)
+        
+        if (self.manager.authorizationStatus == CLAuthorizationStatus.authorizedAlways || self.manager.authorizationStatus == CLAuthorizationStatus.authorizedWhenInUse) {
+            return self.manager.location?.coordinate ?? fallbackLocation
+        }
+        return fallbackLocation
+    }
 }

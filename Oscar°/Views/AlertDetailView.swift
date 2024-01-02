@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct AlertListView: View {
-    @Binding var alerts: [DWDAlert]?
     @Environment(\.presentationMode) var presentationMode
+    @Environment(Weather.self) private var weather: Weather
     
     var body: some View {
         NavigationView {
-            List(alerts ?? [], id: \.self) { alert in
+            List(weather.alerts ?? [], id: \.self) { alert in
                 AlertDetailView(alert: alert)
             }
             .navigationBarTitle(Text("Unwetterwarnungen"), displayMode: .inline)
@@ -30,7 +30,7 @@ struct AlertListView: View {
 }
 
 struct AlertDetailView: View {
-    var alert: DWDAlert
+    var alert: Components.Schemas.Alert
     var body: some View {
         VStack {
             HStack {
@@ -38,7 +38,7 @@ struct AlertDetailView: View {
                     .resizable()
                     .foregroundColor(.orange)
                     .frame(width: 15, height: 15)
-                Text(alert.event)
+                Text(alert.event ?? "")
                     .font(.title3)
                     .bold()
                 Spacer()
@@ -62,7 +62,7 @@ struct AlertDetailView: View {
             .padding(.bottom, 1.5)
 
             HStack {
-                Text(alert.descriptionText)
+                Text(alert.descriptionText ?? "")
                     .font(.subheadline)
                     .minimumScaleFactor(0.5)
                 Spacer()

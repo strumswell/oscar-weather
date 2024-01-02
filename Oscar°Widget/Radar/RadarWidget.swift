@@ -53,6 +53,7 @@
             StaticConfiguration(kind: kind, provider: RadarProvider()) { entry in
                 RadarWidgetEntryView(entry: entry)
             }
+            .contentMarginsDisabled()
             .configurationDisplayName("Regenradar")
             .description("Regenradar für aktuellen Standort")
             .supportedFamilies([.systemSmall, .systemLarge])

@@ -10,7 +10,7 @@ import Combine
 import MapKit
 import SPIndicator
 
-public class LocationViewModel: ObservableObject {
+public class CityService: ObservableObject {
     
     @Published var cities: [City]
 
@@ -98,6 +98,22 @@ public class LocationViewModel: ObservableObject {
         }
         save()
         //nc.post(name: Notification.Name("CityToggle"), object: nil)
+    }
+    
+    func getSelectedCity() -> Optional<City> {
+        let selectedCities = self.cities.filter{$0.selected}
+        if (selectedCities.isEmpty) {
+            return nil
+        }
+        return selectedCities.first!
+    }
+    
+    func getSelectedCityCoordinates() ->Optional<CLLocationCoordinate2D> {
+        let selectedCity = getSelectedCity()
+        if let city = selectedCity {
+            return CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
+        }
+        return nil
     }
     
     private func getCoordinates(searchCompletion: MKLocalSearchCompletion, completion: @escaping (CLLocationCoordinate2D) -> Void) {

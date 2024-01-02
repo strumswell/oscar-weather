@@ -10,7 +10,8 @@ import Charts
 
 struct HourlyView: View {
     @Binding var weather: OpenMeteoResponse?
-    
+    @Environment(Weather.self) private var weather2: Weather
+
     var body: some View {
         Text("Stündlich")
             .font(.title3)
@@ -43,7 +44,7 @@ struct HourlyView: View {
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 10)
-                    .background(Color(UIColor.secondarySystemFill))
+                    .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
                     .cornerRadius(10)
                 }
                 .padding(.vertical, 20)

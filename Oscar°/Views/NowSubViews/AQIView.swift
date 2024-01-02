@@ -42,7 +42,7 @@ struct AQIView: View {
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemFill))
+                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
                 .cornerRadius(10)
                 
                 VStack {
@@ -68,7 +68,7 @@ struct AQIView: View {
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemFill))
+                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
                 .cornerRadius(10)
                 
                 VStack {
@@ -98,7 +98,7 @@ struct AQIView: View {
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemFill))
+                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
                 .cornerRadius(10)
                 
                 VStack {
@@ -128,7 +128,7 @@ struct AQIView: View {
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemFill))
+                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
                 .cornerRadius(10)
                 
                 VStack {
@@ -158,7 +158,7 @@ struct AQIView: View {
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemFill))
+                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
                 .cornerRadius(10)
                 
                 VStack {
@@ -188,7 +188,7 @@ struct AQIView: View {
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemFill))
+                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
                 .cornerRadius(10)
                 
                 VStack {
@@ -218,7 +218,7 @@ struct AQIView: View {
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemFill))
+                .background(Color(UIColor.secondarySystemBackground).opacity(0.3))
                 .cornerRadius(10)
                 
             }

@@ -6,36 +6,47 @@
 
 import SwiftUI
 import SPIndicator
+import OpenAPIRuntime
+import OpenAPIURLSession
+
+#Preview {
+    NowView().preferredColorScheme(.dark)
+}
 
 struct NowView: View {
     @ObservedObject var nowViewModel: NowViewModel = NowViewModel()
     @ObservedObject var settingsService: SettingService = SettingService()
     @State private var isLegalSheetPresented = false
     @State private var isMapSheetPresented = false
-    
+        
+    @Environment(Weather.self) private var weather: Weather
+    @Environment(Location.self) private var location: Location
+
+    private var client = APIClient()
+    private let locationService = LocationService()
+
+
     var body: some View {
         ZStack {
             ZStack {
-                if nowViewModel.updateDidFinish {
-                    StarsView()
-                        .opacity(nowViewModel.starOpacity)
-                    if nowViewModel.isRaining() {
-                        CloudsView(
-                            thickness: Cloud.Thickness.thick,
-                            topTint: nowViewModel.getCloudTopStops().interpolated(amount: nowViewModel.time),
-                            bottomTint: nowViewModel.getCloudBottomStops().interpolated(amount: nowViewModel.time)
-                        )
-                        StormView(type: Storm.Contents.rain, direction: .degrees(30), strength: 80)
-                    } else {
-                        if (nowViewModel.weather?.currentWeather.getCloudDensity() ?? Cloud.Thickness.none) != Cloud.Thickness.thick {
-                            SunView(progress: nowViewModel.time)
-                        }
-                        CloudsView(
-                            thickness: nowViewModel.weather?.currentWeather.getCloudDensity() ?? Cloud.Thickness.none,
-                            topTint: nowViewModel.getCloudTopStops().interpolated(amount: nowViewModel.time),
-                            bottomTint: nowViewModel.getCloudBottomStops().interpolated(amount: nowViewModel.time)
-                        )
+                StarsView()
+                    .opacity(nowViewModel.starOpacity)
+                if nowViewModel.isRaining() {
+                    CloudsView(
+                        thickness: Cloud.Thickness.thick,
+                        topTint: nowViewModel.getCloudTopStops().interpolated(amount: nowViewModel.time),
+                        bottomTint: nowViewModel.getCloudBottomStops().interpolated(amount: nowViewModel.time)
+                    )
+                    StormView(type: Storm.Contents.rain, direction: .degrees(30), strength: 80)
+                } else {
+                    if (nowViewModel.weather?.currentWeather.getCloudDensity() ?? Cloud.Thickness.none) != Cloud.Thickness.thick {
+                        SunView(progress: nowViewModel.time)
                     }
+                    CloudsView(
+                        thickness: nowViewModel.weather?.currentWeather.getCloudDensity() ?? Cloud.Thickness.none,
+                        topTint: nowViewModel.getCloudTopStops().interpolated(amount: nowViewModel.time),
+                        bottomTint: nowViewModel.getCloudBottomStops().interpolated(amount: nowViewModel.time)
+                    )
                 }
             }
             .preferredColorScheme(.dark)
@@ -86,6 +97,17 @@ struct NowView: View {
                                 .background(Color(UIColor.secondarySystemFill))
                             }
                         )
+                        .overlay(
+                            ZStack {
+                                Circle()
+                                    .foregroundColor(.white)
+                                    .shadow(radius: 5)
+                                    .frame(width: 18, height: 18)
+                                Circle()
+                                    .foregroundColor(.blue)
+                                    .frame(width: 13, height: 13)
+                            }
+                        )
                         .cornerRadius(10)
                         .padding()
                         .onTapGesture {
@@ -125,31 +147,37 @@ struct NowView: View {
             }
             .padding(.top, 40)
             .refreshable {
-                nowViewModel.update()
+                await self.updateState()
+            }
+            .task {
+                //await nowViewModel.update()
             }
         }
         .background(Color(UIColor.secondarySystemBackground))
         .edgesIgnoringSafeArea(.all)
-        .onAppear {
-            nowViewModel.update()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-            nowViewModel.update() // Why again? onAppear does not seem to be enough --> bug in SwiftUI?
-        }
         .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("ChangedLocation"), object: nil)) { _ in
-            nowViewModel.update() // GPS location has changed dramatically (2.5km)
+            Task {
+                await self.updateState()
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("CityToggle"), object: nil)) { _ in
-            nowViewModel.update() // User selected city might have changed
+            Task {
+                await self.updateState()
+            }
         }
     }
 }
 
-struct NowView_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            NowView()
-                .preferredColorScheme(.dark)
+extension NowView {
+    func updateState() async {
+        do {
+            locationService.update()
+            location.coordinates = locationService.getCoordinates()
+            location.name = await locationService.getLocationName()
+            weather.forecast = try await client.getForecast(coordinates: location.coordinates)
+        } catch {
+            print(error)
         }
     }
+
 }

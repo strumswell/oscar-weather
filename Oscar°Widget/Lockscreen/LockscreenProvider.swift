@@ -45,8 +45,8 @@ struct LockscreenProvider: TimelineProvider {
         let currentDate = Date()
         let coordinate = lm.gpsLocation ?? self.defaultCoordinate
         
-        guard let url = URL(string: "https://api.open-meteo.com/v1/forecast?latitude=\(coordinate.latitude)&longitude=\(coordinate.longitude)&hourly=precipitation_probability,precipitation,windspeed_10m,uv_index&daily=temperature_2m_max,temperature_2m_min&current_weather=true&forecast_days=1&timezone=auto") else { return }
-                        
+        guard let url = URL(string: "https://api.open-meteo.com/v1/forecast?latitude=\(coordinate.latitude)&longitude=\(coordinate.longitude)&hourly=precipitation_probability,precipitation,windspeed_10m,uv_index&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset&current_weather=true&forecast_days=1&timeformat=unixtime&timezone=auto") else { return }
+        
         AF.request(url).validate().responseDecodable(of: OMDayTemperature.self) { response in
             switch response.result {
             case .success:

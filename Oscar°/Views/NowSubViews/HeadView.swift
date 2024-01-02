@@ -13,12 +13,15 @@ struct HeadView: View {
     @ObservedObject var now: NowViewModel
     @State private var isLocationSheetPresented = false
     
+    @Environment(Weather.self) private var weather: Weather
+    @Environment(Location.self) private var location: Location
+    
     var body: some View {
         HStack {
             Spacer()
             Image(systemName: "magnifyingglass")
                 .foregroundColor(Color(UIColor.label))
-            Text(now.placemark ?? "...")
+            Text(location.name)
                     .font(.title2)
                     .fontWeight(.bold)
                     .lineSpacing(/*@START_MENU_TOKEN@*/10.0/*@END_MENU_TOKEN@*/)
@@ -40,7 +43,7 @@ struct HeadView: View {
             VStack {
                 Spacer()
                 // MARK: Current Temperature
-                Text(now.weather?.currentWeather.getRoundedTempString() ?? "")
+                Text(String(weather.forecast.current!.temperature.rounded()).replacingOccurrences(of: ".0", with: "") + "°")
                     .foregroundColor(Color(UIColor.label))
                     .font(.system(size: 120))
             }
@@ -51,23 +54,23 @@ struct HeadView: View {
                 Image(systemName: "cloud")
                     .frame(width: 30, height: 30)
                     .foregroundColor(Color(UIColor.label))
-                Text("\(now.weather?.getCurrentCloudCover() ?? 0, specifier: "%.0f") %")
+                Text("\(weather.forecast.current!.cloudcover, specifier: "%.0f") %")
                     .foregroundColor(Color(UIColor.label))
                 Image(systemName: "wind")
                     .frame(width: 30, height: 30)
                     .foregroundColor(Color(UIColor.label))
-                Text("\(now.weather?.currentWeather.windspeed ?? 0, specifier: "%.1f") km/h")
+                Text("\(weather.forecast.current!.windspeed, specifier: "%.1f") km/h")
                     .foregroundColor(Color(UIColor.label))
                 Image(systemName: "location")
                     .frame(width: 30, height: 30)
                     .foregroundColor(Color(UIColor.label))
-                Text("\(now.weather?.currentWeather.getWindDirection() ?? "N/A")")
+                Text("\(weather.forecast.current!.getWindDirection())")
                 Spacer()
             }
             .padding(.bottom)
 
-            if ((now.alerts?.count ?? 0) > 0) {
-                AlertView(alerts: $now.alerts)
+            if (weather.alerts.count > 0) {
+                AlertView()
             }
         }
     }
