@@ -50,7 +50,7 @@ struct DailyView: View {
                 Spacer()
                 VStack(alignment: .trailing, spacing: 22) {
                     ForEach(0...9, id: \.self) { dayPos in
-                        Text("\(weather.forecast.daily?.temperature_2m_max?[dayPos].rounded() ?? 0, specifier: "%.0f")°")
+                        Text(roundTemperatureString(temperature: weather.forecast.daily?.temperature_2m_max?[dayPos]))
                             .fontWeight(.semibold)
                             .foregroundColor(Color(UIColor.label))
                     }
@@ -58,7 +58,7 @@ struct DailyView: View {
                 Spacer()
                 VStack(alignment: .trailing, spacing: 22) {
                     ForEach(0...9, id: \.self) { dayPos in
-                        Text("\(weather.forecast.daily?.temperature_2m_min?[dayPos].rounded() ?? 0, specifier: "%.0f")°")
+                        Text(roundTemperatureString(temperature: weather.forecast.daily?.temperature_2m_min?[dayPos]))
                             .fontWeight(.light)
                             .foregroundColor(Color(UIColor.label))
                     }

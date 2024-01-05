@@ -15,4 +15,8 @@ extension View {
         let hour = calendar.component(.hour, from: currentDate)
         return hour
     }
+    
+    public func roundTemperatureString(temperature: Double?) -> String {
+        return "\(Int(temperature?.rounded() ?? 0))°"
+    }
 }

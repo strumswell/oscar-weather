@@ -62,7 +62,7 @@ struct HourlyView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 35, height: 35)
-                                Text("\(weather.forecast.hourly?.temperature_2m?[index].rounded() ?? 0, specifier: "%.0f")°")
+                                Text(roundTemperatureString(temperature: weather.forecast.hourly?.temperature_2m?[index]))
                                     .foregroundColor(Color(UIColor.label))
                             }
                             .padding(.horizontal, 12)

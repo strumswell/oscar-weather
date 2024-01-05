@@ -42,7 +42,7 @@ struct HeadView: View {
         VStack {
             VStack {
                 Spacer()
-                Text(String(weather.forecast.current!.temperature.rounded()).replacingOccurrences(of: ".0", with: "") + "°")
+                Text(roundTemperatureString(temperature: weather.forecast.current!.temperature))
                     .foregroundColor(Color(UIColor.label))
                     .font(.system(size: 120))
             }
