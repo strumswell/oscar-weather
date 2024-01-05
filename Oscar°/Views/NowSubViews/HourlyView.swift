@@ -12,61 +12,94 @@ struct HourlyView: View {
     @Environment(Weather.self) private var weather: Weather
     
     var body: some View {
-        Text("Stündlich")
-            .font(.title3)
-            .bold()
-            .foregroundColor(Color(UIColor.label))
-            .padding(.leading)
-            .padding(.bottom, -10)
-            .padding(.top)
-        
-        ScrollView(.horizontal, showsIndicators: false) {
-            if ((weather.forecast.hourly == nil)) {
-                ProgressView()
-                    .padding()
-            } else {
-                LazyHStack(spacing: 12) {
-                    ForEach(getLocalizedHourIndex() ... getLocalizedHourIndex() + 36, id: \.self) { index in
-                        VStack {
-                            Text(getHourString(timestamp: weather.forecast.hourly?.time[index] ?? 0) + " Uhr")
-                                .foregroundColor(Color(UIColor.label))
-                                .bold()
-                            Text("\(weather.forecast.hourly?.precipitation?[index] ?? 0, specifier: "%.1f") mm")
-                                .font(.footnote)
-                                .foregroundColor(Color(UIColor.label))
-                                .padding(.top, 3)
-                            Text("\(weather.forecast.hourly?.precipitation_probability?[index] ?? 0, specifier: "%.0f") %")
-                                .font(.footnote)
-                                .foregroundColor(Color(UIColor.secondaryLabel))
-                            Image(getWeatherIcon(
-                                weathercode: weather.forecast.hourly?.weathercode?[index] ?? 0,
-                                isDay: weather.forecast.hourly?.is_day?[index] ?? 0))
+        VStack(alignment: .leading) {
+            Text("Stündlich")
+                .font(.title3)
+                .bold()
+                .foregroundColor(Color(UIColor.label))
+                .padding(.leading)
+                .padding(.bottom, -10)
+                .padding(.top)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                if (weather.isLoading) {
+                    HStack(spacing: 12) {
+                        ForEach((1...5).reversed(), id: \.self) {_ in
+                            ProgressView()
+                                .frame(width: 55, height: 140)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 12)
+                                .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                                .cornerRadius(10)
+                                .scrollTransition { content, phase in
+                                    content
+                                        .opacity(phase.isIdentity ? 1 : 0.5)
+                                        .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                                        .blur(radius: phase.isIdentity ? 0 : 2)
+                                }
+                        }
+                        .padding(.vertical, 12)
+                    }
+                    .padding(.leading)
+                    .padding(.top, 7)
+                } else {
+                    LazyHStack(spacing: 12) {
+                        ForEach(getLocalizedHourIndex() ... getLocalizedHourIndex() + 48, id: \.self) { index in
+                            VStack {
+                                Text(getHourString(timestamp: weather.forecast.hourly?.time[index] ?? 0) + " Uhr")
+                                    .foregroundColor(Color(UIColor.label))
+                                    .bold()
+                                Text("\(weather.forecast.hourly?.precipitation?[index] ?? 0, specifier: "%.1f") mm")
+                                    .font(.footnote)
+                                    .foregroundColor(Color(UIColor.label))
+                                    .padding(.top, 3)
+                                Text("\(weather.forecast.hourly?.precipitation_probability?[index] ?? 0, specifier: "%.0f") %")
+                                    .font(.footnote)
+                                    .foregroundColor(Color(UIColor.secondaryLabel))
+                                Image(getWeatherIcon(
+                                    weathercode: weather.forecast.hourly?.weathercode?[index] ?? 0,
+                                    isDay: weather.forecast.hourly?.is_day?[index] ?? 0))
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 35, height: 35)
-                            Text("\(weather.forecast.hourly?.temperature_2m?[index].rounded() ?? 0, specifier: "%.0f")°")
-                                .foregroundColor(Color(UIColor.label))
+                                Text("\(weather.forecast.hourly?.temperature_2m?[index].rounded() ?? 0, specifier: "%.0f")°")
+                                    .foregroundColor(Color(UIColor.label))
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 12)
+                            .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                            .cornerRadius(10)
+                            .scrollTransition { content, phase in
+                                content
+                                    .opacity(phase.isIdentity ? 1 : 0.5)
+                                    .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                                    .blur(radius: phase.isIdentity ? 0 : 2)
+                            }
+                            SunsetSunriseCard(index: index)
+                                .scrollTransition { content, phase in
+                                    content
+                                        .opacity(phase.isIdentity ? 1 : 0.5)
+                                        .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                                        .blur(radius: phase.isIdentity ? 0 : 2)
+                                }
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 12)
-                        .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
-                        .cornerRadius(10)
-                        .scrollTransition { content, phase in
-                            content
-                                .opacity(phase.isIdentity ? 1 : 0.5)
-                                .scaleEffect(phase.isIdentity ? 1 : 0.9)
-                                .blur(radius: phase.isIdentity ? 0 : 2)
-                        }
+                        .padding(.vertical, 20)
                     }
-                    .padding(.vertical, 20)
+                    .scrollTargetLayout()
+                    .font(.system(size: 18))
+                    .padding(.leading)
                 }
-                .scrollTargetLayout()
-                .font(.system(size: 18))
-                .padding(.leading)
+                
             }
+            .scrollTargetBehavior(.viewAligned)
+            .frame(maxWidth: .infinity)
         }
-        .scrollTargetBehavior(.viewAligned)
-        .frame(maxWidth: .infinity)
+        .scrollTransition { content, phase in
+            content
+                .opacity(phase.isIdentity ? 1 : 0.8)
+                .scaleEffect(phase.isIdentity ? 1 : 0.99)
+                .blur(radius: phase.isIdentity ? 0 : 0.5)
+        }
     }
 }
 
@@ -95,7 +128,7 @@ extension HourlyView {
             return 0
         }
     }
-
+    
     public func getWeatherIcon(weathercode: Double, isDay: Double) -> String {
         if (isDay > 0) {
             switch weathercode {
@@ -143,6 +176,129 @@ extension HourlyView {
         let calendar = Calendar.current
         let hours = calendar.component(.hour, from: date)
         return String(format:"%02d", hours)
+    }
+    
+    func isWithinHourOfInterest(eventTimestamp: Int, referenceHour: Int) -> Bool {
+        let eventDate = Date(timeIntervalSince1970: TimeInterval(eventTimestamp))
+        let referenceDate = Date(timeIntervalSince1970: TimeInterval(referenceHour))
+        let calendar = Calendar.current
+        let eventHour = calendar.component(.hour, from: eventDate)
+        let referenceHour = calendar.component(.hour, from: referenceDate)
+        
+        return eventHour == referenceHour
+    }
+
+    func getDayIndexForHourlyForecast(hourlyTimestamp: Int) -> Int {
+        let hourlyDate = Date(timeIntervalSince1970: TimeInterval(hourlyTimestamp))
+        let calendar = Calendar.current
+        for (index, sunriseTimestamp) in (weather.forecast.daily?.sunrise ?? []).enumerated() {
+            let sunriseDate = Date(timeIntervalSince1970: TimeInterval(sunriseTimestamp))
+            if calendar.isDate(hourlyDate, inSameDayAs: sunriseDate) {
+                return index
+            }
+        }
+        return 0 // Default to first day if no match found
+    }
+}
+
+struct SunsetSunriseCard: View {
+    @Environment(Weather.self) private var weather: Weather
+    var index: Int
+
+    var body: some View {
+        let hourlyTimestamp = weather.forecast.hourly?.time[index] ?? 0
+        let dayIndex = getDayIndexForHourlyForecast(hourlyTimestamp: hourlyTimestamp)
+        
+        if isWithinHourOfInterest(eventTimestamp: hourlyTimestamp, referenceHour: weather.forecast.daily?.sunrise?[dayIndex] ?? 0) {
+            VStack {
+                Text(getTimeString(timestamp: weather.forecast.daily?.sunrise?[dayIndex] ?? 0))
+                    .foregroundColor(Color(UIColor.label))
+                    .bold()
+                Text(getWeekDay(timestamp: weather.forecast.daily?.sunrise?[dayIndex] ?? 0))
+                    .foregroundColor(Color(UIColor.label))
+                    .font(.footnote)
+                    .padding(.top, 3)
+                Spacer()
+                Image("halfsun")
+                    .resizable()
+                    .scaledToFit()
+                    .shadow(
+                        color: .orange,
+                        radius: CGFloat(10),
+                        x: CGFloat(0), y: CGFloat(-5))
+                    .frame(width: 50, height: 50)
+                    .padding(.bottom, -3)
+                Image(systemName: "arrow.up")
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
+            .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+            .cornerRadius(10)
+        } else if isWithinHourOfInterest(eventTimestamp: hourlyTimestamp, referenceHour: weather.forecast.daily?.sunset?[dayIndex] ?? 0) {
+            VStack {
+                Text(getTimeString(timestamp: weather.forecast.daily?.sunset?[dayIndex] ?? 0))
+                    .foregroundColor(Color(UIColor.label))
+                    .bold()
+                Text(getWeekDay(timestamp: weather.forecast.daily?.sunset?[dayIndex] ?? 0))
+                    .foregroundColor(Color(UIColor.label))
+                    .font(.footnote)
+                    .padding(.top, 3)
+                Spacer()
+                Image("halfsun")
+                    .resizable()
+                    .scaledToFit()
+                    .shadow(
+                        color: .orange,
+                        radius: CGFloat(10),
+                        x: CGFloat(0), y: CGFloat(-5))
+                    .frame(width: 50, height: 50)
+                    .padding(.bottom, -3)
+                Image(systemName: "arrow.down")
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
+            .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+            .cornerRadius(10)
+        }
+    }
+}
+
+extension SunsetSunriseCard {
+    func isWithinHourOfInterest(eventTimestamp: Double, referenceHour: Double) -> Bool {
+        let eventDate = Date(timeIntervalSince1970: TimeInterval(eventTimestamp))
+        let referenceDate = Date(timeIntervalSince1970: TimeInterval(referenceHour))
+        let calendar = Calendar.current
+        let eventHour = calendar.component(.hour, from: eventDate)
+        let referenceHour = calendar.component(.hour, from: referenceDate)
+        
+        return eventHour == referenceHour
+    }
+
+    func getDayIndexForHourlyForecast(hourlyTimestamp: Double) -> Int {
+        let hourlyDate = Date(timeIntervalSince1970: TimeInterval(hourlyTimestamp))
+        let calendar = Calendar.current
+        for (index, sunriseTimestamp) in (weather.forecast.daily?.sunrise ?? []).enumerated() {
+            let sunriseDate = Date(timeIntervalSince1970: TimeInterval(sunriseTimestamp))
+            if calendar.isDate(hourlyDate, inSameDayAs: sunriseDate) {
+                return index
+            }
+        }
+        return 0 // Default to first day if no match found
+    }
+    
+    public func getTimeString(timestamp: Double) -> String {
+        let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
+        let calendar = Calendar.current
+        let hours = calendar.component(.hour, from: date)
+        let minutes = calendar.component(.minute, from: date)
+        return String(format:"%02d:%02d", hours, minutes)
+    }
+    
+    public func getWeekDay(timestamp: Double) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC\(String(describing: weather.forecast.timezone_abbreviation))")
+        dateFormatter.dateFormat = "EEEE"
+        return dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(timestamp)))
     }
 }
 

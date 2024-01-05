@@ -8,6 +8,7 @@ import SwiftUI
 import SPIndicator
 import OpenAPIRuntime
 import OpenAPIURLSession
+import MapKit
 
 #Preview {
     NowView().preferredColorScheme(.dark)
@@ -15,102 +16,47 @@ import OpenAPIURLSession
 
 struct NowView: View {
     @ObservedObject var nowViewModel: NowViewModel = NowViewModel()
-    @ObservedObject var settingsService: SettingService = SettingService()
-    @State private var isLegalSheetPresented = false
-    @State private var isMapSheetPresented = false
-        
+    @ObservedObject var settingsService: SettingService = SettingService()    
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
+    @State private var isMapSheetPresented = false
 
     private var client = APIClient()
-    private let locationService = LocationService()
-
+    private let locationService = LocationService.shared
 
     var body: some View {
         ZStack {
             WeatherSimulationView()
-            // MARK: Weather Sheet
             ScrollView(.vertical, showsIndicators: false) {
                 ZStack {
                     VStack(alignment: .leading) {
                         HeadView(now: nowViewModel)
                             .padding(.top, 50)
-                        RainView(rain: $nowViewModel.rain)
+                        RainView()
                         HourlyView()
                         DailyView()
-                        
-                        Text("Radar")
-                            .font(.title3)
-                            .bold()
-                            .foregroundColor(Color(UIColor.label))
-                            .padding([.leading, .top])
-                                      
-                        AsyncImage(
-                            url: URL(string: "https://api.oscars.love/api/v1/mapshots/radar?lat=\(nowViewModel.getCurrentCoords().latitude)&lon=\(nowViewModel.getCurrentCoords().longitude)"),
-                            content: { image in
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                            },
-                            placeholder: {
-                                VStack(alignment: .leading) {
-                                    Spacer()
-                                    HStack {
-                                        Spacer()
-                                        ProgressView()
-                                        Spacer()
-                                    }
-                                    Spacer()
-                                }
-                                .frame(height: 350)
-                                .background(Color(UIColor.secondarySystemFill))
-                            }
-                        )
-                        .overlay(
-                            ZStack {
-                                Circle()
-                                    .foregroundColor(.white)
-                                    .shadow(radius: 5)
-                                    .frame(width: 18, height: 18)
-                                Circle()
-                                    .foregroundColor(.blue)
-                                    .frame(width: 13, height: 13)
-                            }
-                        )
-                        .cornerRadius(10)
-                        .padding()
-                        .onTapGesture {
-                            UIApplication.shared.playHapticFeedback()
-                            isMapSheetPresented.toggle()
-                        }
-                        .sheet(isPresented: $isMapSheetPresented) {
-                            MapDetailView(now: nowViewModel, settingsService: settingsService)
-                        }
-                    
-                        AQIView()
-                                          
-                        HStack {
-                            Spacer()
-                            Image(systemName: "info.circle.fill")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 20, height: 20)
-                                .foregroundColor(Color(UIColor.label))
-                            Text("Rechtliche\nInformationen")
-                                .foregroundColor(Color(UIColor.label))
-                                .font(.system(size: 10))
+                        VStack(alignment: .leading) {
+                            Text("Radar")
+                                .font(.title3)
                                 .bold()
-                            Spacer()
+                                .foregroundColor(Color(UIColor.label))
+                                .padding([.leading, .top])
+                            RadarView(settingsService: settingsService, radarMetadata: $nowViewModel.currentRadarMetadata, showLayerSettings: false, userActionAllowed: false)
+                                .frame(height: 350)
+                                .cornerRadius(10)
+                                .padding()
+                                .onTapGesture {
+                                    UIApplication.shared.playHapticFeedback()
+                                    isMapSheetPresented.toggle()
+                                }
+                                .sheet(isPresented: $isMapSheetPresented) {
+                                    MapDetailView(now: nowViewModel, settingsService: settingsService)
+                                }
                         }
-                        .padding(.top)
-                        .padding(.bottom, 50)
-                        .onTapGesture {
-                            UIApplication.shared.playHapticFeedback()
-                            isLegalSheetPresented.toggle()
-                        }
-                        .sheet(isPresented: $isLegalSheetPresented) {
-                            LegalView()
-                        }
+
+                        //RadarImageView(nowViewModel: nowViewModel, settingsService: settingsService)
+                        AQIView()
+                        LegalTextView()
                     }
                 }
             }
@@ -137,17 +83,27 @@ struct NowView: View {
 extension NowView {
     func updateState() async {
         do {
+            if weather.isLoading { return }
+            weather.isLoading = true
+            
             locationService.update()
             location.coordinates = locationService.getCoordinates()
             location.name = await locationService.getLocationName()
-            weather.forecast = try await client.getForecast(coordinates: location.coordinates)
-            weather.air = try await client.getAirQuality(coordinates: location.coordinates)
-            weather.alerts = try await client.getAlerts(coordinates: location.coordinates)
-            weather.rain = try await client.getRainForecast(coordinates: location.coordinates)
+            
+            async let forecastRequest = client.getForecast(coordinates: location.coordinates)
+            async let airQualityRequest = client.getAirQuality(coordinates: location.coordinates)
+            async let radarRequest = client.getRainRadar(coordinates: location.coordinates)
+            let (forecastResponse, airQualityResponse, radarResponse) = try await (forecastRequest, airQualityRequest, radarRequest)
+            weather.forecast = forecastResponse
+            weather.air = airQualityResponse
+            weather.radar = radarResponse
             weather.updateTime()
+            weather.isLoading = false
+            
+            let alertsResponse = try await client.getAlerts(coordinates: location.coordinates)
+            weather.alerts = alertsResponse
         } catch {
             print(error)
         }
     }
-
 }

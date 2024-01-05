@@ -22,10 +22,10 @@ struct HeadView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(Color(UIColor.label))
             Text(location.name)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .lineSpacing(/*@START_MENU_TOKEN@*/10.0/*@END_MENU_TOKEN@*/)
-                    .foregroundColor(Color(UIColor.label))
+                .font(.title2)
+                .fontWeight(.bold)
+                .lineSpacing(10)
+                .foregroundColor(Color(UIColor.label))
             Spacer()
         }
         .onTapGesture {
@@ -33,22 +33,21 @@ struct HeadView: View {
             isLocationSheetPresented.toggle()
         }
         .sheet(isPresented: $isLocationSheetPresented) {
-            SearchView(searchModel: searchModel, now: now, cities: $now.cs.cities)
+            SearchCityView()
         }
         .padding(.bottom, 35)
         .padding(.leading, -20)
         .padding(.top)
         
-        LazyVStack {
+        VStack {
             VStack {
                 Spacer()
-                // MARK: Current Temperature
                 Text(String(weather.forecast.current!.temperature.rounded()).replacingOccurrences(of: ".0", with: "") + "°")
                     .foregroundColor(Color(UIColor.label))
                     .font(.system(size: 120))
             }
             .padding(.bottom, 150)
-
+            
             HStack {
                 Spacer()
                 Image(systemName: "cloud")
@@ -68,10 +67,16 @@ struct HeadView: View {
                 Spacer()
             }
             .padding(.bottom)
-
+            
             if (weather.alerts.count > 0) {
                 AlertView()
             }
+        }
+        .scrollTransition { content, phase in
+            content
+                .opacity(phase.isIdentity ? 1 : 0.8)
+                .scaleEffect(phase.isIdentity ? 1 : 0.99)
+                .blur(radius: phase.isIdentity ? 0 : 0.5)
         }
     }
 }

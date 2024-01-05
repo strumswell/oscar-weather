@@ -9,18 +9,11 @@ import SwiftUI
 
 struct WeatherSimulationView: View {
     @Environment(Weather.self) private var weather: Weather
-
+    
     var body: some View {
         ZStack {
-            StarsView()
-            if weather.forecast.current?.precipitation ?? 0 > 0 {
-                CloudsView(
-                    thickness: Cloud.Thickness.thick,
-                    topTint: getCloudTopStops().interpolated(amount: weather.time),
-                    bottomTint: getCloudBottomStops().interpolated(amount: weather.time)
-                )
-                StormView(type: Storm.Contents.rain, direction: .degrees(30), strength: 80)
-            } else {
+            if !weather.isLoading {
+                StarsView()
                 if getCloudDensity() != Cloud.Thickness.thick {
                     SunView(progress: weather.time)
                 }
@@ -29,16 +22,15 @@ struct WeatherSimulationView: View {
                     topTint: getCloudTopStops().interpolated(amount: weather.time),
                     bottomTint: getCloudBottomStops().interpolated(amount: weather.time)
                 )
+                if shouldDisplayStorm {
+                    StormView(type: getStormType(), direction: .degrees(30), strength: getStormIntensity())
+                }
             }
         }
         .preferredColorScheme(.dark)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-            LinearGradient(colors: [
-                getBackgroundTopStops().interpolated(amount: weather.time),
-                getBackgroundBottomStops().interpolated(amount: weather.time)
-            ], startPoint: .top, endPoint: .bottom)
-        )
+        .background(backgroundGradient)
+
     }
 }
 
@@ -47,16 +39,27 @@ struct WeatherSimulationView: View {
 }
 
 extension WeatherSimulationView {
+    var backgroundGradient: LinearGradient {
+        LinearGradient(colors: [
+            getBackgroundTopStops().interpolated(amount: weather.time),
+            getBackgroundBottomStops().interpolated(amount: weather.time)
+        ], startPoint: .top, endPoint: .bottom)
+    }
+
+    var shouldDisplayStorm: Bool {
+        (weather.forecast.current?.weathercode ?? 0 >= 51 && weather.forecast.current?.precipitation ?? 0 > 0) || weather.radar.isRaining()
+    }
+    
     func getBackgroundTopStops() -> [Gradient.Stop] {
-        if (weather.forecast.hourly == nil) {
+        if (weather.forecast.hourly == nil || weather.radar.radar == nil) {
             return [
                 .init(color: .midnightStart, location: 0),
                 .init(color: .midnightStart, location: 0.25),
                 .init(color: .sunriseStart, location: 0.33),
                 .init(color: .sunnyDayStart, location: 0.38),
-                .init(color: .sunnyDayStart, location: 0.7),
-                .init(color: .sunsetStart, location: 0.78),
-                .init(color: .midnightStart, location: 0.82),
+                .init(color: .sunnyDayStart, location: 0.65),
+                .init(color: .sunsetStart, location: 0.69),
+                .init(color: .midnightStart, location: 0.8),
                 .init(color: .midnightStart, location: 1)
             ]
         }
@@ -66,7 +69,7 @@ extension WeatherSimulationView {
         let sunrise = weather.forecast.daily?.sunrise?.first ?? 0
         let sunset = weather.forecast.daily?.sunset?.first ?? 0
         
-        if weather.forecast.current?.precipitation ?? 0 > 0 {
+        if (weather.forecast.current?.weathercode ?? 0 >= 51 && weather.forecast.current?.precipitation ?? 0 > 0) || weather.radar.isRaining() {
             return [
                 .init(color: .midnightStart, location: 0),
                 .init(color: .midnightStart, location: (sunrise - dayBegin)/dayLength - 0.08),
@@ -89,19 +92,18 @@ extension WeatherSimulationView {
             .init(color: .midnightStart, location: (sunset - dayBegin)/dayLength + 0.04),
             .init(color: .midnightStart, location: 1)
         ]
-
     }
     
     func getBackgroundBottomStops() -> [Gradient.Stop] {
-        if (weather.forecast.hourly == nil) {
+        if (weather.forecast.hourly == nil || weather.radar.radar == nil) {
             return [
                 .init(color: .midnightEnd, location: 0),
                 .init(color: .midnightEnd, location: 0.25),
                 .init(color: .sunriseEnd, location: 0.33),
                 .init(color: .sunnyDayEnd, location: 0.38),
-                .init(color: .sunnyDayEnd, location: 0.7),
-                .init(color: .sunsetEnd, location: 0.78),
-                .init(color: .midnightEnd, location: 0.82),
+                .init(color: .sunnyDayEnd, location: 0.65),
+                .init(color: .sunsetEnd, location: 0.69),
+                .init(color: .midnightEnd, location: 0.8),
                 .init(color: .midnightEnd, location: 1)
             ]
         }
@@ -111,7 +113,7 @@ extension WeatherSimulationView {
         let sunrise = weather.forecast.daily?.sunrise?.first ?? 0
         let sunset = weather.forecast.daily?.sunset?.first ?? 0
         
-        if weather.forecast.current?.precipitation ?? 0 > 0 {
+        if (weather.forecast.current?.weathercode ?? 0 >= 51 && weather.forecast.current?.precipitation ?? 0 > 0) || weather.radar.isRaining() {
             return [
                 .init(color: .midnightEnd, location: 0),
                 .init(color: .midnightEnd, location: (sunrise - dayBegin)/dayLength - 0.08),
@@ -137,7 +139,7 @@ extension WeatherSimulationView {
     }
     
     func getCloudTopStops() -> [Gradient.Stop] {
-        if (weather.forecast.hourly == nil) {
+        if (weather.forecast.hourly == nil || weather.radar.radar == nil) {
             return [
                 .init(color: .darkCloudStart, location: 0),
                 .init(color: .darkCloudStart, location: 0.25),
@@ -155,7 +157,7 @@ extension WeatherSimulationView {
         let sunrise = weather.forecast.daily?.sunrise?.first ?? 0
         let sunset = weather.forecast.daily?.sunset?.first ?? 0
         
-        if weather.forecast.current?.precipitation ?? 0 > 0 {
+        if (weather.forecast.current?.weathercode ?? 0 >= 51 && weather.forecast.current?.precipitation ?? 0 > 0) || weather.radar.isRaining() {
             return [
                 .init(color: .darkCloudStart, location: 0),
                 .init(color: .darkCloudStart, location: (sunrise - dayBegin)/dayLength - 0.08),
@@ -167,7 +169,7 @@ extension WeatherSimulationView {
                 .init(color: .darkCloudStart, location: 1)
             ]
         }
-
+        
         return [
             .init(color: .darkCloudStart, location: 0),
             .init(color: .darkCloudStart, location: (sunrise - dayBegin)/dayLength - 0.08),
@@ -181,7 +183,7 @@ extension WeatherSimulationView {
     }
     
     func getCloudBottomStops() -> [Gradient.Stop] {
-        if (weather.forecast.hourly == nil) {
+        if (weather.forecast.hourly == nil || weather.radar.radar == nil) {
             return [
                 .init(color: .darkCloudEnd, location: 0),
                 .init(color: .darkCloudEnd, location: 0.25),
@@ -199,7 +201,7 @@ extension WeatherSimulationView {
         let sunrise = weather.forecast.daily?.sunrise?.first ?? 0
         let sunset = weather.forecast.daily?.sunset?.first ?? 0
         
-        if weather.forecast.current?.precipitation ?? 0 > 0 {
+        if (weather.forecast.current?.weathercode ?? 0 >= 51 && weather.forecast.current?.precipitation ?? 0 > 0) || weather.radar.isRaining() {
             return [
                 .init(color: .darkCloudEnd, location: 0),
                 .init(color: .darkCloudEnd, location: (sunrise - dayBegin)/dayLength - 0.08),
@@ -211,7 +213,7 @@ extension WeatherSimulationView {
                 .init(color: .darkCloudEnd, location: 1)
             ]
         }
-
+        
         return [
             .init(color: .darkCloudEnd, location: 0),
             .init(color: .darkCloudEnd, location: (sunrise - dayBegin)/dayLength - 0.08),
@@ -223,7 +225,7 @@ extension WeatherSimulationView {
             .init(color: .darkCloudEnd, location: 1)
         ]
     }
-
+    
     public func getCloudDensity() -> Cloud.Thickness {
         switch weather.forecast.current?.weathercode {
         case 0:
@@ -234,19 +236,42 @@ extension WeatherSimulationView {
             return Cloud.Thickness.regular
         case 3:
             return Cloud.Thickness.thick
-        case 45, 48, 51, 52, 55, 61, 63, 65, 66, 67, 71, 73, 75, 77, 85, 86, 95, 96, 99:
-            return Cloud.Thickness.thick
         default:
-            return Cloud.Thickness.light
+            return Cloud.Thickness.thick
         }
     }
     
     public func getStormType() -> Storm.Contents {
         switch weather.forecast.current?.weathercode {
-        case 51, 52, 55, 61, 63, 65, 66, 67, 71, 73, 75, 77, 85, 86, 95, 96, 99:
+        case 51, 53, 55, 61, 63, 65, 66, 67, 95, 96, 99:
             return Storm.Contents.rain
+        case 71, 73, 75, 77, 85, 86:
+            return Storm.Contents.snow
         default:
             return Storm.Contents.none
+        }
+    }
+    
+    public func getStormIntensity() -> Int {
+        switch weather.forecast.current?.weathercode {
+        case 51, 53, 55, 56, 57:
+            return 10
+        case 61, 71:
+            return 20
+        case 63, 73:
+            return 50
+        case 65, 67, 75:
+            return 70
+        case 77:
+            return 50
+        case 80, 85, 95, 99:
+            return 20
+        case 81:
+            return 80
+        case 82, 86:
+            return 90
+        default:
+            return 40
         }
     }
 }

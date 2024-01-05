@@ -45,32 +45,3 @@ struct AlertView: View {
         .padding(.top, -10)
     }
 }
-
-extension Components.Schemas.Alert {
-    func getFormattedHeadline() -> String {
-        guard let headline = headline else {
-            return ""
-        }
-
-        return headline
-            .replacingOccurrences(of: "Amtliche", with: "")
-            .replacingOccurrences(of: "UNWETTER", with: "")
-    }
-    
-    public func getStartDate() -> String {
-        return formatDate(time: self.start ?? 0.0)
-    }
-    
-    public func getEndDate() -> String {
-        return formatDate(time: self.end ?? 0.0)
-    }
-    
-    public func formatDate(time: Double) -> String {
-        let date = Date(timeIntervalSince1970: TimeInterval(Int(time) / 1000))
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .short
-        dateFormatter.timeStyle = .short
-        dateFormatter.locale = Locale(identifier: "de")
-        return dateFormatter.string(from: date)
-    }
-}

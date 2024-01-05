@@ -18,6 +18,10 @@ servers:
     description: "Public Oscar Weather Endpoint"
   - url: https://air-quality-api.open-meteo.com
     description: "Public aqi open meteo endpoint"
+  - url: https://geocoding-api.open-meteo.com/v1
+    description: "Public geocoding open meteo endpoint"
+  - url: https://api.brightsky.dev/
+    description: "Public BrightSky endpoint"
 paths:
   /v1/forecast:
     servers:
@@ -536,6 +540,95 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RainData'
+  /search:
+    servers:
+      - url: https://geocoding-api.open-meteo.com/v1
+    get:
+      operationId: search
+      summary: Search for geocoding information by name.
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Name of the location to search for.
+        - name: count
+          in: query
+          schema:
+            type: integer
+          description: Number of results to return.
+        - name: language
+          in: query
+          schema:
+            type: string
+          description: Language of the response.
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json]
+          description: Format of the response.
+      responses:
+        '200':
+          description: A list of locations matching the search criteria.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+  /radar:
+    get:
+      operationId: getRainRadar
+      summary: Get weather radar data
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The date and time for the requested radar data.
+        - name: bbox
+          in: query
+          schema:
+            type: array
+            items:
+              type: number
+          description: Bounding box coordinates.
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+          description: Latitude of the location.
+        - name: lon
+          in: query
+          required: true
+          schema:
+            type: number
+          description: Longitude of the location.
+        - name: distance
+          in: query
+          schema:
+            type: integer
+          description: Distance parameter for radar data.
+        - name: tz
+          in: query
+          schema:
+            type: string
+          description: Time zone of the location.
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [plain, otherFormats]
+          description: The format of the output data.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RadarResponse'
 components:
   schemas:
     HourlyResponse:
@@ -877,3 +970,82 @@ components:
           type: array
           items:
             type: number
+    SearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+        generationtime_ms:
+          type: number
+          format: float
+          description: Time taken to generate the response, in milliseconds.
+
+    Location:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        latitude:
+          type: number
+          format: float
+        longitude:
+          type: number
+          format: float
+        elevation:
+          type: number
+          format: float
+        feature_code:
+          type: string
+        country_code:
+          type: string
+        admin1_id:
+          type: integer
+        admin3_id:
+          type: integer
+        admin4_id:
+          type: integer
+        timezone:
+          type: string
+        country_id:
+          type: integer
+        country:
+          type: string
+        admin1:
+          type: string
+        admin3:
+          type: string
+        admin4:
+          type: string
+        population:
+          type: integer
+          nullable: true
+        postcodes:
+          type: array
+          items:
+            type: string
+          nullable: true
+    RadarResponse:
+      type: object
+      properties:
+        radar:
+          type: array
+          items:
+            $ref: '#/components/schemas/RadarData'
+    RadarData:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        source:
+          type: string
+        precipitation_5:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer

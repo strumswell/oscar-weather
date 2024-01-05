@@ -10,10 +10,10 @@ import MapKit
 
 struct RadarView: View {
     @ObservedObject var settingsService: SettingService
-    @ObservedObject var now: NowViewModel
     @Binding var radarMetadata: WeatherMapsResponse?
     var showLayerSettings: Bool
-
+    var locationService = LocationService.shared
+    var userActionAllowed = true
 
     var body: some View {
         ZStack {
@@ -21,9 +21,10 @@ struct RadarView: View {
                 overlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.radar.past[radarMetadata!.radar.past.count-1].path ?? "", color: "2", options: "1_1"),
                 overlayOpacity: 0.7,
                 cloudOverlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.satellite.infrared.last?.path ?? "", color: "0", options: "0_0"),
-                coordinates: now.getActiveLocation(),
-                cities: now.cs.cities,
-                settings: settingsService.settings
+                coordinates: locationService.getCoordinates(),
+                cities: locationService.city.cities,
+                settings: settingsService.settings,
+                userActionAllowed: userActionAllowed
             )
             if (showLayerSettings) {
                 VStack {
@@ -125,6 +126,7 @@ struct RadarMapView: UIViewRepresentable {
     var coordinates: CLLocationCoordinate2D
     var cities: [City]
     var settings: Settings?
+    var userActionAllowed: Bool
     
     class Coordinator: NSObject, MKMapViewDelegate {
         var parent: RadarMapView
@@ -215,8 +217,13 @@ struct RadarMapView: UIViewRepresentable {
         let coordinateRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude), latitudinalMeters: 100000, longitudinalMeters: 100000)
         
         mapView.setRegion(coordinateRegion, animated: false)
-        mapView.mapType = .hybridFlyover
+        mapView.mapType = .standard
         mapView.showsUserLocation = true
+        if !userActionAllowed {
+            mapView.isScrollEnabled = false
+            mapView.isZoomEnabled = false
+            mapView.isRotateEnabled = false
+        }
     }
 }
 

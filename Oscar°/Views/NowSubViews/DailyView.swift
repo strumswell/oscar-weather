@@ -11,65 +11,73 @@ struct DailyView: View {
     @Environment(Weather.self) private var weather: Weather
 
     var body: some View {
-        Text("10-Tage")
-            .font(.title3)
-            .bold()
-            .foregroundColor(Color(UIColor.label))
-            .padding([.leading, .top, .bottom])
-        HStack {
-            
-            VStack(alignment: .leading, spacing: 22) {
-                ForEach(0...9, id: \.self) { dayPos in
-                    Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0) )
-                        .foregroundColor(Color(UIColor.label))
-                }
-            }
-            .padding(.leading)
-            Spacer()
-            VStack(spacing: 14) {
-                ForEach(0...9, id: \.self) { dayPos in
-                    Image(getWeatherIcon(pos: dayPos))
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30)
-                }
-            }
-            VStack(alignment: .leading, spacing: 13) {
-                ForEach(0...9, id: \.self) { dayPos in
-                    VStack {
-                        Text("\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") mm")
-                            .font(.caption)
+        VStack(alignment: .leading) {
+            Text("10-Tage")
+                .font(.title3)
+                .bold()
+                .foregroundColor(Color(UIColor.label))
+                .padding([.leading, .top, .bottom])
+            HStack {
+                
+                VStack(alignment: .leading, spacing: 22) {
+                    ForEach(0...9, id: \.self) { dayPos in
+                        Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0) )
                             .foregroundColor(Color(UIColor.label))
-                        Text("\(weather.forecast.daily?.precipitation_probability_max?[dayPos] ?? 0, specifier: "%.0f") %")
-                            .font(.caption)
-                            .foregroundColor(Color(UIColor.secondaryLabel))
                     }
                 }
-            }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 22) {
-                ForEach(0...9, id: \.self) { dayPos in
-                    Text("\(weather.forecast.daily?.temperature_2m_max?[dayPos].rounded() ?? 0, specifier: "%.0f")°")
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color(UIColor.label))
+                .padding(.leading)
+                Spacer()
+                VStack(spacing: 14) {
+                    ForEach(0...9, id: \.self) { dayPos in
+                        Image(getWeatherIcon(pos: dayPos))
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
+                    }
                 }
-            }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 22) {
-                ForEach(0...9, id: \.self) { dayPos in
-                    Text("\(weather.forecast.daily?.temperature_2m_min?[dayPos].rounded() ?? 0, specifier: "%.0f")°")
-                        .fontWeight(.light)
-                        .foregroundColor(Color(UIColor.label))
+                VStack(alignment: .leading, spacing: 13) {
+                    ForEach(0...9, id: \.self) { dayPos in
+                        VStack {
+                            Text("\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") mm")
+                                .font(.caption)
+                                .foregroundColor(Color(UIColor.label))
+                            Text("\(weather.forecast.daily?.precipitation_probability_max?[dayPos] ?? 0, specifier: "%.0f") %")
+                                .font(.caption)
+                                .foregroundColor(Color(UIColor.secondaryLabel))
+                        }
+                    }
                 }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 22) {
+                    ForEach(0...9, id: \.self) { dayPos in
+                        Text("\(weather.forecast.daily?.temperature_2m_max?[dayPos].rounded() ?? 0, specifier: "%.0f")°")
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(UIColor.label))
+                    }
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 22) {
+                    ForEach(0...9, id: \.self) { dayPos in
+                        Text("\(weather.forecast.daily?.temperature_2m_min?[dayPos].rounded() ?? 0, specifier: "%.0f")°")
+                            .fontWeight(.light)
+                            .foregroundColor(Color(UIColor.label))
+                    }
+                }
+                .padding(.trailing)
             }
-            .padding(.trailing)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 10)
+            .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+            .cornerRadius(10)
+            .font(.system(size: 18))
+            .padding([.leading, .trailing])
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 10)
-        .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
-        .cornerRadius(10)
-        .font(.system(size: 18))
-        .padding([.leading, .trailing])
+        .scrollTransition { content, phase in
+            content
+                .opacity(phase.isIdentity ? 1 : 0.8)
+                .scaleEffect(phase.isIdentity ? 1 : 0.99)
+                .blur(radius: phase.isIdentity ? 0 : 0.5)
+        }
     }
 }
 
