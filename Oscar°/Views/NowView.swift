@@ -67,6 +67,11 @@ struct NowView: View {
         }
         .background(Color(UIColor.secondarySystemBackground))
         .edgesIgnoringSafeArea(.all)
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            Task {
+                await self.updateState()
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("ChangedLocation"), object: nil)) { _ in
             Task {
                 await self.updateState()

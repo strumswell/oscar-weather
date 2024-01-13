@@ -17,6 +17,10 @@ extension View {
     }
     
     public func roundTemperatureString(temperature: Double?) -> String {
-        return "\(Int(temperature?.rounded() ?? 0))°"
+        if (temperature == nil) {
+            return ""
+        } else {
+            return "\(Int(temperature?.rounded() ?? 0))°"
+        }
     }
 }

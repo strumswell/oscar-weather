@@ -28,6 +28,7 @@ struct HeadView: View {
                 .foregroundColor(Color(UIColor.label))
             Spacer()
         }
+        .shadow(radius: 5)
         .onTapGesture {
             UIApplication.shared.playHapticFeedback()
             isLocationSheetPresented.toggle()
@@ -42,9 +43,10 @@ struct HeadView: View {
         VStack {
             VStack {
                 Spacer()
-                Text(roundTemperatureString(temperature: weather.forecast.current!.temperature))
-                    .foregroundColor(Color(UIColor.label))
-                    .font(.system(size: 120))
+                Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
+                        .foregroundColor(Color(UIColor.label))
+                        .font(.system(size: 120))
+                        .shadow(radius: 15)
             }
             .padding(.bottom, 150)
             

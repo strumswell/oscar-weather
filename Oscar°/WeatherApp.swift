@@ -25,11 +25,6 @@ struct WeatherApp: App {
                 .task {
                     await updateState()
                 }
-                .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-                    Task {
-                        await updateState()
-                    }
-                }
         }
     }
 }

@@ -43,5 +43,6 @@ struct AlertView: View {
             AlertListView()
         }
         .padding(.top, -10)
+        .shadow(radius: 15)
     }
 }

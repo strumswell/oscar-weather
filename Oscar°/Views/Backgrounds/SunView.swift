@@ -44,7 +44,7 @@ struct SunView: View {
                 }
                 .transition(.opacity)
                 .blendMode(.screen)
-                .position(x: (proxy.frame(in: .global).width - 100) * sunX, y: 75)
+                .position(x: (proxy.frame(in: .global).width - 75) * sunX, y: 60)
                 .rotationEffect(.degrees((progress - 0.5) * 180))
                 .onAppear {
                     withAnimation(.easeInOut(duration: 7).repeatForever(autoreverses: true)) {

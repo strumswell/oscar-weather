@@ -55,7 +55,7 @@ class APIClient {
                 forecast_days: ._14
             )
         ))
-                
+                        
         switch response {
         case let .ok(response):
             switch response.body {

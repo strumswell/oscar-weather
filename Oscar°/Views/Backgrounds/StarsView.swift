@@ -32,7 +32,7 @@ struct StarsView: View {
 
     var body: some View {
         TimelineView(.animation) { timeline in
-            if starOpacity > 0.1 {
+            if starOpacity > 0.01 {
                 Canvas { context, size in
                     let timeInterval = timeline.date.timeIntervalSince1970
                     starField.update(date: timeline.date)

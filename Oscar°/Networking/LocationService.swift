@@ -38,11 +38,13 @@ class LocationService: NSObject, CLLocationManagerDelegate  {
         self.manager.startUpdatingLocation()
         self.authStatus = self.manager.authorizationStatus
         updateGPSCoordinates()
+        
     }
     
     ///  Update class state with all cities from storage and the current GPS coordinates, if available
     func update() {
         city.update()
+        updateGPSCoordinates()
     }
     
     /// Update class state with current user GPS coordinates, if available

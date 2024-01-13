@@ -173,7 +173,8 @@ extension HourlyView {
     
     public func getHourString(timestamp: Double) -> String {
         let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
-        let calendar = Calendar.current
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? TimeZone.current
         let hours = calendar.component(.hour, from: date)
         return String(format:"%02d", hours)
     }
@@ -288,7 +289,8 @@ extension SunsetSunriseCard {
     
     public func getTimeString(timestamp: Double) -> String {
         let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
-        let calendar = Calendar.current
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? TimeZone.current
         let hours = calendar.component(.hour, from: date)
         let minutes = calendar.component(.minute, from: date)
         return String(format:"%02d:%02d", hours, minutes)
@@ -296,7 +298,7 @@ extension SunsetSunriseCard {
     
     public func getWeekDay(timestamp: Double) -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.timeZone = TimeZone(abbreviation: "UTC\(String(describing: weather.forecast.timezone_abbreviation))")
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? TimeZone.current
         dateFormatter.dateFormat = "EEEE"
         return dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(timestamp)))
     }
