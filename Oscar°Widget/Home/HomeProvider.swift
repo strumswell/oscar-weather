@@ -18,74 +18,141 @@ struct HomeEntry: TimelineEntry {
     let temperatureMax: Double
     let temperatureNow: Double
     let icon: String
-    let precipitation: Double
-    let precipitationProbability: Int
     let backgroundGradients: [Color]
 }
 
 class HomeProvider: TimelineProvider {
-    var lm: LocationManager
-    let defaultCoordinate = CLLocationCoordinate2D.init(latitude: 52.42, longitude: 12.52)
-    let dispatchGroup =  DispatchGroup()
-    
-    var placemark: String?
-    var weather: OMDayTemperature?
-    var time: Double?
+    let client = APIClient()
+    let locationService = LocationService.shared
     
     init() {
-        lm = LocationManager()
-        lm.update()
+
+        locationService.update()
     }
     
     func placeholder(in context: Context) -> HomeEntry {
-        HomeEntry(date: Date(), location: "Leipzig", temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", precipitation: 2.5, precipitationProbability: 72, backgroundGradients: [.sunriseStart, .sunnyDayEnd])
+        HomeEntry(date: Date(), location: "Berlin", temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", backgroundGradients: [.sunriseStart, .sunnyDayEnd])
     }
     
     func getSnapshot(in context: Context, completion: @escaping (HomeEntry) -> ()) {
-        let entry = HomeEntry(date: Date(), location: "Leipzig", temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", precipitation: 2.5, precipitationProbability: 72, backgroundGradients: [.sunriseStart, .sunnyDayEnd])
+        let entry = HomeEntry(date: Date(), location: "Berlin", temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", backgroundGradients: [.sunriseStart, .sunnyDayEnd])
         completion(entry)
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<HomeEntry>) -> ()) {
-        lm.update()
-        
-        let currentDate = Date()
-        let coordinates = lm.gpsLocation ?? self.defaultCoordinate
-        
-        self.fetchCurrentPlacemark(coordinates: coordinates)
-        self.fetchWeatherData(coordinates: coordinates)
-                
-        dispatchGroup.notify(queue: DispatchQueue.global()) {
-            if (self.weather == nil || self.placemark == nil) {
-                return
-            }
+        locationService.update()
+
+        Task {
+            let coordinates = locationService.getCoordinates()
+            let locationName = await locationService.getLocationName()
+
+            // TODO: Do a different API call to get JUST the data we need here. The call gets too much.
+            async let weatherRequest = client.getForecast(coordinates: coordinates, forecastDays: ._1)
+            async let radarRequest = client.getRainForecast(coordinates: coordinates)
+            let (weather, radar) = try await (weatherRequest, radarRequest)
+            
+            let dayBegin = weather.hourly?.time.first ?? 0
+            let currentTime = (Date.now.timeIntervalSince1970-Double(dayBegin))/86400.0
+            
+            let temperatureMin = weather.daily?.temperature_2m_min?.first ?? 0
+            let temperatureMax = weather.daily?.temperature_2m_max?.first ?? 0
+            let temperatureNow = weather.current?.temperature ?? 0
+            let weathercode = weather.current?.weathercode ?? 0
+            let isDay = weather.current?.is_day ?? 0
+            let precipitation = weather.current?.precipitation ?? 0
+            let sunrise = weather.daily?.sunrise?.first ?? 0
+            let sunset = weather.daily?.sunset?.first ?? 0          
             
             let entry = HomeEntry(
                 date: Date(),
-                location: self.placemark ?? "Unknown",
-                temperatureMin: self.weather?.daily.temperature2MMin.first ?? 0.0,
-                temperatureMax: self.weather?.daily.temperature2MMax.first ?? 0.0,
-                temperatureNow: self.weather?.currentWeather.temperature ?? 0.0,
-                icon: self.weather?.currentWeather.getWeatherIcon() ?? "cloud.fill",
-                precipitation: self.weather?.hourly.precipitation.first ?? 0.0,
-                precipitationProbability: self.weather?.hourly.precipitationProbability.first ?? 0,
+                location: locationName,
+                temperatureMin: temperatureMin,
+                temperatureMax: temperatureMax,
+                temperatureNow: temperatureNow,
+                icon: getWeatherIcon(weathercode: weathercode, isDay: isDay, isRaining: radar.isRaining(), precipitation: precipitation),
                 backgroundGradients: [
-                    self.getBackgroundTopStops().interpolated(amount: self.time!),
-                    self.getBackgroundBottomStops().interpolated(amount: self.time!)
+                    self.getBackgroundTopStops(
+                        dayBegin: dayBegin,
+                        sunrise: sunrise,
+                        sunset: sunset,
+                        weathercode: weathercode,
+                        isRaining: radar.isRaining(),
+                        precipitation: precipitation)
+                    .interpolated(amount: currentTime),
+                    self.getBackgroundBottomStops(
+                        dayBegin: dayBegin,
+                        sunrise: sunrise,
+                        sunset: sunset,
+                        weathercode: weathercode,
+                        isRaining: radar.isRaining(),
+                        precipitation: precipitation)
+                    .interpolated(amount: currentTime)
                 ]
             )
+            
+            let currentDate = Date()
             let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 30, to: currentDate)!
             let timeline = Timeline(entries:[entry], policy: .after(nextUpdateDate))
             completion(timeline)
         }
     }
     
-    func getBackgroundTopStops() -> [Gradient.Stop] {
+    public func getWeatherIcon(weathercode: Double, isDay: Double, isRaining: Bool, precipitation: Double) -> String {
+        let shouldShowRainingIcon = isRaining || precipitation > 0
+
+        if (isDay > 0) {
+            switch weathercode {
+            case 0, 1:
+                return "sun.max.fill"
+            case 2:
+                return "cloud.sun.fill"
+            case 3:
+                return "cloud.fill"
+            case 45, 48:
+                return "cloud.fog.fill"
+            case 51, 53, 55, 61, 63, 65:
+                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fill"
+            case 56, 57:
+                return shouldShowRainingIcon ? "cloud.sleet.fill" : "cloud.fill"
+            case 71, 73, 75, 77:
+                return shouldShowRainingIcon ?"cloud.snow.fill" : "cloud.fill"
+            case 80, 81, 82, 85, 86:
+                return shouldShowRainingIcon ? "cloud.heavyrain.fill" : "cloud.fill"
+            case 95, 96, 99:
+                return shouldShowRainingIcon ? "cloud.bolt.rain.fill" : "cloud.fill"
+            default:
+                return "cloud.fill"
+            }
+        } else {
+            switch weathercode {
+            case 0, 1:
+                return "moon.stars.fill"
+            case 2:
+                return "cloud.moon.fill"
+            case 3:
+                return "cloud.fill"
+            case 45, 48:
+                return "cloud.fog.fill"
+            case 51, 53, 55, 61, 63, 65:
+                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fill"
+            case 56, 57:
+                return shouldShowRainingIcon ? "cloud.sleet.fill" : "cloud.fill"
+            case 71, 73, 75, 77:
+                return shouldShowRainingIcon ? "cloud.snow.fill" : "cloud.fill"
+            case 80, 81, 82, 85, 86:
+                return shouldShowRainingIcon ? "cloud.heavyrain.fill" : "cloud.fill"
+            case 95, 96, 99:
+                return shouldShowRainingIcon ? "cloud.bolt.rain.fill" : "cloud.fill"
+            default:
+                return "cloud.fill"
+            }
+        }
+    }
+
+    
+    func getBackgroundTopStops(dayBegin: Double, sunrise: Double, sunset: Double, weathercode: Double, isRaining: Bool, precipitation: Double) -> [Gradient.Stop] {
         let dayLength = 86400.0
-        let dayBegin = Double(self.weather!.hourly.time.first!)
-        let sunrise = Double(self.weather!.daily.sunrise.first!)
-        let sunset = Double(self.weather!.daily.sunset.first!)
-        let isRaining = self.weather!.currentWeather.weathercode >= 51 && self.weather!.currentWeather.weathercode <= 99
+        let isRaining = ((weathercode >= 51 && weathercode <= 99) && precipitation > 0) || isRaining
 
         if isRaining {
             return [
@@ -113,13 +180,10 @@ class HomeProvider: TimelineProvider {
         
     }
     
-    func getBackgroundBottomStops() -> [Gradient.Stop] {
+    func getBackgroundBottomStops(dayBegin: Double, sunrise: Double, sunset: Double, weathercode: Double, isRaining: Bool, precipitation: Double) -> [Gradient.Stop] {
         let dayLength = 86400.0
-        let dayBegin = Double(self.weather!.hourly.time.first!)
-        let sunrise = Double(self.weather!.daily.sunrise.first!)
-        let sunset = Double(self.weather!.daily.sunset.first!)
-        let isRaining = self.weather!.currentWeather.weathercode >= 51 && self.weather!.currentWeather.weathercode <= 99
-        
+        let isRaining = ((weathercode >= 51 && weathercode <= 99) && precipitation > 0) || isRaining
+
         if isRaining {
             return [
                 .init(color: .midnightEnd, location: 0),
@@ -143,42 +207,5 @@ class HomeProvider: TimelineProvider {
             .init(color: .midnightEnd, location: (sunset - dayBegin)/dayLength + 0.015),
             .init(color: .midnightEnd, location: 1)
         ]
-    }
-    
-    func fetchCurrentPlacemark(coordinates: CLLocationCoordinate2D) {
-        dispatchGroup.enter()
-        
-        let location = CLLocation(latitude: coordinates.latitude, longitude: coordinates.longitude)
-        let geocoder = CLGeocoder()
-        geocoder.reverseGeocodeLocation(location,completionHandler: {
-            [self] (placemarks, error) in
-            if error == nil {
-                let firstLocation = placemarks?[0]
-                self.placemark = firstLocation?.locality ?? ""
-                dispatchGroup.leave()
-            } else {
-                print("Error fetching Coordinates")
-                dispatchGroup.leave()
-            }
-        })
-    }
-    
-    func fetchWeatherData(coordinates: CLLocationCoordinate2D) {
-        dispatchGroup.enter()
-
-        guard let url = URL(string: "https://api.open-meteo.com/v1/forecast?latitude=\(coordinates.latitude)&longitude=\(coordinates.longitude)&hourly=precipitation_probability,precipitation,windspeed_10m,uv_index&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset&current_weather=true&forecast_days=1&timeformat=unixtime&timezone=auto") else { return }
-                
-        AF.request(url).validate().responseDecodable(of: OMDayTemperature.self) { response in
-            switch response.result {
-            case .success:
-                self.weather = response.value
-                let dayBegin = response.value!.hourly.time.first!
-                self.time = (Date.now.timeIntervalSince1970-Double(dayBegin))/86400.0
-                self.dispatchGroup.leave()
-            case let .failure(error):
-                print(error)
-                self.dispatchGroup.leave()
-            }
-        }
     }
 }

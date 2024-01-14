@@ -8,7 +8,7 @@ import CoreData
 import SwiftUI
 import Combine
 import MapKit
-import SPIndicator
+import WidgetKit
 
 public class CityService: ObservableObject {
     
@@ -28,7 +28,6 @@ public class CityService: ObservableObject {
         do {
             try self.context.save()
             update()
-            UIApplication.shared.playHapticFeedback()
             nc.post(name: Notification.Name("CityToggle"), object: nil)
         } catch {
             let nsError = error as NSError
@@ -145,8 +144,8 @@ public class CityServiceNew {
         do {
             try self.context.save()
             update()
-            UIApplication.shared.playHapticFeedback()
             nc.post(name: Notification.Name("CityToggle"), object: nil)
+            WidgetCenter.shared.reloadAllTimelines()
         } catch {
             let nsError = error as NSError
             fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
@@ -155,6 +154,7 @@ public class CityServiceNew {
     
     func update() {
         do {
+            self.context.refreshAllObjects()
             let fetchRequest: NSFetchRequest<City> = City.fetchRequest()
             fetchRequest.sortDescriptors = [NSSortDescriptor(key: "orderIndex", ascending: true)]
             self.cities = try self.context.fetch(fetchRequest)
@@ -234,7 +234,7 @@ public class CityServiceNew {
             }
             city.selected = true
         }
-        save()
+        self.save()
         //nc.post(name: Notification.Name("CityToggle"), object: nil)
     }
     

@@ -54,7 +54,7 @@ struct NowTodayEntryView: View {
 }
 
 struct NowTodayWidget: Widget {
-    let kind: String = "Weather21Widget"
+    let kind: String = "TodayWidget"
     
     
     var body: some WidgetConfiguration {
@@ -70,7 +70,7 @@ struct NowTodayWidget: Widget {
 
 struct NowTodayEntryView_Previews: PreviewProvider {
     static var previews: some View {
-        NowTodayEntryView(entry: HomeEntry(date: Date(), location: "Leipzig", temperatureMin: 12.0, temperatureMax: 21.0, temperatureNow: 19.0, icon: "sun.max.fill", precipitation: 0.0, precipitationProbability: 12, backgroundGradients: [.sunriseStart, .sunnyDayEnd]))
+        NowTodayEntryView(entry: HomeEntry(date: Date(), location: "Berlin", temperatureMin: 12.0, temperatureMax: 21.0, temperatureNow: 19.0, icon: "sun.max.fill", backgroundGradients: [.sunriseStart, .sunnyDayEnd]))
             .previewContext(WidgetPreviewContext(family: .systemSmall))
     }
 }

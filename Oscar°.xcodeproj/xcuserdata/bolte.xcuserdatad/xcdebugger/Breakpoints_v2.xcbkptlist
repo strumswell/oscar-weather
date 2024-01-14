@@ -7,49 +7,17 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "1B310E9C-CA28-45C9-A2B0-3EF03225C486"
+            uuid = "441A7479-12B0-4C03-8693-05A7C821D455"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Oscar&#xb0;Widget/Home/HomeProvider.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "51"
-            endingLineNumber = "51"
+            startingLineNumber = "43"
+            endingLineNumber = "43"
             landmarkName = "getTimeline(in:completion:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "1B310E9C-CA28-45C9-A2B0-3EF03225C486 - 5db4efd3d8e44774"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Oscar_WidgetExtension.HomeProvider.getTimeline(in: WidgetKit.TimelineProviderContext, completion: (WidgetKit.Timeline&lt;Oscar_WidgetExtension.HomeEntry&gt;) -&gt; ()) -&gt; ()"
-                  moduleName = "Oscar&#xb0;WidgetExtension"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bolte/Documents/Oscar%C2%B0/Oscar%C2%B0Widget/Home/HomeProvider.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "50"
-                  endingLineNumber = "50"
-                  offsetFromSymbolStart = "892">
-               </Location>
-               <Location
-                  uuid = "1B310E9C-CA28-45C9-A2B0-3EF03225C486 - 5db4efd3d8e44755"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Oscar_WidgetExtension.HomeProvider.getTimeline(in: WidgetKit.TimelineProviderContext, completion: (WidgetKit.Timeline&lt;Oscar_WidgetExtension.HomeEntry&gt;) -&gt; ()) -&gt; ()"
-                  moduleName = "Oscar&#xb0;WidgetExtension"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bolte/Documents/Oscar%C2%B0/Oscar%C2%B0Widget/Home/HomeProvider.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "51"
-                  endingLineNumber = "51"
-                  offsetFromSymbolStart = "500">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

@@ -131,6 +131,7 @@ paths:
             - wind_direction_10m
             - weathercode
             - precipitation
+            - is_day
       - name: temperature_unit
         in: query
         schema:
@@ -177,6 +178,7 @@ paths:
         schema:
           type: integer
           enum:
+          - 1
           - 14
       responses:
         200:
@@ -887,6 +889,8 @@ components:
         weathercode:
           type: number
         precipitation:
+          type: number
+        is_day:
           type: number
       required:
         - cloudcover

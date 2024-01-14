@@ -33,14 +33,11 @@ struct RadarEntry: TimelineEntry {
 }
 
 struct RadarProvider: TimelineProvider {
-    var lm: LocationManager
-    let defaultCoordinate = CLLocationCoordinate2D.init(latitude: 52.42, longitude: 12.52)
+    let locationService = LocationService.shared
 
     init() {
-        lm = LocationManager()
-        lm.update()
+        locationService.update()
     }
-
 
     func placeholder(in context: Context) -> RadarEntry {
         RadarEntry(date: Date(), image: Image(uiImage: UIImage(named: "rain")!), snapshotTime: "12:00")
@@ -52,9 +49,8 @@ struct RadarProvider: TimelineProvider {
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<RadarEntry>) -> ()) {
-        lm.update()
-        let currentDate = Date()
-        let coordinate = lm.gpsLocation ?? self.defaultCoordinate
+        locationService.update()
+        let coordinate = locationService.getCoordinates()
         
         guard let url = URL(string: "https://api.oscars.love/api/v1/mapshots/radar?lat=\(coordinate.latitude)&lon=\(coordinate.longitude)") else { return }
         
@@ -73,6 +69,7 @@ struct RadarProvider: TimelineProvider {
                 let timeline = Timeline(entries:[entry], policy: .after(nextUpdateDate))
                 completion(timeline)
             } else {
+                let currentDate = Date()
                 let entry = RadarEntry(date: currentDate, image: Image(uiImage: UIImage(named: "rain")!), snapshotTime: "12:00")
                 let timeline = Timeline(entries: [entry], policy: .atEnd)
                 completion(timeline)
