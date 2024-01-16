@@ -55,8 +55,8 @@
                 RadarWidgetEntryView(entry: entry)
             }
             .contentMarginsDisabled()
-            .configurationDisplayName("Regenradar")
-            .description("Regenradar für aktuellen Standort")
+            .configurationDisplayName(String(localized: "Regenradar"))
+            .description(String(localized: "Regenradar für aktuellen Standort"))
             .supportedFamilies([.systemSmall, .systemLarge])
         }
     }

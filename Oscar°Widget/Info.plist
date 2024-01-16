@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>de_DE</string>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>OscarWidget</string>
 	<key>CFBundleExecutable</key>
@@ -28,13 +28,13 @@
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Location is needed to show weather at your current location.</string>
+	<string>Lediglich benötigt, um Radar am aktuellen Standort anzuzeigen.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Location is needed to show weather at your current location.</string>
+	<string>Lediglich benötigt, um Radar am aktuellen Standort anzuzeigen.</string>
 	<key>NSLocationUsageDescription</key>
 	<string>Lediglich benötigt, um Radar am aktuellen Standort anzuzeigen.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Location is needed to show weather at your current location.</string>
+	<string>Lediglich benötigt, um Radar am aktuellen Standort anzuzeigen.</string>
 	<key>NSWidgetWantsLocation</key>
 	<true/>
 </dict>

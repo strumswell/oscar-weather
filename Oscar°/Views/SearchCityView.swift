@@ -33,10 +33,10 @@ struct SearchCityView: View {
                     }
                 }
             }
-            .navigationBarTitle("Orte", displayMode: .inline)
+            .navigationBarTitle(String(localized: "Orte"), displayMode: .inline)
             .toolbar(content: {
                 ToolbarItem(placement: .navigationBarTrailing, content: {
-                    Button("Fertig", action: {
+                    Button(String(localized: "Fertig"), action: {
                         presentationMode.wrappedValue.dismiss()
                         UIApplication.shared.playHapticFeedback()
                     })
@@ -96,7 +96,7 @@ struct SearchCityView: View {
                 }
             }
         }
-        .searchable(text: $searchText, isPresented: $searchIsActive, placement: .navigationBarDrawer(displayMode: .always), prompt: "Suchen...")
+        .searchable(text: $searchText, isPresented: $searchIsActive, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Suchen..."))
         .onChange(of: searchText, {
             Task {
                 if searchText.count < 1 { return }

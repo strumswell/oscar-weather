@@ -21,7 +21,7 @@ struct MapDetailView: View {
             .navigationBarTitle(Text("Regenradar"), displayMode: .inline)
             .toolbar(content: {
                 ToolbarItem(placement: .navigationBarTrailing, content: {
-                    Button("Fertig", action: {
+                    Button(String(localized: "Fertig"), action: {
                         presentationMode.wrappedValue.dismiss()
                         UIApplication.shared.playHapticFeedback()
                     })

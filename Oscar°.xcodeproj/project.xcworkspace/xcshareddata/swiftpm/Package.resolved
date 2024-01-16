@@ -23,7 +23,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ivanvorobei/SPIndicator",
       "state" : {
-        "revision" : "ec54c0e60a038ef7290280259638fcc22f0ceb69",
+        "revision" : "4040db16d6dfae9c50c79fc288c9b3c6e978d1bb",
         "version" : "1.3.1"
       }
     },

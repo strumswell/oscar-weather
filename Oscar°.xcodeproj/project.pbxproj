@@ -121,6 +121,10 @@
 		3EB89032251A55980028FED0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3EB89031251A55980028FED0 /* Assets.xcassets */; };
 		3EB89036251A55980028FED0 /* Oscar°WidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3EB89028251A55950028FED0 /* Oscar°WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3ED4AEB0254551DE0057DF2F /* OscarWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED4AEAF254551DD0057DF2F /* OscarWidgetsBundle.swift */; };
+		6EFBD1522B56F7B900D6E38E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E320F1A2B56F64C00FDC4DA /* Localizable.xcstrings */; };
+		6EFBD1882B56FB3000D6E38E /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6EFBD1872B56FB3000D6E38E /* InfoPlist.xcstrings */; };
+		6EFBD1AE2B56FEA100D6E38E /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6EFBD19E2B56FD6500D6E38E /* InfoPlist.xcstrings */; };
+		6EFBD1B22B57001100D6E38E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6EFBD1B12B57001100D6E38E /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -203,7 +207,6 @@
 		25429BEA29E5F9B000D5979F /* Oscar_WatchWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Oscar_WatchWidget.swift; sourceTree = "<group>"; };
 		25429BEC29E5F9B000D5979F /* Oscar_WatchWidget.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = Oscar_WatchWidget.intentdefinition; sourceTree = "<group>"; };
 		25429BED29E5F9B300D5979F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		25429BEF29E5F9B300D5979F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2546516329E4905E00D8C13D /* TemperatureLockscreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureLockscreenWidget.swift; sourceTree = "<group>"; };
 		2546516629E492E500D8C13D /* RadarProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarProvider.swift; sourceTree = "<group>"; };
 		2546516929E4935600D8C13D /* LockscreenProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockscreenProvider.swift; sourceTree = "<group>"; };
@@ -260,14 +263,19 @@
 		3EB89016251A55700028FED0 /* NowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowView.swift; sourceTree = "<group>"; };
 		3EB89018251A55740028FED0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3EB8901B251A55740028FED0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		3EB8901D251A55740028FED0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3EB89028251A55950028FED0 /* Oscar°WidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Oscar°WidgetExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EB8902A251A55950028FED0 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		3EB8902C251A55950028FED0 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		3EB8902F251A55950028FED0 /* RadarWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarWidget.swift; sourceTree = "<group>"; };
 		3EB89031251A55980028FED0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		3EB89033251A55980028FED0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3ED4AEAF254551DD0057DF2F /* OscarWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OscarWidgetsBundle.swift; sourceTree = "<group>"; };
+		6E320F1A2B56F64C00FDC4DA /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		6EFBD1822B56FB1700D6E38E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6EFBD1842B56FB1C00D6E38E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6EFBD1862B56FB2100D6E38E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6EFBD1872B56FB3000D6E38E /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		6EFBD19E2B56FD6500D6E38E /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		6EFBD1B12B57001100D6E38E /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -340,7 +348,7 @@
 				25429BEA29E5F9B000D5979F /* Oscar_WatchWidget.swift */,
 				25429BEC29E5F9B000D5979F /* Oscar_WatchWidget.intentdefinition */,
 				25429BED29E5F9B300D5979F /* Assets.xcassets */,
-				25429BEF29E5F9B300D5979F /* Info.plist */,
+				6EFBD1842B56FB1C00D6E38E /* Info.plist */,
 			);
 			path = "Oscar°WatchWidget";
 			sourceTree = "<group>";
@@ -526,6 +534,9 @@
 		3EB89013251A55700028FED0 /* Oscar° */ = {
 			isa = PBXGroup;
 			children = (
+				6E320F1A2B56F64C00FDC4DA /* Localizable.xcstrings */,
+				6EFBD1872B56FB3000D6E38E /* InfoPlist.xcstrings */,
+				2575A1D32B53519E006005FC /* Oscar°.entitlements */,
 				25CB17E62B470429001D973A /* Extensions */,
 				25BEDCE126CACF2900D90D6B /* Storage */,
 				3E89BBA6252EFEC5006F7BCC /* Views */,
@@ -535,7 +546,7 @@
 				3EB89014251A55700028FED0 /* WeatherApp.swift */,
 				2575A1D32B53519E006005FC /* Oscar°.entitlements */,
 				3EB89018251A55740028FED0 /* Assets.xcassets */,
-				3EB8901D251A55740028FED0 /* Info.plist */,
+				6EFBD1862B56FB2100D6E38E /* Info.plist */,
 				3EB8901A251A55740028FED0 /* Preview Content */,
 			);
 			path = "Oscar°";
@@ -568,7 +579,9 @@
 				3ED4AEAF254551DD0057DF2F /* OscarWidgetsBundle.swift */,
 				2575A1D42B5351B3006005FC /* Oscar°WidgetExtension.entitlements */,
 				3EB89031251A55980028FED0 /* Assets.xcassets */,
-				3EB89033251A55980028FED0 /* Info.plist */,
+				6EFBD1822B56FB1700D6E38E /* Info.plist */,
+				6EFBD19E2B56FD6500D6E38E /* InfoPlist.xcstrings */,
+				6EFBD1B12B57001100D6E38E /* Localizable.xcstrings */,
 			);
 			path = "Oscar°Widget";
 			sourceTree = "<group>";
@@ -675,7 +688,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1430;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1520;
 				TargetAttributes = {
 					25429BCF29E5F94100D5979F = {
 						CreatedOnToolsVersion = 14.3;
@@ -698,6 +711,8 @@
 			knownRegions = (
 				Base,
 				de,
+				en,
+				tr,
 			);
 			mainGroup = 3EB89008251A55700028FED0;
 			packageReferences = (
@@ -744,7 +759,10 @@
 			files = (
 				25C42FFD2AC35EE2001DA5FC /* openapi.yml in Resources */,
 				25C42FFE2AC35EE2001DA5FC /* openapi-generator-config.yml in Resources */,
+				6EFBD1522B56F7B900D6E38E /* Localizable.xcstrings in Resources */,
+				258428B82A18C5230033E5A3 /* Launch Screen.storyboard in Resources */,
 				3EB8901C251A55740028FED0 /* Preview Assets.xcassets in Resources */,
+				6EFBD1882B56FB3000D6E38E /* InfoPlist.xcstrings in Resources */,
 				3EB89019251A55740028FED0 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -754,7 +772,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				253F708F2B5316BC0075D093 /* openapi.yml in Resources */,
+				6EFBD1B22B57001100D6E38E /* Localizable.xcstrings in Resources */,
 				253F70902B5316BC0075D093 /* openapi-generator-config.yml in Resources */,
+				6EFBD1AE2B56FEA100D6E38E /* InfoPlist.xcstrings in Resources */,
 				3EB89032251A55980028FED0 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1038,6 +1058,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -1101,6 +1122,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";

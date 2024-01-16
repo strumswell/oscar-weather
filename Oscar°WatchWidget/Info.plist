@@ -7,13 +7,5 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen.</string>
-	<key>NSLocationUsageDescription</key>
-	<string>Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen.</string>
 </dict>
 </plist>

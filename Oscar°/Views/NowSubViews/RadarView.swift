@@ -38,7 +38,7 @@ struct RadarView: View {
                                 }
                             }) {
                                 if (settingsService.settings?.infrarotLayer ?? false) {
-                                    Label("Infrarot", systemImage: "checkmark")
+                                    Label(String(localized: "Infrarot"), systemImage: "checkmark")
                                 } else {
                                     Text("Infrarot")
                                 }
@@ -50,7 +50,7 @@ struct RadarView: View {
                                 }
                             }) {
                                 if (settingsService.settings?.rainviewerLayer ?? false) {
-                                    Label("Regen (Rainviewer)", systemImage: "checkmark")
+                                    Label(String(localized: "Regen (Rainviewer)"), systemImage: "checkmark")
                                 } else {
                                     Text("Regen (Rainviewer)")
                                 }
@@ -62,7 +62,7 @@ struct RadarView: View {
                                 }
                             }) {
                                 if (settingsService.settings?.dwdLayer ?? false) {
-                                    Label("Regen (DWD)", systemImage: "checkmark")
+                                    Label(String(localized: "Regen (DWD)"), systemImage: "checkmark")
                                 } else {
                                     Text("Regen (DWD)")
                                 }
@@ -74,7 +74,7 @@ struct RadarView: View {
                                 }
                             }) {
                                 if (settingsService.settings?.tempLayer ?? false) {
-                                    Label("Temperatur", systemImage: "checkmark")
+                                    Label(String(localized: "Temperatur"), systemImage: "checkmark")
                                 } else {
                                     Text("Temperatur")
                                 }
@@ -86,7 +86,7 @@ struct RadarView: View {
                                 }
                             }) {
                                 if (settingsService.settings?.druckLayer ?? false) {
-                                    Label("Wind & Druck", systemImage: "checkmark")
+                                    Label(String(localized: "Wind & Druck"), systemImage: "checkmark")
                                 } else {
                                     Text("Wind & Druck")
                                 }

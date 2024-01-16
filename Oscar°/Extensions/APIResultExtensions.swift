@@ -9,7 +9,9 @@ import Foundation
 
 extension Components.Schemas.CurrentWeather {
     public func getWindDirection() -> String {
-        let directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"]
+        let directions = [String(localized: "N_compass"), String(localized: "NE_compass"), String(localized: "E_compass"),
+                          String(localized: "SE_compass"), String(localized: "S_compass"), String(localized: "SW_compass"),
+                          String(localized: "W_compass"), String(localized: "NW_compass"), String(localized: "N_compass")]
         let index = Int((self.wind_direction_10m + 22.5) / 45.0)
         return directions[min(max(index, 0), 8)]
     }
