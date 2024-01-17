@@ -20,7 +20,7 @@ struct NowTodayEntryView: View {
                 Spacer()
             }
             HStack {
-                Text("\(entry.temperatureNow, specifier: "%.0f")°")
+                Text(roundTemperatureString(temperature: entry.temperatureNow))
                     .font(.system(size: 45))
                     .fontWeight(.regular)
                 Spacer()
@@ -31,10 +31,10 @@ struct NowTodayEntryView: View {
             }
             .padding(.bottom, 1)
             HStack {
-                Text("H: \(entry.temperatureMax, specifier: "%.0f")°")
+                Text("H: \(roundTemperatureString(temperature: entry.temperatureMax))")
                     .font(.footnote)
                     .fontWeight(.bold)
-                Text("T: \(entry.temperatureMin, specifier: "%.0f")°")
+                Text("T: \(roundTemperatureString(temperature: entry.temperatureMin))")
                     .font(.footnote)
                     .fontWeight(.bold)
                 Spacer()

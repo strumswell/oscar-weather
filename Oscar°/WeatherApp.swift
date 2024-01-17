@@ -52,6 +52,7 @@ extension WeatherApp {
             weather.alerts = alertsResponse
         } catch {
             print(error)
+            weather.error = error.localizedDescription
         }
     }
 }

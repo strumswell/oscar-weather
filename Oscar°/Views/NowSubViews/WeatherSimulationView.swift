@@ -12,7 +12,7 @@ struct WeatherSimulationView: View {
     
     var body: some View {
         ZStack {
-            if !weather.isLoading {
+            if !weather.isLoading && weather.forecast.hourly != nil {
                 StarsView()
                 if getCloudDensity() != Cloud.Thickness.thick {
                     SunView(progress: weather.time)
@@ -24,6 +24,12 @@ struct WeatherSimulationView: View {
                 )
                 if shouldDisplayStorm {
                     StormView(type: getStormType(), direction: .degrees(30), strength: getStormIntensity())
+                }
+            }
+            if weather.debug {
+                VStack {
+                    Text(weather.isLoading.description)
+                    Text(String(reflecting: weather.forecast.hourly == nil))
                 }
             }
         }
@@ -51,7 +57,7 @@ extension WeatherSimulationView {
     }
     
     func getBackgroundTopStops() -> [Gradient.Stop] {
-        if (weather.forecast.hourly == nil || weather.radar.radar == nil) {
+        if (weather.forecast.hourly == nil) {
             return [
                 .init(color: .midnightStart, location: 0),
                 .init(color: .midnightStart, location: 0.25),
@@ -95,7 +101,7 @@ extension WeatherSimulationView {
     }
     
     func getBackgroundBottomStops() -> [Gradient.Stop] {
-        if (weather.forecast.hourly == nil || weather.radar.radar == nil) {
+        if (weather.forecast.hourly == nil) {
             return [
                 .init(color: .midnightEnd, location: 0),
                 .init(color: .midnightEnd, location: 0.25),
@@ -139,7 +145,7 @@ extension WeatherSimulationView {
     }
     
     func getCloudTopStops() -> [Gradient.Stop] {
-        if (weather.forecast.hourly == nil || weather.radar.radar == nil) {
+        if (weather.forecast.hourly == nil) {
             return [
                 .init(color: .darkCloudStart, location: 0),
                 .init(color: .darkCloudStart, location: 0.25),
@@ -183,7 +189,7 @@ extension WeatherSimulationView {
     }
     
     func getCloudBottomStops() -> [Gradient.Stop] {
-        if (weather.forecast.hourly == nil || weather.radar.radar == nil) {
+        if (weather.forecast.hourly == nil) {
             return [
                 .init(color: .darkCloudEnd, location: 0),
                 .init(color: .darkCloudEnd, location: 0.25),
@@ -255,13 +261,19 @@ extension WeatherSimulationView {
     public func getStormIntensity() -> Int {
         switch weather.forecast.current?.weathercode {
         case 51, 53, 55, 56, 57:
-            return 10
-        case 61, 71:
-            return 20
-        case 63, 73:
+            return 30
+        case 61:
+            return 40
+        case 63:
             return 50
-        case 65, 67, 75:
+        case 65, 67:
             return 70
+        case 71:
+            return 90
+        case 73:
+            return 150
+        case 75:
+            return 300
         case 77:
             return 50
         case 80, 85, 95, 99:

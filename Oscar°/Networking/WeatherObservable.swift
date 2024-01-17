@@ -15,6 +15,8 @@ class Weather {
     var air: Operations.getAirQuality.Output.Ok.Body.jsonPayload
     var time: Double
     var radar: Components.Schemas.RadarResponse
+    var error: String = ""
+    var debug = false
     
     init() {
         time = 0

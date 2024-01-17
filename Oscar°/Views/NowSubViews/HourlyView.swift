@@ -22,7 +22,7 @@ struct HourlyView: View {
                 .padding(.top)
             
             ScrollView(.horizontal, showsIndicators: false) {
-                if (weather.isLoading) {
+                if weather.isLoading && weather.forecast.hourly == nil {
                     HStack(spacing: 12) {
                         ForEach((1...5).reversed(), id: \.self) {_ in
                             ProgressView()

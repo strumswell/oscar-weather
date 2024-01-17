@@ -20,6 +20,7 @@ struct NowView: View {
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
     @State private var isMapSheetPresented = false
+    @State private var tapCount = 0
 
     private var client = APIClient()
     private let locationService = LocationService.shared
@@ -32,6 +33,14 @@ struct NowView: View {
                     VStack(alignment: .leading) {
                         HeadView()
                             .padding(.top, 50)
+                            .onTapGesture {
+                                self.tapCount += 1
+                                if self.tapCount == 10 {
+                                    self.tapCount = 0  // Reset the count if needed
+                                    weather.debug.toggle()
+                                    UIApplication.shared.playHapticFeedback()
+                                }
+                            }
                         RainView()
                         HourlyView()
                         DailyView()
@@ -57,6 +66,31 @@ struct NowView: View {
                         //RadarImageView(nowViewModel: nowViewModel, settingsService: settingsService)
                         AQIView()
                         LegalTextView()
+                        if weather.debug {
+                            VStack {
+                                Text(weather.isLoading.description)
+                                Text(weather.error)
+                                Text("Air")
+                                    .padding(.top, 20)
+                                Text(String(reflecting: weather.air))
+                                Text("Radar")
+                                    .padding(.top, 20)
+                                Text(String(reflecting: weather.radar))
+                                Text("Alerts")
+                                    .padding(.top, 20)
+                                Text(String(reflecting: weather.alerts))
+                                Text("Time")
+                                    .padding(.top, 20)
+                                Text(String(reflecting: weather.time))
+                                Text("Location")
+                                    .padding(.top, 20)
+                                Text(String(reflecting: location.coordinates))
+                                Text(String(reflecting: location.name))
+                                Text("Forecast")
+                                    .padding(.top, 20)
+                                Text(String(reflecting: weather.forecast))
+                            }
+                        }
                     }
                 }
             }
@@ -109,6 +143,7 @@ extension NowView {
             weather.alerts = alertsResponse
         } catch {
             print(error)
+            weather.error = error.localizedDescription
         }
     }
 }

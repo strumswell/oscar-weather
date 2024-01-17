@@ -58,6 +58,7 @@
 		25761D4F29F1CC85006976BE /* Cloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799F29F1A7DE002E0AAB /* Cloud.swift */; };
 		25761D5029F1CF14006976BE /* Storm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79AA29F1A7DF002E0AAB /* Storm.swift */; };
 		25761D5129F1D083006976BE /* StormDrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79A729F1A7DF002E0AAB /* StormDrop.swift */; };
+		2576B2032B586E6C004E288A /* GlobalViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CB17E72B47043A001D973A /* GlobalViewExtensions.swift */; };
 		258B223229A81E7500E4ECCE /* Charts in Frameworks */ = {isa = PBXBuildFile; productRef = 258B223129A81E7500E4ECCE /* Charts */; };
 		2590816B28EADDB500886A0E /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 2590816A28EADDB500886A0E /* Alamofire */; };
 		259623D02A2BD6BF00BA75F6 /* HomeProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259623CF2A2BD6BF00BA75F6 /* HomeProvider.swift */; };
@@ -859,6 +860,7 @@
 				253F70962B5319DD0075D093 /* CityService.swift in Sources */,
 				259623D02A2BD6BF00BA75F6 /* HomeProvider.swift in Sources */,
 				253F70932B5319D20075D093 /* LocationService.swift in Sources */,
+				2576B2032B586E6C004E288A /* GlobalViewExtensions.swift in Sources */,
 				2546516429E4905E00D8C13D /* TemperatureLockscreenWidget.swift in Sources */,
 				253BA17F2B093CE30070BD5E /* DataModels.xcdatamodeld in Sources */,
 				259623D52A2BD97300BA75F6 /* Array-GradientStop.swift in Sources */,
