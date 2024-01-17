@@ -30,7 +30,7 @@ struct NowView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 ZStack {
                     VStack(alignment: .leading) {
-                        HeadView(now: nowViewModel)
+                        HeadView()
                             .padding(.top, 50)
                         RainView()
                         HourlyView()

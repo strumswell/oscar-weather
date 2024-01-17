@@ -9,12 +9,9 @@ import CoreLocation
 import Charts
 
 struct HeadView: View {
-    @ObservedObject var searchModel: SearchViewModel = SearchViewModel()
-    @ObservedObject var now: NowViewModel
-    @State private var isLocationSheetPresented = false
-    
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
+    @State private var isLocationSheetPresented = false
     
     var body: some View {
         HStack {

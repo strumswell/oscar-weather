@@ -24,3 +24,14 @@ extension View {
         }
     }
 }
+
+extension UIApplication {
+    func hideKeyboard() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+    
+    func playHapticFeedback() {
+        let hapticFeedback = UIImpactFeedbackGenerator(style: .rigid)
+        hapticFeedback.impactOccurred(intensity: 0.5)
+    }
+}

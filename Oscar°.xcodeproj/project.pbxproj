@@ -73,8 +73,6 @@
 		25A0CEDD26C4068300DD4A79 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A0CEDC26C4068300DD4A79 /* RadarView.swift */; };
 		25BEDCE426CACF7D00D90D6B /* DataModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE226CACF7D00D90D6B /* DataModels.xcdatamodeld */; };
 		25BEDCE626CACFC900D90D6B /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE526CACFC900D90D6B /* PersistenceController.swift */; };
-		25BEDCE826CAD02A00D90D6B /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE726CAD02A00D90D6B /* SearchViewModel.swift */; };
-		25BEDCEA26CAD10B00D90D6B /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE926CAD10B00D90D6B /* SearchView.swift */; };
 		25BF3F9A289FECDF008E7566 /* OpenMeteoResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BF3F99289FECDF008E7566 /* OpenMeteoResponse.swift */; };
 		25C42FFD2AC35EE2001DA5FC /* openapi.yml in Resources */ = {isa = PBXBuildFile; fileRef = 257D07DC2AC355EC005EBD16 /* openapi.yml */; };
 		25C42FFE2AC35EE2001DA5FC /* openapi-generator-config.yml in Resources */ = {isa = PBXBuildFile; fileRef = 257D07DE2AC3561C005EBD16 /* openapi-generator-config.yml */; };
@@ -225,8 +223,6 @@
 		25B4C45A2B57441F0069B3B0 /* ci_post_clone.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_post_clone.sh; sourceTree = "<group>"; };
 		25BEDCE326CACF7D00D90D6B /* DataModels.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModels.xcdatamodel; sourceTree = "<group>"; };
 		25BEDCE526CACFC900D90D6B /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
-		25BEDCE726CAD02A00D90D6B /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
-		25BEDCE926CAD10B00D90D6B /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		25BF3F99289FECDF008E7566 /* OpenMeteoResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenMeteoResponse.swift; sourceTree = "<group>"; };
 		25CB17DA2B46EA6F001D973A /* RadarImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarImageView.swift; sourceTree = "<group>"; };
 		25CB17DD2B46EB61001D973A /* LegalTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalTextView.swift; sourceTree = "<group>"; };
@@ -379,7 +375,6 @@
 			isa = PBXGroup;
 			children = (
 				2596CBBE258BE65300B1C200 /* NowViewModel.swift */,
-				25BEDCE726CAD02A00D90D6B /* SearchViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -494,7 +489,6 @@
 				255C23AE258F93900066B2BD /* NowSubViews */,
 				3EB89016251A55700028FED0 /* NowView.swift */,
 				255950942B45B16000122324 /* SearchCityView.swift */,
-				25BEDCE926CAD10B00D90D6B /* SearchView.swift */,
 				2536438026DACCB800C8A952 /* LegalView.swift */,
 				259704E42757D7E800DFCA53 /* AlertDetailView.swift */,
 				25DA7A1927A420970062E02B /* MapDetailView.swift */,
@@ -802,7 +796,6 @@
 				253F708B29510B06000BD4C0 /* AQIView.swift in Sources */,
 				25CB17E32B470335001D973A /* APIClient.swift in Sources */,
 				2536438126DACCB800C8A952 /* LegalView.swift in Sources */,
-				25BEDCE826CAD02A00D90D6B /* SearchViewModel.swift in Sources */,
 				255ED6E327A6D67800AE9696 /* BrightskyResponse.swift in Sources */,
 				25BF3F9A289FECDF008E7566 /* OpenMeteoResponse.swift in Sources */,
 				250163DA2B093C0B00EEF882 /* CityService.swift in Sources */,
@@ -821,7 +814,6 @@
 				25CB17EA2B470461001D973A /* APIResultExtensions.swift in Sources */,
 				2533940827C434900087C220 /* DWDAlerts.swift in Sources */,
 				3E22B523251D151300D86A58 /* WeatherApp.swift in Sources */,
-				25BEDCEA26CAD10B00D90D6B /* SearchView.swift in Sources */,
 				3EB89017251A55700028FED0 /* NowView.swift in Sources */,
 				25CB17DB2B46EA6F001D973A /* RadarImageView.swift in Sources */,
 				25ED79B529F1A7DF002E0AAB /* Color-Custom.swift in Sources */,
