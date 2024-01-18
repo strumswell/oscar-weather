@@ -121,10 +121,10 @@
 		3EB89032251A55980028FED0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3EB89031251A55980028FED0 /* Assets.xcassets */; };
 		3EB89036251A55980028FED0 /* Oscar°WidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3EB89028251A55950028FED0 /* Oscar°WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3ED4AEB0254551DE0057DF2F /* OscarWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED4AEAF254551DD0057DF2F /* OscarWidgetsBundle.swift */; };
-		6EFBD1522B56F7B900D6E38E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E320F1A2B56F64C00FDC4DA /* Localizable.xcstrings */; };
-		6EFBD1882B56FB3000D6E38E /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6EFBD1872B56FB3000D6E38E /* InfoPlist.xcstrings */; };
-		6EFBD1AE2B56FEA100D6E38E /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6EFBD19E2B56FD6500D6E38E /* InfoPlist.xcstrings */; };
-		6EFBD1B22B57001100D6E38E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6EFBD1B12B57001100D6E38E /* Localizable.xcstrings */; };
+		6E11533D2B59C965004D3273 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E11533C2B59C965004D3273 /* Localizable.xcstrings */; };
+		6E11533F2B59C977004D3273 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E11533E2B59C977004D3273 /* InfoPlist.xcstrings */; };
+		6E1153412B59C98B004D3273 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E1153402B59C98B004D3273 /* Localizable.xcstrings */; };
+		6E1153432B59C9A4004D3273 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E1153422B59C9A4004D3273 /* InfoPlist.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -269,13 +269,13 @@
 		3EB8902F251A55950028FED0 /* RadarWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarWidget.swift; sourceTree = "<group>"; };
 		3EB89031251A55980028FED0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3ED4AEAF254551DD0057DF2F /* OscarWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OscarWidgetsBundle.swift; sourceTree = "<group>"; };
-		6E320F1A2B56F64C00FDC4DA /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		6E11533C2B59C965004D3273 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		6E11533E2B59C977004D3273 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		6E1153402B59C98B004D3273 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		6E1153422B59C9A4004D3273 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		6EFBD1822B56FB1700D6E38E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6EFBD1842B56FB1C00D6E38E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6EFBD1862B56FB2100D6E38E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		6EFBD1872B56FB3000D6E38E /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
-		6EFBD19E2B56FD6500D6E38E /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
-		6EFBD1B12B57001100D6E38E /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -534,9 +534,8 @@
 		3EB89013251A55700028FED0 /* Oscar° */ = {
 			isa = PBXGroup;
 			children = (
-				6E320F1A2B56F64C00FDC4DA /* Localizable.xcstrings */,
-				6EFBD1872B56FB3000D6E38E /* InfoPlist.xcstrings */,
-				2575A1D32B53519E006005FC /* Oscar°.entitlements */,
+				6E11533C2B59C965004D3273 /* Localizable.xcstrings */,
+				6E11533E2B59C977004D3273 /* InfoPlist.xcstrings */,
 				25CB17E62B470429001D973A /* Extensions */,
 				25BEDCE126CACF2900D90D6B /* Storage */,
 				3E89BBA6252EFEC5006F7BCC /* Views */,
@@ -580,8 +579,8 @@
 				2575A1D42B5351B3006005FC /* Oscar°WidgetExtension.entitlements */,
 				3EB89031251A55980028FED0 /* Assets.xcassets */,
 				6EFBD1822B56FB1700D6E38E /* Info.plist */,
-				6EFBD19E2B56FD6500D6E38E /* InfoPlist.xcstrings */,
-				6EFBD1B12B57001100D6E38E /* Localizable.xcstrings */,
+				6E1153402B59C98B004D3273 /* Localizable.xcstrings */,
+				6E1153422B59C9A4004D3273 /* InfoPlist.xcstrings */,
 			);
 			path = "Oscar°Widget";
 			sourceTree = "<group>";
@@ -757,12 +756,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6E11533F2B59C977004D3273 /* InfoPlist.xcstrings in Resources */,
 				25C42FFD2AC35EE2001DA5FC /* openapi.yml in Resources */,
 				25C42FFE2AC35EE2001DA5FC /* openapi-generator-config.yml in Resources */,
-				6EFBD1522B56F7B900D6E38E /* Localizable.xcstrings in Resources */,
-				258428B82A18C5230033E5A3 /* Launch Screen.storyboard in Resources */,
+				6E11533D2B59C965004D3273 /* Localizable.xcstrings in Resources */,
 				3EB8901C251A55740028FED0 /* Preview Assets.xcassets in Resources */,
-				6EFBD1882B56FB3000D6E38E /* InfoPlist.xcstrings in Resources */,
 				3EB89019251A55740028FED0 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -772,9 +770,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				253F708F2B5316BC0075D093 /* openapi.yml in Resources */,
-				6EFBD1B22B57001100D6E38E /* Localizable.xcstrings in Resources */,
+				6E1153432B59C9A4004D3273 /* InfoPlist.xcstrings in Resources */,
+				6E1153412B59C98B004D3273 /* Localizable.xcstrings in Resources */,
 				253F70902B5316BC0075D093 /* openapi-generator-config.yml in Resources */,
-				6EFBD1AE2B56FEA100D6E38E /* InfoPlist.xcstrings in Resources */,
 				3EB89032251A55980028FED0 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

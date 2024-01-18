@@ -9,9 +9,9 @@ import Foundation
 
 extension Components.Schemas.CurrentWeather {
     public func getWindDirection() -> String {
-        let directions = [String(localized: "N_compass"), String(localized: "NE_compass"), String(localized: "E_compass"),
-                          String(localized: "SE_compass"), String(localized: "S_compass"), String(localized: "SW_compass"),
-                          String(localized: "W_compass"), String(localized: "NW_compass"), String(localized: "N_compass")]
+        let directions = [String(localized: "N_compass", comment: "North"), String(localized: "NE_compass", comment: "North-East"),                  String(localized: "E_compass", comment: "East"), String(localized: "SE_compass", comment: "South-East"),                   String(localized: "S_compass", comment: "South"), String(localized: "SW_compass", comment: "South-West"),
+                          String(localized: "W_compass", comment: "West"), String(localized: "NW_compass", comment: "North-West"),
+                          String(localized: "N_compass", comment: "North")]
         let index = Int((self.wind_direction_10m + 22.5) / 45.0)
         return directions[min(max(index, 0), 8)]
     }
@@ -50,7 +50,7 @@ extension Components.Schemas.Alert {
         guard let headline = headline else {
             return ""
         }
-
+        
         return headline
             .replacingOccurrences(of: "Amtliche", with: "")
             .replacingOccurrences(of: "UNWETTER", with: "")

@@ -28,13 +28,13 @@
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Lediglich benötigt, um Radar am aktuellen Standort anzuzeigen.</string>
+	<string>Lediglich benötigt, um den Regenradar am aktuellen Standort anzuzeigen.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Lediglich benötigt, um Radar am aktuellen Standort anzuzeigen.</string>
+	<string>Lediglich benötigt, um den Regenradar am aktuellen Standort anzuzeigen.</string>
 	<key>NSLocationUsageDescription</key>
-	<string>Lediglich benötigt, um Radar am aktuellen Standort anzuzeigen.</string>
+	<string>Lediglich benötigt, um den Regenradar am aktuellen Standort anzuzeigen.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Lediglich benötigt, um Radar am aktuellen Standort anzuzeigen.</string>
+	<string>Lediglich benötigt, um den Regenradar am aktuellen Standort anzuzeigen.</string>
 	<key>NSWidgetWantsLocation</key>
 	<true/>
 </dict>

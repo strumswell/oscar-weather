@@ -25,7 +25,7 @@ struct AQIView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 14) {
                         VStack {
-                            Text("UV", comment: "Environment PM")
+                            Text("UV", comment: "Environment UV")
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(UIColor.label))
                             Gauge(value: max(100 - Double(weather.air.hourly?.uv_index?[getCurrentHour()] ?? 0), 0), in:0...100) {
