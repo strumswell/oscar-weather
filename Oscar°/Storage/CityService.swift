@@ -162,50 +162,23 @@ public class CityServiceNew {
         }
     }
 
-    func addCity(searchResult: MKLocalSearchCompletion) {
-        self.getCoordinates(searchCompletion: searchResult) { coords in
-            let label = searchResult.title.split(separator: ",")[0].description
-
-            if ((self.cities.filter{$0.label == label}).count < 1) {
-                let newCity = City(context: self.context)
-                newCity.label = label
-                newCity.lat = coords.latitude
-                newCity.lon = coords.longitude
-                newCity.selected = false
-                newCity.orderIndex = self.getMaxOrderIndex() + 1
-                                            
-                self.save()
-            } else {
-                self.save()
-            }
-        }
-    }
-    
     func addCity(searchResult: Components.Schemas.Location) {
-        
-        if let lat = searchResult.latitude, let lon = searchResult.longitude {
+        guard let lat = searchResult.latitude, let lon = searchResult.longitude else {
+            return
+        }
+        if let existingCity = self.getExistingCity(latitude: Double(lat), longitude: Double(lon)) {
+            self.toggleActiveCity(city: existingCity)
+        } else {
             let newCity = City(context: self.context)
             newCity.label = searchResult.name
             newCity.lat = Double(lat)
             newCity.lon = Double(lon)
             newCity.selected = false
             newCity.orderIndex = self.getMaxOrderIndex() + 1
-
+            
             save()
-        } else {
-            return
+            self.toggleActiveCity(city: newCity)
         }
-    }
-    
-    func addCity(city: Array<String>) {
-        let newCity = City(context: self.context)
-        newCity.label = city[0].split(separator: ",")[0].description
-        newCity.lat = (city[1] as NSString).doubleValue
-        newCity.lon = (city[2] as NSString).doubleValue
-        newCity.selected = (city[3] as NSString).boolValue
-        newCity.orderIndex = self.getMaxOrderIndex() + 1
-
-        self.save()
     }
     
     func deleteCity(offsets: IndexSet) {
@@ -335,6 +308,9 @@ public class CityServiceNew {
         }
     }
 
+    private func getExistingCity(latitude: Double, longitude: Double) -> City? {
+        return self.cities.first { $0.lat == latitude && $0.lon == longitude }
+    }
 }
 
 
