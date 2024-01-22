@@ -121,10 +121,12 @@
 		3EB89032251A55980028FED0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3EB89031251A55980028FED0 /* Assets.xcassets */; };
 		3EB89036251A55980028FED0 /* Oscar°WidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3EB89028251A55950028FED0 /* Oscar°WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3ED4AEB0254551DE0057DF2F /* OscarWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED4AEAF254551DD0057DF2F /* OscarWidgetsBundle.swift */; };
+		6E00C5282B59E36D00C1A805 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E00C5272B59E36D00C1A805 /* Localizable.xcstrings */; };
+		6E00C52A2B59E44A00C1A805 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E00C5292B59E44A00C1A805 /* Localizable.xcstrings */; };
 		6E11533D2B59C965004D3273 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E11533C2B59C965004D3273 /* Localizable.xcstrings */; };
-		6E11533F2B59C977004D3273 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E11533E2B59C977004D3273 /* InfoPlist.xcstrings */; };
 		6E1153412B59C98B004D3273 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E1153402B59C98B004D3273 /* Localizable.xcstrings */; };
 		6E1153432B59C9A4004D3273 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E1153422B59C9A4004D3273 /* InfoPlist.xcstrings */; };
+		6EE66C492B59DF3700885CB7 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6EE66C482B59DF3700885CB7 /* InfoPlist.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -269,10 +271,12 @@
 		3EB8902F251A55950028FED0 /* RadarWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarWidget.swift; sourceTree = "<group>"; };
 		3EB89031251A55980028FED0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3ED4AEAF254551DD0057DF2F /* OscarWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OscarWidgetsBundle.swift; sourceTree = "<group>"; };
+		6E00C5272B59E36D00C1A805 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		6E00C5292B59E44A00C1A805 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		6E11533C2B59C965004D3273 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
-		6E11533E2B59C977004D3273 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		6E1153402B59C98B004D3273 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		6E1153422B59C9A4004D3273 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		6EE66C482B59DF3700885CB7 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		6EFBD1822B56FB1700D6E38E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6EFBD1842B56FB1C00D6E38E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6EFBD1862B56FB2100D6E38E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -330,6 +334,7 @@
 				25429BD429E5F94100D5979F /* ContentView.swift */,
 				25429BD629E5F94300D5979F /* Assets.xcassets */,
 				25429BD829E5F94300D5979F /* Preview Content */,
+				6E00C5292B59E44A00C1A805 /* Localizable.xcstrings */,
 			);
 			path = "Oscar°Watch Watch App";
 			sourceTree = "<group>";
@@ -349,6 +354,7 @@
 				25429BEC29E5F9B000D5979F /* Oscar_WatchWidget.intentdefinition */,
 				25429BED29E5F9B300D5979F /* Assets.xcassets */,
 				6EFBD1842B56FB1C00D6E38E /* Info.plist */,
+				6E00C5272B59E36D00C1A805 /* Localizable.xcstrings */,
 			);
 			path = "Oscar°WatchWidget";
 			sourceTree = "<group>";
@@ -534,8 +540,8 @@
 		3EB89013251A55700028FED0 /* Oscar° */ = {
 			isa = PBXGroup;
 			children = (
+				6EE66C482B59DF3700885CB7 /* InfoPlist.xcstrings */,
 				6E11533C2B59C965004D3273 /* Localizable.xcstrings */,
-				6E11533E2B59C977004D3273 /* InfoPlist.xcstrings */,
 				25CB17E62B470429001D973A /* Extensions */,
 				25BEDCE126CACF2900D90D6B /* Storage */,
 				3E89BBA6252EFEC5006F7BCC /* Views */,
@@ -708,7 +714,6 @@
 			developmentRegion = de;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				Base,
 				de,
 				en,
 				tr,
@@ -741,6 +746,7 @@
 			files = (
 				25429BDA29E5F94300D5979F /* Preview Assets.xcassets in Resources */,
 				25429BD729E5F94300D5979F /* Assets.xcassets in Resources */,
+				6E00C52A2B59E44A00C1A805 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -748,6 +754,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6E00C5282B59E36D00C1A805 /* Localizable.xcstrings in Resources */,
 				25429BEE29E5F9B300D5979F /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -756,7 +763,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6E11533F2B59C977004D3273 /* InfoPlist.xcstrings in Resources */,
+				6EE66C492B59DF3700885CB7 /* InfoPlist.xcstrings in Resources */,
 				25C42FFD2AC35EE2001DA5FC /* openapi.yml in Resources */,
 				25C42FFE2AC35EE2001DA5FC /* openapi-generator-config.yml in Resources */,
 				6E11533D2B59C965004D3273 /* Localizable.xcstrings in Resources */,
@@ -1211,10 +1218,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Oscar°/Oscar°.entitlements";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°/Preview Content\"";
-				DEVELOPMENT_TEAM = N6J2M765XY;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "Oscar°/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°";
@@ -1227,6 +1235,7 @@
 				MARKETING_VERSION = 0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

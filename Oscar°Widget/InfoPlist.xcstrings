@@ -13,13 +13,13 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "OscarWidget"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "OscarWidget"
           }
         }
@@ -37,13 +37,13 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Oscar°WidgetExtension"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Oscar°WidgetExtension"
           }
         }
@@ -61,13 +61,13 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Only needed to display the rain radar at the current location."
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Yalnızca geçerli konumdaki yağmur radarını görüntülemek için gereklidir."
           }
         }
@@ -85,13 +85,13 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Only needed to display the rain radar at the current location."
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Yalnızca geçerli konumdaki yağmur radarını görüntülemek için gereklidir."
           }
         }
@@ -109,13 +109,13 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Only needed to display the rain radar at the current location."
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Yalnızca geçerli konumdaki yağmur radarını görüntülemek için gereklidir."
           }
         }
@@ -133,13 +133,13 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Only needed to display the rain radar at the current location."
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Yalnızca geçerli konumdaki yağmur radarını görüntülemek için gereklidir."
           }
         }

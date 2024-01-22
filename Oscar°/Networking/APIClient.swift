@@ -55,7 +55,7 @@ class APIClient {
                 forecast_days: forecastDays
             )
         ))
-                        
+        
         switch response {
         case let .ok(response):
             switch response.body {
@@ -131,8 +131,9 @@ class APIClient {
     }
     
     func getGeocodeSearchResult(name: String) async throws -> Components.Schemas.SearchResponse {
+        let appLanguage = Locale.current.language.languageCode?.identifier ?? "de"
         let response = try await openMeteoGeo.search(.init(
-            query: .init(name: name, language: "de")
+            query: .init(name: name, language: Operations.search.Input.Query.languagePayload(rawValue: appLanguage))
         ))
         switch response {
         case let .ok(response):

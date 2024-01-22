@@ -564,6 +564,11 @@ paths:
           in: query
           schema:
             type: string
+            default: de
+            enum:
+            - de
+            - en
+            - tr
           description: Language of the response.
         - name: format
           in: query
