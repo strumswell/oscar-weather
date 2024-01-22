@@ -13,13 +13,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "Oscar°WatchWidget"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "Oscar°WatchWidget"
           }
         }
       }
@@ -36,13 +36,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "Oscar°WatchWidgetExtension"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "Oscar°WatchWidgetExtension"
           }
         }
       }
