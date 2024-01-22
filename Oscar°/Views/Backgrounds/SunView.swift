@@ -44,7 +44,7 @@ struct SunView: View {
                 }
                 .transition(.opacity)
                 .blendMode(.screen)
-                .position(x: proxy.frame(in: .global).width * sunX, y: 50)
+                .position(x: (proxy.frame(in: .global).width - 75) * sunX, y: 60)
                 .rotationEffect(.degrees((progress - 0.5) * 180))
                 .onAppear {
                     withAnimation(.easeInOut(duration: 7).repeatForever(autoreverses: true)) {
@@ -76,6 +76,7 @@ struct SunView: View {
 
 struct SunView_Previews: PreviewProvider {
     static var previews: some View {
-        SunView(progress: 0.5)
+        SunView(progress: 0.4)
+            .background(.black)
     }
 }

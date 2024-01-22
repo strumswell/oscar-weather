@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>de_DE</string>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Oscar°</string>
 	<key>CFBundleExecutable</key>
@@ -25,13 +25,13 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen.</string>
+	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen.</string>
+	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
 	<key>NSLocationUsageDescription</key>
-	<string>Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen.</string>
+	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen.</string>
+	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -41,8 +41,6 @@
 	<true/>
 	<key>UILaunchScreen</key>
 	<dict/>
-	<key>UILaunchStoryboardName</key>
-	<string>Launch Screen.storyboard</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

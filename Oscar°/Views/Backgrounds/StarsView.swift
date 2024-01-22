@@ -11,10 +11,28 @@ struct StarsView: View {
     @State var isShown = false
     @State var starField = StarField()
     @State var meteorShower = MeteorShower()
+    
+    @Environment(Weather.self) private var weather: Weather
+    
+    let starStops: [Gradient.Stop] = [
+        .init(color: .white, location: 0),
+        .init(color: .white, location: 0.25),
+        .init(color: .clear, location: 0.33),
+        .init(color: .clear, location: 0.38),
+        .init(color: .clear, location: 0.7),
+        .init(color: .clear, location: 0.78),
+        .init(color: .white, location: 0.82),
+        .init(color: .white, location: 1)
+    ]
+
+    var starOpacity: Double {
+        let color = starStops.interpolated(amount: weather.time)
+        return color.getComponents().alpha
+    }
 
     var body: some View {
         TimelineView(.animation) { timeline in
-            if isShown {
+            if starOpacity > 0.01 {
                 Canvas { context, size in
                     let timeInterval = timeline.date.timeIntervalSince1970
                     starField.update(date: timeline.date)
@@ -81,12 +99,13 @@ struct StarsView: View {
                 .transition(.opacity)
             }
         }
+        .opacity(starOpacity)
         .ignoresSafeArea()
         .mask(
             LinearGradient(colors: [.white, .clear], startPoint: .top, endPoint: .bottom)
         )
         .onAppear {
-            withAnimation(.easeInOut(duration: 0.3)) {
+            withAnimation(.default) {
                 self.isShown = true
             }
         }

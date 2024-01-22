@@ -15,13 +15,13 @@ struct MapDetailView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                RadarView(settingsService: settingsService, now: now, radarMetadata: $now.currentRadarMetadata, showLayerSettings: true)
+                RadarView(settingsService: settingsService, radarMetadata: $now.currentRadarMetadata, showLayerSettings: true)
             }
             .ignoresSafeArea(edges: [.bottom])
             .navigationBarTitle(Text("Regenradar"), displayMode: .inline)
             .toolbar(content: {
                 ToolbarItem(placement: .navigationBarTrailing, content: {
-                    Button("Fertig", action: {
+                    Button(String(localized: "Fertig"), action: {
                         presentationMode.wrappedValue.dismiss()
                         UIApplication.shared.playHapticFeedback()
                     })

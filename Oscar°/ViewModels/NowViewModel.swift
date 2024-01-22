@@ -15,9 +15,9 @@ import Alamofire
 
 class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
     @Published var lm: LocationManager = LocationManager()
-    @Published var cs: LocationViewModel = LocationViewModel()
+    @Published var cs: CityService = CityService()
     @Published var updateDidFinish: Bool = true
-    @Published var time: Double = 1.0
+    @Published var time: Double = 0.5
 
     let dispatchGroup =  DispatchGroup()
     private let defaultCoordinates = CLLocationCoordinate2D(latitude: 52.01, longitude: 10.77) // just in case...
@@ -60,11 +60,10 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
             objectWillChange.send()
         }
     }
-
     
     override init() {
         super.init()
-        
+
         // Init Location and City model
         lm.objectWillChange.sink {
             self.objectWillChange.send()
@@ -84,7 +83,7 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
     /*
      * Update all info like location, stored cities, forecast, and radar data
      */
-    func update() {
+    func update() async {
         if !self.updateDidFinish {
             return
         }
@@ -348,19 +347,19 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
                 .init(color: .rainyEnd, location: (sunrise - dayBegin!)/dayLength + 0.05),
                 .init(color: .rainyEnd, location: (sunset - dayBegin!)/dayLength - 0.08),
                 .init(color: .rainyEnd, location: (sunset - dayBegin!)/dayLength),
-                .init(color: .midnightEnd, location: (sunset - dayBegin!)/dayLength + 0.04),
+                .init(color: .midnightEnd, location: (sunset - dayBegin!)/dayLength + 0.015),
                 .init(color: .midnightEnd, location: 1)
             ]
         }
-
+        
         return [
             .init(color: .midnightEnd, location: 0),
             .init(color: .midnightEnd, location: (sunrise - dayBegin!)/dayLength - 0.08),
             .init(color: .sunriseEnd, location: (sunrise - dayBegin!)/dayLength),
             .init(color: .sunnyDayEnd, location: (sunrise - dayBegin!)/dayLength + 0.05),
             .init(color: .sunnyDayEnd, location: (sunset - dayBegin!)/dayLength - 0.08),
-            .init(color: .sunsetStart, location: (sunset - dayBegin!)/dayLength),
-            .init(color: .midnightEnd, location: (sunset - dayBegin!)/dayLength + 0.04),
+            .init(color: .sunsetEnd, location: (sunset - dayBegin!)/dayLength),
+            .init(color: .midnightEnd, location: (sunset - dayBegin!)/dayLength + 0.015),
             .init(color: .midnightEnd, location: 1)
         ]
     }
@@ -392,7 +391,7 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
                 .init(color: .rainCloudStart, location: (sunrise - dayBegin!)/dayLength + 0.05),
                 .init(color: .rainCloudStart, location: (sunset - dayBegin!)/dayLength - 0.08),
                 .init(color: .rainCloudStart, location: (sunset - dayBegin!)/dayLength),
-                .init(color: .darkCloudStart, location: (sunset - dayBegin!)/dayLength + 0.04),
+                .init(color: .darkCloudStart, location: (sunset - dayBegin!)/dayLength + 0.015),
                 .init(color: .darkCloudStart, location: 1)
             ]
         }
@@ -404,7 +403,7 @@ class NowViewModel: NSObject, CLLocationManagerDelegate, ObservableObject {
             .init(color: .lightCloudStart, location: (sunrise - dayBegin!)/dayLength + 0.05),
             .init(color: .lightCloudStart, location: (sunset - dayBegin!)/dayLength - 0.08),
             .init(color: .sunsetCloudStart, location: (sunset - dayBegin!)/dayLength),
-            .init(color: .darkCloudStart, location: (sunset - dayBegin!)/dayLength + 0.04),
+            .init(color: .darkCloudStart, location: (sunset - dayBegin!)/dayLength + 0.015),
             .init(color: .darkCloudStart, location: 1)
         ]
     }

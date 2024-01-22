@@ -39,8 +39,8 @@ struct PrecipitationLockScreenWidget: Widget {
         StaticConfiguration(kind: kind, provider: LockscreenProvider()) { entry in
             PrecipitationLockScreenView(entry: entry)
         }
-        .configurationDisplayName("Regen")
-        .description("Regenmenge- und Wahrscheinlichkeit für die aktuelle Stunde")
+        .configurationDisplayName(String(localized: "Regen", comment: "LS Widget Regen"))
+        .description(String(localized: "Regenmenge und -wahrscheinlichkeit für die aktuelle Stunde", comment: "LS Widget Regenmenge und -wahrscheinlichkeit"))
         #if os(iOS)
         .supportedFamilies([.accessoryInline])
         #elseif os(watchOS)

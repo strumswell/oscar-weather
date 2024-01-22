@@ -42,6 +42,7 @@
                 }
                 .padding(15)
             }
+            .containerBackground(.clear, for: .widget)
         }
     }
     
@@ -53,8 +54,9 @@
             StaticConfiguration(kind: kind, provider: RadarProvider()) { entry in
                 RadarWidgetEntryView(entry: entry)
             }
-            .configurationDisplayName("Regenradar")
-            .description("Regenradar für aktuellen Standort")
+            .contentMarginsDisabled()
+            .configurationDisplayName(String(localized: "Regenradar"))
+            .description(String(localized: "Regenradar für aktuellen Standort"))
             .supportedFamilies([.systemSmall, .systemLarge])
         }
     }

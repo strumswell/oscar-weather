@@ -39,7 +39,7 @@ struct WidgetCurrentWeather: Codable {
     let temperature: Double
     let windspeed: Double
     let winddirection, weathercode, isDay: Int
-    let time: String
+    let time: Int
 
     enum CodingKeys: String, CodingKey {
         case temperature, windspeed, winddirection, weathercode
@@ -100,30 +100,33 @@ struct WidgetCurrentWeather: Codable {
 
 // MARK: - Daily
 struct WidgetDaily: Codable {
-    let time: [String]
+    let time: [Int]
     let temperature2MMax, temperature2MMin: [Double]
+    let sunrise, sunset: [Int]
 
     enum CodingKeys: String, CodingKey {
         case time
         case temperature2MMax = "temperature_2m_max"
         case temperature2MMin = "temperature_2m_min"
+        case sunrise, sunset
     }
 }
 
 // MARK: - DailyUnits
 struct WidgetDailyUnits: Codable {
-    let time, temperature2MMax, temperature2MMin: String
+    let time, temperature2MMax, temperature2MMin, sunrise, sunset: String
 
     enum CodingKeys: String, CodingKey {
         case time
         case temperature2MMax = "temperature_2m_max"
         case temperature2MMin = "temperature_2m_min"
+        case sunrise, sunset
     }
 }
 
 // MARK: - Hourly
 struct WidgetHourly: Codable {
-    let time: [String]
+    let time: [Int]
     let precipitationProbability: [Int]
     let precipitation, windspeed10M, uvIndex: [Double]
 
