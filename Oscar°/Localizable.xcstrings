@@ -924,7 +924,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Regenradar"
+            "value" : "Rain Radar"
           }
         },
         "tr" : {
@@ -1259,7 +1259,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Severe weather warnings"
+            "value" : "Weather Warnings"
           }
         },
         "tr" : {
@@ -1327,7 +1327,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wind & Druck"
+            "value" : "Wind & Pressure"
           }
         },
         "tr" : {

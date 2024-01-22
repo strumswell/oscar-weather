@@ -126,6 +126,7 @@
 		6E11533D2B59C965004D3273 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E11533C2B59C965004D3273 /* Localizable.xcstrings */; };
 		6E1153412B59C98B004D3273 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E1153402B59C98B004D3273 /* Localizable.xcstrings */; };
 		6E1153432B59C9A4004D3273 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E1153422B59C9A4004D3273 /* InfoPlist.xcstrings */; };
+		6E5CBE2E2B5F12400045DCE4 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E5CBE2D2B5F12400045DCE4 /* InfoPlist.xcstrings */; };
 		6EE66C492B59DF3700885CB7 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6EE66C482B59DF3700885CB7 /* InfoPlist.xcstrings */; };
 /* End PBXBuildFile section */
 
@@ -276,6 +277,7 @@
 		6E11533C2B59C965004D3273 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		6E1153402B59C98B004D3273 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		6E1153422B59C9A4004D3273 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		6E5CBE2D2B5F12400045DCE4 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		6EE66C482B59DF3700885CB7 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		6EFBD1822B56FB1700D6E38E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6EFBD1842B56FB1C00D6E38E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -355,6 +357,7 @@
 				25429BED29E5F9B300D5979F /* Assets.xcassets */,
 				6EFBD1842B56FB1C00D6E38E /* Info.plist */,
 				6E00C5272B59E36D00C1A805 /* Localizable.xcstrings */,
+				6E5CBE2D2B5F12400045DCE4 /* InfoPlist.xcstrings */,
 			);
 			path = "Oscar°WatchWidget";
 			sourceTree = "<group>";
@@ -754,6 +757,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6E5CBE2E2B5F12400045DCE4 /* InfoPlist.xcstrings in Resources */,
 				6E00C5282B59E36D00C1A805 /* Localizable.xcstrings in Resources */,
 				25429BEE29E5F9B300D5979F /* Assets.xcassets in Resources */,
 			);
