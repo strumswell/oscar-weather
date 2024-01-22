@@ -31,10 +31,10 @@ struct NowTodayEntryView: View {
             }
             .padding(.bottom, 1)
             HStack {
-                Text("H: \(roundTemperatureString(temperature: entry.temperatureMax))")
+                Text("H: \(roundTemperatureString(temperature: entry.temperatureMax))", comment: "Höchste Temperatur")
                     .font(.footnote)
                     .fontWeight(.bold)
-                Text("T: \(roundTemperatureString(temperature: entry.temperatureMin))")
+                Text("T: \(roundTemperatureString(temperature: entry.temperatureMin))", comment: "Niedrigste Temperatur")
                     .font(.footnote)
                     .fontWeight(.bold)
                 Spacer()
@@ -62,8 +62,8 @@ struct NowTodayWidget: Widget {
             NowTodayEntryView(entry: entry)
         }
         .contentMarginsDisabled()
-        .configurationDisplayName("Vorhersage")
-        .description("Aktuelle Wetterbedingungen und Temperaturen für heute.")
+        .configurationDisplayName(String(localized: "Vorhersage"))
+        .description(String(localized: "Aktuelle Wetterbedingungen und Temperaturen für heute."))
         .supportedFamilies([.systemSmall])
     }
 }

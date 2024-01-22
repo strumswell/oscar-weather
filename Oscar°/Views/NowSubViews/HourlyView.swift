@@ -46,7 +46,7 @@ struct HourlyView: View {
                     LazyHStack(spacing: 12) {
                         ForEach(getLocalizedHourIndex() ... getLocalizedHourIndex() + 48, id: \.self) { index in
                             VStack {
-                                Text(getHourString(timestamp: weather.forecast.hourly?.time[index] ?? 0) + " Uhr")
+                                Text(getHourString(timestamp: weather.forecast.hourly?.time[index] ?? 0))
                                     .foregroundColor(Color(UIColor.label))
                                     .bold()
                                 Text("\(weather.forecast.hourly?.precipitation?[index] ?? 0, specifier: "%.1f") mm")
@@ -176,7 +176,7 @@ extension HourlyView {
         var calendar = Calendar.current
         calendar.timeZone = TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? TimeZone.current
         let hours = calendar.component(.hour, from: date)
-        return String(format:"%02d", hours)
+        return String(format:"%02d %@", hours, String(localized: "Uhr")).trimmingCharacters(in: .whitespaces)
     }
     
     func isWithinHourOfInterest(eventTimestamp: Int, referenceHour: Int) -> Bool {
@@ -188,7 +188,7 @@ extension HourlyView {
         
         return eventHour == referenceHour
     }
-
+    
     func getDayIndexForHourlyForecast(hourlyTimestamp: Int) -> Int {
         let hourlyDate = Date(timeIntervalSince1970: TimeInterval(hourlyTimestamp))
         let calendar = Calendar.current
@@ -205,7 +205,7 @@ extension HourlyView {
 struct SunsetSunriseCard: View {
     @Environment(Weather.self) private var weather: Weather
     var index: Int
-
+    
     var body: some View {
         let hourlyTimestamp = weather.forecast.hourly?.time[index] ?? 0
         let dayIndex = getDayIndexForHourlyForecast(hourlyTimestamp: hourlyTimestamp)
@@ -274,7 +274,7 @@ extension SunsetSunriseCard {
         
         return eventHour == referenceHour
     }
-
+    
     func getDayIndexForHourlyForecast(hourlyTimestamp: Double) -> Int {
         let hourlyDate = Date(timeIntervalSince1970: TimeInterval(hourlyTimestamp))
         let calendar = Calendar.current

@@ -19,7 +19,7 @@ struct AlertListView: View {
             .navigationBarTitle(Text("Unwetterwarnungen"), displayMode: .inline)
             .toolbar(content: {
                 ToolbarItem(placement: .navigationBarTrailing, content: {
-                    Button("Fertig", action: {
+                    Button(String(localized: "Fertig"), action: {
                         presentationMode.wrappedValue.dismiss()
                         UIApplication.shared.playHapticFeedback()
                     })

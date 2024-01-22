@@ -25,7 +25,7 @@ struct AQIView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 14) {
                         VStack {
-                            Text("UV")
+                            Text("UV", comment: "Environment UV")
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(UIColor.label))
                             Gauge(value: max(100 - Double(weather.air.hourly?.uv_index?[getCurrentHour()] ?? 0), 0), in:0...100) {
@@ -56,7 +56,7 @@ struct AQIView: View {
                         }
                         
                         VStack {
-                            Text("AQI")
+                            Text("AQI", comment: "Environment AQI")
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(UIColor.label))
                             Gauge(value: max(100 - Double(weather.air.hourly?.european_aqi?[getCurrentHour()] ?? 0), 0), in:0...100) {
@@ -87,7 +87,7 @@ struct AQIView: View {
                         }
                         
                         VStack {
-                            Text("PM")
+                            Text("PM", comment: "Environment PM")
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(UIColor.label))
                             + Text("2.5")
@@ -122,7 +122,7 @@ struct AQIView: View {
                         }
                         
                         VStack {
-                            Text("PM")
+                            Text("PM", comment: "Environment PM")
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(UIColor.label))
                             + Text("10")
@@ -157,7 +157,7 @@ struct AQIView: View {
                         }
                         
                         VStack {
-                            Text("NO")
+                            Text("NO", comment: "Environment NO")
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(UIColor.label))
                             + Text("2")
@@ -192,7 +192,7 @@ struct AQIView: View {
                         }
                         
                         VStack {
-                            Text("O")
+                            Text("O", comment: "Environment O")
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(UIColor.label))
                             + Text("3")
@@ -227,7 +227,7 @@ struct AQIView: View {
                         }
                         
                         VStack {
-                            Text("SO")
+                            Text("SO", comment: "Environment SO")
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(UIColor.label))
                             + Text("2")
