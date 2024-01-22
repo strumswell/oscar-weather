@@ -18,25 +18,24 @@ class APIClient {
     var brightsky: Client
     
     init () {
-        openMeteo = Client(
-            serverURL: try! Servers.server1(),
-            transport: URLSessionTransport()
-        )
-        oscar = Client(
-            serverURL: try! Servers.server2(),
-            transport: URLSessionTransport()
-        )
-        openMeteoAqi = Client(
-            serverURL: try! Servers.server3(),
-            transport: URLSessionTransport()
-        )
-        openMeteoGeo = Client(
-            serverURL: try! Servers.server4(),
-            transport: URLSessionTransport()
-        )
-        brightsky = Client(
-            serverURL: try! Servers.server5(),
-            transport: URLSessionTransport()
+        openMeteo = APIClient.get(url: try! Servers.server1())
+        oscar = APIClient.get(url: try! Servers.server2())
+        openMeteoAqi = APIClient.get(url: try! Servers.server3())
+        openMeteoGeo = APIClient.get(url: try! Servers.server4())
+        brightsky = APIClient.get(url: try! Servers.server5())
+    }
+    
+     class func get(url: URL) -> Client {
+        return Client(
+            serverURL: url,
+            transport: URLSessionTransport(),
+            middlewares: [
+                RetryingMiddleware(
+                    signals: [.code(429), .range(500..<600), .errorThrown],
+                    policy: .upToAttempts(count: 3),
+                    delay: .constant(seconds: 1)
+                )
+            ]
         )
     }
     

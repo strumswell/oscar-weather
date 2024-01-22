@@ -11,7 +11,7 @@ import MapKit
 import WidgetKit
 
 public class CityService: ObservableObject {
-    
+
     @Published var cities: [City]
 
     private let context: NSManagedObjectContext
@@ -83,7 +83,6 @@ public class CityService: ObservableObject {
             city.selected = false
         }
         save()
-        //nc.post(name: Notification.Name("CityToggle"), object: nil)
     }
     
     func toggleActiveCity(city: City) {
@@ -96,7 +95,6 @@ public class CityService: ObservableObject {
             city.selected = true
         }
         save()
-        //nc.post(name: Notification.Name("CityToggle"), object: nil)
     }
     
     func getSelectedCity() -> Optional<City> {
