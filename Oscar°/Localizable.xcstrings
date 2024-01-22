@@ -415,7 +415,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Veri kaynakları"
+            "value" : "Veri Kaynakları"
           }
         }
       }
@@ -836,7 +836,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Legal information"
+            "value" : "Legal Information"
           }
         },
         "tr" : {
@@ -858,7 +858,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Legal information"
+            "value" : "Legal"
           }
         },
         "tr" : {
@@ -1265,7 +1265,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Şiddetli hava durumu uyarıları"
+            "value" : "Hava Durumu Uyarıları"
           }
         }
       }
