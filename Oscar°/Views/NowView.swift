@@ -63,7 +63,6 @@ struct NowView: View {
                                 }
                         }
 
-                        //RadarImageView(nowViewModel: nowViewModel, settingsService: settingsService)
                         AQIView()
                         LegalTextView()
                         if weather.debug {

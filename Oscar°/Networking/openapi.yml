@@ -179,7 +179,16 @@ paths:
           type: integer
           enum:
           - 1
+          - 7
           - 14
+      - name: models
+        in: query
+        description: Weather model
+        schema:
+          type: string
+          enum:
+          - best_match
+          - icon_seamless
       responses:
         200:
           description: OK

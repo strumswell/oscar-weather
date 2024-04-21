@@ -103,13 +103,13 @@ class HomeProvider: TimelineProvider {
         if (isDay > 0) {
             switch weathercode {
             case 0, 1:
-                return "sun.max.fill"
+                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "sun.max.fill"
             case 2:
-                return "cloud.sun.fill"
+                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.sun.fill"
             case 3:
-                return "cloud.fill"
+                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fill"
             case 45, 48:
-                return "cloud.fog.fill"
+                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fog.fill"
             case 51, 53, 55, 61, 63, 65:
                 return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fill"
             case 56, 57:
@@ -126,13 +126,13 @@ class HomeProvider: TimelineProvider {
         } else {
             switch weathercode {
             case 0, 1:
-                return "moon.stars.fill"
+                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "moon.stars.fill"
             case 2:
-                return "cloud.moon.fill"
+                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.moon.fill"
             case 3:
-                return "cloud.fill"
+                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fill"
             case 45, 48:
-                return "cloud.fog.fill"
+                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fog.fill"
             case 51, 53, 55, 61, 63, 65:
                 return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fill"
             case 56, 57:

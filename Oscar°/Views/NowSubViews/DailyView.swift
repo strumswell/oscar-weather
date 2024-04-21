@@ -9,10 +9,13 @@ import SwiftUI
 
 struct DailyView: View {
     @Environment(Weather.self) private var weather: Weather
-
+    
     var body: some View {
+        // Cap at 12 days to keep View from getting to large with too much (unreliable) data
+        let dayNumber = (weather.forecast.daily?.time.count ?? 1) > 12 ? 12 : (weather.forecast.daily?.time.count ?? 1)
+
         VStack(alignment: .leading) {
-            Text("12-Tage")
+            Text("\(dayNumber)-Tage")
                 .font(.title3)
                 .bold()
                 .foregroundColor(Color(UIColor.label))
@@ -45,7 +48,7 @@ struct DailyView: View {
             } else {
                 HStack {
                     VStack(alignment: .leading, spacing: 22) {
-                        ForEach(0...11, id: \.self) { dayPos in
+                        ForEach(0...dayNumber-1, id: \.self) { dayPos in
                             Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0) )
                                 .foregroundColor(Color(UIColor.label))
                         }
@@ -53,7 +56,7 @@ struct DailyView: View {
                     .padding(.leading)
                     Spacer()
                     VStack(spacing: 14) {
-                        ForEach(0...11, id: \.self) { dayPos in
+                        ForEach(0...dayNumber-1, id: \.self) { dayPos in
                             Image(getWeatherIcon(pos: dayPos))
                                 .resizable()
                                 .scaledToFit()
@@ -61,7 +64,7 @@ struct DailyView: View {
                         }
                     }
                     VStack(alignment: .leading, spacing: 13) {
-                        ForEach(0...11, id: \.self) { dayPos in
+                        ForEach(0...dayNumber-1, id: \.self) { dayPos in
                             VStack {
                                 Text("\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") mm")
                                     .font(.caption)
@@ -74,7 +77,7 @@ struct DailyView: View {
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 22) {
-                        ForEach(0...11, id: \.self) { dayPos in
+                        ForEach(0...dayNumber-1, id: \.self) { dayPos in
                             Text(roundTemperatureString(temperature: weather.forecast.daily?.temperature_2m_max?[dayPos]))
                                 .fontWeight(.semibold)
                                 .foregroundColor(Color(UIColor.label))
@@ -82,7 +85,7 @@ struct DailyView: View {
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 22) {
-                        ForEach(0...11, id: \.self) { dayPos in
+                        ForEach(0...dayNumber-1, id: \.self) { dayPos in
                             Text(roundTemperatureString(temperature: weather.forecast.daily?.temperature_2m_min?[dayPos]))
                                 .fontWeight(.light)
                                 .foregroundColor(Color(UIColor.label))

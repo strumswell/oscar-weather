@@ -10,8 +10,10 @@
     <entity name="Settings" representedClassName="Settings" syncable="YES" codeGenerationType="class">
         <attribute name="druckLayer" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="dwdLayer" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="humidityLayer" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="infrarotLayer" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="rainviewerLayer" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="tempLayer" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="windDirectionLayer" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
     </entity>
 </model>

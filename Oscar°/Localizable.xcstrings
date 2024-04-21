@@ -155,6 +155,28 @@
         }
       }
     },
+    "%@-Tage" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@-Tage"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@-Day"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@-Günlük Tahmin"
+          }
+        }
+      }
+    },
     "0 mm/h" : {
       "localizations" : {
         "de" : {
@@ -261,28 +283,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
-          }
-        }
-      }
-    },
-    "12-Tage" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "12-Tage"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "12-Day"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "12-Günlük Tahmin"
           }
         }
       }
@@ -555,28 +555,6 @@
         }
       }
     },
-    "Infrarot" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Infrarot"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Infrared"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kızılötesi"
-          }
-        }
-      }
-    },
     "Location" : {
       "localizations" : {
         "de" : {
@@ -595,6 +573,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Konumum"
+          }
+        }
+      }
+    },
+    "Luftfeuchtigkeit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Humidity"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava nemi"
           }
         }
       }
@@ -891,24 +885,24 @@
         }
       }
     },
-    "Regen (Rainviewer)" : {
+    "Regen (Global)" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Regen (Rainviewer)"
+            "value" : "Regen (Global)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rain (Rainviewer)"
+            "value" : "Regen (Global)"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yağmur (Rainviewer)"
+            "value" : "Yağmur (Küresel)"
           }
         }
       }
@@ -1316,24 +1310,50 @@
         }
       }
     },
-    "Wind & Druck" : {
+    "Windgeschwindidkeit" : {
       "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wind & Druck"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wind & Pressure"
+            "value" : "Wind speed"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rüzgar ve Basınç"
+            "value" : "Rüzgar hızı"
+          }
+        }
+      }
+    },
+    "Windrichtung" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wind direction"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rüzgar yönü"
+          }
+        }
+      }
+    },
+    "Wolken" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clouds"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bulutlar"
           }
         }
       }

@@ -42,18 +42,27 @@ class APIClient {
     func getForecast(coordinates: CLLocationCoordinate2D, forecastDays: Operations.getForecast.Input.Query.forecast_daysPayload? = ._14) async throws -> Operations.getForecast.Output.Ok.Body.jsonPayload {
         let fallbackForecast: Operations.getForecast.Output.Ok.Body.jsonPayload = .init(latitude: coordinates.latitude, longitude: coordinates.longitude, current: .init(cloudcover: 0.0, time: 0.0, temperature: 0.0, windspeed: 0.0, wind_direction_10m: 0.0, weathercode: 0.0))
         
-        let response = try await openMeteo.getForecast(.init(
-            query: .init(
-                latitude: coordinates.latitude,
-                longitude: coordinates.longitude,
-                hourly: [.temperature_2m, .apparent_temperature, .precipitation, .weathercode, .cloudcover, .windspeed_10m, .winddirection_10m, .precipitation_probability, .is_day],
-                daily: [.precipitation_probability_max, .precipitation_sum, .sunrise, .sunset, .temperature_2m_max, .temperature_2m_min, .weathercode],
-                current: [.cloudcover, .temperature, .wind_direction_10m, .weathercode, .windspeed, .precipitation, .is_day],
-                timeformat: .unixtime,
-                timezone: "auto",
-                forecast_days: forecastDays
-            )
-        ))
+        var query: Operations.getForecast.Input.Query = .init(
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude,
+            hourly: [.temperature_2m, .apparent_temperature, .precipitation, .weathercode, .cloudcover, .windspeed_10m, .winddirection_10m, .precipitation_probability, .is_day],
+            daily: [.precipitation_probability_max, .precipitation_sum, .sunrise, .sunset, .temperature_2m_max, .temperature_2m_min, .weathercode],
+            current: [.cloudcover, .temperature, .wind_direction_10m, .weathercode, .windspeed, .precipitation, .is_day],
+            timeformat: .unixtime,
+            timezone: "auto",
+            forecast_days: forecastDays
+        )
+        
+        // Open Meteo does not have a model for Spain and falls back to a very unreliable mix of models
+        // Pin the DWD ICON model for Spain and Portugal
+        if coordinates.country() == .spain || coordinates.country() == .portugal {
+            query.models = .icon_seamless
+            query.forecast_days = ._7
+        }
+        
+        print(query)
+        
+        let response = try await openMeteo.getForecast(.init(query: query))
         
         switch response {
         case let .ok(response):

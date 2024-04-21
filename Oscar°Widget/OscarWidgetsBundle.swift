@@ -15,6 +15,7 @@ struct OscarWidgetsBundle: WidgetBundle {
         #if os(iOS)
         RadarWidget()
         NowTodayWidget()
+        GlobalRadarWidget()
         #endif
         TemperatureLockScreenWidget()
         PrecipitationLockScreenWidget()
