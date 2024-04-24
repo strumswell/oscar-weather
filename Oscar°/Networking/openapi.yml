@@ -20,7 +20,7 @@ servers:
     description: "Public aqi open meteo endpoint"
   - url: https://geocoding-api.open-meteo.com/v1
     description: "Public geocoding open meteo endpoint"
-  - url: https://api.brightsky.dev/
+  - url: https://api.brightsky.dev
     description: "Public BrightSky endpoint"
 paths:
   /v1/forecast:

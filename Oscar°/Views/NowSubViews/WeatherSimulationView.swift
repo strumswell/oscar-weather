@@ -36,7 +36,6 @@ struct WeatherSimulationView: View {
         .preferredColorScheme(.dark)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(backgroundGradient)
-
     }
 }
 

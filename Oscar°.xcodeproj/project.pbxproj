@@ -93,6 +93,7 @@
 		259704E52757D7E800DFCA53 /* AlertDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259704E42757D7E800DFCA53 /* AlertDetailView.swift */; };
 		259EDA6C29ABC19F00F94996 /* RainRadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259EDA6B29ABC19F00F94996 /* RainRadarView.swift */; };
 		25A0CEDD26C4068300DD4A79 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A0CEDC26C4068300DD4A79 /* RadarView.swift */; };
+		25B734172BD9BB86003C6756 /* SentrySwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 25B734162BD9BB86003C6756 /* SentrySwiftUI */; };
 		25BEDCE426CACF7D00D90D6B /* DataModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE226CACF7D00D90D6B /* DataModels.xcdatamodeld */; };
 		25BEDCE626CACFC900D90D6B /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE526CACFC900D90D6B /* PersistenceController.swift */; };
 		25BF3F9A289FECDF008E7566 /* OpenMeteoResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BF3F99289FECDF008E7566 /* OpenMeteoResponse.swift */; };
@@ -336,6 +337,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				255BDD9F2BD9B2E40061E4EB /* Sentry in Frameworks */,
+				25B734172BD9BB86003C6756 /* SentrySwiftUI in Frameworks */,
 				259704DF2757CB0D00DFCA53 /* Alamofire in Frameworks */,
 				258B223229A81E7500E4ECCE /* Charts in Frameworks */,
 				25C4300F2AC36165001DA5FC /* OpenAPIRuntime in Frameworks */,
@@ -706,6 +708,7 @@
 				25C4300E2AC36165001DA5FC /* OpenAPIRuntime */,
 				25C430112AC36173001DA5FC /* OpenAPIURLSession */,
 				4EBF1FE0D46648989064EF72 /* Sentry */,
+				25B734162BD9BB86003C6756 /* SentrySwiftUI */,
 			);
 			productName = Weather;
 			productReference = 3EB89011251A55700028FED0 /* Oscar°.app */;
@@ -1535,6 +1538,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 259704DD2757CB0D00DFCA53 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
+		};
+		25B734162BD9BB86003C6756 /* SentrySwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SentrySwiftUI;
 		};
 		25C4300E2AC36165001DA5FC /* OpenAPIRuntime */ = {
 			isa = XCSwiftPackageProductDependency;
