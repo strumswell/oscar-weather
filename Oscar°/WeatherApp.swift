@@ -6,9 +6,26 @@
 //
 
 import SwiftUI
+import Sentry
+
 
 @main
 struct WeatherApp: App {
+    init() {
+        SentrySDK.start { options in
+            options.dsn = "https://f6b7fe82cd8cd8bb11dc0dc38db42255@o4507143648772096.ingest.de.sentry.io/4507143650148432"
+            options.debug = false
+            options.enableTracing = true
+
+            options.attachScreenshot = true
+            options.attachViewHierarchy = true
+            options.enableMetricKit = true
+            options.enableTimeToFullDisplayTracing = true
+            options.swiftAsyncStacktraces = true
+            options.enableAppLaunchProfiling = true
+        }
+    }
+    
     @State private var weather = Weather()
     @State private var location = Location()
     private let locationService = LocationService.shared

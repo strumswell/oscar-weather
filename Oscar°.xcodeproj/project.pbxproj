@@ -42,8 +42,6 @@
 		25429BE829E5F9B000D5979F /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3EB8902C251A55950028FED0 /* SwiftUI.framework */; };
 		25429BEB29E5F9B000D5979F /* Oscar_WatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25429BEA29E5F9B000D5979F /* Oscar_WatchWidget.swift */; };
 		25429BEE29E5F9B300D5979F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 25429BED29E5F9B300D5979F /* Assets.xcassets */; };
-		25429BF029E5F9B300D5979F /* Oscar_WatchWidget.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 25429BEC29E5F9B000D5979F /* Oscar_WatchWidget.intentdefinition */; };
-		25429BF129E5F9B300D5979F /* Oscar_WatchWidget.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 25429BEC29E5F9B000D5979F /* Oscar_WatchWidget.intentdefinition */; };
 		25429BF429E5F9B300D5979F /* Oscar°WatchWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 25429BE629E5F9B000D5979F /* Oscar°WatchWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		25429BFA29E5FA5300D5979F /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 25429BF929E5FA5300D5979F /* Alamofire */; };
 		25429BFB29E5FAC600D5979F /* LockscreenProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2546516929E4935600D8C13D /* LockscreenProvider.swift */; };
@@ -56,6 +54,10 @@
 		2546516A29E4935600D8C13D /* LockscreenProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2546516929E4935600D8C13D /* LockscreenProvider.swift */; };
 		2546516D29E494DB00D8C13D /* OMDayTemperature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2546516C29E494DB00D8C13D /* OMDayTemperature.swift */; };
 		255950952B45B16000122324 /* SearchCityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 255950942B45B16000122324 /* SearchCityView.swift */; };
+		255BDD9E2BD9B2E40061E4EB /* (null) in Frameworks */ = {isa = PBXBuildFile; };
+		255BDD9F2BD9B2E40061E4EB /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 4EBF1FE0D46648989064EF72 /* Sentry */; };
+		255BDDA02BD9B2E40061E4EB /* (null) in Frameworks */ = {isa = PBXBuildFile; };
+		255BDDA12BD9B2E40061E4EB /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 		255ED6E327A6D67800AE9696 /* BrightskyResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 255ED6E227A6D67800AE9696 /* BrightskyResponse.swift */; };
 		256FDAC92BCB164C00E18655 /* GlobalRadarWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256FDAC42BCB14D000E18655 /* GlobalRadarWidget.swift */; };
 		256FDACA2BCB164F00E18655 /* GlobalRadarProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256FDAC62BCB14DA00E18655 /* GlobalRadarProvider.swift */; };
@@ -147,6 +149,7 @@
 		6E1153432B59C9A4004D3273 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E1153422B59C9A4004D3273 /* InfoPlist.xcstrings */; };
 		6E5CBE2E2B5F12400045DCE4 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E5CBE2D2B5F12400045DCE4 /* InfoPlist.xcstrings */; };
 		6EE66C492B59DF3700885CB7 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6EE66C482B59DF3700885CB7 /* InfoPlist.xcstrings */; };
+		D580749BDBEC4BFE98D9ED6A /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 4EBF1FE0D46648989064EF72 /* Sentry */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -228,7 +231,6 @@
 		25429BD929E5F94300D5979F /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		25429BE629E5F9B000D5979F /* Oscar°WatchWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Oscar°WatchWidgetExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		25429BEA29E5F9B000D5979F /* Oscar_WatchWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Oscar_WatchWidget.swift; sourceTree = "<group>"; };
-		25429BEC29E5F9B000D5979F /* Oscar_WatchWidget.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = Oscar_WatchWidget.intentdefinition; sourceTree = "<group>"; };
 		25429BED29E5F9B300D5979F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2546516329E4905E00D8C13D /* TemperatureLockscreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureLockscreenWidget.swift; sourceTree = "<group>"; };
 		2546516629E492E500D8C13D /* RadarProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarProvider.swift; sourceTree = "<group>"; };
@@ -312,6 +314,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				255BDDA02BD9B2E40061E4EB /* (null) in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -324,6 +327,7 @@
 				257EB3532BD8312000E46468 /* OpenAPIRuntime in Frameworks */,
 				257EB3552BD8312500E46468 /* OpenAPIURLSession in Frameworks */,
 				25429BE729E5F9B000D5979F /* WidgetKit.framework in Frameworks */,
+				255BDDA12BD9B2E40061E4EB /* (null) in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -331,10 +335,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				255BDD9F2BD9B2E40061E4EB /* Sentry in Frameworks */,
 				259704DF2757CB0D00DFCA53 /* Alamofire in Frameworks */,
 				258B223229A81E7500E4ECCE /* Charts in Frameworks */,
 				25C4300F2AC36165001DA5FC /* OpenAPIRuntime in Frameworks */,
 				25C430122AC36173001DA5FC /* OpenAPIURLSession in Frameworks */,
+				255BDD9E2BD9B2E40061E4EB /* (null) in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -347,6 +353,7 @@
 				253F708C2B5316A90075D093 /* OpenAPIRuntime in Frameworks */,
 				253F708E2B5316A90075D093 /* OpenAPIURLSession in Frameworks */,
 				3EB8902B251A55950028FED0 /* WidgetKit.framework in Frameworks */,
+				D580749BDBEC4BFE98D9ED6A /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -377,7 +384,6 @@
 			isa = PBXGroup;
 			children = (
 				25429BEA29E5F9B000D5979F /* Oscar_WatchWidget.swift */,
-				25429BEC29E5F9B000D5979F /* Oscar_WatchWidget.intentdefinition */,
 				25429BED29E5F9B300D5979F /* Assets.xcassets */,
 				6EFBD1842B56FB1C00D6E38E /* Info.plist */,
 				6E00C5272B59E36D00C1A805 /* Localizable.xcstrings */,
@@ -684,6 +690,7 @@
 				3EB8900F251A55700028FED0 /* Resources */,
 				3EB8903A251A55980028FED0 /* Embed Foundation Extensions */,
 				25429BDE29E5F94300D5979F /* Embed Watch Content */,
+				99EB13A1B51E4E3299FDEFFF /* Upload Debug Symbols to Sentry */,
 			);
 			buildRules = (
 			);
@@ -698,6 +705,7 @@
 				258B223129A81E7500E4ECCE /* Charts */,
 				25C4300E2AC36165001DA5FC /* OpenAPIRuntime */,
 				25C430112AC36173001DA5FC /* OpenAPIURLSession */,
+				4EBF1FE0D46648989064EF72 /* Sentry */,
 			);
 			productName = Weather;
 			productReference = 3EB89011251A55700028FED0 /* Oscar°.app */;
@@ -767,6 +775,7 @@
 				25C430062AC3608E001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-generator" */,
 				25C4300D2AC36165001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */,
 				25C430102AC36173001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */,
+				61BF2619978C4D10BB7D4A9F /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 			);
 			productRefGroup = 3EB89012251A55700028FED0 /* Products */;
 			projectDirPath = "";
@@ -833,13 +842,30 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		99EB13A1B51E4E3299FDEFFF /* Upload Debug Symbols to Sentry */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
+			);
+			name = "Upload Debug Symbols to Sentry";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This script is responsable to upload debug symbols and source context for Sentry.\nif which sentry-cli >/dev/null; then\nexport SENTRY_ORG=philipp-bolte\nexport SENTRY_PROJECT=apple-ios\nERROR=$(sentry-cli debug-files upload --include-sources \"$DWARF_DSYM_FOLDER_PATH\" 2>&1 >/dev/null)\nif [ ! $? -eq 0 ]; then\necho \"warning: sentry-cli - $ERROR\"\nfi\nelse\necho \"warning: sentry-cli not installed, download from https://github.com/getsentry/sentry-cli/releases\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		25429BCC29E5F94100D5979F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				25CB17EC2B4704E1001D973A /* LocationManager.swift in Sources */,
-				25429BF129E5F9B300D5979F /* Oscar_WatchWidget.intentdefinition in Sources */,
 				25429BD529E5F94100D5979F /* ContentView.swift in Sources */,
 				25429BD329E5F94100D5979F /* Oscar_WatchApp.swift in Sources */,
 			);
@@ -856,7 +882,6 @@
 				257EB3752BD832BC00E46468 /* DataModels.xcdatamodeld in Sources */,
 				25429BEB29E5F9B000D5979F /* Oscar_WatchWidget.swift in Sources */,
 				257EB3682BD8321B00E46468 /* GlobalViewExtensions.swift in Sources */,
-				25429BF029E5F9B300D5979F /* Oscar_WatchWidget.intentdefinition in Sources */,
 				25429BFB29E5FAC600D5979F /* LockscreenProvider.swift in Sources */,
 				257EB3602BD831D200E46468 /* CityService.swift in Sources */,
 				25429C0129E5FAF200D5979F /* TemperatureLockscreenWidget.swift in Sources */,
@@ -1255,6 +1280,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 32;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°/Preview Content\"";
 				DEVELOPMENT_TEAM = N6J2M765XY;
 				ENABLE_PREVIEWS = YES;
@@ -1285,6 +1311,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 32;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
@@ -1448,6 +1475,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		61BF2619978C4D10BB7D4A9F /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa/";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1515,6 +1550,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 25C430062AC3608E001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-generator" */;
 			productName = "plugin:OpenAPIGenerator";
+		};
+		4EBF1FE0D46648989064EF72 /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 61BF2619978C4D10BB7D4A9F /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
 		};
 /* End XCSwiftPackageProductDependency section */
 

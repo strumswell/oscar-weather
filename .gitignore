@@ -4,3 +4,5 @@ api/.DS_Store
 api/.env
 api/dist
 xcuserdata/
+
+.sentryclirc
