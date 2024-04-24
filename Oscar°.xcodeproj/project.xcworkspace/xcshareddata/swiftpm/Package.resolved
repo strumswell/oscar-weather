@@ -1,5 +1,5 @@
 {
-  "originHash" : "f4a56583a411d385d5d323f6509b2200fb3cf2e34b6c1f97880aa00c4088f3de",
+  "originHash" : "2a6bf566f70e8dddfd09bd341a0de4c2d265d122173581ecaf0274e982ea7c59",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -17,15 +17,6 @@
       "state" : {
         "revision" : "283454875cc6e5b2801d184d65835b92252d1784",
         "version" : "3.1.2"
-      }
-    },
-    {
-      "identity" : "spindicator",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ivanvorobei/SPIndicator",
-      "state" : {
-        "revision" : "4040db16d6dfae9c50c79fc288c9b3c6e978d1bb",
-        "version" : "1.3.1"
       }
     },
     {

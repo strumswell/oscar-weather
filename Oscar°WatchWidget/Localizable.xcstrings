@@ -112,6 +112,18 @@
         }
       }
     },
+    "E_compass" : {
+      "comment" : "East"
+    },
+    "N_compass" : {
+      "comment" : "North"
+    },
+    "NE_compass" : {
+      "comment" : "North-East"
+    },
+    "NW_compass" : {
+      "comment" : "North-West"
+    },
     "Regen" : {
       "comment" : "LS Widget Regen",
       "localizations" : {
@@ -158,6 +170,15 @@
         }
       }
     },
+    "S_compass" : {
+      "comment" : "South"
+    },
+    "SE_compass" : {
+      "comment" : "South-East"
+    },
+    "SW_compass" : {
+      "comment" : "South-West"
+    },
     "Temperatur" : {
       "comment" : "LS Temperatur",
       "localizations" : {
@@ -180,6 +201,9 @@
           }
         }
       }
+    },
+    "W_compass" : {
+      "comment" : "West"
     }
   },
   "version" : "1.0"

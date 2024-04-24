@@ -26,7 +26,6 @@ class HomeProvider: TimelineProvider {
     let locationService = LocationService.shared
     
     init() {
-
         locationService.update()
     }
     

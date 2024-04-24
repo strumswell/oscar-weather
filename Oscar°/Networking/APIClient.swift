@@ -10,6 +10,7 @@ import OpenAPIRuntime
 import OpenAPIURLSession
 import CoreLocation
 
+// TODO: Caching for API results
 class APIClient {
     var openMeteo: Client
     var oscar: Client
@@ -59,9 +60,7 @@ class APIClient {
             query.models = .icon_seamless
             query.forecast_days = ._7
         }
-        
-        print(query)
-        
+                
         let response = try await openMeteo.getForecast(.init(query: query))
         
         switch response {

@@ -9,7 +9,6 @@ import Foundation
 import CoreLocation
 import Combine
 import SwiftUI
-import SPIndicator
 import WidgetKit
 import Alamofire
 

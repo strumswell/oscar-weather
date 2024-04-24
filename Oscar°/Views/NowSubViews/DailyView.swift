@@ -11,7 +11,7 @@ struct DailyView: View {
     @Environment(Weather.self) private var weather: Weather
     
     var body: some View {
-        // Cap at 12 days to keep View from getting to large with too much (unreliable) data
+        // Cap at 12 days to keep View from getting too large with too much (unreliable) data
         let dayNumber = (weather.forecast.daily?.time.count ?? 1) > 12 ? 12 : (weather.forecast.daily?.time.count ?? 1)
 
         VStack(alignment: .leading) {

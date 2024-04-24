@@ -5,7 +5,6 @@
 //  Created by Philipp Bolte on 22.09.20.
 
 import SwiftUI
-import SPIndicator
 import OpenAPIRuntime
 import OpenAPIURLSession
 import MapKit

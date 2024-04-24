@@ -51,8 +51,6 @@ struct TemperatureLockScreenView: View {
 
 struct TemperatureLockScreenWidget: Widget {
     let kind: String = "TemperatureLockScreenWidget"
-    
-    
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: LockscreenProvider()) { entry in
             TemperatureLockScreenView(entry: entry)

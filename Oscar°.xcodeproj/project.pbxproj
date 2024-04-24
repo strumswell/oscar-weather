@@ -9,10 +9,12 @@
 /* Begin PBXBuildFile section */
 		250163DA2B093C0B00EEF882 /* CityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25E30B2A26CD9B31007F468D /* CityService.swift */; };
 		2505C94D29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2505C94C29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift */; };
+		2516BD562BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
+		2516BD572BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
+		2516BD582BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
 		251FE39127C5674400D26F0F /* WMSTileOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251FE39027C5674400D26F0F /* WMSTileOverlay.swift */; };
 		2523367D27C3E9D500C2111A /* RainModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2523367C27C3E9D500C2111A /* RainModel.swift */; };
 		2523367F27C3EB3900C2111A /* RainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2523367E27C3EB3900C2111A /* RainView.swift */; };
-		25288A0126D130E300A612AF /* SPIndicator in Frameworks */ = {isa = PBXBuildFile; productRef = 25288A0026D130E300A612AF /* SPIndicator */; };
 		2533940827C434900087C220 /* DWDAlerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2533940727C434900087C220 /* DWDAlerts.swift */; };
 		2533940A27C43F810087C220 /* AlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2533940927C43F810087C220 /* AlertView.swift */; };
 		2535259E26DB7FDF000AA927 /* WeatherMapsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D90A5226C40DB800128F7A /* WeatherMapsResponse.swift */; };
@@ -61,6 +63,19 @@
 		25761D5029F1CF14006976BE /* Storm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79AA29F1A7DF002E0AAB /* Storm.swift */; };
 		25761D5129F1D083006976BE /* StormDrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED79A729F1A7DF002E0AAB /* StormDrop.swift */; };
 		2576B2032B586E6C004E288A /* GlobalViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CB17E72B47043A001D973A /* GlobalViewExtensions.swift */; };
+		257EB34E2BD830F300E46468 /* openapi.yml in Resources */ = {isa = PBXBuildFile; fileRef = 257D07DC2AC355EC005EBD16 /* openapi.yml */; };
+		257EB34F2BD830F300E46468 /* openapi-generator-config.yml in Resources */ = {isa = PBXBuildFile; fileRef = 257D07DE2AC3561C005EBD16 /* openapi-generator-config.yml */; };
+		257EB3532BD8312000E46468 /* OpenAPIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 257EB3522BD8312000E46468 /* OpenAPIRuntime */; };
+		257EB3552BD8312500E46468 /* OpenAPIURLSession in Frameworks */ = {isa = PBXBuildFile; productRef = 257EB3542BD8312500E46468 /* OpenAPIURLSession */; };
+		257EB35B2BD831C300E46468 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CB17E22B470335001D973A /* APIClient.swift */; };
+		257EB35F2BD831CB00E46468 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 253BA18B2B0941670070BD5E /* LocationService.swift */; };
+		257EB3602BD831D200E46468 /* CityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25E30B2A26CD9B31007F468D /* CityService.swift */; };
+		257EB3642BD8321700E46468 /* APIResultExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CB17E92B470461001D973A /* APIResultExtensions.swift */; };
+		257EB3682BD8321B00E46468 /* GlobalViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CB17E72B47043A001D973A /* GlobalViewExtensions.swift */; };
+		257EB3692BD8322A00E46468 /* RetryClientMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */; };
+		257EB3712BD8328A00E46468 /* HapticsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 257EB3702BD8328A00E46468 /* HapticsExtension.swift */; };
+		257EB3752BD832BC00E46468 /* DataModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE226CACF7D00D90D6B /* DataModels.xcdatamodeld */; };
+		257EB3792BD832C000E46468 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE526CACFC900D90D6B /* PersistenceController.swift */; };
 		258B223229A81E7500E4ECCE /* Charts in Frameworks */ = {isa = PBXBuildFile; productRef = 258B223129A81E7500E4ECCE /* Charts */; };
 		258EE2ED2B5EF4E900AE942B /* RetryClientMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */; };
 		258EE2F62B5EF58100AE942B /* RetryClientMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */; };
@@ -196,6 +211,7 @@
 
 /* Begin PBXFileReference section */
 		2505C94C29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecipitationLockscreenWidget.swift; sourceTree = "<group>"; };
+		2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		251FE39027C5674400D26F0F /* WMSTileOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WMSTileOverlay.swift; sourceTree = "<group>"; };
 		2523367C27C3E9D500C2111A /* RainModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainModel.swift; sourceTree = "<group>"; };
 		2523367E27C3EB3900C2111A /* RainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainView.swift; sourceTree = "<group>"; };
@@ -226,6 +242,7 @@
 		2575A1D42B5351B3006005FC /* Oscar°WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Oscar°WidgetExtension.entitlements"; sourceTree = "<group>"; };
 		257D07DC2AC355EC005EBD16 /* openapi.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = openapi.yml; sourceTree = "<group>"; };
 		257D07DE2AC3561C005EBD16 /* openapi-generator-config.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "openapi-generator-config.yml"; sourceTree = "<group>"; };
+		257EB3702BD8328A00E46468 /* HapticsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsExtension.swift; sourceTree = "<group>"; };
 		258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetryClientMiddleware.swift; sourceTree = "<group>"; };
 		259623CF2A2BD6BF00BA75F6 /* HomeProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeProvider.swift; sourceTree = "<group>"; };
 		259623D12A2BD72C00BA75F6 /* NowTodayWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowTodayWidget.swift; sourceTree = "<group>"; };
@@ -304,6 +321,8 @@
 			files = (
 				25429BFA29E5FA5300D5979F /* Alamofire in Frameworks */,
 				25429BE829E5F9B000D5979F /* SwiftUI.framework in Frameworks */,
+				257EB3532BD8312000E46468 /* OpenAPIRuntime in Frameworks */,
+				257EB3552BD8312500E46468 /* OpenAPIURLSession in Frameworks */,
 				25429BE729E5F9B000D5979F /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -316,7 +335,6 @@
 				258B223229A81E7500E4ECCE /* Charts in Frameworks */,
 				25C4300F2AC36165001DA5FC /* OpenAPIRuntime in Frameworks */,
 				25C430122AC36173001DA5FC /* OpenAPIURLSession in Frameworks */,
-				25288A0126D130E300A612AF /* SPIndicator in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -475,6 +493,7 @@
 			children = (
 				25CB17E72B47043A001D973A /* GlobalViewExtensions.swift */,
 				25CB17E92B470461001D973A /* APIResultExtensions.swift */,
+				257EB3702BD8328A00E46468 /* HapticsExtension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -558,8 +577,6 @@
 		3EB89013251A55700028FED0 /* Oscar° */ = {
 			isa = PBXGroup;
 			children = (
-				6EE66C482B59DF3700885CB7 /* InfoPlist.xcstrings */,
-				6E11533C2B59C965004D3273 /* Localizable.xcstrings */,
 				25CB17E62B470429001D973A /* Extensions */,
 				25BEDCE126CACF2900D90D6B /* Storage */,
 				3E89BBA6252EFEC5006F7BCC /* Views */,
@@ -570,6 +587,9 @@
 				2575A1D32B53519E006005FC /* Oscar°.entitlements */,
 				3EB89018251A55740028FED0 /* Assets.xcassets */,
 				6EFBD1862B56FB2100D6E38E /* Info.plist */,
+				6EE66C482B59DF3700885CB7 /* InfoPlist.xcstrings */,
+				6E11533C2B59C965004D3273 /* Localizable.xcstrings */,
+				2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */,
 				3EB8901A251A55740028FED0 /* Preview Content */,
 			);
 			path = "Oscar°";
@@ -643,10 +663,13 @@
 			buildRules = (
 			);
 			dependencies = (
+				257EB3572BD8314200E46468 /* PBXTargetDependency */,
 			);
 			name = "Oscar°WatchWidgetExtension";
 			packageProductDependencies = (
 				25429BF929E5FA5300D5979F /* Alamofire */,
+				257EB3522BD8312000E46468 /* OpenAPIRuntime */,
+				257EB3542BD8312500E46468 /* OpenAPIURLSession */,
 			);
 			productName = "Oscar°WatchWidgetExtension";
 			productReference = 25429BE629E5F9B000D5979F /* Oscar°WatchWidgetExtension.appex */;
@@ -671,7 +694,6 @@
 			);
 			name = "Oscar°";
 			packageProductDependencies = (
-				25288A0026D130E300A612AF /* SPIndicator */,
 				259704DE2757CB0D00DFCA53 /* Alamofire */,
 				258B223129A81E7500E4ECCE /* Charts */,
 				25C4300E2AC36165001DA5FC /* OpenAPIRuntime */,
@@ -736,10 +758,10 @@
 				de,
 				en,
 				tr,
+				Base,
 			);
 			mainGroup = 3EB89008251A55700028FED0;
 			packageReferences = (
-				252889FF26D130E300A612AF /* XCRemoteSwiftPackageReference "SPIndicator" */,
 				259704DD2757CB0D00DFCA53 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				258B223029A81E7500E4ECCE /* XCRemoteSwiftPackageReference "swiftui-charts" */,
 				25C430062AC3608E001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-generator" */,
@@ -773,6 +795,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2516BD582BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */,
+				257EB34E2BD830F300E46468 /* openapi.yml in Resources */,
+				257EB34F2BD830F300E46468 /* openapi-generator-config.yml in Resources */,
 				6E5CBE2E2B5F12400045DCE4 /* InfoPlist.xcstrings in Resources */,
 				6E00C5282B59E36D00C1A805 /* Localizable.xcstrings in Resources */,
 				25429BEE29E5F9B300D5979F /* Assets.xcassets in Resources */,
@@ -784,6 +809,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6EE66C492B59DF3700885CB7 /* InfoPlist.xcstrings in Resources */,
+				2516BD562BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */,
 				25C42FFD2AC35EE2001DA5FC /* openapi.yml in Resources */,
 				25C42FFE2AC35EE2001DA5FC /* openapi-generator-config.yml in Resources */,
 				6E11533D2B59C965004D3273 /* Localizable.xcstrings in Resources */,
@@ -796,6 +822,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2516BD572BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */,
 				253F708F2B5316BC0075D093 /* openapi.yml in Resources */,
 				6E1153432B59C9A4004D3273 /* InfoPlist.xcstrings in Resources */,
 				6E1153412B59C98B004D3273 /* Localizable.xcstrings in Resources */,
@@ -823,13 +850,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				25429C0229E5FAF600D5979F /* OMDayTemperature.swift in Sources */,
+				257EB3692BD8322A00E46468 /* RetryClientMiddleware.swift in Sources */,
 				25429BFC29E5FAE600D5979F /* OscarWidgetsBundle.swift in Sources */,
+				257EB35F2BD831CB00E46468 /* LocationService.swift in Sources */,
+				257EB3752BD832BC00E46468 /* DataModels.xcdatamodeld in Sources */,
 				25429BEB29E5F9B000D5979F /* Oscar_WatchWidget.swift in Sources */,
+				257EB3682BD8321B00E46468 /* GlobalViewExtensions.swift in Sources */,
 				25429BF029E5F9B300D5979F /* Oscar_WatchWidget.intentdefinition in Sources */,
 				25429BFB29E5FAC600D5979F /* LockscreenProvider.swift in Sources */,
+				257EB3602BD831D200E46468 /* CityService.swift in Sources */,
 				25429C0129E5FAF200D5979F /* TemperatureLockscreenWidget.swift in Sources */,
 				25429C0029E5FAEF00D5979F /* PrecipitationLockscreenWidget.swift in Sources */,
+				257EB3642BD8321700E46468 /* APIResultExtensions.swift in Sources */,
 				25CB17ED2B4704E2001D973A /* LocationManager.swift in Sources */,
+				257EB35B2BD831C300E46468 /* APIClient.swift in Sources */,
+				257EB3792BD832C000E46468 /* PersistenceController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -871,6 +906,7 @@
 				25ED79AB29F1A7DF002E0AAB /* Meteor.swift in Sources */,
 				3E6117082544B27600B68120 /* HourlyView.swift in Sources */,
 				25ED79B129F1A7DF002E0AAB /* MeteorShower.swift in Sources */,
+				257EB3712BD8328A00E46468 /* HapticsExtension.swift in Sources */,
 				25ED79B829F1A7DF002E0AAB /* CloudsView.swift in Sources */,
 				259704E12757D19C00DFCA53 /* AlertResponse.swift in Sources */,
 				25BEDCE626CACFC900D90D6B /* PersistenceController.swift in Sources */,
@@ -944,6 +980,10 @@
 			target = 25429BE529E5F9B000D5979F /* Oscar°WatchWidgetExtension */;
 			targetProxy = 25429BF229E5F9B300D5979F /* PBXContainerItemProxy */;
 		};
+		257EB3572BD8314200E46468 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 257EB3562BD8314200E46468 /* OpenAPIGenerator */;
+		};
 		25CBB6352B44648400223B69 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			productRef = 25CBB6342B44648400223B69 /* OpenAPIGenerator */;
@@ -984,7 +1024,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
 		};
@@ -1016,7 +1056,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
 		};
@@ -1047,7 +1087,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
 		};
@@ -1078,7 +1118,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
 		};
@@ -1368,14 +1408,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		252889FF26D130E300A612AF /* XCRemoteSwiftPackageReference "SPIndicator" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ivanvorobei/SPIndicator";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
 		258B223029A81E7500E4ECCE /* XCRemoteSwiftPackageReference "swiftui-charts" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/spacenation/swiftui-charts";
@@ -1419,11 +1451,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		25288A0026D130E300A612AF /* SPIndicator */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 252889FF26D130E300A612AF /* XCRemoteSwiftPackageReference "SPIndicator" */;
-			productName = SPIndicator;
-		};
 		253F70892B53167D0075D093 /* OpenAPIGenerator */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 25C430062AC3608E001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-generator" */;
@@ -1443,6 +1470,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 259704DD2757CB0D00DFCA53 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
+		};
+		257EB3522BD8312000E46468 /* OpenAPIRuntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 25C4300D2AC36165001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */;
+			productName = OpenAPIRuntime;
+		};
+		257EB3542BD8312500E46468 /* OpenAPIURLSession */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 25C430102AC36173001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */;
+			productName = OpenAPIURLSession;
+		};
+		257EB3562BD8314200E46468 /* OpenAPIGenerator */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 25C430062AC3608E001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-generator" */;
+			productName = "plugin:OpenAPIGenerator";
 		};
 		258B223129A81E7500E4ECCE /* Charts */ = {
 			isa = XCSwiftPackageProductDependency;

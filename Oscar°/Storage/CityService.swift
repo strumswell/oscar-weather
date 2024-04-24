@@ -46,6 +46,7 @@ public class CityService: ObservableObject {
         }
     }
 
+    #if os(iOS)
     func addCity(searchResult: MKLocalSearchCompletion) {
         self.getCoordinates(searchCompletion: searchResult) { coords in
             let label = searchResult.title.split(separator: ",")[0].description
@@ -63,6 +64,7 @@ public class CityService: ObservableObject {
             }
         }
     }
+    #endif
     
     func addCity(city: Array<String>) {
         let newCity = City(context: self.context)
@@ -113,6 +115,7 @@ public class CityService: ObservableObject {
         return nil
     }
     
+    #if os(iOS)
     private func getCoordinates(searchCompletion: MKLocalSearchCompletion, completion: @escaping (CLLocationCoordinate2D) -> Void) {
         let searchRequest = MKLocalSearch.Request(completion: searchCompletion)
         let search = MKLocalSearch(request: searchRequest)
@@ -122,6 +125,7 @@ public class CityService: ObservableObject {
             completion(coordinates)
         }
     }
+    #endif
 }
 
 @Observable
@@ -239,6 +243,7 @@ public class CityServiceNew {
         return nil
     }
     
+    #if os(iOS)
     private func getCoordinates(searchCompletion: MKLocalSearchCompletion, completion: @escaping (CLLocationCoordinate2D) -> Void) {
         let searchRequest = MKLocalSearch.Request(completion: searchCompletion)
         let search = MKLocalSearch(request: searchRequest)
@@ -248,6 +253,7 @@ public class CityServiceNew {
             completion(coordinates)
         }
     }
+    #endif
     
     private func hasEntitiesWithoutOrderId() -> Bool {
         let fetchRequest: NSFetchRequest<City> = City.fetchRequest()
