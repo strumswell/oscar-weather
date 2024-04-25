@@ -15,7 +15,7 @@ if [[ $(command -v sentry-cli) == "" ]]; then
 fi
 
 echo "Authenticate to Sentry"
-sentry-cli login --auth-token $SENTRY_AUTH_TOKEN
+$CI_PRIMARY_REPOSITORY_PATH/ci_scripts/sentry-cli login --auth-token $SENTRY_AUTH_TOKEN
 
 echo "Uploading dSYM to Sentry"
-sentry-cli debug-files upload -o 'philipp-bolte' -p 'oscar' $CI_ARCHIVE_PATH
+$CI_PRIMARY_REPOSITORY_PATH/ci_scripts/sentry-cli debug-files upload -o 'philipp-bolte' -p 'oscar' $CI_ARCHIVE_PATH
