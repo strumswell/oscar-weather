@@ -269,6 +269,7 @@
 		25D90A5226C40DB800128F7A /* WeatherMapsResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherMapsResponse.swift; sourceTree = "<group>"; };
 		25DA7A1927A420970062E02B /* MapDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapDetailView.swift; sourceTree = "<group>"; };
 		25E30B2A26CD9B31007F468D /* CityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityService.swift; sourceTree = "<group>"; };
+		25ECE65D2BDA1F250088B302 /* ci_post_xcodebuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_post_xcodebuild.sh; sourceTree = "<group>"; };
 		25ED4A4627A2F5C60050C4A9 /* HeadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadView.swift; sourceTree = "<group>"; };
 		25ED799429F1A7C6002E0AAB /* Color-Interpolation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Color-Interpolation.swift"; sourceTree = "<group>"; };
 		25ED799629F1A7DD002E0AAB /* Meteor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Meteor.swift; sourceTree = "<group>"; };
@@ -467,6 +468,7 @@
 			isa = PBXGroup;
 			children = (
 				25B4C45A2B57441F0069B3B0 /* ci_post_clone.sh */,
+				25ECE65D2BDA1F250088B302 /* ci_post_xcodebuild.sh */,
 			);
 			path = ci_scripts;
 			sourceTree = "<group>";
