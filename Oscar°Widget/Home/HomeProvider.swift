@@ -9,7 +9,6 @@ import Foundation
 import CoreLocation
 import SwiftUI
 import WidgetKit
-import Alamofire
 
 struct HomeEntry: TimelineEntry {
     let date: Date

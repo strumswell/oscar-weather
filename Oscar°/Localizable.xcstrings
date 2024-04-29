@@ -155,18 +155,19 @@
         }
       }
     },
-    "%@-Tage" : {
+    "%d-Tage" : {
+      "comment" : "Headline for Daily View",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@-Tage"
+            "value" : "%d-Tage"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@-Day"
+            "value" : "%d-Day"
           }
         },
         "tr" : {
@@ -726,6 +727,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O"
+          }
+        }
+      }
+    },
+    "Orte" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locations"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konumlarım"
           }
         }
       }

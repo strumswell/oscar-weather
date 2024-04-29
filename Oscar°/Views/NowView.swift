@@ -14,7 +14,6 @@ import MapKit
 }
 
 struct NowView: View {
-    @ObservedObject var nowViewModel: NowViewModel = NowViewModel()
     @ObservedObject var settingsService: SettingService = SettingService()    
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
@@ -49,7 +48,7 @@ struct NowView: View {
                                 .bold()
                                 .foregroundColor(Color(UIColor.label))
                                 .padding([.leading, .top])
-                            RadarView(settingsService: settingsService, radarMetadata: $nowViewModel.currentRadarMetadata, showLayerSettings: false, userActionAllowed: false)
+                            RadarView(settingsService: settingsService, showLayerSettings: false, userActionAllowed: false)
                                 .frame(height: 350)
                                 .cornerRadius(10)
                                 .padding()
@@ -58,7 +57,7 @@ struct NowView: View {
                                     isMapSheetPresented.toggle()
                                 }
                                 .sheet(isPresented: $isMapSheetPresented) {
-                                    MapDetailView(now: nowViewModel, settingsService: settingsService)
+                                    MapDetailView(settingsService: settingsService)
                                 }
                         }
 

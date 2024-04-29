@@ -10,7 +10,6 @@ import MapKit
 
 struct RadarView: View {
     @ObservedObject var settingsService: SettingService
-    @Binding var radarMetadata: WeatherMapsResponse?
     var showLayerSettings: Bool
     var locationService = LocationService.shared
     var userActionAllowed = true
@@ -18,12 +17,10 @@ struct RadarView: View {
     var body: some View {
         ZStack {
             RadarMapView(
-                overlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.radar.past[radarMetadata!.radar.past.count-1].path ?? "", color: "2", options: "1_1"),
+                settingsService: settingsService,
                 overlayOpacity: 0.7,
-                cloudOverlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.satellite.infrared.last?.path ?? "", color: "0", options: "0_0"),
                 coordinates: locationService.getCoordinates(),
                 cities: locationService.city.cities,
-                settings: settingsService.settings,
                 userActionAllowed: userActionAllowed
             )
             if (showLayerSettings && settingsService.settings != nil) {
@@ -228,12 +225,10 @@ struct WebMapServiceConstants {
 }
 
 struct RadarMapView: UIViewRepresentable {
-    var overlay: MKTileOverlay
+    @ObservedObject var settingsService: SettingService
     var overlayOpacity: Double
-    var cloudOverlay: MKTileOverlay
     var coordinates: CLLocationCoordinate2D
     var cities: [City]
-    var settings: Settings?
     var userActionAllowed: Bool
     
     class Coordinator: NSObject, MKMapViewDelegate {
@@ -256,7 +251,10 @@ struct RadarMapView: UIViewRepresentable {
     }
 
     func makeUIView(context: Context) -> MKMapView {
-        return MKMapView()
+        let mapView = MKMapView()
+        let coordinateRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude), latitudinalMeters: 100000, longitudinalMeters: 100000)
+        mapView.setRegion(coordinateRegion, animated: false)
+        return mapView
     }
     
     func updateUIView(_ mapView: MKMapView, context: Context) {
@@ -278,66 +276,74 @@ struct RadarMapView: UIViewRepresentable {
         mapView.delegate = context.coordinator
         //mapView.overrideUserInterfaceStyle = .dark
         mapView.removeOverlays(overlays)
-                
-        if (settings?.druckLayer ?? false) {
-            let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/windSpeed/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
-            mapView.addOverlay(overlay)
-            //https://services.meteored.com/img/tiles/cep010/6/31/21/014_temp2m@2x.png
-        }
-        if (settings?.tempLayer ?? false) {
-            let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/temperature/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
-            mapView.addOverlay(overlay)
-        }
-        if (settings?.infrarotLayer ?? false) {
-            let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/cloudCover/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
-            mapView.addOverlay(overlay)
-            //mapView.addOverlay(cloudOverlay)
-        }
-        if (settings?.rainviewerLayer ?? false) {
-            let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/precipitationIntensity/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
-            mapView.addOverlay(overlay)
-            //mapView.addOverlay(overlay)
-        }
-        if (settings?.windDirectionLayer ?? false) {
-            let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/windDirection/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
-            mapView.addOverlay(overlay)
-            //mapView.addOverlay(overlay)
-        }
-        if (settings?.humidityLayer ?? false) {
-            let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/humidity/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
-            mapView.addOverlay(overlay)
-            //mapView.addOverlay(overlay)
-        }
-        if (settings?.dwdLayer ?? true) {
-            var referenceSystem = ""
-            if WebMapServiceConstants.version == "1.1.1" {
-                referenceSystem = "SRS"
-            } else {
-                referenceSystem = "CRS"
+        
+        if let settings = settingsService.settings {
+            if settings.druckLayer {
+                let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/windSpeed/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
+                mapView.addOverlay(overlay)
+                //https://services.meteored.com/img/tiles/cep010/6/31/21/014_temp2m@2x.png
             }
-
-            let urlLayers = "layers=dwd:Niederschlagsradar&"
-            let urlVersion = "version=\(WebMapServiceConstants.version)&"
-            let urlReferenceSystem = "\(referenceSystem)=EPSG:\(WebMapServiceConstants.epsg)&"
-            let urlWidthAndHeight = "width=\(WebMapServiceConstants.tileSize)&height=\(WebMapServiceConstants.tileSize)&"
-            let urlFormat = "format=\(WebMapServiceConstants.format)&format_options=MODE:refresh&"
-            let urlTransparent = "transparent=\(WebMapServiceConstants.transparent)&"
-
-            var useMercator = false
-            if(WebMapServiceConstants.epsg == "900913"){
-                useMercator = true
+            if settings.tempLayer {
+                let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/temperature/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
+                mapView.addOverlay(overlay)
             }
+            if settings.infrarotLayer {
+                let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/cloudCover/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
+                mapView.addOverlay(overlay)
+            }
+            if settings.rainviewerLayer {
+                let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/precipitationIntensity/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
+                mapView.addOverlay(overlay)
+            }
+            if settings.windDirectionLayer {
+                let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/windDirection/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
+                mapView.addOverlay(overlay)
+            }
+            if settings.humidityLayer {
+                let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/humidity/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
+                mapView.addOverlay(overlay)
+            }
+            if settings.dwdLayer {
+                var referenceSystem = ""
+                if WebMapServiceConstants.version == "1.1.1" {
+                    referenceSystem = "SRS"
+                } else {
+                    referenceSystem = "CRS"
+                }
 
-            let urlString = WebMapServiceConstants.baseUrl + "?styles=&service=WMS&request=GetMap&" + urlLayers + urlVersion + urlReferenceSystem + urlWidthAndHeight + urlFormat + urlTransparent //+ "&time=" + time[index]
-            let overlay = WMSTileOverlay(urlArg: urlString, useMercator: useMercator, wmsVersion: WebMapServiceConstants.version)
-            mapView.addOverlay(overlay)
+                let urlLayers = "layers=dwd:Niederschlagsradar&"
+                let urlVersion = "version=\(WebMapServiceConstants.version)&"
+                let urlReferenceSystem = "\(referenceSystem)=EPSG:\(WebMapServiceConstants.epsg)&"
+                let urlWidthAndHeight = "width=\(WebMapServiceConstants.tileSize)&height=\(WebMapServiceConstants.tileSize)&"
+                let urlFormat = "format=\(WebMapServiceConstants.format)&format_options=MODE:refresh&"
+                let urlTransparent = "transparent=\(WebMapServiceConstants.transparent)&"
+
+                var useMercator = false
+                if(WebMapServiceConstants.epsg == "900913"){
+                    useMercator = true
+                }
+
+                let urlString = WebMapServiceConstants.baseUrl + "?styles=&service=WMS&request=GetMap&" + urlLayers + urlVersion + urlReferenceSystem + urlWidthAndHeight + urlFormat + urlTransparent //+ "&time=" + time[index]
+                let overlay = WMSTileOverlay(urlArg: urlString, useMercator: useMercator, wmsVersion: WebMapServiceConstants.version)
+                mapView.addOverlay(overlay)
+            }
         }
         
-        // Define region to center map on -> Modify lat so selected city is visible in the map view (Map view extends down behind the weather sheet -> pull to refresh shows no blank space behind sheet
-        let coordinateRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude), latitudinalMeters: 100000, longitudinalMeters: 100000)
-        
-        mapView.setRegion(coordinateRegion, animated: false)
-        mapView.mapType = .standard
+        // Let's auto-update the map region if users location changes for static views
+        if !userActionAllowed {
+            let currentCenter = mapView.centerCoordinate
+            let desiredCenter = coordinates
+
+            let currentLocation = CLLocation(latitude: currentCenter.latitude, longitude: currentCenter.longitude)
+            let desiredLocation = CLLocation(latitude: desiredCenter.latitude, longitude: desiredCenter.longitude)
+            let distance = currentLocation.distance(from: desiredLocation)
+
+            if distance > 1000 {
+                let coordinateRegion = MKCoordinateRegion(center: desiredCenter, latitudinalMeters: 100000, longitudinalMeters: 100000)
+                mapView.setRegion(coordinateRegion, animated: false)
+            }
+        }
+
         mapView.showsUserLocation = true
         if !userActionAllowed {
             mapView.isScrollEnabled = false

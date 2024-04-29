@@ -124,7 +124,6 @@ extension RetryingMiddleware: ClientMiddleware {
                 try await willRetry()
                 continue
             } else {
-                print("Returning the received response, either because of success or ran out of attempts.")
                 return (response, responseBody)
             }
         }

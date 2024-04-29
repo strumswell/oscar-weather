@@ -13,9 +13,10 @@ struct DailyView: View {
     var body: some View {
         // Cap at 12 days to keep View from getting too large with too much (unreliable) data
         let dayNumber = (weather.forecast.daily?.time.count ?? 1) > 12 ? 12 : (weather.forecast.daily?.time.count ?? 1)
+        let heading = String.localizedStringWithFormat(NSLocalizedString("%d-Tage", comment: "Headline for Daily View"), dayNumber)
 
         VStack(alignment: .leading) {
-            Text("\(dayNumber)-Tage")
+            Text(heading)
                 .font(.title3)
                 .bold()
                 .foregroundColor(Color(UIColor.label))
