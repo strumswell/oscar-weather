@@ -173,7 +173,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@-Günlük Tahmin"
+            "value" : "%d-Günlük Tahmin"
           }
         }
       }

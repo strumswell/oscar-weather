@@ -18,4 +18,4 @@ echo "Authenticate to Sentry"
 $CI_PRIMARY_REPOSITORY_PATH/ci_scripts/sentry-cli login --auth-token $SENTRY_AUTH_TOKEN
 
 echo "Uploading dSYM to Sentry"
-$CI_PRIMARY_REPOSITORY_PATH/ci_scripts/sentry-cli debug-files upload -o 'philipp-bolte' -p 'oscar' $CI_ARCHIVE_PATH
+$CI_PRIMARY_REPOSITORY_PATH/ci_scripts/sentry-cli debug-files upload --include-sources -o 'philipp-bolte' -p 'oscar' $CI_ARCHIVE_PATH
