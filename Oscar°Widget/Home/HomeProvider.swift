@@ -46,7 +46,7 @@ class HomeProvider: TimelineProvider {
 
             // TODO: Do a different API call to get JUST the data we need here. The call gets too much.
             async let weatherRequest = client.getForecast(coordinates: coordinates, forecastDays: ._1)
-            async let radarRequest = client.getRainForecast(coordinates: coordinates)
+            async let radarRequest = client.getRainRadar(coordinates: coordinates)
             let (weather, radar) = try await (weatherRequest, radarRequest)
             
             let dayBegin = weather.hourly?.time.first ?? 0

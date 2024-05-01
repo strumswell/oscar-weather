@@ -13,17 +13,15 @@ import CoreLocation
 // TODO: Caching for API results
 class APIClient {
     var openMeteo: Client
-    var oscar: Client
     var openMeteoAqi: Client
     var openMeteoGeo: Client
     var brightsky: Client
     
     init () {
         openMeteo = APIClient.get(url: try! Servers.server1())
-        oscar = APIClient.get(url: try! Servers.server2())
-        openMeteoAqi = APIClient.get(url: try! Servers.server3())
-        openMeteoGeo = APIClient.get(url: try! Servers.server4())
-        brightsky = APIClient.get(url: try! Servers.server5())
+        openMeteoAqi = APIClient.get(url: try! Servers.server2())
+        openMeteoGeo = APIClient.get(url: try! Servers.server3())
+        brightsky = APIClient.get(url: try! Servers.server4())
     }
     
      class func get(url: URL) -> Client {
@@ -117,25 +115,6 @@ class APIClient {
             return .init()
         }
 
-    }
-    
-    func getRainForecast(coordinates: CLLocationCoordinate2D) async throws -> Components.Schemas.RainData {
-        let response = try await oscar.getRain(.init(
-            query: .init(
-                lat: coordinates.latitude,
-                lon: coordinates.longitude
-            )
-        ))
-        
-        switch response {
-        case let .ok(response):
-            switch response.body {
-            case .json(let result):
-                return result
-            }
-        case .undocumented:
-            return .init()
-        }
     }
     
     func getGeocodeSearchResult(name: String) async throws -> Components.Schemas.SearchResponse {

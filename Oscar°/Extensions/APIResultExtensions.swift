@@ -18,20 +18,6 @@ extension Components.Schemas.CurrentWeather {
     }
 }
 
-extension Components.Schemas.RainData {
-    func isRaining() -> Bool {
-        if (data?.isEmpty) == nil {
-            return false
-        }
-        
-        if data?.first?.mmh ?? 0 > 0 {
-            return true
-        }
-        
-        return false
-    }
-}
-
 extension Components.Schemas.RadarResponse {
     func isRaining() -> Bool {
         if (radar?.first) == nil {

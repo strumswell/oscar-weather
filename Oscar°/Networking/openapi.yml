@@ -13,8 +13,6 @@ info:
 servers:
   - url: https://api.open-meteo.com
     description: "Public Open-Meteo endpoint"
-  - url: https://api.oscars.love
-    description: "Public Oscar Weather Endpoint"
   - url: https://air-quality-api.open-meteo.com
     description: "Public AQI Open-Meteo endpoint"
   - url: https://geocoding-api.open-meteo.com/v1
@@ -492,34 +490,6 @@ paths:
                     type: string
                   hourly:
                     $ref: '#/components/schemas/AirQuality'
-  /api/v1/rain:
-    servers:
-      - url: https://api.oscars.love
-    get:
-      operationId: getRain
-      summary: Get rain data based on location
-      parameters:
-        - name: lat
-          in: query
-          required: true
-          schema:
-            type: number
-            format: double
-          description: Latitude for the location
-        - name: lon
-          in: query
-          required: true
-          schema:
-            type: number
-            format: double
-          description: Longitude for the location
-      responses:
-        200:
-          description: Rain data for the location
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RainData'
   /search:
     servers:
       - url: https://geocoding-api.open-meteo.com/v1
@@ -984,21 +954,6 @@ components:
         - windspeed
         - wind_direction_10m
         - weathercode
-    RainData:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/RainRecord'
-    RainRecord:
-      type: object
-      properties:
-        time:
-          type: string
-        mmh:
-          type: number
-          format: double
     AirQuality:
       type: object
       properties:
