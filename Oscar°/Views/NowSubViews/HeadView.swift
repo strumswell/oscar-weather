@@ -67,7 +67,7 @@ struct HeadView: View {
             }
             .padding(.bottom)
             
-            if (weather.alerts.count > 0) {
+            if hasWeatherAlerts() {
                 AlertView()
             }
         }
@@ -77,5 +77,11 @@ struct HeadView: View {
                 .scaleEffect(phase.isIdentity ? 1 : 0.99)
                 .blur(radius: phase.isIdentity ? 0 : 0.5)
         }
+    }
+}
+
+extension HeadView {
+    func hasWeatherAlerts() -> Bool {
+        return weather.alerts.alerts?.count ?? 0 > 0
     }
 }

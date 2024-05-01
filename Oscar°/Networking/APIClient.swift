@@ -99,8 +99,8 @@ class APIClient {
         }
     }
     
-    func getAlerts(coordinates: CLLocationCoordinate2D) async throws -> [Components.Schemas.Alert] {
-        let response = try await oscar.getAlerts(.init(
+    func getAlerts(coordinates: CLLocationCoordinate2D) async throws -> Operations.getAlerts.Output.Ok.Body.jsonPayload {
+        let response = try await brightsky.getAlerts(.init(
             query: .init(
                 lat: coordinates.latitude,
                 lon: coordinates.longitude
@@ -114,8 +114,9 @@ class APIClient {
                 return result
             }
         case .undocumented:
-            return []
+            return .init()
         }
+
     }
     
     func getRainForecast(coordinates: CLLocationCoordinate2D) async throws -> Components.Schemas.RainData {

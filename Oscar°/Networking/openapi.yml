@@ -1,25 +1,24 @@
 openapi: 3.1.0
 info:
-  title: Open-Meteo APIs
-  description: 'Open-Meteo offers free weather forecast APIs for open-source developers and non-commercial use. No API key is required.'
+  title: Underlying Oscar Endpoints
+  description: 'This OpenAPI document outline all endpoints being used by Oscar for retrieving weather-related data.'
   version: '1.0'
   contact:
-    name: Open-Meteo
-    url: https://open-meteo.com
-    email: info@open-meteo.com
+    name: Philipp Bolte
+    url: https://bolte.id/
+    email: oscar@bolte.id
   license:
     name: Attribution 4.0 International (CC BY 4.0)
     url: https://creativecommons.org/licenses/by/4.0/
-  termsOfService: https://open-meteo.com/en/features#terms
 servers:
   - url: https://api.open-meteo.com
-    description: "Public open meteo endpoint"
+    description: "Public Open-Meteo endpoint"
   - url: https://api.oscars.love
     description: "Public Oscar Weather Endpoint"
   - url: https://air-quality-api.open-meteo.com
-    description: "Public aqi open meteo endpoint"
+    description: "Public AQI Open-Meteo endpoint"
   - url: https://geocoding-api.open-meteo.com/v1
-    description: "Public geocoding open meteo endpoint"
+    description: "Public Geocoding Open-Meteo endpoint"
   - url: https://api.brightsky.dev
     description: "Public BrightSky endpoint"
 paths:
@@ -493,36 +492,6 @@ paths:
                     type: string
                   hourly:
                     $ref: '#/components/schemas/AirQuality'
-  /api/v1/alerts:
-    servers:
-      - url: https://api.oscars.love
-    get:
-      operationId: getAlerts
-      summary: Get weather alerts based on location
-      parameters:
-        - name: lat
-          in: query
-          required: true
-          schema:
-            type: number
-            format: double
-          description: Latitude for the location
-        - name: lon
-          in: query
-          required: true
-          schema:
-            type: number
-            format: double
-          description: Longitude for the location
-      responses:
-        200:
-          description: An array of weather alerts
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Alert'
   /api/v1/rain:
     servers:
       - url: https://api.oscars.love
@@ -593,6 +562,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/SearchResponse'
   /radar:
+    servers:
+      - url: https://api.brightsky.dev
     get:
       operationId: getRainRadar
       summary: Get weather radar data
@@ -645,8 +616,108 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RadarResponse'
+  /alerts:
+    servers:
+      - url: https://api.brightsky.dev
+        description: "Public BrightSky endpoint for weather alerts"
+    get:
+      operationId: getAlerts
+      tags:
+      - Alerts
+      summary: Fetch weather alerts for a specific location
+      description: Retrieves current weather alerts based on latitude and longitude coordinates.
+      parameters:
+      - name: lat
+        in: query
+        required: true
+        description: Latitude of the location
+        schema:
+          type: number
+          format: double
+      - name: lon
+        in: query
+        required: true
+        description: Longitude of the location
+        schema:
+          type: number
+          format: double
+      responses:
+        200:
+          description: An array of weather alerts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alerts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WeatherAlert'
+                  location:
+                    $ref: '#/components/schemas/AlertLocation'
 components:
   schemas:
+    WeatherAlert:
+      type: object
+      properties:
+        id:
+          type: integer
+        alert_id:
+          type: string
+        effective:
+          type: string
+          format: date-time
+        onset:
+          type: string
+          format: date-time
+        expires:
+          type: string
+          format: date-time
+        category:
+          type: string
+        response_type:
+          type: string
+        urgency:
+          type: string
+        severity:
+          type: string
+        certainty:
+          type: string
+        event_code:
+          type: integer
+        event_en:
+          type: string
+        event_de:
+          type: string
+        headline_en:
+          type: string
+        headline_de:
+          type: string
+        description_en:
+          type: string
+        description_de:
+          type: string
+        instruction_en:
+          type: string
+          nullable: true
+        instruction_de:
+          type: string
+          nullable: true
+    AlertLocation:
+      type: object
+      properties:
+        warn_cell_id:
+          type: integer
+        name:
+          type: string
+        name_short:
+          type: string
+        district:
+          type: string
+        state:
+          type: string
+        state_short:
+          type: string
     HourlyResponse:
       type: object
       required:
@@ -913,31 +984,6 @@ components:
         - windspeed
         - wind_direction_10m
         - weathercode
-    Alert:
-      type: object
-      properties:
-        warnId:
-          type: string
-        type:
-          type: number
-        level:
-          type: number
-        start:
-          type: number
-        end:
-          type: number
-        bn:
-          type: boolean
-        instruction:
-          type: string
-        description:
-          type: string
-        descriptionText:
-          type: string
-        event:
-          type: string
-        headline:
-          type: string
     RainData:
       type: object
       properties:

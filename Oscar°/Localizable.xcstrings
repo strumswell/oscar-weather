@@ -1,28 +1,6 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
-    " (+)" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : " (+)"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        }
-      }
-    },
     "* 17.04.02 – † 03.08.21" : {
       "localizations" : {
         "de" : {

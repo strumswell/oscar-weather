@@ -17,13 +17,8 @@ struct AlertView: View {
                 .resizable()
                 .foregroundColor(.orange)
                 .frame(width: 15, height: 15)
-            if (weather.alerts.count > 1) {
-                Text(weather.alerts.first!.getFormattedHeadline().uppercased() + " (+"+String(weather.alerts.count-1)+")")
-                    .font(.caption2)
-                    .foregroundColor(.orange)
-                    .bold()
-            } else if (weather.alerts.count > 0) {
-                Text(weather.alerts.first!.getFormattedHeadline().uppercased())
+            if hasAlert() {
+                Text(getFormattedHeadline())
                     .font(.caption2)
                     .foregroundColor(.orange)
                     .bold()
@@ -44,5 +39,35 @@ struct AlertView: View {
         }
         .padding(.top, -10)
         .shadow(radius: 15)
+    }
+}
+
+extension AlertView {
+    func hasAlert() -> Bool {
+        return (weather.alerts.alerts?.count ?? 0) > 0
+    }
+    
+    func getAlertCont() -> Int {
+        return weather.alerts.alerts?.count ?? 0
+    }
+    
+    func getFormattedHeadline() -> String {
+        let langStr = Locale.current.language.languageCode?.identifier ?? "de"
+        let alertCount = getAlertCont()
+        let headlineDe = (weather.alerts.alerts?.first?.headline_de ?? "")
+            .replacingOccurrences(of: "Amtliche", with: "")
+            .replacingOccurrences(of: "UNWETTER", with: "")
+        let headlineEn = (weather.alerts.alerts?.first?.event_en ?? "")
+            .replacingOccurrences(of: "Official", with: "")
+        let localizedEvent = langStr == "de"
+            ? headlineDe.uppercased()
+            : headlineEn.uppercased()
+        
+        if alertCount > 1 {
+            return "\(localizedEvent) (+\(alertCount-1))"
+        } else {
+            return localizedEvent
+        }
+        
     }
 }

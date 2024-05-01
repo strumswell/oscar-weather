@@ -11,7 +11,7 @@ import Foundation
 class Weather {
     var isLoading: Bool = false
     var forecast: Operations.getForecast.Output.Ok.Body.jsonPayload
-    var alerts: [Components.Schemas.Alert]
+    var alerts: Operations.getAlerts.Output.Ok.Body.jsonPayload
     var air: Operations.getAirQuality.Output.Ok.Body.jsonPayload
     var time: Double
     var radar: Components.Schemas.RadarResponse
@@ -25,7 +25,7 @@ class Weather {
             longitude: 0.0,
             current: .init(cloudcover: 0.0, time: 0.0, temperature: 0.0, windspeed: 0.0, wind_direction_10m: 0.0, weathercode: 0.0)
         )
-        alerts = []
+        alerts = .init()
         air = Operations.getAirQuality.Output.Ok.Body.jsonPayload.init(latitude: 0, longitude: 0, hourly: nil)
         radar = .init()
     }
