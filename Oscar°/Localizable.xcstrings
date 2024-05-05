@@ -1,24 +1,24 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
-    "* 17.04.02 – † 03.08.21" : {
+    "... wurde in liebevoller Erinnerung an diejenigen entwickelt, die nicht mehr unter uns sind. In unseren Herzen und Gedanken bleiben sie jedoch für immer lebendig." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "* 17.04.02 – † 03.08.21"
+            "value" : "... wurde in liebevoller Erinnerung an diejenigen entwickelt, die nicht mehr unter uns sind. In unseren Herzen und Gedanken bleiben sie jedoch für immer lebendig."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "... was developed in loving memory of those who are no longer with us. However, they remain forever alive in our hearts and minds."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "... artık aramızda olmayanların sevgi dolu anısına geliştirilmiştir. Ancak onlar kalplerimizde ve zihinlerimizde sonsuza dek canlı kalacaklar."
           }
         }
       }
@@ -512,28 +512,6 @@
         }
       }
     },
-    "In Gedenken an Kater Oscar von der Katzenfreiheit" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In Gedenken an Kater Oscar von der Katzenfreiheit"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In memory of Oscar von der Katzenfreiheit"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar von der Katzenfreiheit'ın anısına"
-          }
-        }
-      }
-    },
     "Location" : {
       "localizations" : {
         "de" : {
@@ -732,6 +710,28 @@
         }
       }
     },
+    "Oscar°" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar°"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar°"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar°"
+          }
+        }
+      }
+    },
     "Oscar° Weather" : {
       "localizations" : {
         "de" : {
@@ -844,6 +844,7 @@
       }
     },
     "Rechtliches" : {
+      "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {

@@ -83,6 +83,7 @@
 		259704E52757D7E800DFCA53 /* AlertDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259704E42757D7E800DFCA53 /* AlertDetailView.swift */; };
 		259EDA6C29ABC19F00F94996 /* RainRadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259EDA6B29ABC19F00F94996 /* RainRadarView.swift */; };
 		25A0CEDD26C4068300DD4A79 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A0CEDC26C4068300DD4A79 /* RadarView.swift */; };
+		25AD38E72BE716E100A8F305 /* MemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25AD38E62BE716E100A8F305 /* MemoryView.swift */; };
 		25B734172BD9BB86003C6756 /* SentrySwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 25B734162BD9BB86003C6756 /* SentrySwiftUI */; };
 		25BEDCE426CACF7D00D90D6B /* DataModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE226CACF7D00D90D6B /* DataModels.xcdatamodeld */; };
 		25BEDCE626CACFC900D90D6B /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE526CACFC900D90D6B /* PersistenceController.swift */; };
@@ -235,6 +236,7 @@
 		259704E42757D7E800DFCA53 /* AlertDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertDetailView.swift; sourceTree = "<group>"; };
 		259EDA6B29ABC19F00F94996 /* RainRadarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainRadarView.swift; sourceTree = "<group>"; };
 		25A0CEDC26C4068300DD4A79 /* RadarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarView.swift; sourceTree = "<group>"; };
+		25AD38E62BE716E100A8F305 /* MemoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryView.swift; sourceTree = "<group>"; };
 		25B4C45A2B57441F0069B3B0 /* ci_post_clone.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_post_clone.sh; sourceTree = "<group>"; };
 		25BEDCE326CACF7D00D90D6B /* DataModels.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModels.xcdatamodel; sourceTree = "<group>"; };
 		25BEDCE526CACFC900D90D6B /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
@@ -410,6 +412,7 @@
 				253F708A29510B06000BD4C0 /* AQIView.swift */,
 				25CBB63B2B44A13600223B69 /* WeatherSimulationView.swift */,
 				25CB17DD2B46EB61001D973A /* LegalTextView.swift */,
+				25AD38E62BE716E100A8F305 /* MemoryView.swift */,
 			);
 			path = NowSubViews;
 			sourceTree = "<group>";
@@ -886,6 +889,7 @@
 				25BEDCE626CACFC900D90D6B /* PersistenceController.swift in Sources */,
 				259704E52757D7E800DFCA53 /* AlertDetailView.swift in Sources */,
 				25CB17E52B4703CD001D973A /* WeatherObservable.swift in Sources */,
+				25AD38E72BE716E100A8F305 /* MemoryView.swift in Sources */,
 				25ED4A4727A2F5C60050C4A9 /* HeadView.swift in Sources */,
 				25ED79B329F1A7DF002E0AAB /* CloudGroup.swift in Sources */,
 				25ED79BC29F1A7DF002E0AAB /* StormDrop.swift in Sources */,
