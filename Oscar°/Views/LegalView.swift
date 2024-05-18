@@ -12,7 +12,7 @@ struct LegalView: View {
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 Form {
                     Section(header: Text("Über")) {
@@ -22,7 +22,7 @@ struct LegalView: View {
                                 .foregroundColor(.white)
                                 .background(Color.blue)
                                 .cornerRadius(5)
-                            Link("Datenschutz", destination: URL(string: "https://oscars.love/")!)
+                            Link(String(localized: "Datenschutz"), destination: URL(string: "https://oscars.love/")!)
                                 .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .font(.body)
                         }
@@ -32,7 +32,7 @@ struct LegalView: View {
                                 .foregroundColor(.white)
                                 .background(Color.blue)
                                 .cornerRadius(5)
-                            Link("Impressum", destination: URL(string: "https://oscars.love/")!)
+                            Link(String(localized: "Impressum"), destination: URL(string: "https://oscars.love/")!)
                                 .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .font(.body)
                         }
@@ -155,28 +155,28 @@ struct LegalView: View {
                         }
                     }
                     
-                    HStack {
-                        Spacer()
-                        VStack {
-                            Text("Oscar° Weather")
-                                .font(.body)
-                                .bold()
-                            Text("by Philipp Bolte")
-                                .font(.caption)
-                                .padding(.bottom, 2)
-                            Text("In Gedenken an Kater Oscar von der Katzenfreiheit")
-                                .font(.caption2)
-                                .foregroundColor(.gray)
-                            Text("* 17.04.02 – † 03.08.21")
-                                .font(.caption2)
-                                .foregroundColor(.gray)
+                    NavigationLink {
+                        MemoryView()
+                            .navigationBarBackButtonHidden()
+                    } label: {
+                        HStack {
+                            Spacer()
+                            VStack {
+                                Text("Oscar° Weather")
+                                    .font(.body)
+                                    .bold()
+                                Text("by Philipp Bolte")
+                                    .font(.caption)
+                                    .padding(.bottom, 2)
+                            }
+                            Spacer()
                         }
-                        Spacer()
+                        .padding(.bottom, 1)
                     }
-                    .padding(.bottom, 1)
+
                 }
             }
-            .navigationBarTitle(Text("Rechtliches"), displayMode: .inline)
+            .navigationTitle("Rechtliches")
             .toolbar(content: {
                 ToolbarItem(placement: .navigationBarTrailing, content: {
                     Button("Fertig", action: {

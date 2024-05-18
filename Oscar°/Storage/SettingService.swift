@@ -51,6 +51,8 @@ public class SettingService: ObservableObject {
                 defaultSettings.rainviewerLayer = false
                 defaultSettings.infrarotLayer = false
                 defaultSettings.tempLayer = false
+                defaultSettings.humidityLayer = false
+                defaultSettings.windDirectionLayer = false
                 self.save()
             } else {
                 self.settings = result.first!

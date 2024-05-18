@@ -51,14 +51,12 @@ struct TemperatureLockScreenView: View {
 
 struct TemperatureLockScreenWidget: Widget {
     let kind: String = "TemperatureLockScreenWidget"
-    
-    
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: LockscreenProvider()) { entry in
             TemperatureLockScreenView(entry: entry)
         }
-        .configurationDisplayName("Temperatur")
-        .description("Aktuelle Temperatur und heute zu erwartende Temperaturen")
+        .configurationDisplayName(String(localized: "Temperatur", comment: "LS Temperatur"))
+        .description(String(localized: "Aktuelle Temperatur und heute zu erwartende Temperaturen", comment: "LS Widget"))
         #if os(iOS)
         .supportedFamilies([.accessoryCircular, .accessoryInline])
         #elseif os(watchOS)

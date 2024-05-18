@@ -9,8 +9,8 @@ import CoreLocation
 import Charts
 
 struct HeadView: View {
-    @ObservedObject var searchModel: SearchViewModel = SearchViewModel()
-    @ObservedObject var now: NowViewModel
+    @Environment(Weather.self) private var weather: Weather
+    @Environment(Location.self) private var location: Location
     @State private var isLocationSheetPresented = false
     
     var body: some View {
@@ -18,57 +18,70 @@ struct HeadView: View {
             Spacer()
             Image(systemName: "magnifyingglass")
                 .foregroundColor(Color(UIColor.label))
-            Text(now.placemark ?? "...")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .lineSpacing(/*@START_MENU_TOKEN@*/10.0/*@END_MENU_TOKEN@*/)
-                    .foregroundColor(Color(UIColor.label))
+            Text(location.name)
+                .font(.title2)
+                .fontWeight(.bold)
+                .lineSpacing(10)
+                .foregroundColor(Color(UIColor.label))
             Spacer()
         }
+        .shadow(radius: 5)
         .onTapGesture {
             UIApplication.shared.playHapticFeedback()
             isLocationSheetPresented.toggle()
         }
         .sheet(isPresented: $isLocationSheetPresented) {
-            SearchView(searchModel: searchModel, now: now, cities: $now.cs.cities)
+            SearchCityView()
         }
-        .padding(.bottom, 40)
+        .padding(.bottom, 35)
         .padding(.leading, -20)
         .padding(.top)
         
-        LazyVStack {
+        VStack {
             VStack {
                 Spacer()
-                // MARK: Current Temperature
-                Text(now.weather?.currentWeather.getRoundedTempString() ?? "")
-                    .foregroundColor(Color(UIColor.label))
-                    .font(.system(size: 120))
+                Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
+                        .foregroundColor(Color(UIColor.label))
+                        .font(.system(size: 120))
+                        .shadow(radius: 15)
             }
             .padding(.bottom, 150)
-
+            
             HStack {
                 Spacer()
                 Image(systemName: "cloud")
                     .frame(width: 30, height: 30)
                     .foregroundColor(Color(UIColor.label))
-                Text("\(now.weather?.getCurrentCloudCover() ?? 0, specifier: "%.0f") %")
+                Text("\(weather.forecast.current!.cloudcover, specifier: "%.0f") %")
                     .foregroundColor(Color(UIColor.label))
                 Image(systemName: "wind")
                     .frame(width: 30, height: 30)
                     .foregroundColor(Color(UIColor.label))
-                Text("\(now.weather?.currentWeather.windspeed ?? 0, specifier: "%.1f") km/h")
+                Text("\(weather.forecast.current!.windspeed, specifier: "%.1f") km/h")
                     .foregroundColor(Color(UIColor.label))
                 Image(systemName: "location")
                     .frame(width: 30, height: 30)
                     .foregroundColor(Color(UIColor.label))
-                Text("\(now.weather?.currentWeather.getWindDirection() ?? "N/A")")
+                Text("\(weather.forecast.current!.getWindDirection())")
                 Spacer()
             }
             .padding(.bottom)
-
-            if ((now.alerts?.count ?? 0) > 0) {
-                AlertView(alerts: $now.alerts)
+            
+            if hasWeatherAlerts() {
+                AlertView()
             }
         }
+        .scrollTransition { content, phase in
+            content
+                .opacity(phase.isIdentity ? 1 : 0.8)
+                .scaleEffect(phase.isIdentity ? 1 : 0.99)
+                .blur(radius: phase.isIdentity ? 0 : 0.5)
+        }
+    }
+}
+
+extension HeadView {
+    func hasWeatherAlerts() -> Bool {
+        return weather.alerts.alerts?.count ?? 0 > 0
     }
 }

@@ -10,21 +10,46 @@ import MapKit
 
 struct RadarView: View {
     @ObservedObject var settingsService: SettingService
-    @ObservedObject var now: NowViewModel
-    @Binding var radarMetadata: WeatherMapsResponse?
     var showLayerSettings: Bool
-
+    var locationService = LocationService.shared
+    var userActionAllowed = true
 
     var body: some View {
         ZStack {
             RadarMapView(
-                overlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.radar.past[radarMetadata!.radar.past.count-1].path ?? "", color: "2", options: "1_1"),
+                settingsService: settingsService,
                 overlayOpacity: 0.7,
-                cloudOverlay: getOverlay(host: radarMetadata?.host ?? "", path: radarMetadata?.satellite.infrared.last?.path ?? "", color: "0", options: "0_0"),
-                coordinates: now.getActiveLocation(),
-                cities: now.cs.cities,
-                settings: settingsService.settings
+                coordinates: locationService.getCoordinates(),
+                cities: locationService.city.cities,
+                userActionAllowed: userActionAllowed
             )
+            if (showLayerSettings && settingsService.settings != nil) {
+                VStack {
+                    Spacer()
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            if (settingsService.settings?.rainviewerLayer ?? false) {
+                                LegendView(legendURL: "https://files.readme.io/6efe1f9-precipitation-si-spectrum.png")
+                            }
+                            if (settingsService.settings?.tempLayer ?? false) {
+                                LegendView(legendURL: "https://files.readme.io/e19fcb3-temperature-si-spectrum.png")
+                            }
+                            if (settingsService.settings?.windDirectionLayer ?? false) {
+                                LegendView(legendURL: "https://files.readme.io/bf5392a-wind-direction-spectrum.png")
+                            }
+                            if (settingsService.settings?.druckLayer ?? false) {
+                                LegendView(legendURL: "https://files.readme.io/e8317b1-wind-speed-si-spectrum.png")
+                            }
+                            if (settingsService.settings?.humidityLayer ?? false) {
+                                LegendView(legendURL: "https://files.readme.io/70de95d-humidity-spectrum.png")
+                            }
+                            if (settingsService.settings?.infrarotLayer ?? false) {
+                                LegendView(legendURL: "https://files.readme.io/168dd28-cloud-cover-spectrum.png")
+                            }
+                        }
+                    }
+                }
+            }
             if (showLayerSettings) {
                 VStack {
                     HStack {
@@ -32,26 +57,14 @@ struct RadarView: View {
                         Menu {
                             Button(action: {
                                 if (settingsService.settings != nil) {
-                                    settingsService.settings!.infrarotLayer.toggle()
-                                    settingsService.save()
-                                }
-                            }) {
-                                if (settingsService.settings?.infrarotLayer ?? false) {
-                                    Label("Infrarot", systemImage: "checkmark")
-                                } else {
-                                    Text("Infrarot")
-                                }
-                            }
-                            Button(action: {
-                                if (settingsService.settings != nil) {
                                     settingsService.settings!.rainviewerLayer.toggle()
                                     settingsService.save()
                                 }
                             }) {
                                 if (settingsService.settings?.rainviewerLayer ?? false) {
-                                    Label("Regen (Rainviewer)", systemImage: "checkmark")
+                                    Label(String(localized: "Regen (Global)"), systemImage: "checkmark")
                                 } else {
-                                    Text("Regen (Rainviewer)")
+                                    Text("Regen (Global)")
                                 }
                             }
                             Button(action: {
@@ -61,7 +74,7 @@ struct RadarView: View {
                                 }
                             }) {
                                 if (settingsService.settings?.dwdLayer ?? false) {
-                                    Label("Regen (DWD)", systemImage: "checkmark")
+                                    Label(String(localized: "Regen (DWD)"), systemImage: "checkmark")
                                 } else {
                                     Text("Regen (DWD)")
                                 }
@@ -73,7 +86,7 @@ struct RadarView: View {
                                 }
                             }) {
                                 if (settingsService.settings?.tempLayer ?? false) {
-                                    Label("Temperatur", systemImage: "checkmark")
+                                    Label(String(localized: "Temperatur"), systemImage: "checkmark")
                                 } else {
                                     Text("Temperatur")
                                 }
@@ -85,9 +98,45 @@ struct RadarView: View {
                                 }
                             }) {
                                 if (settingsService.settings?.druckLayer ?? false) {
-                                    Label("Wind & Druck", systemImage: "checkmark")
+                                    Label(String(localized: "Windgeschwindidkeit"), systemImage: "checkmark")
                                 } else {
-                                    Text("Wind & Druck")
+                                    Text("Windgeschwindidkeit")
+                                }
+                            }
+                            Button(action: {
+                                if (settingsService.settings != nil) {
+                                    settingsService.settings!.infrarotLayer.toggle()
+                                    settingsService.save()
+                                }
+                            }) {
+                                if (settingsService.settings?.infrarotLayer ?? false) {
+                                    Label(String(localized: "Wolken"), systemImage: "checkmark")
+                                } else {
+                                    Text("Wolken")
+                                }
+                            }
+                            Button(action: {
+                                if (settingsService.settings != nil) {
+                                    settingsService.settings!.humidityLayer.toggle()
+                                    settingsService.save()
+                                }
+                            }) {
+                                if (settingsService.settings?.humidityLayer ?? false) {
+                                    Label(String(localized: "Luftfeuchtigkeit"), systemImage: "checkmark")
+                                } else {
+                                    Text("Luftfeuchtigkeit")
+                                }
+                            }
+                            Button(action: {
+                                if (settingsService.settings != nil) {
+                                    settingsService.settings!.windDirectionLayer.toggle()
+                                    settingsService.save()
+                                }
+                            }) {
+                                if (settingsService.settings?.windDirectionLayer ?? false) {
+                                    Label(String(localized: "Windrichtung"), systemImage: "checkmark")
+                                } else {
+                                    Text("Windrichtung")
                                 }
                             }
                         } label: {
@@ -109,6 +158,63 @@ struct RadarView: View {
     }
 }
 
+struct LegendView: View {
+    var legendURL: String
+    var body: some View {
+                AsyncImage(
+                    url: URL(string: legendURL),
+                    content: { image in
+                        image
+                            .resizable()
+                            .cornerRadius(10)
+                            .opacity(0.8)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 300, height: 200)
+                    },
+                    placeholder: {
+                        VStack(alignment: .leading) {
+                            Spacer()
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                Spacer()
+                            }
+                            Spacer()
+                        }
+                        .frame(height: 350)
+                        .background(Color(UIColor.secondarySystemFill))
+                    }
+                )
+                .padding(10)
+            }
+        
+    }
+
+
+extension RadarView {
+    func getLayerLegendURL() -> String? {
+        if (settingsService.settings!.rainviewerLayer) {
+            return "https://files.readme.io/6efe1f9-precipitation-si-spectrum.png"
+        }
+        if (settingsService.settings!.tempLayer) {
+            return "https://files.readme.io/e19fcb3-temperature-si-spectrum.png"
+        }
+        if (settingsService.settings!.windDirectionLayer) {
+            return "https://files.readme.io/bf5392a-wind-direction-spectrum.png"
+        }
+        if (settingsService.settings!.druckLayer) {
+            return "https://files.readme.io/e8317b1-wind-speed-si-spectrum.png"
+        }
+        if (settingsService.settings!.humidityLayer) {
+            return "https://files.readme.io/e8317b1-wind-speed-si-spectrum.png"
+        }
+        if (settingsService.settings!.infrarotLayer) {
+            return "https://files.readme.io/e8317b1-wind-speed-si-spectrum.png"
+        }
+        return nil
+    }
+}
+
 struct WebMapServiceConstants {
     static let baseUrl = "https://maps.dwd.de/geoserver/dwd/wms"
     static let version = "1.3.0"
@@ -119,12 +225,11 @@ struct WebMapServiceConstants {
 }
 
 struct RadarMapView: UIViewRepresentable {
-    var overlay: MKTileOverlay
+    @ObservedObject var settingsService: SettingService
     var overlayOpacity: Double
-    var cloudOverlay: MKTileOverlay
     var coordinates: CLLocationCoordinate2D
     var cities: [City]
-    var settings: Settings?
+    var userActionAllowed: Bool
     
     class Coordinator: NSObject, MKMapViewDelegate {
         var parent: RadarMapView
@@ -146,13 +251,14 @@ struct RadarMapView: UIViewRepresentable {
     }
 
     func makeUIView(context: Context) -> MKMapView {
-        return MKMapView()
+        let mapView = MKMapView()
+        let coordinateRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude), latitudinalMeters: 100000, longitudinalMeters: 100000)
+        mapView.setRegion(coordinateRegion, animated: false)
+        return mapView
     }
     
     func updateUIView(_ mapView: MKMapView, context: Context) {
         let overlays = mapView.overlays
-        let hour = Calendar.current.component(.hour, from: Date())
-        
         
         mapView.removeAnnotations(mapView.annotations)
 
@@ -170,53 +276,80 @@ struct RadarMapView: UIViewRepresentable {
         mapView.delegate = context.coordinator
         //mapView.overrideUserInterfaceStyle = .dark
         mapView.removeOverlays(overlays)
-                
-        if (settings?.druckLayer ?? false) {
-            let overlay = MKTileOverlay(urlTemplate: "https://services.meteored.com/img/tiles/cep010/{z}/{x}/{y}/0\(String(format: "%02d",hour-2))_prsvie.png")
-            mapView.addOverlay(overlay)
-            //https://services.meteored.com/img/tiles/cep010/6/31/21/014_temp2m@2x.png
-        }
-        if (settings?.tempLayer ?? false) {
-            let overlay = MKTileOverlay(urlTemplate: "https://services.meteored.com/img/tiles/cep010/{z}/{x}/{y}/0\(String(format: "%02d",hour-2))_temp2m.png")
-            mapView.addOverlay(overlay)
-        }
-        if (settings?.infrarotLayer ?? false) {
-            mapView.addOverlay(cloudOverlay)
-        }
-        if (settings?.rainviewerLayer ?? false) {
-            mapView.addOverlay(overlay)
-        }
-        if (settings?.dwdLayer ?? true) {
-            var referenceSystem = ""
-            if WebMapServiceConstants.version == "1.1.1" {
-                referenceSystem = "SRS"
-            } else {
-                referenceSystem = "CRS"
+        
+        if let settings = settingsService.settings {
+            if settings.druckLayer {
+                let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/windSpeed/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
+                mapView.addOverlay(overlay)
+                //https://services.meteored.com/img/tiles/cep010/6/31/21/014_temp2m@2x.png
             }
-
-            let urlLayers = "layers=dwd:Niederschlagsradar&"
-            let urlVersion = "version=\(WebMapServiceConstants.version)&"
-            let urlReferenceSystem = "\(referenceSystem)=EPSG:\(WebMapServiceConstants.epsg)&"
-            let urlWidthAndHeight = "width=\(WebMapServiceConstants.tileSize)&height=\(WebMapServiceConstants.tileSize)&"
-            let urlFormat = "format=\(WebMapServiceConstants.format)&format_options=MODE:refresh&"
-            let urlTransparent = "transparent=\(WebMapServiceConstants.transparent)&"
-
-            var useMercator = false
-            if(WebMapServiceConstants.epsg == "900913"){
-                useMercator = true
+            if settings.tempLayer {
+                let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/temperature/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
+                mapView.addOverlay(overlay)
             }
+            if settings.infrarotLayer {
+                let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/cloudCover/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
+                mapView.addOverlay(overlay)
+            }
+            if settings.rainviewerLayer {
+                let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/precipitationIntensity/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
+                mapView.addOverlay(overlay)
+            }
+            if settings.windDirectionLayer {
+                let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/windDirection/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
+                mapView.addOverlay(overlay)
+            }
+            if settings.humidityLayer {
+                let overlay = MKTileOverlay(urlTemplate: "https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/humidity/now.png?apikey=XjlExJsvt4ftR9UgSXvacuTwvwEEebiQ")
+                mapView.addOverlay(overlay)
+            }
+            if settings.dwdLayer {
+                var referenceSystem = ""
+                if WebMapServiceConstants.version == "1.1.1" {
+                    referenceSystem = "SRS"
+                } else {
+                    referenceSystem = "CRS"
+                }
 
-            let urlString = WebMapServiceConstants.baseUrl + "?styles=&service=WMS&request=GetMap&" + urlLayers + urlVersion + urlReferenceSystem + urlWidthAndHeight + urlFormat + urlTransparent //+ "&time=" + time[index]
-            let overlay = WMSTileOverlay(urlArg: urlString, useMercator: useMercator, wmsVersion: WebMapServiceConstants.version)
-            mapView.addOverlay(overlay)
+                let urlLayers = "layers=dwd:Niederschlagsradar&"
+                let urlVersion = "version=\(WebMapServiceConstants.version)&"
+                let urlReferenceSystem = "\(referenceSystem)=EPSG:\(WebMapServiceConstants.epsg)&"
+                let urlWidthAndHeight = "width=\(WebMapServiceConstants.tileSize)&height=\(WebMapServiceConstants.tileSize)&"
+                let urlFormat = "format=\(WebMapServiceConstants.format)&format_options=MODE:refresh&"
+                let urlTransparent = "transparent=\(WebMapServiceConstants.transparent)&"
+
+                var useMercator = false
+                if(WebMapServiceConstants.epsg == "900913"){
+                    useMercator = true
+                }
+
+                let urlString = WebMapServiceConstants.baseUrl + "?styles=&service=WMS&request=GetMap&" + urlLayers + urlVersion + urlReferenceSystem + urlWidthAndHeight + urlFormat + urlTransparent //+ "&time=" + time[index]
+                let overlay = WMSTileOverlay(urlArg: urlString, useMercator: useMercator, wmsVersion: WebMapServiceConstants.version)
+                mapView.addOverlay(overlay)
+            }
         }
         
-        // Define region to center map on -> Modify lat so selected city is visible in the map view (Map view extends down behind the weather sheet -> pull to refresh shows no blank space behind sheet
-        let coordinateRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude), latitudinalMeters: 100000, longitudinalMeters: 100000)
-        
-        mapView.setRegion(coordinateRegion, animated: false)
-        mapView.mapType = .hybridFlyover
+        // Let's auto-update the map region if users location changes for static views
+        if !userActionAllowed {
+            let currentCenter = mapView.centerCoordinate
+            let desiredCenter = coordinates
+
+            let currentLocation = CLLocation(latitude: currentCenter.latitude, longitude: currentCenter.longitude)
+            let desiredLocation = CLLocation(latitude: desiredCenter.latitude, longitude: desiredCenter.longitude)
+            let distance = currentLocation.distance(from: desiredLocation)
+
+            if distance > 1000 {
+                let coordinateRegion = MKCoordinateRegion(center: desiredCenter, latitudinalMeters: 100000, longitudinalMeters: 100000)
+                mapView.setRegion(coordinateRegion, animated: false)
+            }
+        }
+
         mapView.showsUserLocation = true
+        if !userActionAllowed {
+            mapView.isScrollEnabled = false
+            mapView.isZoomEnabled = false
+            mapView.isRotateEnabled = false
+        }
     }
 }
 
