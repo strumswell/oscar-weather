@@ -96,7 +96,7 @@ struct NowView: View {
                 await self.updateState()
             }
         }
-        .background(Color(UIColor.secondarySystemBackground))
+        .background(.thinMaterial)
         .edgesIgnoringSafeArea(.all)
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             Task {

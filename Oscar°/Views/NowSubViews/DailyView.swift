@@ -1,10 +1,3 @@
-//
-//  DailyView.swift
-//  Weather
-//
-//  Created by Philipp Bolte on 24.10.20.
-//
-
 import SwiftUI
 
 struct DailyView: View {
@@ -13,6 +6,8 @@ struct DailyView: View {
     var body: some View {
         // Cap at 12 days to keep View from getting too large with too much (unreliable) data
         let dayNumber = (weather.forecast.daily?.time.count ?? 1) > 12 ? 12 : (weather.forecast.daily?.time.count ?? 1)
+        let minTemp = weather.forecast.daily?.temperature_2m_min?.min() ?? 0.0
+        let maxTemp = weather.forecast.daily?.temperature_2m_max?.max() ?? 40.0
         let heading = String.localizedStringWithFormat(NSLocalizedString("%d-Tage", comment: "Headline for Daily View"), dayNumber)
 
         VStack(alignment: .leading) {
@@ -42,30 +37,24 @@ struct DailyView: View {
                     )
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                .background(.thinMaterial)
                 .cornerRadius(10)
                 .font(.system(size: 18))
                 .padding([.leading, .trailing])
             } else {
-                HStack {
-                    VStack(alignment: .leading, spacing: 22) {
-                        ForEach(0...dayNumber-1, id: \.self) { dayPos in
-                            Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0) )
+                VStack {
+                    ForEach(0...dayNumber-1, id: \.self) { dayPos in
+                        let dayMinTemp = weather.forecast.daily?.temperature_2m_min?[dayPos]
+                        let dayMaxTemp = weather.forecast.daily?.temperature_2m_max?[dayPos]
+                        HStack {
+                            Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0))
                                 .foregroundColor(Color(UIColor.label))
-                        }
-                    }
-                    .padding(.leading)
-                    Spacer()
-                    VStack(spacing: 14) {
-                        ForEach(0...dayNumber-1, id: \.self) { dayPos in
+                                .bold()
+                                .frame(width: 50, alignment: .leading)
                             Image(getWeatherIcon(pos: dayPos))
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 30, height: 30)
-                        }
-                    }
-                    VStack(alignment: .leading, spacing: 13) {
-                        ForEach(0...dayNumber-1, id: \.self) { dayPos in
                             VStack {
                                 Text("\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") mm")
                                     .font(.caption)
@@ -74,29 +63,20 @@ struct DailyView: View {
                                     .font(.caption)
                                     .foregroundColor(Color(UIColor.secondaryLabel))
                             }
+                            .padding(.trailing)
+                            Text(roundTemperatureString(temperature: dayMinTemp))
+                                .frame(width: 30, alignment: .trailing)
+                            TemperatureRangeView(low: Int(dayMinTemp?.rounded() ?? 0), high: Int(dayMaxTemp?.rounded() ?? 0), minTemp: Int(minTemp.rounded()), maxTemp: Int(maxTemp.rounded()))
+                                .frame(height: 5)
+                            Text(roundTemperatureString(temperature: dayMaxTemp))
+                                .frame(width: 30, alignment: .leading)
                         }
+                        .padding(.vertical, 4)
                     }
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 22) {
-                        ForEach(0...dayNumber-1, id: \.self) { dayPos in
-                            Text(roundTemperatureString(temperature: weather.forecast.daily?.temperature_2m_max?[dayPos]))
-                                .fontWeight(.semibold)
-                                .foregroundColor(Color(UIColor.label))
-                        }
-                    }
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 22) {
-                        ForEach(0...dayNumber-1, id: \.self) { dayPos in
-                            Text(roundTemperatureString(temperature: weather.forecast.daily?.temperature_2m_min?[dayPos]))
-                                .fontWeight(.light)
-                                .foregroundColor(Color(UIColor.label))
-                        }
-                    }
-                    .padding(.trailing)
                 }
-                .padding(.horizontal, 10)
+                .padding(.horizontal, 20)
                 .padding(.vertical, 10)
-                .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                .background(.thinMaterial)
                 .cornerRadius(10)
                 .font(.system(size: 18))
                 .padding([.leading, .trailing])
@@ -115,7 +95,7 @@ extension DailyView {
     public func getWeekDay(timestamp: Double) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.timeZone = TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? TimeZone.current
-        dateFormatter.dateFormat = "EEEE"
+        dateFormatter.dateFormat = "E"
         return dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(timestamp)))
     }
     
@@ -137,6 +117,60 @@ extension DailyView {
             return "11d"
         default:
             return "09d"
+        }
+    }
+}
+
+struct TemperatureRangeView: View {
+    let low: Int
+    let high: Int
+    let minTemp: Int
+    let maxTemp: Int
+
+    var body: some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            let lowPosition = position(for: low, in: width)
+            let highPosition = position(for: high, in: width)
+            
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: width, height: 4)
+                Capsule()
+                    .fill(gradient(for: low, high: high))
+                    .frame(width: highPosition - lowPosition, height: 4)
+                    .offset(x: lowPosition)
+            }
+            .alignmentGuide(VerticalAlignment.center) { d in d[VerticalAlignment.center] }
+        }
+    }
+
+    func position(for temperature: Int, in width: CGFloat) -> CGFloat {
+        let scale = CGFloat(temperature - minTemp) / CGFloat(maxTemp - minTemp)
+        return scale * width
+    }
+    
+    func gradient(for low: Int, high: Int) -> LinearGradient {
+        let lowColor = color(for: low)
+        let highColor = color(for: high)
+        return LinearGradient(gradient: Gradient(colors: [lowColor, highColor]), startPoint: .leading, endPoint: .trailing)
+    }
+    
+    func color(for temperature: Int) -> Color {
+        switch temperature {
+        case ..<0:
+            return .blue
+        case ..<11:
+            return .green
+        case ..<19:
+            return .yellow
+        case ..<26:
+            return .orange
+        case ..<41:
+            return .red
+        default:
+            return .purple
         }
     }
 }

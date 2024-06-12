@@ -29,7 +29,7 @@ struct HourlyView: View {
                                 .frame(width: 55, height: 140)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 12)
-                                .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                                .background(.thinMaterial)
                                 .cornerRadius(10)
                                 .scrollTransition { content, phase in
                                     content
@@ -67,7 +67,7 @@ struct HourlyView: View {
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 12)
-                            .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                            .background(.thinMaterial)
                             .cornerRadius(10)
                             .scrollTransition { content, phase in
                                 content
@@ -233,7 +233,7 @@ struct SunsetSunriseCard: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 12)
-            .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+            .background(.thinMaterial)
             .cornerRadius(10)
         } else if isWithinHourOfInterest(eventTimestamp: hourlyTimestamp, referenceHour: weather.forecast.daily?.sunset?[dayIndex] ?? 0) {
             VStack {
@@ -258,7 +258,7 @@ struct SunsetSunriseCard: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 12)
-            .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+            .background(.thinMaterial)
             .cornerRadius(10)
         }
     }

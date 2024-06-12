@@ -46,7 +46,7 @@ struct AQIView: View {
                         }
                         .padding(.horizontal, 10)
                         .padding(.vertical, 10)
-                        .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                        .background(.thinMaterial)
                         .cornerRadius(10)
                         .scrollTransition { content, phase in
                             content
@@ -77,7 +77,7 @@ struct AQIView: View {
                         }
                         .padding(.horizontal, 10)
                         .padding(.vertical, 10)
-                        .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                        .background(.thinMaterial)
                         .cornerRadius(10)
                         .scrollTransition { content, phase in
                             content
@@ -112,7 +112,7 @@ struct AQIView: View {
                         }
                         .padding(.horizontal, 10)
                         .padding(.vertical, 10)
-                        .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                        .background(.thinMaterial)
                         .cornerRadius(10)
                         .scrollTransition { content, phase in
                             content
@@ -147,7 +147,7 @@ struct AQIView: View {
                         }
                         .padding(.horizontal, 10)
                         .padding(.vertical, 10)
-                        .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                        .background(.thinMaterial)
                         .cornerRadius(10)
                         .scrollTransition { content, phase in
                             content
@@ -182,7 +182,7 @@ struct AQIView: View {
                         }
                         .padding(.horizontal, 10)
                         .padding(.vertical, 10)
-                        .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                        .background(.thinMaterial)
                         .cornerRadius(10)
                         .scrollTransition { content, phase in
                             content
@@ -217,7 +217,7 @@ struct AQIView: View {
                         }
                         .padding(.horizontal, 10)
                         .padding(.vertical, 10)
-                        .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                        .background(.thinMaterial)
                         .cornerRadius(10)
                         .scrollTransition { content, phase in
                             content
@@ -252,7 +252,7 @@ struct AQIView: View {
                         }
                         .padding(.horizontal, 10)
                         .padding(.vertical, 10)
-                        .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                        .background(.thinMaterial)
                         .cornerRadius(10)
                         .scrollTransition { content, phase in
                             content

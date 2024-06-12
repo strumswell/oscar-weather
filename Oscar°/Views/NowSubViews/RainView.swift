@@ -17,7 +17,7 @@ struct RainView: View {
                 chartView
                     .padding(.horizontal, 10)
                     .padding(.vertical, 10)
-                    .background(Color(UIColor.secondarySystemBackground).opacity(0.5))
+                    .background(.thinMaterial)
                     .cornerRadius(10)
                     .font(.system(size: 18))
                     .padding([.leading, .trailing, .bottom])
