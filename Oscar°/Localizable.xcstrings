@@ -23,6 +23,9 @@
         }
       }
     },
+    "%.0f" : {
+
+    },
     "%.0f %" : {
       "localizations" : {
         "de" : {
@@ -44,6 +47,9 @@
           }
         }
       }
+    },
+    "%.1f" : {
+
     },
     "%.1f km/h" : {
       "localizations" : {
@@ -157,6 +163,7 @@
       }
     },
     "0 mm/h" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -355,6 +362,38 @@
         }
       }
     },
+    "Bodentemperatur" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soil Temperature"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zemin sıcaklığı"
+          }
+        }
+      }
+    },
+    "Bodenwassergehalt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soil Moisture"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toprak su içeriği"
+          }
+        }
+      }
+    },
     "by Philipp Bolte" : {
       "localizations" : {
         "de" : {
@@ -422,6 +461,22 @@
         }
       }
     },
+    "Durchschnittlicher Wassergehalt des Bodens als volumetrisches Mischungsverhältnis in verschiedenen Tiefen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Average water content of the soil as a volumetric mixing ratio at different depths."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Farklı derinliklerde hacimsel karışım oranı olarak toprağın ortalama su içeriği."
+          }
+        }
+      }
+    },
     "E_compass" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -467,6 +522,22 @@
         }
       }
     },
+    "ET₀ ist die Referenz-Evapotranspiration eines gut bewässerten Grasfeldes und dient zur Schätzung des Bewässerungsbedarfs von Pflanzen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ET₀ is the reference evapotranspiration of a well-watered grass field and is used to estimate the irrigation requirements of plants."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ET₀, iyi sulanan bir çim alanın referans evapotranspirasyonudur ve bitkilerin sulama gereksinimlerini tahmin etmek için kullanılır."
+          }
+        }
+      }
+    },
     "Forecast" : {
       "localizations" : {
         "de" : {
@@ -485,6 +556,45 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tahmin"
+          }
+        }
+      }
+    },
+    "Für die nächsten Tage wird kein Regen vorhergesagt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No rain is predicted for the next few days."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önümüzdeki birkaç gün için yağmur beklenmiyor."
+          }
+        }
+      }
+    },
+    "Gefühlte Temperatur (°C)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gefühlte Temperatur (°C)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apparent temperature (°C)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algılanan sıcaklık (°C)"
           }
         }
       }
@@ -530,6 +640,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Konumum"
+          }
+        }
+      }
+    },
+    "Luftdruck" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressure"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava basıncı"
+          }
+        }
+      }
+    },
+    "Luftdruck (hPa)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atmospheric pressure (hPa)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava basıncı (hPa)"
           }
         }
       }
@@ -614,6 +757,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KD"
+          }
+        }
+      }
+    },
+    "Niederschlag (mm)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Precipitation (mm)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağış miktarı (mm)"
           }
         }
       }
@@ -866,6 +1026,55 @@
         }
       }
     },
+    "Referenz-Evapotranspiration (ET₀)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reference Evapotranspiration (ET₀)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Referans Evapotranspirasyon (ET₀)"
+          }
+        }
+      }
+    },
+    "Referenz-Evapotranspiration (mm)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reference Evapotranspiration (mm)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Referans Evapotranspirasyon (mm)"
+          }
+        }
+      }
+    },
+    "Regen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur"
+          }
+        }
+      }
+    },
     "Regen (DWD)" : {
       "localizations" : {
         "de" : {
@@ -928,6 +1137,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yağmur Radarı"
+          }
+        }
+      }
+    },
+    "Relative Luftfeuchtigkeit (%)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relative humidity (%)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağıl nem (%)"
           }
         }
       }
@@ -996,6 +1222,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Servisler"
+          }
+        }
+      }
+    },
+    "Sinkender Luftdruck deutet auf schlechtes Wetter oder Stürme hin, steigender Luftdruck auf gutes Wetter oder Hochdruckgebiete." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falling air pressure indicates bad weather or storms, rising air pressure indicates good weather or high pressure areas."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düşen hava basıncı kötü hava koşullarını veya fırtınaları, yükselen hava basıncı ise iyi hava koşullarını veya yüksek basınç alanlarını gösterir."
           }
         }
       }
@@ -1089,6 +1331,22 @@
         }
       }
     },
+    "Stündliche Details" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hourly Details"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saatlik detaylar"
+          }
+        }
+      }
+    },
     "Suchen..." : {
       "localizations" : {
         "de" : {
@@ -1152,6 +1410,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sıcaklık"
+          }
+        }
+      }
+    },
+    "Temperatur (°C)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatur (°C)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature (°C)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıcaklık (°C)"
           }
         }
       }
@@ -1309,6 +1590,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "B"
+          }
+        }
+      }
+    },
+    "Wind" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wind"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rüzgar"
           }
         }
       }

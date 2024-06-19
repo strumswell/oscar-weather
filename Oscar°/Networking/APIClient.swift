@@ -44,7 +44,7 @@ class APIClient {
         var query: Operations.getForecast.Input.Query = .init(
             latitude: coordinates.latitude,
             longitude: coordinates.longitude,
-            hourly: [.temperature_2m, .apparent_temperature, .precipitation, .weathercode, .cloudcover, .windspeed_10m, .winddirection_10m, .precipitation_probability, .is_day],
+            hourly: [.temperature_2m, .apparent_temperature, .precipitation, .weathercode, .cloudcover, .windspeed_10m, .windspeed_80m, .windspeed_120m, .windspeed_180m, .winddirection_10m, .precipitation_probability, .is_day, .relativehumidity_2m, .pressure_msl, .soil_temperature_0cm, .soil_temperature_6cm, .soil_temperature_18cm, .soil_temperature_54cm, .soil_moisture_0_1cm, .soil_moisture_1_3cm, .soil_moisture_3_9cm, .soil_moisture_9_27cm, .soil_moisture_27_81cm, .et0_fao_evapotranspiration],
             daily: [.precipitation_probability_max, .precipitation_sum, .sunrise, .sunset, .temperature_2m_max, .temperature_2m_min, .weathercode],
             current: [.cloudcover, .temperature, .wind_direction_10m, .weathercode, .windspeed, .precipitation, .is_day],
             timeformat: .unixtime,

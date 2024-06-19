@@ -9,19 +9,53 @@ import Charts
 
 struct RainView: View {
     @Environment(Weather.self) private var weather: Weather
-
+    
     var body: some View {
-        if getMaxPreci() > 0 {
+        if weather.radar.isRaining() {
             VStack(alignment: .leading) {
-                headerView
-                chartView
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 10)
-                    .background(.thinMaterial)
-                    .cornerRadius(10)
-                    .font(.system(size: 18))
-                    .padding([.leading, .trailing, .bottom])
-                    .frame(height: 165)
+                Text("Radar")
+                    .font(.system(size: 20))
+                    .bold()
+                    .foregroundColor(Color(UIColor.label))
+                    .padding([.leading, .top])
+                Chart {
+                    ForEach(weather.radar.radar ?? [], id: \.timestamp) { data in
+                        if let timestamp = data.timestamp, let precipitation = data.precipitation_5?.first?.first {
+                            AreaMark(
+                                x: .value("Time", timestamp),
+                                y: .value("Precipitation", Double(precipitation) / 10.0)
+                            )
+                            .foregroundStyle(LinearGradient(gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.2)]), startPoint: .top, endPoint: .bottom))
+                        }
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(position: .bottom) { value in
+                        AxisTick()
+                        AxisValueLabel() {
+                            if let date = value.as(Date.self) {
+                                Text(getFormattedTime(time: date))
+                            }
+                        }
+                    }
+                }
+                .chartYAxis {
+                    let yAxisValues = getYAxisValues()
+                    AxisMarks(values: yAxisValues) { value in
+                        AxisGridLine()
+                        AxisValueLabel() {
+                            if let value = value.as(Double.self) {
+                                Text("\(value, specifier: "%.1f") mm/h") // Add "mm" to y-axis labels
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 20)
+                .background(.thinMaterial)
+                .cornerRadius(10)
+                .padding([.leading, .trailing, .bottom])
+                .frame(height: 180)
             }
             .scrollTransition { content, phase in
                 content
@@ -31,73 +65,7 @@ struct RainView: View {
             }
         }
     }
-}
-
-private extension RainView {
-    var headerView: some View {
-        Text("Radar")
-            .font(.system(size: 20))
-            .bold()
-            .foregroundColor(Color(UIColor.label))
-            .padding([.leading, .top])
-    }
     
-    var chartView: some View {
-        HStack {
-            precipitationScale
-            VStack {
-                chart
-                timeLabels
-            }
-        }
-    }
-    
-    var precipitationScale: some View {
-        VStack {
-            Text("\(getMaxPreci(), specifier: "%.1f") mm/h")
-            Spacer()
-            Text("\(getMaxPreci() / 2, specifier: "%.1f") mm/h")
-            Spacer()
-            Text("0 mm/h")
-        }
-        .font(.footnote)
-        .foregroundColor(Color(UIColor.label))
-    }
-    
-    var chart: some View {
-        VStack {
-            if getMaxPreci() <= 1 {
-                Chart(data: getRadarForecast())
-                    .chartStyle(
-                        AreaChartStyle(.quadCurve, fill: blueGradient)
-                    )
-            } else if let radarCount = weather.radar.radar?.count, radarCount > 0 {
-                Chart(data: weather.radar.radar?.map { (Double($0.precipitation_5?.first?.first ?? 0) / 10) / getMaxPreci() } ?? [])
-                    .chartStyle(
-                        AreaChartStyle(.quadCurve, fill: blueGradient)
-                    )
-            }
-        }
-    }
-    
-    var timeLabels: some View {
-        HStack {
-            Text(getFormattedTime(time: weather.radar.radar?.first?.timestamp))
-            Spacer()
-            if weather.radar.radar?.count ?? 0 > 1 {
-                Text(getFormattedTime(time: weather.radar.radar?.middle?.timestamp))
-                Spacer()
-            }
-            Text(getFormattedTime(time: weather.radar.radar?.last?.timestamp))
-        }
-        .font(.footnote)
-        .foregroundColor(Color(UIColor.label))
-    }
-
-    var blueGradient: LinearGradient {
-        LinearGradient(gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.5)]), startPoint: .top, endPoint: .bottom)
-    }
-
     func getFormattedTime(time: Date?) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
@@ -107,13 +75,11 @@ private extension RainView {
     
     func getMaxPreci() -> Double {
         let maxPreci = weather.radar.radar?.compactMap { Double($0.precipitation_5?.first?.first ?? 0) / 10 }.max() ?? 0
-        return maxPreci <= 1 && maxPreci > 0 ? 1 : maxPreci
+        return maxPreci < 1 ? 1 : maxPreci
     }
     
-    func getRadarForecast() -> [Double] {
-        guard let radarEntries = weather.radar.radar else { return [] }
-        return radarEntries.flatMap { entry in
-            entry.precipitation_5?.flatMap { $0.map { Double($0) / 10.0 } } ?? []
-        }
+    func getYAxisValues() -> [Double] {
+        let maxPreci = getMaxPreci()
+        return [0, maxPreci / 2, maxPreci]
     }
 }

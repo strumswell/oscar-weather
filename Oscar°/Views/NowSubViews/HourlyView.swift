@@ -10,7 +10,8 @@ import Charts
 
 struct HourlyView: View {
     @Environment(Weather.self) private var weather: Weather
-    
+    @State private var showDetailView: Bool = false
+
     var body: some View {
         VStack(alignment: .leading) {
             Text("Stündlich")
@@ -99,6 +100,12 @@ struct HourlyView: View {
                 .opacity(phase.isIdentity ? 1 : 0.8)
                 .scaleEffect(phase.isIdentity ? 1 : 0.99)
                 .blur(radius: phase.isIdentity ? 0 : 0.5)
+        }
+        .onTapGesture {
+            UIApplication.shared.playHapticFeedback()
+            showDetailView.toggle()        }
+        .sheet(isPresented: $showDetailView) {
+            HourlyDetailView()
         }
     }
 }

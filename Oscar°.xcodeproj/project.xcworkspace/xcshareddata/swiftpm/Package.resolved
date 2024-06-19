@@ -1,15 +1,6 @@
 {
-  "originHash" : "a2c23582f040cd26cceccf71e3a317c37d9cfc8090b4a30bd5d9bbb8e3dbfc3c",
+  "originHash" : "a866a3437bf6bcbb0e830a79549919273e960b515b5a8d903b00b53b8ea05abf",
   "pins" : [
-    {
-      "identity" : "alamofire",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Alamofire/Alamofire",
-      "state" : {
-        "revision" : "d120af1e8638c7da36c8481fd61a66c0c08dc4fc",
-        "version" : "5.4.4"
-      }
-    },
     {
       "identity" : "openapikit",
       "kind" : "remoteSourceControl",
@@ -98,24 +89,6 @@
       "state" : {
         "revision" : "aac0a8273fa1186641e0b336da3f1be01aa6a0eb",
         "version" : "1.0.0"
-      }
-    },
-    {
-      "identity" : "swiftui-charts",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/spacenation/swiftui-charts",
-      "state" : {
-        "branch" : "master",
-        "revision" : "a24e51a9db161ba96e8af69bfc010f4fbf44be7e"
-      }
-    },
-    {
-      "identity" : "swiftui-shapes",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/spacenation/swiftui-shapes.git",
-      "state" : {
-        "revision" : "c58b15c37eae9bd20525c6daa93a06a689ca75cb",
-        "version" : "1.1.0"
       }
     },
     {

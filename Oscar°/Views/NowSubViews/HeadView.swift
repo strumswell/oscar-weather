@@ -6,7 +6,6 @@
 
 import SwiftUI
 import CoreLocation
-import Charts
 
 struct HeadView: View {
     @Environment(Weather.self) private var weather: Weather

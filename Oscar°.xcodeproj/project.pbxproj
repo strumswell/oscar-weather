@@ -29,6 +29,7 @@
 		253F70962B5319DD0075D093 /* CityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25E30B2A26CD9B31007F468D /* CityService.swift */; };
 		253F70972B5319EC0075D093 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE526CACFC900D90D6B /* PersistenceController.swift */; };
 		253F709C2B5333BE0075D093 /* APIResultExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CB17E92B470461001D973A /* APIResultExtensions.swift */; };
+		253F84F72C20B8ED00844A9E /* HourlyDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 253F84F62C20B8ED00844A9E /* HourlyDetailView.swift */; };
 		25429BD329E5F94100D5979F /* Oscar_WatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25429BD229E5F94100D5979F /* Oscar_WatchApp.swift */; };
 		25429BD529E5F94100D5979F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25429BD429E5F94100D5979F /* ContentView.swift */; };
 		25429BD729E5F94300D5979F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 25429BD629E5F94300D5979F /* Assets.xcassets */; };
@@ -72,7 +73,6 @@
 		257EB3712BD8328A00E46468 /* HapticsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 257EB3702BD8328A00E46468 /* HapticsExtension.swift */; };
 		257EB3752BD832BC00E46468 /* DataModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE226CACF7D00D90D6B /* DataModels.xcdatamodeld */; };
 		257EB3792BD832C000E46468 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE526CACFC900D90D6B /* PersistenceController.swift */; };
-		258B223229A81E7500E4ECCE /* Charts in Frameworks */ = {isa = PBXBuildFile; productRef = 258B223129A81E7500E4ECCE /* Charts */; };
 		258EE2ED2B5EF4E900AE942B /* RetryClientMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */; };
 		258EE2F62B5EF58100AE942B /* RetryClientMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */; };
 		259623D02A2BD6BF00BA75F6 /* HomeProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259623CF2A2BD6BF00BA75F6 /* HomeProvider.swift */; };
@@ -210,6 +210,7 @@
 		2536438026DACCB800C8A952 /* LegalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalView.swift; sourceTree = "<group>"; };
 		253BA18B2B0941670070BD5E /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		253F708A29510B06000BD4C0 /* AQIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AQIView.swift; sourceTree = "<group>"; };
+		253F84F62C20B8ED00844A9E /* HourlyDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyDetailView.swift; sourceTree = "<group>"; };
 		25429BD029E5F94100D5979F /* Oscar°Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Oscar°Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		25429BD229E5F94100D5979F /* Oscar_WatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Oscar_WatchApp.swift; sourceTree = "<group>"; };
 		25429BD429E5F94100D5979F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -319,7 +320,6 @@
 			files = (
 				255BDD9F2BD9B2E40061E4EB /* Sentry in Frameworks */,
 				25B734172BD9BB86003C6756 /* SentrySwiftUI in Frameworks */,
-				258B223229A81E7500E4ECCE /* Charts in Frameworks */,
 				25C4300F2AC36165001DA5FC /* OpenAPIRuntime in Frameworks */,
 				25C430122AC36173001DA5FC /* OpenAPIURLSession in Frameworks */,
 				255BDD9E2BD9B2E40061E4EB /* (null) in Frameworks */,
@@ -405,6 +405,7 @@
 			children = (
 				25ED4A4627A2F5C60050C4A9 /* HeadView.swift */,
 				3E6117072544B27600B68120 /* HourlyView.swift */,
+				253F84F62C20B8ED00844A9E /* HourlyDetailView.swift */,
 				3E61170B2544B2D300B68120 /* DailyView.swift */,
 				25A0CEDC26C4068300DD4A79 /* RadarView.swift */,
 				2523367E27C3EB3900C2111A /* RainView.swift */,
@@ -659,7 +660,6 @@
 			);
 			name = "Oscar°";
 			packageProductDependencies = (
-				258B223129A81E7500E4ECCE /* Charts */,
 				25C4300E2AC36165001DA5FC /* OpenAPIRuntime */,
 				25C430112AC36173001DA5FC /* OpenAPIURLSession */,
 				4EBF1FE0D46648989064EF72 /* Sentry */,
@@ -727,8 +727,6 @@
 			);
 			mainGroup = 3EB89008251A55700028FED0;
 			packageReferences = (
-				259704DD2757CB0D00DFCA53 /* XCRemoteSwiftPackageReference "Alamofire" */,
-				258B223029A81E7500E4ECCE /* XCRemoteSwiftPackageReference "swiftui-charts" */,
 				25C430062AC3608E001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-generator" */,
 				25C4300D2AC36165001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */,
 				25C430102AC36173001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */,
@@ -854,6 +852,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				253F84F72C20B8ED00844A9E /* HourlyDetailView.swift in Sources */,
 				251FE39127C5674400D26F0F /* WMSTileOverlay.swift in Sources */,
 				255950952B45B16000122324 /* SearchCityView.swift in Sources */,
 				253F708B29510B06000BD4C0 /* AQIView.swift in Sources */,
@@ -1383,22 +1382,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		258B223029A81E7500E4ECCE /* XCRemoteSwiftPackageReference "swiftui-charts" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/spacenation/swiftui-charts";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
-		259704DD2757CB0D00DFCA53 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Alamofire/Alamofire";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.0.0;
-			};
-		};
 		25C430062AC3608E001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-generator" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-openapi-generator";
@@ -1463,11 +1446,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 25C430062AC3608E001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-generator" */;
 			productName = "plugin:OpenAPIGenerator";
-		};
-		258B223129A81E7500E4ECCE /* Charts */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 258B223029A81E7500E4ECCE /* XCRemoteSwiftPackageReference "swiftui-charts" */;
-			productName = Charts;
 		};
 		25B734162BD9BB86003C6756 /* SentrySwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;

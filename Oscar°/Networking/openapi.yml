@@ -76,6 +76,7 @@ paths:
             - diffuse_radiation
             - vapor_pressure_deficit
             - evapotranspiration
+            - et0_fao_evapotranspiration
             - precipitation
             - precipitation_probability
             - weathercode
@@ -275,7 +276,9 @@ paths:
                           type: number
                       windspeed_180m:
                         type: array
+                        nullable: true
                         items:
+                          nullable: true
                           type: number
                       winddirection_10m:
                         type: array
@@ -291,7 +294,9 @@ paths:
                           type: number
                       winddirection_180m:
                         type: array
+                        nullable: true
                         items:
+                          nullable: true
                           type: number
                       windgusts_10m:
                         type: array
@@ -321,6 +326,10 @@ paths:
                         type: array
                         items:
                           type: number
+                      et0_fao_evapotranspiration:
+                        type: array
+                        items:
+                          type: number
                       precipitation:
                         type: array
                         items:
@@ -343,39 +352,57 @@ paths:
                           type: number
                       soil_temperature_0cm:
                         type: array
+                        nullable: true
                         items:
+                          nullable: true
                           type: number
                       soil_temperature_6cm:
                         type: array
+                        nullable: true
                         items:
+                          nullable: true
                           type: number
                       soil_temperature_18cm:
                         type: array
+                        nullable: true
                         items:
+                          nullable: true
                           type: number
                       soil_temperature_54cm:
                         type: array
+                        nullable: true
                         items:
+                          nullable: true
                           type: number
                       soil_moisture_0_1cm:
                         type: array
+                        nullable: true
                         items:
+                          nullable: true
                           type: number
                       soil_moisture_1_3cm:
                         type: array
+                        nullable: true
                         items:
+                          nullable: true
                           type: number
                       soil_moisture_3_9cm:
                         type: array
+                        nullable: true
                         items:
+                          nullable: true
                           type: number
                       soil_moisture_9_27cm:
                         type: array
+                        nullable: true
                         items:
+                          nullable: true
                           type: number
                       soil_moisture_27_81cm:
                         type: array
+                        nullable: true
                         items:
+                          nullable: true
                           type: number
                       is_day:
                         type: array
@@ -747,7 +774,9 @@ components:
             type: number
         windspeed_180m:
           type: array
+          nullable: true
           items:
+            nullable: true
             type: number
         winddirection_10m:
           type: array
@@ -763,7 +792,9 @@ components:
             type: number
         winddirection_180m:
           type: array
+          nullable: true
           items:
+            nullable: true
             type: number
         windgusts_10m:
           type: array
@@ -817,39 +848,57 @@ components:
             type: number
         soil_temperature_0cm:
           type: array
+          nullable: true
           items:
+            nullable: true
             type: number
         soil_temperature_6cm:
           type: array
+          nullable: true
           items:
+            nullable: true
             type: number
         soil_temperature_18cm:
           type: array
+          nullable: true
           items:
+            nullable: true
             type: number
         soil_temperature_54cm:
           type: array
+          nullable: true
           items:
+            nullable: true
             type: number
         soil_moisture_0_1cm:
           type: array
+          nullable: true
           items:
+            nullable: true
             type: number
         soil_moisture_1_3cm:
           type: array
+          nullable: true
           items:
+            nullable: true
             type: number
         soil_moisture_3_9cm:
           type: array
+          nullable: true
           items:
+            nullable: true
             type: number
         soil_moisture_9_27cm:
           type: array
+          nullable: true
           items:
+            nullable: true
             type: number
         soil_moisture_27_81cm:
           type: array
+          nullable: true
           items:
+            nullable: true
             type: number
     DailyResponse:
       type: object
