@@ -715,6 +715,9 @@
         }
       }
     },
+    "mm/h" : {
+
+    },
     "N_compass" : {
       "extractionState" : "manual",
       "localizations" : {

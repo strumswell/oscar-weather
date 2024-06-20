@@ -161,7 +161,13 @@ struct TemperatureChart: View {
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                        .annotation(position: .overlay, alignment: .top) {
+                        .annotation(
+                            position: .topTrailing, spacing: 5,
+                            overflowResolution: .init(
+                                x: .fit(to: .chart),
+                                y: .fit(to: .chart)
+                            )
+                        ) {
                             Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                                 .font(.caption)
                                 .foregroundColor(.gray)
@@ -208,7 +214,13 @@ struct PrecipitationChart: View {
                         RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                             .foregroundStyle(.gray)
                             .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                            .annotation(position: .overlay, alignment: .top) {
+                            .annotation(
+                                position: .topTrailing, spacing: 5,
+                                overflowResolution: .init(
+                                    x: .fit(to: .chart),
+                                    y: .fit(to: .chart)
+                                )
+                            ) {
                                 Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                                     .font(.caption)
                                     .foregroundColor(.gray)
@@ -264,7 +276,13 @@ struct HumidityChart: View {
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                        .annotation(position: .overlay, alignment: .top) {
+                        .annotation(
+                            position: .topTrailing, spacing: 5,
+                            overflowResolution: .init(
+                                x: .fit(to: .chart),
+                                y: .fit(to: .chart)
+                            )
+                        ) {
                             Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                                 .font(.caption)
                                 .foregroundColor(.gray)
@@ -348,7 +366,13 @@ struct WindChart: View {
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                        .annotation(position: .overlay, alignment: .top) {
+                        .annotation(
+                            position: .topTrailing, spacing: 5,
+                            overflowResolution: .init(
+                                x: .fit(to: .chart),
+                                y: .fit(to: .chart)
+                            )
+                        ) {
                             Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                                 .font(.caption)
                                 .foregroundColor(.gray)
@@ -402,7 +426,13 @@ struct PressureChart: View {
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                        .annotation(position: .overlay, alignment: .top) {
+                        .annotation(
+                            position: .topTrailing, spacing: 5,
+                            overflowResolution: .init(
+                                x: .fit(to: .chart),
+                                y: .fit(to: .chart)
+                            )
+                        ) {
                             Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                                 .font(.caption)
                                 .foregroundColor(.gray)
@@ -490,7 +520,13 @@ struct SoilTemperatureChart: View {
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                        .annotation(position: .overlay, alignment: .top) {
+                        .annotation(
+                            position: .topTrailing, spacing: 5,
+                            overflowResolution: .init(
+                                x: .fit(to: .chart),
+                                y: .fit(to: .chart)
+                            )
+                        ) {
                             Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                                 .font(.caption)
                                 .foregroundColor(.gray)
@@ -581,7 +617,13 @@ struct SoilMoistureChart: View {
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                        .annotation(position: .overlay, alignment: .top) {
+                        .annotation(
+                            position: .topTrailing, spacing: 5,
+                            overflowResolution: .init(
+                                x: .fit(to: .chart),
+                                y: .fit(to: .chart)
+                            )
+                        ) {
                             Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                                 .font(.caption)
                                 .foregroundColor(.gray)
@@ -631,7 +673,13 @@ struct ET0EvapotranspirationChart: View {
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
-                        .annotation(position: .overlay, alignment: .top) {
+                        .annotation(
+                            position: .topTrailing, spacing: 5,
+                            overflowResolution: .init(
+                                x: .fit(to: .chart),
+                                y: .fit(to: .chart)
+                            )
+                        ) {
                             Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                                 .font(.caption)
                                 .foregroundColor(.gray)

@@ -63,7 +63,7 @@ struct DailyView: View {
                                     .font(.caption)
                                     .foregroundColor(Color(UIColor.secondaryLabel))
                             }
-                            .padding(.trailing)
+                                .frame(width: 60)
                             Text(roundTemperatureString(temperature: dayMinTemp))
                                 .frame(width: 30, alignment: .trailing)
                             TemperatureRangeView(low: Int(dayMinTemp?.rounded() ?? 0), high: Int(dayMaxTemp?.rounded() ?? 0), minTemp: Int(minTemp.rounded()), maxTemp: Int(maxTemp.rounded()))

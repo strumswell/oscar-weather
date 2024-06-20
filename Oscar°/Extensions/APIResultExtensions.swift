@@ -30,12 +30,31 @@ extension Components.Schemas.RadarResponse {
         
         return false
     }
+    
+    func isExpectingRain() -> Bool {
+        guard let radarData = radar else {
+            return false
+        }
+        
+        for timeframe in radarData {
+            if let precipitationArray = timeframe.precipitation_5 {
+                for row in precipitationArray {
+                    for precipitation in row {
+                        if precipitation > 0 {
+                            return true
+                        }
+                    }
+                }
+            }
+        }
+        return false
+    }
 }
 
 extension Array {
     var middle: Element? {
         guard count != 0 else { return nil }
-
+        
         let middleIndex = (count > 1 ? count - 1 : count) / 2
         return self[middleIndex]
     }
