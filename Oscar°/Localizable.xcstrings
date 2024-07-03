@@ -538,6 +538,23 @@
         }
       }
     },
+    "Fertig" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fertig"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        }
+      }
+    },
     "Forecast" : {
       "localizations" : {
         "de" : {
@@ -618,6 +635,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Baskı"
+          }
+        }
+      }
+    },
+    "Kein Regen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Regen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Rain"
           }
         }
       }
