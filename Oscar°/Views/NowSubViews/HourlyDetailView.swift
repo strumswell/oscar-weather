@@ -380,7 +380,7 @@ struct WindChart: View {
                 }
             }
             .chartForegroundStyleScale([
-                "10m (km/h))": .teal,
+                "10m (km/h)": .teal,
                 "80m (km/h)": .teal.opacity(0.6),
                 "120m (km/h)": .teal.opacity(0.4),
                 "180m (km/h)": .teal.opacity(0.2)
