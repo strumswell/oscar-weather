@@ -158,6 +158,12 @@
             "state" : "new",
             "value" : "%1$@ %2$@"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
         }
       }
     },
@@ -185,10 +191,24 @@
       }
     },
     "°C" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "°C"
+          }
+        }
+      }
     },
     "°F" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "°F"
+          }
+        }
+      }
     },
     "0 mm/h" : {
       "extractionState" : "stale",
@@ -202,7 +222,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "0 mm/h"
           }
         },
         "tr" : {
@@ -224,7 +244,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "2"
           }
         },
         "tr" : {
@@ -246,7 +266,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "2.5"
           }
         },
         "tr" : {
@@ -268,7 +288,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "3"
           }
         },
         "tr" : {
@@ -290,7 +310,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "10"
           }
         },
         "tr" : {
@@ -302,7 +322,14 @@
       }
     },
     "ACCESS-G - Australian Bureau of Meteorology (BOM)" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ACCESS-G - Australian Bureau of Meteorology (BOM)"
+          }
+        }
+      }
     },
     "Air" : {
       "localizations" : {
@@ -394,13 +421,34 @@
       }
     },
     "ARPEGE & AROME - Météo-France" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ARPEGE & AROME - Météo-France"
+          }
+        }
+      }
     },
     "Attribution 4.0 International (CC BY 4.0)" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attribution 4.0 International (CC BY 4.0)"
+          }
+        }
+      }
     },
     "Beta User" : {
-
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beta Kullanıcı"
+          }
+        }
+      }
     },
     "Bodentemperatur" : {
       "localizations" : {
@@ -435,13 +483,40 @@
       }
     },
     "BrightSky" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrightSky"
+          }
+        }
+      }
     },
     "BrightSky ist eine Open-Source-Wetter-API, die offene Wetterdaten vom DWD aufbereiten und für Oscar in Form von Wetterwarnung und Radardaten für Deutschland zur Verfügung stellen. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu BrightSky, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrightSky is an open-source weather API that processes open weather data from the DWD and makes it available to Oscar in the form of weather warnings and radar data for Germany. Oscar uses the free access to BrightSky as a non-commercial app, but supports the project with a monthly donation of five euros."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrightSky, DWD'den alınan açık hava durumu verilerini işleyen ve bunları Almanya için hava durumu uyarıları ve radar verileri şeklinde Oscar'ın kullanımına sunan açık kaynaklı bir hava durumu API'sidir. Oscar, BrightSky'a ücretsiz erişimi ticari olmayan bir uygulama olarak kullanıyor, ancak projeyi aylık beş avroluk bir bağışla destekliyor."
+          }
+        }
+      }
     },
     "brightsky.dev" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brightsky.dev"
+          }
+        }
+      }
     },
     "by Philipp Bolte" : {
       "localizations" : {
@@ -466,7 +541,14 @@
       }
     },
     "COSMO 2I & 5M - AM ARPAE ARPAP" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "COSMO 2I & 5M - AM ARPAE ARPAP"
+          }
+        }
+      }
     },
     "Datenquellen" : {
       "localizations" : {
@@ -514,10 +596,30 @@
       }
     },
     "Der Deutsche Wetterdienst (DWD) stellt über deren GeoServer den Radar-Layer für Zentraleuropa kostenlos bereit. Zudem kommen sämtliche Daten des DWD durch andere Dritt-Services wie Open-Meteo und BrightSky in Oscar zum Einsatz." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The German Weather Service (DWD) provides the radar layer for Central Europe free of charge via its GeoServer. In addition, all DWD data is used in Oscar by other third-party services such as Open-Meteo and BrightSky."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alman Hava Durumu Servisi (DWD) Orta Avrupa için radar katmanını GeoServer üzerinden ücretsiz olarak sağlamaktadır. Ayrıca, tüm DWD verileri Oscar'da Open-Meteo ve BrightSky gibi diğer üçüncü taraf hizmetleri tarafından kullanılmaktadır."
+          }
+        }
+      }
     },
     "Deutscher Wetterdienst (DWD)" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deutscher Wetterdienst (DWD)"
+          }
+        }
+      }
     },
     "Durchschnittlicher Wassergehalt des Bodens als volumetrisches Mischungsverhältnis in verschiedenen Tiefen." : {
       "localizations" : {
@@ -536,7 +638,14 @@
       }
     },
     "dwd.de" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dwd.de"
+          }
+        }
+      }
     },
     "E_compass" : {
       "extractionState" : "manual",
@@ -562,10 +671,36 @@
       }
     },
     "Einheiten" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Units"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birimler"
+          }
+        }
+      }
     },
     "Einstellungen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar"
+          }
+        }
+      }
     },
     "Ende: " : {
       "localizations" : {
@@ -618,6 +753,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Done"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bitti"
           }
         }
       }
@@ -744,6 +885,12 @@
             "state" : "translated",
             "value" : "No Rain"
           }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur yok"
+          }
         }
       }
     },
@@ -754,7 +901,20 @@
 
     },
     "Lizenz" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "License"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruhsat"
+          }
+        }
+      }
     },
     "Location" : {
       "localizations" : {
@@ -853,7 +1013,14 @@
       }
     },
     "Member" : {
-
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üye"
+          }
+        }
+      }
     },
     "MET Nordic - MET Norway" : {
 
@@ -1003,10 +1170,30 @@
       }
     },
     "Open-Meteo" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo"
+          }
+        }
+      }
     },
     "Open-Meteo ist eine Open-Source-Wetter-API, die offene Wetterdaten von verschiedenen internationalen Wetterdiensten sammelt. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu Open-Meteo, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo is an open source weather API that collects open weather data from various international weather services. Oscar uses the free access to Open-Meteo as a non-commercial app, but supports the project with a monthly donation of five euros."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo, çeşitli uluslararası hava durumu hizmetlerinden açık hava durumu verilerini toplayan açık kaynaklı bir hava durumu API'sidir. Oscar, Open-Meteo'ya ücretsiz erişimi ticari olmayan bir uygulama olarak kullanıyor, ancak projeyi aylık beş avroluk bir bağışla destekliyor."
+          }
+        }
+      }
     },
     "open-meteo.com" : {
 
@@ -1630,7 +1817,20 @@
 
     },
     "Tomorrow.io, vertreten durch die Tomorrow Companies Inc., stellt diverse Kartenlayer unter deren Free-Tier bereit. Darunter fallen unter anderem das globale Regenradar, Temperatur, Windgeschwindigkeit, Windrichtung, Wolken und Luftfeuchtigkeit." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomorrow.io, represented by Tomorrow Companies Inc., provides various map layers under its free tier. These include the global rain radar, temperature, wind speed, wind direction, clouds and humidity."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomorrow Companies Inc. tarafından temsil edilen Tomorrow.io, ücretsiz katmanı altında çeşitli harita katmanları sunmaktadır. Bunlar arasında küresel yağmur radarı, sıcaklık, rüzgar hızı, rüzgar yönü, bulutlar ve nem yer alıyor."
+          }
+        }
+      }
     },
     "Über" : {
       "localizations" : {
@@ -1768,7 +1968,20 @@
       }
     },
     "Webseite" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Website"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Web sitesi"
+          }
+        }
+      }
     },
     "Wind" : {
       "localizations" : {
