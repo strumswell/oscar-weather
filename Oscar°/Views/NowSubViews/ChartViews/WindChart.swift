@@ -35,7 +35,7 @@ struct WindChart: View {
                             Image(systemName: "location.north.fill")
                                 .resizable()
                                 .frame(width: 10, height: 10)
-                                .rotationEffect(.degrees(winddirection10m[index]))
+                                .rotationEffect(.degrees(invertWindDirection(winddirection10m[index])))
                                 .foregroundColor(.teal)
                         }
                     }
@@ -109,5 +109,9 @@ struct WindChart: View {
             .chartXVisibleDomain(length: 129600)
             .frame(height: 200)
         }
+    }
+    
+    private func invertWindDirection(_ direction: Double) -> Double {
+        return (direction + 180).truncatingRemainder(dividingBy: 360)
     }
 }
