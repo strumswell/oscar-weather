@@ -83,6 +83,14 @@
 		257EB3792BD832C000E46468 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE526CACFC900D90D6B /* PersistenceController.swift */; };
 		258EE2ED2B5EF4E900AE942B /* RetryClientMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */; };
 		258EE2F62B5EF58100AE942B /* RetryClientMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */; };
+		259187C92C715AEA00611B0F /* TemperatureChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259187C82C715AEA00611B0F /* TemperatureChart.swift */; };
+		259187CB2C715B2900611B0F /* PrecipitationChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259187CA2C715B2900611B0F /* PrecipitationChart.swift */; };
+		259187CD2C715B5900611B0F /* HumidityChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259187CC2C715B5900611B0F /* HumidityChart.swift */; };
+		259187CF2C715B7500611B0F /* WindChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259187CE2C715B7500611B0F /* WindChart.swift */; };
+		259187D12C715B9600611B0F /* PressureChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259187D02C715B9600611B0F /* PressureChart.swift */; };
+		259187D32C715BBD00611B0F /* SoilMoistureChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259187D22C715BBD00611B0F /* SoilMoistureChart.swift */; };
+		259187D52C715BE000611B0F /* SoilTemperatureChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259187D42C715BE000611B0F /* SoilTemperatureChart.swift */; };
+		259187D72C715C2400611B0F /* ET0EvapotranspirationChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259187D62C715C2400611B0F /* ET0EvapotranspirationChart.swift */; };
 		259623D02A2BD6BF00BA75F6 /* HomeProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259623CF2A2BD6BF00BA75F6 /* HomeProvider.swift */; };
 		259623D32A2BD79200BA75F6 /* NowTodayWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259623D12A2BD72C00BA75F6 /* NowTodayWidget.swift */; };
 		259623D42A2BD96600BA75F6 /* Color-Interpolation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799429F1A7C6002E0AAB /* Color-Interpolation.swift */; };
@@ -246,6 +254,14 @@
 		257D07DE2AC3561C005EBD16 /* openapi-generator-config.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "openapi-generator-config.yml"; sourceTree = "<group>"; };
 		257EB3702BD8328A00E46468 /* HapticsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsExtension.swift; sourceTree = "<group>"; };
 		258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetryClientMiddleware.swift; sourceTree = "<group>"; };
+		259187C82C715AEA00611B0F /* TemperatureChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureChart.swift; sourceTree = "<group>"; };
+		259187CA2C715B2900611B0F /* PrecipitationChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecipitationChart.swift; sourceTree = "<group>"; };
+		259187CC2C715B5900611B0F /* HumidityChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HumidityChart.swift; sourceTree = "<group>"; };
+		259187CE2C715B7500611B0F /* WindChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindChart.swift; sourceTree = "<group>"; };
+		259187D02C715B9600611B0F /* PressureChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PressureChart.swift; sourceTree = "<group>"; };
+		259187D22C715BBD00611B0F /* SoilMoistureChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoilMoistureChart.swift; sourceTree = "<group>"; };
+		259187D42C715BE000611B0F /* SoilTemperatureChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoilTemperatureChart.swift; sourceTree = "<group>"; };
+		259187D62C715C2400611B0F /* ET0EvapotranspirationChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ET0EvapotranspirationChart.swift; sourceTree = "<group>"; };
 		259623CF2A2BD6BF00BA75F6 /* HomeProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeProvider.swift; sourceTree = "<group>"; };
 		259623D12A2BD72C00BA75F6 /* NowTodayWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowTodayWidget.swift; sourceTree = "<group>"; };
 		259704E42757D7E800DFCA53 /* AlertDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertDetailView.swift; sourceTree = "<group>"; };
@@ -430,6 +446,7 @@
 		255C23AE258F93900066B2BD /* NowSubViews */ = {
 			isa = PBXGroup;
 			children = (
+				259187C42C715A7C00611B0F /* ChartViews */,
 				25ED4A4627A2F5C60050C4A9 /* HeadView.swift */,
 				3E6117072544B27600B68120 /* HourlyView.swift */,
 				253F84F62C20B8ED00844A9E /* HourlyDetailView.swift */,
@@ -452,6 +469,21 @@
 				256FDAC42BCB14D000E18655 /* GlobalRadarWidget.swift */,
 			);
 			path = GlobalRadarWidget;
+			sourceTree = "<group>";
+		};
+		259187C42C715A7C00611B0F /* ChartViews */ = {
+			isa = PBXGroup;
+			children = (
+				259187C82C715AEA00611B0F /* TemperatureChart.swift */,
+				259187CA2C715B2900611B0F /* PrecipitationChart.swift */,
+				259187CC2C715B5900611B0F /* HumidityChart.swift */,
+				259187CE2C715B7500611B0F /* WindChart.swift */,
+				259187D02C715B9600611B0F /* PressureChart.swift */,
+				259187D22C715BBD00611B0F /* SoilMoistureChart.swift */,
+				259187D42C715BE000611B0F /* SoilTemperatureChart.swift */,
+				259187D62C715C2400611B0F /* ET0EvapotranspirationChart.swift */,
+			);
+			path = ChartViews;
 			sourceTree = "<group>";
 		};
 		259623CE2A2BD6A000BA75F6 /* Home */ = {
@@ -887,12 +919,15 @@
 				253F708B29510B06000BD4C0 /* AQIView.swift in Sources */,
 				25CB17E32B470335001D973A /* APIClient.swift in Sources */,
 				2536438126DACCB800C8A952 /* LegalView.swift in Sources */,
+				259187CD2C715B5900611B0F /* HumidityChart.swift in Sources */,
 				250163DA2B093C0B00EEF882 /* CityService.swift in Sources */,
 				253BA18C2B0941670070BD5E /* LocationService.swift in Sources */,
+				259187D12C715B9600611B0F /* PressureChart.swift in Sources */,
 				2512E94D2C398060004670E4 /* TomorrowAttribution.swift in Sources */,
 				258EE2ED2B5EF4E900AE942B /* RetryClientMiddleware.swift in Sources */,
 				25ED79BE29F1A7DF002E0AAB /* Array-GradientStop.swift in Sources */,
 				2533940A27C43F810087C220 /* AlertView.swift in Sources */,
+				259187CB2C715B2900611B0F /* PrecipitationChart.swift in Sources */,
 				25ED79B429F1A7DF002E0AAB /* Cloud.swift in Sources */,
 				3E61170C2544B2D300B68120 /* DailyView.swift in Sources */,
 				25D72B2727C67016001F43FC /* SettingService.swift in Sources */,
@@ -903,6 +938,7 @@
 				25CB17E82B47043A001D973A /* GlobalViewExtensions.swift in Sources */,
 				2512E9522C398188004670E4 /* DWDAttribution.swift in Sources */,
 				25ED79BB29F1A7DF002E0AAB /* Star.swift in Sources */,
+				259187D32C715BBD00611B0F /* SoilMoistureChart.swift in Sources */,
 				25ED79BF29F1A7DF002E0AAB /* Storm.swift in Sources */,
 				25CB17EA2B470461001D973A /* APIResultExtensions.swift in Sources */,
 				3E22B523251D151300D86A58 /* WeatherApp.swift in Sources */,
@@ -916,6 +952,7 @@
 				25CBB63C2B44A13600223B69 /* WeatherSimulationView.swift in Sources */,
 				2512E9432C37E3EB004670E4 /* MemberCard.swift in Sources */,
 				25ED79AB29F1A7DF002E0AAB /* Meteor.swift in Sources */,
+				259187C92C715AEA00611B0F /* TemperatureChart.swift in Sources */,
 				3E6117082544B27600B68120 /* HourlyView.swift in Sources */,
 				25ED79B129F1A7DF002E0AAB /* MeteorShower.swift in Sources */,
 				257EB3712BD8328A00E46468 /* HapticsExtension.swift in Sources */,
@@ -924,14 +961,17 @@
 				259704E52757D7E800DFCA53 /* AlertDetailView.swift in Sources */,
 				25CB17E52B4703CD001D973A /* WeatherObservable.swift in Sources */,
 				25AD38E72BE716E100A8F305 /* MemoryView.swift in Sources */,
+				259187CF2C715B7500611B0F /* WindChart.swift in Sources */,
 				25ED4A4727A2F5C60050C4A9 /* HeadView.swift in Sources */,
 				25ED79B329F1A7DF002E0AAB /* CloudGroup.swift in Sources */,
 				25ED79BC29F1A7DF002E0AAB /* StormDrop.swift in Sources */,
 				2523367F27C3EB3900C2111A /* RainView.swift in Sources */,
 				25A0CEDD26C4068300DD4A79 /* RadarView.swift in Sources */,
+				259187D72C715C2400611B0F /* ET0EvapotranspirationChart.swift in Sources */,
 				25ED79B229F1A7DF002E0AAB /* StarField.swift in Sources */,
 				25ED799529F1A7C6002E0AAB /* Color-Interpolation.swift in Sources */,
 				25ED79AF29F1A7DF002E0AAB /* StarsView.swift in Sources */,
+				259187D52C715BE000611B0F /* SoilTemperatureChart.swift in Sources */,
 				259EDA6C29ABC19F00F94996 /* RainRadarView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
