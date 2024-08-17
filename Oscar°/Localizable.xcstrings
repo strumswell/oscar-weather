@@ -758,7 +758,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bitti"
+            "value" : "Hazır"
           }
         }
       }
@@ -801,25 +801,25 @@
         }
       }
     },
-    "Gefühlte Temperatur (°C)" : {
+    "Gefühlte Temperatur" : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gefühlte Temperatur (°C)"
+            "value" : "Gefühlte Temperatur"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apparent temperature (°C)"
+            "value" : "Apparent temperature"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Algılanan sıcaklık (°C)"
+            "value" : "Algılanan sıcaklık"
           }
         }
       }
@@ -1083,19 +1083,19 @@
         }
       }
     },
-    "Niederschlag (mm)" : {
+    "Niederschlag" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Precipitation (mm)"
+            "value" : "Precipitation"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yağış miktarı (mm)"
+            "value" : "Yağış miktarı "
           }
         }
       }
@@ -1377,38 +1377,25 @@
         }
       }
     },
-    "Referenz-Evapotranspiration (ET₀)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reference Evapotranspiration (ET₀)"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Referans Evapotranspirasyon (ET₀)"
-          }
-        }
-      }
-    },
-    "Referenz-Evapotranspiration (mm)" : {
+    "Referenz-Evapotranspiration" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reference Evapotranspiration (mm)"
+            "value" : "Reference Evapotranspiration"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Referans Evapotranspirasyon (mm)"
+            "value" : "Referans Evapotranspirasyon"
           }
         }
       }
+    },
+    "Referenz-Evapotranspiration (ET₀)" : {
+
     },
     "Regen" : {
       "localizations" : {
@@ -1492,19 +1479,19 @@
         }
       }
     },
-    "Relative Luftfeuchtigkeit (%)" : {
+    "Relative Luftfeuchtigkeit" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Relative humidity (%)"
+            "value" : "Relative humidity"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bağıl nem (%)"
+            "value" : "Bağıl nem"
           }
         }
       }
@@ -2000,6 +1987,23 @@
       }
     },
     "Windgeschwindidkeit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wind speed"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rüzgar hızı"
+          }
+        }
+      }
+    },
+    "Windgeschwindigkeit" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {

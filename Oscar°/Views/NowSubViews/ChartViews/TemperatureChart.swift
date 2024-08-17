@@ -57,7 +57,7 @@ struct TemperatureChart: View {
                         }
                 }
             }
-            .chartForegroundStyleScale([String(localized: "Temperatur (\(unit))"): .orange, String(localized: "Gefühlte Temperatur (\(unit))"): .red])
+            .chartForegroundStyleScale([String(localized: "Temperatur") + " (\(unit))": .orange, String(localized: "Gefühlte Temperatur") + " (\(unit))": .red])
             .chartXAxis {
                 AxisMarks(values: .stride(by: .hour, count: 6)) { value in
                     AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .omitted)))

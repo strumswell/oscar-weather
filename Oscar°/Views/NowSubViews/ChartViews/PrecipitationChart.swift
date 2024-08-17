@@ -47,7 +47,7 @@ struct PrecipitationChart: View {
                             }
                     }
                 }
-                .chartForegroundStyleScale([String(localized: "Niederschlag (\(unit))"): .blue])
+                .chartForegroundStyleScale([String(localized: "Niederschlag") + " (\(unit))": .blue])
                 .chartXAxis {
                     AxisMarks(values: .stride(by: .hour, count: 6)) { value in
                         AxisValueLabel(format: .dateTime.hour(.twoDigits(amPM: .omitted)))

@@ -46,7 +46,7 @@ struct ET0EvapotranspirationChart: View {
                 }
             }
             .chartForegroundStyleScale([
-                String(localized: "Referenz-Evapotranspiration (\(unit))"): .blue
+                String(localized: "Referenz-Evapotranspiration") + " (\(unit))": .blue
             ])
             .chartXAxis {
                 AxisMarks(values: .stride(by: .hour, count: 6)) { value in

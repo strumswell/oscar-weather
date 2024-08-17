@@ -13,7 +13,7 @@ struct UnitSettings: View {
     var body: some View {
         NavigationView {
             List {
-                Picker("Temperatur", selection: Binding(
+                Picker(String(localized: "Temperatur"), selection: Binding(
                     get: { settingsService.settings?.temperatureUnit ?? "celsius" },
                     set: { settingsService.updateTemperatureUnit($0) }
                 )) {
@@ -21,7 +21,7 @@ struct UnitSettings: View {
                     Text("°F").tag("fahrenheit")
                 }
                 
-                Picker("Windgeschwindigkeit", selection: Binding(
+                Picker(String(localized: "Windgeschwindigkeit"), selection: Binding(
                     get: { settingsService.settings?.windSpeedUnit ?? "kmh" },
                     set: { settingsService.updateWindSpeedUnit($0) }
                 )) {
@@ -31,7 +31,7 @@ struct UnitSettings: View {
                     Text("kn").tag("kn")
                 }
                 
-                Picker("Niederschlag", selection: Binding(
+                Picker(String(localized: "Niederschlag"), selection: Binding(
                     get: { settingsService.settings?.precipitationUnit ?? "mm" },
                     set: { settingsService.updatePrecipitationUnit($0) }
                 )) {

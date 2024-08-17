@@ -45,7 +45,7 @@ struct HumidityChart: View {
                         }
                 }
             }
-            .chartForegroundStyleScale([String(localized: "Relative Luftfeuchtigkeit (\(unit))"): .green])
+            .chartForegroundStyleScale([String(localized: "Relative Luftfeuchtigkeit") + " (\(unit))": .green])
             .chartXAxis {
                 AxisMarks(values: .stride(by: .hour, count: 6)) { value in
                     AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .omitted)))
