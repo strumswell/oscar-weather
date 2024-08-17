@@ -51,7 +51,18 @@
     "%.1f" : {
 
     },
+    "%.1f %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$.1f %2$@"
+          }
+        }
+      }
+    },
     "%.1f km/h" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -74,6 +85,7 @@
       }
     },
     "%.1f mm" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -139,6 +151,16 @@
         }
       }
     },
+    "%@ %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
     "%d-Tage" : {
       "comment" : "Headline for Daily View",
       "localizations" : {
@@ -161,6 +183,12 @@
           }
         }
       }
+    },
+    "°C" : {
+
+    },
+    "°F" : {
+
     },
     "0 mm/h" : {
       "extractionState" : "stale",
@@ -273,6 +301,9 @@
         }
       }
     },
+    "ACCESS-G - Australian Bureau of Meteorology (BOM)" : {
+
+    },
     "Air" : {
       "localizations" : {
         "de" : {
@@ -362,6 +393,15 @@
         }
       }
     },
+    "ARPEGE & AROME - Météo-France" : {
+
+    },
+    "Attribution 4.0 International (CC BY 4.0)" : {
+
+    },
+    "Beta User" : {
+
+    },
     "Bodentemperatur" : {
       "localizations" : {
         "en" : {
@@ -394,6 +434,15 @@
         }
       }
     },
+    "BrightSky" : {
+
+    },
+    "BrightSky ist eine Open-Source-Wetter-API, die offene Wetterdaten vom DWD aufbereiten und für Oscar in Form von Wetterwarnung und Radardaten für Deutschland zur Verfügung stellen. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu BrightSky, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro." : {
+
+    },
+    "brightsky.dev" : {
+
+    },
     "by Philipp Bolte" : {
       "localizations" : {
         "de" : {
@@ -415,6 +464,9 @@
           }
         }
       }
+    },
+    "COSMO 2I & 5M - AM ARPAE ARPAP" : {
+
     },
     "Datenquellen" : {
       "localizations" : {
@@ -461,6 +513,12 @@
         }
       }
     },
+    "Der Deutsche Wetterdienst (DWD) stellt über deren GeoServer den Radar-Layer für Zentraleuropa kostenlos bereit. Zudem kommen sämtliche Daten des DWD durch andere Dritt-Services wie Open-Meteo und BrightSky in Oscar zum Einsatz." : {
+
+    },
+    "Deutscher Wetterdienst (DWD)" : {
+
+    },
     "Durchschnittlicher Wassergehalt des Bodens als volumetrisches Mischungsverhältnis in verschiedenen Tiefen." : {
       "localizations" : {
         "en" : {
@@ -476,6 +534,9 @@
           }
         }
       }
+    },
+    "dwd.de" : {
+
     },
     "E_compass" : {
       "extractionState" : "manual",
@@ -499,6 +560,12 @@
           }
         }
       }
+    },
+    "Einheiten" : {
+
+    },
+    "Einstellungen" : {
+
     },
     "Ende: " : {
       "localizations" : {
@@ -616,6 +683,27 @@
         }
       }
     },
+    "GEM - Canadian Weather Service" : {
+
+    },
+    "GFS & HRRR - NOAA" : {
+
+    },
+    "GFS GRAPES - China Meteorological Administration (CMA)" : {
+
+    },
+    "HARMONIE - DMI" : {
+
+    },
+    "HARMONIE - KNMI" : {
+
+    },
+    "ICON - Deutscher Wetterdienst (DWD)" : {
+
+    },
+    "IFS & AIFS - ECMWF" : {
+
+    },
     "Impressum" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -639,6 +727,9 @@
         }
       }
     },
+    "inch" : {
+
+    },
     "Kein Regen" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -655,6 +746,15 @@
           }
         }
       }
+    },
+    "km/h" : {
+
+    },
+    "kn" : {
+
+    },
+    "Lizenz" : {
+
     },
     "Location" : {
       "localizations" : {
@@ -727,6 +827,9 @@
         }
       }
     },
+    "m/s" : {
+
+    },
     "Meine Orte" : {
       "localizations" : {
         "de" : {
@@ -749,7 +852,22 @@
         }
       }
     },
+    "Member" : {
+
+    },
+    "MET Nordic - MET Norway" : {
+
+    },
+    "mm" : {
+
+    },
     "mm/h" : {
+
+    },
+    "mph" : {
+
+    },
+    "MSM & GSM - JMA" : {
 
     },
     "N_compass" : {
@@ -883,6 +1001,15 @@
           }
         }
       }
+    },
+    "Open-Meteo" : {
+
+    },
+    "Open-Meteo ist eine Open-Source-Wetter-API, die offene Wetterdaten von verschiedenen internationalen Wetterdiensten sammelt. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu Open-Meteo, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro." : {
+
+    },
+    "open-meteo.com" : {
+
     },
     "Orte" : {
       "extractionState" : "manual",
@@ -1496,6 +1623,15 @@
         }
       }
     },
+    "Tomorrow" : {
+
+    },
+    "tomorrow.io" : {
+
+    },
+    "Tomorrow.io, vertreten durch die Tomorrow Companies Inc., stellt diverse Kartenlayer unter deren Free-Tier bereit. Darunter fallen unter anderem das globale Regenradar, Temperatur, Windgeschwindigkeit, Windrichtung, Wolken und Luftfeuchtigkeit." : {
+
+    },
     "Über" : {
       "localizations" : {
         "de" : {
@@ -1630,6 +1766,9 @@
           }
         }
       }
+    },
+    "Webseite" : {
+
     },
     "Wind" : {
       "localizations" : {

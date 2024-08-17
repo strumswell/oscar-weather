@@ -11,86 +11,23 @@ import Charts
 struct HourlyView: View {
     @Environment(Weather.self) private var weather: Weather
     @State private var showDetailView: Bool = false
-
+    
     var body: some View {
         VStack(alignment: .leading) {
             Text("Stündlich")
                 .font(.title3)
                 .bold()
-                .foregroundColor(Color(UIColor.label))
+                .foregroundColor(.primary)
                 .padding(.leading)
-                .padding(.bottom, -10)
-                .padding(.top)
             
             ScrollView(.horizontal, showsIndicators: false) {
                 if weather.isLoading && weather.forecast.hourly == nil {
-                    HStack(spacing: 12) {
-                        ForEach((1...5).reversed(), id: \.self) {_ in
-                            ProgressView()
-                                .frame(width: 55, height: 140)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 12)
-                                .background(.thinMaterial)
-                                .cornerRadius(10)
-                                .scrollTransition { content, phase in
-                                    content
-                                        .opacity(phase.isIdentity ? 1 : 0.5)
-                                        .scaleEffect(phase.isIdentity ? 1 : 0.9)
-                                        .blur(radius: phase.isIdentity ? 0 : 2)
-                                }
-                        }
-                        .padding(.vertical, 12)
-                    }
-                    .padding(.leading)
-                    .padding(.top, 7)
+                    loadingView
+                        .padding(.leading)
                 } else {
-                    LazyHStack(spacing: 12) {
-                        ForEach(getLocalizedHourIndex() ... getLocalizedHourIndex() + 48, id: \.self) { index in
-                            VStack {
-                                Text(getHourString(timestamp: weather.forecast.hourly?.time[index] ?? 0))
-                                    .foregroundColor(Color(UIColor.label))
-                                    .bold()
-                                Text("\(weather.forecast.hourly?.precipitation?[index] ?? 0, specifier: "%.1f") mm")
-                                    .font(.footnote)
-                                    .foregroundColor(Color(UIColor.label))
-                                    .padding(.top, 3)
-                                Text("\(weather.forecast.hourly?.precipitation_probability?[index] ?? 0, specifier: "%.0f") %")
-                                    .font(.footnote)
-                                    .foregroundColor(Color(UIColor.secondaryLabel))
-                                Image(getWeatherIcon(
-                                    weathercode: weather.forecast.hourly?.weathercode?[index] ?? 0,
-                                    isDay: weather.forecast.hourly?.is_day?[index] ?? 0))
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 35, height: 35)
-                                Text(roundTemperatureString(temperature: weather.forecast.hourly?.temperature_2m?[index]))
-                                    .foregroundColor(Color(UIColor.label))
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 12)
-                            .background(.thinMaterial)
-                            .cornerRadius(10)
-                            .scrollTransition { content, phase in
-                                content
-                                    .opacity(phase.isIdentity ? 1 : 0.5)
-                                    .scaleEffect(phase.isIdentity ? 1 : 0.9)
-                                    .blur(radius: phase.isIdentity ? 0 : 2)
-                            }
-                            SunsetSunriseCard(index: index)
-                                .scrollTransition { content, phase in
-                                    content
-                                        .opacity(phase.isIdentity ? 1 : 0.5)
-                                        .scaleEffect(phase.isIdentity ? 1 : 0.9)
-                                        .blur(radius: phase.isIdentity ? 0 : 2)
-                                }
-                        }
-                        .padding(.vertical, 20)
-                    }
-                    .scrollTargetLayout()
-                    .font(.system(size: 18))
-                    .padding(.leading)
+                    forecastView
+                        .padding(.leading)
                 }
-                
             }
             .scrollTargetBehavior(.viewAligned)
             .frame(maxWidth: .infinity)
@@ -103,10 +40,77 @@ struct HourlyView: View {
         }
         .onTapGesture {
             UIApplication.shared.playHapticFeedback()
-            showDetailView.toggle()        }
+            showDetailView.toggle()
+        }
         .sheet(isPresented: $showDetailView) {
             HourlyDetailView()
         }
+    }
+    
+    private var loadingView: some View {
+        HStack(spacing: 12) {
+            ForEach((1...5).reversed(), id: \.self) { _ in
+                ProgressView()
+                    .frame(width: 55, height: 140)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 12)
+                    .background(.thinMaterial)
+                    .cornerRadius(10)
+                    .scrollTransition { content, phase in
+                        content
+                            .opacity(phase.isIdentity ? 1 : 0.5)
+                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                            .blur(radius: phase.isIdentity ? 0 : 2)
+                    }
+            }
+        }
+        .padding(.vertical, 12)
+        .padding(.top, 7)
+    }
+    
+    private var forecastView: some View {
+        LazyHStack(spacing: 12) {
+            ForEach(getLocalizedHourIndex() ... getLocalizedHourIndex() + 48, id: \.self) { index in
+                VStack {
+                    Text(getHourString(timestamp: weather.forecast.hourly?.time[index] ?? 0))
+                        .bold()
+                    Text("\(weather.forecast.hourly?.precipitation?[index] ?? 0, specifier: "%.1f") \(weather.forecast.hourly_units?.precipitation ?? "mm")")
+                        .font(.footnote)
+                        .padding(.top, 3)
+                    Text("\(weather.forecast.hourly?.precipitation_probability?[index] ?? 0, specifier: "%.0f") %")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                    Image(getWeatherIcon(
+                        weathercode: weather.forecast.hourly?.weathercode?[index] ?? 0,
+                        isDay: weather.forecast.hourly?.is_day?[index] ?? 0))
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 35, height: 35)
+                    Text(roundTemperatureString(temperature: weather.forecast.hourly?.temperature_2m?[index]))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 12)
+                .background(.thinMaterial)
+                .cornerRadius(10)
+                .scrollTransition { content, phase in
+                    content
+                        .opacity(phase.isIdentity ? 1 : 0.5)
+                        .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                        .blur(radius: phase.isIdentity ? 0 : 2)
+                }
+                
+                SunsetSunriseCard(index: index)
+                    .scrollTransition { content, phase in
+                        content
+                            .opacity(phase.isIdentity ? 1 : 0.5)
+                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                            .blur(radius: phase.isIdentity ? 0 : 2)
+                    }
+            }
+            .padding(.vertical, 20)
+        }
+        .scrollTargetLayout()
+        .font(.system(size: 18))
     }
 }
 
@@ -309,5 +313,11 @@ extension SunsetSunriseCard {
         dateFormatter.dateFormat = "EEEE"
         return dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(timestamp)))
     }
+}
+
+#Preview {
+    HourlyView()
+        .frame(height: 200)
+        .environment(Weather.mock)
 }
 

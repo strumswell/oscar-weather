@@ -16,23 +16,27 @@ struct HourlyDetailView: View {
                         GroupBox(label: Text("Temperatur").padding(.bottom, 2)) {
                             let temperature = weather.forecast.hourly?.temperature_2m ?? []
                             let apparentTemperature = weather.forecast.hourly?.apparent_temperature ?? []
+                            let temperatureUnit = weather.forecast.hourly_units?.temperature_2m ?? "°C"
                             TemperatureChart(
                                 temperature: temperature,
                                 apparentTemperature: apparentTemperature,
-                                time: time
+                                time: time,
+                                unit: temperatureUnit
                             )
                             .chartScrollPosition(x: $chartScrollPosition)
                         }
                         
                         GroupBox(label: Text("Regen").padding(.bottom, 2)) {
                             let precipitation = weather.forecast.hourly?.precipitation ?? []
-                            PrecipitationChart(precipitation: precipitation, time: time)
+                            let precipitationUnit = weather.forecast.hourly_units?.precipitation ?? "mm"
+                            PrecipitationChart(precipitation: precipitation, time: time, unit: precipitationUnit)
                                 .chartScrollPosition(x: $chartScrollPosition)
                         }
                         
                         GroupBox(label: Text("Luftfeuchtigkeit").padding(.bottom, 2)) {
                             let humidity = weather.forecast.hourly?.relativehumidity_2m ?? []
-                            HumidityChart(humidity: humidity, time: time)
+                            let humidityUnit = "%"
+                            HumidityChart(humidity: humidity, time: time, unit: humidityUnit)
                                 .chartScrollPosition(x: $chartScrollPosition)
                         }
                         
@@ -42,14 +46,16 @@ struct HourlyDetailView: View {
                             let windspeed120m = weather.forecast.hourly?.windspeed_120m ?? []
                             let windspeed180m = (weather.forecast.hourly?.windspeed_180m ?? []).map { $0 ?? 0 }
                             let winddirection10m = weather.forecast.hourly?.winddirection_10m ?? []
+                            let windUnit = weather.forecast.hourly_units?.windspeed_10m ?? "km/h"
                             
-                            WindChart(windspeed10m: windspeed10m, windspeed80m: windspeed80m, windspeed120m: windspeed120m, windspeed180m: windspeed180m, winddirection10m: winddirection10m, time: time)
+                            WindChart(windspeed10m: windspeed10m, windspeed80m: windspeed80m, windspeed120m: windspeed120m, windspeed180m: windspeed180m, winddirection10m: winddirection10m, time: time, unit: windUnit)
                                 .chartScrollPosition(x: $chartScrollPosition)
                         }
                         
                         GroupBox(label: Text("Luftdruck").padding(.bottom, 2)) {
                             let pressure = weather.forecast.hourly?.pressure_msl ?? []
-                            PressureChart(pressure: pressure, time: time)
+                            let pressureUnit = "hPa"
+                            PressureChart(pressure: pressure, time: time, unit: pressureUnit)
                                 .chartScrollPosition(x: $chartScrollPosition)
                             HStack {
                                 Text("Sinkender Luftdruck deutet auf schlechtes Wetter oder Stürme hin, steigender Luftdruck auf gutes Wetter oder Hochdruckgebiete.")
@@ -65,13 +71,15 @@ struct HourlyDetailView: View {
                             let soilTemp6cm = weather.forecast.hourly?.soil_temperature_6cm ?? []
                             let soilTemp18cm = weather.forecast.hourly?.soil_temperature_18cm ?? []
                             let soilTemp54cm = weather.forecast.hourly?.soil_temperature_54cm ?? []
+                            let soilTempUnit = weather.forecast.hourly_units?.soil_temperature_0cm ?? "°C"
                             
                             SoilTemperatureChart(
                                 soilTemp0cm: soilTemp0cm,
                                 soilTemp6cm: soilTemp6cm,
                                 soilTemp18cm: soilTemp18cm,
                                 soilTemp54cm: soilTemp54cm,
-                                time: time
+                                time: time,
+                                unit: soilTempUnit
                             )
                             .chartScrollPosition(x: $chartScrollPosition)
                         }
@@ -82,6 +90,7 @@ struct HourlyDetailView: View {
                             let soilMoisture3_9cm = weather.forecast.hourly?.soil_moisture_3_9cm ?? []
                             let soilMoisture9_27cm = weather.forecast.hourly?.soil_moisture_9_27cm ?? []
                             let soilMoisture27_81cm = weather.forecast.hourly?.soil_moisture_27_81cm ?? []
+                            let soilMoistureUnit = weather.forecast.hourly_units?.soil_moisture_0_1cm ?? "m³/m³"
                             
                             SoilMoistureChart(
                                 soilMoisture0_1cm: soilMoisture0_1cm,
@@ -89,7 +98,8 @@ struct HourlyDetailView: View {
                                 soilMoisture3_9cm: soilMoisture3_9cm,
                                 soilMoisture9_27cm: soilMoisture9_27cm,
                                 soilMoisture27_81cm: soilMoisture27_81cm,
-                                time: time
+                                time: time,
+                                unit: soilMoistureUnit
                             )
                             .chartScrollPosition(x: $chartScrollPosition)
                             HStack {
@@ -103,7 +113,8 @@ struct HourlyDetailView: View {
                         
                         GroupBox(label: Text("Referenz-Evapotranspiration (ET₀)").padding(.bottom, 2)) {
                             let et0 = weather.forecast.hourly?.et0_fao_evapotranspiration ?? []
-                            ET0EvapotranspirationChart(et0: et0, time: time)
+                            let et0Unit = weather.forecast.hourly_units?.et0_fao_evapotranspiration ?? "mm"
+                            ET0EvapotranspirationChart(et0: et0, time: time, unit: et0Unit)
                                 .chartScrollPosition(x: $chartScrollPosition)
                             HStack {
                                 Text("ET₀ ist die Referenz-Evapotranspiration eines gut bewässerten Grasfeldes und dient zur Schätzung des Bewässerungsbedarfs von Pflanzen.")
@@ -134,6 +145,7 @@ struct TemperatureChart: View {
     var temperature: [Double]
     var apparentTemperature: [Double]
     var time: [Double]
+    var unit: String
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -141,7 +153,7 @@ struct TemperatureChart: View {
                 ForEach(time.indices, id: \.self) { index in
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
-                        y: .value("Temperatur (°C)", temperature[index]),
+                        y: .value("Temperatur (\(unit))", temperature[index]),
                         series: .value("Series", "Temperature")
                     )
                     .interpolationMethod(.catmullRom)
@@ -149,14 +161,13 @@ struct TemperatureChart: View {
                     
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
-                        y: .value("Gefühlte Temperatur (°C)", apparentTemperature[index]),
+                        y: .value("Gefühlte Temperatur (\(unit))", apparentTemperature[index]),
                         series: .value("Series", "Apparent Temperature")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.red)
                 }
                 
-                // Add vertical mark for day change
                 ForEach(dayChangeIndices(time: time), id: \.self) { index in
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
@@ -174,7 +185,7 @@ struct TemperatureChart: View {
                         }
                 }
             }
-            .chartForegroundStyleScale([String(localized: "Temperatur (°C)"): .orange, String(localized: "Gefühlte Temperatur (°C)"): .red])
+            .chartForegroundStyleScale([String(localized: "Temperatur (\(unit))"): .orange, String(localized: "Gefühlte Temperatur (\(unit))"): .red])
             .chartXAxis {
                 AxisMarks(values: .stride(by: .hour, count: 6)) { value in
                     AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .omitted)))
@@ -183,16 +194,16 @@ struct TemperatureChart: View {
                 }
             }
             .chartScrollableAxes(.horizontal)
-            .chartXVisibleDomain(length: 129600) // 129600 seconds in 36 hours to ensure scrolling
+            .chartXVisibleDomain(length: 129600)
             .frame(height: 175)
         }
-        
     }
 }
 
 struct PrecipitationChart: View {
     var precipitation: [Double]
     var time: [Double]
+    var unit: String
     
     var body: some View {
         if precipitation.max() == 0 {
@@ -204,12 +215,11 @@ struct PrecipitationChart: View {
                     ForEach(time.indices, id: \.self) { index in
                         BarMark(
                             x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
-                            y: .value("Niederschlag (mm)", precipitation[index])
+                            y: .value("Niederschlag (\(unit))", precipitation[index])
                         )
                         .foregroundStyle(.blue)
                     }
                     
-                    // Add vertical mark for day change
                     ForEach(dayChangeIndices(time: time), id: \.self) { index in
                         RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                             .foregroundStyle(.gray)
@@ -227,7 +237,7 @@ struct PrecipitationChart: View {
                             }
                     }
                 }
-                .chartForegroundStyleScale([String(localized: "Niederschlag (mm)"): .blue])
+                .chartForegroundStyleScale([String(localized: "Niederschlag (\(unit))"): .blue])
                 .chartXAxis {
                     AxisMarks(values: .stride(by: .hour, count: 6)) { value in
                         AxisValueLabel(format: .dateTime.hour(.twoDigits(amPM: .omitted)))
@@ -247,7 +257,7 @@ struct PrecipitationChart: View {
                     }
                 }
                 .chartScrollableAxes(.horizontal)
-                .chartXVisibleDomain(length: 129600) // 129600 seconds in 36 hours to ensure scrolling
+                .chartXVisibleDomain(length: 129600)
                 .frame(height: 175)
             }
         }
@@ -257,6 +267,7 @@ struct PrecipitationChart: View {
 struct HumidityChart: View {
     var humidity: [Double]
     var time: [Double]
+    var unit: String
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -271,7 +282,6 @@ struct HumidityChart: View {
                     .foregroundStyle(.green)
                 }
                 
-                // Add vertical mark for day change
                 ForEach(dayChangeIndices(time: time), id: \.self) { index in
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
@@ -289,7 +299,7 @@ struct HumidityChart: View {
                         }
                 }
             }
-            .chartForegroundStyleScale([String(localized: "Relative Luftfeuchtigkeit (%)"): .green])
+            .chartForegroundStyleScale([String(localized: "Relative Luftfeuchtigkeit (\(unit))"): .green])
             .chartXAxis {
                 AxisMarks(values: .stride(by: .hour, count: 6)) { value in
                     AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .omitted)))
@@ -298,10 +308,9 @@ struct HumidityChart: View {
                 }
             }
             .chartScrollableAxes(.horizontal)
-            .chartXVisibleDomain(length: 129600) // 129600 seconds in 36 hours to ensure scrolling
+            .chartXVisibleDomain(length: 129600)
             .frame(height: 175)
         }
-        
     }
 }
 
@@ -312,6 +321,7 @@ struct WindChart: View {
     var windspeed180m: [Double]
     var winddirection10m: [Double]
     var time: [Double]
+    var unit: String
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -319,7 +329,7 @@ struct WindChart: View {
                 ForEach(time.indices, id: \.self) { index in
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
-                        y: .value("Wind 10m (km/h)", windspeed10m[index]),
+                        y: .value("Wind 10m (\(unit))", windspeed10m[index]),
                         series: .value("Series", "10m")
                     )
                     .interpolationMethod(.catmullRom)
@@ -336,32 +346,29 @@ struct WindChart: View {
 
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
-                        y: .value("Wind 80m (km/h)", windspeed80m[index]),
+                        y: .value("Wind 80m (\(unit))", windspeed80m[index]),
                         series: .value("Series", "80m")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.teal.opacity(0.6))
 
-                    
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
-                        y: .value("Wind 120m (km/h)", windspeed120m[index]),
+                        y: .value("Wind 120m (\(unit))", windspeed120m[index]),
                         series: .value("Series", "120m")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.teal.opacity(0.4))
 
-                    
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
-                        y: .value("Wind 180m (km/h)", windspeed180m[index]),
+                        y: .value("Wind 180m (\(unit))", windspeed180m[index]),
                         series: .value("Series", "180m")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.teal.opacity(0.2))
                 }
                 
-                // Add vertical mark for day change
                 ForEach(dayChangeIndices(time: time), id: \.self) { index in
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
@@ -380,10 +387,10 @@ struct WindChart: View {
                 }
             }
             .chartForegroundStyleScale([
-                "10m (km/h)": .teal,
-                "80m (km/h)": .teal.opacity(0.6),
-                "120m (km/h)": .teal.opacity(0.4),
-                "180m (km/h)": .teal.opacity(0.2)
+                "10m (\(unit))": .teal,
+                "80m (\(unit))": .teal.opacity(0.6),
+                "120m (\(unit))": .teal.opacity(0.4),
+                "180m (\(unit))": .teal.opacity(0.2)
             ])
             .chartXAxis {
                 AxisMarks(values: .stride(by: .hour, count: 6)) { value in
@@ -396,13 +403,13 @@ struct WindChart: View {
             .chartXVisibleDomain(length: 129600)
             .frame(height: 200)
         }
-        
     }
 }
 
 struct PressureChart: View {
     var pressure: [Double]
     var time: [Double]
+    var unit: String
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -421,7 +428,6 @@ struct PressureChart: View {
                     .foregroundStyle(.purple)
                 }
                 
-                // Add vertical mark for day change
                 ForEach(dayChangeIndices(time: time), id: \.self) { index in
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
@@ -439,7 +445,7 @@ struct PressureChart: View {
                         }
                 }
             }
-            .chartForegroundStyleScale([String(localized: "Luftdruck (hPa)"): .purple])
+            .chartForegroundStyleScale([String(localized: "Luftdruck (\(unit))"): .purple])
             .chartXAxis {
                 AxisMarks(values: .stride(by: .hour, count: 6)) { value in
                     AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .omitted)))
@@ -460,7 +466,7 @@ struct PressureChart: View {
             }
             .chartYScale(domain: minPressure...maxPressure)
             .chartScrollableAxes(.horizontal)
-            .chartXVisibleDomain(length: 129600) // 129600 seconds in 36 hours to ensure scrolling
+            .chartXVisibleDomain(length: 129600)
             .frame(height: 175)
         }
     }
@@ -472,6 +478,7 @@ struct SoilTemperatureChart: View {
     var soilTemp18cm: [Double?]
     var soilTemp54cm: [Double?]
     var time: [Double]
+    var unit: String
     
     var body: some View {
         let filteredSoilTemp0cm = soilTemp0cm.compactMap { $0 }
@@ -485,7 +492,7 @@ struct SoilTemperatureChart: View {
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
                         y: .value("0cm", filteredSoilTemp0cm[index]),
-                        series: .value("Series", "Bodentemperatur 0cm (°C)")
+                        series: .value("Series", "Bodentemperatur 0cm (\(unit))")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.brown)
@@ -493,7 +500,7 @@ struct SoilTemperatureChart: View {
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
                         y: .value("6cm", filteredSoilTemp6cm[index]),
-                        series: .value("Series", "Bodentemperatur 6cm (°C)")
+                        series: .value("Series", "Bodentemperatur 6cm (\(unit))")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.brown.opacity(0.6))
@@ -501,7 +508,7 @@ struct SoilTemperatureChart: View {
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
                         y: .value("18cm", filteredSoilTemp18cm[index]),
-                        series: .value("Series", "Bodentemperatur 18cm (°C)")
+                        series: .value("Series", "Bodentemperatur 18cm (\(unit))")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.brown.opacity(0.4))
@@ -509,13 +516,12 @@ struct SoilTemperatureChart: View {
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
                         y: .value("54cm", filteredSoilTemp54cm[index]),
-                        series: .value("Series", "Bodentemperatur 54cm (°C)")
+                        series: .value("Series", "Bodentemperatur 54cm (\(unit))")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.brown.opacity(0.2))
                 }
                 
-                // Add vertical mark for day change
                 ForEach(dayChangeIndices(time: time), id: \.self) { index in
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
@@ -534,10 +540,10 @@ struct SoilTemperatureChart: View {
                 }
             }
             .chartForegroundStyleScale([
-                "0cm (°C)": .brown,
-                "6cm (°C)": .brown.opacity(0.6),
-                "18cm (°C)": .brown.opacity(0.4),
-                "54cm (°C)": .brown.opacity(0.2)
+                "0cm (\(unit))": .brown,
+                "6cm (\(unit))": .brown.opacity(0.6),
+                "18cm (\(unit))": .brown.opacity(0.4),
+                "54cm (\(unit))": .brown.opacity(0.2)
             ])
             .chartXAxis {
                 AxisMarks(values: .stride(by: .hour, count: 6)) { value in
@@ -560,6 +566,7 @@ struct SoilMoistureChart: View {
     var soilMoisture9_27cm: [Double?]
     var soilMoisture27_81cm: [Double?]
     var time: [Double]
+    var unit: String
     
     var body: some View {
         let filteredSoilMoisture0_1cm = soilMoisture0_1cm.compactMap { $0 }
@@ -574,7 +581,7 @@ struct SoilMoistureChart: View {
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
                         y: .value("0-1cm", filteredSoilMoisture0_1cm[index]),
-                        series: .value("Series", "Bodenwassergehalt 0-1cm (m³/m³)")
+                        series: .value("Series", "Bodenwassergehalt 0-1cm (\(unit))")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.brown)
@@ -582,7 +589,7 @@ struct SoilMoistureChart: View {
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
                         y: .value("1-3cm", filteredSoilMoisture1_3cm[index]),
-                        series: .value("Series", "Bodenwassergehalt 1-3cm (m³/m³)")
+                        series: .value("Series", "Bodenwassergehalt 1-3cm (\(unit))")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.brown.opacity(0.6))
@@ -590,7 +597,7 @@ struct SoilMoistureChart: View {
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
                         y: .value("3-9cm", filteredSoilMoisture3_9cm[index]),
-                        series: .value("Series", "Bodenwassergehalt 3-9cm (m³/m³)")
+                        series: .value("Series", "Bodenwassergehalt 3-9cm (\(unit))")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.brown.opacity(0.4))
@@ -598,7 +605,7 @@ struct SoilMoistureChart: View {
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
                         y: .value("9-27cm", filteredSoilMoisture9_27cm[index]),
-                        series: .value("Series", "Bodenwassergehalt 9-27cm (m³/m³)")
+                        series: .value("Series", "Bodenwassergehalt 9-27cm (\(unit))")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.brown.opacity(0.2))
@@ -606,13 +613,12 @@ struct SoilMoistureChart: View {
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
                         y: .value("27-81cm", filteredSoilMoisture27_81cm[index]),
-                        series: .value("Series", "Bodenwassergehalt 27-81cm (m³/m³)")
+                        series: .value("Series", "Bodenwassergehalt 27-81cm (\(unit))")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.brown.opacity(0.1))
                 }
                 
-                // Add vertical mark for day change
                 ForEach(dayChangeIndices(time: time), id: \.self) { index in
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
@@ -631,11 +637,11 @@ struct SoilMoistureChart: View {
                 }
             }
             .chartForegroundStyleScale([
-                "0-1cm (m³/m³)": .brown,
-                "1-3cm (m³/m³)": .brown.opacity(0.6),
-                "3-9cm (m³/m³)": .brown.opacity(0.4),
-                "9-27cm (m³/m³)": .brown.opacity(0.2),
-                "27-81cm (m³/m³)": .brown.opacity(0.1)
+                "0-1cm (\(unit))": .brown,
+                "1-3cm (\(unit))": .brown.opacity(0.6),
+                "3-9cm (\(unit))": .brown.opacity(0.4),
+                "9-27cm (\(unit))": .brown.opacity(0.2),
+                "27-81cm (\(unit))": .brown.opacity(0.1)
             ])
             .chartXAxis {
                 AxisMarks(values: .stride(by: .hour, count: 6)) { value in
@@ -654,6 +660,7 @@ struct SoilMoistureChart: View {
 struct ET0EvapotranspirationChart: View {
     var et0: [Double]
     var time: [Double]
+    var unit: String
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -662,13 +669,12 @@ struct ET0EvapotranspirationChart: View {
                     LineMark(
                         x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))),
                         y: .value("ET0", et0[index]),
-                        series: .value("Series", "ET0 FAO (mm/day)")
+                        series: .value("Series", "ET0 FAO (\(unit))")
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.blue)
                 }
                 
-                // Add vertical mark for day change
                 ForEach(dayChangeIndices(time: time), id: \.self) { index in
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
                         .foregroundStyle(.gray)
@@ -687,7 +693,7 @@ struct ET0EvapotranspirationChart: View {
                 }
             }
             .chartForegroundStyleScale([
-                String(localized: "Referenz-Evapotranspiration (mm)"): .blue
+                String(localized: "Referenz-Evapotranspiration (\(unit))"): .blue
             ])
             .chartXAxis {
                 AxisMarks(values: .stride(by: .hour, count: 6)) { value in

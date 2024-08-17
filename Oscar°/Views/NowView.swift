@@ -113,6 +113,11 @@ struct NowView: View {
                 await self.updateState()
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("UnitChanged"), object: nil)) { _ in
+            Task {
+                await self.updateState()
+            }
+        }
     }
 }
 

@@ -9,6 +9,8 @@ struct DailyView: View {
         let minTemp = weather.forecast.daily?.temperature_2m_min?.min() ?? 0.0
         let maxTemp = weather.forecast.daily?.temperature_2m_max?.max() ?? 40.0
         let heading = String.localizedStringWithFormat(NSLocalizedString("%d-Tage", comment: "Headline for Daily View"), dayNumber)
+        let temperatureUnit = weather.forecast.daily_units?.temperature_2m_min ?? "°C"
+        let precipitationUnit = weather.forecast.daily_units?.precipitation_sum ?? "mm"
 
         VStack(alignment: .leading) {
             Text(heading)
@@ -56,7 +58,7 @@ struct DailyView: View {
                                 .scaledToFit()
                                 .frame(width: 30, height: 30)
                             VStack {
-                                Text("\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") mm")
+                                Text("\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") \(precipitationUnit)")
                                     .font(.caption)
                                     .foregroundColor(Color(UIColor.label))
                                 Text("\(weather.forecast.daily?.precipitation_probability_max?[dayPos] ?? 0, specifier: "%.0f") %")
@@ -65,11 +67,11 @@ struct DailyView: View {
                             }
                                 .frame(width: 60)
                             Text(roundTemperatureString(temperature: dayMinTemp))
-                                .frame(width: 30, alignment: .trailing)
-                            TemperatureRangeView(low: Int(dayMinTemp?.rounded() ?? 0), high: Int(dayMaxTemp?.rounded() ?? 0), minTemp: Int(minTemp.rounded()), maxTemp: Int(maxTemp.rounded()))
+                                .frame(width: 37, alignment: .trailing)
+                            TemperatureRangeView(low: Int(dayMinTemp?.rounded() ?? 0), high: Int(dayMaxTemp?.rounded() ?? 0), minTemp: Int(minTemp.rounded()), maxTemp: Int(maxTemp.rounded()), unit: temperatureUnit)
                                 .frame(height: 5)
                             Text(roundTemperatureString(temperature: dayMaxTemp))
-                                .frame(width: 30, alignment: .leading)
+                                .frame(width: 37, alignment: .leading)
                         }
                         .padding(.vertical, 4)
                     }
@@ -126,6 +128,7 @@ struct TemperatureRangeView: View {
     let high: Int
     let minTemp: Int
     let maxTemp: Int
+    let unit: String
 
     var body: some View {
         GeometryReader { geometry in
@@ -152,22 +155,69 @@ struct TemperatureRangeView: View {
     }
     
     func gradient(for low: Int, high: Int) -> LinearGradient {
-        let lowColor = color(for: low)
-        let highColor = color(for: high)
+        let lowColor = color(for: low, unit: unit)
+        let highColor = color(for: high, unit: unit)
         return LinearGradient(gradient: Gradient(colors: [lowColor, highColor]), startPoint: .leading, endPoint: .trailing)
     }
     
-    func color(for temperature: Int) -> Color {
+    func color(for temperature: Int, unit: String) -> Color {
+        switch unit {
+        case "°C":
+            return colorForCelsius(temperature)
+        case "°F":
+            return colorForFahrenheit(temperature)
+        case "K":
+            return colorForKelvin(temperature)
+        default:
+            return colorForCelsius(temperature) // Default to Celsius if unit is unknown
+        }
+    }
+    
+    private func colorForCelsius(_ temperature: Int) -> Color {
         switch temperature {
         case ..<0:
             return .blue
-        case ..<11:
+        case 0..<10:
             return .green
-        case ..<19:
+        case 10..<20:
             return .yellow
-        case ..<26:
+        case 20..<30:
             return .orange
-        case ..<41:
+        case 30...:
+            return .red
+        default:
+            return .purple
+        }
+    }
+    
+    private func colorForFahrenheit(_ temperature: Int) -> Color {
+        switch temperature {
+        case ..<32:
+            return .blue
+        case 32..<50:
+            return .green
+        case 50..<68:
+            return .yellow
+        case 68..<86:
+            return .orange
+        case 86...:
+            return .red
+        default:
+            return .purple
+        }
+    }
+    
+    private func colorForKelvin(_ temperature: Int) -> Color {
+        switch temperature {
+        case ..<273:
+            return .blue
+        case 273..<283:
+            return .green
+        case 283..<293:
+            return .yellow
+        case 293..<303:
+            return .orange
+        case 303...:
             return .red
         default:
             return .purple

@@ -148,6 +148,14 @@ paths:
           - ms
           - mph
           - kn
+      - name: precipitation_unit
+        in: query
+        schema:
+          type: string
+          default: mm
+          enum:
+          - mm
+          - inch
       - name: timeformat
         in: query
         description: If format `unixtime` is selected, all time values are returned in UNIX epoch time in seconds. Please not that all time is then in GMT+0! For daily values with unix timestamp, please apply `utc_offset_seconds` again to get the correct date.
@@ -410,17 +418,13 @@ paths:
                           type: number
                     description: For each selected weather variable, data will be returned as a numbering point array. Additionally a `time` array will be returned with ISO8601 timestamps.
                   hourly_units:
-                    type: object
-                    additionalProperties:
-                      type: string
-                    description: For each selected weather variable, the unit will be listed here.
+                    $ref: '#/components/schemas/HourlyUnits'
+                    description: For each selected hourly weather variable, the unit will be listed here.
                   daily:
                     $ref: '#/components/schemas/DailyResponse'
                     description: For each selected daily weather variable, data will be returned as a numbering point array. Additionally a `time` array will be returned with ISO8601 timestamps.
                   daily_units:
-                    type: object
-                    additionalProperties:
-                      type: string
+                    $ref: '#/components/schemas/DailyUnits'
                     description: For each selected daily weather variable, the unit will be listed here.
                   current:
                     $ref: '#/components/schemas/CurrentWeather'
@@ -1117,3 +1121,60 @@ components:
             type: array
             items:
               type: integer
+    HourlyUnits:
+      type: object
+      properties:
+        time:
+          type: string
+          example: "unixtime"
+        temperature_2m:
+          type: string
+          example: "°C"
+        apparent_temperature:
+          type: string
+          example: "°C"
+        precipitation:
+          type: string
+          example: "mm"
+        weathercode:
+          type: string
+          example: "wmo code"
+        cloudcover:
+          type: string
+          example: "%"
+        windspeed_10m:
+          type: string
+          example: "km/h"
+        winddirection_10m:
+          type: string
+          example: "°"
+        soil_temperature_0cm:
+          type: string
+          example: "°C"
+        soil_moisture_0_1cm:
+          type: string
+          example: "m³/m³"
+        et0_fao_evapotranspiration:
+          type: string
+          example: "mm"
+    DailyUnits:
+      type: object
+      properties:
+        time:
+          type: string
+          example: "unixtime"
+        weathercode:
+          type: string
+          example: "wmo code"
+        temperature_2m_max:
+          type: string
+          example: "°C"
+        temperature_2m_min:
+          type: string
+          example: "°C"
+        precipitation_sum:
+          type: string
+          example: "mm"
+        precipitation_probability_max:
+          type: string
+          example: "%"

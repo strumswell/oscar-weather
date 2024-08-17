@@ -9,6 +9,14 @@
 /* Begin PBXBuildFile section */
 		250163DA2B093C0B00EEF882 /* CityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25E30B2A26CD9B31007F468D /* CityService.swift */; };
 		2505C94D29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2505C94C29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift */; };
+		2512E9412C37C765004670E4 /* OpenMeteoAttribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9402C37C765004670E4 /* OpenMeteoAttribution.swift */; };
+		2512E9432C37E3EB004670E4 /* MemberCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9422C37E3EB004670E4 /* MemberCard.swift */; };
+		2512E9482C397DEB004670E4 /* BrightSkyAttribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9472C397DEB004670E4 /* BrightSkyAttribution.swift */; };
+		2512E94D2C398060004670E4 /* TomorrowAttribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E94C2C398060004670E4 /* TomorrowAttribution.swift */; };
+		2512E9522C398188004670E4 /* DWDAttribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9512C398188004670E4 /* DWDAttribution.swift */; };
+		2512E9592C398CCA004670E4 /* SettingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D72B2627C67016001F43FC /* SettingService.swift */; };
+		2512E95E2C398CCB004670E4 /* SettingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D72B2627C67016001F43FC /* SettingService.swift */; };
+		2512E9672C399B7D004670E4 /* UnitSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9662C399B7D004670E4 /* UnitSettings.swift */; };
 		2516BD562BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
 		2516BD572BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
 		2516BD582BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
@@ -203,6 +211,12 @@
 
 /* Begin PBXFileReference section */
 		2505C94C29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecipitationLockscreenWidget.swift; sourceTree = "<group>"; };
+		2512E9402C37C765004670E4 /* OpenMeteoAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenMeteoAttribution.swift; sourceTree = "<group>"; };
+		2512E9422C37E3EB004670E4 /* MemberCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberCard.swift; sourceTree = "<group>"; };
+		2512E9472C397DEB004670E4 /* BrightSkyAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrightSkyAttribution.swift; sourceTree = "<group>"; };
+		2512E94C2C398060004670E4 /* TomorrowAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TomorrowAttribution.swift; sourceTree = "<group>"; };
+		2512E9512C398188004670E4 /* DWDAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DWDAttribution.swift; sourceTree = "<group>"; };
+		2512E9662C399B7D004670E4 /* UnitSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitSettings.swift; sourceTree = "<group>"; };
 		2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		251FE39027C5674400D26F0F /* WMSTileOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WMSTileOverlay.swift; sourceTree = "<group>"; };
 		2523367E27C3EB3900C2111A /* RainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainView.swift; sourceTree = "<group>"; };
@@ -341,6 +355,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2512E9392C37C751004670E4 /* Legal */ = {
+			isa = PBXGroup;
+			children = (
+				2512E9402C37C765004670E4 /* OpenMeteoAttribution.swift */,
+				2512E9422C37E3EB004670E4 /* MemberCard.swift */,
+				2512E9472C397DEB004670E4 /* BrightSkyAttribution.swift */,
+				2512E94C2C398060004670E4 /* TomorrowAttribution.swift */,
+				2512E9512C398188004670E4 /* DWDAttribution.swift */,
+				2512E9662C399B7D004670E4 /* UnitSettings.swift */,
+			);
+			path = Legal;
+			sourceTree = "<group>";
+		};
 		25429BD129E5F94100D5979F /* Oscar°Watch Watch App */ = {
 			isa = PBXGroup;
 			children = (
@@ -505,6 +532,7 @@
 		3E89BBA6252EFEC5006F7BCC /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2512E9392C37C751004670E4 /* Legal */,
 				25ED799329F1A79D002E0AAB /* Backgrounds */,
 				255C23AE258F93900066B2BD /* NowSubViews */,
 				3EB89016251A55700028FED0 /* NowView.swift */,
@@ -844,6 +872,7 @@
 				257EB3642BD8321700E46468 /* APIResultExtensions.swift in Sources */,
 				25CB17ED2B4704E2001D973A /* LocationManager.swift in Sources */,
 				257EB35B2BD831C300E46468 /* APIClient.swift in Sources */,
+				2512E95E2C398CCB004670E4 /* SettingService.swift in Sources */,
 				257EB3792BD832C000E46468 /* PersistenceController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -860,6 +889,7 @@
 				2536438126DACCB800C8A952 /* LegalView.swift in Sources */,
 				250163DA2B093C0B00EEF882 /* CityService.swift in Sources */,
 				253BA18C2B0941670070BD5E /* LocationService.swift in Sources */,
+				2512E94D2C398060004670E4 /* TomorrowAttribution.swift in Sources */,
 				258EE2ED2B5EF4E900AE942B /* RetryClientMiddleware.swift in Sources */,
 				25ED79BE29F1A7DF002E0AAB /* Array-GradientStop.swift in Sources */,
 				2533940A27C43F810087C220 /* AlertView.swift in Sources */,
@@ -867,19 +897,24 @@
 				3E61170C2544B2D300B68120 /* DailyView.swift in Sources */,
 				25D72B2727C67016001F43FC /* SettingService.swift in Sources */,
 				25ED79BD29F1A7DF002E0AAB /* SunView.swift in Sources */,
+				2512E9412C37C765004670E4 /* OpenMeteoAttribution.swift in Sources */,
+				2512E9482C397DEB004670E4 /* BrightSkyAttribution.swift in Sources */,
 				25ED79B029F1A7DF002E0AAB /* StormView.swift in Sources */,
 				25CB17E82B47043A001D973A /* GlobalViewExtensions.swift in Sources */,
+				2512E9522C398188004670E4 /* DWDAttribution.swift in Sources */,
 				25ED79BB29F1A7DF002E0AAB /* Star.swift in Sources */,
 				25ED79BF29F1A7DF002E0AAB /* Storm.swift in Sources */,
 				25CB17EA2B470461001D973A /* APIResultExtensions.swift in Sources */,
 				3E22B523251D151300D86A58 /* WeatherApp.swift in Sources */,
 				3EB89017251A55700028FED0 /* NowView.swift in Sources */,
+				2512E9672C399B7D004670E4 /* UnitSettings.swift in Sources */,
 				25ED79B529F1A7DF002E0AAB /* Color-Custom.swift in Sources */,
 				25CB17DE2B46EB61001D973A /* LegalTextView.swift in Sources */,
 				25DA7A1A27A420970062E02B /* MapDetailView.swift in Sources */,
 				25D003C626CD490200FFF8B8 /* LocationManager.swift in Sources */,
 				25BEDCE426CACF7D00D90D6B /* DataModels.xcdatamodeld in Sources */,
 				25CBB63C2B44A13600223B69 /* WeatherSimulationView.swift in Sources */,
+				2512E9432C37E3EB004670E4 /* MemberCard.swift in Sources */,
 				25ED79AB29F1A7DF002E0AAB /* Meteor.swift in Sources */,
 				3E6117082544B27600B68120 /* HourlyView.swift in Sources */,
 				25ED79B129F1A7DF002E0AAB /* MeteorShower.swift in Sources */,
@@ -923,6 +958,7 @@
 				256FDACA2BCB164F00E18655 /* GlobalRadarProvider.swift in Sources */,
 				259623D42A2BD96600BA75F6 /* Color-Interpolation.swift in Sources */,
 				253F70892950FA0F000BD4C0 /* RadarWidget.swift in Sources */,
+				2512E9592C398CCA004670E4 /* SettingService.swift in Sources */,
 				259623D32A2BD79200BA75F6 /* NowTodayWidget.swift in Sources */,
 				2546516729E492E500D8C13D /* RadarProvider.swift in Sources */,
 				259623D62A2BD97C00BA75F6 /* Color-Custom.swift in Sources */,

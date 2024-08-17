@@ -1,20 +1,12 @@
-//
-//  SettingsService.swift
-//  Oscar°
-//
-//  Created by Philipp Bolte on 23.02.22.
-//
 import CoreData
 import SwiftUI
 import Combine
 
-/*
- * Settings storage should only have ONE object
- */
 public class SettingService: ObservableObject {
     @Published var settings: Settings?
     private let context: NSManagedObjectContext
     private let pc = PersistenceController.shared
+    private let nc = NotificationCenter.default
 
     init() {
         self.context = pc.container.viewContext
@@ -36,12 +28,6 @@ public class SettingService: ObservableObject {
             let fetchRequest: NSFetchRequest<Settings>
             fetchRequest = Settings.fetchRequest()
             let result = try self.context.fetch(fetchRequest)
-            /*
-            for e in result {
-                self.context.delete(e)
-                try self.context.save()
-            }
-             */
             
             // Create default settings if empty
             if (result.count < 1) {
@@ -53,6 +39,9 @@ public class SettingService: ObservableObject {
                 defaultSettings.tempLayer = false
                 defaultSettings.humidityLayer = false
                 defaultSettings.windDirectionLayer = false
+                defaultSettings.temperatureUnit = "celsius"
+                defaultSettings.windSpeedUnit = "kmh"
+                defaultSettings.precipitationUnit = "mm"
                 self.save()
             } else {
                 self.settings = result.first!
@@ -61,5 +50,23 @@ public class SettingService: ObservableObject {
             let nsError = error as NSError
             fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
         }
+    }
+    
+    func updateTemperatureUnit(_ unit: String) {
+        settings?.temperatureUnit = unit
+        save()
+        nc.post(name: Notification.Name("UnitChanged"), object: nil)
+    }
+    
+    func updateWindSpeedUnit(_ unit: String) {
+        settings?.windSpeedUnit = unit
+        save()
+        nc.post(name: Notification.Name("UnitChanged"), object: nil)
+    }
+    
+    func updatePrecipitationUnit(_ unit: String) {
+        settings?.precipitationUnit = unit
+        save()
+        nc.post(name: Notification.Name("UnitChanged"), object: nil)
     }
 }

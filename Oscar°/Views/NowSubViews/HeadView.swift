@@ -56,7 +56,7 @@ struct HeadView: View {
                 Image(systemName: "wind")
                     .frame(width: 30, height: 30)
                     .foregroundColor(Color(UIColor.label))
-                Text("\(weather.forecast.current!.windspeed, specifier: "%.1f") km/h")
+                Text("\(weather.forecast.current!.windspeed, specifier: "%.1f") \(weather.forecast.hourly_units?.windspeed_10m ?? "km/h")")
                     .foregroundColor(Color(UIColor.label))
                 Image(systemName: "location")
                     .frame(width: 30, height: 30)
