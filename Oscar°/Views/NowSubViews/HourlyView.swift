@@ -21,13 +21,8 @@ struct HourlyView: View {
                 .padding(.leading)
             
             ScrollView(.horizontal, showsIndicators: false) {
-                if weather.isLoading && weather.forecast.hourly == nil {
-                    loadingView
-                        .padding(.leading)
-                } else {
-                    forecastView
-                        .padding(.leading)
-                }
+                forecastView
+                    .padding(.leading)
             }
             .scrollTargetBehavior(.viewAligned)
             .frame(maxWidth: .infinity)
@@ -47,27 +42,6 @@ struct HourlyView: View {
         }
     }
     
-    private var loadingView: some View {
-        HStack(spacing: 12) {
-            ForEach((1...5).reversed(), id: \.self) { _ in
-                ProgressView()
-                    .frame(width: 55, height: 140)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 12)
-                    .background(.thinMaterial)
-                    .cornerRadius(10)
-                    .scrollTransition { content, phase in
-                        content
-                            .opacity(phase.isIdentity ? 1 : 0.5)
-                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
-                            .blur(radius: phase.isIdentity ? 0 : 2)
-                    }
-            }
-        }
-        .padding(.vertical, 12)
-        .padding(.top, 7)
-    }
-    
     private var forecastView: some View {
         LazyHStack(spacing: 12) {
             ForEach(getLocalizedHourIndex() ... getLocalizedHourIndex() + 48, id: \.self) { index in
@@ -76,10 +50,8 @@ struct HourlyView: View {
                         .bold()
                     Text("\(weather.forecast.hourly?.precipitation?[index] ?? 0, specifier: "%.1f") \(weather.forecast.hourly_units?.precipitation ?? "mm")")
                         .font(.footnote)
-                        .padding(.top, 3)
-                    Text("\(weather.forecast.hourly?.precipitation_probability?[index] ?? 0, specifier: "%.0f") %")
-                        .font(.footnote)
                         .foregroundColor(.secondary)
+                        .padding(.top, 3)
                     Image(getWeatherIcon(
                         weathercode: weather.forecast.hourly?.weathercode?[index] ?? 0,
                         isDay: weather.forecast.hourly?.is_day?[index] ?? 0))
@@ -92,20 +64,27 @@ struct HourlyView: View {
                 .padding(.vertical, 12)
                 .background(.thinMaterial)
                 .cornerRadius(10)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color(UIColor(.secondary.opacity(0.075))), lineWidth: 1)
+                )
                 .scrollTransition { content, phase in
                     content
                         .opacity(phase.isIdentity ? 1 : 0.5)
                         .scaleEffect(phase.isIdentity ? 1 : 0.9)
                         .blur(radius: phase.isIdentity ? 0 : 2)
                 }
+                .redacted(reason: weather.isLoading || weather.forecast.hourly == nil  ? .placeholder : [])
                 
-                SunsetSunriseCard(index: index)
-                    .scrollTransition { content, phase in
-                        content
-                            .opacity(phase.isIdentity ? 1 : 0.5)
-                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
-                            .blur(radius: phase.isIdentity ? 0 : 2)
-                    }
+                if (!weather.isLoading && weather.forecast.hourly != nil) {
+                    SunsetSunriseCard(index: index)
+                        .scrollTransition { content, phase in
+                            content
+                                .opacity(phase.isIdentity ? 1 : 0.5)
+                                .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                                .blur(radius: phase.isIdentity ? 0 : 2)
+                        }
+                }
             }
             .padding(.vertical, 20)
         }
@@ -221,14 +200,15 @@ struct SunsetSunriseCard: View {
         let hourlyTimestamp = weather.forecast.hourly?.time[index] ?? 0
         let dayIndex = getDayIndexForHourlyForecast(hourlyTimestamp: hourlyTimestamp)
         
+        
         if isWithinHourOfInterest(eventTimestamp: hourlyTimestamp, referenceHour: weather.forecast.daily?.sunrise?[dayIndex] ?? 0) {
             VStack {
                 Text(getTimeString(timestamp: weather.forecast.daily?.sunrise?[dayIndex] ?? 0))
                     .foregroundColor(Color(UIColor.label))
                     .bold()
                 Text(getWeekDay(timestamp: weather.forecast.daily?.sunrise?[dayIndex] ?? 0))
-                    .foregroundColor(Color(UIColor.label))
                     .font(.footnote)
+                    .foregroundColor(.secondary)
                     .padding(.top, 3)
                 Spacer()
                 Image("halfsun")
@@ -238,7 +218,7 @@ struct SunsetSunriseCard: View {
                         color: .orange,
                         radius: CGFloat(10),
                         x: CGFloat(0), y: CGFloat(-5))
-                    .frame(width: 50, height: 50)
+                    .frame(width: 45, height: 45)
                     .padding(.bottom, -3)
                 Image(systemName: "arrow.up")
             }
@@ -263,7 +243,7 @@ struct SunsetSunriseCard: View {
                         color: .orange,
                         radius: CGFloat(10),
                         x: CGFloat(0), y: CGFloat(-5))
-                    .frame(width: 50, height: 50)
+                    .frame(width: 45, height: 45)
                     .padding(.bottom, -3)
                 Image(systemName: "arrow.down")
             }

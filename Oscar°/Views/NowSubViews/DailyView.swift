@@ -11,7 +11,7 @@ struct DailyView: View {
         let heading = String.localizedStringWithFormat(NSLocalizedString("%d-Tage", comment: "Headline for Daily View"), dayNumber)
         let temperatureUnit = weather.forecast.daily_units?.temperature_2m_min ?? "°C"
         let precipitationUnit = weather.forecast.daily_units?.precipitation_sum ?? "mm"
-
+        
         VStack(alignment: .leading) {
             Text(heading)
                 .font(.title3)
@@ -19,70 +19,48 @@ struct DailyView: View {
                 .foregroundColor(Color(UIColor.label))
                 .padding([.leading, .top, .bottom])
             
-            if weather.forecast.daily?.time == nil && weather.isLoading {
-                VStack {
-                    Spacer()
+            
+            VStack {
+                ForEach(0...dayNumber-1, id: \.self) { dayPos in
+                    let dayMinTemp = weather.forecast.daily?.temperature_2m_min?[dayPos]
+                    let dayMaxTemp = weather.forecast.daily?.temperature_2m_max?[dayPos]
                     HStack {
-                        Spacer()
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle())
-                        Spacer()
-                    }
-                    Spacer()
-                }
-                .frame(
-                      minWidth: 0,
-                      maxWidth: .infinity,
-                      minHeight: 400,
-                      maxHeight: 400,
-                      alignment: .topLeading
-                    )
-                .padding(.horizontal, 10)
-                .padding(.vertical, 10)
-                .background(.thinMaterial)
-                .cornerRadius(10)
-                .font(.system(size: 18))
-                .padding([.leading, .trailing])
-            } else {
-                VStack {
-                    ForEach(0...dayNumber-1, id: \.self) { dayPos in
-                        let dayMinTemp = weather.forecast.daily?.temperature_2m_min?[dayPos]
-                        let dayMaxTemp = weather.forecast.daily?.temperature_2m_max?[dayPos]
-                        HStack {
-                            Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0))
+                        Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0))
+                            .foregroundColor(Color(UIColor.label))
+                            .bold()
+                            .frame(width: 45, alignment: .leading)
+                        Image(getWeatherIcon(pos: dayPos))
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
+                        VStack {
+                            Text("\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") \(precipitationUnit)")
+                                .font(.caption)
                                 .foregroundColor(Color(UIColor.label))
-                                .bold()
-                                .frame(width: 50, alignment: .leading)
-                            Image(getWeatherIcon(pos: dayPos))
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 30, height: 30)
-                            VStack {
-                                Text("\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") \(precipitationUnit)")
-                                    .font(.caption)
-                                    .foregroundColor(Color(UIColor.label))
-                                Text("\(weather.forecast.daily?.precipitation_probability_max?[dayPos] ?? 0, specifier: "%.0f") %")
-                                    .font(.caption)
-                                    .foregroundColor(Color(UIColor.secondaryLabel))
-                            }
-                                .frame(width: 60)
-                            Text(roundTemperatureString(temperature: dayMinTemp))
-                                .frame(width: 37, alignment: .trailing)
-                            TemperatureRangeView(low: Int(dayMinTemp?.rounded() ?? 0), high: Int(dayMaxTemp?.rounded() ?? 0), minTemp: Int(minTemp.rounded()), maxTemp: Int(maxTemp.rounded()), unit: temperatureUnit)
-                                .frame(height: 5)
-                            Text(roundTemperatureString(temperature: dayMaxTemp))
-                                .frame(width: 37, alignment: .leading)
                         }
-                        .padding(.vertical, 4)
+                        .frame(width: 50)
+                        Text(roundTemperatureString(temperature: dayMinTemp))
+                            .frame(width: 37, alignment: .trailing)
+                        TemperatureRangeView(low: Int(dayMinTemp?.rounded() ?? 0), high: Int(dayMaxTemp?.rounded() ?? 0), minTemp: Int(minTemp.rounded()), maxTemp: Int(maxTemp.rounded()), unit: temperatureUnit)
+                            .frame(height: 5)
+                        Text(roundTemperatureString(temperature: dayMaxTemp))
+                            .frame(width: 37, alignment: .leading)
                     }
+                    .padding(.vertical, 4)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
-                .background(.thinMaterial)
-                .cornerRadius(10)
-                .font(.system(size: 18))
-                .padding([.leading, .trailing])
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            .background(.thinMaterial)
+            .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color(UIColor(.secondary.opacity(0.075))), lineWidth: 1)
+            )
+            .font(.system(size: 18))
+            .padding([.leading, .trailing])
+            .redacted(reason: weather.forecast.daily?.time == nil && weather.isLoading ? .placeholder : [])
+            
         }
         .scrollTransition { content, phase in
             content
@@ -129,7 +107,7 @@ struct TemperatureRangeView: View {
     let minTemp: Int
     let maxTemp: Int
     let unit: String
-
+    
     var body: some View {
         GeometryReader { geometry in
             let width = geometry.size.width
@@ -148,7 +126,7 @@ struct TemperatureRangeView: View {
             .alignmentGuide(VerticalAlignment.center) { d in d[VerticalAlignment.center] }
         }
     }
-
+    
     func position(for temperature: Int, in width: CGFloat) -> CGFloat {
         let scale = CGFloat(temperature - minTemp) / CGFloat(maxTemp - minTemp)
         return scale * width

@@ -19,6 +19,8 @@ servers:
     description: "Public Geocoding Open-Meteo endpoint"
   - url: https://api.brightsky.dev
     description: "Public BrightSky endpoint"
+  - url: https://weather.gc.ca
+    description: "Public Weather Service from Canada"
 paths:
   /v1/forecast:
     servers:
@@ -656,6 +658,117 @@ paths:
                       $ref: '#/components/schemas/WeatherAlert'
                   location:
                     $ref: '#/components/schemas/AlertLocation'
+  /api/app/en/Location/{latitude},{longitude}:
+    servers:
+      - url: https://weather.gc.ca
+        description: "Environment Canada Weather API"
+    get:
+      operationId: getCanadianWeatherAlerts
+      tags:
+      - Canadian Weather Alerts
+      summary: Fetch weather alerts for a specific location in Canada
+      description: Retrieves current weather alerts based on latitude and longitude coordinates in Canada.
+      parameters:
+      - name: latitude
+        in: path
+        required: true
+        description: Latitude of the location
+        schema:
+          type: number
+          format: double
+      - name: longitude
+        in: path
+        required: true
+        description: Longitude of the location
+        schema:
+          type: number
+          format: double
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    alert:
+                      type: object
+                      nullable: true
+                      properties:
+                        zoneId:
+                          type: string
+                        uuid:
+                          type: string
+                        mostSevere:
+                          type: string
+                        hwyMostSevere:
+                          type: string
+                        alerts:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              type:
+                                type: string
+                              sequence:
+                                type: integer
+                              status:
+                                type: string
+                              transitionStatus:
+                                type: string
+                              issueTime:
+                                type: string
+                              timezone:
+                                type: string
+                              issueTimeText:
+                                type: string
+                              issuingOfficeTZ:
+                                type: string
+                              expiryTime:
+                                type: string
+                              eventOnsetTime:
+                                type: string
+                              eventEndTime:
+                                type: string
+                              alertId:
+                                type: string
+                              alertCode:
+                                type: string
+                              program:
+                                type: string
+                              alertBannerText:
+                                type: string
+                              alertHeaderText:
+                                type: string
+                              bannerColour:
+                                type: string
+                              zoneId:
+                                type: string
+                              zones:
+                                type: array
+                                items:
+                                  type: string
+                              text:
+                                type: string
+                              special_text:
+                                type: array
+                                nullable: true
+                                items:
+                                  type: object
+                                  properties:
+                                    type:
+                                      type: string
+                                    link:
+                                      type: string
+                              tcisURL:
+                                type: string
+                                nullable: true
+                        hwyAlerts:
+                          type: array
+                          items: {}
+                          nullable: true
 components:
   schemas:
     WeatherAlert:

@@ -11,7 +11,7 @@ import Foundation
 class Weather {
     var isLoading: Bool = false
     var forecast: Operations.getForecast.Output.Ok.Body.jsonPayload
-    var alerts: Operations.getAlerts.Output.Ok.Body.jsonPayload
+    var alerts: AlertResponse
     var air: Operations.getAirQuality.Output.Ok.Body.jsonPayload
     var time: Double
     var radar: Components.Schemas.RadarResponse
@@ -25,7 +25,7 @@ class Weather {
             longitude: 0.0,
             current: .init(cloudcover: 0.0, time: 0.0, temperature: 0.0, windspeed: 0.0, wind_direction_10m: 0.0, weathercode: 0.0)
         )
-        alerts = .init()
+        alerts = .brightsky(.init())
         air = Operations.getAirQuality.Output.Ok.Body.jsonPayload.init(latitude: 0, longitude: 0, hourly: nil)
         radar = .init()
     }
@@ -105,7 +105,7 @@ extension Weather {
         
         // Set other properties
         mockWeather.time = 0.5 // Midday
-        mockWeather.alerts = .init() // Empty alerts
+        mockWeather.alerts = .brightsky(.init()) // Empty alerts
         mockWeather.air = Operations.getAirQuality.Output.Ok.Body.jsonPayload(latitude: 51.34, longitude: 12.379999, hourly: nil)
         mockWeather.radar = .init() // Empty radar
         
