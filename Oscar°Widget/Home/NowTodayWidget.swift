@@ -10,6 +10,7 @@ import WidgetKit
 struct NowTodayEntryView: View {
     var entry: HomeProvider.Entry
     @Environment(\.widgetFamily) var family
+    @Environment(\.widgetRenderingMode) var widgetRenderingMode
     
     var body: some View {
         VStack {
@@ -41,6 +42,7 @@ struct NowTodayEntryView: View {
             }
             Spacer()
         }
+        .widgetAccentable()
         .padding()
         .foregroundColor(.white)
         .background(
@@ -48,6 +50,7 @@ struct NowTodayEntryView: View {
                 entry.backgroundGradients.first!,
                 entry.backgroundGradients.last!,
             ], startPoint: .top, endPoint: .bottom)
+            .opacity(widgetRenderingMode == .accented ? 0 : 1)
         )
         .containerBackground(.clear, for: .widget)
     }

@@ -9,6 +9,7 @@ import SwiftUI
 import MapKit
 
 struct RadarView: View {
+    @Environment(Location.self) private var location: Location
     @ObservedObject var settingsService: SettingService
     var showLayerSettings: Bool
     var locationService = LocationService.shared
@@ -19,7 +20,7 @@ struct RadarView: View {
             RadarMapView(
                 settingsService: settingsService,
                 overlayOpacity: 0.7,
-                coordinates: locationService.getCoordinates(),
+                coordinates: location.coordinates,
                 cities: locationService.city.cities,
                 userActionAllowed: userActionAllowed
             )

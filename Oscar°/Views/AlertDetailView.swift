@@ -13,8 +13,17 @@ struct AlertListView: View {
     
     var body: some View {
         NavigationView {
-            List(weather.alerts.alerts ?? [] , id: \.self) { alert in
-                AlertDetailView(alert: alert)
+            List {
+                switch weather.alerts {
+                case .brightsky(let brightskyAlerts):
+                    ForEach(brightskyAlerts.alerts ?? [], id: \.self) { alert in
+                        AlertDetailView(alert: .brightsky(alert))
+                    }
+                case .canadian(let canadianAlerts):
+                    if let firstAlert = canadianAlerts.first?.alert?.alerts {
+                        AlertDetailView(alert: .canadian(firstAlert))
+                    }
+                }
             }
             .navigationBarTitle(Text("Unwetterwarnungen"), displayMode: .inline)
             .toolbar(content: {
@@ -30,7 +39,13 @@ struct AlertListView: View {
 }
 
 struct AlertDetailView: View {
-    var alert: Components.Schemas.WeatherAlert
+    enum AlertType {
+        case brightsky(Components.Schemas.WeatherAlert)
+        case canadian(Operations.getCanadianWeatherAlerts.Output.Ok.Body.jsonPayloadPayload.alertPayload.alertsPayload)
+    }
+    
+    var alert: AlertType
+    
     var body: some View {
         VStack {
             HStack {
@@ -69,16 +84,18 @@ struct AlertDetailView: View {
             }
             .padding(.bottom, 1.5)
             
-            HStack {
-                Text(getInstruction())
-                    .font(.subheadline)
-                    .minimumScaleFactor(0.5)
-                Spacer()
+            if let instruction = getInstruction() {
+                HStack {
+                    Text(instruction)
+                        .font(.subheadline)
+                        .minimumScaleFactor(0.5)
+                    Spacer()
+                }
+                .padding(.bottom, 1)
             }
-            .padding(.bottom, 1)
 
             HStack {
-                Text("Quelle: Deutscher Wetterdienst")
+                Text("Quelle: " + getSource())
                     .font(.subheadline)
                 Spacer()
             }
@@ -88,15 +105,33 @@ struct AlertDetailView: View {
 }
 
 extension AlertDetailView {
-    public func getStartDate() -> String {
-        return formatDate(date: alert.onset ?? Date())
+    func getStartDate() -> String {
+        switch alert {
+        case .brightsky(let brightskyAlert):
+            return formatDate(date: brightskyAlert.onset ?? Date())
+        case .canadian(let canadianAlert):
+            if let dateString = canadianAlert.first?.eventOnsetTime {
+                return formatDate(date: parseISO8601Date(dateString) ?? Date())
+            } else {
+                return formatDate(date: Date())
+            }
+        }
     }
     
-    public func getEndDate() -> String {
-        return formatDate(date: alert.expires ?? Date())
+    func getEndDate() -> String {
+        switch alert {
+        case .brightsky(let brightskyAlert):
+            return formatDate(date: brightskyAlert.expires ?? Date())
+        case .canadian(let canadianAlert):
+            if let dateString = canadianAlert.first?.eventEndTime {
+                return formatDate(date: parseISO8601Date(dateString) ?? Date())
+            } else {
+                return formatDate(date: Date())
+            }
+        }
     }
     
-    public func formatDate(date: Date) -> String {
+    func formatDate(date: Date) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .short
         dateFormatter.timeStyle = .short
@@ -104,27 +139,45 @@ extension AlertDetailView {
         return dateFormatter.string(from: date)
     }
     
-    public func getHeadline() -> String {
-        let langStr = Locale.current.language.languageCode?.identifier ?? "de"
-        let headlineDe = alert.event_de ?? ""
-        let headlineEn = (alert.event_en ?? "").capitalized
-        let localizedEvent = langStr == "de" ? headlineDe : headlineEn
-        return localizedEvent
+    func parseISO8601Date(_ dateString: String) -> Date? {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter.date(from: dateString)
     }
     
-    public func getDescription() -> String {
-        let langStr = Locale.current.language.languageCode?.identifier ?? "de"
-        let descriptionDe = alert.description_de ?? ""
-        let descriptionEn = alert.description_en ?? ""
-        let localizedDescription = langStr == "de" ? descriptionDe : descriptionEn
-        return localizedDescription
+    func getHeadline() -> String {
+        switch alert {
+        case .brightsky(let brightskyAlert):
+            return brightskyAlert.event_de ?? brightskyAlert.event_en ?? ""
+        case .canadian(let canadianAlert):
+            return canadianAlert.first?.alertBannerText ?? ""
+        }
     }
     
-    public func getInstruction() -> String {
-        let langStr = Locale.current.language.languageCode?.identifier ?? "de"
-        let instructionDe = alert.instruction_de ?? ""
-        let instructionEn = alert.instruction_en ?? ""
-        let localizedInstruction = langStr == "de" ? instructionDe : instructionEn
-        return localizedInstruction
+    func getDescription() -> String {
+        switch alert {
+        case .brightsky(let brightskyAlert):
+            return brightskyAlert.description_de ?? brightskyAlert.description_en ?? ""
+        case .canadian(let canadianAlert):
+            return canadianAlert.first?.text ?? ""
+        }
+    }
+    
+    func getInstruction() -> String? {
+        switch alert {
+        case .brightsky(let brightskyAlert):
+            return brightskyAlert.instruction_de ?? brightskyAlert.instruction_en
+        case .canadian:
+            return nil
+        }
+    }
+    
+    func getSource() -> String {
+        switch alert {
+        case .brightsky:
+            return "Deutscher Wetterdienst"
+        case .canadian:
+            return "Environment Canada"
+        }
     }
 }

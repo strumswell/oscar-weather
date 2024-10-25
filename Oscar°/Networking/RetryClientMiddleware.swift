@@ -112,6 +112,7 @@ extension RetryingMiddleware: ClientMiddleware {
                         throw error
                     } else {
                         print("Retrying after an error")
+                        print(error)
                         try await willRetry()
                         continue
                     }

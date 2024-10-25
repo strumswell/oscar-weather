@@ -27,6 +27,7 @@
 
     },
     "%.0f %" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -47,6 +48,9 @@
           }
         }
       }
+    },
+    "%.0f %%" : {
+
     },
     "%.1f" : {
 
@@ -703,6 +707,7 @@
       }
     },
     "Ende: " : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1289,6 +1294,7 @@
       }
     },
     "Quelle: Deutscher Wetterdienst" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1626,6 +1632,7 @@
       }
     },
     "Start: " : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

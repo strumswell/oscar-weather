@@ -10,12 +10,18 @@ import OpenAPIRuntime
 import OpenAPIURLSession
 import CoreLocation
 
+enum AlertResponse {
+    case brightsky(Operations.getAlerts.Output.Ok.Body.jsonPayload)
+    case canadian(Operations.getCanadianWeatherAlerts.Output.Ok.Body.jsonPayload)
+}
+
 // TODO: Caching for API results
 class APIClient {
     var openMeteo: Client
     var openMeteoAqi: Client
     var openMeteoGeo: Client
     var brightsky: Client
+    var canadaWeather: Client
     var settingService: SettingService
 
     init () {
@@ -23,14 +29,16 @@ class APIClient {
         openMeteoAqi = APIClient.get(url: try! Servers.server2())
         openMeteoGeo = APIClient.get(url: try! Servers.server3())
         brightsky = APIClient.get(url: try! Servers.server4())
+        canadaWeather = APIClient.get(url: try! Servers.server5())
         settingService = SettingService()
     }
     
-     class func get(url: URL) -> Client {
+    class func get(url: URL) -> Client {
         return Client(
             serverURL: url,
             transport: URLSessionTransport(),
             middlewares: [
+                CachingMiddleware(cacheTime: 60),
                 RetryingMiddleware(
                     signals: [.code(429), .range(500..<600), .errorThrown],
                     policy: .upToAttempts(count: 3),
@@ -102,7 +110,21 @@ class APIClient {
         }
     }
     
-    func getAlerts(coordinates: CLLocationCoordinate2D) async throws -> Operations.getAlerts.Output.Ok.Body.jsonPayload {
+    func getAlerts(coordinates: CLLocationCoordinate2D) async throws -> AlertResponse {
+        if isCanadianLocation(coordinates) {
+            return try await getCanadianWeatherAlerts(coordinates: coordinates)
+        } else {
+            return try await getBrightskyAlerts(coordinates: coordinates)
+        }
+    }
+
+    private func isCanadianLocation(_ coordinates: CLLocationCoordinate2D) -> Bool {
+        // Rough bounding box for Canada
+        return coordinates.latitude >= 41.0 && coordinates.latitude <= 84.0 &&
+               coordinates.longitude >= -141.0 && coordinates.longitude <= -52.0
+    }
+
+    private func getBrightskyAlerts(coordinates: CLLocationCoordinate2D) async throws -> AlertResponse {
         let response = try await brightsky.getAlerts(.init(
             query: .init(
                 lat: coordinates.latitude,
@@ -114,12 +136,30 @@ class APIClient {
         case let .ok(response):
             switch response.body {
             case .json(let result):
-                return result
+                return .brightsky(result)
             }
         case .undocumented:
-            return .init()
+            return .brightsky(.init())
         }
+    }
 
+    private func getCanadianWeatherAlerts(coordinates: CLLocationCoordinate2D) async throws -> AlertResponse {
+        let response = try await canadaWeather.getCanadianWeatherAlerts(.init(
+            path: .init(
+                latitude: coordinates.latitude,
+                longitude: coordinates.longitude
+            )
+        ))
+        
+        switch response {
+        case let .ok(response):
+            switch response.body {
+            case .json(let result):
+                return .canadian(result)
+            }
+        case .undocumented:
+            return .canadian([])
+        }
     }
     
     func getGeocodeSearchResult(name: String) async throws -> Components.Schemas.SearchResponse {

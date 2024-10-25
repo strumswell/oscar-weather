@@ -44,30 +44,48 @@ struct AlertView: View {
 
 extension AlertView {
     func hasAlert() -> Bool {
-        return (weather.alerts.alerts?.count ?? 0) > 0
+        switch weather.alerts {
+        case .brightsky(let brightskyAlerts):
+            return (brightskyAlerts.alerts?.count ?? 0) > 0
+        case .canadian(let canadianAlerts):
+            return !canadianAlerts.isEmpty && canadianAlerts.first?.alert != nil
+        }
     }
     
-    func getAlertCont() -> Int {
-        return weather.alerts.alerts?.count ?? 0
+    func getAlertCount() -> Int {
+        switch weather.alerts {
+        case .brightsky(let brightskyAlerts):
+            return brightskyAlerts.alerts?.count ?? 0
+        case .canadian(let canadianAlerts):
+            return canadianAlerts.reduce(0) { $0 + ($1.alert?.alerts?.count ?? 0) }
+        }
     }
     
     func getFormattedHeadline() -> String {
-        let langStr = Locale.current.language.languageCode?.identifier ?? "de"
-        let alertCount = getAlertCont()
-        let headlineDe = (weather.alerts.alerts?.first?.headline_de ?? "")
-            .replacingOccurrences(of: "Amtliche", with: "")
-            .replacingOccurrences(of: "UNWETTER", with: "")
-        let headlineEn = (weather.alerts.alerts?.first?.event_en ?? "")
-            .replacingOccurrences(of: "Official", with: "")
-        let localizedEvent = langStr == "de"
-            ? headlineDe.uppercased()
-            : headlineEn.uppercased()
-        
-        if alertCount > 1 {
-            return "\(localizedEvent) (+\(alertCount-1))"
-        } else {
-            return localizedEvent
+        switch weather.alerts {
+        case .brightsky(let brightskyAlerts):
+            let alertCount = getAlertCount()
+            let headlineDe = (brightskyAlerts.alerts?.first?.headline_de ?? "")
+                .replacingOccurrences(of: "Amtliche", with: "")
+                .replacingOccurrences(of: "UNWETTER", with: "")
+            let localizedEvent = headlineDe.uppercased()
+            
+            if alertCount > 1 {
+                return "\(localizedEvent) (+\(alertCount-1))"
+            } else {
+                return localizedEvent
+            }
+        case .canadian(let canadianAlerts):
+            let alertCount = getAlertCount()
+            if let firstAlert = canadianAlerts.first?.alert?.alerts?.first {
+                let headline = firstAlert.alertBannerText?.uppercased() ?? ""
+                if alertCount > 1 {
+                    return "\(headline) (+\(alertCount-1))"
+                } else {
+                    return headline
+                }
+            }
+            return ""
         }
-        
     }
 }

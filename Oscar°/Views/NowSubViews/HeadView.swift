@@ -24,6 +24,7 @@ struct HeadView: View {
                 .foregroundColor(Color(UIColor.label))
             Spacer()
         }
+        .redacted(reason: weather.isLoading ? .placeholder : [])
         .shadow(radius: 5)
         .onTapGesture {
             UIApplication.shared.playHapticFeedback()
@@ -44,7 +45,7 @@ struct HeadView: View {
                         .font(.system(size: 120))
                         .shadow(radius: 15)
             }
-            .padding(.bottom, 150)
+            .padding(.bottom, 160)
             
             HStack {
                 Spacer()
@@ -70,6 +71,7 @@ struct HeadView: View {
                 AlertView()
             }
         }
+        .redacted(reason: weather.isLoading ? .placeholder : [])
         .scrollTransition { content, phase in
             content
                 .opacity(phase.isIdentity ? 1 : 0.8)
@@ -81,6 +83,11 @@ struct HeadView: View {
 
 extension HeadView {
     func hasWeatherAlerts() -> Bool {
-        return weather.alerts.alerts?.count ?? 0 > 0
+        switch weather.alerts {
+        case .brightsky(let brightskyAlerts):
+            return (brightskyAlerts.alerts?.count ?? 0) > 0
+        case .canadian(let canadianAlerts):
+            return canadianAlerts.contains { $0.alert?.alerts?.isEmpty == false }
+        }
     }
 }

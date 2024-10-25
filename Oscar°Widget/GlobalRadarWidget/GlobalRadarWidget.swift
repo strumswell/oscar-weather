@@ -47,6 +47,7 @@ struct GlobalRadarEntryWidget: View {
             .padding(15)
         }
         .containerBackground(.clear, for: .widget)
+        .widgetAccentable()
     }
 }
 

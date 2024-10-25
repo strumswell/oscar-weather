@@ -34,7 +34,7 @@
       }
     },
     "%@ % • %.1f mm" : {
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -52,6 +52,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : ""
+          }
+        }
+      }
+    },
+    "%@ %% • %.1f mm" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %% • %2$.1f mm"
           }
         }
       }

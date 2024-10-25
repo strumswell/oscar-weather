@@ -8,6 +8,8 @@
     import SwiftUI
         
     struct RadarWidgetEntryView : View {
+        @Environment(\.widgetRenderingMode) var widgetRenderingMode
+
         var entry: RadarProvider.Entry
         let dateFormatter: DateFormatter = {
             let formatter = DateFormatter()
@@ -17,9 +19,17 @@
 
         var body: some View {
             ZStack(alignment: .center) {
-                Image(uiImage: entry.image)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
+                if #available(iOSApplicationExtension 18.0, *) {
+                    Image(uiImage: entry.image)
+                        .resizable()
+                        .widgetAccentedRenderingMode(.accentedDesaturated)
+                        .aspectRatio(contentMode: .fill)
+                        .contrast(widgetRenderingMode == .accented ? 1.5 : 1)
+                } else {
+                    Image(uiImage: entry.image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                }
 
                 VStack {
                     HStack {
@@ -28,8 +38,9 @@
                             .foregroundColor(.white)
                             .padding(.horizontal, 5)
                             .padding(.vertical, 2)
-                            .background(Color.gray.opacity(0.6))
+                            .background(widgetRenderingMode == .accented ? .gray.opacity(0.3) : .gray.opacity(0.6))
                             .cornerRadius(5)
+                            .widgetAccentable()
                         Spacer()
                     }
                     Spacer()
@@ -37,11 +48,12 @@
                 .padding(15)
 
                 Circle()
-                    .fill(Color.blue)
+                    .fill(.blue)
+                    .widgetAccentable()
                     .frame(width: 11, height: 11)
                     .overlay(
                         Circle()
-                            .stroke(Color.white.opacity(0.8), lineWidth: 2)
+                            .stroke(.white.opacity(0.8), lineWidth: 2)
                     )
                     .shadow(radius: 3)
             }
