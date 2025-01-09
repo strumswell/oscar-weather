@@ -29,11 +29,13 @@ struct HourlyDetailView: View {
                         }
                         
                         // Precipitation Chart
-                        GroupBox(label: Text("Regen").padding(.bottom, 2)) {
+                        GroupBox(label: Text("Niederschlag").padding(.bottom, 2)) {
                             let precipitation = weather.forecast.hourly?.precipitation ?? []
+                            let snowfall = weather.forecast.hourly?.snowfall ?? []
                             let precipitationUnit = weather.forecast.hourly_units?.precipitation ?? "mm"
                             PrecipitationChart(
                                 precipitation: precipitation,
+                                snowfall: snowfall,
                                 time: time,
                                 unit: precipitationUnit,
                                 maxTimeRange: maxTimeRange

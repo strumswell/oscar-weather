@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		250163DA2B093C0B00EEF882 /* CityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25E30B2A26CD9B31007F468D /* CityService.swift */; };
+		2502F6F72D2F3D2600636DC9 /* WeatherObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2502F6F62D2F3D2600636DC9 /* WeatherObservable.swift */; };
+		2502F6F82D2F3D2600636DC9 /* WeatherObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2502F6F62D2F3D2600636DC9 /* WeatherObservable.swift */; };
+		2502F6F92D2F3D2600636DC9 /* WeatherObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2502F6F62D2F3D2600636DC9 /* WeatherObservable.swift */; };
 		2505C94D29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2505C94C29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift */; };
 		2512E9412C37C765004670E4 /* OpenMeteoAttribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9402C37C765004670E4 /* OpenMeteoAttribution.swift */; };
 		2512E9432C37E3EB004670E4 /* MemberCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9422C37E3EB004670E4 /* MemberCard.swift */; };
@@ -112,7 +115,6 @@
 		25C430122AC36173001DA5FC /* OpenAPIURLSession in Frameworks */ = {isa = PBXBuildFile; productRef = 25C430112AC36173001DA5FC /* OpenAPIURLSession */; };
 		25CB17DE2B46EB61001D973A /* LegalTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CB17DD2B46EB61001D973A /* LegalTextView.swift */; };
 		25CB17E32B470335001D973A /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CB17E22B470335001D973A /* APIClient.swift */; };
-		25CB17E52B4703CD001D973A /* WeatherObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CB17E42B4703CD001D973A /* WeatherObservable.swift */; };
 		25CB17E82B47043A001D973A /* GlobalViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CB17E72B47043A001D973A /* GlobalViewExtensions.swift */; };
 		25CB17EA2B470461001D973A /* APIResultExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CB17E92B470461001D973A /* APIResultExtensions.swift */; };
 		25CB17EB2B4704E1001D973A /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D003C526CD490200FFF8B8 /* LocationManager.swift */; };
@@ -221,6 +223,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2502F6F62D2F3D2600636DC9 /* WeatherObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherObservable.swift; sourceTree = "<group>"; };
 		2505C94C29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecipitationLockscreenWidget.swift; sourceTree = "<group>"; };
 		2512E9402C37C765004670E4 /* OpenMeteoAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenMeteoAttribution.swift; sourceTree = "<group>"; };
 		2512E9422C37E3EB004670E4 /* MemberCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberCard.swift; sourceTree = "<group>"; };
@@ -277,7 +280,6 @@
 		25BEDCE526CACFC900D90D6B /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		25CB17DD2B46EB61001D973A /* LegalTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalTextView.swift; sourceTree = "<group>"; };
 		25CB17E22B470335001D973A /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
-		25CB17E42B4703CD001D973A /* WeatherObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherObservable.swift; sourceTree = "<group>"; };
 		25CB17E72B47043A001D973A /* GlobalViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalViewExtensions.swift; sourceTree = "<group>"; };
 		25CB17E92B470461001D973A /* APIResultExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIResultExtensions.swift; sourceTree = "<group>"; };
 		25CBB63B2B44A13600223B69 /* WeatherSimulationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherSimulationView.swift; sourceTree = "<group>"; };
@@ -527,9 +529,9 @@
 				25CB17E22B470335001D973A /* APIClient.swift */,
 				25D003C526CD490200FFF8B8 /* LocationManager.swift */,
 				253BA18B2B0941670070BD5E /* LocationService.swift */,
-				25CB17E42B4703CD001D973A /* WeatherObservable.swift */,
 				258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */,
 				2598E9352C7291D2004A9D5E /* CacheMiddleware.swift */,
+				2502F6F62D2F3D2600636DC9 /* WeatherObservable.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -764,7 +766,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1430;
-				LastUpgradeCheck = 1520;
+				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					25429BCF29E5F94100D5979F = {
 						CreatedOnToolsVersion = 14.3;
@@ -906,6 +908,7 @@
 				25429BFB29E5FAC600D5979F /* LockscreenProvider.swift in Sources */,
 				257EB3602BD831D200E46468 /* CityService.swift in Sources */,
 				25429C0129E5FAF200D5979F /* TemperatureLockscreenWidget.swift in Sources */,
+				2502F6F82D2F3D2600636DC9 /* WeatherObservable.swift in Sources */,
 				25429C0029E5FAEF00D5979F /* PrecipitationLockscreenWidget.swift in Sources */,
 				257EB3642BD8321700E46468 /* APIResultExtensions.swift in Sources */,
 				25CB17ED2B4704E2001D973A /* LocationManager.swift in Sources */,
@@ -922,6 +925,7 @@
 				253F84F72C20B8ED00844A9E /* HourlyDetailView.swift in Sources */,
 				251FE39127C5674400D26F0F /* WMSTileOverlay.swift in Sources */,
 				255950952B45B16000122324 /* SearchCityView.swift in Sources */,
+				2502F6F72D2F3D2600636DC9 /* WeatherObservable.swift in Sources */,
 				253F708B29510B06000BD4C0 /* AQIView.swift in Sources */,
 				25CB17E32B470335001D973A /* APIClient.swift in Sources */,
 				2536438126DACCB800C8A952 /* LegalView.swift in Sources */,
@@ -965,7 +969,6 @@
 				25ED79B829F1A7DF002E0AAB /* CloudsView.swift in Sources */,
 				25BEDCE626CACFC900D90D6B /* PersistenceController.swift in Sources */,
 				259704E52757D7E800DFCA53 /* AlertDetailView.swift in Sources */,
-				25CB17E52B4703CD001D973A /* WeatherObservable.swift in Sources */,
 				2598E9362C7291D2004A9D5E /* CacheMiddleware.swift in Sources */,
 				25AD38E72BE716E100A8F305 /* MemoryView.swift in Sources */,
 				259187CF2C715B7500611B0F /* WindChart.swift in Sources */,
@@ -1004,6 +1007,7 @@
 				259623D52A2BD97300BA75F6 /* Array-GradientStop.swift in Sources */,
 				256FDACA2BCB164F00E18655 /* GlobalRadarProvider.swift in Sources */,
 				259623D42A2BD96600BA75F6 /* Color-Interpolation.swift in Sources */,
+				2502F6F92D2F3D2600636DC9 /* WeatherObservable.swift in Sources */,
 				253F70892950FA0F000BD4C0 /* RadarWidget.swift in Sources */,
 				2512E9592C398CCA004670E4 /* SettingService.swift in Sources */,
 				259623D32A2BD79200BA75F6 /* NowTodayWidget.swift in Sources */,
@@ -1055,7 +1059,6 @@
 		25429BDF29E5F94300D5979F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -1087,7 +1090,6 @@
 		25429BE029E5F94300D5979F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -1304,7 +1306,6 @@
 		3EB89021251A55740028FED0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Oscar°/Oscar°.entitlements";
@@ -1335,7 +1336,6 @@
 		3EB89022251A55740028FED0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Oscar°/Oscar°.entitlements";

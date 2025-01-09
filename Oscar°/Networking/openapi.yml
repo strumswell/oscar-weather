@@ -1,8 +1,10 @@
+# @format
+
 openapi: 3.1.0
 info:
   title: Underlying Oscar Endpoints
-  description: 'This OpenAPI document outline all endpoints being used by Oscar for retrieving weather-related data.'
-  version: '1.0'
+  description: "This OpenAPI document outline all endpoints being used by Oscar for retrieving weather-related data."
+  version: "1.0"
   contact:
     name: Philipp Bolte
     url: https://bolte.id/
@@ -21,6 +23,8 @@ servers:
     description: "Public BrightSky endpoint"
   - url: https://weather.gc.ca
     description: "Public Weather Service from Canada"
+  - url: https://api.rainviewer.com
+    description: "Public RainViewer endpoint"
 paths:
   /v1/forecast:
     servers:
@@ -28,175 +32,176 @@ paths:
     get:
       operationId: getForecast
       tags:
-      - Weather Forecast APIs
+        - Weather Forecast APIs
       summary: 7 day weather forecast for coordinates
       description: 7 day weather variables in hourly and daily resolution for given WGS84 latitude and longitude coordinates. Available worldwide.
       parameters:
-      - name: latitude
-        in: query
-        required: true
-        description: "WGS84 coordinate"
-        schema:
-          type: number
-          format: number
-      - name: longitude
-        in: query
-        required: true
-        description: "WGS84 coordinate"
-        schema:
-          type: number
-          format: number
-      - name: hourly
-        in: query
-        explode: false
-        schema:
-          type: array
-          items:
+        - name: latitude
+          in: query
+          required: true
+          description: "WGS84 coordinate"
+          schema:
+            type: number
+            format: number
+        - name: longitude
+          in: query
+          required: true
+          description: "WGS84 coordinate"
+          schema:
+            type: number
+            format: number
+        - name: hourly
+          in: query
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - temperature_2m
+                - relativehumidity_2m
+                - dewpoint_2m
+                - apparent_temperature
+                - pressure_msl
+                - cloudcover
+                - cloudcover_low
+                - cloudcover_mid
+                - cloudcover_high
+                - windspeed_10m
+                - windspeed_80m
+                - windspeed_120m
+                - windspeed_180m
+                - winddirection_10m
+                - winddirection_80m
+                - winddirection_120m
+                - winddirection_180m
+                - windgusts_10m
+                - shortwave_radiation
+                - direct_radiation
+                - direct_normal_irradiance
+                - diffuse_radiation
+                - vapor_pressure_deficit
+                - evapotranspiration
+                - et0_fao_evapotranspiration
+                - precipitation
+                - precipitation_probability
+                - weathercode
+                - snow_height
+                - snowfall
+                - freezinglevel_height
+                - soil_temperature_0cm
+                - soil_temperature_6cm
+                - soil_temperature_18cm
+                - soil_temperature_54cm
+                - soil_moisture_0_1cm
+                - soil_moisture_1_3cm
+                - soil_moisture_3_9cm
+                - soil_moisture_9_27cm
+                - soil_moisture_27_81cm
+                - is_day
+        - name: daily
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - temperature_2m_max
+                - temperature_2m_min
+                - apparent_temperature_max
+                - apparent_temperature_min
+                - precipitation_sum
+                - precipitation_hours
+                - precipitation_probability_max
+                - weathercode
+                - sunrise
+                - sunset
+                - windspeed_10m_max
+                - windgusts_10m_max
+                - winddirection_10m_dominant
+                - shortwave_radiation_sum
+                - uv_index_max
+                - uv_index_clear_sky_max
+                - et0_fao_evapotranspiration
+        - name: current
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - cloudcover
+                - temperature
+                - windspeed
+                - wind_direction_10m
+                - weathercode
+                - precipitation
+                - is_day
+        - name: temperature_unit
+          in: query
+          schema:
+            type: string
+            default: celsius
+            enum:
+              - celsius
+              - fahrenheit
+        - name: windspeed_unit
+          in: query
+          schema:
+            type: string
+            default: kmh
+            enum:
+              - kmh
+              - ms
+              - mph
+              - kn
+        - name: precipitation_unit
+          in: query
+          schema:
+            type: string
+            default: mm
+            enum:
+              - mm
+              - inch
+        - name: timeformat
+          in: query
+          description: If format `unixtime` is selected, all time values are returned in UNIX epoch time in seconds. Please not that all time is then in GMT+0! For daily values with unix timestamp, please apply `utc_offset_seconds` again to get the correct date.
+          schema:
+            type: string
+            default: iso8601
+            enum:
+              - iso8601
+              - unixtime
+        - name: timezone
+          in: query
+          description: If `timezone` is set, all timestamps are returned as local-time and data is returned starting at 0:00 local-time. Any time zone name from the [time zone database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) is supported.
+          schema:
+            type: string
+        - name: past_days
+          in: query
+          description: If `past_days` is set, yesterdays or the day before yesterdays data are also returned.
+          schema:
+            type: integer
+            enum:
+              - 1
+              - 2
+        - name: forecast_days
+          in: query
+          description: If `forecast_days` is set, the specified number of days will be included in the forecast
+          schema:
+            type: integer
+            enum:
+              - 1
+              - 7
+              - 14
+        - name: models
+          in: query
+          description: Weather model
+          schema:
             type: string
             enum:
-            - temperature_2m
-            - relativehumidity_2m
-            - dewpoint_2m
-            - apparent_temperature
-            - pressure_msl
-            - cloudcover
-            - cloudcover_low
-            - cloudcover_mid
-            - cloudcover_high
-            - windspeed_10m
-            - windspeed_80m
-            - windspeed_120m
-            - windspeed_180m
-            - winddirection_10m
-            - winddirection_80m
-            - winddirection_120m
-            - winddirection_180m
-            - windgusts_10m
-            - shortwave_radiation
-            - direct_radiation
-            - direct_normal_irradiance
-            - diffuse_radiation
-            - vapor_pressure_deficit
-            - evapotranspiration
-            - et0_fao_evapotranspiration
-            - precipitation
-            - precipitation_probability
-            - weathercode
-            - snow_height
-            - freezinglevel_height
-            - soil_temperature_0cm
-            - soil_temperature_6cm
-            - soil_temperature_18cm
-            - soil_temperature_54cm
-            - soil_moisture_0_1cm
-            - soil_moisture_1_3cm
-            - soil_moisture_3_9cm
-            - soil_moisture_9_27cm
-            - soil_moisture_27_81cm
-            - is_day
-      - name: daily
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - temperature_2m_max
-            - temperature_2m_min
-            - apparent_temperature_max
-            - apparent_temperature_min
-            - precipitation_sum
-            - precipitation_hours
-            - precipitation_probability_max
-            - weathercode
-            - sunrise
-            - sunset
-            - windspeed_10m_max
-            - windgusts_10m_max
-            - winddirection_10m_dominant
-            - shortwave_radiation_sum
-            - uv_index_max
-            - uv_index_clear_sky_max
-            - et0_fao_evapotranspiration
-      - name: current
-        in: query
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - cloudcover
-            - temperature
-            - windspeed
-            - wind_direction_10m
-            - weathercode
-            - precipitation
-            - is_day
-      - name: temperature_unit
-        in: query
-        schema:
-          type: string
-          default: celsius
-          enum:
-          - celsius
-          - fahrenheit
-      - name: windspeed_unit
-        in: query
-        schema:
-          type: string
-          default: kmh
-          enum:
-          - kmh
-          - ms
-          - mph
-          - kn
-      - name: precipitation_unit
-        in: query
-        schema:
-          type: string
-          default: mm
-          enum:
-          - mm
-          - inch
-      - name: timeformat
-        in: query
-        description: If format `unixtime` is selected, all time values are returned in UNIX epoch time in seconds. Please not that all time is then in GMT+0! For daily values with unix timestamp, please apply `utc_offset_seconds` again to get the correct date.
-        schema:
-          type: string
-          default: iso8601
-          enum:
-          - iso8601
-          - unixtime
-      - name: timezone
-        in: query
-        description: If `timezone` is set, all timestamps are returned as local-time and data is returned starting at 0:00 local-time. Any time zone name from the [time zone database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) is supported.
-        schema:
-          type: string
-      - name: past_days
-        in: query
-        description: If `past_days` is set, yesterdays or the day before yesterdays data are also returned.
-        schema:
-          type: integer
-          enum:
-          - 1
-          - 2
-      - name: forecast_days
-        in: query
-        description: If `forecast_days` is set, the specified number of days will be included in the forecast
-        schema:
-          type: integer
-          enum:
-          - 1
-          - 7
-          - 14
-      - name: models
-        in: query
-        description: Weather model
-        schema:
-          type: string
-          enum:
-          - best_match
-          - icon_seamless
+              - best_match
+              - icon_seamless
       responses:
         200:
           description: OK
@@ -356,6 +361,10 @@ paths:
                         type: array
                         items:
                           type: number
+                      snowfall:
+                        type: array
+                        items:
+                          type: number
                       freezinglevel_height:
                         type: array
                         items:
@@ -420,16 +429,16 @@ paths:
                           type: number
                     description: For each selected weather variable, data will be returned as a numbering point array. Additionally a `time` array will be returned with ISO8601 timestamps.
                   hourly_units:
-                    $ref: '#/components/schemas/HourlyUnits'
+                    $ref: "#/components/schemas/HourlyUnits"
                     description: For each selected hourly weather variable, the unit will be listed here.
                   daily:
-                    $ref: '#/components/schemas/DailyResponse'
+                    $ref: "#/components/schemas/DailyResponse"
                     description: For each selected daily weather variable, data will be returned as a numbering point array. Additionally a `time` array will be returned with ISO8601 timestamps.
                   daily_units:
-                    $ref: '#/components/schemas/DailyUnits'
+                    $ref: "#/components/schemas/DailyUnits"
                     description: For each selected daily weather variable, the unit will be listed here.
                   current:
-                    $ref: '#/components/schemas/CurrentWeather'
+                    $ref: "#/components/schemas/CurrentWeather"
                     description: "Current weather conditions with the attributes: time, temperature, windspeed, winddirection and weathercode"
         400:
           description: Bad Request
@@ -451,58 +460,58 @@ paths:
     get:
       operationId: getAirQuality
       tags:
-      - Weather Forecast APIs
+        - Weather Forecast APIs
       parameters:
-      - name: latitude
-        in: query
-        required: true
-        description: "WGS84 coordinate"
-        schema:
-          type: number
-          format: number
-      - name: longitude
-        in: query
-        required: true
-        description: "WGS84 coordinate"
-        schema:
-          type: number
-          format: number
-      - name: timezone
-        in: query
-        description: If `timezone` is set, all timestamps are returned as local-time and data is returned starting at 0:00 local-time. Any time zone name from the [time zone database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) is supported.
-        schema:
-          type: string
-      - name: timeformat
-        in: query
-        description: If format `unixtime` is selected, all time values are returned in UNIX epoch time in seconds. Please not that all time is then in GMT+0! For daily values with unix timestamp, please apply `utc_offset_seconds` again to get the correct date.
-        schema:
-          type: string
-          default: iso8601
-          enum:
-          - iso8601
-          - unixtime
-      - name: forecast_days
-        in: query
-        schema:
-          type: integer
-          enum:
-          - 1
-      - name: hourly
-        in: query
-        explode: false
-        schema:
-          type: array
-          items:
+        - name: latitude
+          in: query
+          required: true
+          description: "WGS84 coordinate"
+          schema:
+            type: number
+            format: number
+        - name: longitude
+          in: query
+          required: true
+          description: "WGS84 coordinate"
+          schema:
+            type: number
+            format: number
+        - name: timezone
+          in: query
+          description: If `timezone` is set, all timestamps are returned as local-time and data is returned starting at 0:00 local-time. Any time zone name from the [time zone database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) is supported.
+          schema:
             type: string
+        - name: timeformat
+          in: query
+          description: If format `unixtime` is selected, all time values are returned in UNIX epoch time in seconds. Please not that all time is then in GMT+0! For daily values with unix timestamp, please apply `utc_offset_seconds` again to get the correct date.
+          schema:
+            type: string
+            default: iso8601
             enum:
-            - time
-            - european_aqi
-            - european_aqi_pm2_5
-            - european_aqi_pm10
-            - european_aqi_no2
-            - european_aqi_o3
-            - european_aqi_so2
-            - uv_index
+              - iso8601
+              - unixtime
+        - name: forecast_days
+          in: query
+          schema:
+            type: integer
+            enum:
+              - 1
+        - name: hourly
+          in: query
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - time
+                - european_aqi
+                - european_aqi_pm2_5
+                - european_aqi_pm10
+                - european_aqi_no2
+                - european_aqi_o3
+                - european_aqi_so2
+                - uv_index
       responses:
         200:
           description: OK
@@ -522,7 +531,7 @@ paths:
                   timezone_abbreviation:
                     type: string
                   hourly:
-                    $ref: '#/components/schemas/AirQuality'
+                    $ref: "#/components/schemas/AirQuality"
   /search:
     servers:
       - url: https://geocoding-api.open-meteo.com/v1
@@ -547,9 +556,9 @@ paths:
             type: string
             default: de
             enum:
-            - de
-            - en
-            - tr
+              - de
+              - en
+              - tr
           description: Language of the response.
         - name: format
           in: query
@@ -558,12 +567,12 @@ paths:
             enum: [json]
           description: Format of the response.
       responses:
-        '200':
+        "200":
           description: A list of locations matching the search criteria.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SearchResponse'
+                $ref: "#/components/schemas/SearchResponse"
   /radar:
     servers:
       - url: https://api.brightsky.dev
@@ -613,12 +622,12 @@ paths:
             enum: [plain, otherFormats]
           description: The format of the output data.
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RadarResponse'
+                $ref: "#/components/schemas/RadarResponse"
   /alerts:
     servers:
       - url: https://api.brightsky.dev
@@ -626,24 +635,24 @@ paths:
     get:
       operationId: getAlerts
       tags:
-      - Alerts
+        - Alerts
       summary: Fetch weather alerts for a specific location
       description: Retrieves current weather alerts based on latitude and longitude coordinates.
       parameters:
-      - name: lat
-        in: query
-        required: true
-        description: Latitude of the location
-        schema:
-          type: number
-          format: double
-      - name: lon
-        in: query
-        required: true
-        description: Longitude of the location
-        schema:
-          type: number
-          format: double
+        - name: lat
+          in: query
+          required: true
+          description: Latitude of the location
+          schema:
+            type: number
+            format: double
+        - name: lon
+          in: query
+          required: true
+          description: Longitude of the location
+          schema:
+            type: number
+            format: double
       responses:
         200:
           description: An array of weather alerts
@@ -655,9 +664,9 @@ paths:
                   alerts:
                     type: array
                     items:
-                      $ref: '#/components/schemas/WeatherAlert'
+                      $ref: "#/components/schemas/WeatherAlert"
                   location:
-                    $ref: '#/components/schemas/AlertLocation'
+                    $ref: "#/components/schemas/AlertLocation"
   /api/app/en/Location/{latitude},{longitude}:
     servers:
       - url: https://weather.gc.ca
@@ -665,26 +674,26 @@ paths:
     get:
       operationId: getCanadianWeatherAlerts
       tags:
-      - Canadian Weather Alerts
+        - Canadian Weather Alerts
       summary: Fetch weather alerts for a specific location in Canada
       description: Retrieves current weather alerts based on latitude and longitude coordinates in Canada.
       parameters:
-      - name: latitude
-        in: path
-        required: true
-        description: Latitude of the location
-        schema:
-          type: number
-          format: double
-      - name: longitude
-        in: path
-        required: true
-        description: Longitude of the location
-        schema:
-          type: number
-          format: double
+        - name: latitude
+          in: path
+          required: true
+          description: Latitude of the location
+          schema:
+            type: number
+            format: double
+        - name: longitude
+          in: path
+          required: true
+          description: Longitude of the location
+          schema:
+            type: number
+            format: double
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
@@ -769,6 +778,51 @@ paths:
                           type: array
                           items: {}
                           nullable: true
+  /public/weather-maps.json:
+    servers:
+      - url: https://api.rainviewer.com
+    get:
+      operationId: getWeatherMaps
+      tags:
+        - Weather Maps
+      summary: Get weather radar and satellite imagery information
+      description: Returns paths to radar and satellite imagery tiles, including past observations and nowcast predictions
+      responses:
+        "200":
+          description: Successful response with radar and satellite data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                    example: "2.0"
+                  generated:
+                    type: integer
+                    description: Unix timestamp when the response was generated
+                  host:
+                    type: string
+                    description: Base URL for tile requests
+                  radar:
+                    type: object
+                    properties:
+                      past:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/RainViewerMapFrame"
+                      nowcast:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/RainViewerMapFrame"
+                  satellite:
+                    type: object
+                    properties:
+                      infrared:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/RainViewerMapFrame"
+
 components:
   schemas:
     WeatherAlert:
@@ -1161,7 +1215,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/Location'
+            $ref: "#/components/schemas/Location"
         generationtime_ms:
           type: number
           format: float
@@ -1219,7 +1273,7 @@ components:
         radar:
           type: array
           items:
-            $ref: '#/components/schemas/RadarData'
+            $ref: "#/components/schemas/RadarData"
     RadarData:
       type: object
       properties:
@@ -1291,3 +1345,12 @@ components:
         precipitation_probability_max:
           type: string
           example: "%"
+    RainViewerMapFrame:
+      type: object
+      properties:
+        time:
+          type: integer
+          description: Unix timestamp of the frame
+        path:
+          type: string
+          description: Path to request the tile data

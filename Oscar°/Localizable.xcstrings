@@ -790,7 +790,18 @@
         }
       }
     },
+    "Für die nächsten Tage wird kein Niederschlag vorhergesagt." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önümüzdeki birkaç gün için yağış beklenmemektedir."
+          }
+        }
+      }
+    },
     "Für die nächsten Tage wird kein Regen vorhergesagt." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1401,9 +1412,17 @@
       }
     },
     "Referenz-Evapotranspiration (ET₀)" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reference Evapotranspiration (ET₀)"
+          }
+        }
+      }
     },
     "Regen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1521,6 +1540,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "G"
+          }
+        }
+      }
+    },
+    "Schnee" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snow"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kar"
           }
         }
       }
