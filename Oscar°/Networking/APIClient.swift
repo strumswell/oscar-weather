@@ -22,6 +22,7 @@ class APIClient {
   var openMeteoGeo: Client
   var brightsky: Client
   var canadaWeather: Client
+  var rainViewer: Client
   var settingService: SettingService
 
   init() {
@@ -30,6 +31,7 @@ class APIClient {
     openMeteoGeo = APIClient.get(url: try! Servers.server3())
     brightsky = APIClient.get(url: try! Servers.server4())
     canadaWeather = APIClient.get(url: try! Servers.server5())
+    rainViewer = APIClient.get(url: try! Servers.server6())
     settingService = SettingService()
   }
 
@@ -90,8 +92,7 @@ class APIClient {
     )
 
     // For regions where ICON model is better
-    if coordinates.country() == .spain || coordinates.country() == .portugal
-      || coordinates.country() == .centralEurope
+    if coordinates.country() == .spain || coordinates.country() == .portugal  //|| coordinates.country() == .centralEurope
     {
       // First request: Get 7 days with ICON model
       query.models = .icon_seamless
@@ -297,6 +298,28 @@ class APIClient {
       }
     case .undocumented:
       return .init()
+    }
+  }
+
+  func getRainViewerMaps() async throws -> Components.Schemas.RainViewerResponse {
+    let fallbackResponse: Components.Schemas.RainViewerResponse = .init(
+      version: "2.0",
+      generated: Int(Date().timeIntervalSince1970),
+      host: "",
+      radar: .init(past: [], nowcast: []),
+      satellite: .init(infrared: [])
+    )
+
+    let response = try await rainViewer.getRainViewerMaps(.init())
+
+    switch response {
+    case let .ok(response):
+      switch response.body {
+      case .json(let result):
+        return result
+      }
+    case .undocumented:
+      return fallbackResponse
     }
   }
 }

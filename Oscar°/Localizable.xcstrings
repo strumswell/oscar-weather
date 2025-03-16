@@ -792,6 +792,12 @@
     },
     "Für die nächsten Tage wird kein Niederschlag vorhergesagt." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No rain is predicted for the next few days."
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1348,6 +1354,28 @@
           }
         }
       }
+    },
+    "RainViewer" : {
+
+    },
+    "RainViewer stellt diverse Kartenlayer bereit. Darunter fallen unter anderem das globale Regenradar und Satellitenbilder." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RainViewer provides various map layers. These include, among others, the global rain radar and satellite images."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RainViewer çeşitli harita katmanları sunmaktadır. Bunlar arasında küresel yağmur radarı ve uydu görüntüleri de bulunmaktadır."
+          }
+        }
+      }
+    },
+    "rainviewer.com" : {
+
     },
     "Rechtliche\nInformationen" : {
       "localizations" : {

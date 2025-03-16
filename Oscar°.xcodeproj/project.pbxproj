@@ -20,6 +20,7 @@
 		2512E9592C398CCA004670E4 /* SettingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D72B2627C67016001F43FC /* SettingService.swift */; };
 		2512E95E2C398CCB004670E4 /* SettingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D72B2627C67016001F43FC /* SettingService.swift */; };
 		2512E9672C399B7D004670E4 /* UnitSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9662C399B7D004670E4 /* UnitSettings.swift */; };
+		251440892D86E0E400E48037 /* RainViewerAttribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251440882D86E0E400E48037 /* RainViewerAttribution.swift */; };
 		2516BD562BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
 		2516BD572BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
 		2516BD582BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
@@ -231,6 +232,7 @@
 		2512E94C2C398060004670E4 /* TomorrowAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TomorrowAttribution.swift; sourceTree = "<group>"; };
 		2512E9512C398188004670E4 /* DWDAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DWDAttribution.swift; sourceTree = "<group>"; };
 		2512E9662C399B7D004670E4 /* UnitSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitSettings.swift; sourceTree = "<group>"; };
+		251440882D86E0E400E48037 /* RainViewerAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainViewerAttribution.swift; sourceTree = "<group>"; };
 		2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		251FE39027C5674400D26F0F /* WMSTileOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WMSTileOverlay.swift; sourceTree = "<group>"; };
 		2523367E27C3EB3900C2111A /* RainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainView.swift; sourceTree = "<group>"; };
@@ -384,6 +386,7 @@
 				2512E9422C37E3EB004670E4 /* MemberCard.swift */,
 				2512E9472C397DEB004670E4 /* BrightSkyAttribution.swift */,
 				2512E94C2C398060004670E4 /* TomorrowAttribution.swift */,
+				251440882D86E0E400E48037 /* RainViewerAttribution.swift */,
 				2512E9512C398188004670E4 /* DWDAttribution.swift */,
 				2512E9662C399B7D004670E4 /* UnitSettings.swift */,
 			);
@@ -969,6 +972,7 @@
 				25ED79B829F1A7DF002E0AAB /* CloudsView.swift in Sources */,
 				25BEDCE626CACFC900D90D6B /* PersistenceController.swift in Sources */,
 				259704E52757D7E800DFCA53 /* AlertDetailView.swift in Sources */,
+				251440892D86E0E400E48037 /* RainViewerAttribution.swift in Sources */,
 				2598E9362C7291D2004A9D5E /* CacheMiddleware.swift in Sources */,
 				25AD38E72BE716E100A8F305 /* MemoryView.swift in Sources */,
 				259187CF2C715B7500611B0F /* WindChart.swift in Sources */,

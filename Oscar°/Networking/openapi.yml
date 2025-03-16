@@ -782,7 +782,7 @@ paths:
     servers:
       - url: https://api.rainviewer.com
     get:
-      operationId: getWeatherMaps
+      operationId: getRainViewerMaps
       tags:
         - Weather Maps
       summary: Get weather radar and satellite imagery information
@@ -793,35 +793,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  version:
-                    type: string
-                    example: "2.0"
-                  generated:
-                    type: integer
-                    description: Unix timestamp when the response was generated
-                  host:
-                    type: string
-                    description: Base URL for tile requests
-                  radar:
-                    type: object
-                    properties:
-                      past:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/RainViewerMapFrame"
-                      nowcast:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/RainViewerMapFrame"
-                  satellite:
-                    type: object
-                    properties:
-                      infrared:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/RainViewerMapFrame"
+                $ref: "#/components/schemas/RainViewerResponse"
 
 components:
   schemas:
@@ -1345,6 +1317,36 @@ components:
         precipitation_probability_max:
           type: string
           example: "%"
+    RainViewerResponse:
+      type: object
+      properties:
+        version:
+          type: string
+          example: "2.0"
+        generated:
+          type: integer
+          description: Unix timestamp when the response was generated
+        host:
+          type: string
+          description: Base URL for tile requests
+        radar:
+          type: object
+          properties:
+            past:
+              type: array
+              items:
+                $ref: "#/components/schemas/RainViewerMapFrame"
+            nowcast:
+              type: array
+              items:
+                $ref: "#/components/schemas/RainViewerMapFrame"
+        satellite:
+          type: object
+          properties:
+            infrared:
+              type: array
+              items:
+                $ref: "#/components/schemas/RainViewerMapFrame"
     RainViewerMapFrame:
       type: object
       properties:
