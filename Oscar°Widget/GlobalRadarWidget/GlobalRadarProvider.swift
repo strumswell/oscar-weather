@@ -166,7 +166,7 @@ struct GlobalRadarProvider: TimelineProvider {
           let host = rainViewerData.host ?? "https://tilecache.rainviewer.com"
           let path = mostRecentFrame.path ?? ""
 
-          let urlString = "\(host)\(path)/256/\(z)/\(x)/\(y)/4/1_1.png"
+          let urlString = "\(host)\(path)/256/\(z)/\(x)/\(y)/1/1_1.png"
 
           guard let url = URL(string: urlString) else {
             completion(nil)
