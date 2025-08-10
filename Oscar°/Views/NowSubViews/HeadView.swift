@@ -45,7 +45,7 @@ struct HeadView: View {
           .font(.system(size: 120))
           .shadow(radius: 15)
       }
-      .padding(.bottom, 150)
+      .padding(.bottom, 170)
 
       HStack {
         Spacer()

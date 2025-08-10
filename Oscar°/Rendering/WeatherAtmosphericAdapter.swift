@@ -33,7 +33,7 @@ class WeatherAtmosphericAdapter {
         
         // Calculate sun position using timezone-aware calculations
         let sunElevation = renderer.calculateSunElevation(for: localDate, at: location, weather: weather)
-        let sunAzimuth = renderer.calculateSunAzimuth(for: localDate, at: location, weather: weather)
+        let sunAzimuth   = renderer.calculateSunAzimuth(for: localDate, at: location, weather: weather)
         
         if weather.debug {
             print("🕐 AtmosphericAdapter: Local time: \(localDate)")
@@ -64,14 +64,11 @@ class WeatherAtmosphericAdapter {
         }
         
         // weather.time is a fraction of the day (0.0 = start of day, 1.0 = end of day)
-        let currentTimeOffset = weather.time * 86400.0 // Convert to seconds
+        let currentTimeOffset = weather.time * 86400.0 // seconds
         let utcTimestamp = dayBegin + currentTimeOffset
-        
-        // Create Date from UTC timestamp - the sun calculation will handle timezone conversion
         let utcDate = Date(timeIntervalSince1970: utcTimestamp)
         
         if weather.debug {
-            // Create timezone-aware calendar for display
             var calendar = Calendar.current
             calendar.timeZone = TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? TimeZone.current
             
@@ -90,38 +87,31 @@ class WeatherAtmosphericAdapter {
     }
     
     /// Get atmospheric cloud colors for tinting clouds
-    /// - Parameters:
-    ///   - weather: Current weather data
-    ///   - location: Location coordinates
-    ///   - isTop: Whether this is for top or bottom cloud tinting
-    /// - Returns: Color for cloud tinting
     func getAtmosphericCloudColor(
         from weather: Weather,
         at location: CLLocationCoordinate2D,
         isTop: Bool
     ) -> Color {
         guard location.latitude != 0 && location.longitude != 0 else {
-            // Fallback to neutral cloud color if no location
             return Color(red: 0.6, green: 0.6, blue: 0.6)
         }
         
-        let localDate = getLocationAwareDate(from: weather)
+        let localDate    = getLocationAwareDate(from: weather)
         let sunElevation = renderer.calculateSunElevation(for: localDate, at: location, weather: weather)
         
         // Sample the atmospheric color at cloud level (about 30% up from horizon)
         let cloudViewAngle = Float.pi / 2.0 * 0.3 // 30% up from horizon to zenith
-        let viewDirection = simd_float3(0, cos(cloudViewAngle), sin(cloudViewAngle))
+        let viewDirection  = simd_float3(0, cos(cloudViewAngle), sin(cloudViewAngle))
         
         // Get sunrise/sunset data for proper color calculation
-        let sunriseTime = weather.forecast.daily?.sunrise?.first ?? 0
-        let sunsetTime = weather.forecast.daily?.sunset?.first ?? 0
         let dayBegin = weather.forecast.hourly?.time.first ?? 0
         let currentTimestamp = dayBegin + (weather.time * 86400.0)
+        let (sunriseTime, sunsetTime) = getSunriseSunsetForCurrentTime(weather: weather, currentTimestamp: currentTimestamp)
         
         // Get weather code for realistic cloud coloring
         let weatherCode = Int(weather.forecast.current?.weathercode ?? 0)
         
-        // Get the atmospheric renderer's color calculation
+        // Renderer’s cloud color
         let atmosphericColor = renderer.getAtmosphericColorForClouds(
             viewDirection: viewDirection,
             sunElevation: sunElevation,
@@ -141,34 +131,27 @@ class WeatherAtmosphericAdapter {
     
     // MARK: - Weather Data Conversion
     
-    /// Convert Weather object to AtmosphericConditions
     private func convertWeatherToAtmosphericConditions(_ weather: Weather) -> AtmosphericConditions {
+        let currentHumidity       = weather.forecast.hourly?.relativehumidity_2m?.first ?? 50.0
+        let currentPrecipitation  = weather.forecast.current?.precipitation ?? 0.0
+        let currentCloudCover     = weather.forecast.current?.cloudcover ?? 0.0
+        let currentPressure       = weather.forecast.hourly?.pressure_msl?.first ?? 1013.25
         
-        // Extract current weather values with safe defaults
-        let currentHumidity = weather.forecast.hourly?.relativehumidity_2m?.first ?? 50.0
-        let currentPrecipitation = weather.forecast.current?.precipitation ?? 0.0
-        let currentCloudCover = weather.forecast.current?.cloudcover ?? 0.0
-        let currentPressure = weather.forecast.hourly?.pressure_msl?.first ?? 1013.25
-        
-        // Calculate atmospheric conditions
-        let humidity = Float(currentHumidity) / 100.0 // Convert percentage to 0-1
+        let humidity = Float(currentHumidity) / 100.0
         let moisture = calculateMoisture(
             humidity: Float(currentHumidity),
             precipitation: Float(currentPrecipitation),
             radar: weather.radar
         )
-        
         let particleDensity = calculateParticleDensity(
             cloudCover: Float(currentCloudCover),
             weather: weather
         )
-        
         let precipitationIntensity = calculatePrecipitationIntensity(
             precipitation: Float(currentPrecipitation),
             radar: weather.radar
         )
-        
-        let cloudCover = Float(currentCloudCover) / 100.0 // Convert percentage to 0-1
+        let cloudCover = Float(currentCloudCover) / 100.0
         let pressure = normalizePressure(Float(currentPressure))
         
         return AtmosphericConditions(
@@ -183,171 +166,117 @@ class WeatherAtmosphericAdapter {
     
     // MARK: - Atmospheric Parameter Calculations
     
-    /// Calculate atmospheric moisture from humidity, precipitation, and radar
     private func calculateMoisture(
         humidity: Float,
         precipitation: Float,
         radar: Components.Schemas.RadarResponse
     ) -> Float {
-        var moisture = humidity / 100.0 // Base moisture from humidity
-        
-        // Increase moisture with precipitation
-        if precipitation > 0 {
-            moisture = min(1.0, moisture + precipitation * 0.1)
-        }
-        
-        // Increase moisture if radar shows precipitation
+        var moisture = humidity / 100.0
+        if precipitation > 0 { moisture = min(1.0, moisture + precipitation * 0.1) }
         if radar.isRaining() {
             let radarIntensity = getRadarPrecipitationIntensity(radar)
             moisture = min(1.0, moisture + radarIntensity * 0.2)
         }
-        
         return moisture
     }
     
-    /// Calculate particle density from cloud cover and atmospheric conditions
     private func calculateParticleDensity(
         cloudCover: Float,
         weather: Weather
     ) -> Float {
-        var particles = cloudCover / 100.0 // Base particles from clouds
-        
-        // Increase particles in certain weather conditions
-        if let weatherCode = weather.forecast.current?.weathercode {
-            switch Int(weatherCode) {
-            case 45, 48: // Fog
-                particles = min(1.0, particles + 0.6)
-            case 51...67: // Drizzle/Rain
-                particles = min(1.0, particles + 0.3)
-            case 71...86: // Snow
-                particles = min(1.0, particles + 0.4)
-            case 95...99: // Thunderstorm
-                particles = min(1.0, particles + 0.5)
-            default:
-                break
+        var particles = cloudCover / 100.0
+        if let code = weather.forecast.current?.weathercode {
+            switch Int(code) {
+            case 45, 48: particles = min(1.0, particles + 0.6) // Fog
+            case 51...67: particles = min(1.0, particles + 0.3) // Drizzle/Rain
+            case 71...86: particles = min(1.0, particles + 0.4) // Snow
+            case 95...99: particles = min(1.0, particles + 0.5) // Thunderstorm
+            default: break
             }
         }
-        
         return particles
     }
     
-    /// Calculate precipitation intensity from direct measurement and radar
     private func calculatePrecipitationIntensity(
         precipitation: Float,
         radar: Components.Schemas.RadarResponse
     ) -> Float {
         var intensity: Float = 0.0
-        
-        // From direct precipitation measurement
-        if precipitation > 0 {
-            intensity = min(1.0, precipitation / 10.0) // Normalize assuming max 10mm/h
-        }
-        
-        // From radar data
+        if precipitation > 0 { intensity = min(1.0, precipitation / 10.0) }
         if radar.isRaining() {
-            let radarIntensity = getRadarPrecipitationIntensity(radar)
-            intensity = max(intensity, radarIntensity)
+            intensity = max(intensity, getRadarPrecipitationIntensity(radar))
         }
-        
         return intensity
     }
     
-    /// Normalize atmospheric pressure to 0.8-1.2 range
     private func normalizePressure(_ pressure: Float) -> Float {
-        // Standard pressure: 1013.25 hPa
-        // Range typically: 950-1050 hPa
         let normalized = pressure / 1013.25
         return max(0.8, min(1.2, normalized))
     }
     
     // MARK: - Radar Data Helpers
     
-    /// Extract precipitation intensity from radar data
     private func getRadarPrecipitationIntensity(_ radar: Components.Schemas.RadarResponse) -> Float {
         guard let radarData = radar.radar?.first,
               let precipData = radarData.precipitation_5 else {
             return 0.0
         }
-        
-        // Calculate average precipitation intensity from the data grid
-        var totalPrecip: Int = 0
-        var cellCount: Int = 0
-        
+        var total: Int = 0
+        var count: Int = 0
         for row in precipData {
             for cell in row {
-                totalPrecip += cell
-                cellCount += 1
+                total += cell
+                count += 1
             }
         }
-        
-        guard cellCount > 0 else { return 0.0 }
-        
-        let averageIntensity = Float(totalPrecip) / Float(cellCount)
-        
-        // Normalize to 0-1 range (assuming max radar value of 255)
-        return min(1.0, averageIntensity / 255.0)
+        guard count > 0 else { return 0.0 }
+        let avg = Float(total) / Float(count)
+        return min(1.0, avg / 255.0)
     }
     
     // MARK: - Time-based Enhancements
     
-    /// Check if it's currently twilight period
     func isTwilight(for date: Date, at location: CLLocationCoordinate2D, weather: Weather) -> Bool {
         let sunElevation = renderer.calculateSunElevation(for: date, at: location, weather: weather)
-        return sunElevation < 0 && sunElevation > -0.314 // -18 degrees in radians
+        return sunElevation < 0 && sunElevation > -0.314 // -18° in radians
     }
     
-    /// Get twilight type (civil, nautical, astronomical)
     func getTwilightType(for date: Date, at location: CLLocationCoordinate2D, weather: Weather) -> TwilightType {
         let sunElevation = renderer.calculateSunElevation(for: date, at: location, weather: weather)
-        
-        if sunElevation >= 0 {
-            return .none
-        } else if sunElevation > -0.105 { // -6 degrees
-            return .civil
-        } else if sunElevation > -0.21 { // -12 degrees
-            return .nautical
-        } else if sunElevation > -0.314 { // -18 degrees
-            return .astronomical
-        } else {
-            return .night
-        }
+        if sunElevation >= 0 { return .none }
+        if sunElevation > -0.105 { return .civil }
+        if sunElevation > -0.21  { return .nautical }
+        if sunElevation > -0.314 { return .astronomical }
+        return .night
     }
     
     /// Get atmospheric colors for widget backgrounds (top and bottom)
-    /// - Parameters:
-    ///   - weather: Current weather data
-    ///   - location: Location coordinates
-    /// - Returns: Array with [topColor, bottomColor] for widget gradient
     func getWidgetBackgroundColors(
         from weather: Weather,
         at location: CLLocationCoordinate2D
     ) -> [Color] {
-        // Generate full atmospheric gradient and extract top/bottom colors
         let gradient = generateAtmosphericSkyGradient(from: weather, at: location)
         
-        // We need to extract the actual sky colors, not use the gradient directly
-        // Let's recreate the sky color calculation for zenith and horizon
         guard location.latitude != 0 && location.longitude != 0 else {
-            // Fallback to day sky colors if no location
-            return [Color(red: 0.2, green: 0.5, blue: 0.9), Color(red: 0.6, green: 0.8, blue: 0.95)]
+            return [Color(red: 0.2, green: 0.5, blue: 0.9),
+                    Color(red: 0.6, green: 0.8, blue: 0.95)]
         }
         
-        let localDate = getLocationAwareDate(from: weather)
+        let localDate    = getLocationAwareDate(from: weather)
         let sunElevation = renderer.calculateSunElevation(for: localDate, at: location, weather: weather)
-        let sunAzimuth = renderer.calculateSunAzimuth(for: localDate, at: location, weather: weather)
+        let sunAzimuth   = renderer.calculateSunAzimuth(for: localDate, at: location, weather: weather)
         
-        // Calculate sun position vector
-        let sunPosition = simd_float3(
+        // Sun vector (for consistency if needed later)
+        _ = simd_float3(
             cos(sunElevation) * sin(sunAzimuth),
-            sin(sunElevation), 
+            sin(sunElevation),
             cos(sunElevation) * cos(sunAzimuth)
         )
         
-        // Get sunrise/sunset data for solar phase determination
-        let sunriseTime = weather.forecast.daily?.sunrise?.first ?? 0
-        let sunsetTime = weather.forecast.daily?.sunset?.first ?? 0
+        // Sunrise/sunset for phase
         let dayBegin = weather.forecast.hourly?.time.first ?? 0
         let currentTimestamp = dayBegin + (weather.time * 86400.0)
+        let (sunriseTime, sunsetTime) = getSunriseSunsetForCurrentTime(weather: weather, currentTimestamp: currentTimestamp)
         
         let solarPhase = determineSolarPhase(
             currentTime: currentTimestamp,
@@ -356,28 +285,25 @@ class WeatherAtmosphericAdapter {
             sunElevation: sunElevation
         )
         
-        // Calculate sky colors for zenith (top) and horizon (bottom)
-        let zenithDirection = simd_float3(0, 1, 0)  // Looking straight up
-        let horizonDirection = simd_float3(0, 0, 1) // Looking at horizon
+        // Colors for zenith & horizon using the same palettes/logic as renderer (simplified)
+        let zenithDirection  = simd_float3(0, 1, 0)
+        let horizonDirection = simd_float3(0, 0, 1)
         
         let zenithSkyColor = calculateSkyColorForView(
             viewDirection: zenithDirection,
-            sunDirection: sunPosition,
             sunElevation: sunElevation,
             solarPhase: solarPhase,
             weather: weather
         )
-        
         let horizonSkyColor = calculateSkyColorForView(
             viewDirection: horizonDirection,
-            sunDirection: sunPosition,
             sunElevation: sunElevation,
             solarPhase: solarPhase,
             weather: weather
         )
         
         return [
-            Color(red: Double(zenithSkyColor.x), green: Double(zenithSkyColor.y), blue: Double(zenithSkyColor.z)),
+            Color(red: Double(zenithSkyColor.x),  green: Double(zenithSkyColor.y),  blue: Double(zenithSkyColor.z)),
             Color(red: Double(horizonSkyColor.x), green: Double(horizonSkyColor.y), blue: Double(horizonSkyColor.z))
         ]
     }
@@ -385,20 +311,22 @@ class WeatherAtmosphericAdapter {
     /// Calculate sky color for a specific view direction (helper for widget colors)
     private func calculateSkyColorForView(
         viewDirection: simd_float3,
-        sunDirection: simd_float3,
         sunElevation: Float,
         solarPhase: SolarPhase,
         weather: Weather
     ) -> simd_float3 {
-        let horizonFactor = 1.0 - viewDirection.y // How close to horizon (0 = zenith, 1 = horizon)
-        let weatherCode = Int(weather.forecast.current?.weathercode ?? 0)
-        let cloudCover = Float(weather.forecast.current?.cloudcover ?? 0) / 100.0
+        let horizonFactor = 1.0 - viewDirection.y
+        let weatherCode   = Int(weather.forecast.current?.weathercode ?? 0)
+        let cloudCover    = Float(weather.forecast.current?.cloudcover ?? 0) / 100.0
         let precipitation = Float(weather.forecast.current?.precipitation ?? 0)
         
-        // Get base sky color for solar phase
-        let baseSkyColor = getBaseSkyColorForPhase(solarPhase: solarPhase, horizonFactor: horizonFactor)
+        // Base sky color now takes sunElevation to align twilight blending with renderer
+        let baseSkyColor = getBaseSkyColorForPhase(
+            solarPhase: solarPhase,
+            horizonFactor: horizonFactor,
+            sunElevation: sunElevation
+        )
         
-        // Apply weather effects
         return applyWeatherEffectsToSky(
             baseColor: baseSkyColor,
             weatherCode: weatherCode,
@@ -409,77 +337,95 @@ class WeatherAtmosphericAdapter {
         )
     }
     
-    /// Helper to determine solar phase (copied from AtmosphericRenderer)
-    private func determineSolarPhase(currentTime: Double, sunrise: Double, sunset: Double, sunElevation: Float) -> SolarPhase {
-        let civilTwilightAngle: Float = -0.105  // -6 degrees
-        let nauticalTwilightAngle: Float = -0.21 // -12 degrees
-        let astronomicalTwilightAngle: Float = -0.314 // -18 degrees
-        
-        // Time-based checks for sunrise/sunset periods (±30 minutes)
-        let sunriseWindow = abs(currentTime - sunrise) < 1800 // 30 minutes
-        let sunsetWindow = abs(currentTime - sunset) < 1800   // 30 minutes
-        
-        if sunElevation > 0.05 { // Sun well above horizon
-            if sunriseWindow {
-                return .sunrise
-            } else if sunsetWindow {
-                return .sunset
-            } else {
-                return .day
-            }
-        } else if sunElevation > civilTwilightAngle {
-            return sunriseWindow || sunsetWindow ? .goldenHour : .civilTwilight
-        } else if sunElevation > nauticalTwilightAngle {
-            return .nauticalTwilight
-        } else if sunElevation > astronomicalTwilightAngle {
-            return .astronomicalTwilight
-        } else {
-            return .night
-        }
+    // MARK: - Phase & Palettes (aligned with renderer)
+    
+    enum SolarPhase {
+        case day, sunrise, sunset, goldenHour, civilTwilight, nauticalTwilight, astronomicalTwilight, night
     }
     
-    /// Helper to get base sky colors (copied from AtmosphericRenderer)
-    private func getBaseSkyColorForPhase(solarPhase: SolarPhase, horizonFactor: Float) -> simd_float3 {
+    /// Elevation-driven phase logic with near-sunset guard (degrees)
+    private func determineSolarPhase(
+        currentTime: Double,
+        sunrise: Double,
+        sunset: Double,
+        sunElevation: Float
+    ) -> SolarPhase {
+        let elevDeg: Float = sunElevation * 180.0 / .pi
+        let civil: Float = -6.0
+        let nautical: Float = -12.0
+        let astro: Float = -18.0
+        
+        let minsToSunset = Float((sunset - currentTime) / 60.0)
+        if minsToSunset > 0, minsToSunset < 75, elevDeg > -0.833 {
+            return elevDeg >= 6 ? .day : .goldenHour
+        }
+        
+        if elevDeg >= 6.0 { return .day }
+        if elevDeg >= 0.0 { return .goldenHour }
+        if elevDeg >= civil { return .civilTwilight }
+        if elevDeg >= nautical { return .nauticalTwilight }
+        if elevDeg >= astro { return .astronomicalTwilight }
+        return .night
+    }
+    
+    /// Widget/base palettes aligned to renderer; includes twilight→night blend via sunElevation
+    private func getBaseSkyColorForPhase(
+        solarPhase: SolarPhase,
+        horizonFactor: Float,
+        sunElevation: Float   // radians
+    ) -> simd_float3 {
+        
+        // Night palette for blends
+        let nightZenith  = simd_float3(0.05, 0.08, 0.16)
+        let nightHorizon = simd_float3(0.08, 0.10, 0.20)
+        // Blend factor: 0 at -18°, 1 at 0°
+        let blend = max(0.0, min(1.0, (sunElevation + 0.314) / 0.314))
+        
         switch solarPhase {
         case .day:
-            // Clear blue sky
-            let zenithBlue = simd_float3(0.2, 0.5, 0.9)
-            let horizonBlue = simd_float3(0.6, 0.8, 0.95)
+            let zenithBlue  = simd_float3(0.20, 0.50, 0.90)
+            let horizonBlue = simd_float3(0.60, 0.80, 0.95)
             return simd_mix(zenithBlue, horizonBlue, simd_float3(repeating: horizonFactor))
             
         case .sunrise, .goldenHour:
-            // Warm sunrise/golden hour colors
-            let zenithColor = simd_float3(0.4, 0.6, 0.9)  // Light blue
-            let horizonColor = simd_float3(1.0, 0.7, 0.3) // Golden orange
-            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.8))
+            // Softer, less yellow (peachy)
+            let zenithColor  = simd_float3(0.42, 0.62, 0.90)
+            let horizonColor = simd_float3(0.98, 0.78, 0.70)
+            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.75))
             
         case .sunset:
-            // Warm sunset colors
-            let zenithColor = simd_float3(0.3, 0.4, 0.8)  // Deep blue
-            let horizonColor = simd_float3(1.0, 0.5, 0.2) // Deep orange/red
-            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor))
+            // Rose/peach instead of orange
+            let zenithColor  = simd_float3(0.32, 0.44, 0.82)
+            let horizonColor = simd_float3(0.95, 0.70, 0.72)
+            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.85))
             
         case .civilTwilight:
-            // Blue hour
-            let zenithColor = simd_float3(0.1, 0.2, 0.6)
-            let horizonColor = simd_float3(0.8, 0.4, 0.3)
-            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.5))
+            let civilZenith  = simd_float3(0.12, 0.22, 0.62)
+            let civilHorizon = simd_float3(0.55, 0.50, 0.65) // muted, not orange
+            let civilColor   = simd_mix(civilZenith, civilHorizon, simd_float3(repeating: horizonFactor * 0.5))
+            let nightBlend   = simd_mix(nightZenith, nightHorizon, simd_float3(repeating: horizonFactor))
+            return simd_mix(nightBlend, civilColor, simd_float3(repeating: blend))
             
-        case .nauticalTwilight, .astronomicalTwilight:
-            // Twilight colors
-            let zenithColor = simd_float3(0.05, 0.1, 0.4)
-            let horizonColor = simd_float3(0.2, 0.15, 0.3)
-            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor))
+        case .nauticalTwilight:
+            let nautZenith  = simd_float3(0.07, 0.12, 0.38)
+            let nautHorizon = simd_float3(0.25, 0.20, 0.35)
+            let nautColor   = simd_mix(nautZenith, nautHorizon, simd_float3(repeating: horizonFactor))
+            let nightBlend  = simd_mix(nightZenith, nightHorizon, simd_float3(repeating: horizonFactor))
+            return simd_mix(nightBlend, nautColor, simd_float3(repeating: blend * 0.6))
+            
+        case .astronomicalTwilight:
+            let astroZenith  = simd_float3(0.06, 0.09, 0.18)
+            let astroHorizon = simd_float3(0.10, 0.12, 0.22)
+            let astroColor   = simd_mix(astroZenith, astroHorizon, simd_float3(repeating: horizonFactor))
+            let nightBlend   = simd_mix(nightZenith, nightHorizon, simd_float3(repeating: horizonFactor))
+            return simd_mix(nightBlend, astroColor, simd_float3(repeating: blend * 0.3))
             
         case .night:
-            // Night sky - darkened for better cloud contrast
-            let darkNightBlue = simd_float3(0.05, 0.08, 0.16)   // Darker blue at zenith
-            let horizonNight = simd_float3(0.08, 0.10, 0.20)    // Slightly lighter blue at horizon
-            return simd_mix(darkNightBlue, horizonNight, simd_float3(repeating: horizonFactor))
+            return simd_mix(nightZenith, nightHorizon, simd_float3(repeating: horizonFactor))
         }
     }
     
-    /// Helper to apply weather effects (copied from AtmosphericRenderer)
+    /// Apply weather effects to base color (same parameters as renderer’s simplified path)
     private func applyWeatherEffectsToSky(
         baseColor: simd_float3,
         weatherCode: Int,
@@ -491,63 +437,98 @@ class WeatherAtmosphericAdapter {
         
         var modifiedColor = baseColor
         
-        // Storm effects - dramatic darkening and color shifts (day only)
-        if weatherCode >= 95 && weatherCode <= 99 { // Thunderstorms
+        // Thunderstorms
+        if weatherCode >= 95 && weatherCode <= 99 {
             if solarPhase != .night && solarPhase != .astronomicalTwilight {
-                let stormDarkening: Float = 0.3 // Make much darker
-                let stormColorShift = simd_float3(0.1, 0.1, 0.0) // Slightly greenish tint
+                let stormDarkening: Float = 0.3
+                let stormColorShift = simd_float3(0.1, 0.1, 0.0)
                 modifiedColor = modifiedColor * stormDarkening + stormColorShift
-                
-                // Add dramatic contrast - darker sky, but preserve some horizon brightness
                 let contrastFactor = 1.0 - horizonFactor * 0.5
                 modifiedColor = modifiedColor * contrastFactor
             }
         }
-        // Heavy rain effects
-        else if weatherCode >= 61 && weatherCode <= 67 { // Heavy rain
+        // Heavy rain
+        else if weatherCode >= 61 && weatherCode <= 67 {
             if solarPhase != .night && solarPhase != .astronomicalTwilight {
-                let rainDarkening: Float = 0.5 // Moderate darkening
-                let rainColorShift = simd_float3(-0.05, -0.02, 0.05) // Slightly blue-gray tint
+                let rainDarkening: Float = 0.5
+                let rainColorShift = simd_float3(-0.05, -0.02, 0.05)
                 modifiedColor = modifiedColor * rainDarkening + rainColorShift
             }
         }
-        // Light rain/drizzle effects
-        else if weatherCode >= 51 && weatherCode <= 60 { // Light rain/drizzle
+        // Light rain / drizzle
+        else if weatherCode >= 51 && weatherCode <= 60 {
             if solarPhase != .night && solarPhase != .astronomicalTwilight {
-                let drizzleDarkening: Float = 0.7 // Mild darkening
-                let drizzleColorShift = simd_float3(-0.02, 0.0, 0.02) // Slight blue tint
+                let drizzleDarkening: Float = 0.7
+                let drizzleColorShift = simd_float3(-0.02, 0.0, 0.02)
                 modifiedColor = modifiedColor * drizzleDarkening + drizzleColorShift
             }
         }
         
-        // Cloud cover effects (day only)
+        // Cloud cover effects (dayish phases)
         if cloudCover > 0.1 {
             if solarPhase != .night && solarPhase != .astronomicalTwilight {
-                // Day: normal cloud effects
-                let cloudDarkening = 1.0 - (cloudCover * 0.4) // Up to 40% darkening for full cloud cover
-                let cloudColorShift = simd_float3(-0.1, -0.05, 0.0) * cloudCover // Grayish tint
+                let cloudDarkening = 1.0 - (cloudCover * 0.4)
+                let cloudColorShift = simd_float3(-0.1, -0.05, 0.0) * cloudCover
                 modifiedColor = modifiedColor * cloudDarkening + cloudColorShift
                 
-                // Heavy overcast - very flat, uniform lighting (day only)
                 if cloudCover > 0.8 {
                     let flatteningFactor = 1.0 - (cloudCover - 0.8) * 2.5
-                    let uniformColor = simd_mix(baseColor, simd_float3(repeating: (baseColor.x + baseColor.y + baseColor.z) / 3.0), simd_float3(repeating: flatteningFactor))
+                    let gray = (baseColor.x + baseColor.y + baseColor.z) / 3.0
+                    let uniformColor = simd_mix(baseColor,
+                                                simd_float3(repeating: gray),
+                                                simd_float3(repeating: flatteningFactor))
                     modifiedColor = simd_mix(modifiedColor, uniformColor, simd_float3(repeating: 0.6))
                 }
             }
         }
         
-        // Ensure colors stay within valid range
-        return simd_clamp(modifiedColor, simd_float3(repeating: 0.0), simd_float3(repeating: 1.0))
+        return simd_clamp(modifiedColor,
+                          simd_float3(repeating: 0.0),
+                          simd_float3(repeating: 1.0))
     }
     
-    enum SolarPhase {
-        case day, sunrise, sunset, goldenHour, civilTwilight, nauticalTwilight, astronomicalTwilight, night
+    /// Get sunrise and sunset times for the current timestamp (finds the correct day)
+    private func getSunriseSunsetForCurrentTime(weather: Weather, currentTimestamp: Double) -> (sunrise: Double, sunset: Double) {
+        guard let sunriseArray = weather.forecast.daily?.sunrise,
+              let sunsetArray  = weather.forecast.daily?.sunset,
+              let dailyTimes   = weather.forecast.daily?.time else {
+            return (0, 0)
+        }
+        
+        var calendar = Calendar(identifier: .gregorian)
+        if let off = weather.forecast.utc_offset_seconds {
+            calendar.timeZone = TimeZone(secondsFromGMT: off) ?? .current
+        }
+        let currentDate = Date(timeIntervalSince1970: currentTimestamp)
+        
+        for (index, _) in dailyTimes.enumerated() {
+            if index < sunriseArray.count && index < sunsetArray.count {
+                let sunriseDate = Date(timeIntervalSince1970: sunriseArray[index])
+                if calendar.isDate(currentDate, inSameDayAs: sunriseDate) {
+                    if weather.debug {
+                        let df = DateFormatter()
+                        df.dateFormat = "yyyy-MM-dd HH:mm"
+                        df.timeZone = calendar.timeZone
+                        print("🌅 WeatherAtmosphericAdapter: Found correct day \(index) for time \(df.string(from: currentDate))")
+                        print("   Sunrise: \(df.string(from: sunriseDate))")
+                        print("   Sunset: \(df.string(from: Date(timeIntervalSince1970: sunsetArray[index])))")
+                    }
+                    return (sunriseArray[index], sunsetArray[index])
+                }
+            }
+        }
+        
+        if weather.debug {
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd HH:mm"
+            df.timeZone = calendar.timeZone
+            print("⚠️ WeatherAtmosphericAdapter: No matching day found for \(df.string(from: currentDate)), using first day's sunrise/sunset")
+        }
+        return (sunriseArray.first ?? 0, sunsetArray.first ?? 0)
     }
     
-    /// Calculate moon phase for enhanced night rendering (future enhancement)
+    /// (Kept for future use in adapter if needed)
     func getMoonPhase(for date: Date) -> Float {
-        // Simplified moon phase calculation
         let daysSinceNewMoon = date.timeIntervalSince1970 / 86400.0
         let cyclePosition = (daysSinceNewMoon / 29.53).truncatingRemainder(dividingBy: 1.0)
         return Float(cyclePosition)
@@ -559,8 +540,7 @@ class WeatherAtmosphericAdapter {
 enum TwilightType {
     case none        // Sun above horizon
     case civil       // Sun 0° to -6° below horizon
-    case nautical    // Sun -6° to -12° below horizon  
+    case nautical    // Sun -6° to -12° below horizon
     case astronomical // Sun -12° to -18° below horizon
     case night       // Sun below -18°
 }
-
