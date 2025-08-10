@@ -4,6 +4,13 @@ import OpenAPIRuntime
 
 actor CacheStore {
   private var cache: [String: (Date, HTTPResponse, Data)] = [:]
+  private let userDefaults = UserDefaults.standard
+  
+  init() {
+    Task {
+      await loadFromPersistentStorage()
+    }
+  }
 
   func get(_ key: String) -> (Date, HTTPResponse, Data)? {
     return cache[key]
@@ -11,6 +18,87 @@ actor CacheStore {
 
   func set(_ key: String, value: (Date, HTTPResponse, Data)) {
     cache[key] = value
+    saveToPersistentStorage(key: key, value: value)
+    
+    // Limit cache size to prevent unbounded growth
+    if cache.count > 100 {
+      cleanOldEntries()
+    }
+  }
+  
+  func clearCache() {
+    cache.removeAll()
+    userDefaults.removeObject(forKey: "APICache")
+    print("Cache cleared")
+  }
+  
+  private func cleanOldEntries() {
+    let now = Date()
+    let oldKeys = cache.compactMap { (key, value) in
+      now.timeIntervalSince(value.0) > 604800 ? key : nil // Remove entries older than 1 week
+    }
+    
+    if !oldKeys.isEmpty {
+      for key in oldKeys {
+        cache.removeValue(forKey: key)
+      }
+      
+      // Update persistent storage
+      var persistentCache = userDefaults.dictionary(forKey: "APICache") ?? [:]
+      for key in oldKeys {
+        persistentCache.removeValue(forKey: key)
+      }
+      userDefaults.set(persistentCache, forKey: "APICache")
+      
+      print("Cleaned \(oldKeys.count) old cache entries (older than 1 week)")
+    }
+  }
+  
+  private func loadFromPersistentStorage() {
+    // Use UserDefaults dictionary instead of NSKeyedUnarchiver
+    guard let cacheDict = userDefaults.dictionary(forKey: "APICache") else { return }
+    
+    let now = Date()
+    var cleanedCache: [String: Any] = [:]
+    var loadedCount = 0
+    
+    for (key, value) in cacheDict {
+      guard let valueDict = value as? [String: Any],
+            let timestampInterval = valueDict["timestamp"] as? TimeInterval,
+            let statusCode = valueDict["statusCode"] as? Int,
+            let dataString = valueDict["data"] as? String,
+            let data = Data(base64Encoded: dataString) else { continue }
+      
+      let timestamp = Date(timeIntervalSince1970: timestampInterval)
+      
+      // Clean up entries older than 1 week
+      if now.timeIntervalSince(timestamp) < 604800 { // 1 week (7 * 24 * 60 * 60)
+        let response = HTTPResponse(status: HTTPResponse.Status(code: statusCode), headerFields: [:])
+        cache[key] = (timestamp, response, data)
+        cleanedCache[key] = value
+        loadedCount += 1
+      }
+    }
+    
+    // Update UserDefaults with cleaned cache
+    if cleanedCache.count < cacheDict.count {
+      userDefaults.set(cleanedCache, forKey: "APICache")
+      print("Cleaned \(cacheDict.count - cleanedCache.count) expired cache entries (older than 1 week)")
+    }
+    
+    print("Loaded \(loadedCount) cached items from persistent storage")
+  }
+  
+  private func saveToPersistentStorage(key: String, value: (Date, HTTPResponse, Data)) {
+    var persistentCache = userDefaults.dictionary(forKey: "APICache") ?? [:]
+    
+    persistentCache[key] = [
+      "timestamp": value.0.timeIntervalSince1970,
+      "statusCode": value.1.status.code,
+      "data": value.2.base64EncodedString()
+    ]
+    
+    userDefaults.set(persistentCache, forKey: "APICache")
   }
 }
 
@@ -21,6 +109,10 @@ final class CachingMiddleware: ClientMiddleware {
   init(cacheTime: TimeInterval = 10) {
     self.cacheTime = cacheTime
     self.cacheStore = CacheStore()
+  }
+  
+  func clearCache() async {
+    await cacheStore.clearCache()
   }
 
   private func cacheKey(for request: HTTPRequest, baseURL: URL) -> String {

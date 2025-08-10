@@ -24,7 +24,8 @@ struct HeadView: View {
         .foregroundColor(Color(UIColor.label))
       Spacer()
     }
-    .redacted(reason: weather.isLoading ? .placeholder : [])
+    .opacity(weather.isLoading ? 0.3 : 1.0)
+    .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
     .shadow(radius: 5)
     .onTapGesture {
       UIApplication.shared.playHapticFeedback()
@@ -44,6 +45,7 @@ struct HeadView: View {
           .foregroundColor(Color(UIColor.label))
           .font(.system(size: 120))
           .shadow(radius: 15)
+          .contentTransition(.numericText())
       }
       .padding(.bottom, 170)
 
@@ -52,19 +54,21 @@ struct HeadView: View {
         Image(systemName: "cloud")
           .frame(width: 30, height: 30)
           .foregroundColor(Color(UIColor.label))
-        Text("\(weather.forecast.current!.cloudcover, specifier: "%.0f") %")
+        Text("\(weather.forecast.current?.cloudcover ?? 0, specifier: "%.0f") %")
           .foregroundColor(Color(UIColor.label))
+          .contentTransition(.numericText())
         Image(systemName: "wind")
           .frame(width: 30, height: 30)
           .foregroundColor(Color(UIColor.label))
         Text(
-          "\(weather.forecast.current!.windspeed, specifier: "%.1f") \(weather.forecast.hourly_units?.windspeed_10m ?? "km/h")"
+          "\(weather.forecast.current?.windspeed ?? 0, specifier: "%.1f") \(weather.forecast.hourly_units?.windspeed_10m ?? "km/h")"
         )
         .foregroundColor(Color(UIColor.label))
+        .contentTransition(.numericText())
         Image(systemName: "location")
           .frame(width: 30, height: 30)
           .foregroundColor(Color(UIColor.label))
-        Text("\(weather.forecast.current!.getWindDirection())")
+        Text(weather.forecast.current?.getWindDirection() ?? "")
         Spacer()
       }
       .padding(.bottom)
@@ -74,7 +78,8 @@ struct HeadView: View {
           .padding(.bottom, 20)
       }
     }
-    .redacted(reason: weather.isLoading ? .placeholder : [])
+    .opacity(weather.isLoading ? 0.3 : 1.0)
+    .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
     .scrollTransition { content, phase in
       content
         .opacity(phase.isIdentity ? 1 : 0.8)

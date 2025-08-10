@@ -23,7 +23,7 @@ class Weather {
         forecast = Operations.getForecast.Output.Ok.Body.jsonPayload.init(
             latitude: 0.0,
             longitude: 0.0,
-            current: .init(cloudcover: 0.0, time: 0.0, temperature: 0.0, windspeed: 0.0, wind_direction_10m: 0.0, weathercode: 0.0)
+            current: .init(cloudcover: 0.0, time: 0.0, temperature: 20.0, windspeed: 0.0, wind_direction_10m: 0.0, weathercode: 0.0)
         )
         alerts = .brightsky(.init())
         air = Operations.getAirQuality.Output.Ok.Body.jsonPayload.init(latitude: 0, longitude: 0, hourly: nil)

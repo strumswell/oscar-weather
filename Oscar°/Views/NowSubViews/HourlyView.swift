@@ -54,6 +54,7 @@ struct HourlyView: View {
           .font(.footnote)
           .foregroundColor(.secondary)
           .padding(.top, 3)
+          .contentTransition(.numericText())
           Image(
             getWeatherIcon(
               weathercode: weather.forecast.hourly?.weathercode?[index] ?? 0,
@@ -63,6 +64,7 @@ struct HourlyView: View {
           .scaledToFit()
           .frame(width: 35, height: 35)
           Text(roundTemperatureString(temperature: weather.forecast.hourly?.temperature_2m?[index]))
+            .contentTransition(.numericText())
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
@@ -78,7 +80,8 @@ struct HourlyView: View {
             .scaleEffect(phase.isIdentity ? 1 : 0.9)
             .blur(radius: phase.isIdentity ? 0 : 2)
         }
-        .redacted(reason: weather.isLoading || weather.forecast.hourly == nil ? .placeholder : [])
+        .opacity(weather.isLoading || weather.forecast.hourly == nil ? 0.3 : 1.0)
+        .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
 
         if !weather.isLoading && weather.forecast.hourly != nil {
           SunsetSunriseCard(index: index)

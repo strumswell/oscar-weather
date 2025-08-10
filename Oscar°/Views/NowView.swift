@@ -29,6 +29,7 @@ struct NowView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 ZStack {
                     VStack(alignment: .leading) {
+                        
                         HeadView()
                             .padding(.top, 50)
                             .onTapGesture {
@@ -40,8 +41,12 @@ struct NowView: View {
                                 }
                             }
                         RainView()
+                            .opacity(weather.isLoading ? 0.3 : 1.0)
+                            .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
                         HourlyView()
                         DailyView()
+                            .opacity(weather.isLoading ? 0.3 : 1.0)
+                            .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
                         VStack(alignment: .leading) {
                             Text("Radar")
                                 .font(.title3)
@@ -52,6 +57,8 @@ struct NowView: View {
                                 .frame(height: 350)
                                 .cornerRadius(10)
                                 .padding()
+                                .opacity(weather.isLoading ? 0.3 : 1.0)
+                                .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
                                 .onTapGesture {
                                     UIApplication.shared.playHapticFeedback()
                                     isMapSheetPresented.toggle()
@@ -146,6 +153,7 @@ extension NowView {
         } catch {
             print(error)
             weather.error = error.localizedDescription
+            weather.isLoading = false
         }
     }
 }

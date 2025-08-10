@@ -41,10 +41,12 @@ struct DailyView: View {
               )
               .font(.caption)
               .foregroundColor(Color(UIColor.label))
+              .contentTransition(.numericText())
             }
             .frame(width: 50)
             Text(roundTemperatureString(temperature: dayMinTemp))
               .frame(width: 37, alignment: .trailing)
+              .contentTransition(.numericText())
             TemperatureRangeView(
               low: Int(dayMinTemp?.rounded() ?? 0), high: Int(dayMaxTemp?.rounded() ?? 0),
               minTemp: Int(minTemp.rounded()), maxTemp: Int(maxTemp.rounded()),
@@ -53,6 +55,7 @@ struct DailyView: View {
             .frame(height: 5)
             Text(roundTemperatureString(temperature: dayMaxTemp))
               .frame(width: 37, alignment: .leading)
+              .contentTransition(.numericText())
           }
           .padding(.vertical, 4)
         }
@@ -67,8 +70,8 @@ struct DailyView: View {
       )
       .font(.system(size: 18))
       .padding([.leading, .trailing])
-      .redacted(
-        reason: weather.forecast.daily?.time == nil && weather.isLoading ? .placeholder : [])
+      .opacity(weather.forecast.daily?.time == nil && weather.isLoading ? 0.3 : 1.0)
+      .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
 
     }
     .scrollTransition { content, phase in

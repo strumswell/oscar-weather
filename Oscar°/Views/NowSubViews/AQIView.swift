@@ -30,6 +30,7 @@ struct AQIView: View {
                         } currentValueLabel: {
                             Text("\(Int(weather.air.hourly?.uv_index?[getCurrentHour()] ?? 0))")
                                 .foregroundColor(getColorForUVI(uvi: weather.air.hourly?.uv_index?[getCurrentHour()] ?? 0))
+                                .contentTransition(.numericText())
                         } minimumValueLabel: {
                             Text("\(Int(11))")
                                 .foregroundColor(Color.purple)
@@ -65,6 +66,7 @@ struct AQIView: View {
                         } currentValueLabel: {
                             Text("\(Int(weather.air.hourly?.european_aqi?[getCurrentHour()] ?? 0))")
                                 .foregroundColor(getColorForAQI(aqi: Int(weather.air.hourly?.european_aqi?[getCurrentHour()] ?? 0)))
+                                .contentTransition(.numericText())
                         } minimumValueLabel: {
                             Text("\(Int(100))")
                                 .foregroundColor(Color.purple)
@@ -292,7 +294,8 @@ struct AQIView: View {
             .scrollTargetBehavior(.viewAligned)
             .frame(maxWidth: .infinity)
             .padding(.bottom, 20)
-            .redacted(reason: weather.isLoading || weather.air.hourly == nil ? .placeholder : [])
+            .opacity(weather.isLoading || weather.air.hourly == nil ? 0.3 : 1.0)
+            .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
             
         }
         .scrollTransition { content, phase in
