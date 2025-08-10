@@ -6,9 +6,13 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct WeatherSimulationView: View {
     @Environment(Weather.self) private var weather: Weather
+    @Environment(Location.self) private var location: Location
+    
+    private let atmosphericAdapter = WeatherAtmosphericAdapter()
     
     var body: some View {
         ZStack {
@@ -19,8 +23,8 @@ struct WeatherSimulationView: View {
                 }
                 CloudsView(
                     thickness: getCloudDensity(),
-                    topTint: getCloudTopStops().interpolated(amount: weather.time),
-                    bottomTint: getCloudBottomStops().interpolated(amount: weather.time)
+                    topTint: getAtmosphericCloudTopTint(),
+                    bottomTint: getAtmosphericCloudBottomTint()
                 )
                 if shouldDisplayStorm {
                     StormView(type: getStormType(), direction: .degrees(30), strength: getStormIntensity())
@@ -35,7 +39,7 @@ struct WeatherSimulationView: View {
         }
         .preferredColorScheme(.dark)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(backgroundGradient)
+        .background(atmosphericBackgroundGradient)
     }
 }
 
@@ -44,11 +48,60 @@ struct WeatherSimulationView: View {
 }
 
 extension WeatherSimulationView {
-    var backgroundGradient: LinearGradient {
+    /// Atmospheric physics-based background gradient
+    var atmosphericBackgroundGradient: LinearGradient {
+        // Only use atmospheric rendering if location is available
+        guard location.coordinates.latitude != 0 && location.coordinates.longitude != 0 else {
+            if weather.debug {
+                print("🌍 WeatherSimulationView: Using legacy gradient - Location not available: \(location.coordinates)")
+            }
+            return legacyBackgroundGradient
+        }
+        
+        if weather.debug {
+            print("🌍 WeatherSimulationView: Using atmospheric renderer at \(location.coordinates)")
+        }
+        
+        return atmosphericAdapter.generateAtmosphericSkyGradient(
+            from: weather,
+            at: location.coordinates
+        )
+    }
+    
+    /// Legacy gradient system as fallback
+    var legacyBackgroundGradient: LinearGradient {
         LinearGradient(colors: [
             getBackgroundTopStops().interpolated(amount: weather.time),
             getBackgroundBottomStops().interpolated(amount: weather.time)
         ], startPoint: .top, endPoint: .bottom)
+    }
+    
+    /// Get atmospheric color for cloud top tinting
+    func getAtmosphericCloudTopTint() -> Color {
+        guard location.coordinates.latitude != 0 && location.coordinates.longitude != 0 else {
+            // Fallback to legacy system if no location
+            return getCloudTopStops().interpolated(amount: weather.time)
+        }
+        
+        return atmosphericAdapter.getAtmosphericCloudColor(
+            from: weather,
+            at: location.coordinates,
+            isTop: true
+        )
+    }
+    
+    /// Get atmospheric color for cloud bottom tinting
+    func getAtmosphericCloudBottomTint() -> Color {
+        guard location.coordinates.latitude != 0 && location.coordinates.longitude != 0 else {
+            // Fallback to legacy system if no location
+            return getCloudBottomStops().interpolated(amount: weather.time)
+        }
+        
+        return atmosphericAdapter.getAtmosphericCloudColor(
+            from: weather,
+            at: location.coordinates,
+            isTop: false
+        )
     }
 
     var shouldDisplayStorm: Bool {

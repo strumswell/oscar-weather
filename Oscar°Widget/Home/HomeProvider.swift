@@ -9,6 +9,7 @@ import Foundation
 import CoreLocation
 import SwiftUI
 import WidgetKit
+import simd
 
 struct HomeEntry: TimelineEntry {
     let date: Date
@@ -23,6 +24,7 @@ struct HomeEntry: TimelineEntry {
 class HomeProvider: TimelineProvider {
     let client = APIClient()
     let locationService = LocationService.shared
+    private let atmosphericAdapter = WeatherAtmosphericAdapter()
     
     init() {
         locationService.update()
@@ -57,9 +59,29 @@ class HomeProvider: TimelineProvider {
             let temperatureNow = weather.current?.temperature ?? 0
             let weathercode = weather.current?.weathercode ?? 0
             let isDay = weather.current?.is_day ?? 0
-            let precipitation = weather.current?.precipitation ?? 0
-            let sunrise = weather.daily?.sunrise?.first ?? 0
-            let sunset = weather.daily?.sunset?.first ?? 0          
+            let precipitation = weather.current?.precipitation ?? 0          
+            
+            // Create Weather object for atmospheric rendering
+            let weatherForRendering = Weather()
+            weatherForRendering.time = currentTime
+            weatherForRendering.forecast = weather // Use the existing forecast data
+            weatherForRendering.radar = radar
+            weatherForRendering.debug = true // Enable debug for troubleshooting
+            
+            // Get atmospheric colors for widget background
+            let gradientColors = atmosphericAdapter.getWidgetBackgroundColors(
+                from: weatherForRendering,
+                at: coordinates
+            )
+            
+            // Debug output for troubleshooting
+            if weatherForRendering.debug {
+                print("🔧 Widget Debug - Location: \(coordinates)")
+                print("🔧 Widget Debug - Time: \(currentTime)")
+                print("🔧 Widget Debug - Weather code: \(weathercode)")
+                print("🔧 Widget Debug - Temperature: \(temperatureNow)")
+                print("🔧 Widget Debug - Gradient colors: \(gradientColors)")
+            }
             
             let entry = HomeEntry(
                 date: Date(),
@@ -68,24 +90,7 @@ class HomeProvider: TimelineProvider {
                 temperatureMax: temperatureMax,
                 temperatureNow: temperatureNow,
                 icon: getWeatherIcon(weathercode: weathercode, isDay: isDay, isRaining: radar.isRaining(), precipitation: precipitation),
-                backgroundGradients: [
-                    self.getBackgroundTopStops(
-                        dayBegin: dayBegin,
-                        sunrise: sunrise,
-                        sunset: sunset,
-                        weathercode: weathercode,
-                        isRaining: radar.isRaining(),
-                        precipitation: precipitation)
-                    .interpolated(amount: currentTime),
-                    self.getBackgroundBottomStops(
-                        dayBegin: dayBegin,
-                        sunrise: sunrise,
-                        sunset: sunset,
-                        weathercode: weathercode,
-                        isRaining: radar.isRaining(),
-                        precipitation: precipitation)
-                    .interpolated(amount: currentTime)
-                ]
+                backgroundGradients: gradientColors
             )
             
             let currentDate = Date()
@@ -145,65 +150,5 @@ class HomeProvider: TimelineProvider {
                 return "cloud.fill"
             }
         }
-    }
-
-    
-    func getBackgroundTopStops(dayBegin: Double, sunrise: Double, sunset: Double, weathercode: Double, isRaining: Bool, precipitation: Double) -> [Gradient.Stop] {
-        let dayLength = 86400.0
-        let isRaining = ((weathercode >= 51 && weathercode <= 99) && precipitation > 0) || isRaining
-
-        if isRaining {
-            return [
-                .init(color: .midnightStart, location: 0),
-                .init(color: .midnightStart, location: (sunrise - dayBegin)/dayLength - 0.08),
-                .init(color: .rainyStart, location: (sunrise - dayBegin)/dayLength),
-                .init(color: .rainyStart, location: (sunrise - dayBegin)/dayLength + 0.05),
-                .init(color: .rainyStart, location: (sunset - dayBegin)/dayLength - 0.08),
-                .init(color: .rainyStart, location: (sunset - dayBegin)/dayLength),
-                .init(color: .midnightStart, location: (sunset - dayBegin)/dayLength + 0.04),
-                .init(color: .midnightStart, location: 1)
-            ]
-        }
-        
-        return [
-            .init(color: .midnightStart, location: 0),
-            .init(color: .midnightStart, location: (sunrise - dayBegin)/dayLength - 0.08),
-            .init(color: .sunriseStart, location: (sunrise - dayBegin)/dayLength),
-            .init(color: .sunnyDayStart, location: (sunrise - dayBegin)/dayLength + 0.05),
-            .init(color: .sunnyDayStart, location: (sunset - dayBegin)/dayLength - 0.08),
-            .init(color: .sunsetStart, location: (sunset - dayBegin)/dayLength),
-            .init(color: .midnightStart, location: (sunset - dayBegin)/dayLength + 0.04),
-            .init(color: .midnightStart, location: 1)
-        ]
-        
-    }
-    
-    func getBackgroundBottomStops(dayBegin: Double, sunrise: Double, sunset: Double, weathercode: Double, isRaining: Bool, precipitation: Double) -> [Gradient.Stop] {
-        let dayLength = 86400.0
-        let isRaining = ((weathercode >= 51 && weathercode <= 99) && precipitation > 0) || isRaining
-
-        if isRaining {
-            return [
-                .init(color: .midnightEnd, location: 0),
-                .init(color: .midnightEnd, location: (sunrise - dayBegin)/dayLength - 0.08),
-                .init(color: .rainyEnd, location: (sunrise - dayBegin)/dayLength),
-                .init(color: .rainyEnd, location: (sunrise - dayBegin)/dayLength + 0.05),
-                .init(color: .rainyEnd, location: (sunset - dayBegin)/dayLength - 0.08),
-                .init(color: .rainyEnd, location: (sunset - dayBegin)/dayLength),
-                .init(color: .midnightEnd, location: (sunset - dayBegin)/dayLength + 0.015),
-                .init(color: .midnightEnd, location: 1)
-            ]
-        }
-        
-        return [
-            .init(color: .midnightEnd, location: 0),
-            .init(color: .midnightEnd, location: (sunrise - dayBegin)/dayLength - 0.08),
-            .init(color: .sunriseEnd, location: (sunrise - dayBegin)/dayLength),
-            .init(color: .sunnyDayEnd, location: (sunrise - dayBegin)/dayLength + 0.05),
-            .init(color: .sunnyDayEnd, location: (sunset - dayBegin)/dayLength - 0.08),
-            .init(color: .sunsetEnd, location: (sunset - dayBegin)/dayLength),
-            .init(color: .midnightEnd, location: (sunset - dayBegin)/dayLength + 0.015),
-            .init(color: .midnightEnd, location: 1)
-        ]
     }
 }

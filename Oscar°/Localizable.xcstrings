@@ -2058,6 +2058,7 @@
       }
     },
     "Windgeschwindidkeit" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2091,6 +2092,7 @@
       }
     },
     "Windrichtung" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
