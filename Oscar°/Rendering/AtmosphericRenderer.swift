@@ -387,7 +387,7 @@ class AtmosphericRenderer {
             let viewAngle = Float.pi / 2.0 * Float(i) / Float(sampleCount - 1) // 0 to π/2 (zenith to horizon)
             let viewDirection = simd_float3(0, cos(viewAngle), sin(viewAngle))
             
-            let skyColor = calculateSkyColorForPhase(
+            let skyColor = calculateSkyColorForPhaseWithSmoothing(
                 viewDirection: viewDirection,
                 sunDirection: sunPosition,
                 sunElevation: sunElevation,
@@ -395,7 +395,10 @@ class AtmosphericRenderer {
                 horizonFactor: Float(i) / Float(sampleCount - 1),
                 weatherCode: weatherCode,
                 cloudCover: cloudCover,
-                precipitationIntensity: precipitation
+                precipitationIntensity: precipitation,
+                currentTime: currentTimestamp,
+                sunrise: sunriseTime,
+                sunset: sunsetTime
             )
             
             stops.append(Gradient.Stop(
@@ -525,6 +528,90 @@ class AtmosphericRenderer {
         )
     }
     
+    /// Calculate sky color with smooth phase transitions
+    private func calculateSkyColorForPhaseWithSmoothing(
+        viewDirection: simd_float3,
+        sunDirection: simd_float3,
+        sunElevation: Float,
+        solarPhase: SolarPhase,
+        horizonFactor: Float,
+        weatherCode: Int = 0,
+        cloudCover: Float = 0.0,
+        precipitationIntensity: Float = 0.0,
+        currentTime: Double,
+        sunrise: Double,
+        sunset: Double
+    ) -> simd_float3 {
+        
+        let elevDeg = sunElevation * 180.0 / .pi
+        
+        // Define transition zones and blend between adjacent phases
+        var primaryColor: simd_float3
+        var blendColor: simd_float3?
+        var blendFactor: Float = 0.0
+        
+        // Get primary phase color
+        primaryColor = getBaseSkyColorForPhase(solarPhase: solarPhase, horizonFactor: horizonFactor)
+        
+        // Add smooth transitions between phases
+        switch solarPhase {
+        case .day:
+            // Blend towards golden hour as sun gets lower
+            if elevDeg < 10.0 && elevDeg > 6.0 {
+                let goldenHourColor = getBaseSkyColorForPhase(solarPhase: .goldenHour, horizonFactor: horizonFactor)
+                blendColor = goldenHourColor
+                blendFactor = (10.0 - elevDeg) / 4.0  // Smooth transition from 10° to 6°
+            }
+            
+        case .goldenHour:
+            // Blend with day or twilight depending on elevation
+            if elevDeg > 3.0 {
+                let dayColor = getBaseSkyColorForPhase(solarPhase: .day, horizonFactor: horizonFactor)
+                blendColor = dayColor
+                blendFactor = (elevDeg - 3.0) / 3.0  // Blend from 3° to 6°
+            } else if elevDeg > -3.0 {
+                let twilightColor = getBaseSkyColorForPhase(solarPhase: .civilTwilight, horizonFactor: horizonFactor)
+                blendColor = twilightColor
+                blendFactor = (-elevDeg + 3.0) / 6.0  // Blend from 3° to -3°
+            }
+            
+        case .civilTwilight:
+            // Blend with golden hour when close to horizon
+            if elevDeg > -3.0 {
+                let goldenHourColor = getBaseSkyColorForPhase(solarPhase: .goldenHour, horizonFactor: horizonFactor)
+                blendColor = goldenHourColor
+                blendFactor = (elevDeg + 3.0) / 3.0  // Blend from -3° to 0°
+            } else if elevDeg > -9.0 {
+                // Blend with nautical twilight
+                let nauticalColor = calculateTwilightSkyColor(
+                    viewDirection: viewDirection,
+                    sunDirection: sunDirection,
+                    sunElevation: sunElevation
+                )
+                blendColor = nauticalColor
+                blendFactor = (-elevDeg - 6.0) / 3.0  // Blend from -6° to -9°
+            }
+            
+        default:
+            break
+        }
+        
+        // Apply blending if needed
+        if let blend = blendColor {
+            primaryColor = simd_mix(primaryColor, blend, simd_float3(repeating: min(1.0, max(0.0, blendFactor))))
+        }
+        
+        // Apply weather modifications
+        return applyWeatherEffectsToSky(
+            baseColor: primaryColor,
+            weatherCode: weatherCode,
+            cloudCover: cloudCover,
+            precipitationIntensity: precipitationIntensity,
+            solarPhase: solarPhase,
+            horizonFactor: horizonFactor
+        )
+    }
+    
     /// Get base sky colors without weather effects
     private func getBaseSkyColorForPhase(solarPhase: SolarPhase, horizonFactor: Float) -> simd_float3 {
         switch solarPhase {
@@ -537,18 +624,19 @@ class AtmosphericRenderer {
         case .sunrise, .goldenHour:
             let zenithColor  = simd_float3(0.42, 0.62, 0.90)  // light blue
             let horizonColor = simd_float3(0.98, 0.78, 0.70)  // soft peach
-            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.75))
+            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.8))
 
         case .sunset:
+            // Redder due to particle accumulation throughout the day
             let zenithColor  = simd_float3(0.32, 0.44, 0.82)  // deep blue
-            let horizonColor = simd_float3(0.95, 0.70, 0.72)  // rose-peach
-            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.85))
+            let horizonColor = simd_float3(0.95, 0.62, 0.58)  // more red than sunrise
+            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.8))
             
         case .civilTwilight:
-            // Blue hour
-            let zenithColor = simd_float3(0.1, 0.2, 0.6)
-            let horizonColor = simd_float3(0.8, 0.4, 0.3)
-            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.5))
+            // Blue hour with warmer tones
+            let zenithColor = simd_float3(0.2, 0.3, 0.5)
+            let horizonColor = simd_float3(0.85, 0.5, 0.35)
+            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.6))
             
         case .nauticalTwilight, .astronomicalTwilight:
             return calculateTwilightSkyColor(
@@ -744,17 +832,17 @@ class AtmosphericRenderer {
         
         // Enhanced orange/red colors in the anti-solar direction during twilight
         let antiSolarEffect = max(0, -cosTheta) // Stronger when looking away from sun
-        let orangeEnhancement = simd_float3(0.8, 0.4, 0.1) * antiSolarEffect * abs(sunElevation) * 2.0
+        let orangeEnhancement = simd_float3(0.9, 0.5, 0.2) * antiSolarEffect * abs(sunElevation) * 2.5
         
-        // Purple belt effect (earth's shadow)
+        // Purple belt effect (earth's shadow) - more subtle
         let shadowBeltHeight = 1.0 - abs(viewDirection.y - 0.1) // Around 10° above horizon
-        let purpleEnhancement = simd_float3(0.4, 0.2, 0.6) * shadowBeltHeight * abs(sunElevation) * 1.5
+        let purpleEnhancement = simd_float3(0.3, 0.2, 0.4) * shadowBeltHeight * abs(sunElevation) * 0.8
         
-        // Venus belt (pink anti-twilight arch)
+        // Venus belt (pink anti-twilight arch) - warmer pink
         let venusBeltHeight = 1.0 - abs(viewDirection.y + 0.05) // Around 5° below horizon
-        let pinkEnhancement = simd_float3(0.6, 0.3, 0.4) * venusBeltHeight * antiSolarEffect * abs(sunElevation)
+        let pinkEnhancement = simd_float3(0.7, 0.4, 0.3) * venusBeltHeight * antiSolarEffect * abs(sunElevation)
         
-        return (orangeEnhancement + purpleEnhancement + pinkEnhancement) * 0.3
+        return (orangeEnhancement + purpleEnhancement + pinkEnhancement) * 0.25
     }
     
     /// Calculate optical depth for Rayleigh and Mie scattering

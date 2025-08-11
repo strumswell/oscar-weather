@@ -320,8 +320,8 @@ class WeatherAtmosphericAdapter {
         let cloudCover    = Float(weather.forecast.current?.cloudcover ?? 0) / 100.0
         let precipitation = Float(weather.forecast.current?.precipitation ?? 0)
         
-        // Base sky color now takes sunElevation to align twilight blending with renderer
-        let baseSkyColor = getBaseSkyColorForPhase(
+        // Base sky color with smooth transitions
+        let baseSkyColor = getSmoothSkyColorForPhase(
             solarPhase: solarPhase,
             horizonFactor: horizonFactor,
             sunElevation: sunElevation
@@ -368,6 +368,75 @@ class WeatherAtmosphericAdapter {
         return .night
     }
     
+    /// Get smooth sky colors with phase transitions for widget
+    private func getSmoothSkyColorForPhase(
+        solarPhase: SolarPhase,
+        horizonFactor: Float,
+        sunElevation: Float   // radians
+    ) -> simd_float3 {
+        
+        let elevDeg = sunElevation * 180.0 / .pi
+        
+        // Get base color for current phase
+        var primaryColor = getBaseSkyColorForPhase(
+            solarPhase: solarPhase,
+            horizonFactor: horizonFactor,
+            sunElevation: sunElevation
+        )
+        
+        // Add smooth transitions between phases
+        switch solarPhase {
+        case .day:
+            // Blend towards golden hour as sun gets lower
+            if elevDeg < 10.0 && elevDeg > 6.0 {
+                let goldenHourColor = getBaseSkyColorForPhase(
+                    solarPhase: .goldenHour,
+                    horizonFactor: horizonFactor,
+                    sunElevation: sunElevation
+                )
+                let blendFactor = (10.0 - elevDeg) / 4.0
+                primaryColor = simd_mix(primaryColor, goldenHourColor, simd_float3(repeating: blendFactor))
+            }
+            
+        case .goldenHour:
+            // Blend with day or twilight depending on elevation
+            if elevDeg > 3.0 {
+                let dayColor = getBaseSkyColorForPhase(
+                    solarPhase: .day,
+                    horizonFactor: horizonFactor,
+                    sunElevation: sunElevation
+                )
+                let blendFactor = (elevDeg - 3.0) / 3.0
+                primaryColor = simd_mix(primaryColor, dayColor, simd_float3(repeating: blendFactor))
+            } else if elevDeg > -3.0 {
+                let twilightColor = getBaseSkyColorForPhase(
+                    solarPhase: .civilTwilight,
+                    horizonFactor: horizonFactor,
+                    sunElevation: sunElevation
+                )
+                let blendFactor = (-elevDeg + 3.0) / 6.0
+                primaryColor = simd_mix(primaryColor, twilightColor, simd_float3(repeating: blendFactor))
+            }
+            
+        case .civilTwilight:
+            // Blend with golden hour when close to horizon
+            if elevDeg > -3.0 {
+                let goldenHourColor = getBaseSkyColorForPhase(
+                    solarPhase: .goldenHour,
+                    horizonFactor: horizonFactor,
+                    sunElevation: sunElevation
+                )
+                let blendFactor = (elevDeg + 3.0) / 3.0
+                primaryColor = simd_mix(primaryColor, goldenHourColor, simd_float3(repeating: blendFactor))
+            }
+            
+        default:
+            break
+        }
+        
+        return primaryColor
+    }
+
     /// Widget/base palettes aligned to renderer; includes twilight→night blend via sunElevation
     private func getBaseSkyColorForPhase(
         solarPhase: SolarPhase,
@@ -383,6 +452,7 @@ class WeatherAtmosphericAdapter {
         
         switch solarPhase {
         case .day:
+            // Clear blue sky
             let zenithBlue  = simd_float3(0.20, 0.50, 0.90)
             let horizonBlue = simd_float3(0.60, 0.80, 0.95)
             return simd_mix(zenithBlue, horizonBlue, simd_float3(repeating: horizonFactor))
@@ -391,18 +461,18 @@ class WeatherAtmosphericAdapter {
             // Softer, less yellow (peachy)
             let zenithColor  = simd_float3(0.42, 0.62, 0.90)
             let horizonColor = simd_float3(0.98, 0.78, 0.70)
-            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.75))
+            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.8))
             
         case .sunset:
-            // Rose/peach instead of orange
+            // Redder due to particle accumulation throughout the day
             let zenithColor  = simd_float3(0.32, 0.44, 0.82)
-            let horizonColor = simd_float3(0.95, 0.70, 0.72)
-            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.85))
+            let horizonColor = simd_float3(0.95, 0.62, 0.58)  // More red than sunrise
+            return simd_mix(zenithColor, horizonColor, simd_float3(repeating: horizonFactor * 0.8))
             
         case .civilTwilight:
-            let civilZenith  = simd_float3(0.12, 0.22, 0.62)
-            let civilHorizon = simd_float3(0.55, 0.50, 0.65) // muted, not orange
-            let civilColor   = simd_mix(civilZenith, civilHorizon, simd_float3(repeating: horizonFactor * 0.5))
+            let civilZenith  = simd_float3(0.2, 0.3, 0.5)
+            let civilHorizon = simd_float3(0.85, 0.5, 0.35) // warmer orange
+            let civilColor   = simd_mix(civilZenith, civilHorizon, simd_float3(repeating: horizonFactor * 0.6))
             let nightBlend   = simd_mix(nightZenith, nightHorizon, simd_float3(repeating: horizonFactor))
             return simd_mix(nightBlend, civilColor, simd_float3(repeating: blend))
             
