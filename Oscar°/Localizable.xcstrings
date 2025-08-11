@@ -49,8 +49,28 @@
         }
       }
     },
+    "%.0f %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$.0f %2$@"
+          }
+        }
+      }
+    },
     "%.0f %%" : {
 
+    },
+    "%.0f%@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$.0f%2$@"
+          }
+        }
+      }
     },
     "%.1f" : {
 
@@ -61,6 +81,46 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$.1f %2$@"
+          }
+        }
+      }
+    },
+    "%.1f %@ (10m)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$.1f %2$@ (10m)"
+          }
+        }
+      }
+    },
+    "%.1f %@ (80m)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$.1f %2$@ (80m)"
+          }
+        }
+      }
+    },
+    "%.1f %@ (120m)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$.1f %2$@ (120m)"
+          }
+        }
+      }
+    },
+    "%.1f %@ (180m)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$.1f %2$@ (180m)"
           }
         }
       }
@@ -129,6 +189,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
+          }
+        }
+      }
+    },
+    "%.1f%@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$.1f%2$@"
+          }
+        }
+      }
+    },
+    "%.1f° (0cm)" : {
+
+    },
+    "%.1f° (6cm)" : {
+
+    },
+    "%.1f° (18cm)" : {
+
+    },
+    "%.1f° (54cm)" : {
+
+    },
+    "%.2f (0-1cm)" : {
+
+    },
+    "%.2f (1-3cm)" : {
+
+    },
+    "%.2f (3-9cm)" : {
+
+    },
+    "%.2f (9-27cm)" : {
+
+    },
+    "%.2f (27-81cm)" : {
+
+    },
+    "%.2f%@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$.2f%2$@"
           }
         }
       }
@@ -213,6 +320,9 @@
           }
         }
       }
+    },
+    "0 %@" : {
+
     },
     "0 mm/h" : {
       "extractionState" : "stale",

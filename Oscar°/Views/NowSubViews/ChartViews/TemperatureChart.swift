@@ -21,6 +21,8 @@ struct TemperatureChart: View {
   var time: [Double]
   var unit: String
   var maxTimeRange: ClosedRange<Date>
+  
+  @State private var selectedDate: Date?
 
   var temperatureData: [TemperatureData] {
     // Ensure all arrays have the same length
@@ -38,60 +40,89 @@ struct TemperatureChart: View {
   var body: some View {
     VStack(alignment: .leading) {
       Chart {
-        if #available(iOS 18, *) {
-          LinePlot(
-            temperatureData,
-            x: .value("Hour", \.time),
-            y: .value("Temperature (\(unit))", \.temperature),
+        // Temperature line
+        ForEach(temperatureData) { dataPoint in
+          LineMark(
+            x: .value("Hour", dataPoint.time),
+            y: .value("Temperature (\(unit))", dataPoint.temperature),
             series: .value("Series", "Temperature")
           )
-          .foregroundStyle(.orange)
           .interpolationMethod(.catmullRom)
+          .foregroundStyle(.orange)
+          .lineStyle(.init(lineWidth: 3))
+        }
 
-          LinePlot(
-            temperatureData,
-            x: .value("Hour", \.time),
-            y: .value("Gefühlte Temperature (\(unit))", \.apparentTemperature),
+        // Apparent temperature line  
+        ForEach(temperatureData) { dataPoint in
+          LineMark(
+            x: .value("Hour", dataPoint.time),
+            y: .value("Gefühlte Temperature (\(unit))", dataPoint.apparentTemperature),
             series: .value("Series", "Apparent Temperature")
           )
-          .foregroundStyle(.red)
           .interpolationMethod(.catmullRom)
-        } else {
-          ForEach(temperatureData) { dataPoint in
-            LineMark(
-              x: .value("Hour", dataPoint.time),
-              y: .value("Temperature (\(unit))", dataPoint.temperature),
-              series: .value("Series", "Temperature")
-            )
-            .interpolationMethod(.catmullRom)
-            .foregroundStyle(.orange)
-          }
-
-          ForEach(temperatureData) { dataPoint in
-            LineMark(
-              x: .value("Hour", dataPoint.time),
-              y: .value("Gefühlte Temperature (\(unit))", dataPoint.apparentTemperature),
-              series: .value("Series", "Apparent Temperature")
-            )
-            .interpolationMethod(.catmullRom)
-            .foregroundStyle(.red)
-          }
+          .foregroundStyle(.red)
+          .lineStyle(.init(lineWidth: 3))
+        }
+        
+        // Interactive selection indicator
+        if let selectedDate {
+          RuleMark(x: .value("Selected", selectedDate))
+            .foregroundStyle(.gray.opacity(0.3))
+            .lineStyle(.init(lineWidth: 2))
+            .annotation(
+              position: .topTrailing, spacing: 0,
+              overflowResolution: .init(
+                x: .fit(to: .chart),
+                y: .fit(to: .chart)
+              )
+            ) {
+              if let selectedData = getSelectedTemperatureData(for: selectedDate) {
+                VStack(alignment: .center, spacing: 2) {
+                  Text(formatTimeToHHMM(date: selectedDate))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                  
+                  VStack(alignment: .leading, spacing: 1) {
+                    HStack(spacing: 4) {
+                      Circle().fill(.orange).frame(width: 6, height: 6)
+                      Text("\(selectedData.temperature, specifier: "%.1f")\(unit)")
+                        .font(.caption2)
+                        .foregroundStyle(.white)
+                    }
+                    
+                    HStack(spacing: 4) {
+                      Circle().fill(.red).frame(width: 6, height: 6)
+                      Text("\(selectedData.apparentTemperature, specifier: "%.1f")\(unit)")
+                        .font(.caption2)
+                        .foregroundStyle(.white)
+                    }
+                  }
+                }
+                .padding(8)
+                .background(.ultraThinMaterial.opacity(0.9))
+                .cornerRadius(8)
+                .shadow(radius: 4)
+              }
+            }
         }
 
         ForEach(dayChangeIndices(time: temperatureData.map { $0.time }), id: \.self) { index in
           RuleMark(x: .value("Hour", temperatureData[index].time))
-            .foregroundStyle(.gray)
-            .lineStyle(StrokeStyle(lineWidth: 1, dash: [5]))
+            .foregroundStyle(.gray.opacity(0.6))
+            .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [8, 4]))
             .annotation(
-              position: .topTrailing, spacing: 5,
+              position: .topTrailing, spacing: 8,
               overflowResolution: .init(
                 x: .fit(to: .chart),
                 y: .fit(to: .chart)
               )
             ) {
               Text(dayAbbreviation(from: temperatureData[index].time))
-                .font(.caption)
-                .foregroundColor(.gray)
+                .font(.caption.weight(.medium))
+                .foregroundColor(.primary.opacity(0.7))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(.ultraThinMaterial, in: .capsule)
             }
         }
       }
@@ -109,6 +140,7 @@ struct TemperatureChart: View {
       .chartXScale(domain: maxTimeRange)
       .chartScrollableAxes(.horizontal)
       .chartXVisibleDomain(length: 129600)
+      .chartXSelection(value: $selectedDate)
       .frame(height: 175)
     }
   }
@@ -134,4 +166,17 @@ struct TemperatureChart: View {
     formatter.dateFormat = "E"  // Short day abbreviation, e.g., Mon, Tue
     return formatter.string(from: date)
   }
+  
+  /// Gets the nearest temperature data for a selected date
+  func getSelectedTemperatureData(for selectedDate: Date) -> TemperatureData? {
+    return temperatureData.min(by: { abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate)) })
+  }
+  
+  /// Formats time to HH:MM format
+  func formatTimeToHHMM(date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "HH:mm"
+    return formatter.string(from: date)
+  }
+  
 }
