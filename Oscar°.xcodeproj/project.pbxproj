@@ -1364,11 +1364,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Oscar°/Oscar°.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 32;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = N6J2M765XY;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "Oscar°/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°";
@@ -1398,6 +1398,7 @@
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = N6J2M765XY;
 				INFOPLIST_FILE = "Oscar°Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1424,6 +1425,7 @@
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = N6J2M765XY;
 				INFOPLIST_FILE = "Oscar°Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

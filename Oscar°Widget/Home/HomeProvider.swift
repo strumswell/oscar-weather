@@ -18,7 +18,7 @@ struct HomeEntry: TimelineEntry {
     let temperatureMax: Double
     let temperatureNow: Double
     let icon: String
-    let backgroundGradients: [Color]
+    let backgroundGradient: LinearGradient
 }
 
 class HomeProvider: TimelineProvider {
@@ -31,11 +31,13 @@ class HomeProvider: TimelineProvider {
     }
     
     func placeholder(in context: Context) -> HomeEntry {
-        HomeEntry(date: Date(), location: "Berlin", temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", backgroundGradients: [.sunriseStart, .sunnyDayEnd])
+        let placeholderGradient = LinearGradient(colors: [.sunriseStart, .sunnyDayEnd], startPoint: .top, endPoint: .bottom)
+        return HomeEntry(date: Date(), location: "Berlin", temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", backgroundGradient: placeholderGradient)
     }
-    
+
     func getSnapshot(in context: Context, completion: @escaping (HomeEntry) -> ()) {
-        let entry = HomeEntry(date: Date(), location: "Berlin", temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", backgroundGradients: [.sunriseStart, .sunnyDayEnd])
+        let placeholderGradient = LinearGradient(colors: [.sunriseStart, .sunnyDayEnd], startPoint: .top, endPoint: .bottom)
+        let entry = HomeEntry(date: Date(), location: "Berlin", temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", backgroundGradient: placeholderGradient)
         completion(entry)
     }
     
@@ -68,21 +70,21 @@ class HomeProvider: TimelineProvider {
             weatherForRendering.radar = radar
             weatherForRendering.debug = true // Enable debug for troubleshooting
             
-            // Get atmospheric colors for widget background
-            let gradientColors = atmosphericAdapter.getWidgetBackgroundColors(
+            // Get atmospheric gradient for widget background (full 12-sample gradient)
+            let backgroundGradient = atmosphericAdapter.getWidgetFullGradient(
                 from: weatherForRendering,
                 at: coordinates
             )
-            
+
             // Debug output for troubleshooting
             if weatherForRendering.debug {
                 print("🔧 Widget Debug - Location: \(coordinates)")
                 print("🔧 Widget Debug - Time: \(currentTime)")
                 print("🔧 Widget Debug - Weather code: \(weathercode)")
                 print("🔧 Widget Debug - Temperature: \(temperatureNow)")
-                print("🔧 Widget Debug - Gradient colors: \(gradientColors)")
+                print("🔧 Widget Debug - Using full atmospheric gradient")
             }
-            
+
             let entry = HomeEntry(
                 date: Date(),
                 location: locationName,
@@ -90,7 +92,7 @@ class HomeProvider: TimelineProvider {
                 temperatureMax: temperatureMax,
                 temperatureNow: temperatureNow,
                 icon: getWeatherIcon(weathercode: weathercode, isDay: isDay, isRaining: radar.isRaining(), precipitation: precipitation),
-                backgroundGradients: gradientColors
+                backgroundGradient: backgroundGradient
             )
             
             let currentDate = Date()

@@ -46,11 +46,8 @@ struct NowTodayEntryView: View {
         .padding()
         .foregroundColor(.white)
         .background(
-            LinearGradient(colors: [
-                entry.backgroundGradients.first!,
-                entry.backgroundGradients.last!,
-            ], startPoint: .top, endPoint: .bottom)
-            .opacity(widgetRenderingMode == .accented ? 0 : 1)
+            entry.backgroundGradient
+                .opacity(widgetRenderingMode == .accented ? 0 : 1)
         )
         .containerBackground(.clear, for: .widget)
     }
@@ -73,7 +70,8 @@ struct NowTodayWidget: Widget {
 
 struct NowTodayEntryView_Previews: PreviewProvider {
     static var previews: some View {
-        NowTodayEntryView(entry: HomeEntry(date: Date(), location: "Berlin", temperatureMin: 12.0, temperatureMax: 21.0, temperatureNow: 19.0, icon: "sun.max.fill", backgroundGradients: [.sunriseStart, .sunnyDayEnd]))
+        let previewGradient = LinearGradient(colors: [.sunriseStart, .sunnyDayEnd], startPoint: .top, endPoint: .bottom)
+        NowTodayEntryView(entry: HomeEntry(date: Date(), location: "Berlin", temperatureMin: 12.0, temperatureMax: 21.0, temperatureNow: 19.0, icon: "sun.max.fill", backgroundGradient: previewGradient))
             .previewContext(WidgetPreviewContext(family: .systemSmall))
     }
 }

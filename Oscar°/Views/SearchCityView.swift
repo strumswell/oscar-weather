@@ -5,6 +5,7 @@ struct SearchCityView: View {
     @State private var searchText = ""
     @State private var searchIsActive = false
     @State private var searchResult: Components.Schemas.SearchResponse = .init()
+    @State private var refreshID = UUID()
     private var client = APIClient()
     private var locationService = LocationService.shared
 
@@ -88,15 +89,20 @@ struct SearchCityView: View {
                                 .onTapGesture {
                                     locationService.city.toggleActiveCity(city: city)
                                 }
+                                .id("\(city.objectID.uriRepresentation())-\(city.selected)")
                             }
                             .onDelete(perform: locationService.city.deleteCity)
                             .onMove(perform: locationService.city.moveCity)
                         }
+                        .id(refreshID)
                     }
                 }
             }
         }
         .searchable(text: $searchText, isPresented: $searchIsActive, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Suchen..."))
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("CityToggle"))) { _ in
+            refreshID = UUID()
+        }
         .onChange(of: searchText, {
             Task {
                 if searchText.count < 1 { return }

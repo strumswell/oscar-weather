@@ -24,7 +24,7 @@ class Location {
 @Observable
 class LocationService: NSObject, CLLocationManagerDelegate  {
     static let shared = LocationService()
-    var city = CityServiceNew()
+    var city = CityServiceNew.shared
     var authStatus: CLAuthorizationStatus?
     var gpsLocation: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 52.52, longitude: 13.4)
     private let manager = CLLocationManager()

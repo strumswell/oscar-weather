@@ -130,13 +130,14 @@ public class CityService: ObservableObject {
 
 @Observable
 public class CityServiceNew {
+    static let shared = CityServiceNew()
     var cities: [City]
 
     private let context: NSManagedObjectContext
     private let pc = PersistenceController.shared
     private let nc = NotificationCenter.default
 
-    init() {
+    private init() {
         self.cities = []
         self.context = pc.container.viewContext
         self.update()
@@ -201,14 +202,12 @@ public class CityServiceNew {
     }
     
     func toggleActiveCity(city: City) {
-        if (city.selected) {
+        // Deselect all cities
+        for city in cities {
             city.selected = false
-        } else {
-            for city in cities {
-                city.selected = false
-            }
-            city.selected = true
         }
+        // Select the clicked city
+        city.selected = true
         self.save()
         //nc.post(name: Notification.Name("CityToggle"), object: nil)
     }

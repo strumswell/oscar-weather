@@ -250,13 +250,21 @@ class WeatherAtmosphericAdapter {
         return .night
     }
     
+    /// Get full atmospheric gradient for widget backgrounds (12-sample gradient)
+    func getWidgetFullGradient(
+        from weather: Weather,
+        at location: CLLocationCoordinate2D
+    ) -> LinearGradient {
+        return generateAtmosphericSkyGradient(from: weather, at: location)
+    }
+
     /// Get atmospheric colors for widget backgrounds (top and bottom)
     func getWidgetBackgroundColors(
         from weather: Weather,
         at location: CLLocationCoordinate2D
     ) -> [Color] {
         let gradient = generateAtmosphericSkyGradient(from: weather, at: location)
-        
+
         guard location.latitude != 0 && location.longitude != 0 else {
             return [Color(red: 0.2, green: 0.5, blue: 0.9),
                     Color(red: 0.6, green: 0.8, blue: 0.95)]

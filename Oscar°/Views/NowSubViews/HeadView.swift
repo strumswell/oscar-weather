@@ -8,6 +8,7 @@ import CoreLocation
 import SwiftUI
 
 struct HeadView: View {
+  @Namespace private var transition
   @Environment(Weather.self) private var weather: Weather
   @Environment(Location.self) private var location: Location
   @State private var isLocationSheetPresented = false
@@ -15,13 +16,25 @@ struct HeadView: View {
   var body: some View {
     HStack {
       Spacer()
-      Image(systemName: "magnifyingglass")
-        .foregroundColor(Color(UIColor.label))
-      Text(location.name)
-        .font(.title2)
-        .fontWeight(.bold)
-        .lineSpacing(10)
-        .foregroundColor(Color(UIColor.label))
+        if #available(iOS 18.0, *) {
+            HStack {
+                Image(systemName: "magnifyingglass")
+                  .foregroundColor(Color(UIColor.label))
+                Text(location.name)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .lineSpacing(10)
+                    .foregroundColor(Color(UIColor.label))
+            }
+            .matchedTransitionSource(id: "locationName", in: transition)
+        } else {
+            Image(systemName: "magnifyingglass")
+              .foregroundColor(Color(UIColor.label))
+            Text(location.name)
+                .font(.title2)
+                .fontWeight(.bold)
+                .lineSpacing(10)
+                .foregroundColor(Color(UIColor.label))        }
       Spacer()
     }
     .opacity(weather.isLoading ? 0.3 : 1.0)
@@ -32,7 +45,16 @@ struct HeadView: View {
       isLocationSheetPresented.toggle()
     }
     .sheet(isPresented: $isLocationSheetPresented) {
-      SearchCityView()
+        if #available(iOS 18.0, *) {
+            SearchCityView()
+                .presentationDetents([.large])
+                .navigationTransition(
+                    .zoom(sourceID: "locationName", in: transition)
+                )
+        } else {
+            SearchCityView()
+                .presentationDetents([.large])
+      }
     }
     .padding(.bottom, 35)
     .padding(.leading, -20)

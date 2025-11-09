@@ -8,6 +8,7 @@ import SwiftUI
 import OpenAPIRuntime
 import OpenAPIURLSession
 import MapKit
+import WidgetKit
 
 #Preview {
     NowView().preferredColorScheme(.dark)
@@ -53,6 +54,13 @@ struct NowView: View {
                                 .bold()
                                 .foregroundColor(Color(UIColor.label))
                                 .padding([.leading, .top])
+                                .onTapGesture {
+                                    UIApplication.shared.playHapticFeedback()
+                                    isMapSheetPresented.toggle()
+                                }
+                                .sheet(isPresented: $isMapSheetPresented) {
+                                    MapDetailView(settingsService: settingsService)
+                                }
                             RadarView(settingsService: settingsService, showLayerSettings: false, userActionAllowed: false)
                                 .frame(height: 350)
                                 .cornerRadius(10)
@@ -108,6 +116,7 @@ struct NowView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             Task {
                 await self.updateState()
+                WidgetCenter.shared.reloadAllTimelines()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("ChangedLocation"), object: nil)) { _ in

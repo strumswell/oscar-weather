@@ -40,7 +40,7 @@ class APIClient {
       serverURL: url,
       transport: URLSessionTransport(),
       middlewares: [
-        CachingMiddleware(cacheTime: 60),
+        //CachingMiddleware(cacheTime: 60),
         RetryingMiddleware(
           signals: [.code(429), .range(500..<600), .errorThrown],
           policy: .upToAttempts(count: 3),
