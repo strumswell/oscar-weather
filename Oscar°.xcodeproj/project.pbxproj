@@ -30,6 +30,7 @@
 		251BFEC42E48F34000D35589 /* WeatherAtmosphericAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */; };
 		251FE39127C5674400D26F0F /* WMSTileOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251FE39027C5674400D26F0F /* WMSTileOverlay.swift */; };
 		2523367F27C3EB3900C2111A /* RainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2523367E27C3EB3900C2111A /* RainView.swift */; };
+		252FC3B42ECE830300981FF3 /* RadarColorMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 252FC3B32ECE830200981FF3 /* RadarColorMapping.swift */; };
 		2533940A27C43F810087C220 /* AlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2533940927C43F810087C220 /* AlertView.swift */; };
 		2536438126DACCB800C8A952 /* LegalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2536438026DACCB800C8A952 /* LegalView.swift */; };
 		253BA17F2B093CE30070BD5E /* DataModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE226CACF7D00D90D6B /* DataModels.xcdatamodeld */; };
@@ -242,6 +243,7 @@
 		251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAtmosphericAdapter.swift; sourceTree = "<group>"; };
 		251FE39027C5674400D26F0F /* WMSTileOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WMSTileOverlay.swift; sourceTree = "<group>"; };
 		2523367E27C3EB3900C2111A /* RainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainView.swift; sourceTree = "<group>"; };
+		252FC3B32ECE830200981FF3 /* RadarColorMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarColorMapping.swift; sourceTree = "<group>"; };
 		2533940927C43F810087C220 /* AlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertView.swift; sourceTree = "<group>"; };
 		2536438026DACCB800C8A952 /* LegalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegalView.swift; sourceTree = "<group>"; };
 		253BA18B2B0941670070BD5E /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
@@ -599,6 +601,7 @@
 				25DA7A1927A420970062E02B /* MapDetailView.swift */,
 				251FE39027C5674400D26F0F /* WMSTileOverlay.swift */,
 				259EDA6B29ABC19F00F94996 /* RainRadarView.swift */,
+				252FC3B32ECE830200981FF3 /* RadarColorMapping.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -960,6 +963,7 @@
 				251BFE7E2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift in Sources */,
 				259187CB2C715B2900611B0F /* PrecipitationChart.swift in Sources */,
 				25ED79B429F1A7DF002E0AAB /* Cloud.swift in Sources */,
+				252FC3B42ECE830300981FF3 /* RadarColorMapping.swift in Sources */,
 				3E61170C2544B2D300B68120 /* DailyView.swift in Sources */,
 				25D72B2727C67016001F43FC /* SettingService.swift in Sources */,
 				25ED79BD29F1A7DF002E0AAB /* SunView.swift in Sources */,

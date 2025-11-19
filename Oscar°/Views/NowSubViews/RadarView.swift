@@ -186,7 +186,7 @@ struct RadarMapView: UIViewRepresentable {
           referenceSystem = "CRS"
         }
 
-        let urlLayers = "layers=dwd:Niederschlagsradar&"
+        let urlLayers = "layers=dwd:RADOLAN-RY&"
         let urlVersion = "version=\(WebMapServiceConstants.version)&"
         let urlReferenceSystem = "\(referenceSystem)=EPSG:\(WebMapServiceConstants.epsg)&"
         let urlWidthAndHeight =
@@ -204,6 +204,7 @@ struct RadarMapView: UIViewRepresentable {
           + urlVersion + urlReferenceSystem + urlWidthAndHeight + urlFormat + urlTransparent
         let overlay = WMSTileOverlay(
           urlArg: urlString, useMercator: useMercator, wmsVersion: WebMapServiceConstants.version)
+        overlay.applyColorTransform = true
         mapView.addOverlay(overlay)
       }
 
