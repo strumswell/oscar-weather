@@ -52,6 +52,14 @@ public class SettingService: ObservableObject {
         }
     }
     
+    var oscarRadarLayer: Bool {
+        get { UserDefaults.standard.bool(forKey: "oscarRadarLayer") }
+        set {
+            objectWillChange.send()
+            UserDefaults.standard.set(newValue, forKey: "oscarRadarLayer")
+        }
+    }
+
     func updateTemperatureUnit(_ unit: String) {
         settings?.temperatureUnit = unit
         save()

@@ -26,29 +26,6 @@
     "%.0f" : {
 
     },
-    "%.0f %" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$.0f %2$"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        }
-      }
-    },
     "%.0f %@" : {
       "localizations" : {
         "de" : {
@@ -121,52 +98,6 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$.1f %2$@ (180m)"
-          }
-        }
-      }
-    },
-    "%.1f km/h" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%.1f km/h"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        }
-      }
-    },
-    "%.1f mm" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%.1f mm"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
           }
         }
       }
@@ -323,29 +254,6 @@
     },
     "0 %@" : {
 
-    },
-    "0 mm/h" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "0 mm/h"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "0 mm/h"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
-          }
-        }
-      }
     },
     "2" : {
       "localizations" : {
@@ -751,6 +659,9 @@
         }
       }
     },
+    "DWD" : {
+
+    },
     "dwd.de" : {
       "localizations" : {
         "en" : {
@@ -812,29 +723,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ayarlar"
-          }
-        }
-      }
-    },
-    "Ende: " : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ende: "
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "End:"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Son:"
           }
         }
       }
@@ -912,23 +800,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Önümüzdeki birkaç gün için yağış beklenmemektedir."
-          }
-        }
-      }
-    },
-    "Für die nächsten Tage wird kein Regen vorhergesagt." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No rain is predicted for the next few days."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Önümüzdeki birkaç gün için yağmur beklenmiyor."
           }
         }
       }
@@ -1030,6 +901,9 @@
 
     },
     "kn" : {
+
+    },
+    "LIVE" : {
 
     },
     "Lizenz" : {
@@ -1353,6 +1227,16 @@
         }
       }
     },
+    "Oscar Radar-Daten werden geladen…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading Oscar radar data…"
+          }
+        }
+      }
+    },
     "Oscar°" : {
       "localizations" : {
         "de" : {
@@ -1420,29 +1304,6 @@
         }
       }
     },
-    "Quelle: Deutscher Wetterdienst" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quelle: Deutscher Wetterdienst"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Source: Deutscher Wetterdienst"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kaynak: Deutscher Wetterdienst"
-          }
-        }
-      }
-    },
     "Radar" : {
       "localizations" : {
         "de" : {
@@ -1464,6 +1325,9 @@
           }
         }
       }
+    },
+    "Radar (DWD)" : {
+
     },
     "RainViewer" : {
 
@@ -1556,22 +1420,11 @@
             "state" : "translated",
             "value" : "Reference Evapotranspiration (ET₀)"
           }
-        }
-      }
-    },
-    "Regen" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rain"
-          }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yağmur"
+            "value" : "Referans Evapotranspirasyon (ET₀)"
           }
         }
       }
@@ -1801,29 +1654,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Diğer Bilgiler"
-          }
-        }
-      }
-    },
-    "Start: " : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start: "
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Begin:"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Başlangıç:"
           }
         }
       }
@@ -2167,23 +1997,6 @@
         }
       }
     },
-    "Windgeschwindidkeit" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wind speed"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rüzgar hızı"
-          }
-        }
-      }
-    },
     "Windgeschwindigkeit" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2197,39 +2010,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rüzgar hızı"
-          }
-        }
-      }
-    },
-    "Windrichtung" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wind direction"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rüzgar yönü"
-          }
-        }
-      }
-    },
-    "Wolken" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clouds"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bulutlar"
           }
         }
       }

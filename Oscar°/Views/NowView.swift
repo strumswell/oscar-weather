@@ -15,11 +15,12 @@ import WidgetKit
 }
 
 struct NowView: View {
-    @ObservedObject var settingsService: SettingService = SettingService()    
+    @ObservedObject var settingsService: SettingService = SettingService()
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
     @State private var isMapSheetPresented = false
     @State private var tapCount = 0
+    @State private var oscarRadarState = OscarRadarState()
 
     private var client = APIClient()
     private let locationService = LocationService.shared
@@ -61,7 +62,12 @@ struct NowView: View {
                                 .sheet(isPresented: $isMapSheetPresented) {
                                     MapDetailView(settingsService: settingsService)
                                 }
-                            RadarView(settingsService: settingsService, showLayerSettings: false, userActionAllowed: false)
+                            RadarView(
+                                settingsService: settingsService,
+                                showLayerSettings: false,
+                                userActionAllowed: false,
+                                oscarRadarState: oscarRadarState
+                            )
                                 .frame(height: 350)
                                 .cornerRadius(10)
                                 .padding()
@@ -73,6 +79,18 @@ struct NowView: View {
                                 }
                                 .sheet(isPresented: $isMapSheetPresented) {
                                     MapDetailView(settingsService: settingsService)
+                                }
+                                .task {
+                                    if settingsService.oscarRadarLayer {
+                                        await oscarRadarState.loadCurrentFrame()
+                                    }
+                                }
+                                .onChange(of: settingsService.oscarRadarLayer) { _, isEnabled in
+                                    if isEnabled == true && oscarRadarState.frames.isEmpty {
+                                        Task { await oscarRadarState.loadCurrentFrame() }
+                                    } else if isEnabled == false {
+                                        oscarRadarState.pause()
+                                    }
                                 }
                         }
 
@@ -113,10 +131,22 @@ struct NowView: View {
         }
         .background(.thinMaterial)
         .edgesIgnoringSafeArea(.all)
+        .task {
+            // Periodically refresh the current radar frame so the map stays up to date
+            // as new DWD scans become available (aligns with the 10-min image cache).
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(5 * 60))
+                guard !Task.isCancelled, settingsService.oscarRadarLayer else { continue }
+                await oscarRadarState.loadCurrentFrame()
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             Task {
                 await self.updateState()
                 WidgetCenter.shared.reloadAllTimelines()
+                if settingsService.oscarRadarLayer {
+                    await oscarRadarState.loadCurrentFrame()
+                }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("ChangedLocation"), object: nil)) { _ in

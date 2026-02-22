@@ -24,6 +24,8 @@
 		2516BD562BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
 		2516BD572BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
 		2516BD582BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
+		2519538F2F124B27003D5302 /* RadarImageOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2519538D2F124B27003D5302 /* RadarImageOverlay.swift */; };
+		251953902F124B27003D5302 /* RadarTimelineControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2519538E2F124B27003D5302 /* RadarTimelineControls.swift */; };
 		251BFE7D2E48DC7600D35589 /* AtmosphericRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFE7A2E48DC7600D35589 /* AtmosphericRenderer.swift */; };
 		251BFE7E2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */; };
 		251BFEBE2E48F33800D35589 /* AtmosphericRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFE7A2E48DC7600D35589 /* AtmosphericRenderer.swift */; };
@@ -90,6 +92,9 @@
 		257EB3712BD8328A00E46468 /* HapticsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 257EB3702BD8328A00E46468 /* HapticsExtension.swift */; };
 		257EB3752BD832BC00E46468 /* DataModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE226CACF7D00D90D6B /* DataModels.xcdatamodeld */; };
 		257EB3792BD832C000E46468 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE526CACFC900D90D6B /* PersistenceController.swift */; };
+		2589E7CE2F4B55CD005BB633 /* OscarRadarState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2589E7CD2F4B55CD005BB633 /* OscarRadarState.swift */; };
+		2589E7CF2F4B55CD005BB633 /* OscarRadarState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2589E7CD2F4B55CD005BB633 /* OscarRadarState.swift */; };
+		2589E7D02F4B55CD005BB633 /* OscarRadarState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2589E7CD2F4B55CD005BB633 /* OscarRadarState.swift */; };
 		258EE2ED2B5EF4E900AE942B /* RetryClientMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */; };
 		258EE2F62B5EF58100AE942B /* RetryClientMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */; };
 		259187C92C715AEA00611B0F /* TemperatureChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259187C82C715AEA00611B0F /* TemperatureChart.swift */; };
@@ -239,6 +244,8 @@
 		2512E9662C399B7D004670E4 /* UnitSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitSettings.swift; sourceTree = "<group>"; };
 		251440882D86E0E400E48037 /* RainViewerAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainViewerAttribution.swift; sourceTree = "<group>"; };
 		2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		2519538D2F124B27003D5302 /* RadarImageOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarImageOverlay.swift; sourceTree = "<group>"; };
+		2519538E2F124B27003D5302 /* RadarTimelineControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarTimelineControls.swift; sourceTree = "<group>"; };
 		251BFE7A2E48DC7600D35589 /* AtmosphericRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphericRenderer.swift; sourceTree = "<group>"; };
 		251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAtmosphericAdapter.swift; sourceTree = "<group>"; };
 		251FE39027C5674400D26F0F /* WMSTileOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WMSTileOverlay.swift; sourceTree = "<group>"; };
@@ -269,6 +276,7 @@
 		257D07DC2AC355EC005EBD16 /* openapi.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = openapi.yml; sourceTree = "<group>"; };
 		257D07DE2AC3561C005EBD16 /* openapi-generator-config.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "openapi-generator-config.yml"; sourceTree = "<group>"; };
 		257EB3702BD8328A00E46468 /* HapticsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsExtension.swift; sourceTree = "<group>"; };
+		2589E7CD2F4B55CD005BB633 /* OscarRadarState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OscarRadarState.swift; sourceTree = "<group>"; };
 		258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetryClientMiddleware.swift; sourceTree = "<group>"; };
 		259187C82C715AEA00611B0F /* TemperatureChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureChart.swift; sourceTree = "<group>"; };
 		259187CA2C715B2900611B0F /* PrecipitationChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecipitationChart.swift; sourceTree = "<group>"; };
@@ -552,6 +560,7 @@
 				258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */,
 				2598E9352C7291D2004A9D5E /* CacheMiddleware.swift */,
 				2502F6F62D2F3D2600636DC9 /* WeatherObservable.swift */,
+				2589E7CD2F4B55CD005BB633 /* OscarRadarState.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -602,6 +611,8 @@
 				251FE39027C5674400D26F0F /* WMSTileOverlay.swift */,
 				259EDA6B29ABC19F00F94996 /* RainRadarView.swift */,
 				252FC3B32ECE830200981FF3 /* RadarColorMapping.swift */,
+				2519538D2F124B27003D5302 /* RadarImageOverlay.swift */,
+				2519538E2F124B27003D5302 /* RadarTimelineControls.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -924,6 +935,7 @@
 				257EB3692BD8322A00E46468 /* RetryClientMiddleware.swift in Sources */,
 				25429BFC29E5FAE600D5979F /* OscarWidgetsBundle.swift in Sources */,
 				257EB35F2BD831CB00E46468 /* LocationService.swift in Sources */,
+				2589E7CE2F4B55CD005BB633 /* OscarRadarState.swift in Sources */,
 				257EB3752BD832BC00E46468 /* DataModels.xcdatamodeld in Sources */,
 				25429BEB29E5F9B000D5979F /* Oscar_WatchWidget.swift in Sources */,
 				257EB3682BD8321B00E46468 /* GlobalViewExtensions.swift in Sources */,
@@ -955,6 +967,7 @@
 				250163DA2B093C0B00EEF882 /* CityService.swift in Sources */,
 				253BA18C2B0941670070BD5E /* LocationService.swift in Sources */,
 				259187D12C715B9600611B0F /* PressureChart.swift in Sources */,
+				2589E7D02F4B55CD005BB633 /* OscarRadarState.swift in Sources */,
 				2512E94D2C398060004670E4 /* TomorrowAttribution.swift in Sources */,
 				258EE2ED2B5EF4E900AE942B /* RetryClientMiddleware.swift in Sources */,
 				25ED79BE29F1A7DF002E0AAB /* Array-GradientStop.swift in Sources */,
@@ -996,6 +1009,8 @@
 				259704E52757D7E800DFCA53 /* AlertDetailView.swift in Sources */,
 				251440892D86E0E400E48037 /* RainViewerAttribution.swift in Sources */,
 				2598E9362C7291D2004A9D5E /* CacheMiddleware.swift in Sources */,
+				2519538F2F124B27003D5302 /* RadarImageOverlay.swift in Sources */,
+				251953902F124B27003D5302 /* RadarTimelineControls.swift in Sources */,
 				25AD38E72BE716E100A8F305 /* MemoryView.swift in Sources */,
 				259187CF2C715B7500611B0F /* WindChart.swift in Sources */,
 				25ED4A4727A2F5C60050C4A9 /* HeadView.swift in Sources */,
@@ -1048,6 +1063,7 @@
 				253F709C2B5333BE0075D093 /* APIResultExtensions.swift in Sources */,
 				25CB17EB2B4704E1001D973A /* LocationManager.swift in Sources */,
 				2546516A29E4935600D8C13D /* LockscreenProvider.swift in Sources */,
+				2589E7CF2F4B55CD005BB633 /* OscarRadarState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1347,7 +1363,7 @@
 				INFOPLIST_FILE = "Oscar°/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1377,7 +1393,7 @@
 				INFOPLIST_FILE = "Oscar°/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
