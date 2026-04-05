@@ -92,7 +92,6 @@
 		257EB3712BD8328A00E46468 /* HapticsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 257EB3702BD8328A00E46468 /* HapticsExtension.swift */; };
 		257EB3752BD832BC00E46468 /* DataModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE226CACF7D00D90D6B /* DataModels.xcdatamodeld */; };
 		257EB3792BD832C000E46468 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE526CACFC900D90D6B /* PersistenceController.swift */; };
-		2589E7CE2F4B55CD005BB633 /* OscarRadarState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2589E7CD2F4B55CD005BB633 /* OscarRadarState.swift */; };
 		2589E7CF2F4B55CD005BB633 /* OscarRadarState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2589E7CD2F4B55CD005BB633 /* OscarRadarState.swift */; };
 		2589E7D02F4B55CD005BB633 /* OscarRadarState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2589E7CD2F4B55CD005BB633 /* OscarRadarState.swift */; };
 		258EE2ED2B5EF4E900AE942B /* RetryClientMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */; };
@@ -935,7 +934,6 @@
 				257EB3692BD8322A00E46468 /* RetryClientMiddleware.swift in Sources */,
 				25429BFC29E5FAE600D5979F /* OscarWidgetsBundle.swift in Sources */,
 				257EB35F2BD831CB00E46468 /* LocationService.swift in Sources */,
-				2589E7CE2F4B55CD005BB633 /* OscarRadarState.swift in Sources */,
 				257EB3752BD832BC00E46468 /* DataModels.xcdatamodeld in Sources */,
 				25429BEB29E5F9B000D5979F /* Oscar_WatchWidget.swift in Sources */,
 				257EB3682BD8321B00E46468 /* GlobalViewExtensions.swift in Sources */,

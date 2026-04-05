@@ -659,7 +659,7 @@
         }
       }
     },
-    "DWD" : {
+    "DWD Radar" : {
 
     },
     "dwd.de" : {
@@ -872,6 +872,9 @@
       }
     },
     "inch" : {
+
+    },
+    "Karte" : {
 
     },
     "Kein Regen" : {
@@ -1326,9 +1329,6 @@
         }
       }
     },
-    "Radar (DWD)" : {
-
-    },
     "RainViewer" : {
 
     },
@@ -1430,6 +1430,7 @@
       }
     },
     "Regen (DWD)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1452,6 +1453,7 @@
       }
     },
     "Regen (Global)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1474,6 +1476,7 @@
       }
     },
     "Regenradar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1980,6 +1983,9 @@
           }
         }
       }
+    },
+    "Wetterdaten werden geladen…" : {
+
     },
     "Wind" : {
       "localizations" : {

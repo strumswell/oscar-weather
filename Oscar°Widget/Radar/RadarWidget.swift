@@ -33,7 +33,7 @@
 
                 VStack {
                     HStack {
-                        Text(dateFormatter.string(from: entry.date))
+                        Text(dateFormatter.string(from: entry.frameDate))
                             .font(.footnote)
                             .foregroundColor(.white)
                             .padding(.horizontal, 5)
@@ -46,16 +46,6 @@
                     Spacer()
                 }
                 .padding(15)
-
-                Circle()
-                    .fill(.blue)
-                    .widgetAccentable()
-                    .frame(width: 11, height: 11)
-                    .overlay(
-                        Circle()
-                            .stroke(.white.opacity(0.8), lineWidth: 2)
-                    )
-                    .shadow(radius: 3)
             }
             .containerBackground(.clear, for: .widget)
         }
@@ -77,7 +67,7 @@
     
     struct RadarWidget_Previews: PreviewProvider {
         static var previews: some View {
-            RadarWidgetEntryView(entry: RadarEntry(date: Date(), image: UIImage(named: "rain")!))
+            RadarWidgetEntryView(entry: RadarEntry(date: Date(), frameDate: Date(), image: UIImage(named: "rain")!))
                 .previewContext(WidgetPreviewContext(family: .systemSmall))
         }
     }

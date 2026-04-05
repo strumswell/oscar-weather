@@ -21,6 +21,7 @@ struct NowView: View {
     @State private var isMapSheetPresented = false
     @State private var tapCount = 0
     @State private var oscarRadarState = OscarRadarState()
+    @State private var weatherTileState = WeatherTileState()
 
     private var client = APIClient()
     private let locationService = LocationService.shared
@@ -50,7 +51,7 @@ struct NowView: View {
                             .opacity(weather.isLoading ? 0.3 : 1.0)
                             .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
                         VStack(alignment: .leading) {
-                            Text("Radar")
+                            Text("Karte")
                                 .font(.title3)
                                 .bold()
                                 .foregroundColor(Color(UIColor.label))
@@ -66,7 +67,8 @@ struct NowView: View {
                                 settingsService: settingsService,
                                 showLayerSettings: false,
                                 userActionAllowed: false,
-                                oscarRadarState: oscarRadarState
+                                oscarRadarState: oscarRadarState,
+                                weatherTileState: weatherTileState
                             )
                                 .frame(height: 350)
                                 .cornerRadius(10)
@@ -83,13 +85,26 @@ struct NowView: View {
                                 .task {
                                     if settingsService.oscarRadarLayer {
                                         await oscarRadarState.loadCurrentFrame()
+                                    } else if let layer = settingsService.activeTileLayer {
+                                        await weatherTileState.switchLayer(layer)
                                     }
                                 }
                                 .onChange(of: settingsService.oscarRadarLayer) { _, isEnabled in
-                                    if isEnabled == true && oscarRadarState.frames.isEmpty {
-                                        Task { await oscarRadarState.loadCurrentFrame() }
-                                    } else if isEnabled == false {
+                                    if isEnabled {
+                                        weatherTileState.pause()
+                                        if oscarRadarState.frames.isEmpty {
+                                            Task { await oscarRadarState.loadCurrentFrame() }
+                                        }
+                                    } else {
                                         oscarRadarState.pause()
+                                    }
+                                }
+                                .onChange(of: settingsService.activeTileLayer) { _, newLayer in
+                                    if let layer = newLayer {
+                                        oscarRadarState.pause()
+                                        Task { await weatherTileState.switchLayer(layer) }
+                                    } else {
+                                        weatherTileState.pause()
                                     }
                                 }
                         }
@@ -132,31 +147,39 @@ struct NowView: View {
         .background(.thinMaterial)
         .edgesIgnoringSafeArea(.all)
         .task {
-            // Periodically refresh the current radar frame so the map stays up to date
-            // as new DWD scans become available (aligns with the 10-min image cache).
+            // Periodically refresh radar / tile metadata so the map stays current.
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(5 * 60))
-                guard !Task.isCancelled, settingsService.oscarRadarLayer else { continue }
-                await oscarRadarState.loadCurrentFrame()
+                guard !Task.isCancelled else { break }
+                if settingsService.oscarRadarLayer {
+                    await oscarRadarState.loadCurrentFrame()
+                } else if settingsService.activeTileLayer != nil {
+                    await weatherTileState.loadFrames(forceRefresh: true)
+                }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             Task {
                 await self.updateState()
+                await RainAlertManager.shared.syncLocationUpdate()
                 WidgetCenter.shared.reloadAllTimelines()
                 if settingsService.oscarRadarLayer {
                     await oscarRadarState.loadCurrentFrame()
+                } else if settingsService.activeTileLayer != nil {
+                    await weatherTileState.loadFrames(forceRefresh: true)
                 }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("ChangedLocation"), object: nil)) { _ in
             Task {
                 await self.updateState()
+                await RainAlertManager.shared.syncLocationUpdate()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("CityToggle"), object: nil)) { _ in
             Task {
                 await self.updateState()
+                await RainAlertManager.shared.syncLocationUpdate()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("UnitChanged"), object: nil)) { _ in

@@ -60,6 +60,16 @@ public class SettingService: ObservableObject {
         }
     }
 
+    /// Raw storage for the active tile layer key (ICON-D2 or GFS).
+    /// Use the `activeTileLayer: WeatherTileLayer?` extension accessor on iOS.
+    var activeTileLayerRaw: String? {
+        get { UserDefaults.standard.string(forKey: "activeTileLayer") }
+        set {
+            objectWillChange.send()
+            UserDefaults.standard.set(newValue, forKey: "activeTileLayer")
+        }
+    }
+
     func updateTemperatureUnit(_ unit: String) {
         settings?.temperatureUnit = unit
         save()
