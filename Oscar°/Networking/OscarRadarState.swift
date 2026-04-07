@@ -418,6 +418,28 @@ struct WeatherTileFrame: Identifiable {
     let validTime: String
 }
 
+private actor WeatherTileMetadataCache {
+    private var cachedFrames: [String: [WeatherTileFrame]] = [:]
+    private var lastFetchTime: [String: Date] = [:]
+    private let cacheDuration: TimeInterval = 60 * 60 // 1 h
+
+    func frames(for endpoint: String, forceRefresh: Bool) -> [WeatherTileFrame]? {
+        guard !forceRefresh,
+              let last = lastFetchTime[endpoint],
+              Date().timeIntervalSince(last) < cacheDuration,
+              let cached = cachedFrames[endpoint],
+              !cached.isEmpty else {
+            return nil
+        }
+        return cached
+    }
+
+    func store(_ frames: [WeatherTileFrame], for endpoint: String) {
+        cachedFrames[endpoint] = frames
+        lastFetchTime[endpoint] = Date()
+    }
+}
+
 // MARK: WeatherTileState
 
 @Observable
@@ -434,10 +456,7 @@ final class WeatherTileState {
     private var playbackTimer: Timer?
     private var preloadTask: Task<Void, Never>?
 
-    // Shared metadata cache keyed by framesEndpoint
-    private static var cachedFrames: [String: [WeatherTileFrame]] = [:]
-    private static var lastFetchTime: [String: Date] = [:]
-    private static let metaCacheDuration: TimeInterval = 60 * 60 // 1 h
+    private static let metadataCache = WeatherTileMetadataCache()
 
     // MARK: - Derived
 
@@ -599,10 +618,7 @@ final class WeatherTileState {
     // MARK: - Fetch
 
     private static func fetchFrames(endpoint: String, forceRefresh: Bool) async throws -> [WeatherTileFrame] {
-        if !forceRefresh,
-           let last = lastFetchTime[endpoint],
-           Date().timeIntervalSince(last) < metaCacheDuration,
-           let cached = cachedFrames[endpoint], !cached.isEmpty {
+        if let cached = await metadataCache.frames(for: endpoint, forceRefresh: forceRefresh) {
             return cached
         }
         guard let url = URL(string: "\(baseURL)/\(endpoint)") else { throw URLError(.badURL) }
@@ -610,8 +626,7 @@ final class WeatherTileState {
         let (data, _) = try await URLSession.shared.data(for: req)
         let decoded = try JSONDecoder().decode(TileFramesResponse.self, from: data)
         let result = decoded.frames.map { WeatherTileFrame(key: $0.key, validTime: $0.validTime) }
-        cachedFrames[endpoint] = result
-        lastFetchTime[endpoint] = Date()
+        await metadataCache.store(result, for: endpoint)
         return result
     }
 

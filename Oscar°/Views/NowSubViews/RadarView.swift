@@ -181,6 +181,7 @@ struct RadarView: View {
     private func activateDWDRadar() {
         settingsService.activeTileLayer = nil
         settingsService.settings?.rainviewerLayer = false
+        settingsService.settings?.dwdLayer = true
         settingsService.save()
         settingsService.oscarRadarLayer = true
         weatherTileState?.pause()
@@ -189,6 +190,7 @@ struct RadarView: View {
     private func activateTileLayer(_ layer: WeatherTileLayer) {
         settingsService.oscarRadarLayer = false
         settingsService.settings?.rainviewerLayer = false
+        settingsService.settings?.dwdLayer = false
         settingsService.save()
         oscarRadarState?.pause()
         settingsService.activeTileLayer = layer
@@ -220,6 +222,9 @@ struct RadarMapView: UIViewRepresentable {
         "\(oscarRadarArrowHost)/radar/vector-tiles/\(frameId)/{z}/{x}/{y}.webp"
     }
 
+    private final class RainViewerRadarTileOverlay: MKTileOverlay {}
+    private final class RainViewerInfraredTileOverlay: MKTileOverlay {}
+    private final class LegacyDWDTileOverlay: WMSTileOverlay {}
     private final class OscarRadarArrowTileOverlay: MKTileOverlay {}
 
     class Coordinator: NSObject, MKMapViewDelegate {
@@ -228,6 +233,10 @@ struct RadarMapView: UIViewRepresentable {
         var lastRenderedFrameIndex: Int = -1
         /// Combines tilePath + frameKey — detects both frame advances and layer switches.
         var lastTileOverlayID: String? = nil
+        var rainViewerRadarOverlayID: String? = nil
+        var rainViewerInfraredOverlayID: String? = nil
+        var isLoadingRainViewerRadar = false
+        var isLoadingRainViewerInfrared = false
 
         init(_ parent: RadarMapView) {
             self.parent = parent
@@ -290,10 +299,16 @@ struct RadarMapView: UIViewRepresentable {
         let oscarOverlays      = mapView.overlays.filter { $0 is OscarRadarImageOverlay }
         let oscarArrowOverlays = mapView.overlays.filter { $0 is OscarRadarArrowTileOverlay }
         let tileOverlays       = mapView.overlays.filter { $0 is WeatherTileOverlay }
+        let rainViewerRadarOverlays = mapView.overlays.filter { $0 is RainViewerRadarTileOverlay }
+        let rainViewerInfraredOverlays = mapView.overlays.filter { $0 is RainViewerInfraredTileOverlay }
+        let legacyDWDOverlays = mapView.overlays.filter { $0 is LegacyDWDTileOverlay }
         let otherOverlays      = mapView.overlays.filter {
             !($0 is OscarRadarImageOverlay)
                 && !($0 is OscarRadarArrowTileOverlay)
                 && !($0 is WeatherTileOverlay)
+                && !($0 is RainViewerRadarTileOverlay)
+                && !($0 is RainViewerInfraredTileOverlay)
+                && !($0 is LegacyDWDTileOverlay)
         }
 
         mapView.removeAnnotations(mapView.annotations)
@@ -313,68 +328,101 @@ struct RadarMapView: UIViewRepresentable {
 
         if let settings = settingsService.settings {
             if settings.rainviewerLayer {
-                Task {
-                    do {
-                        let rainViewerData = try await APIClient().getRainViewerMaps()
-                        if let mostRecentFrame = rainViewerData.radar?.past?.last {
-                            let host = rainViewerData.host ?? "https://tilecache.rainviewer.com"
-                            let path = mostRecentFrame.path ?? ""
-                            let urlTemplate = "\(host)\(path)/256/{z}/{x}/{y}/4/1_1.png"
-                            DispatchQueue.main.async {
-                                let overlay = MKTileOverlay(urlTemplate: urlTemplate)
-                                overlay.canReplaceMapContent = false
-                                mapView.addOverlay(overlay)
+                if rainViewerRadarOverlays.isEmpty && !context.coordinator.isLoadingRainViewerRadar {
+                    context.coordinator.isLoadingRainViewerRadar = true
+                    Task {
+                        do {
+                            let rainViewerData = try await APIClient().getRainViewerMaps()
+                            if let mostRecentFrame = rainViewerData.radar?.past?.last {
+                                let host = rainViewerData.host ?? "https://tilecache.rainviewer.com"
+                                let path = mostRecentFrame.path ?? ""
+                                let urlTemplate = "\(host)\(path)/256/{z}/{x}/{y}/4/1_1.png"
+                                DispatchQueue.main.async {
+                                    context.coordinator.isLoadingRainViewerRadar = false
+                                    guard context.coordinator.rainViewerRadarOverlayID != urlTemplate else { return }
+                                    mapView.removeOverlays(mapView.overlays.filter { $0 is RainViewerRadarTileOverlay })
+                                    context.coordinator.rainViewerRadarOverlayID = urlTemplate
+                                    let overlay = RainViewerRadarTileOverlay(urlTemplate: urlTemplate)
+                                    overlay.canReplaceMapContent = false
+                                    mapView.addOverlay(overlay)
+                                }
+                            } else {
+                                DispatchQueue.main.async {
+                                    context.coordinator.isLoadingRainViewerRadar = false
+                                }
                             }
+                        } catch {
+                            DispatchQueue.main.async {
+                                context.coordinator.isLoadingRainViewerRadar = false
+                            }
+                            print("Error fetching RainViewer data: \(error)")
                         }
-                    } catch {
-                        print("Error fetching RainViewer data: \(error)")
                     }
                 }
+            } else if !rainViewerRadarOverlays.isEmpty {
+                mapView.removeOverlays(rainViewerRadarOverlays)
+                context.coordinator.rainViewerRadarOverlayID = nil
             }
 
             if settings.dwdLayer {
-                var referenceSystem = ""
-                if WebMapServiceConstants.version == "1.1.1" {
-                    referenceSystem = "SRS"
-                } else {
-                    referenceSystem = "CRS"
+                if legacyDWDOverlays.isEmpty {
+                    let referenceSystem = WebMapServiceConstants.version == "1.1.1" ? "SRS" : "CRS"
+                    let urlLayers = "layers=dwd:RADOLAN-RY&"
+                    let urlVersion = "version=\(WebMapServiceConstants.version)&"
+                    let urlReferenceSystem = "\(referenceSystem)=EPSG:\(WebMapServiceConstants.epsg)&"
+                    let urlWidthAndHeight =
+                        "width=\(WebMapServiceConstants.tileSize)&height=\(WebMapServiceConstants.tileSize)&"
+                    let urlFormat = "format=\(WebMapServiceConstants.format)&format_options=MODE:refresh&"
+                    let urlTransparent = "transparent=\(WebMapServiceConstants.transparent)&"
+                    let useMercator = WebMapServiceConstants.epsg == "900913"
+                    let urlString =
+                        WebMapServiceConstants.baseUrl + "?styles=&service=WMS&request=GetMap&"
+                        + urlLayers + urlVersion + urlReferenceSystem + urlWidthAndHeight
+                        + urlFormat + urlTransparent
+                    let overlay = LegacyDWDTileOverlay(
+                        urlArg: urlString, useMercator: useMercator, wmsVersion: WebMapServiceConstants.version)
+                    overlay.applyColorTransform = true
+                    mapView.addOverlay(overlay)
                 }
-                let urlLayers = "layers=dwd:RADOLAN-RY&"
-                let urlVersion = "version=\(WebMapServiceConstants.version)&"
-                let urlReferenceSystem = "\(referenceSystem)=EPSG:\(WebMapServiceConstants.epsg)&"
-                let urlWidthAndHeight =
-                    "width=\(WebMapServiceConstants.tileSize)&height=\(WebMapServiceConstants.tileSize)&"
-                let urlFormat = "format=\(WebMapServiceConstants.format)&format_options=MODE:refresh&"
-                let urlTransparent = "transparent=\(WebMapServiceConstants.transparent)&"
-                var useMercator = WebMapServiceConstants.epsg == "900913"
-                let urlString =
-                    WebMapServiceConstants.baseUrl + "?styles=&service=WMS&request=GetMap&"
-                    + urlLayers + urlVersion + urlReferenceSystem + urlWidthAndHeight
-                    + urlFormat + urlTransparent
-                let overlay = WMSTileOverlay(
-                    urlArg: urlString, useMercator: useMercator, wmsVersion: WebMapServiceConstants.version)
-                overlay.applyColorTransform = true
-                mapView.addOverlay(overlay)
+            } else if !legacyDWDOverlays.isEmpty {
+                mapView.removeOverlays(legacyDWDOverlays)
             }
 
             if settings.infrarotLayer {
-                Task {
-                    do {
-                        let rainViewerData = try await APIClient().getRainViewerMaps()
-                        if let mostRecentFrame = rainViewerData.satellite?.infrared?.last {
-                            let host = rainViewerData.host ?? "https://tilecache.rainviewer.com"
-                            let path = mostRecentFrame.path ?? ""
-                            let urlTemplate = "\(host)\(path)/256/{z}/{x}/{y}/0/0_0.png"
-                            DispatchQueue.main.async {
-                                let overlay = MKTileOverlay(urlTemplate: urlTemplate)
-                                overlay.canReplaceMapContent = false
-                                mapView.addOverlay(overlay)
+                if rainViewerInfraredOverlays.isEmpty && !context.coordinator.isLoadingRainViewerInfrared {
+                    context.coordinator.isLoadingRainViewerInfrared = true
+                    Task {
+                        do {
+                            let rainViewerData = try await APIClient().getRainViewerMaps()
+                            if let mostRecentFrame = rainViewerData.satellite?.infrared?.last {
+                                let host = rainViewerData.host ?? "https://tilecache.rainviewer.com"
+                                let path = mostRecentFrame.path ?? ""
+                                let urlTemplate = "\(host)\(path)/256/{z}/{x}/{y}/0/0_0.png"
+                                DispatchQueue.main.async {
+                                    context.coordinator.isLoadingRainViewerInfrared = false
+                                    guard context.coordinator.rainViewerInfraredOverlayID != urlTemplate else { return }
+                                    mapView.removeOverlays(mapView.overlays.filter { $0 is RainViewerInfraredTileOverlay })
+                                    context.coordinator.rainViewerInfraredOverlayID = urlTemplate
+                                    let overlay = RainViewerInfraredTileOverlay(urlTemplate: urlTemplate)
+                                    overlay.canReplaceMapContent = false
+                                    mapView.addOverlay(overlay)
+                                }
+                            } else {
+                                DispatchQueue.main.async {
+                                    context.coordinator.isLoadingRainViewerInfrared = false
+                                }
                             }
+                        } catch {
+                            DispatchQueue.main.async {
+                                context.coordinator.isLoadingRainViewerInfrared = false
+                            }
+                            print("Error fetching RainViewer data: \(error)")
                         }
-                    } catch {
-                        print("Error fetching RainViewer data: \(error)")
                     }
                 }
+            } else if !rainViewerInfraredOverlays.isEmpty {
+                mapView.removeOverlays(rainViewerInfraredOverlays)
+                context.coordinator.rainViewerInfraredOverlayID = nil
             }
 
             // ── Oscar DWD radar (animated image overlay) ──────────────────
