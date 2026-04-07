@@ -45,7 +45,6 @@ struct WeatherApp: App {
         SentrySDK.start { options in
             options.dsn = "https://f6b7fe82cd8cd8bb11dc0dc38db42255@o4507143648772096.ingest.de.sentry.io/4507143650148432"
             options.debug = false
-            options.enableTracing = true
             options.tracesSampleRate = 0.5
 
             options.attachScreenshot = true
@@ -53,7 +52,6 @@ struct WeatherApp: App {
             options.enableMetricKit = true
             options.enableTimeToFullDisplayTracing = true
             options.swiftAsyncStacktraces = true
-            options.enableAppLaunchProfiling = true
         }
     }
     
@@ -210,6 +208,7 @@ final class RainAlertManager: NSObject, ObservableObject {
         
         locationService.update()
         let currentLocation = await locationService.getLocation()
+        let outboundCoordinates = LocationService.outboundCoordinate(currentLocation.coordinates)
         let cityName = currentLocation.name.isEmpty ? "Current Location" : currentLocation.name
         
         let languageCode: String
@@ -222,8 +221,8 @@ final class RainAlertManager: NSObject, ObservableObject {
         
         let body: [String: Any] = [
             "deviceToken": token,
-            "locationLat": currentLocation.coordinates.latitude,
-            "locationLon": currentLocation.coordinates.longitude,
+            "locationLat": outboundCoordinates.latitude,
+            "locationLon": outboundCoordinates.longitude,
             "locationName": cityName,
             "timezone": TimeZone.current.identifier,
             "language": language
@@ -233,8 +232,8 @@ final class RainAlertManager: NSObject, ObservableObject {
             await register(body: body)
         } else {
             await patchSettings([
-                "locationLat": currentLocation.coordinates.latitude,
-                "locationLon": currentLocation.coordinates.longitude,
+                "locationLat": outboundCoordinates.latitude,
+                "locationLon": outboundCoordinates.longitude,
                 "locationName": cityName,
                 "timezone": TimeZone.current.identifier,
                 "language": language,
@@ -249,6 +248,7 @@ final class RainAlertManager: NSObject, ObservableObject {
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.addAPIContactIdentity()
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = httpBody
         
@@ -276,6 +276,7 @@ final class RainAlertManager: NSObject, ObservableObject {
         
         var request = URLRequest(url: url)
         request.httpMethod = "PATCH"
+        request.addAPIContactIdentity()
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.httpBody = httpBody

@@ -142,6 +142,7 @@ struct RadarProvider: TimelineProvider {
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.timeoutInterval = 20
+        request.addAPIContactIdentity()
 
         guard let (data, _) = try? await URLSession.shared.data(for: request),
               let response = try? JSONDecoder().decode(OscarFramesResponse.self, from: data),
@@ -279,6 +280,7 @@ struct RadarProvider: TimelineProvider {
             var request = URLRequest(url: spec.url)
             request.cachePolicy = .reloadIgnoringLocalCacheData
             request.timeoutInterval = 20
+            request.addAPIContactIdentity()
 
             guard let (data, _) = try? await URLSession.shared.data(for: request),
                   let image = UIImage(data: data) else {

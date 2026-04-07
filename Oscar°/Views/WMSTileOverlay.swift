@@ -170,6 +170,8 @@ public class WMSTileOverlay : MKTileOverlay {
         } else {
             let request = NSMutableURLRequest(url: url1)
             request.httpMethod = "GET"
+            request.setValue(APIContactIdentity.userAgent, forHTTPHeaderField: "User-Agent")
+            request.setValue(APIContactIdentity.contactEmail, forHTTPHeaderField: "From")
 
             let session = URLSession.shared
             session.dataTask(with: request as URLRequest, completionHandler: {(data, response, error) in

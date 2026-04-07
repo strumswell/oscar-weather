@@ -12,12 +12,11 @@ struct DWDAttribution: View {
         NavigationView {
             List {
                 Section(header: Text("Über")) {
-                    Text("Der Deutsche Wetterdienst (DWD) stellt über deren GeoServer den Radar-Layer für Zentraleuropa kostenlos bereit. Zudem kommen sämtliche Daten des DWD durch andere Dritt-Services wie Open-Meteo und BrightSky in Oscar zum Einsatz.")
+                    Text("Oscar verwendet Wetter- und Geodaten des Deutschen Wetterdienstes (DWD), unter anderem Radardaten sowie Prognosedaten aus dem ICON-D2-Modell. Datenbasis: Deutscher Wetterdienst. Die Daten werden unter den Open-Data-Nutzungsbedingungen des DWD bereitgestellt.")
                 }
                 Section(header: Text("Webseite")) {
-                    Link(destination: URL(string: "https://www.dwd.de/")!, label: {
-                        Text("dwd.de")
-                    })
+                    Link("dwd.de", destination: URL(string: "https://www.dwd.de/")!)
+                    Link("DWD Open Data", destination: URL(string: "https://opendata.dwd.de/")!)
                 }
             }
         }

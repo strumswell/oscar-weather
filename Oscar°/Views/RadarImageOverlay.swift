@@ -184,7 +184,8 @@ final class WeatherTileOverlay: MKTileOverlay {
         result: @escaping (Data?, Error?) -> Void
     ) {
         let url = self.url(forTilePath: path)
-        let request = URLRequest(url: url)
+        var request = URLRequest(url: url)
+        request.addAPIContactIdentity()
 
         // Fast path: already in cache
         if let cached = URLCache.shared.cachedResponse(for: request), !cached.data.isEmpty {

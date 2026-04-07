@@ -24,7 +24,7 @@
       }
     },
     "%.0f" : {
-
+      "shouldTranslate" : false
     },
     "%.0f %@" : {
       "localizations" : {
@@ -34,10 +34,11 @@
             "value" : "%1$.0f %2$@"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%.0f %%" : {
-
+      "shouldTranslate" : false
     },
     "%.0f%@" : {
       "localizations" : {
@@ -47,10 +48,11 @@
             "value" : "%1$.0f%2$@"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%.1f" : {
-
+      "shouldTranslate" : false
     },
     "%.1f %@" : {
       "localizations" : {
@@ -60,7 +62,8 @@
             "value" : "%1$.1f %2$@"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%.1f %@ (10m)" : {
       "localizations" : {
@@ -70,7 +73,8 @@
             "value" : "%1$.1f %2$@ (10m)"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%.1f %@ (80m)" : {
       "localizations" : {
@@ -80,7 +84,8 @@
             "value" : "%1$.1f %2$@ (80m)"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%.1f %@ (120m)" : {
       "localizations" : {
@@ -90,7 +95,8 @@
             "value" : "%1$.1f %2$@ (120m)"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%.1f %@ (180m)" : {
       "localizations" : {
@@ -100,7 +106,8 @@
             "value" : "%1$.1f %2$@ (180m)"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%.1f mm/h" : {
       "localizations" : {
@@ -113,13 +120,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%.1f mm/h"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%.1f mm/h"
           }
         }
       }
@@ -132,34 +139,35 @@
             "value" : "%1$.1f%2$@"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%.1f° (0cm)" : {
-
+      "shouldTranslate" : false
     },
     "%.1f° (6cm)" : {
-
+      "shouldTranslate" : false
     },
     "%.1f° (18cm)" : {
-
+      "shouldTranslate" : false
     },
     "%.1f° (54cm)" : {
-
+      "shouldTranslate" : false
     },
     "%.2f (0-1cm)" : {
-
+      "shouldTranslate" : false
     },
     "%.2f (1-3cm)" : {
-
+      "shouldTranslate" : false
     },
     "%.2f (3-9cm)" : {
-
+      "shouldTranslate" : false
     },
     "%.2f (9-27cm)" : {
-
+      "shouldTranslate" : false
     },
     "%.2f (27-81cm)" : {
-
+      "shouldTranslate" : false
     },
     "%.2f%@" : {
       "localizations" : {
@@ -169,7 +177,8 @@
             "value" : "%1$.2f%2$@"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%@" : {
       "localizations" : {
@@ -182,13 +191,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%@"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%@"
           }
         }
       }
@@ -202,6 +211,12 @@
           }
         },
         "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
+        },
+        "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ %2$@"
@@ -239,6 +254,12 @@
             "state" : "translated",
             "value" : "°C"
           }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "°C"
+          }
         }
       }
     },
@@ -249,11 +270,17 @@
             "state" : "translated",
             "value" : "°F"
           }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "°F"
+          }
         }
       }
     },
     "0 %@" : {
-
+      "shouldTranslate" : false
     },
     "2" : {
       "localizations" : {
@@ -272,7 +299,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "2"
           }
         }
       }
@@ -294,7 +321,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "2.5"
           }
         }
       }
@@ -316,7 +343,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "3"
           }
         }
       }
@@ -338,7 +365,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "10"
           }
         }
       }
@@ -351,7 +378,8 @@
             "value" : "ACCESS-G - Australian Bureau of Meteorology (BOM)"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "Air" : {
       "localizations" : {
@@ -375,6 +403,29 @@
         }
       }
     },
+    "Aktiviere Regenwarnungen (Beta) für Mitteleuropa, um Mitteilungen bei bevorstehendem Regen zu erhalten. Dein ungefährer Standort wird dazu auf einem Oscar-Server gespeichert." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktiviere Regenwarnungen (Beta) für Mitteleuropa, um Mitteilungen bei bevorstehendem Regen zu erhalten. Dein ungefährer Standort wird dazu auf einem Oscar-Server gespeichert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable rain alerts (Beta) for Central Europe to receive notifications about upcoming rain. Your approximate location will be stored on an Oscar server for this."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yaklaşan yağmur hakkında bildirim almak için Orta Avrupa yağmur uyarılarını (Beta) etkinleştirin. Bunun için yaklaşık konumunuz bir Oscar sunucusunda saklanır."
+          }
+        }
+      }
+    },
     "Aktueller Standort" : {
       "localizations" : {
         "de" : {
@@ -392,7 +443,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Konumum"
+            "value" : "Geçerli Konum"
           }
         }
       }
@@ -450,7 +501,8 @@
             "value" : "ARPEGE & AROME - Météo-France"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "Attribution 4.0 International (CC BY 4.0)" : {
       "localizations" : {
@@ -458,6 +510,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Attribution 4.0 International (CC BY 4.0)"
+          }
+        }
+      },
+      "shouldTranslate" : false
+    },
+    "Benachrichtigungen deaktiviert" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benachrichtigungen deaktiviert"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications Disabled"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirimler devre dışı"
+          }
+        }
+      }
+    },
+    "Benachrichtigungsstatus unbekannt." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benachrichtigungsstatus unbekannt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notification status unknown."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirim durumu bilinmiyor."
           }
         }
       }
@@ -470,7 +569,8 @@
             "value" : "Beta Kullanıcı"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "Bodentemperatur" : {
       "localizations" : {
@@ -483,7 +583,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zemin sıcaklığı"
+            "value" : "Toprak sıcaklığı"
           }
         }
       }
@@ -512,7 +612,8 @@
             "value" : "BrightSky"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "BrightSky ist eine Open-Source-Wetter-API, die offene Wetterdaten vom DWD aufbereiten und für Oscar in Form von Wetterwarnung und Radardaten für Deutschland zur Verfügung stellen. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu BrightSky, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro." : {
       "localizations" : {
@@ -525,7 +626,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BrightSky, DWD'den alınan açık hava durumu verilerini işleyen ve bunları Almanya için hava durumu uyarıları ve radar verileri şeklinde Oscar'ın kullanımına sunan açık kaynaklı bir hava durumu API'sidir. Oscar, BrightSky'a ücretsiz erişimi ticari olmayan bir uygulama olarak kullanıyor, ancak projeyi aylık beş avroluk bir bağışla destekliyor."
+            "value" : "BrightSky, DWD'den alınan açık hava durumu verilerini işleyen ve Almanya için hava durumu uyarıları ile radar verileri olarak Oscar'ın kullanımına sunan açık kaynaklı bir hava durumu API'sidir. Oscar, ticari olmayan bir uygulama olarak BrightSky'ın ücretsiz erişimini kullanır, ancak projeyi aylık beş avroluk bir bağışla destekler."
           }
         }
       }
@@ -538,7 +639,8 @@
             "value" : "brightsky.dev"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "by Philipp Bolte" : {
       "localizations" : {
@@ -557,7 +659,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Philipp Bolte"
+            "value" : "Philipp Bolte tarafından"
           }
         }
       }
@@ -570,7 +672,8 @@
             "value" : "COSMO 2I & 5M - AM ARPAE ARPAP"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "Datenquellen" : {
       "localizations" : {
@@ -617,22 +720,6 @@
         }
       }
     },
-    "Der Deutsche Wetterdienst (DWD) stellt über deren GeoServer den Radar-Layer für Zentraleuropa kostenlos bereit. Zudem kommen sämtliche Daten des DWD durch andere Dritt-Services wie Open-Meteo und BrightSky in Oscar zum Einsatz." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The German Weather Service (DWD) provides the radar layer for Central Europe free of charge via its GeoServer. In addition, all DWD data is used in Oscar by other third-party services such as Open-Meteo and BrightSky."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alman Hava Durumu Servisi (DWD) Orta Avrupa için radar katmanını GeoServer üzerinden ücretsiz olarak sağlamaktadır. Ayrıca, tüm DWD verileri Oscar'da Open-Meteo ve BrightSky gibi diğer üçüncü taraf hizmetleri tarafından kullanılmaktadır."
-          }
-        }
-      }
-    },
     "Deutscher Wetterdienst (DWD)" : {
       "localizations" : {
         "en" : {
@@ -641,7 +728,8 @@
             "value" : "Deutscher Wetterdienst (DWD)"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "Durchschnittlicher Wassergehalt des Bodens als volumetrisches Mischungsverhältnis in verschiedenen Tiefen." : {
       "localizations" : {
@@ -660,17 +748,7 @@
       }
     },
     "DWD Radar" : {
-
-    },
-    "dwd.de" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "dwd.de"
-          }
-        }
-      }
+      "shouldTranslate" : false
     },
     "E_compass" : {
       "extractionState" : "manual",
@@ -727,6 +805,29 @@
         }
       }
     },
+    "Erlaube Mitteilungen in den iOS Einstellungen, um Regenwarnungen zu erhalten." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erlaube Mitteilungen in den iOS Einstellungen, um Regenwarnungen zu erhalten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow notifications in iOS Settings to receive rain alerts."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur uyarılarını almak için iOS Ayarları'nda bildirimlere izin verin."
+          }
+        }
+      }
+    },
     "ET₀ ist die Referenz-Evapotranspiration eines gut bewässerten Grasfeldes und dient zur Schätzung des Bewässerungsbedarfs von Pflanzen." : {
       "localizations" : {
         "en" : {
@@ -761,7 +862,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hazır"
+            "value" : "Bitti"
           }
         }
       }
@@ -828,25 +929,25 @@
       }
     },
     "GEM - Canadian Weather Service" : {
-
+      "shouldTranslate" : false
     },
     "GFS & HRRR - NOAA" : {
-
+      "shouldTranslate" : false
     },
     "GFS GRAPES - China Meteorological Administration (CMA)" : {
-
+      "shouldTranslate" : false
     },
     "HARMONIE - DMI" : {
-
+      "shouldTranslate" : false
     },
     "HARMONIE - KNMI" : {
-
+      "shouldTranslate" : false
     },
     "ICON - Deutscher Wetterdienst (DWD)" : {
-
+      "shouldTranslate" : false
     },
     "IFS & AIFS - ECMWF" : {
-
+      "shouldTranslate" : false
     },
     "Impressum" : {
       "extractionState" : "manual",
@@ -866,16 +967,29 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Baskı"
+            "value" : "Künye"
           }
         }
       }
     },
     "inch" : {
-
+      "shouldTranslate" : false
     },
     "Karte" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Map"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Harita"
+          }
+        }
+      }
     },
     "Kein Regen" : {
       "extractionState" : "manual",
@@ -901,13 +1015,13 @@
       }
     },
     "km/h" : {
-
+      "shouldTranslate" : false
     },
     "kn" : {
-
+      "shouldTranslate" : false
     },
     "LIVE" : {
-
+      "shouldTranslate" : false
     },
     "Lizenz" : {
       "localizations" : {
@@ -920,7 +1034,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ruhsat"
+            "value" : "Lisans"
           }
         }
       }
@@ -942,7 +1056,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Konumum"
+            "value" : "Konum"
           }
         }
       }
@@ -991,13 +1105,13 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hava nemi"
+            "value" : "Nem"
           }
         }
       }
     },
     "m/s" : {
-
+      "shouldTranslate" : false
     },
     "Meine Orte" : {
       "localizations" : {
@@ -1029,22 +1143,46 @@
             "value" : "Üye"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "MET Nordic - MET Norway" : {
-
+      "shouldTranslate" : false
+    },
+    "Mitteilungen sind auf Systemebene deaktiviert." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mitteilungen sind auf Systemebene deaktiviert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications are disabled at the system level."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirimler sistem düzeyinde devre dışı bırakılmış."
+          }
+        }
+      }
     },
     "mm" : {
-
+      "shouldTranslate" : false
     },
     "mm/h" : {
-
+      "shouldTranslate" : false
     },
     "mph" : {
-
+      "shouldTranslate" : false
     },
     "MSM & GSM - JMA" : {
-
+      "shouldTranslate" : false
     },
     "N_compass" : {
       "extractionState" : "manual",
@@ -1104,7 +1242,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yağış miktarı "
+            "value" : "Yağış"
           }
         }
       }
@@ -1131,6 +1269,9 @@
           }
         }
       }
+    },
+    "NOAA Global Forecast System (GFS)" : {
+      "shouldTranslate" : false
     },
     "NW_compass" : {
       "extractionState" : "manual",
@@ -1178,6 +1319,29 @@
         }
       }
     },
+    "OK" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tamam"
+          }
+        }
+      }
+    },
     "Open-Meteo" : {
       "localizations" : {
         "en" : {
@@ -1186,7 +1350,8 @@
             "value" : "Open-Meteo"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "Open-Meteo ist eine Open-Source-Wetter-API, die offene Wetterdaten von verschiedenen internationalen Wetterdiensten sammelt. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu Open-Meteo, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro." : {
       "localizations" : {
@@ -1199,13 +1364,13 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Open-Meteo, çeşitli uluslararası hava durumu hizmetlerinden açık hava durumu verilerini toplayan açık kaynaklı bir hava durumu API'sidir. Oscar, Open-Meteo'ya ücretsiz erişimi ticari olmayan bir uygulama olarak kullanıyor, ancak projeyi aylık beş avroluk bir bağışla destekliyor."
+            "value" : "Open-Meteo, çeşitli uluslararası hava durumu hizmetlerinden açık hava durumu verilerini toplayan açık kaynaklı bir hava durumu API'sidir. Oscar, ticari olmayan bir uygulama olarak Open-Meteo'nun ücretsiz erişimini kullanır, ancak projeyi aylık beş avroluk bir bağışla destekler."
           }
         }
       }
     },
     "open-meteo.com" : {
-
+      "shouldTranslate" : false
     },
     "Orte" : {
       "extractionState" : "manual",
@@ -1225,7 +1390,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Konumlarım"
+            "value" : "Konumlar"
           }
         }
       }
@@ -1236,6 +1401,44 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Loading Oscar radar data…"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar radar verileri yükleniyor…"
+          }
+        }
+      }
+    },
+    "Oscar verwendet Prognosedaten des Global Forecast System (GFS), einem Wettervorhersagemodell der National Centers for Environmental Prediction (NCEP), bereitgestellt durch NOAA. NOAA/NWS-Daten sind in der Regel gemeinfrei, sofern nicht anders gekennzeichnet. Die Nutzung stellt keine Unterstützung, Empfehlung oder offizielle Verbindung zu NOAA, NWS oder NCEP dar." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses forecast data from the Global Forecast System (GFS), a weather forecasting model of the National Centers for Environmental Prediction (NCEP), provided by NOAA. NOAA/NWS data is generally in the public domain unless otherwise indicated. Its use does not imply endorsement, recommendation, or any official affiliation with NOAA, NWS, or NCEP."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, NOAA tarafından sağlanan National Centers for Environmental Prediction (NCEP) bünyesindeki bir hava tahmin modeli olan Global Forecast System (GFS) tahmin verilerini kullanır. NOAA/NWS verileri, aksi belirtilmediği sürece genellikle kamu malıdır. Bu verilerin kullanımı; NOAA, NWS veya NCEP tarafından herhangi bir destek, tavsiye ya da resmi bağlantı olduğu anlamına gelmez."
+          }
+        }
+      }
+    },
+    "Oscar verwendet Wetter- und Geodaten des Deutschen Wetterdienstes (DWD), unter anderem Radardaten sowie Prognosedaten aus dem ICON-D2-Modell. Datenbasis: Deutscher Wetterdienst. Die Daten werden unter den Open-Data-Nutzungsbedingungen des DWD bereitgestellt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses weather and geodata from the German Weather Service (DWD), including radar data and forecast data from the ICON-D2 model. Data source: German Weather Service. The data is provided under the DWD Open Data Terms of Use."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, Alman Meteoroloji Servisi (DWD) tarafından sağlanan hava durumu ve coğrafi verileri kullanır; buna radar verileri ve ICON-D2 modelinden alınan tahmin verileri de dahildir. Veri kaynağı: Alman Meteoroloji Servisi. Veriler, DWD Açık Veri Kullanım Koşulları kapsamında sağlanmaktadır."
           }
         }
       }
@@ -1330,7 +1533,7 @@
       }
     },
     "RainViewer" : {
-
+      "shouldTranslate" : false
     },
     "RainViewer stellt diverse Kartenlayer bereit. Darunter fallen unter anderem das globale Regenradar und Satellitenbilder." : {
       "localizations" : {
@@ -1349,7 +1552,7 @@
       }
     },
     "rainviewer.com" : {
-
+      "shouldTranslate" : false
     },
     "Rechtliche\nInformationen" : {
       "localizations" : {
@@ -1391,7 +1594,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yasal Bilgiler"
+            "value" : "Yasal"
           }
         }
       }
@@ -1429,71 +1632,48 @@
         }
       }
     },
-    "Regen (DWD)" : {
+    "Regenwarnungen (Beta)" : {
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Regen (DWD)"
+            "value" : "Regenwarnungen (Beta)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rain (DWD)"
+            "value" : "Rain Alerts (Beta)"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yağmur (DWD)"
+            "value" : "Yağmur Uyarıları (Beta)"
           }
         }
       }
     },
-    "Regen (Global)" : {
+    "Regenwarnungen werden für deinen aktuellen Ort innerhalb von Mitteleuropa gesendet." : {
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Regen (Global)"
+            "value" : "Regenwarnungen werden für deinen aktuellen Ort innerhalb von Mitteleuropa gesendet."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rain (Global)"
+            "value" : "Rain alerts are sent for your current location within Central Europe."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yağmur (Küresel)"
-          }
-        }
-      }
-    },
-    "Regenradar" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Regenradar"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rain Radar"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yağmur Radarı"
+            "value" : "Yağmur uyarıları, Orta Avrupa içindeki mevcut konumunuz için gönderilir."
           }
         }
       }
@@ -1595,7 +1775,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Servisler"
+            "value" : "Hizmetler"
           }
         }
       }
@@ -1656,7 +1836,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Diğer Bilgiler"
+            "value" : "Diğer"
           }
         }
       }
@@ -1678,7 +1858,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saatlik Tahmin"
+            "value" : "Saatlik"
           }
         }
       }
@@ -1694,7 +1874,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saatlik detaylar"
+            "value" : "Saatlik Ayrıntılar"
           }
         }
       }
@@ -1716,7 +1896,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arama..."
+            "value" : "Ara..."
           }
         }
       }
@@ -1740,6 +1920,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "GB"
+          }
+        }
+      }
+    },
+    "Systemeinstellungen öffnen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systemeinstellungen öffnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem Ayarlarını Aç"
           }
         }
       }
@@ -1812,10 +2015,10 @@
       }
     },
     "Tomorrow" : {
-
+      "shouldTranslate" : false
     },
     "tomorrow.io" : {
-
+      "shouldTranslate" : false
     },
     "Tomorrow.io, vertreten durch die Tomorrow Companies Inc., stellt diverse Kartenlayer unter deren Free-Tier bereit. Darunter fallen unter anderem das globale Regenradar, Temperatur, Windgeschwindigkeit, Windrichtung, Wolken und Luftfeuchtigkeit." : {
       "localizations" : {
@@ -1828,7 +2031,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tomorrow Companies Inc. tarafından temsil edilen Tomorrow.io, ücretsiz katmanı altında çeşitli harita katmanları sunmaktadır. Bunlar arasında küresel yağmur radarı, sıcaklık, rüzgar hızı, rüzgar yönü, bulutlar ve nem yer alıyor."
+            "value" : "Tomorrow Companies Inc. tarafından temsil edilen Tomorrow.io, ücretsiz katmanı kapsamında çeşitli harita katmanları sunar. Bunlar arasında küresel yağmur radarı, sıcaklık, rüzgar hızı, rüzgar yönü, bulutlar ve nem yer alır."
           }
         }
       }
@@ -1985,7 +2188,20 @@
       }
     },
     "Wetterdaten werden geladen…" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather data is being loaded…"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava durumu verileri yükleniyor…"
+          }
+        }
+      }
     },
     "Wind" : {
       "localizations" : {

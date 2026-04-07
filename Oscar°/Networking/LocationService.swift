@@ -24,6 +24,7 @@ class Location {
 @Observable
 class LocationService: NSObject, CLLocationManagerDelegate  {
     static let shared = LocationService()
+    static let outboundCoordinateDecimalPlaces = 3
     var city = CityServiceNew.shared
     var authStatus: CLAuthorizationStatus?
     var gpsLocation: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 52.52, longitude: 13.4)
@@ -121,6 +122,18 @@ class LocationService: NSObject, CLLocationManagerDelegate  {
                 notificationCenter.post(name: Notification.Name("ChangedLocation"), object: nil) // notify view
             }
         }
+    }
+
+    static func outboundCoordinate(_ coordinate: CLLocationCoordinate2D) -> CLLocationCoordinate2D {
+        CLLocationCoordinate2D(
+            latitude: roundedOutboundCoordinate(coordinate.latitude),
+            longitude: roundedOutboundCoordinate(coordinate.longitude)
+        )
+    }
+
+    static func roundedOutboundCoordinate(_ value: Double) -> Double {
+        let scale = pow(10.0, Double(outboundCoordinateDecimalPlaces))
+        return (value * scale).rounded() / scale
     }
 }
 

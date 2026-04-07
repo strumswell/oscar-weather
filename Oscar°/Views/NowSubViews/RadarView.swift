@@ -181,7 +181,7 @@ struct RadarView: View {
     private func activateDWDRadar() {
         settingsService.activeTileLayer = nil
         settingsService.settings?.rainviewerLayer = false
-        settingsService.settings?.dwdLayer = true
+        settingsService.settings?.dwdLayer = false
         settingsService.save()
         settingsService.oscarRadarLayer = true
         weatherTileState?.pause()
@@ -227,20 +227,63 @@ struct RadarMapView: UIViewRepresentable {
     private final class LegacyDWDTileOverlay: WMSTileOverlay {}
     private final class OscarRadarArrowTileOverlay: MKTileOverlay {}
 
+    struct RainViewerOverlayTemplates {
+        let radar: String?
+        let infrared: String?
+    }
+
     class Coordinator: NSObject, MKMapViewDelegate {
         var parent: RadarMapView
         var animatingRenderer: OscarRadarAnimatingRenderer?
         var lastRenderedFrameIndex: Int = -1
         /// Combines tilePath + frameKey — detects both frame advances and layer switches.
         var lastTileOverlayID: String? = nil
+        var pendingTileOverlayID: String? = nil
+        var pendingTileOverlayTask: Task<Void, Never>? = nil
+        var lastVisibleTilePrefetchID: String? = nil
         var rainViewerRadarOverlayID: String? = nil
         var rainViewerInfraredOverlayID: String? = nil
         var isLoadingRainViewerRadar = false
         var isLoadingRainViewerInfrared = false
+        var rainViewerTemplatesTask: Task<RainViewerOverlayTemplates, Error>? = nil
 
         init(_ parent: RadarMapView) {
             self.parent = parent
             super.init()
+        }
+
+        deinit {
+            pendingTileOverlayTask?.cancel()
+            rainViewerTemplatesTask?.cancel()
+        }
+
+        @MainActor
+        func rainViewerTemplates() async throws -> RainViewerOverlayTemplates {
+            if let rainViewerTemplatesTask {
+                return try await rainViewerTemplatesTask.value
+            }
+
+            let task = Task {
+                let rainViewerData = try await APIClient().getRainViewerMaps()
+                let host = rainViewerData.host ?? "https://tilecache.rainviewer.com"
+                let radarTemplate = rainViewerData.radar?.past?.last.map {
+                    "\(host)\($0.path ?? "")/256/{z}/{x}/{y}/4/1_1.png"
+                }
+                let infraredTemplate = rainViewerData.satellite?.infrared?.last.map {
+                    "\(host)\($0.path ?? "")/256/{z}/{x}/{y}/0/0_0.png"
+                }
+                return RainViewerOverlayTemplates(radar: radarTemplate, infrared: infraredTemplate)
+            }
+            rainViewerTemplatesTask = task
+
+            do {
+                let result = try await task.value
+                rainViewerTemplatesTask = nil
+                return result
+            } catch {
+                rainViewerTemplatesTask = nil
+                throw error
+            }
         }
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
@@ -327,16 +370,15 @@ struct RadarMapView: UIViewRepresentable {
         mapView.removeOverlays(otherOverlays)
 
         if let settings = settingsService.settings {
-            if settings.rainviewerLayer {
+            let canShowRainViewer = settingsService.activeTileLayer == nil && !settingsService.oscarRadarLayer
+
+            if settings.rainviewerLayer && canShowRainViewer {
                 if rainViewerRadarOverlays.isEmpty && !context.coordinator.isLoadingRainViewerRadar {
                     context.coordinator.isLoadingRainViewerRadar = true
                     Task {
                         do {
-                            let rainViewerData = try await APIClient().getRainViewerMaps()
-                            if let mostRecentFrame = rainViewerData.radar?.past?.last {
-                                let host = rainViewerData.host ?? "https://tilecache.rainviewer.com"
-                                let path = mostRecentFrame.path ?? ""
-                                let urlTemplate = "\(host)\(path)/256/{z}/{x}/{y}/4/1_1.png"
+                            let templates = try await context.coordinator.rainViewerTemplates()
+                            if let urlTemplate = templates.radar {
                                 DispatchQueue.main.async {
                                     context.coordinator.isLoadingRainViewerRadar = false
                                     guard context.coordinator.rainViewerRadarOverlayID != urlTemplate else { return }
@@ -364,7 +406,7 @@ struct RadarMapView: UIViewRepresentable {
                 context.coordinator.rainViewerRadarOverlayID = nil
             }
 
-            if settings.dwdLayer {
+            if settings.dwdLayer && !settingsService.oscarRadarLayer {
                 if legacyDWDOverlays.isEmpty {
                     let referenceSystem = WebMapServiceConstants.version == "1.1.1" ? "SRS" : "CRS"
                     let urlLayers = "layers=dwd:RADOLAN-RY&"
@@ -388,16 +430,13 @@ struct RadarMapView: UIViewRepresentable {
                 mapView.removeOverlays(legacyDWDOverlays)
             }
 
-            if settings.infrarotLayer {
+            if settings.infrarotLayer && canShowRainViewer {
                 if rainViewerInfraredOverlays.isEmpty && !context.coordinator.isLoadingRainViewerInfrared {
                     context.coordinator.isLoadingRainViewerInfrared = true
                     Task {
                         do {
-                            let rainViewerData = try await APIClient().getRainViewerMaps()
-                            if let mostRecentFrame = rainViewerData.satellite?.infrared?.last {
-                                let host = rainViewerData.host ?? "https://tilecache.rainviewer.com"
-                                let path = mostRecentFrame.path ?? ""
-                                let urlTemplate = "\(host)\(path)/256/{z}/{x}/{y}/0/0_0.png"
+                            let templates = try await context.coordinator.rainViewerTemplates()
+                            if let urlTemplate = templates.infrared {
                                 DispatchQueue.main.async {
                                     context.coordinator.isLoadingRainViewerInfrared = false
                                     guard context.coordinator.rainViewerInfraredOverlayID != urlTemplate else { return }
@@ -472,21 +511,67 @@ struct RadarMapView: UIViewRepresentable {
                let activeLayer = settingsService.activeTileLayer,
                let frameKey = tileState.currentFrameKey
             {
-                // Use activeLayer (from settings) as the source of truth for the path.
-                // tileState.currentLayer lags behind by one async hop after a layer switch,
-                // so reading it here would produce the wrong URL template.
                 let overlayID = "\(activeLayer.tilePath)/\(frameKey)"
-                if overlayID != context.coordinator.lastTileOverlayID {
-                    context.coordinator.lastTileOverlayID = overlayID
-                    mapView.removeOverlays(tileOverlays)
-                    let template = "\(WeatherTileState.baseURL)/\(activeLayer.tilePath)/\(frameKey)/{z}/{x}/{y}.webp"
-                    let overlay = WeatherTileOverlay(urlTemplate: template)
-                    overlay.canReplaceMapContent = false
-                    overlay.tileSize = CGSize(width: 256, height: 256)
-                    mapView.addOverlay(overlay, level: .aboveRoads)
+                let visibleMapRect = mapView.visibleMapRect
+                let zoomScale = mapView.bounds.width / visibleMapRect.size.width
+                if zoomScale.isFinite, zoomScale > 0 {
+                    let prefetchID = [
+                        overlayID,
+                        String(Int(log2(Double(max(zoomScale, 0.0001))).rounded())),
+                        String(Int((visibleMapRect.minX / (MKMapSize.world.width / 512)).rounded(.down))),
+                        String(Int((visibleMapRect.minY / (MKMapSize.world.width / 512)).rounded(.down))),
+                        String(Int((visibleMapRect.maxX / (MKMapSize.world.width / 512)).rounded(.down))),
+                        String(Int((visibleMapRect.maxY / (MKMapSize.world.width / 512)).rounded(.down)))
+                    ].joined(separator: "/")
+                    if prefetchID != context.coordinator.lastVisibleTilePrefetchID {
+                        context.coordinator.lastVisibleTilePrefetchID = prefetchID
+                        tileState.prefetchVisibleTiles(
+                            around: tileState.currentFrameIndex,
+                            visibleMapRect: visibleMapRect,
+                            zoomScale: zoomScale,
+                            layer: activeLayer
+                        )
+                    }
                 }
-            } else if !tileOverlays.isEmpty {
-                mapView.removeOverlays(tileOverlays)
+                let template = "\(WeatherTileState.baseURL)/\(activeLayer.tilePath)/\(frameKey)/{z}/{x}/{y}.webp"
+                if overlayID != context.coordinator.lastTileOverlayID {
+                    if context.coordinator.pendingTileOverlayID != overlayID {
+                        context.coordinator.pendingTileOverlayTask?.cancel()
+                        context.coordinator.pendingTileOverlayID = overlayID
+
+                        let frameIndex = tileState.currentFrameIndex
+                        let existingTileOverlays = tileOverlays
+                        context.coordinator.pendingTileOverlayTask = Task {
+                            await tileState.prepareVisibleTiles(
+                                for: frameIndex,
+                                layer: activeLayer,
+                                visibleMapRect: visibleMapRect,
+                                zoomScale: zoomScale
+                            )
+
+                            guard !Task.isCancelled else { return }
+                            await MainActor.run {
+                                guard context.coordinator.pendingTileOverlayID == overlayID else { return }
+                                let overlay = WeatherTileOverlay(urlTemplate: template)
+                                overlay.canReplaceMapContent = false
+                                overlay.tileSize = CGSize(width: 256, height: 256)
+                                mapView.addOverlay(overlay, level: .aboveRoads)
+                                mapView.removeOverlays(existingTileOverlays)
+                                context.coordinator.lastTileOverlayID = overlayID
+                                context.coordinator.pendingTileOverlayID = nil
+                                context.coordinator.pendingTileOverlayTask = nil
+                            }
+                        }
+                    }
+                }
+            } else {
+                context.coordinator.lastVisibleTilePrefetchID = nil
+                context.coordinator.pendingTileOverlayTask?.cancel()
+                context.coordinator.pendingTileOverlayTask = nil
+                context.coordinator.pendingTileOverlayID = nil
+                if !tileOverlays.isEmpty {
+                    mapView.removeOverlays(tileOverlays)
+                }
                 context.coordinator.lastTileOverlayID = nil
             }
         }

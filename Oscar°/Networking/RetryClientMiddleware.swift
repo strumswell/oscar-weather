@@ -94,11 +94,18 @@ extension RetryingMiddleware: ClientMiddleware {
     operationID: String,
     next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
   ) async throws -> (HTTPResponse, HTTPBody?) {
+    let requestContext = "\(baseURL.host() ?? baseURL.absoluteString) \(operationID) \(request.method) \(request.path ?? "")"
+    func logRequest(attempt: Int, maxAttemptCount: Int) {
+      print("Sending request \(requestContext) attempt \(attempt)/\(maxAttemptCount)")
+    }
+
     guard case .upToAttempts(count: let maxAttemptCount) = policy else {
+      print("Sending request \(requestContext)")
       return try await next(request, body, baseURL)
     }
     if let body {
       guard body.iterationBehavior == .multiple else {
+        print("Sending request \(requestContext)")
         return try await next(request, body, baseURL)
       }
     }
@@ -110,11 +117,13 @@ extension RetryingMiddleware: ClientMiddleware {
         try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
       }
     }
+    let retryContext = "\(baseURL.host() ?? baseURL.absoluteString) \(operationID)"
 
     for attempt in 1...maxAttemptCount {
       let (response, responseBody): (HTTPResponse, HTTPBody?)
       if signals.contains(.errorThrown) {
         do {
+          logRequest(attempt: attempt, maxAttemptCount: maxAttemptCount)
           (response, responseBody) = try await next(request, body, baseURL)
         } catch {
           // Don't retry if the error is a cancellation
@@ -125,17 +134,20 @@ extension RetryingMiddleware: ClientMiddleware {
           if attempt == maxAttemptCount {
             throw error
           } else {
-            print("Retrying after an error")
+            print("Retrying \(retryContext) after error on attempt \(attempt)/\(maxAttemptCount)")
             print(error)
             try await willRetry()
             continue
           }
         }
       } else {
+        logRequest(attempt: attempt, maxAttemptCount: maxAttemptCount)
         (response, responseBody) = try await next(request, body, baseURL)
       }
       if signals.contains(response.status.code) && attempt < maxAttemptCount {
-        print("Retrying with code \(response.status.code)")
+        print(
+          "Retrying \(retryContext) with code \(response.status.code) on attempt \(attempt)/\(maxAttemptCount)"
+        )
         try await willRetry()
         continue
       } else {

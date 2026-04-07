@@ -1,4 +1,5 @@
 import Foundation
+import MapKit
 import UIKit
 
 struct OscarRadarBounds {
@@ -268,7 +269,9 @@ class OscarRadarState {
         cacheLock.unlock()
 
         guard let url = URL(string: "\(baseURL)/radar/frames") else { throw URLError(.badURL) }
-        let (data, _) = try await URLSession.shared.data(from: url)
+        var request = URLRequest(url: url)
+        request.addAPIContactIdentity()
+        let (data, _) = try await URLSession.shared.data(for: request)
         let response = try JSONDecoder().decode(OscarFramesResponse.self, from: data)
         cacheLock.lock()
         cachedFrameInfos = response.frames
@@ -289,7 +292,9 @@ class OscarRadarState {
 
         guard let url = URL(string: "\(baseURL)/radar/image/\(frameInfo.key).webp?cmap=plasma") else { return nil }
         do {
-            let (data, _) = try await URLSession.shared.data(from: url)
+            var request = URLRequest(url: url)
+            request.addAPIContactIdentity()
+            let (data, _) = try await URLSession.shared.data(for: request)
             guard let uiImage = UIImage(data: data) else { return nil }
             guard let cgImage = prepareForRenderer(uiImage) else { return nil }
             cacheLock.lock()
@@ -455,6 +460,7 @@ final class WeatherTileState {
 
     private var playbackTimer: Timer?
     private var preloadTask: Task<Void, Never>?
+    private var visiblePrefetchTask: Task<Void, Never>?
 
     private static let metadataCache = WeatherTileMetadataCache()
 
@@ -506,13 +512,8 @@ final class WeatherTileState {
                 self.isLoading = false
             }
 
-            // Kick off aggressive background tile preloading
             preloadTask?.cancel()
-            let capturedFrames = newFrames
-            let capturedLayer = layer
-            preloadTask = Task.detached(priority: .background) { [weak self] in
-                await self?.preloadAllTiles(frames: capturedFrames, layer: capturedLayer)
-            }
+            preloadTask = nil
         } catch {
             await MainActor.run {
                 self.error = "Fehler: \(error.localizedDescription)"
@@ -554,16 +555,46 @@ final class WeatherTileState {
 
     // MARK: - Preloading
 
-    /// Warms URLCache for all frames × zoom levels so MKTileOverlay gets instant cache hits.
-    private func preloadAllTiles(frames: [WeatherTileFrame], layer: WeatherTileLayer) async {
-        let bounds = layer.preloadBounds
-        // Phase 1: cheap low-zoom tiles for all frames immediately
-        let phase1 = tileURLs(frames: frames, path: layer.tilePath, bounds: bounds, zooms: [5, 6])
-        await fetchIntoCache(urls: phase1, concurrency: 10)
-        guard !Task.isCancelled else { return }
-        // Phase 2: higher-zoom tiles in background
-        let phase2 = tileURLs(frames: frames, path: layer.tilePath, bounds: bounds, zooms: [7])
-        await fetchIntoCache(urls: phase2, concurrency: 6)
+    func prefetchVisibleTiles(
+        around frameIndex: Int,
+        visibleMapRect: MKMapRect,
+        zoomScale: MKZoomScale,
+        layer explicitLayer: WeatherTileLayer? = nil,
+        radius: Int = 2
+    ) {
+        guard !frames.isEmpty, frames.indices.contains(frameIndex) else { return }
+
+        visiblePrefetchTask?.cancel()
+        let layer = explicitLayer ?? currentLayer
+        let nearbyFrames = frames[
+            max(0, frameIndex - radius)...min(frames.count - 1, frameIndex + radius)
+        ].map { $0 }
+        let zoom = tileZoom(zoomScale: zoomScale)
+        let bounds = Self.coordinateBounds(for: visibleMapRect)
+        let urls = tileURLs(frames: nearbyFrames, path: layer.tilePath, bounds: bounds, zooms: [zoom])
+
+        visiblePrefetchTask = Task.detached(priority: .utility) { [weak self] in
+            await self?.fetchIntoCache(urls: urls, concurrency: 4)
+        }
+    }
+
+    func prepareVisibleTiles(
+        for frameIndex: Int,
+        layer: WeatherTileLayer,
+        visibleMapRect: MKMapRect,
+        zoomScale: MKZoomScale
+    ) async {
+        guard !frames.isEmpty, frames.indices.contains(frameIndex) else { return }
+
+        let zoom = tileZoom(zoomScale: zoomScale)
+        let bounds = Self.coordinateBounds(for: visibleMapRect)
+        let urls = tileURLs(
+            frames: [frames[frameIndex]],
+            path: layer.tilePath,
+            bounds: bounds,
+            zooms: [zoom]
+        )
+        await fetchIntoCache(urls: urls, concurrency: 8)
     }
 
     private func tileURLs(
@@ -574,11 +605,14 @@ final class WeatherTileState {
     ) -> [URL] {
         var result: [URL] = []
         for z in zooms {
-            let x0 = tileX(bounds.west, zoom: z), x1 = tileX(bounds.east,  zoom: z)
-            let y0 = tileY(bounds.north, zoom: z), y1 = tileY(bounds.south, zoom: z)
+            let maxTile = Int(pow(2, Double(z))) - 1
+            let x0 = max(0, min(maxTile, tileX(bounds.west, zoom: z)))
+            let x1 = max(0, min(maxTile, tileX(bounds.east, zoom: z)))
+            let y0 = max(0, min(maxTile, tileY(bounds.north, zoom: z)))
+            let y1 = max(0, min(maxTile, tileY(bounds.south, zoom: z)))
             for frame in frames {
-                for x in x0...max(x0, x1) {
-                    for y in y0...max(y0, y1) {
+                for x in min(x0, x1)...max(x0, x1) {
+                    for y in min(y0, y1)...max(y0, y1) {
                         let s = "\(Self.baseURL)/\(path)/\(frame.key)/\(z)/\(x)/\(y).webp"
                         if let url = URL(string: s) { result.append(url) }
                     }
@@ -590,7 +624,9 @@ final class WeatherTileState {
 
     private func fetchIntoCache(urls: [URL], concurrency: Int) async {
         let pending = urls.filter {
-            URLCache.shared.cachedResponse(for: URLRequest(url: $0)) == nil
+            var request = URLRequest(url: $0)
+            request.addAPIContactIdentity()
+            return URLCache.shared.cachedResponse(for: request) == nil
         }
         guard !pending.isEmpty else { return }
 
@@ -603,12 +639,13 @@ final class WeatherTileState {
                     inFlight -= 1
                 }
                 group.addTask {
-                    let req = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+                    var req = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+                    req.addAPIContactIdentity()
                     guard let (data, response) = try? await URLSession.shared.data(for: req),
                           let http = response as? HTTPURLResponse,
                           http.statusCode == 200, !data.isEmpty else { return }
                     let cached = CachedURLResponse(response: response, data: data)
-                    URLCache.shared.storeCachedResponse(cached, for: URLRequest(url: url))
+                    URLCache.shared.storeCachedResponse(cached, for: req)
                 }
                 inFlight += 1
             }
@@ -622,7 +659,8 @@ final class WeatherTileState {
             return cached
         }
         guard let url = URL(string: "\(baseURL)/\(endpoint)") else { throw URLError(.badURL) }
-        let req = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+        var req = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+        req.addAPIContactIdentity()
         let (data, _) = try await URLSession.shared.data(for: req)
         let decoded = try JSONDecoder().decode(TileFramesResponse.self, from: data)
         let result = decoded.frames.map { WeatherTileFrame(key: $0.key, validTime: $0.validTime) }
@@ -657,9 +695,29 @@ final class WeatherTileState {
         return Int(floor((1 - log(tan(rad) + 1 / cos(rad)) / .pi) / 2 * pow(2, Double(zoom))))
     }
 
+    private func tileZoom(zoomScale: MKZoomScale) -> Int {
+        let numTilesAt1_0 = MKMapSize.world.width / 256.0
+        let zoomLevelAt1_0 = log2(numTilesAt1_0)
+        return max(0, Int(zoomLevelAt1_0 + floor(log2(Double(zoomScale)) + 0.5)))
+    }
+
+    private static func coordinateBounds(
+        for mapRect: MKMapRect
+    ) -> (west: Double, east: Double, north: Double, south: Double) {
+        let topLeft = MKMapPoint(x: mapRect.minX, y: mapRect.minY).coordinate
+        let bottomRight = MKMapPoint(x: mapRect.maxX, y: mapRect.maxY).coordinate
+        return (
+            west: min(topLeft.longitude, bottomRight.longitude),
+            east: max(topLeft.longitude, bottomRight.longitude),
+            north: max(topLeft.latitude, bottomRight.latitude),
+            south: min(topLeft.latitude, bottomRight.latitude)
+        )
+    }
+
     deinit {
         playbackTimer?.invalidate()
         preloadTask?.cancel()
+        visiblePrefetchTask?.cancel()
     }
 }
 

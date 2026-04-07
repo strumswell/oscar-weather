@@ -40,7 +40,8 @@ class APIClient {
       serverURL: url,
       transport: URLSessionTransport(),
       middlewares: [
-        //CachingMiddleware(cacheTime: 60),
+        CachingMiddleware(cacheTime: 60),
+        ContactIdentityMiddleware(),
         RetryingMiddleware(
           signals: [.code(429), .range(500..<600), .errorThrown],
           policy: .upToAttempts(count: 3),
@@ -54,15 +55,16 @@ class APIClient {
     coordinates: CLLocationCoordinate2D,
     forecastDays: Operations.getForecast.Input.Query.forecast_daysPayload? = ._14
   ) async throws -> Operations.getForecast.Output.Ok.Body.jsonPayload {
+    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
     let fallbackForecast: Operations.getForecast.Output.Ok.Body.jsonPayload = .init(
-      latitude: coordinates.latitude, longitude: coordinates.longitude,
+      latitude: outboundCoordinates.latitude, longitude: outboundCoordinates.longitude,
       current: .init(
         cloudcover: 0.0, time: 0.0, temperature: 0.0, windspeed: 0.0, wind_direction_10m: 0.0,
         weathercode: 0.0))
 
     var query: Operations.getForecast.Input.Query = .init(
-      latitude: coordinates.latitude,
-      longitude: coordinates.longitude,
+      latitude: outboundCoordinates.latitude,
+      longitude: outboundCoordinates.longitude,
       hourly: [
         .temperature_2m, .apparent_temperature, .precipitation, .snowfall, .weathercode,
         .cloudcover,
@@ -175,14 +177,15 @@ class APIClient {
   func getAirQuality(coordinates: CLLocationCoordinate2D) async throws
     -> Operations.getAirQuality.Output.Ok.Body.jsonPayload
   {
+    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
     let fallbackForecast: Operations.getAirQuality.Output.Ok.Body.jsonPayload = .init(
       latitude: 0, longitude: 0)
 
     let response = try await openMeteoAqi.getAirQuality(
       .init(
         query: .init(
-          latitude: coordinates.latitude,
-          longitude: coordinates.longitude,
+          latitude: outboundCoordinates.latitude,
+          longitude: outboundCoordinates.longitude,
           timezone: "auto", timeformat: .unixtime, forecast_days: ._1,
           hourly: [
             .european_aqi, .european_aqi_no2, .european_aqi_o3, .european_aqi_pm10,
@@ -218,11 +221,12 @@ class APIClient {
 
   private func getBrightskyAlerts(coordinates: CLLocationCoordinate2D) async throws -> AlertResponse
   {
+    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
     let response = try await brightsky.getAlerts(
       .init(
         query: .init(
-          lat: coordinates.latitude,
-          lon: coordinates.longitude
+          lat: outboundCoordinates.latitude,
+          lon: outboundCoordinates.longitude
         )
       ))
 
@@ -240,11 +244,12 @@ class APIClient {
   private func getCanadianWeatherAlerts(coordinates: CLLocationCoordinate2D) async throws
     -> AlertResponse
   {
+    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
     let response = try await canadaWeather.getCanadianWeatherAlerts(
       .init(
         path: .init(
-          latitude: coordinates.latitude,
-          longitude: coordinates.longitude
+          latitude: outboundCoordinates.latitude,
+          longitude: outboundCoordinates.longitude
         )
       ))
 
@@ -281,13 +286,17 @@ class APIClient {
   func getRainRadar(coordinates: CLLocationCoordinate2D) async throws
     -> Components.Schemas.RadarResponse
   {
+    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
     let formatter = ISO8601DateFormatter()
     formatter.timeZone = TimeZone.current
     let iso8601String = formatter.string(from: Date())
     let response = try await brightsky.getRainRadar(
       .init(
         query: .init(
-          date: iso8601String, lat: coordinates.latitude, lon: coordinates.longitude, distance: 0,
+          date: iso8601String,
+          lat: outboundCoordinates.latitude,
+          lon: outboundCoordinates.longitude,
+          distance: 0,
           tz: "Europe/Berlin", format: .plain)
       ))
     switch response {
