@@ -191,6 +191,12 @@ struct NowView: View {
 }
 
 extension NowView {
+    private enum WeatherUpdateResponse {
+        case forecast(Operations.getForecast.Output.Ok.Body.jsonPayload)
+        case airQuality(Operations.getAirQuality.Output.Ok.Body.jsonPayload)
+        case radar(Components.Schemas.RadarResponse)
+    }
+
     func updateState() async {
         do {
             if weather.isLoading { return }
@@ -199,11 +205,33 @@ extension NowView {
             locationService.update()
             location.coordinates = locationService.getCoordinates()
             location.name = await locationService.getLocationName()
-            
-            async let forecastRequest = client.getForecast(coordinates: location.coordinates)
-            async let airQualityRequest = client.getAirQuality(coordinates: location.coordinates)
-            async let radarRequest = client.getRainRadar(coordinates: location.coordinates)
-            let (forecastResponse, airQualityResponse, radarResponse) = try await (forecastRequest, airQualityRequest, radarRequest)
+
+            let coordinates = location.coordinates
+            var forecastResponse: Operations.getForecast.Output.Ok.Body.jsonPayload?
+            var airQualityResponse: Operations.getAirQuality.Output.Ok.Body.jsonPayload?
+            var radarResponse: Components.Schemas.RadarResponse?
+
+            try await withThrowingTaskGroup(of: WeatherUpdateResponse.self) { group in
+                group.addTask { .forecast(try await client.getForecast(coordinates: coordinates)) }
+                group.addTask { .airQuality(try await client.getAirQuality(coordinates: coordinates)) }
+                group.addTask { .radar(try await client.getRainRadar(coordinates: coordinates)) }
+
+                for try await response in group {
+                    switch response {
+                    case .forecast(let response):
+                        forecastResponse = response
+                    case .airQuality(let response):
+                        airQualityResponse = response
+                    case .radar(let response):
+                        radarResponse = response
+                    }
+                }
+            }
+
+            guard let forecastResponse, let airQualityResponse, let radarResponse else {
+                throw URLError(.badServerResponse)
+            }
+
             weather.forecast = forecastResponse
             weather.air = airQualityResponse
             weather.radar = radarResponse
