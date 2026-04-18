@@ -1,8 +1,9 @@
 import Foundation
 import MapKit
+import Observation
 import UIKit
 
-struct OscarRadarBounds {
+struct OscarRadarBounds: Equatable {
     let north: Double
     let south: Double
     let west: Double
@@ -16,8 +17,129 @@ struct OscarRadarFrame: Identifiable {
     let cgImage: CGImage  // pre-decoded + pre-flipped for MapKit's CG coordinate system
 }
 
+enum MapRenderMode {
+    case preview
+    case fullscreen
+
+    var focusedPreloadCount: Int {
+        switch self {
+        case .preview:
+            3
+        case .fullscreen:
+            5
+        }
+    }
+
+    var allowsBackgroundPreload: Bool {
+        self == .fullscreen
+    }
+}
+
+enum MapInteractionState {
+    case idle
+    case scrubbing
+    case playing
+}
+
+private func closestTimestampIndex(in timestamps: [String]) -> Int {
+    let now = Date()
+    let fmt = ISO8601DateFormatter()
+    fmt.formatOptions = [.withInternetDateTime]
+    let fmtFrac = ISO8601DateFormatter()
+    fmtFrac.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+
+    var bestIndex = 0
+    var bestDiff = TimeInterval.infinity
+
+    for (index, timestamp) in timestamps.enumerated() {
+        let date = fmtFrac.date(from: timestamp)
+            ?? fmt.date(from: timestamp)
+            ?? Double(timestamp).map { Date(timeIntervalSince1970: $0) }
+        guard let date else { continue }
+
+        let diff = abs(now.timeIntervalSince(date))
+        if diff < bestDiff {
+            bestDiff = diff
+            bestIndex = index
+        }
+    }
+
+    return bestIndex
+}
+
+private func prioritizedFrameIndices(count: Int, around center: Int) -> [Int] {
+    guard count > 0 else { return [] }
+
+    let clampedCenter = max(0, min(count - 1, center))
+    var ordered: [Int] = [clampedCenter]
+    ordered.reserveCapacity(count)
+
+    var step = 1
+    while ordered.count < count {
+        let right = clampedCenter + step
+        if right < count {
+            ordered.append(right)
+        }
+
+        let left = clampedCenter - step
+        if left >= 0 {
+            ordered.append(left)
+        }
+
+        step += 1
+    }
+
+    return ordered
+}
+
+private func nextLoadedIndex(in loaded: [Bool], after index: Int) -> Int? {
+    guard !loaded.isEmpty else { return nil }
+
+    let start = max(0, min(loaded.count - 1, index))
+    var candidate = (start + 1) % loaded.count
+
+    while candidate != start {
+        if loaded[candidate] {
+            return candidate
+        }
+        candidate = (candidate + 1) % loaded.count
+    }
+
+    return nil
+}
+
+private func contiguousLoadedRange(in loaded: [Bool], around anchor: Int?) -> ClosedRange<Int>? {
+    guard !loaded.isEmpty, let anchor else { return nil }
+    let clampedAnchor = max(0, min(loaded.count - 1, anchor))
+    guard loaded[clampedAnchor] else { return nil }
+
+    var lower = clampedAnchor
+    while lower > 0, loaded[lower - 1] {
+        lower -= 1
+    }
+
+    var upper = clampedAnchor
+    while upper + 1 < loaded.count, loaded[upper + 1] {
+        upper += 1
+    }
+
+    return lower...upper
+}
+
+private func allowsBackgroundPreload(for renderMode: MapRenderMode) -> Bool {
+    guard renderMode.allowsBackgroundPreload else { return false }
+
+    switch ProcessInfo.processInfo.thermalState {
+    case .serious, .critical:
+        return false
+    default:
+        return true
+    }
+}
+
+@MainActor
 @Observable
-class OscarRadarState {
+final class OscarRadarState {
     // nil slots represent frames whose image hasn't arrived yet.
     // The array is pre-sized to the full frame count as soon as metadata loads.
     var frames: [OscarRadarFrame?] = []
@@ -28,19 +150,44 @@ class OscarRadarState {
 
     var bounds: OscarRadarBounds?
     var isLoading: Bool = false
-    var currentFrameIndex: Int = 0
+    var currentFrameIndex: Int = 0 {
+        didSet {
+            guard currentFrameIndex != oldValue else { return }
+            handleFrameSelectionChanged()
+        }
+    }
     var isPlaying: Bool = false
     var error: String?
+    private(set) var loadingFrameIndices: Set<Int> = []
+    private(set) var renderFrameIndex: Int?
+    private(set) var interactionState: MapInteractionState = .idle
 
-    private var playbackTimer: Timer?
-    private static let baseURL = "https://radar.oscars.love"
+    @ObservationIgnored private var playbackTimer: Timer?
+    @ObservationIgnored private var frameInfos: [OscarFrameInfo] = []
+    @ObservationIgnored private var loadSessionID = UUID()
+    @ObservationIgnored private var suppressSelectionSideEffects = false
+    @ObservationIgnored private var bootstrapTask: Task<Void, Never>?
+    @ObservationIgnored private var backgroundPreloadTask: Task<Void, Never>?
+    @ObservationIgnored private var focusedLoadTask: Task<Void, Never>?
+    @ObservationIgnored private let renderMode: MapRenderMode
+    private static let baseURL = radarBaseURL
     private static let cacheLock = NSLock()
+
+    init(renderMode: MapRenderMode = .fullscreen) {
+        self.renderMode = renderMode
+    }
 
     // MARK: - Derived state
 
     var currentFrame: OscarRadarFrame? {
-        guard currentFrameIndex < frames.count else { return nil }
-        return frames[currentFrameIndex]
+        frame(at: renderFrameIndex ?? currentFrameIndex)
+    }
+
+    var nextFrame: OscarRadarFrame? {
+        guard let anchor = renderFrameIndex ?? (isSelectedFrameReady ? currentFrameIndex : nil) else { return nil }
+        let loaded = frames.map { $0 != nil }
+        guard let nextIndex = nextLoadedIndex(in: loaded, after: anchor) else { return nil }
+        return frame(at: nextIndex)
     }
 
     /// Timestamp for the current position, even if the image isn't loaded yet.
@@ -53,11 +200,42 @@ class OscarRadarState {
     /// Deliberately not a threshold check — only the "natural now" frame is LIVE.
     var isCurrentFrameLive: Bool {
         guard !frameTimestamps.isEmpty else { return false }
-        return currentFrameIndex == closestIndex(in: frameTimestamps)
+        return currentFrameIndex == closestTimestampIndex(in: frameTimestamps)
     }
 
     var hasAnyLoadedFrame: Bool {
         frames.contains { $0 != nil }
+    }
+
+    var isSelectedFrameReady: Bool {
+        frames.indices.contains(currentFrameIndex) && frames[currentFrameIndex] != nil
+    }
+
+    var loadedFrameIndices: Set<Int> {
+        Set(frames.indices.filter { frames[$0] != nil })
+    }
+
+    var contiguousReadyRange: ClosedRange<Int>? {
+        contiguousLoadedRange(
+            in: frames.map { $0 != nil },
+            around: isSelectedFrameReady ? currentFrameIndex : renderFrameIndex
+        )
+    }
+
+    var highestContiguouslyReadyForwardIndex: Int? {
+        guard isSelectedFrameReady else { return nil }
+
+        var index = currentFrameIndex
+        while index + 1 < frames.count, frames[index + 1] != nil {
+            index += 1
+        }
+        return index
+    }
+
+    var furthestContiguouslyReadyTimestamp: String? {
+        guard let index = highestContiguouslyReadyForwardIndex,
+              frameTimestamps.indices.contains(index) else { return nil }
+        return frameTimestamps[index]
     }
 
     // MARK: - Shared Cache
@@ -73,222 +251,263 @@ class OscarRadarState {
         return Date().timeIntervalSince(last) < cacheDuration
     }
 
+    static func purgeDecodedCaches() {
+        cacheLock.withLock {
+            cachedImages.removeAll()
+        }
+    }
+
     // MARK: - Loading
 
     /// Loads only the frame closest to the current time.
     /// Designed for NowView: fast, minimal network work.
     func loadCurrentFrame() async {
-        guard !isLoading else { return }
-        await MainActor.run { isLoading = true; error = nil }
-
-        do {
-            let (frameInfos, boundsInfo) = try await Self.fetchFrameInfos()
-            guard !frameInfos.isEmpty else {
-                await MainActor.run { isLoading = false }
-                return
-            }
-
-            let timestamps = frameInfos.map { $0.timestamp }
-            let closest = closestIndex(in: timestamps)
-
-            // Pre-size the frames array so the scrubber skeleton has the right slot count
-            // even though we're only loading one image.
-            await MainActor.run {
-                self.bounds = boundsInfo.asDomain
-                self.frameTimestamps = timestamps
-                if self.frames.count != frameInfos.count {
-                    self.frames = Array(repeating: nil, count: frameInfos.count)
-                }
-                self.currentFrameIndex = closest
-                self.isLoading = false
-            }
-
-            guard let cgImage = await Self.loadImage(for: frameInfos[closest]) else { return }
-            let frame = OscarRadarFrame(
-                key: frameInfos[closest].key,
-                timestamp: frameInfos[closest].timestamp,
-                cgImage: cgImage
-            )
-
-            await MainActor.run {
-                var updated = self.frames
-                updated[closest] = frame
-                self.frames = updated
-            }
-        } catch {
-            await MainActor.run {
-                self.error = "Fehler beim Laden: \(error.localizedDescription)"
-                self.isLoading = false
-            }
-        }
+        await loadFrames(allowBackgroundPreload: false)
     }
 
     /// Loads all frames, showing the scrubber skeleton immediately after metadata
     /// arrives and filling in ticks progressively as each image downloads.
     func loadAllFrames() async {
-        guard !isLoading else { return }
-        await MainActor.run { isLoading = true; error = nil }
-
-        do {
-            let (frameInfos, boundsInfo) = try await Self.fetchFrameInfos()
-            guard !frameInfos.isEmpty else {
-                await MainActor.run { isLoading = false }
-                return
-            }
-
-            let timestamps = frameInfos.map { $0.timestamp }
-            let closest = closestIndex(in: timestamps)
-
-            // Phase 1: show the skeleton scrubber immediately.
-            await MainActor.run {
-                self.bounds = boundsInfo.asDomain
-                self.frameTimestamps = timestamps
-                if self.frames.count != frameInfos.count {
-                    self.frames = Array(repeating: nil, count: frameInfos.count)
-                }
-                self.currentFrameIndex = closest
-                self.isLoading = false  // skeleton is ready — hide the loading chip
-            }
-
-            // Phase 2: download images in parallel, filling ticks as they arrive.
-            await withTaskGroup(of: (Int, OscarRadarFrame?).self) { group in
-                for (index, frameInfo) in frameInfos.enumerated() {
-                    group.addTask {
-                        guard let cgImage = await Self.loadImage(for: frameInfo) else {
-                            return (index, nil)
-                        }
-                        return (index, OscarRadarFrame(
-                            key: frameInfo.key,
-                            timestamp: frameInfo.timestamp,
-                            cgImage: cgImage
-                        ))
-                    }
-                }
-
-                for await (index, frame) in group {
-                    await MainActor.run {
-                        var updated = self.frames
-                        updated[index] = frame
-                        self.frames = updated
-                    }
-                }
-            }
-        } catch {
-            await MainActor.run {
-                self.error = "Fehler beim Laden: \(error.localizedDescription)"
-                self.isLoading = false
-            }
-        }
+        await loadFrames(allowBackgroundPreload: allowsBackgroundPreload(for: renderMode))
     }
 
     // MARK: - Playback
 
-    @MainActor
     func play() {
         guard hasAnyLoadedFrame else { return }
         isPlaying = true
+        interactionState = .playing
+        restartBackgroundPreloadIfNeeded()
         playbackTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
-            guard let self, !self.frames.isEmpty else { return }
-            // Advance, skipping over nil (not-yet-loaded) slots.
-            var next = (self.currentFrameIndex + 1) % self.frames.count
-            var checked = 0
-            while self.frames[next] == nil && checked < self.frames.count {
-                next = (next + 1) % self.frames.count
-                checked += 1
+            Task { @MainActor in
+                self?.advanceFrame()
             }
-            self.currentFrameIndex = next
         }
     }
 
-    @MainActor
     func pause() {
         isPlaying = false
+        interactionState = .idle
         playbackTimer?.invalidate()
         playbackTimer = nil
     }
 
     /// Stops the internal Timer without changing `isPlaying`.
     /// Called when the Metal display link takes over frame advancement.
-    @MainActor
     func cancelInternalTimer() {
         playbackTimer?.invalidate()
         playbackTimer = nil
     }
 
     /// Advance to the next loaded frame. Called by the Metal display-link tick.
-    @MainActor
     func advanceFrame() {
         guard !frames.isEmpty else { return }
-        var next = (currentFrameIndex + 1) % frames.count
-        var checked = 0
-        while frames[next] == nil && checked < frames.count {
-            next = (next + 1) % frames.count
-            checked += 1
+        let loaded = frames.map { $0 != nil }
+        guard let next = nextLoadedIndex(in: loaded, after: currentFrameIndex) else {
+            return
         }
         currentFrameIndex = next
     }
 
-    // MARK: - Private Helpers
-
-    /// Index in `timestamps` whose value is closest to the current time.
-    private func closestIndex(in timestamps: [String]) -> Int {
-        let now = Date()
-        // Two local formatters (ISO8601DateFormatter is not thread-safe — avoid shared statics here).
-        let fmt = ISO8601DateFormatter()
-        fmt.formatOptions = [.withInternetDateTime]
-        let fmtFrac = ISO8601DateFormatter()
-        fmtFrac.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-
-        var best = 0, bestDiff = TimeInterval.infinity
-        for (i, ts) in timestamps.enumerated() {
-            let date = fmtFrac.date(from: ts)
-                ?? fmt.date(from: ts)
-                ?? Double(ts).map { Date(timeIntervalSince1970: $0) }
-            if let date {
-                let diff = abs(now.timeIntervalSince(date))
-                if diff < bestDiff { bestDiff = diff; best = i }
-            }
-        }
-        return best
+    func beginScrubbing() {
+        interactionState = .scrubbing
+        backgroundPreloadTask?.cancel()
     }
 
-    private func findClosestFrameToCurrentTime() -> Int {
-        closestIndex(in: frameTimestamps)
+    func endScrubbing() {
+        interactionState = isPlaying ? .playing : .idle
+        restartBackgroundPreloadIfNeeded()
+    }
+
+    // MARK: - Private Helpers
+
+    private func loadFrames(allowBackgroundPreload: Bool) async {
+        bootstrapTask?.cancel()
+        focusedLoadTask?.cancel()
+        backgroundPreloadTask?.cancel()
+
+        let sessionID = UUID()
+        loadSessionID = sessionID
+        isLoading = true
+        error = nil
+        loadingFrameIndices.removeAll()
+        renderFrameIndex = nil
+
+        bootstrapTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let (fetchedFrameInfos, boundsInfo) = try await Self.fetchFrameInfos()
+                guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
+                guard !fetchedFrameInfos.isEmpty else {
+                    self.isLoading = false
+                    return
+                }
+
+                let timestamps = fetchedFrameInfos.map(\.timestamp)
+                let closest = closestTimestampIndex(in: timestamps)
+
+                self.suppressSelectionSideEffects = true
+                self.bounds = boundsInfo.asDomain
+                self.frameInfos = fetchedFrameInfos
+                self.frameTimestamps = timestamps
+                self.frames = Array(repeating: nil, count: fetchedFrameInfos.count)
+                self.currentFrameIndex = closest
+                self.suppressSelectionSideEffects = false
+
+                await self.loadFocusedFrames(around: closest, sessionID: sessionID)
+
+                guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
+                self.isLoading = false
+
+                if allowBackgroundPreload {
+                    self.restartBackgroundPreloadIfNeeded()
+                }
+            } catch {
+                guard self.loadSessionID == sessionID else { return }
+                self.error = "Fehler beim Laden: \(error.localizedDescription)"
+                self.isLoading = false
+            }
+        }
+
+        await bootstrapTask?.value
+    }
+
+    private func handleFrameSelectionChanged() {
+        guard !suppressSelectionSideEffects else { return }
+        guard !frameInfos.isEmpty, frameInfos.indices.contains(currentFrameIndex) else { return }
+
+        if isSelectedFrameReady {
+            renderFrameIndex = currentFrameIndex
+        }
+
+        focusedLoadTask?.cancel()
+        let sessionID = loadSessionID
+        let focusIndices = focusedFrameIndices(around: currentFrameIndex)
+        focusedLoadTask = Task { [weak self] in
+            guard let self else { return }
+            await self.loadFrameBatch(indices: focusIndices, sessionID: sessionID)
+            guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
+            self.restartBackgroundPreloadIfNeeded()
+        }
+    }
+
+    private func restartBackgroundPreloadIfNeeded() {
+        backgroundPreloadTask?.cancel()
+        guard allowsBackgroundPreload(for: renderMode),
+              interactionState != .scrubbing,
+              !frameInfos.isEmpty else { return }
+
+        let sessionID = loadSessionID
+        let focused = Set(focusedFrameIndices(around: currentFrameIndex))
+        let ordered = prioritizedFrameIndices(count: frameInfos.count, around: currentFrameIndex)
+            .filter { !focused.contains($0) }
+
+        backgroundPreloadTask = Task { [weak self] in
+            guard let self else { return }
+            await self.loadFrameBatch(indices: ordered, sessionID: sessionID)
+        }
+    }
+
+    private func focusedFrameIndices(around center: Int) -> [Int] {
+        Array(prioritizedFrameIndices(count: frameInfos.count, around: center).prefix(renderMode.focusedPreloadCount))
+    }
+
+    private func loadFocusedFrames(around center: Int, sessionID: UUID) async {
+        await loadFrameBatch(indices: focusedFrameIndices(around: center), sessionID: sessionID)
+    }
+
+    private func loadFrameBatch(indices: [Int], sessionID: UUID) async {
+        for index in indices {
+            guard !Task.isCancelled else { return }
+            _ = await loadFrameIfNeeded(at: index, sessionID: sessionID)
+        }
+    }
+
+    private func loadFrameIfNeeded(at index: Int, sessionID: UUID) async -> Bool {
+        guard loadSessionID == sessionID,
+              frameInfos.indices.contains(index),
+              frames.indices.contains(index) else {
+            return false
+        }
+
+        if frames[index] != nil {
+            if renderFrameIndex == nil {
+                renderFrameIndex = index
+            }
+            return true
+        }
+
+        if loadingFrameIndices.contains(index) {
+            return false
+        }
+
+        loadingFrameIndices.insert(index)
+        defer { loadingFrameIndices.remove(index) }
+
+        guard let cgImage = await Self.loadImage(for: frameInfos[index]),
+              loadSessionID == sessionID,
+              frameInfos.indices.contains(index),
+              frames.indices.contains(index) else {
+            return false
+        }
+
+        var updated = frames
+        let info = frameInfos[index]
+        updated[index] = OscarRadarFrame(
+            key: info.key,
+            timestamp: info.timestamp,
+            cgImage: cgImage
+        )
+        frames = updated
+
+        if renderFrameIndex == nil || currentFrameIndex == index {
+            renderFrameIndex = index
+        }
+
+        if isLoading, hasAnyLoadedFrame {
+            isLoading = false
+        }
+
+        return true
+    }
+
+    private func frame(at index: Int?) -> OscarRadarFrame? {
+        guard let index, frames.indices.contains(index) else { return nil }
+        return frames[index]
     }
 
     /// Fetches frame metadata from the server, or returns the cached list if still valid.
     /// Clears the image cache when the metadata expires, since frame keys will have changed.
     private static func fetchFrameInfos() async throws -> ([OscarFrameInfo], OscarBoundsInfo) {
-        cacheLock.lock()
-        if isCacheValid, let bounds = cachedBounds, !cachedFrameInfos.isEmpty {
-            let frames = cachedFrameInfos
-            cacheLock.unlock()
-            return (frames, bounds)
+        if let cached = cacheLock.withLock({
+            if isCacheValid, let bounds = cachedBounds, !cachedFrameInfos.isEmpty {
+                return (cachedFrameInfos, bounds)
+            }
+            cachedImages.removeAll()
+            return nil
+        }) {
+            return cached
         }
-        cachedImages.removeAll()
-        cacheLock.unlock()
 
         guard let url = URL(string: "\(baseURL)/radar/frames") else { throw URLError(.badURL) }
         var request = URLRequest(url: url)
         request.addAPIContactIdentity()
         let (data, _) = try await URLSession.shared.data(for: request)
         let response = try JSONDecoder().decode(OscarFramesResponse.self, from: data)
-        cacheLock.lock()
-        cachedFrameInfos = response.frames
-        cachedBounds = response.bounds
-        lastFetchedTime = Date()
-        cacheLock.unlock()
+        cacheLock.withLock {
+            cachedFrameInfos = response.frames
+            cachedBounds = response.bounds
+            lastFetchedTime = Date()
+        }
         return (response.frames, response.bounds)
     }
 
     /// Returns a cached CGImage for the frame, or downloads and caches it if missing.
     private static func loadImage(for frameInfo: OscarFrameInfo) async -> CGImage? {
-        cacheLock.lock()
-        if let cached = cachedImages[frameInfo.key] {
-            cacheLock.unlock()
+        if let cached = cacheLock.withLock({ cachedImages[frameInfo.key] }) {
             return cached
         }
-        cacheLock.unlock()
 
         guard let url = URL(string: "\(baseURL)/radar/image/\(frameInfo.key).webp?cmap=plasma") else { return nil }
         do {
@@ -297,9 +516,9 @@ class OscarRadarState {
             let (data, _) = try await URLSession.shared.data(for: request)
             guard let uiImage = UIImage(data: data) else { return nil }
             guard let cgImage = prepareForRenderer(uiImage) else { return nil }
-            cacheLock.lock()
-            cachedImages[frameInfo.key] = cgImage
-            cacheLock.unlock()
+            cacheLock.withLock {
+                cachedImages[frameInfo.key] = cgImage
+            }
             return cgImage
         } catch {
             return nil
@@ -312,7 +531,7 @@ class OscarRadarState {
     /// so `context.draw(cgImage, in:)` places the image's row 0 at the BOTTOM of the
     /// rect. By pre-flipping here (on a background thread at load time), the renderer's
     /// draw() needs no transform and no UIGraphicsPushContext — just a direct CG draw.
-    private static func prepareForRenderer(_ image: UIImage) -> CGImage? {
+    static func prepareForRenderer(_ image: UIImage) -> CGImage? {
         guard let cgImage = image.cgImage else { return nil }
         let w = cgImage.width, h = cgImage.height
         let cs = CGColorSpaceCreateDeviceRGB()
@@ -329,6 +548,9 @@ class OscarRadarState {
     }
 
     deinit {
+        bootstrapTask?.cancel()
+        focusedLoadTask?.cancel()
+        backgroundPreloadTask?.cancel()
         playbackTimer?.invalidate()
     }
 }
@@ -397,327 +619,425 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
         }
     }
 
+    /// Full-world image endpoint path for each layer.
+    var imagePath: String? {
+        switch self {
+        case .iconPrecip: return "icon/precip-image"
+        case .iconTemp:   return "icon/temp-image"
+        case .iconWind:   return "icon/wind-image"
+        case .gfsPrecip:  return "gfs/prate-image"
+        case .gfsTemp:    return "gfs/temp-image"
+        case .gfsWind:    return "gfs/wind-image"
+        }
+    }
+
     var sourceLabel: String {
         switch self {
         case .iconPrecip, .iconTemp, .iconWind: return "DWD ICON-D2"
         case .gfsPrecip, .gfsTemp, .gfsWind:   return "NOAA GFS"
         }
     }
-
-    /// Domain bounds (west, east, north, south) used for tile pre-fetching.
-    var preloadBounds: (west: Double, east: Double, north: Double, south: Double) {
-        switch self {
-        case .iconPrecip, .iconTemp, .iconWind:
-            return (west: -2, east: 22, north: 56, south: 43)
-        case .gfsPrecip, .gfsTemp, .gfsWind:
-            return (west: -5, east: 25, north: 60, south: 42)
-        }
-    }
 }
 
-// MARK: WeatherTileFrame
+// MARK: - GFS Full-World Image Layer State
 
-struct WeatherTileFrame: Identifiable {
-    let id = UUID()
-    let key: String
-    let validTime: String
-}
+let radarBaseURL = "https://radar.oscars.love"
 
-private actor WeatherTileMetadataCache {
-    private var cachedFrames: [String: [WeatherTileFrame]] = [:]
-    private var lastFetchTime: [String: Date] = [:]
-    private let cacheDuration: TimeInterval = 60 * 60 // 1 h
-
-    func frames(for endpoint: String, forceRefresh: Bool) -> [WeatherTileFrame]? {
-        guard !forceRefresh,
-              let last = lastFetchTime[endpoint],
-              Date().timeIntervalSince(last) < cacheDuration,
-              let cached = cachedFrames[endpoint],
-              !cached.isEmpty else {
-            return nil
-        }
-        return cached
-    }
-
-    func store(_ frames: [WeatherTileFrame], for endpoint: String) {
-        cachedFrames[endpoint] = frames
-        lastFetchTime[endpoint] = Date()
-    }
-}
-
-// MARK: WeatherTileState
-
+@MainActor
 @Observable
-final class WeatherTileState {
-    static let baseURL = "https://radar.oscars.love"
+final class GFSImageLayerState {
 
-    private(set) var frames: [WeatherTileFrame] = []
-    var currentFrameIndex: Int = 0
-    var isPlaying: Bool = false
+    static let baseURL = radarBaseURL
+
+    // Pre-sized when metadata arrives; slots fill in as images download.
+    private(set) var frames: [CGImage?] = []
+    private(set) var frameTimestamps: [String] = []
+    private(set) var frameKeys: [String] = []
+    private(set) var bounds: OscarRadarBounds?
+    /// Selected frame index from the timeline. Rendering may temporarily stay on
+    /// the last ready frame if the selected frame is still warming.
+    var currentFrameIndex: Int = 0 {
+        didSet {
+            guard currentFrameIndex != oldValue else { return }
+            handleFrameSelectionChanged()
+        }
+    }
     var isLoading: Bool = false
+    var isPlaying: Bool = false
     var error: String?
-    private(set) var currentLayer: WeatherTileLayer = .iconPrecip
+    private(set) var currentLayer: WeatherTileLayer?
+    private(set) var loadingFrameIndices: Set<Int> = []
+    private(set) var renderFrameIndex: Int?
+    private(set) var interactionState: MapInteractionState = .idle
 
-    private var playbackTimer: Timer?
-    private var preloadTask: Task<Void, Never>?
-    private var visiblePrefetchTask: Task<Void, Never>?
+    @ObservationIgnored private var loadTask: Task<Void, Never>?
+    @ObservationIgnored private var backgroundPreloadTask: Task<Void, Never>?
+    @ObservationIgnored private var focusedLoadTask: Task<Void, Never>?
+    @ObservationIgnored private var playbackTimer: Timer?
+    @ObservationIgnored private var frameInfos: [TileFrameInfo] = []
+    @ObservationIgnored private var loadSessionID = UUID()
+    @ObservationIgnored private var suppressSelectionSideEffects = false
+    @ObservationIgnored private let renderMode: MapRenderMode
 
-    private static let metadataCache = WeatherTileMetadataCache()
+    // Shared across instances — survives layer switches.
+    private static let cacheLock = NSLock()
+    private static var imageCache: [String: CGImage] = [:]
+
+    static func purgeDecodedCaches() {
+        cacheLock.withLock {
+            imageCache.removeAll()
+        }
+    }
+
+    init(renderMode: MapRenderMode = .fullscreen) {
+        self.renderMode = renderMode
+    }
 
     // MARK: - Derived
 
-    var frameTimestamps: [String] { frames.map { $0.validTime } }
+    var currentFrame: CGImage? {
+        frame(at: renderFrameIndex ?? currentFrameIndex)
+    }
 
-    var currentFrameKey: String? {
-        guard !frames.isEmpty, currentFrameIndex < frames.count else { return nil }
-        return frames[currentFrameIndex].key
+    var nextFrame: CGImage? {
+        guard let anchor = renderFrameIndex ?? (isSelectedFrameReady ? currentFrameIndex : nil) else { return nil }
+        let loaded = frames.map { $0 != nil }
+        guard let nextIndex = nextLoadedIndex(in: loaded, after: anchor) else { return nil }
+        return frame(at: nextIndex)
     }
 
     var currentFrameTimestamp: String? {
-        guard !frames.isEmpty, currentFrameIndex < frames.count else { return nil }
-        return frames[currentFrameIndex].validTime
+        guard !frameTimestamps.isEmpty, frameTimestamps.indices.contains(currentFrameIndex) else { return nil }
+        return frameTimestamps[currentFrameIndex]
     }
 
-    var isCurrentFrameLive: Bool {
-        guard !frames.isEmpty else { return false }
-        return currentFrameIndex == closestIndex(in: frameTimestamps)
+    var currentFrameKey: String? {
+        guard !frameKeys.isEmpty,
+              let index = renderFrameIndex ?? (isSelectedFrameReady ? currentFrameIndex : nil),
+              frameKeys.indices.contains(index) else { return nil }
+        return frameKeys[index]
     }
 
-    // MARK: - Load
-
-    func switchLayer(_ layer: WeatherTileLayer) async {
-        let changed = layer != currentLayer
-        await MainActor.run { currentLayer = layer }
-        await loadFrames(forceRefresh: changed)
+    var hasCurrentFrame: Bool {
+        currentFrame != nil
     }
 
-    func loadFrames(forceRefresh: Bool = false) async {
-        let layer = currentLayer
-        await MainActor.run { isLoading = true; error = nil }
+    var hasRenderableFrame: Bool {
+        currentFrame != nil || nextFrame != nil
+    }
 
-        do {
-            let newFrames = try await Self.fetchFrames(
-                endpoint: layer.framesEndpoint, forceRefresh: forceRefresh)
-            guard !newFrames.isEmpty else {
-                await MainActor.run { isLoading = false }
-                return
-            }
+    var hasAnyLoadedFrame: Bool {
+        frames.contains { $0 != nil }
+    }
 
-            let closest = closestIndex(in: newFrames.map { $0.validTime })
+    var isSelectedFrameReady: Bool {
+        frames.indices.contains(currentFrameIndex) && frames[currentFrameIndex] != nil
+    }
 
-            await MainActor.run {
-                guard self.currentLayer == layer else { return }
-                self.frames = newFrames
-                self.currentFrameIndex = closest
-                self.isLoading = false
-            }
+    var loadedFrameIndices: Set<Int> {
+        Set(frames.indices.filter { frames[$0] != nil })
+    }
 
-            preloadTask?.cancel()
-            preloadTask = nil
-        } catch {
-            await MainActor.run {
-                self.error = "Fehler: \(error.localizedDescription)"
-                self.isLoading = false
-            }
+    var contiguousReadyRange: ClosedRange<Int>? {
+        contiguousLoadedRange(
+            in: frames.map { $0 != nil },
+            around: isSelectedFrameReady ? currentFrameIndex : renderFrameIndex
+        )
+    }
+
+    var highestContiguouslyReadyForwardIndex: Int? {
+        guard isSelectedFrameReady else { return nil }
+
+        var index = currentFrameIndex
+        while index + 1 < frames.count, frames[index + 1] != nil {
+            index += 1
         }
+        return index
+    }
+
+    var furthestContiguouslyReadyTimestamp: String? {
+        guard let index = highestContiguouslyReadyForwardIndex,
+              frameTimestamps.indices.contains(index) else { return nil }
+        return frameTimestamps[index]
     }
 
     // MARK: - Playback
 
-    @MainActor
     func play() {
         guard !frames.isEmpty else { return }
         isPlaying = true
+        interactionState = .playing
+        restartBackgroundPreloadIfNeeded()
         playbackTimer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { [weak self] _ in
-            self?.advanceFrame()
+            Task { @MainActor in
+                self?.advanceFrame()
+            }
         }
     }
 
-    @MainActor
     func pause() {
         isPlaying = false
+        interactionState = .idle
         playbackTimer?.invalidate()
         playbackTimer = nil
     }
 
-    @MainActor
     func advanceFrame() {
         guard !frames.isEmpty else { return }
-        currentFrameIndex = (currentFrameIndex + 1) % frames.count
-    }
-
-    // MARK: - Tile URL Template
-
-    func tileURLTemplate() -> String? {
-        guard let key = currentFrameKey else { return nil }
-        return "\(Self.baseURL)/\(currentLayer.tilePath)/\(key)/{z}/{x}/{y}.webp"
-    }
-
-    // MARK: - Preloading
-
-    func prefetchVisibleTiles(
-        around frameIndex: Int,
-        visibleMapRect: MKMapRect,
-        zoomScale: MKZoomScale,
-        layer explicitLayer: WeatherTileLayer? = nil,
-        radius: Int = 2
-    ) {
-        guard !frames.isEmpty, frames.indices.contains(frameIndex) else { return }
-
-        visiblePrefetchTask?.cancel()
-        let layer = explicitLayer ?? currentLayer
-        let nearbyFrames = frames[
-            max(0, frameIndex - radius)...min(frames.count - 1, frameIndex + radius)
-        ].map { $0 }
-        let zoom = tileZoom(zoomScale: zoomScale)
-        let bounds = Self.coordinateBounds(for: visibleMapRect)
-        let urls = tileURLs(frames: nearbyFrames, path: layer.tilePath, bounds: bounds, zooms: [zoom])
-
-        visiblePrefetchTask = Task.detached(priority: .utility) { [weak self] in
-            await self?.fetchIntoCache(urls: urls, concurrency: 4)
+        let loaded = frames.map { $0 != nil }
+        guard let nextIndex = nextLoadedIndex(in: loaded, after: currentFrameIndex) else {
+            return
         }
+        currentFrameIndex = nextIndex
     }
 
-    func prepareVisibleTiles(
-        for frameIndex: Int,
-        layer: WeatherTileLayer,
-        visibleMapRect: MKMapRect,
-        zoomScale: MKZoomScale
-    ) async {
-        guard !frames.isEmpty, frames.indices.contains(frameIndex) else { return }
-
-        let zoom = tileZoom(zoomScale: zoomScale)
-        let bounds = Self.coordinateBounds(for: visibleMapRect)
-        let urls = tileURLs(
-            frames: [frames[frameIndex]],
-            path: layer.tilePath,
-            bounds: bounds,
-            zooms: [zoom]
-        )
-        await fetchIntoCache(urls: urls, concurrency: 8)
+    func beginScrubbing() {
+        interactionState = .scrubbing
+        backgroundPreloadTask?.cancel()
     }
 
-    private func tileURLs(
-        frames: [WeatherTileFrame],
-        path: String,
-        bounds: (west: Double, east: Double, north: Double, south: Double),
-        zooms: [Int]
-    ) -> [URL] {
-        var result: [URL] = []
-        for z in zooms {
-            let maxTile = Int(pow(2, Double(z))) - 1
-            let x0 = max(0, min(maxTile, tileX(bounds.west, zoom: z)))
-            let x1 = max(0, min(maxTile, tileX(bounds.east, zoom: z)))
-            let y0 = max(0, min(maxTile, tileY(bounds.north, zoom: z)))
-            let y1 = max(0, min(maxTile, tileY(bounds.south, zoom: z)))
-            for frame in frames {
-                for x in min(x0, x1)...max(x0, x1) {
-                    for y in min(y0, y1)...max(y0, y1) {
-                        let s = "\(Self.baseURL)/\(path)/\(frame.key)/\(z)/\(x)/\(y).webp"
-                        if let url = URL(string: s) { result.append(url) }
-                    }
+    func endScrubbing() {
+        interactionState = isPlaying ? .playing : .idle
+        restartBackgroundPreloadIfNeeded()
+    }
+
+    // MARK: - Load
+
+    func loadLayer(_ layer: WeatherTileLayer) async {
+        guard let imagePath = layer.imagePath else { return }
+        loadTask?.cancel()
+        focusedLoadTask?.cancel()
+        backgroundPreloadTask?.cancel()
+
+        let sessionID = UUID()
+        loadSessionID = sessionID
+
+        currentLayer = layer
+        isLoading = true
+        error = nil
+        frames = []
+        frameTimestamps = []
+        frameKeys = []
+        frameInfos = []
+        bounds = OscarRadarBounds(north: 85.051, south: -85.051, west: -180, east: 180)
+        loadingFrameIndices.removeAll()
+        renderFrameIndex = nil
+
+        loadTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                // 1. Fetch frame list + bounds
+                guard let url = URL(string: "\(Self.baseURL)/\(layer.framesEndpoint)") else { return }
+                var req = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+                req.addAPIContactIdentity()
+                let (data, _) = try await URLSession.shared.data(for: req)
+                let decoded = try JSONDecoder().decode(TileFramesResponse.self, from: data)
+                guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
+
+                let fetchedFrameInfos = decoded.frames
+                let fetchedBounds: OscarRadarBounds
+                if let b = decoded.imageBounds ?? decoded.bounds {
+                    fetchedBounds = OscarRadarBounds(north: b.north, south: b.south, west: b.west, east: b.east)
+                } else {
+                    fetchedBounds = OscarRadarBounds(north: 85.051, south: -85.051, west: -180, east: 180)
                 }
+
+                // 2. Pre-size array so the scrubber can render immediately.
+                let timestamps = fetchedFrameInfos.map(\.validTime)
+                let keys = fetchedFrameInfos.map(\.key)
+                let closest = closestTimestampIndex(in: timestamps)
+
+                self.suppressSelectionSideEffects = true
+                self.frameInfos = fetchedFrameInfos
+                self.frames = Array(repeating: nil, count: fetchedFrameInfos.count)
+                self.frameTimestamps = timestamps
+                self.frameKeys = keys
+                self.bounds = fetchedBounds
+                self.currentFrameIndex = closest
+                self.suppressSelectionSideEffects = false
+
+                await self.loadFrameBatch(
+                    indices: self.focusedFrameIndices(around: closest),
+                    sessionID: sessionID,
+                    imagePath: imagePath,
+                    layer: layer
+                )
+
+                guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
+                self.isLoading = false
+                self.restartBackgroundPreloadIfNeeded()
+            } catch {
+                guard self.loadSessionID == sessionID else { return }
+                self.isLoading = false
+                self.error = error.localizedDescription
             }
         }
-        return result
-    }
 
-    private func fetchIntoCache(urls: [URL], concurrency: Int) async {
-        let pending = urls.filter {
-            var request = URLRequest(url: $0)
-            request.addAPIContactIdentity()
-            return URLCache.shared.cachedResponse(for: request) == nil
-        }
-        guard !pending.isEmpty else { return }
-
-        await withTaskGroup(of: Void.self) { group in
-            var inFlight = 0
-            for url in pending {
-                guard !Task.isCancelled else { break }
-                if inFlight >= concurrency {
-                    await group.next()
-                    inFlight -= 1
-                }
-                group.addTask {
-                    var req = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
-                    req.addAPIContactIdentity()
-                    guard let (data, response) = try? await URLSession.shared.data(for: req),
-                          let http = response as? HTTPURLResponse,
-                          http.statusCode == 200, !data.isEmpty else { return }
-                    let cached = CachedURLResponse(response: response, data: data)
-                    URLCache.shared.storeCachedResponse(cached, for: req)
-                }
-                inFlight += 1
-            }
-        }
-    }
-
-    // MARK: - Fetch
-
-    private static func fetchFrames(endpoint: String, forceRefresh: Bool) async throws -> [WeatherTileFrame] {
-        if let cached = await metadataCache.frames(for: endpoint, forceRefresh: forceRefresh) {
-            return cached
-        }
-        guard let url = URL(string: "\(baseURL)/\(endpoint)") else { throw URLError(.badURL) }
-        var req = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
-        req.addAPIContactIdentity()
-        let (data, _) = try await URLSession.shared.data(for: req)
-        let decoded = try JSONDecoder().decode(TileFramesResponse.self, from: data)
-        let result = decoded.frames.map { WeatherTileFrame(key: $0.key, validTime: $0.validTime) }
-        await metadataCache.store(result, for: endpoint)
-        return result
+        await loadTask?.value
     }
 
     // MARK: - Helpers
 
-    private func closestIndex(in timestamps: [String]) -> Int {
-        let now = Date()
-        let fmt = ISO8601DateFormatter()
-        fmt.formatOptions = [.withInternetDateTime]
-        let fmtFrac = ISO8601DateFormatter()
-        fmtFrac.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    private func handleFrameSelectionChanged() {
+        guard !suppressSelectionSideEffects else { return }
+        guard !frameInfos.isEmpty,
+              currentLayer != nil,
+              frameInfos.indices.contains(currentFrameIndex) else { return }
 
-        var best = 0, bestDiff = TimeInterval.infinity
-        for (i, ts) in timestamps.enumerated() {
-            guard let date = fmtFrac.date(from: ts) ?? fmt.date(from: ts) else { continue }
-            let diff = abs(now.timeIntervalSince(date))
-            if diff < bestDiff { bestDiff = diff; best = i }
+        if isSelectedFrameReady {
+            renderFrameIndex = currentFrameIndex
         }
-        return best
+
+        focusedLoadTask?.cancel()
+        guard let layer = currentLayer, let imagePath = layer.imagePath else { return }
+        let sessionID = loadSessionID
+        let focusIndices = focusedFrameIndices(around: currentFrameIndex)
+
+        focusedLoadTask = Task { [weak self] in
+            guard let self else { return }
+            await self.loadFrameBatch(
+                indices: focusIndices,
+                sessionID: sessionID,
+                imagePath: imagePath,
+                layer: layer
+            )
+            guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
+            self.restartBackgroundPreloadIfNeeded()
+        }
     }
 
-    private func tileX(_ lon: Double, zoom: Int) -> Int {
-        Int(floor((lon + 180) / 360 * pow(2, Double(zoom))))
+    private func restartBackgroundPreloadIfNeeded() {
+        backgroundPreloadTask?.cancel()
+        guard allowsBackgroundPreload(for: renderMode),
+              interactionState != .scrubbing,
+              let layer = currentLayer,
+              let imagePath = layer.imagePath,
+              !frameInfos.isEmpty else { return }
+
+        let sessionID = loadSessionID
+        let focused = Set(focusedFrameIndices(around: currentFrameIndex))
+        let ordered = prioritizedFrameIndices(count: frameInfos.count, around: currentFrameIndex)
+            .filter { !focused.contains($0) }
+
+        backgroundPreloadTask = Task { [weak self] in
+            guard let self else { return }
+            await self.loadFrameBatch(
+                indices: ordered,
+                sessionID: sessionID,
+                imagePath: imagePath,
+                layer: layer
+            )
+        }
     }
 
-    private func tileY(_ lat: Double, zoom: Int) -> Int {
-        let rad = lat * .pi / 180
-        return Int(floor((1 - log(tan(rad) + 1 / cos(rad)) / .pi) / 2 * pow(2, Double(zoom))))
+    private func focusedFrameIndices(around center: Int) -> [Int] {
+        Array(prioritizedFrameIndices(count: frameInfos.count, around: center).prefix(renderMode.focusedPreloadCount))
     }
 
-    private func tileZoom(zoomScale: MKZoomScale) -> Int {
-        let numTilesAt1_0 = MKMapSize.world.width / 256.0
-        let zoomLevelAt1_0 = log2(numTilesAt1_0)
-        return max(0, Int(zoomLevelAt1_0 + floor(log2(Double(zoomScale)) + 0.5)))
+    private func loadFrameBatch(
+        indices: [Int],
+        sessionID: UUID,
+        imagePath: String,
+        layer: WeatherTileLayer
+    ) async {
+        for index in indices {
+            guard !Task.isCancelled else { return }
+            _ = await loadFrameIfNeeded(
+                at: index,
+                sessionID: sessionID,
+                imagePath: imagePath,
+                layer: layer
+            )
+        }
     }
 
-    private static func coordinateBounds(
-        for mapRect: MKMapRect
-    ) -> (west: Double, east: Double, north: Double, south: Double) {
-        let topLeft = MKMapPoint(x: mapRect.minX, y: mapRect.minY).coordinate
-        let bottomRight = MKMapPoint(x: mapRect.maxX, y: mapRect.maxY).coordinate
-        return (
-            west: min(topLeft.longitude, bottomRight.longitude),
-            east: max(topLeft.longitude, bottomRight.longitude),
-            north: max(topLeft.latitude, bottomRight.latitude),
-            south: min(topLeft.latitude, bottomRight.latitude)
-        )
+    private func loadFrameIfNeeded(
+        at index: Int,
+        sessionID: UUID,
+        imagePath: String,
+        layer: WeatherTileLayer
+    ) async -> Bool {
+        guard loadSessionID == sessionID,
+              currentLayer == layer,
+              frameInfos.indices.contains(index),
+              frames.indices.contains(index) else {
+            return false
+        }
+
+        if frames[index] != nil {
+            if renderFrameIndex == nil {
+                renderFrameIndex = index
+            }
+            return true
+        }
+
+        if loadingFrameIndices.contains(index) {
+            return false
+        }
+
+        loadingFrameIndices.insert(index)
+        defer { loadingFrameIndices.remove(index) }
+
+        let info = frameInfos[index]
+        let cacheKey = "\(layer.rawValue)/\(info.key)"
+
+        let cached = Self.cacheLock.withLock { Self.imageCache[cacheKey] }
+
+        let cgImage: CGImage?
+        if let cached {
+            cgImage = cached
+        } else {
+            guard !Task.isCancelled,
+                  let url = URL(string: "\(Self.baseURL)/\(imagePath)/\(info.key)") else {
+                return false
+            }
+            var req = URLRequest(url: url)
+            req.addAPIContactIdentity()
+            guard let (data, response) = try? await URLSession.shared.data(for: req),
+                  let http = response as? HTTPURLResponse,
+                  http.statusCode == 200,
+                  let uiImage = UIImage(data: data),
+                  let decoded = OscarRadarState.prepareForRenderer(uiImage) else {
+                return false
+            }
+            Self.cacheLock.withLock {
+                Self.imageCache[cacheKey] = decoded
+            }
+            cgImage = decoded
+        }
+
+        guard let cgImage,
+              loadSessionID == sessionID,
+              currentLayer == layer,
+              frames.indices.contains(index) else {
+            return false
+        }
+
+        var updated = frames
+        updated[index] = cgImage
+        frames = updated
+
+        if renderFrameIndex == nil || currentFrameIndex == index {
+            renderFrameIndex = index
+        }
+
+        if isLoading, hasAnyLoadedFrame {
+            isLoading = false
+        }
+
+        return true
+    }
+
+    private func frame(at index: Int?) -> CGImage? {
+        guard let index, frames.indices.contains(index) else { return nil }
+        return frames[index]
     }
 
     deinit {
+        loadTask?.cancel()
+        backgroundPreloadTask?.cancel()
+        focusedLoadTask?.cancel()
         playbackTimer?.invalidate()
-        preloadTask?.cancel()
-        visiblePrefetchTask?.cancel()
     }
 }
 
@@ -725,6 +1045,25 @@ final class WeatherTileState {
 
 private struct TileFramesResponse: Decodable {
     let frames: [TileFrameInfo]
+    let bounds: TileBounds?
+    let imageBounds: TileBounds?
+
+    enum CodingKeys: String, CodingKey {
+        case frames
+        case bounds
+        case imageBounds = "image_bounds"
+    }
+
+    struct TileBounds: Decodable {
+        let north, south, west, east: Double
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        frames = try container.decode([TileFrameInfo].self, forKey: .frames)
+        bounds = try? container.decode(TileBounds.self, forKey: .bounds)
+        imageBounds = try? container.decode(TileBounds.self, forKey: .imageBounds)
+    }
 }
 
 private struct TileFrameInfo: Decodable {

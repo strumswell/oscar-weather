@@ -10,8 +10,8 @@ import SwiftUI
 struct MapDetailView: View {
     @ObservedObject var settingsService: SettingService
     @Environment(\.presentationMode) var presentationMode
-    @State private var oscarRadarState = OscarRadarState()
-    @State private var weatherTileState = WeatherTileState()
+    @State private var oscarRadarState = OscarRadarState(renderMode: .fullscreen)
+    @State private var gfsImageState = GFSImageLayerState(renderMode: .fullscreen)
 
     var body: some View {
         NavigationView {
@@ -20,7 +20,7 @@ struct MapDetailView: View {
                     settingsService: settingsService,
                     showLayerSettings: true,
                     oscarRadarState: oscarRadarState,
-                    weatherTileState: weatherTileState
+                    gfsImageState: gfsImageState
                 )
 
                 // Timeline controls — floats above the bottom safe area
@@ -31,7 +31,7 @@ struct MapDetailView: View {
                             .padding(.horizontal, 16)
                             .padding(.bottom, 60)
                     } else if settingsService.activeTileLayer != nil {
-                        WeatherTileTimelineControls(tileState: weatherTileState)
+                        WeatherTileTimelineControls(imageState: gfsImageState)
                             .padding(.horizontal, 16)
                             .padding(.bottom, 60)
                     }
@@ -43,7 +43,7 @@ struct MapDetailView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(String(localized: "Fertig")) {
                         oscarRadarState.pause()
-                        weatherTileState.pause()
+                        gfsImageState.pause()
                         presentationMode.wrappedValue.dismiss()
                         UIApplication.shared.playHapticFeedback()
                     }
@@ -53,12 +53,12 @@ struct MapDetailView: View {
                 if settingsService.oscarRadarLayer {
                     await oscarRadarState.loadAllFrames()
                 } else if let layer = settingsService.activeTileLayer {
-                    await weatherTileState.switchLayer(layer)
+                    await gfsImageState.loadLayer(layer)
                 }
             }
             .onChange(of: settingsService.oscarRadarLayer) { _, isEnabled in
                 if isEnabled {
-                    weatherTileState.pause()
+                    gfsImageState.pause()
                     if oscarRadarState.frames.isEmpty {
                         Task { await oscarRadarState.loadAllFrames() }
                     }
@@ -69,9 +69,9 @@ struct MapDetailView: View {
             .onChange(of: settingsService.activeTileLayer) { _, newLayer in
                 if let layer = newLayer {
                     oscarRadarState.pause()
-                    Task { await weatherTileState.switchLayer(layer) }
+                    Task { await gfsImageState.loadLayer(layer) }
                 } else {
-                    weatherTileState.pause()
+                    gfsImageState.pause()
                 }
             }
         }

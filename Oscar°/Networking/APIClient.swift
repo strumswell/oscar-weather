@@ -186,10 +186,11 @@ class APIClient {
         query: .init(
           latitude: outboundCoordinates.latitude,
           longitude: outboundCoordinates.longitude,
-          timezone: "auto", timeformat: .unixtime, forecast_days: ._1,
+          timezone: "auto", timeformat: .unixtime, forecast_days: ._3,
           hourly: [
             .european_aqi, .european_aqi_no2, .european_aqi_o3, .european_aqi_pm10,
-            .european_aqi_pm10, .european_aqi_pm2_5, .european_aqi_so2, .uv_index,
+            .european_aqi_pm2_5, .european_aqi_so2, .uv_index, .alder_pollen, .birch_pollen,
+            .grass_pollen, .mugwort_pollen, .ragweed_pollen
           ]
         )
       ))

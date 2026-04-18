@@ -7,6 +7,7 @@
 
 import MapKit
 import SwiftUI
+import UIKit
 
 struct RadarView: View {
     @Environment(Location.self) private var location: Location
@@ -15,8 +16,9 @@ struct RadarView: View {
     var showLayerSettings: Bool
     var locationService = LocationService.shared
     var userActionAllowed = true
+    var showWindParticles = true
     var oscarRadarState: OscarRadarState?
-    var weatherTileState: WeatherTileState?
+    var gfsImageState: GFSImageLayerState?
 
     var body: some View {
         ZStack {
@@ -26,29 +28,55 @@ struct RadarView: View {
                 coordinates: location.coordinates,
                 cities: locationService.city.cities,
                 userActionAllowed: userActionAllowed,
+                showWindParticles: showWindParticles,
                 lastRefresh: lastRefresh,
                 oscarRadarState: oscarRadarState,
-                weatherTileState: weatherTileState
+                gfsImageState: gfsImageState
             )
 
             // Timestamp badge + optional colormap legend — top-left
             VStack {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 6) {
-                        if settingsService.oscarRadarLayer, let frame = oscarRadarState?.currentFrame {
+                        if settingsService.oscarRadarLayer {
+                            let _ = oscarRadarState?.currentFrameIndex
+                            let _ = oscarRadarState?.currentFrame
+                            let _ = oscarRadarState?.nextFrame
+                            let _ = oscarRadarState?.loadingFrameIndices
+                            let _ = oscarRadarState?.isLoading
+                            let _ = oscarRadarState?.bounds
+                            if let oscarRadarState,
+                               oscarRadarState.hasAnyLoadedFrame,
+                               let timestamp = oscarRadarState.currentFrameTimestamp {
                             RadarTimestampBadge(
-                                timestamp: frame.timestamp,
-                                isLive: oscarRadarState?.isCurrentFrameLive ?? false
+                                timestamp: timestamp,
+                                isLive: oscarRadarState.isCurrentFrameLive
                             )
                             if showLayerSettings {
                                 ColormapVerticalLegend(colormap: .radar)
                             }
-                        } else if settingsService.activeTileLayer != nil,
-                                  let ts = weatherTileState?.currentFrameTimestamp {
-                            let _ = weatherTileState?.currentFrameIndex
-                            RadarTimestampBadge(timestamp: ts, isLive: false)
-                            if showLayerSettings, let cm = settingsService.activeTileLayer?.colormap {
-                                ColormapVerticalLegend(colormap: cm)
+                            } else if oscarRadarState?.isLoading == true {
+                                ProgressView()
+                                    .controlSize(.small)
+                            }
+                        } else if settingsService.activeTileLayer != nil {
+                            // Observe so updateUIView fires as images load/scrub.
+                            let _ = gfsImageState?.frames.count
+                            let _ = gfsImageState?.isLoading
+                            let _ = gfsImageState?.currentFrameIndex
+                            let _ = gfsImageState?.currentFrame
+                            let _ = gfsImageState?.nextFrame
+                            let _ = gfsImageState?.bounds
+                            let _ = gfsImageState?.currentLayer
+                            if let gfsImageState, gfsImageState.hasCurrentFrame,
+                               let ts = gfsImageState.currentFrameTimestamp {
+                                RadarTimestampBadge(timestamp: ts, isLive: false)
+                                if showLayerSettings, let cm = settingsService.activeTileLayer?.colormap {
+                                    ColormapVerticalLegend(colormap: cm)
+                                }
+                            } else if gfsImageState?.isLoading == true {
+                                ProgressView()
+                                    .controlSize(.small)
                             }
                         }
                     }
@@ -120,6 +148,7 @@ struct RadarView: View {
                     activateTileLayer(.gfsWind)
                 }
             }
+
             
             // ── Rainviewer ─────────────────────────────────────────────────
             Section("Rainviewer") {
@@ -165,7 +194,7 @@ struct RadarView: View {
         settingsService.settings?.rainviewerLayer = false
         settingsService.save()
         oscarRadarState?.pause()
-        weatherTileState?.pause()
+        gfsImageState?.pause()
     }
 
     private func activateRainviewer() {
@@ -175,7 +204,7 @@ struct RadarView: View {
         settingsService.settings?.dwdLayer = false
         settingsService.save()
         oscarRadarState?.pause()
-        weatherTileState?.pause()
+        gfsImageState?.pause()
     }
 
     private func activateDWDRadar() {
@@ -184,7 +213,7 @@ struct RadarView: View {
         settingsService.settings?.dwdLayer = false
         settingsService.save()
         settingsService.oscarRadarLayer = true
-        weatherTileState?.pause()
+        gfsImageState?.pause()
     }
 
     private func activateTileLayer(_ layer: WeatherTileLayer) {
@@ -194,7 +223,6 @@ struct RadarView: View {
         settingsService.save()
         oscarRadarState?.pause()
         settingsService.activeTileLayer = layer
-        // Parent's onChange(of: settingsService.activeTileLayer) will call switchLayer
     }
 }
 
@@ -213,19 +241,64 @@ struct RadarMapView: UIViewRepresentable {
     var coordinates: CLLocationCoordinate2D
     var cities: [City]
     var userActionAllowed: Bool
+    var showWindParticles: Bool
     var lastRefresh: Date
     var oscarRadarState: OscarRadarState?
-    var weatherTileState: WeatherTileState?
+    var gfsImageState: GFSImageLayerState?
 
-    private static let oscarRadarArrowHost = "https://radar.oscars.love"
-    private static func arrowTileTemplate(frameId: String) -> String {
-        "\(oscarRadarArrowHost)/radar/vector-tiles/\(frameId)/{z}/{x}/{y}.webp"
-    }
+    private static let oscarRadarArrowHost = radarBaseURL
 
     private final class RainViewerRadarTileOverlay: MKTileOverlay {}
     private final class RainViewerInfraredTileOverlay: MKTileOverlay {}
     private final class LegacyDWDTileOverlay: WMSTileOverlay {}
-    private final class OscarRadarArrowTileOverlay: MKTileOverlay {}
+    private final class OscarRadarArrowTileOverlay: MKTileOverlay {
+        var frameID: String
+
+        init(frameID: String) {
+            self.frameID = frameID
+            super.init(urlTemplate: nil)
+            canReplaceMapContent = false
+        }
+
+        override func loadTile(
+            at path: MKTileOverlayPath,
+            result: @escaping (Data?, Error?) -> Void
+        ) {
+            guard let url = URL(
+                string: "\(RadarMapView.oscarRadarArrowHost)/radar/vector-tiles/\(frameID)/\(path.z)/\(path.x)/\(path.y).webp"
+            ) else {
+                result(nil, nil)
+                return
+            }
+
+            var request = URLRequest(url: url)
+            request.addAPIContactIdentity()
+
+            if let cached = URLCache.shared.cachedResponse(for: request), !cached.data.isEmpty {
+                result(cached.data, nil)
+                return
+            }
+
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                if let data, let response, !data.isEmpty {
+                    URLCache.shared.storeCachedResponse(
+                        CachedURLResponse(response: response, data: data),
+                        for: request
+                    )
+                }
+                result(data, error)
+            }.resume()
+        }
+    }
+    private final class SelectedCityAnnotation: NSObject, MKAnnotation {
+        let coordinate: CLLocationCoordinate2D
+        let title: String?
+
+        init(city: City) {
+            self.coordinate = CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
+            self.title = city.label
+        }
+    }
 
     struct RainViewerOverlayTemplates {
         let radar: String?
@@ -236,16 +309,23 @@ struct RadarMapView: UIViewRepresentable {
         var parent: RadarMapView
         var animatingRenderer: OscarRadarAnimatingRenderer?
         var lastRenderedFrameIndex: Int = -1
-        /// Combines tilePath + frameKey — detects both frame advances and layer switches.
-        var lastTileOverlayID: String? = nil
-        var pendingTileOverlayID: String? = nil
-        var pendingTileOverlayTask: Task<Void, Never>? = nil
-        var lastVisibleTilePrefetchID: String? = nil
+        var lastRenderedOscarFrameKey: String?
+        var hasRenderedOscarFrame = false
+        var gfsImageRenderer: OscarRadarAnimatingRenderer?
+        var lastGFSImageFrameIndex: Int = -1
+        var lastGFSImageFrameKey: String?
+        var lastGFSImageLayer: WeatherTileLayer?
+        var lastGFSBounds: OscarRadarBounds?
+        var hasRenderedGFSFrame = false
         var rainViewerRadarOverlayID: String? = nil
         var rainViewerInfraredOverlayID: String? = nil
         var isLoadingRainViewerRadar = false
         var isLoadingRainViewerInfrared = false
         var rainViewerTemplatesTask: Task<RainViewerOverlayTemplates, Error>? = nil
+        private var oscarArrowOverlay: OscarRadarArrowTileOverlay?
+        var windParticleView: WindParticleView?
+        var lastWindFrameKey: String?
+        private var selectedCityAnnotation: SelectedCityAnnotation?
 
         init(_ parent: RadarMapView) {
             self.parent = parent
@@ -253,8 +333,32 @@ struct RadarMapView: UIViewRepresentable {
         }
 
         deinit {
-            pendingTileOverlayTask?.cancel()
             rainViewerTemplatesTask?.cancel()
+        }
+
+        func syncOscarArrowOverlay(frameKey: String, on mapView: MKMapView) {
+            if let overlay = oscarArrowOverlay {
+                if overlay.frameID != frameKey {
+                    overlay.frameID = frameKey
+                    (mapView.renderer(for: overlay) as? MKTileOverlayRenderer)?.reloadData()
+                }
+                if !mapView.overlays.contains(where: { ($0 as AnyObject) === overlay }) {
+                    mapView.addOverlay(overlay, level: .aboveLabels)
+                }
+                return
+            }
+
+            let overlay = OscarRadarArrowTileOverlay(frameID: frameKey)
+            oscarArrowOverlay = overlay
+            mapView.addOverlay(overlay, level: .aboveLabels)
+        }
+
+        func removeOscarArrowOverlay(from mapView: MKMapView) {
+            if let overlay = oscarArrowOverlay,
+               mapView.overlays.contains(where: { ($0 as AnyObject) === overlay }) {
+                mapView.removeOverlay(overlay)
+            }
+            oscarArrowOverlay = nil
         }
 
         @MainActor
@@ -299,16 +403,26 @@ struct RadarMapView: UIViewRepresentable {
                 // Feed images immediately so the overlay is visible without
                 // waiting for the next frame-index change (fixes blank-on-first-load).
                 if let state = parent.oscarRadarState, let frame = state.currentFrame {
-                    let next = (state.currentFrameIndex + 1) % max(1, state.frames.count)
-                    r.updateImages(imageA: frame.cgImage, imageB: state.frames[next]?.cgImage)
-                    lastRenderedFrameIndex = state.currentFrameIndex
+                    r.updateImages(imageA: frame.cgImage, imageB: state.nextFrame?.cgImage)
+                    lastRenderedFrameIndex = state.renderFrameIndex ?? state.currentFrameIndex
+                    lastRenderedOscarFrameKey = frame.key
+                    hasRenderedOscarFrame = true
                 }
                 animatingRenderer = r
                 return r
             }
-            if let tileOverlay = overlay as? WeatherTileOverlay {
-                let r = MKTileOverlayRenderer(tileOverlay: tileOverlay)
+            if let gfsOverlay = overlay as? GFSFullWorldImageOverlay {
+                if let existing = gfsImageRenderer { return existing }
+                let r = OscarRadarAnimatingRenderer(gfsOverlay: gfsOverlay)
                 r.alpha = CGFloat(parent.overlayOpacity)
+                if let state = parent.gfsImageState {
+                    r.updateImages(imageA: state.currentFrame, imageB: state.nextFrame)
+                    lastGFSImageFrameIndex = state.renderFrameIndex ?? state.currentFrameIndex
+                    lastGFSImageFrameKey = state.currentFrameKey
+                    lastGFSImageLayer = state.currentLayer
+                    hasRenderedGFSFrame = state.currentFrame != nil || state.nextFrame != nil
+                }
+                gfsImageRenderer = r
                 return r
             }
             if overlay is OscarRadarArrowTileOverlay {
@@ -319,6 +433,43 @@ struct RadarMapView: UIViewRepresentable {
             let r = MKTileOverlayRenderer(overlay: overlay)
             r.alpha = parent.overlayOpacity
             return r
+        }
+
+        func mapView(_ mapView: MKMapView, viewFor annotation: any MKAnnotation) -> MKAnnotationView? {
+            if annotation is MKUserLocation {
+                return nil
+            }
+
+            if annotation is SelectedCityAnnotation {
+                let view = mapView.dequeueReusableAnnotationView(withIdentifier: "SelectedCityMarker")
+                    as? MKMarkerAnnotationView
+                    ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: "SelectedCityMarker")
+                view.annotation = annotation
+                view.markerTintColor = .systemRed
+                view.glyphImage = UIImage(systemName: "location.fill")
+                view.displayPriority = .required
+                return view
+            }
+
+            return nil
+        }
+
+        func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+            windParticleView?.onMapRegionChanged()
+        }
+
+        func syncSelectedCityAnnotation(on mapView: MKMapView) {
+            let selectedCity = parent.cities.first(where: \.selected)
+
+            if let existing = selectedCityAnnotation {
+                mapView.removeAnnotation(existing)
+                selectedCityAnnotation = nil
+            }
+
+            guard let selectedCity else { return }
+            let annotation = SelectedCityAnnotation(city: selectedCity)
+            selectedCityAnnotation = annotation
+            mapView.addAnnotation(annotation)
         }
     }
 
@@ -333,6 +484,14 @@ struct RadarMapView: UIViewRepresentable {
                 latitude: coordinates.latitude, longitude: coordinates.longitude),
             latitudinalMeters: 130000, longitudinalMeters: 130000)
         mapView.setRegion(coordinateRegion, animated: false)
+
+        // Add wind particle overlay above the map content.
+        let particleView = WindParticleView(frame: mapView.bounds)
+        particleView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        particleView.mapView = mapView
+        mapView.addSubview(particleView)
+        context.coordinator.windParticleView = particleView
+
         return mapView
     }
 
@@ -341,32 +500,21 @@ struct RadarMapView: UIViewRepresentable {
 
         let oscarOverlays      = mapView.overlays.filter { $0 is OscarRadarImageOverlay }
         let oscarArrowOverlays = mapView.overlays.filter { $0 is OscarRadarArrowTileOverlay }
-        let tileOverlays       = mapView.overlays.filter { $0 is WeatherTileOverlay }
+        let gfsImageOverlays   = mapView.overlays.filter { $0 is GFSFullWorldImageOverlay }
         let rainViewerRadarOverlays = mapView.overlays.filter { $0 is RainViewerRadarTileOverlay }
         let rainViewerInfraredOverlays = mapView.overlays.filter { $0 is RainViewerInfraredTileOverlay }
         let legacyDWDOverlays = mapView.overlays.filter { $0 is LegacyDWDTileOverlay }
         let otherOverlays      = mapView.overlays.filter {
             !($0 is OscarRadarImageOverlay)
                 && !($0 is OscarRadarArrowTileOverlay)
-                && !($0 is WeatherTileOverlay)
+                && !($0 is GFSFullWorldImageOverlay)
                 && !($0 is RainViewerRadarTileOverlay)
                 && !($0 is RainViewerInfraredTileOverlay)
                 && !($0 is LegacyDWDTileOverlay)
         }
 
-        mapView.removeAnnotations(mapView.annotations)
-
-        for city in self.cities {
-            if city.selected {
-                let pin = MKPointAnnotation()
-                pin.title = city.label
-                pin.coordinate = CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
-                mapView.addAnnotation(pin)
-                break
-            }
-        }
-
         mapView.delegate = context.coordinator
+        context.coordinator.syncSelectedCityAnnotation(on: mapView)
         mapView.removeOverlays(otherOverlays)
 
         if let settings = settingsService.settings {
@@ -470,14 +618,20 @@ struct RadarMapView: UIViewRepresentable {
                    let frame = oscarState.currentFrame,
                    let bounds = oscarState.bounds
                 {
-                    let nextIndex = (oscarState.currentFrameIndex + 1) % max(1, oscarState.frames.count)
+                    let renderedIndex = oscarState.renderFrameIndex ?? oscarState.currentFrameIndex
+                    let frameKeyDidChange = context.coordinator.lastRenderedOscarFrameKey != frame.key
 
-                    if context.coordinator.lastRenderedFrameIndex != oscarState.currentFrameIndex {
-                        context.coordinator.lastRenderedFrameIndex = oscarState.currentFrameIndex
+                    if context.coordinator.lastRenderedFrameIndex != renderedIndex
+                        || frameKeyDidChange
+                        || !context.coordinator.hasRenderedOscarFrame
+                    {
+                        context.coordinator.lastRenderedFrameIndex = renderedIndex
+                        context.coordinator.lastRenderedOscarFrameKey = frame.key
                         context.coordinator.animatingRenderer?.updateImages(
                             imageA: frame.cgImage,
-                            imageB: oscarState.frames[nextIndex]?.cgImage
+                            imageB: oscarState.nextFrame?.cgImage
                         )
+                        context.coordinator.hasRenderedOscarFrame = true
                     }
 
                     if oscarOverlays.isEmpty {
@@ -494,85 +648,122 @@ struct RadarMapView: UIViewRepresentable {
                         }
                     }
 
-                    mapView.removeOverlays(oscarArrowOverlays)
-                    let arrowOverlay = OscarRadarArrowTileOverlay(
-                        urlTemplate: Self.arrowTileTemplate(frameId: frame.key))
-                    arrowOverlay.canReplaceMapContent = false
-                    mapView.addOverlay(arrowOverlay, level: .aboveLabels)
+                    context.coordinator.syncOscarArrowOverlay(frameKey: frame.key, on: mapView)
                 }
             } else {
                 mapView.removeOverlays(oscarOverlays)
                 mapView.removeOverlays(oscarArrowOverlays)
+                context.coordinator.removeOscarArrowOverlay(from: mapView)
                 context.coordinator.animatingRenderer?.stopAnimation()
+                context.coordinator.lastRenderedFrameIndex = -1
+                context.coordinator.lastRenderedOscarFrameKey = nil
+                context.coordinator.hasRenderedOscarFrame = false
             }
 
-            // ── Tile-based weather layers (ICON-D2 / GFS) ─────────────────
-            if let tileState = weatherTileState,
-               let activeLayer = settingsService.activeTileLayer,
-               let frameKey = tileState.currentFrameKey
-            {
-                let overlayID = "\(activeLayer.tilePath)/\(frameKey)"
-                let visibleMapRect = mapView.visibleMapRect
-                let zoomScale = mapView.bounds.width / visibleMapRect.size.width
-                if zoomScale.isFinite, zoomScale > 0 {
-                    let prefetchID = [
-                        overlayID,
-                        String(Int(log2(Double(max(zoomScale, 0.0001))).rounded())),
-                        String(Int((visibleMapRect.minX / (MKMapSize.world.width / 512)).rounded(.down))),
-                        String(Int((visibleMapRect.minY / (MKMapSize.world.width / 512)).rounded(.down))),
-                        String(Int((visibleMapRect.maxX / (MKMapSize.world.width / 512)).rounded(.down))),
-                        String(Int((visibleMapRect.maxY / (MKMapSize.world.width / 512)).rounded(.down)))
-                    ].joined(separator: "/")
-                    if prefetchID != context.coordinator.lastVisibleTilePrefetchID {
-                        context.coordinator.lastVisibleTilePrefetchID = prefetchID
-                        tileState.prefetchVisibleTiles(
-                            around: tileState.currentFrameIndex,
-                            visibleMapRect: visibleMapRect,
-                            zoomScale: zoomScale,
-                            layer: activeLayer
-                        )
+            // ── Full-world image overlay (ICON-D2 / GFS) ─────────────────
+            if settingsService.activeTileLayer != nil,
+               let gfsState = gfsImageState, let bounds = gfsState.bounds {
+                let layerDidChange = context.coordinator.lastGFSImageLayer != gfsState.currentLayer
+                let boundsDidChange = context.coordinator.lastGFSBounds != bounds
+                let frameKeyDidChange = context.coordinator.lastGFSImageFrameKey != gfsState.currentFrameKey
+
+                if layerDidChange || boundsDidChange {
+                    if !gfsImageOverlays.isEmpty {
+                        mapView.removeOverlays(gfsImageOverlays)
                     }
+                    context.coordinator.gfsImageRenderer = nil
+                    context.coordinator.lastGFSImageFrameIndex = -1
+                    context.coordinator.lastGFSImageFrameKey = nil
+                    context.coordinator.lastGFSImageLayer = gfsState.currentLayer
+                    context.coordinator.lastGFSBounds = bounds
+                    context.coordinator.hasRenderedGFSFrame = false
                 }
-                let template = "\(WeatherTileState.baseURL)/\(activeLayer.tilePath)/\(frameKey)/{z}/{x}/{y}.webp"
-                if overlayID != context.coordinator.lastTileOverlayID {
-                    if context.coordinator.pendingTileOverlayID != overlayID {
-                        context.coordinator.pendingTileOverlayTask?.cancel()
-                        context.coordinator.pendingTileOverlayID = overlayID
 
-                        let frameIndex = tileState.currentFrameIndex
-                        let existingTileOverlays = tileOverlays
-                        context.coordinator.pendingTileOverlayTask = Task {
-                            await tileState.prepareVisibleTiles(
-                                for: frameIndex,
-                                layer: activeLayer,
-                                visibleMapRect: visibleMapRect,
-                                zoomScale: zoomScale
-                            )
+                if gfsImageOverlays.isEmpty {
+                    let overlay = GFSFullWorldImageOverlay(bounds: bounds)
+                    mapView.addOverlay(overlay, level: .aboveRoads)
+                }
 
-                            guard !Task.isCancelled else { return }
-                            await MainActor.run {
-                                guard context.coordinator.pendingTileOverlayID == overlayID else { return }
-                                let overlay = WeatherTileOverlay(urlTemplate: template)
-                                overlay.canReplaceMapContent = false
-                                overlay.tileSize = CGSize(width: 256, height: 256)
-                                mapView.addOverlay(overlay, level: .aboveRoads)
-                                mapView.removeOverlays(existingTileOverlays)
-                                context.coordinator.lastTileOverlayID = overlayID
-                                context.coordinator.pendingTileOverlayID = nil
-                                context.coordinator.pendingTileOverlayTask = nil
-                            }
-                        }
-                    }
+                let hasRenderableFrame = gfsState.currentFrame != nil || gfsState.nextFrame != nil
+                let renderedIndex = gfsState.renderFrameIndex ?? gfsState.currentFrameIndex
+                if hasRenderableFrame &&
+                    (
+                        layerDidChange
+                        || boundsDidChange
+                        || frameKeyDidChange
+                        || context.coordinator.lastGFSImageFrameIndex != renderedIndex
+                        || !context.coordinator.hasRenderedGFSFrame
+                    )
+                {
+                    context.coordinator.lastGFSImageFrameIndex = renderedIndex
+                    context.coordinator.lastGFSImageFrameKey = gfsState.currentFrameKey
+                    context.coordinator.lastGFSImageLayer = gfsState.currentLayer
+                    context.coordinator.lastGFSBounds = bounds
+                    context.coordinator.gfsImageRenderer?.updateImages(
+                        imageA: gfsState.currentFrame, imageB: gfsState.nextFrame)
+                    context.coordinator.hasRenderedGFSFrame = true
                 }
             } else {
-                context.coordinator.lastVisibleTilePrefetchID = nil
-                context.coordinator.pendingTileOverlayTask?.cancel()
-                context.coordinator.pendingTileOverlayTask = nil
-                context.coordinator.pendingTileOverlayID = nil
-                if !tileOverlays.isEmpty {
-                    mapView.removeOverlays(tileOverlays)
+                if !gfsImageOverlays.isEmpty {
+                    mapView.removeOverlays(gfsImageOverlays)
+                    context.coordinator.gfsImageRenderer = nil
                 }
-                context.coordinator.lastTileOverlayID = nil
+                context.coordinator.lastGFSImageFrameIndex = -1
+                context.coordinator.lastGFSImageFrameKey = nil
+                context.coordinator.lastGFSImageLayer = nil
+                context.coordinator.lastGFSBounds = nil
+                context.coordinator.hasRenderedGFSFrame = false
+            }
+
+            // ── Wind particle layer ───────────────────────────────────────
+            let isWindLayer = showWindParticles && (
+                settingsService.activeTileLayer == .iconWind
+                || settingsService.activeTileLayer == .gfsWind
+            )
+            if let particleView = context.coordinator.windParticleView {
+                if isWindLayer,
+                   let gfsState = gfsImageState,
+                   let frameKey = gfsState.currentFrameKey,
+                   let layer = settingsService.activeTileLayer
+                {
+                    particleView.activeLayer = layer
+
+                    if context.coordinator.lastWindFrameKey != frameKey {
+                        context.coordinator.lastWindFrameKey = frameKey
+                        particleView.frameKey = frameKey
+
+                        // Prefetch tiles for adjacent frames so scrubbing feels instant.
+                        let index = gfsState.renderFrameIndex ?? gfsState.currentFrameIndex
+                        let keys = gfsState.frameKeys
+                        if index > 0 {
+                            particleView.prefetchFrame(frameId: keys[index - 1], layer: layer)
+                        }
+                        if index + 1 < keys.count {
+                            particleView.prefetchFrame(frameId: keys[index + 1], layer: layer)
+                        }
+
+                        // Evict tiles outside the ±2 frame window.
+                        let lo = max(0, index - 2)
+                        let hi = min(keys.count - 1, index + 2)
+                        if lo <= hi {
+                            let keepIds = Set(keys[lo...hi])
+                            Task { await WindFieldCache.shared.evict(retaining: keepIds) }
+                        }
+                    }
+
+                    particleView.isHidden = UIAccessibility.isReduceMotionEnabled
+                    if !UIAccessibility.isReduceMotionEnabled {
+                        particleView.startDisplayLinkIfNeeded()
+                    }
+                } else {
+                    particleView.isHidden = true
+                    particleView.stopDisplayLink()
+                    if !isWindLayer {
+                        particleView.frameKey = nil
+                        particleView.activeLayer = nil
+                        context.coordinator.lastWindFrameKey = nil
+                    }
+                }
             }
         }
 

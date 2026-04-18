@@ -20,6 +20,24 @@ class OscarRadarImageOverlay: NSObject, MKOverlay {
 }
 
 // ---------------------------------------------------------------------------
+// MARK: - GFS full-world image overlay anchor
+
+/// Distinct type from OscarRadarImageOverlay so the Coordinator can tell them apart.
+final class GFSFullWorldImageOverlay: NSObject, MKOverlay {
+    let boundingMapRect: MKMapRect
+    let coordinate: CLLocationCoordinate2D
+
+    init(bounds: OscarRadarBounds) {
+        let nw = MKMapPoint(CLLocationCoordinate2D(latitude: bounds.north, longitude: bounds.west))
+        let se = MKMapPoint(CLLocationCoordinate2D(latitude: bounds.south, longitude: bounds.east))
+        let rect = MKMapRect(x: nw.x, y: nw.y, width: se.x - nw.x, height: se.y - nw.y)
+        self.boundingMapRect = rect
+        self.coordinate = MKMapPoint(x: rect.midX, y: rect.midY).coordinate
+        super.init()
+    }
+}
+
+// ---------------------------------------------------------------------------
 // MARK: - Animating overlay renderer (zero sync lag, no tile seams)
 //
 // Design: double-buffered draw state.
@@ -65,6 +83,11 @@ final class OscarRadarAnimatingRenderer: MKOverlayRenderer {
         super.init(overlay: overlay)
     }
 
+    init(gfsOverlay: GFSFullWorldImageOverlay) {
+        self.overlayRect = gfsOverlay.boundingMapRect
+        super.init(overlay: gfsOverlay)
+    }
+
     // MARK: - Public API (main thread)
 
     /// Queue a new frame pair.  The swap happens in the next tick() so all
@@ -94,7 +117,11 @@ final class OscarRadarAnimatingRenderer: MKOverlayRenderer {
         let proxy = DisplayLinkProxy()
         proxy.target = self
         let link = CADisplayLink(target: proxy, selector: #selector(DisplayLinkProxy.tick))
-        link.preferredFramesPerSecond = 60
+        if #available(iOS 15, *) {
+            link.preferredFrameRateRange = CAFrameRateRange(minimum: 60, maximum: 120, preferred: 60)
+        } else {
+            link.preferredFramesPerSecond = 60
+        }
         link.add(to: .main, forMode: .common)
         displayLink = link
     }

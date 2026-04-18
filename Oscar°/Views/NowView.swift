@@ -20,8 +20,8 @@ struct NowView: View {
     @Environment(Location.self) private var location: Location
     @State private var isMapSheetPresented = false
     @State private var tapCount = 0
-    @State private var oscarRadarState = OscarRadarState()
-    @State private var weatherTileState = WeatherTileState()
+    @State private var oscarRadarState = OscarRadarState(renderMode: .preview)
+    @State private var gfsImageState = GFSImageLayerState(renderMode: .preview)
 
     private var client = APIClient()
     private let locationService = LocationService.shared
@@ -67,8 +67,9 @@ struct NowView: View {
                                 settingsService: settingsService,
                                 showLayerSettings: false,
                                 userActionAllowed: false,
+                                showWindParticles: false,
                                 oscarRadarState: oscarRadarState,
-                                weatherTileState: weatherTileState
+                                gfsImageState: gfsImageState
                             )
                                 .frame(height: 350)
                                 .cornerRadius(10)
@@ -86,12 +87,12 @@ struct NowView: View {
                                     if settingsService.oscarRadarLayer {
                                         await oscarRadarState.loadCurrentFrame()
                                     } else if let layer = settingsService.activeTileLayer {
-                                        await weatherTileState.switchLayer(layer)
+                                        await gfsImageState.loadLayer(layer)
                                     }
                                 }
                                 .onChange(of: settingsService.oscarRadarLayer) { _, isEnabled in
                                     if isEnabled {
-                                        weatherTileState.pause()
+                                        gfsImageState.pause()
                                         if oscarRadarState.frames.isEmpty {
                                             Task { await oscarRadarState.loadCurrentFrame() }
                                         }
@@ -102,9 +103,9 @@ struct NowView: View {
                                 .onChange(of: settingsService.activeTileLayer) { _, newLayer in
                                     if let layer = newLayer {
                                         oscarRadarState.pause()
-                                        Task { await weatherTileState.switchLayer(layer) }
+                                        Task { await gfsImageState.loadLayer(layer) }
                                     } else {
-                                        weatherTileState.pause()
+                                        gfsImageState.pause()
                                     }
                                 }
                         }
@@ -154,7 +155,7 @@ struct NowView: View {
                 if settingsService.oscarRadarLayer {
                     await oscarRadarState.loadCurrentFrame()
                 } else if settingsService.activeTileLayer != nil {
-                    await weatherTileState.loadFrames(forceRefresh: true)
+                    if let layer = settingsService.activeTileLayer { await gfsImageState.loadLayer(layer) }
                 }
             }
         }
@@ -166,7 +167,7 @@ struct NowView: View {
                 if settingsService.oscarRadarLayer {
                     await oscarRadarState.loadCurrentFrame()
                 } else if settingsService.activeTileLayer != nil {
-                    await weatherTileState.loadFrames(forceRefresh: true)
+                    if let layer = settingsService.activeTileLayer { await gfsImageState.loadLayer(layer) }
                 }
             }
         }

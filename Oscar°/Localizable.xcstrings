@@ -224,6 +224,56 @@
         }
       }
     },
+    "%@ %@, %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@, %3$@"
+          }
+        }
+      }
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%@: %.0f" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$.0f"
+          }
+        }
+      }
+    },
+    "%@: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$@"
+          }
+        }
+      }
+    },
+    "%@%@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@%2$@"
+          }
+        }
+      }
+    },
     "%d-Tage" : {
       "comment" : "Headline for Daily View",
       "localizations" : {
@@ -283,6 +333,7 @@
       "shouldTranslate" : false
     },
     "2" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -305,6 +356,7 @@
       }
     },
     "2.5" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -327,6 +379,7 @@
       }
     },
     "3" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -349,6 +402,7 @@
       }
     },
     "10" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -470,8 +524,27 @@
         }
       }
     },
+    "Ambrosia" : {
+      "comment" : "Pollen type name",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ragweed"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domuz Otu"
+          }
+        }
+      }
+    },
     "AQI" : {
       "comment" : "Environment AQI",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -514,6 +587,24 @@
         }
       },
       "shouldTranslate" : false
+    },
+    "Beifuß" : {
+      "comment" : "Pollen type name",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mugwort"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelin Otu"
+          }
+        }
+      }
     },
     "Benachrichtigungen deaktiviert" : {
       "extractionState" : "stale",
@@ -571,6 +662,24 @@
         }
       },
       "shouldTranslate" : false
+    },
+    "Birke" : {
+      "comment" : "Pollen type name",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birch"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Huş Ağacı"
+          }
+        }
+      }
     },
     "Bodentemperatur" : {
       "localizations" : {
@@ -828,6 +937,24 @@
         }
       }
     },
+    "Erle" : {
+      "comment" : "Pollen type name",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alder"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kızılağaç"
+          }
+        }
+      }
+    },
     "ET₀ ist die Referenz-Evapotranspiration eines gut bewässerten Grasfeldes und dient zur Schätzung des Bewässerungsbedarfs von Pflanzen." : {
       "localizations" : {
         "en" : {
@@ -931,17 +1058,81 @@
     "GEM - Canadian Weather Service" : {
       "shouldTranslate" : false
     },
+    "Gering" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gering"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düşük"
+          }
+        }
+      }
+    },
     "GFS & HRRR - NOAA" : {
       "shouldTranslate" : false
     },
     "GFS GRAPES - China Meteorological Administration (CMA)" : {
       "shouldTranslate" : false
     },
+    "Gräser" : {
+      "comment" : "Pollen type name",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grass"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çimen"
+          }
+        }
+      }
+    },
     "HARMONIE - DMI" : {
       "shouldTranslate" : false
     },
     "HARMONIE - KNMI" : {
       "shouldTranslate" : false
+    },
+    "Hoch" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüksek"
+          }
+        }
+      }
     },
     "ICON - Deutscher Wetterdienst (DWD)" : {
       "shouldTranslate" : false
@@ -1010,6 +1201,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yağmur yok"
+          }
+        }
+      }
+    },
+    "Keine" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yok"
           }
         }
       }
@@ -1110,8 +1324,77 @@
         }
       }
     },
+    "Luftqualität" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luftqualität"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Air Quality"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava Kalitesi"
+          }
+        }
+      }
+    },
+    "Luftqualitätsindex" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luftqualitätsindex"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Air Quality Index"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava Kalitesi Endeksi"
+          }
+        }
+      }
+    },
     "m/s" : {
       "shouldTranslate" : false
+    },
+    "Mäßig" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mäßig"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moderate"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta"
+          }
+        }
+      }
     },
     "Meine Orte" : {
       "localizations" : {
@@ -1249,6 +1532,7 @@
     },
     "NO" : {
       "comment" : "Environment NO",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1298,6 +1582,7 @@
     },
     "O" : {
       "comment" : "Environment O",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1315,6 +1600,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O"
+          }
+        }
+      }
+    },
+    "Öffnet stündliche Umweltdiagramme" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet stündliche Umweltdiagramme"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens hourly environment charts"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saatlik çevre grafiklerini açar"
           }
         }
       }
@@ -1489,6 +1797,7 @@
     },
     "PM" : {
       "comment" : "Environment PM",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1506,6 +1815,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "PM"
+          }
+        }
+      }
+    },
+    "Pollen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pollen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pollen"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Polen"
+          }
+        }
+      }
+    },
+    "Pollen/m³" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pollen/m³"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pollen/m³"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "polen/m³"
           }
         }
       }
@@ -1758,6 +2113,29 @@
         }
       }
     },
+    "Sehr Hoch" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sehr Hoch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Very High"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çok Yüksek"
+          }
+        }
+      }
+    },
     "Services" : {
       "localizations" : {
         "de" : {
@@ -1798,6 +2176,7 @@
     },
     "SO" : {
       "comment" : "Environment SO",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2103,6 +2482,880 @@
         }
       }
     },
+    "Aktuell dominierender Schadstoff" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuell dominierender Schadstoff"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Currently dominant pollutant"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu anda baskın kirletici"
+          }
+        }
+      }
+    },
+    "Aktuelle Werte" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuelle Werte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current values"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel değerler"
+          }
+        }
+      }
+    },
+    "Akzeptabel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akzeptabel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fair"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta"
+          }
+        }
+      }
+    },
+    "Bei diesem UV-Wert besteht nur eine geringe gesundheitliche Gefährdung. Meist sind keine besonderen Schutzmaßnahmen erforderlich." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bei diesem UV-Wert besteht nur eine geringe gesundheitliche Gefährdung. Meist sind keine besonderen Schutzmaßnahmen erforderlich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At this UV level, the health risk is low. In most cases, no special protective measures are needed."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu UV değerinde sağlık riski düşüktür. Çoğu durumda özel bir korunma önlemi gerekmez."
+          }
+        }
+      }
+    },
+    "Bodennahes Ozon bildet sich bei starker Sonneneinstrahlung aus Abgasen. Es kann Husten, Reizungen und eine verringerte Lungenfunktion auslösen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bodennahes Ozon bildet sich bei starker Sonneneinstrahlung aus Abgasen. Es kann Husten, Reizungen und eine verringerte Lungenfunktion auslösen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ground-level ozone forms from emissions during strong sunlight. It can trigger coughing, irritation, and reduced lung function."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yere yakın ozon güçlü güneş ışığında egzoz gazlarından oluşur. Öksürük, tahriş ve akciğer işlevinde azalmaya yol açabilir."
+          }
+        }
+      }
+    },
+    "Die Weltgesundheitsorganisation (WHO) empfiehlt, zwischen 11 und 16 Uhr im Schutz eines Hauses zu bleiben und auch außerhalb dieser Zeit unbedingt Schatten zu suchen. Ein sonnendichtes Hemd, lange Hosen, Sonnencreme, Sonnenbrille und ein breitkrempiger Hut sind auch im Schatten unerlässlich." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Weltgesundheitsorganisation (WHO) empfiehlt, zwischen 11 und 16 Uhr im Schutz eines Hauses zu bleiben und auch außerhalb dieser Zeit unbedingt Schatten zu suchen. Ein sonnendichtes Hemd, lange Hosen, Sonnencreme, Sonnenbrille und ein breitkrempiger Hut sind auch im Schatten unerlässlich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The World Health Organization (WHO) recommends staying indoors between 11 a.m. and 4 p.m. and seeking shade at all other times. A tightly woven shirt, long trousers, sunscreen, sunglasses, and a wide-brimmed hat remain essential even in the shade."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dünya Sağlık Örgütü (WHO), 11.00 ile 16.00 saatleri arasında kapalı bir yerde kalınmasını ve diğer saatlerde de mutlaka gölge aranmasını önerir. Sık dokulu bir gömlek, uzun pantolon, güneş kremi, güneş gözlüğü ve geniş kenarlı bir şapka gölgede bile vazgeçilmezdir."
+          }
+        }
+      }
+    },
+    "Die Weltgesundheitsorganisation (WHO) rät, mittags den Schatten zu suchen. In der Sonne werden Hemd, Sonnencreme, Sonnenbrille und Kopfbedeckung benötigt." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Weltgesundheitsorganisation (WHO) rät, mittags den Schatten zu suchen. In der Sonne werden Hemd, Sonnencreme, Sonnenbrille und Kopfbedeckung benötigt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The World Health Organization (WHO) advises seeking shade at midday. In direct sun, a shirt, sunscreen, sunglasses, and a hat are recommended."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dünya Sağlık Örgütü (WHO), öğle saatlerinde gölgeye geçmeyi önerir. Güneşte gömlek, güneş kremi, güneş gözlüğü ve baş koruması gerekir."
+          }
+        }
+      }
+    },
+    "Die Weltgesundheitsorganisation (WHO) rät, zwischen 11 und 16 Uhr den Aufenthalt im Freien zu vermeiden, aber auch im Schatten gehören ein sonnendichtes Hemd, lange Hosen, Sonnencreme, Sonnenbrille und ein breitkrempiger Hut zum sonnengerechten Verhalten." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Weltgesundheitsorganisation (WHO) rät, zwischen 11 und 16 Uhr den Aufenthalt im Freien zu vermeiden, aber auch im Schatten gehören ein sonnendichtes Hemd, lange Hosen, Sonnencreme, Sonnenbrille und ein breitkrempiger Hut zum sonnengerechten Verhalten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The World Health Organization (WHO) advises avoiding outdoor stays between 11 a.m. and 4 p.m. In the sun and even in the shade, tightly woven clothing, long trousers, sunscreen, sunglasses, and a wide-brimmed hat are recommended."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dünya Sağlık Örgütü (WHO), 11.00 ile 16.00 saatleri arasında dışarıda kalmaktan kaçınılmasını önerir. Güneşte ve gölgede sık dokulu bir gömlek, uzun pantolon, güneş kremi, güneş gözlüğü ve geniş kenarlı bir şapka önerilir."
+          }
+        }
+      }
+    },
+    "Extrem" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extrem"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extreme"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aşırı"
+          }
+        }
+      }
+    },
+    "Extrem schlecht" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extrem schlecht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extremely poor"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son derece kötü"
+          }
+        }
+      }
+    },
+    "Extreme gesundheitliche Gefährdung, Besondere Schutzmaßnahmen sind ein Muss." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extreme gesundheitliche Gefährdung, Besondere Schutzmaßnahmen sind ein Muss."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extreme health risk, special protective measures are essential."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aşırı sağlık riski, özel korunma önlemleri şarttır."
+          }
+        }
+      }
+    },
+    "Für den aktuellen Zeitraum liegen keine Pollendaten vor." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für den aktuellen Zeitraum liegen keine Pollendaten vor."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pollen data is available for the current period."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geçerli dönem için polen verisi yok."
+          }
+        }
+      }
+    },
+    "Für die aktuelle Stunde liegen keine Luftqualitätsdaten vor." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für die aktuelle Stunde liegen keine Luftqualitätsdaten vor."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No air quality data is available for the current hour."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mevcut saat için hava kalitesi verisi yok."
+          }
+        }
+      }
+    },
+    "Für die aktuelle Stunde liegen keine UV-Daten vor." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für die aktuelle Stunde liegen keine UV-Daten vor."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No UV data is available for the current hour."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mevcut saat için UV verisi yok."
+          }
+        }
+      }
+    },
+    "Gesundheitsbewertung" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesundheitsbewertung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health assessment"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağlık değerlendirmesi"
+          }
+        }
+      }
+    },
+    "Geringe gesundheitliche Gefährdung" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geringe gesundheitliche Gefährdung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low health risk"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düşük sağlık riski"
+          }
+        }
+      }
+    },
+    "Gut" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gut"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Good"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İyi"
+          }
+        }
+      }
+    },
+    "Hauptschadstoff" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hauptschadstoff"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Main pollutant"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana kirletici"
+          }
+        }
+      }
+    },
+    "Hemd, Sonnencreme und Sonnenbrille schützen vor zu viel UV-Strahlung." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hemd, Sonnencreme und Sonnenbrille schützen vor zu viel UV-Strahlung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A shirt, sunscreen, and sunglasses protect against excessive UV exposure."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gömlek, güneş kremi ve güneş gözlüğü aşırı UV ışınlarına karşı korur."
+          }
+        }
+      }
+    },
+    "Heute" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heute"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugün"
+          }
+        }
+      }
+    },
+    "Hohe gesundheitliche Gefährdung, Schutzmaßnahmen sind erforderlich." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hohe gesundheitliche Gefährdung, Schutzmaßnahmen sind erforderlich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High health risk, protective measures are required."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüksek sağlık riski, korunma önlemleri gereklidir."
+          }
+        }
+      }
+    },
+    "Jetzt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Now"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şimdi"
+          }
+        }
+      }
+    },
+    "Keine Daten" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Daten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No data"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veri yok"
+          }
+        }
+      }
+    },
+    "Keine Pollendaten verfügbar" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Pollendaten verfügbar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pollen data available"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Polen verisi yok"
+          }
+        }
+      }
+    },
+    "Körner/m³" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Körner/m³"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "grains/m³"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tane/m³"
+          }
+        }
+      }
+    },
+    "Maximum heute" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum heute"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today's peak"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugünün en yüksek değeri"
+          }
+        }
+      }
+    },
+    "Mittlere gesundheitliche Gefährdung, Schutzmaßnahmen sind erforderlich." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mittlere gesundheitliche Gefährdung, Schutzmaßnahmen sind erforderlich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moderate health risk, protective measures are required."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta düzey sağlık riski, korunma önlemleri gereklidir."
+          }
+        }
+      }
+    },
+    "Mittel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mittel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moderate"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta"
+          }
+        }
+      }
+    },
+    "PM10 stammt oft aus Straßenstaub, Baustellen und Landwirtschaft. Die Partikel reizen Augen und Atemwege und können Beschwerden bei empfindlichen Personen verstärken." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PM10 stammt oft aus Straßenstaub, Baustellen und Landwirtschaft. Die Partikel reizen Augen und Atemwege und können Beschwerden bei empfindlichen Personen verstärken."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PM10 often comes from road dust, construction sites, and agriculture. These particles can irritate the eyes and airways and worsen symptoms in sensitive people."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PM10 çoğu zaman yol tozu, inşaat alanları ve tarımdan kaynaklanır. Bu parçacıklar gözleri ve solunum yollarını tahriş edebilir ve hassas kişilerde şikayetleri artırabilir."
+          }
+        }
+      }
+    },
+    "PM2.5 entsteht vor allem durch Verkehr, Holzfeuer und Industrie. Die feinen Partikel dringen tief in die Lunge ein und belasten Atemwege und Herz-Kreislauf-System." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PM2.5 entsteht vor allem durch Verkehr, Holzfeuer und Industrie. Die feinen Partikel dringen tief in die Lunge ein und belasten Atemwege und Herz-Kreislauf-System."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PM2.5 mainly comes from traffic, wood burning, and industry. These fine particles can penetrate deep into the lungs and strain the airways and cardiovascular system."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PM2.5 çoğunlukla trafik, odun yakımı ve sanayiden kaynaklanır. Bu ince parçacıklar akciğerlerin derinliklerine ulaşabilir ve solunum yolları ile kalp damar sistemini zorlayabilir."
+          }
+        }
+      }
+    },
+    "Schadstoffe jetzt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schadstoffe jetzt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pollutants now"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu anki kirleticiler"
+          }
+        }
+      }
+    },
+    "Schlecht" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schlecht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poor"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kötü"
+          }
+        }
+      }
+    },
+    "Schwefeldioxid entsteht vor allem bei der Verbrennung schwefelhaltiger Brennstoffe in Industrie und Energieerzeugung. Es reizt die Atemwege und belastet besonders Menschen mit Asthma." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schwefeldioxid entsteht vor allem bei der Verbrennung schwefelhaltiger Brennstoffe in Industrie und Energieerzeugung. Es reizt die Atemwege und belastet besonders Menschen mit Asthma."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sulfur dioxide mainly results from burning sulfur-containing fuels in industry and power generation. It irritates the airways and is especially stressful for people with asthma."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kükürt dioksit çoğunlukla sanayi ve enerji üretiminde kükürt içeren yakıtların yakılmasıyla oluşur. Solunum yollarını tahriş eder ve özellikle astımı olan kişiler için yük oluşturur."
+          }
+        }
+      }
+    },
+    "Sehr hohe gesundheitliche Gefährdung, Schutzmaßnahmen sind unbedingt erforderlich." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sehr hohe gesundheitliche Gefährdung, Schutzmaßnahmen sind unbedingt erforderlich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Very high health risk, protective measures are essential."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çok yüksek sağlık riski, korunma önlemleri mutlaka gereklidir."
+          }
+        }
+      }
+    },
+    "Sehr schlecht" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sehr schlecht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Very poor"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çok kötü"
+          }
+        }
+      }
+    },
+    "Stickstoffdioxid entsteht vor allem bei Verbrennungsprozessen im Straßenverkehr und in Heizungen. Es reizt die Atemwege und kann Asthma sowie andere Lungenerkrankungen verschlimmern." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stickstoffdioxid entsteht vor allem bei Verbrennungsprozessen im Straßenverkehr und in Heizungen. Es reizt die Atemwege und kann Asthma sowie andere Lungenerkrankungen verschlimmern."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nitrogen dioxide is mainly produced by combustion in road traffic and heating systems. It irritates the airways and can worsen asthma and other lung diseases."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Azot dioksit çoğunlukla karayolu trafiği ve ısıtma sistemlerindeki yanma süreçlerinden kaynaklanır. Solunum yollarını tahriş eder ve astım ile diğer akciğer hastalıklarını kötüleştirebilir."
+          }
+        }
+      }
+    },
+    "Zeitpunkt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeitpunkt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saat"
+          }
+        }
+      }
+    },
+    "Umweltdetails" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Umweltdetails"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Environment Details"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çevre Ayrıntıları"
+          }
+        }
+      }
+    },
     "Unwetterwarnungen" : {
       "localizations" : {
         "de" : {
@@ -2127,6 +3380,7 @@
     },
     "UV" : {
       "comment" : "Environment UV",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2147,6 +3401,32 @@
           }
         }
       }
+    },
+    "UV-Index" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV-Index"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV Index"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV İndeksi"
+          }
+        }
+      }
+    },
+    "UV: %.1f" : {
+
     },
     "W_compass" : {
       "extractionState" : "manual",

@@ -14,6 +14,25 @@ import UIKit
 import Security
 
 final class AppDelegate: NSObject, UIApplicationDelegate {
+    private var memoryWarningObserver: NSObjectProtocol?
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        memoryWarningObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            Task { @MainActor in
+                OscarRadarState.purgeDecodedCaches()
+                GFSImageLayerState.purgeDecodedCaches()
+            }
+        }
+        return true
+    }
+
     func application(
         _ application: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
@@ -28,6 +47,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
         print("APNs registration failed: \(error.localizedDescription)")
+    }
+
+    deinit {
+        if let memoryWarningObserver {
+            NotificationCenter.default.removeObserver(memoryWarningObserver)
+        }
     }
 }
 
@@ -142,7 +167,7 @@ final class RainAlertManager: NSObject, ObservableObject {
     @Published private(set) var isEnabled: Bool
     @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
     
-    private let baseURL = URL(string: "https://radar.oscars.love")!
+    private let baseURL = URL(string: radarBaseURL)!
     private let locationService = LocationService.shared
     
     private let appEnabledKey = "rainAlertEnabledInApp"

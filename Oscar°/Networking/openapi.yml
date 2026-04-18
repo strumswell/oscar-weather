@@ -496,6 +496,7 @@ paths:
             type: integer
             enum:
               - 1
+              - 3
         - name: hourly
           in: query
           explode: false
@@ -512,6 +513,12 @@ paths:
                 - european_aqi_o3
                 - european_aqi_so2
                 - uv_index
+                - alder_pollen
+                - birch_pollen
+                - grass_pollen
+                - mugwort_pollen
+                - olive_pollen
+                - ragweed_pollen
       responses:
         200:
           description: OK
@@ -1181,6 +1188,30 @@ components:
           type: array
           items:
             type: number
+        alder_pollen:
+          type: [array, null]
+          items:
+            type: [number, null]
+        birch_pollen:
+          type: [array, null]
+          items:
+            type: [number, null]
+        grass_pollen:
+          type: [array, null]
+          items:
+            type: [number, null]
+        mugwort_pollen:
+          type: [array, null]
+          items:
+            type: [number, null]
+        olive_pollen:
+          type: [array, null]
+          items:
+            type: [number, null]
+        ragweed_pollen:
+          type: [array, null]
+          items:
+            type: [number, null]
     SearchResponse:
       type: object
       properties:
