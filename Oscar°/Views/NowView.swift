@@ -162,7 +162,7 @@ struct NowView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             Task {
                 await self.updateState()
-                await RainAlertManager.shared.syncLocationUpdate()
+                await NotificationSettingsManager.shared.syncLocationUpdate()
                 WidgetCenter.shared.reloadAllTimelines()
                 if settingsService.oscarRadarLayer {
                     await oscarRadarState.loadCurrentFrame()
@@ -174,13 +174,13 @@ struct NowView: View {
         .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("ChangedLocation"), object: nil)) { _ in
             Task {
                 await self.updateState()
-                await RainAlertManager.shared.syncLocationUpdate()
+                await NotificationSettingsManager.shared.syncLocationUpdate()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("CityToggle"), object: nil)) { _ in
             Task {
                 await self.updateState()
-                await RainAlertManager.shared.syncLocationUpdate()
+                await NotificationSettingsManager.shared.syncLocationUpdate()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for:  Notification.Name("UnitChanged"), object: nil)) { _ in

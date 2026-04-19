@@ -119,7 +119,15 @@
 		25A1C0022F8D000100000001 /* APIContactIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1C0012F8D000100000001 /* APIContactIdentity.swift */; };
 		25A1C0032F8D000100000001 /* APIContactIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1C0012F8D000100000001 /* APIContactIdentity.swift */; };
 		25A1C0042F8D000100000001 /* APIContactIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1C0012F8D000100000001 /* APIContactIdentity.swift */; };
-		25A1C0062F8D000100000001 /* RainAlertSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1C0052F8D000100000001 /* RainAlertSettingsView.swift */; };
+		25A1C0062F8D000100000001 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1C0052F8D000100000001 /* NotificationSettingsView.swift */; };
+		25A1D1012F8E000100000001 /* MemberCardStickerPlacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1D1002F8E000100000001 /* MemberCardStickerPlacement.swift */; };
+		25A1D1032F8E000100000001 /* MemberCardStickerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1D1022F8E000100000001 /* MemberCardStickerStore.swift */; };
+		25A1D1052F8E000100000001 /* MemberCardSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1D1042F8E000100000001 /* MemberCardSurface.swift */; };
+		25A1D1072F8E000100000001 /* MemberCardPlacedStickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1D1062F8E000100000001 /* MemberCardPlacedStickerView.swift */; };
+		25A1D1092F8E000100000001 /* MemberCardStickerDock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1D1082F8E000100000001 /* MemberCardStickerDock.swift */; };
+		25A1D10B2F8E000100000001 /* StickerShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 25A1D10A2F8E000100000001 /* StickerShaders.metal */; };
+		25A1D10D2F8E000100000001 /* MemberCardStickerArtworkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1D10C2F8E000100000001 /* MemberCardStickerArtworkView.swift */; };
+		25A1D10F2F8E000100000001 /* MemberCardStickerAlphaBounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1D10E2F8E000100000001 /* MemberCardStickerAlphaBounds.swift */; };
 		25AD38E72BE716E100A8F305 /* MemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25AD38E62BE716E100A8F305 /* MemoryView.swift */; };
 		25B734172BD9BB86003C6756 /* SentrySwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 25B734162BD9BB86003C6756 /* SentrySwiftUI */; };
 		25BEDCE426CACF7D00D90D6B /* DataModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 25BEDCE226CACF7D00D90D6B /* DataModels.xcdatamodeld */; };
@@ -192,6 +200,7 @@
 		AB0001102F9A00000000001A /* EnvironmentAirQualitySectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB00010F2F9A00000000001A /* EnvironmentAirQualitySectionView.swift */; };
 		AB0001122F9A00000000001A /* EnvironmentUVSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0001112F9A00000000001A /* EnvironmentUVSectionView.swift */; };
 		AB0001142F9A00000000001A /* EnvironmentPollenSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0001132F9A00000000001A /* EnvironmentPollenSectionView.swift */; };
+		AC0000022FAA000000000001 /* NotificationSettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0000012FAA000000000001 /* NotificationSettingsManager.swift */; };
 		D2CE14A38C6521B8E277CF62 /* WindParticleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C05DF774DD1215A6E465D9AD /* WindParticleView.swift */; };
 		D580749BDBEC4BFE98D9ED6A /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 4EBF1FE0D46648989064EF72 /* Sentry */; };
 /* End PBXBuildFile section */
@@ -317,7 +326,15 @@
 		259EDA6B29ABC19F00F94996 /* RainRadarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainRadarView.swift; sourceTree = "<group>"; };
 		25A0CEDC26C4068300DD4A79 /* RadarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarView.swift; sourceTree = "<group>"; };
 		25A1C0012F8D000100000001 /* APIContactIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIContactIdentity.swift; sourceTree = "<group>"; };
-		25A1C0052F8D000100000001 /* RainAlertSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainAlertSettingsView.swift; sourceTree = "<group>"; };
+		25A1C0052F8D000100000001 /* NotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
+		25A1D1002F8E000100000001 /* MemberCardStickerPlacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberCardStickerPlacement.swift; sourceTree = "<group>"; };
+		25A1D1022F8E000100000001 /* MemberCardStickerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberCardStickerStore.swift; sourceTree = "<group>"; };
+		25A1D1042F8E000100000001 /* MemberCardSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberCardSurface.swift; sourceTree = "<group>"; };
+		25A1D1062F8E000100000001 /* MemberCardPlacedStickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberCardPlacedStickerView.swift; sourceTree = "<group>"; };
+		25A1D1082F8E000100000001 /* MemberCardStickerDock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberCardStickerDock.swift; sourceTree = "<group>"; };
+		25A1D10A2F8E000100000001 /* StickerShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = StickerShaders.metal; sourceTree = "<group>"; };
+		25A1D10C2F8E000100000001 /* MemberCardStickerArtworkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberCardStickerArtworkView.swift; sourceTree = "<group>"; };
+		25A1D10E2F8E000100000001 /* MemberCardStickerAlphaBounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberCardStickerAlphaBounds.swift; sourceTree = "<group>"; };
 		25AD38E62BE716E100A8F305 /* MemoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryView.swift; sourceTree = "<group>"; };
 		25B4C45A2B57441F0069B3B0 /* ci_post_clone.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_post_clone.sh; sourceTree = "<group>"; };
 		25BEDCE326CACF7D00D90D6B /* DataModels.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModels.xcdatamodel; sourceTree = "<group>"; };
@@ -389,6 +406,7 @@
 		AB00010F2F9A00000000001A /* EnvironmentAirQualitySectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentAirQualitySectionView.swift; sourceTree = "<group>"; };
 		AB0001112F9A00000000001A /* EnvironmentUVSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentUVSectionView.swift; sourceTree = "<group>"; };
 		AB0001132F9A00000000001A /* EnvironmentPollenSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentPollenSectionView.swift; sourceTree = "<group>"; };
+		AC0000012FAA000000000001 /* NotificationSettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsManager.swift; sourceTree = "<group>"; };
 		C05DF774DD1215A6E465D9AD /* WindParticleView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WindParticleView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -446,6 +464,14 @@
 				254CA7B32F85A4B60014801D /* NOAAAttribution.swift */,
 				2512E9402C37C765004670E4 /* OpenMeteoAttribution.swift */,
 				2512E9422C37E3EB004670E4 /* MemberCard.swift */,
+				25A1D1002F8E000100000001 /* MemberCardStickerPlacement.swift */,
+				25A1D1022F8E000100000001 /* MemberCardStickerStore.swift */,
+				25A1D1042F8E000100000001 /* MemberCardSurface.swift */,
+				25A1D1062F8E000100000001 /* MemberCardPlacedStickerView.swift */,
+				25A1D1082F8E000100000001 /* MemberCardStickerDock.swift */,
+				25A1D10C2F8E000100000001 /* MemberCardStickerArtworkView.swift */,
+				25A1D10E2F8E000100000001 /* MemberCardStickerAlphaBounds.swift */,
+				25A1D10A2F8E000100000001 /* StickerShaders.metal */,
 				2512E9472C397DEB004670E4 /* BrightSkyAttribution.swift */,
 				2512E94C2C398060004670E4 /* TomorrowAttribution.swift */,
 				251440882D86E0E400E48037 /* RainViewerAttribution.swift */,
@@ -665,7 +691,6 @@
 				25DA7A1927A420970062E02B /* MapDetailView.swift */,
 				251FE39027C5674400D26F0F /* WMSTileOverlay.swift */,
 				259EDA6B29ABC19F00F94996 /* RainRadarView.swift */,
-				25A1C0052F8D000100000001 /* RainAlertSettingsView.swift */,
 				252FC3B32ECE830200981FF3 /* RadarColorMapping.swift */,
 				2519538D2F124B27003D5302 /* RadarImageOverlay.swift */,
 				2519538E2F124B27003D5302 /* RadarTimelineControls.swift */,
@@ -702,6 +727,7 @@
 			isa = PBXGroup;
 			children = (
 				251BFE7C2E48DC7600D35589 /* Rendering */,
+				AC0000002FAA000000000001 /* Notifications */,
 				25CB17E62B470429001D973A /* Extensions */,
 				25BEDCE126CACF2900D90D6B /* Storage */,
 				3E89BBA6252EFEC5006F7BCC /* Views */,
@@ -769,6 +795,15 @@
 				AB0001132F9A00000000001A /* EnvironmentPollenSectionView.swift */,
 			);
 			path = EnvironmentDetail;
+			sourceTree = "<group>";
+		};
+		AC0000002FAA000000000001 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				AC0000012FAA000000000001 /* NotificationSettingsManager.swift */,
+				25A1C0052F8D000100000001 /* NotificationSettingsView.swift */,
+			);
+			path = Notifications;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1056,7 +1091,8 @@
 				25CB17E32B470335001D973A /* APIClient.swift in Sources */,
 				25A1C0022F8D000100000001 /* APIContactIdentity.swift in Sources */,
 				2536438126DACCB800C8A952 /* LegalView.swift in Sources */,
-				25A1C0062F8D000100000001 /* RainAlertSettingsView.swift in Sources */,
+				AC0000022FAA000000000001 /* NotificationSettingsManager.swift in Sources */,
+				25A1C0062F8D000100000001 /* NotificationSettingsView.swift in Sources */,
 				259187CD2C715B5900611B0F /* HumidityChart.swift in Sources */,
 				AA0000132F9A00000000001A /* AQIChart.swift in Sources */,
 				AA0000152F9A00000000001A /* UVChart.swift in Sources */,
@@ -1096,6 +1132,14 @@
 				25BEDCE426CACF7D00D90D6B /* DataModels.xcdatamodeld in Sources */,
 				25CBB63C2B44A13600223B69 /* WeatherSimulationView.swift in Sources */,
 				2512E9432C37E3EB004670E4 /* MemberCard.swift in Sources */,
+				25A1D1012F8E000100000001 /* MemberCardStickerPlacement.swift in Sources */,
+				25A1D1032F8E000100000001 /* MemberCardStickerStore.swift in Sources */,
+				25A1D1052F8E000100000001 /* MemberCardSurface.swift in Sources */,
+				25A1D1072F8E000100000001 /* MemberCardPlacedStickerView.swift in Sources */,
+				25A1D1092F8E000100000001 /* MemberCardStickerDock.swift in Sources */,
+				25A1D10D2F8E000100000001 /* MemberCardStickerArtworkView.swift in Sources */,
+				25A1D10F2F8E000100000001 /* MemberCardStickerAlphaBounds.swift in Sources */,
+				25A1D10B2F8E000100000001 /* StickerShaders.metal in Sources */,
 				25ED79AB29F1A7DF002E0AAB /* Meteor.swift in Sources */,
 				259187C92C715AEA00611B0F /* TemperatureChart.swift in Sources */,
 				3E6117082544B27600B68120 /* HourlyView.swift in Sources */,
