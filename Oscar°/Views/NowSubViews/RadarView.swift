@@ -293,10 +293,12 @@ struct RadarMapView: UIViewRepresentable {
     private final class SelectedCityAnnotation: NSObject, MKAnnotation {
         let coordinate: CLLocationCoordinate2D
         let title: String?
+        let identity: String
 
         init(city: City) {
             self.coordinate = CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
             self.title = city.label
+            self.identity = "\(city.label)|\(city.lat)|\(city.lon)"
         }
     }
 
@@ -395,11 +397,6 @@ struct RadarMapView: UIViewRepresentable {
                 if let existing = animatingRenderer { return existing }
                 let r = OscarRadarAnimatingRenderer(overlay: oscarOverlay)
                 r.alpha = CGFloat(parent.overlayOpacity)
-                r.advanceFrameCallback = { [weak self] in
-                    Task { @MainActor in
-                        self?.parent.oscarRadarState?.advanceFrame()
-                    }
-                }
                 // Feed images immediately so the overlay is visible without
                 // waiting for the next frame-index change (fixes blank-on-first-load).
                 if let state = parent.oscarRadarState, let frame = state.currentFrame {
@@ -461,12 +458,23 @@ struct RadarMapView: UIViewRepresentable {
         func syncSelectedCityAnnotation(on mapView: MKMapView) {
             let selectedCity = parent.cities.first(where: \.selected)
 
-            if let existing = selectedCityAnnotation {
-                mapView.removeAnnotation(existing)
-                selectedCityAnnotation = nil
+            guard let selectedCity else {
+                if let existing = selectedCityAnnotation {
+                    mapView.removeAnnotation(existing)
+                    selectedCityAnnotation = nil
+                }
+                return
             }
 
-            guard let selectedCity else { return }
+            let identity = "\(selectedCity.label)|\(selectedCity.lat)|\(selectedCity.lon)"
+            if selectedCityAnnotation?.identity == identity {
+                return
+            }
+
+            if let existing = selectedCityAnnotation {
+                mapView.removeAnnotation(existing)
+            }
+
             let annotation = SelectedCityAnnotation(city: selectedCity)
             selectedCityAnnotation = annotation
             mapView.addAnnotation(annotation)
@@ -640,12 +648,7 @@ struct RadarMapView: UIViewRepresentable {
                     }
 
                     if let r = context.coordinator.animatingRenderer {
-                        if oscarState.isPlaying {
-                            oscarState.cancelInternalTimer()
-                            r.startAnimation()
-                        } else {
-                            r.stopAnimation()
-                        }
+                        r.stopAnimation()
                     }
 
                     context.coordinator.syncOscarArrowOverlay(frameKey: frame.key, on: mapView)
