@@ -269,11 +269,13 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
 
         let lastSentToken = Keychain.load(key: lastSentDeviceTokenKey)
         let lastSentState = loadLastSentSubscriptionState()
+        let lastSentAPNsEnvironment = loadLastSentAPNsEnvironment() ?? lastSentState?.apnsEnvironment
         let registrationCompleted = UserDefaults.standard.bool(forKey: installationRegistrationCompletedKey)
         let shouldRegister = forceRegister
             || !registrationCompleted
             || Keychain.load(key: subscriptionKey) == nil
             || Keychain.load(key: apiKeyKey) == nil
+            || lastSentAPNsEnvironment != apnsEnvironment
             || lastSentToken != token
 
         if shouldRegister {
@@ -284,6 +286,8 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
                 reason = "installationRegistrationIncomplete"
             } else if Keychain.load(key: subscriptionKey) == nil || Keychain.load(key: apiKeyKey) == nil {
                 reason = "missingCredentials"
+            } else if lastSentAPNsEnvironment != apnsEnvironment {
+                reason = "apnsEnvironmentChanged"
             } else {
                 reason = "deviceTokenChanged"
             }
@@ -438,6 +442,14 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
         }
 
         return try? JSONDecoder().decode(SentSubscriptionState.self, from: data)
+    }
+
+    private func loadLastSentAPNsEnvironment() -> APNsEnvironment? {
+        guard let rawValue = UserDefaults.standard.string(forKey: lastSentAPNsEnvironmentKey) else {
+            return nil
+        }
+
+        return APNsEnvironment(rawValue: rawValue)
     }
 
     private func persistLastSentSubscriptionState(_ state: SentSubscriptionState) {
