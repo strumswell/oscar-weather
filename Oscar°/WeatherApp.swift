@@ -114,6 +114,7 @@ extension WeatherApp {
         do {
             if weather.isLoading { return }
             weather.isLoading = true
+            weather.clearLoadingQueries()
             
             locationService.update()
             location = await locationService.getLocation()
@@ -124,18 +125,26 @@ extension WeatherApp {
             var radarResponse: Components.Schemas.RadarResponse?
 
             try await withThrowingTaskGroup(of: WeatherUpdateResponse.self) { group in
+                weather.markLoading(.forecast)
                 group.addTask { .forecast(try await client.getForecast(coordinates: coordinates)) }
+
+                weather.markLoading(.airQuality)
                 group.addTask { .airQuality(try await client.getAirQuality(coordinates: coordinates)) }
+
+                weather.markLoading(.rainRadar)
                 group.addTask { .radar(try await client.getRainRadar(coordinates: coordinates)) }
 
                 for try await response in group {
                     switch response {
                     case .forecast(let response):
                         forecastResponse = response
+                        weather.markFinished(.forecast)
                     case .airQuality(let response):
                         airQualityResponse = response
+                        weather.markFinished(.airQuality)
                     case .radar(let response):
                         radarResponse = response
+                        weather.markFinished(.rainRadar)
                     }
                 }
             }
@@ -150,12 +159,15 @@ extension WeatherApp {
             weather.updateTime()
             weather.isLoading = false
             
+            weather.markLoading(.alerts)
             let alertsResponse = try await client.getAlerts(coordinates: location.coordinates)
             weather.alerts = alertsResponse
+            weather.markFinished(.alerts)
         } catch {
             print(error)
             weather.error = error.localizedDescription
             weather.isLoading = false
+            weather.clearLoadingQueries()
         }
     }
 }

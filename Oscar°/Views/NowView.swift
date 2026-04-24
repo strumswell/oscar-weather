@@ -43,13 +43,11 @@ struct NowView: View {
                                     UIApplication.shared.playHapticFeedback()
                                 }
                             }
-                        RainView()
+                        RainView(openRadarMap: openRadarMap)
                             .opacity(weather.isLoading ? 0.3 : 1.0)
                             .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
                         HourlyView()
                         DailyView()
-                            .opacity(weather.isLoading ? 0.3 : 1.0)
-                            .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
                         VStack(alignment: .leading) {
                             Text("Karte")
                                 .font(.title3)
@@ -57,11 +55,7 @@ struct NowView: View {
                                 .foregroundColor(Color(UIColor.label))
                                 .padding([.leading, .top])
                                 .onTapGesture {
-                                    UIApplication.shared.playHapticFeedback()
-                                    isMapSheetPresented.toggle()
-                                }
-                                .sheet(isPresented: $isMapSheetPresented) {
-                                    MapDetailView(settingsService: settingsService)
+                                    presentMap()
                                 }
                             RadarView(
                                 settingsService: settingsService,
@@ -77,11 +71,7 @@ struct NowView: View {
                                 .opacity(weather.isLoading ? 0.3 : 1.0)
                                 .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
                                 .onTapGesture {
-                                    UIApplication.shared.playHapticFeedback()
-                                    isMapSheetPresented.toggle()
-                                }
-                                .sheet(isPresented: $isMapSheetPresented) {
-                                    MapDetailView(settingsService: settingsService)
+                                    presentMap()
                                 }
                                 .task {
                                     if settingsService.oscarRadarLayer {
@@ -145,6 +135,9 @@ struct NowView: View {
                 await self.updateState()
             }
         }
+        .sheet(isPresented: $isMapSheetPresented) {
+            MapDetailView(settingsService: settingsService)
+        }
         .background(.thinMaterial)
         .edgesIgnoringSafeArea(.all)
         .task {
@@ -202,6 +195,7 @@ extension NowView {
         do {
             if weather.isLoading { return }
             weather.isLoading = true
+            weather.clearLoadingQueries()
             
             locationService.update()
             location.coordinates = locationService.getCoordinates()
@@ -213,18 +207,26 @@ extension NowView {
             var radarResponse: Components.Schemas.RadarResponse?
 
             try await withThrowingTaskGroup(of: WeatherUpdateResponse.self) { group in
+                weather.markLoading(.forecast)
                 group.addTask { .forecast(try await client.getForecast(coordinates: coordinates)) }
+
+                weather.markLoading(.airQuality)
                 group.addTask { .airQuality(try await client.getAirQuality(coordinates: coordinates)) }
+
+                weather.markLoading(.rainRadar)
                 group.addTask { .radar(try await client.getRainRadar(coordinates: coordinates)) }
 
                 for try await response in group {
                     switch response {
                     case .forecast(let response):
                         forecastResponse = response
+                        weather.markFinished(.forecast)
                     case .airQuality(let response):
                         airQualityResponse = response
+                        weather.markFinished(.airQuality)
                     case .radar(let response):
                         radarResponse = response
+                        weather.markFinished(.rainRadar)
                     }
                 }
             }
@@ -239,12 +241,30 @@ extension NowView {
             weather.updateTime()
             weather.isLoading = false
             
+            weather.markLoading(.alerts)
             let alertsResponse = try await client.getAlerts(coordinates: location.coordinates)
             weather.alerts = alertsResponse
+            weather.markFinished(.alerts)
         } catch {
             print(error)
             weather.error = error.localizedDescription
             weather.isLoading = false
+            weather.clearLoadingQueries()
         }
+    }
+
+    private func presentMap() {
+        UIApplication.shared.playHapticFeedback()
+        isMapSheetPresented = true
+    }
+
+    private func openRadarMap() {
+        settingsService.activeTileLayer = nil
+        settingsService.settings?.rainviewerLayer = false
+        settingsService.settings?.dwdLayer = false
+        settingsService.save()
+        settingsService.oscarRadarLayer = true
+        gfsImageState.pause()
+        presentMap()
     }
 }

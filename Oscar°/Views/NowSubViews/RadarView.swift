@@ -328,6 +328,9 @@ struct RadarMapView: UIViewRepresentable {
         var windParticleView: WindParticleView?
         var lastWindFrameKey: String?
         private var selectedCityAnnotation: SelectedCityAnnotation?
+        private var mapInteractionEndWorkItem: DispatchWorkItem?
+        private var isMapInteractionActive = false
+        private var trackedMapGestureRecognizers: Set<ObjectIdentifier> = []
 
         init(_ parent: RadarMapView) {
             self.parent = parent
@@ -336,6 +339,29 @@ struct RadarMapView: UIViewRepresentable {
 
         deinit {
             rainViewerTemplatesTask?.cancel()
+            mapInteractionEndWorkItem?.cancel()
+        }
+
+        func installMapInteractionTracking(on mapView: MKMapView) {
+            mapView.gestureRecognizers?.forEach { recognizer in
+                let identifier = ObjectIdentifier(recognizer)
+                guard !trackedMapGestureRecognizers.contains(identifier) else { return }
+                trackedMapGestureRecognizers.insert(identifier)
+                recognizer.addTarget(self, action: #selector(handleMapGesture(_:)))
+            }
+        }
+
+        @objc private func handleMapGesture(_ recognizer: UIGestureRecognizer) {
+            guard parent.userActionAllowed else { return }
+
+            switch recognizer.state {
+            case .began, .changed:
+                beginMapInteraction()
+            case .ended, .cancelled, .failed:
+                scheduleMapInteractionEnd()
+            default:
+                break
+            }
         }
 
         func syncOscarArrowOverlay(frameKey: String, on mapView: MKMapView) {
@@ -451,8 +477,36 @@ struct RadarMapView: UIViewRepresentable {
             return nil
         }
 
+        func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
+            guard parent.userActionAllowed else { return }
+            beginMapInteraction()
+        }
+
+        private func beginMapInteraction() {
+            mapInteractionEndWorkItem?.cancel()
+            mapInteractionEndWorkItem = nil
+            guard !isMapInteractionActive else { return }
+            isMapInteractionActive = true
+            parent.oscarRadarState?.beginMapInteraction()
+            parent.gfsImageState?.beginMapInteraction()
+        }
+
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
             windParticleView?.onMapRegionChanged()
+            guard parent.userActionAllowed, isMapInteractionActive else { return }
+            scheduleMapInteractionEnd()
+        }
+
+        private func scheduleMapInteractionEnd() {
+            mapInteractionEndWorkItem?.cancel()
+            let workItem = DispatchWorkItem { [weak self] in
+                guard let self else { return }
+                self.isMapInteractionActive = false
+                self.parent.oscarRadarState?.endMapInteraction()
+                self.parent.gfsImageState?.endMapInteraction()
+            }
+            mapInteractionEndWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: workItem)
         }
 
         func syncSelectedCityAnnotation(on mapView: MKMapView) {
@@ -499,12 +553,14 @@ struct RadarMapView: UIViewRepresentable {
         particleView.mapView = mapView
         mapView.addSubview(particleView)
         context.coordinator.windParticleView = particleView
+        context.coordinator.installMapInteractionTracking(on: mapView)
 
         return mapView
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
         context.coordinator.parent = self  // keep parent reference current
+        context.coordinator.installMapInteractionTracking(on: mapView)
 
         let oscarOverlays      = mapView.overlays.filter { $0 is OscarRadarImageOverlay }
         let oscarArrowOverlays = mapView.overlays.filter { $0 is OscarRadarArrowTileOverlay }
@@ -735,14 +791,17 @@ struct RadarMapView: UIViewRepresentable {
                         context.coordinator.lastWindFrameKey = frameKey
                         particleView.frameKey = frameKey
 
-                        // Prefetch tiles for adjacent frames so scrubbing feels instant.
                         let index = gfsState.renderFrameIndex ?? gfsState.currentFrameIndex
                         let keys = gfsState.frameKeys
-                        if index > 0 {
-                            particleView.prefetchFrame(frameId: keys[index - 1], layer: layer)
-                        }
-                        if index + 1 < keys.count {
-                            particleView.prefetchFrame(frameId: keys[index + 1], layer: layer)
+
+                        if !gfsState.isMapInteracting {
+                            // Prefetch tiles for adjacent frames so scrubbing feels instant.
+                            if index > 0 {
+                                particleView.prefetchFrame(frameId: keys[index - 1], layer: layer)
+                            }
+                            if index + 1 < keys.count {
+                                particleView.prefetchFrame(frameId: keys[index + 1], layer: layer)
+                            }
                         }
 
                         // Evict tiles outside the ±2 frame window.

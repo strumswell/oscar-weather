@@ -10,15 +10,19 @@ import Charts
 struct RainView: View {
     @Environment(Weather.self) private var weather: Weather
     @State private var rawSelectedDate: Date?
+    var openRadarMap: () -> Void = {}
     
     var body: some View {
         if weather.radar.isExpectingRain() {
             VStack(alignment: .leading) {
-                Text("Radar")
-                    .font(.system(size: 20))
-                    .bold()
-                    .foregroundColor(Color(UIColor.label))
-                    .padding([.leading, .top])
+                Button(action: openRadarMap) {
+                    Text("Radar")
+                        .font(.system(size: 20))
+                        .bold()
+                        .foregroundColor(Color(UIColor.label))
+                }
+                .buttonStyle(.plain)
+                .padding([.leading, .top])
                 Chart {
                     ForEach(weather.radar.radar ?? [], id: \.timestamp) { data in
                         if let timestamp = data.timestamp, let precipitation = data.precipitation_5?.first?.first {

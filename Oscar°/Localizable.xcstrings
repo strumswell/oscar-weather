@@ -1967,6 +1967,9 @@
         }
       }
     },
+    "Loading queries" : {
+
+    },
     "Location" : {
       "localizations" : {
         "de" : {
@@ -2340,6 +2343,9 @@
     "NOAA Global Forecast System (GFS)" : {
       "shouldTranslate" : false
     },
+    "None" : {
+
+    },
     "Notifications" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2455,6 +2461,9 @@
           }
         }
       }
+    },
+    "Öffnet die stündliche Wettervorhersage" : {
+
     },
     "Öffnet stündliche Umweltdiagramme" : {
       "extractionState" : "manual",

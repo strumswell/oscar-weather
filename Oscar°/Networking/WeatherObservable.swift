@@ -7,9 +7,36 @@
 
 import Foundation
 
+enum WeatherLoadingQuery: String, CaseIterable, Comparable {
+    case forecast
+    case airQuality
+    case rainRadar
+    case alerts
+
+    var displayName: String {
+        switch self {
+        case .forecast:
+            return "Forecast"
+        case .airQuality:
+            return "Air quality"
+        case .rainRadar:
+            return "Rain radar"
+        case .alerts:
+            return "Alerts"
+        }
+    }
+
+    static func < (lhs: WeatherLoadingQuery, rhs: WeatherLoadingQuery) -> Bool {
+        let lhsIndex = allCases.firstIndex(of: lhs) ?? allCases.endIndex
+        let rhsIndex = allCases.firstIndex(of: rhs) ?? allCases.endIndex
+        return lhsIndex < rhsIndex
+    }
+}
+
 @Observable
 class Weather {
     var isLoading: Bool = false
+    var loadingQueries: Set<WeatherLoadingQuery> = []
     var forecast: Operations.getForecast.Output.Ok.Body.jsonPayload
     var alerts: AlertResponse
     var air: Operations.getAirQuality.Output.Ok.Body.jsonPayload
@@ -34,6 +61,18 @@ class Weather {
     func updateTime() {
         let dayBegin = self.forecast.hourly?.time.first ?? 0
         self.time = (Date.now.timeIntervalSince1970-dayBegin)/86400.0
+    }
+
+    func markLoading(_ query: WeatherLoadingQuery) {
+        loadingQueries.insert(query)
+    }
+
+    func markFinished(_ query: WeatherLoadingQuery) {
+        loadingQueries.remove(query)
+    }
+
+    func clearLoadingQueries() {
+        loadingQueries.removeAll()
     }
     
     private func currentTimeScaled() -> Double {

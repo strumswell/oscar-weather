@@ -161,6 +161,7 @@ final class OscarRadarState {
     private(set) var loadingFrameIndices: Set<Int> = []
     private(set) var renderFrameIndex: Int?
     private(set) var interactionState: MapInteractionState = .idle
+    private(set) var isMapInteracting = false
 
     @ObservationIgnored private var playbackTimer: Timer?
     @ObservationIgnored private var frameInfos: [OscarFrameInfo] = []
@@ -319,6 +320,18 @@ final class OscarRadarState {
         restartBackgroundPreloadIfNeeded()
     }
 
+    func beginMapInteraction() {
+        guard !isMapInteracting else { return }
+        isMapInteracting = true
+        backgroundPreloadTask?.cancel()
+    }
+
+    func endMapInteraction() {
+        guard isMapInteracting else { return }
+        isMapInteracting = false
+        restartBackgroundPreloadIfNeeded()
+    }
+
     // MARK: - Private Helpers
 
     private func loadFrames(allowBackgroundPreload: Bool) async {
@@ -396,6 +409,7 @@ final class OscarRadarState {
         backgroundPreloadTask?.cancel()
         guard allowsBackgroundPreload(for: renderMode),
               interactionState != .scrubbing,
+              !isMapInteracting,
               !frameInfos.isEmpty else { return }
 
         let sessionID = loadSessionID
@@ -669,6 +683,7 @@ final class GFSImageLayerState {
     private(set) var loadingFrameIndices: Set<Int> = []
     private(set) var renderFrameIndex: Int?
     private(set) var interactionState: MapInteractionState = .idle
+    private(set) var isMapInteracting = false
 
     @ObservationIgnored private var loadTask: Task<Void, Never>?
     @ObservationIgnored private var backgroundPreloadTask: Task<Void, Never>?
@@ -801,6 +816,18 @@ final class GFSImageLayerState {
         restartBackgroundPreloadIfNeeded()
     }
 
+    func beginMapInteraction() {
+        guard !isMapInteracting else { return }
+        isMapInteracting = true
+        backgroundPreloadTask?.cancel()
+    }
+
+    func endMapInteraction() {
+        guard isMapInteracting else { return }
+        isMapInteracting = false
+        restartBackgroundPreloadIfNeeded()
+    }
+
     // MARK: - Load
 
     func loadLayer(_ layer: WeatherTileLayer) async {
@@ -910,6 +937,7 @@ final class GFSImageLayerState {
         backgroundPreloadTask?.cancel()
         guard allowsBackgroundPreload(for: renderMode),
               interactionState != .scrubbing,
+              !isMapInteracting,
               let layer = currentLayer,
               let imagePath = layer.imagePath,
               !frameInfos.isEmpty else { return }

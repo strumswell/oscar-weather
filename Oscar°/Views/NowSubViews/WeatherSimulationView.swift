@@ -34,6 +34,15 @@ struct WeatherSimulationView: View {
                 VStack {
                     Text(weather.isLoading.description)
                     Text(String(reflecting: weather.forecast.hourly == nil))
+                    Text("Loading queries")
+                        .padding(.top, 20)
+                    if weather.loadingQueries.isEmpty {
+                        Text("None")
+                    } else {
+                        ForEach(weather.loadingQueries.sorted(), id: \.self) { query in
+                            Text(query.displayName)
+                        }
+                    }
                 }
             }
         }
