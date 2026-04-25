@@ -101,6 +101,9 @@ struct MemberCard: View {
                 onCardTap: openDock,
                 onApplyChanges: closeDock,
                 onStickerTap: selectSticker,
+                onStickerPressChanged: { placement, isPressed in
+                    updateExistingStickerPress(placement: placement, isPressed: isPressed, in: cardSize)
+                },
                 onStickerDragChanged: { placement, translation in
                     updateExistingStickerDrag(placement: placement, translation: translation, in: cardSize)
                 },
@@ -131,7 +134,15 @@ struct MemberCard: View {
                 .offset(y: Self.cardHeight)
                 .zIndex(10)
 
-            if let activeDrag, activeDrag.isPalette || activeDrag.isExisting {
+            if let activeDrag, activeDrag.isExisting {
+                stickerPreview(for: activeDrag)
+                    .position(activeDrag.center)
+                    .opacity(activeDrag.center.y > Self.cardHeight - 12 ? 1 : 0)
+                    .allowsHitTesting(false)
+                    .zIndex(300)
+            }
+
+            if let activeDrag, activeDrag.isPalette {
                 stickerPreview(for: activeDrag)
                     .position(activeDrag.center)
                     .transition(.opacity)
@@ -148,7 +159,7 @@ struct MemberCard: View {
                 assetNames: Self.availableStickerAssets,
                 activeDragAssetName: activeDrag?.isPalette == true ? activeDrag?.assetName : nil,
                 isRemoveTargeted: isHoveringRemoveBin,
-                canRemoveSelection: selectedStickerID != nil,
+                canRemoveSelection: selectedStickerID != nil || activeDrag?.isExisting == true,
                 onPickupStarted: { assetName, globalCenter in
                     beginPaletteStickerDrag(assetName: assetName, globalCenter: globalCenter, in: layoutFrame)
                 },
@@ -284,23 +295,26 @@ struct MemberCard: View {
 
         updatedPlacements.append(sticker)
         persist(updatedPlacements)
-        animateStickerFoldDown(for: sticker.id)
         selectedStickerID = nil
         UIApplication.shared.playHapticFeedback()
+    }
+
+    private func updateExistingStickerPress(placement: MemberCardStickerPlacement, isPressed: Bool, in cardSize: CGSize) {
+        guard isPressed else { return }
+        updateExistingStickerDrag(placement: placement, translation: .zero, in: cardSize)
     }
 
     private func updateExistingStickerDrag(placement: MemberCardStickerPlacement, translation: CGSize, in cardSize: CGSize) {
         let origin = stickerCenter(for: placement, in: cardSize)
         let center = CGPoint(x: origin.x + translation.width, y: origin.y + translation.height)
 
-        if activeDrag?.existingStickerID != placement.id {
-            bringStickerToFront(placement.id)
-            selectedStickerID = placement.id
+        var transaction = Transaction()
+        transaction.animation = nil
+        withTransaction(transaction) {
+            settlingStickerID = nil
+            settlingStickerFoldProgress = 0
+            activeDrag = ActiveDrag(source: .existing(placement.id), assetName: placement.assetName, baseScale: placement.scale, baseRotation: placement.rotation, center: center)
         }
-
-        settlingStickerID = nil
-        settlingStickerFoldProgress = 0
-        activeDrag = ActiveDrag(source: .existing(placement.id), assetName: placement.assetName, baseScale: placement.scale, baseRotation: placement.rotation, center: center)
     }
 
     private func finishExistingStickerDrag(
@@ -309,6 +323,15 @@ struct MemberCard: View {
         in cardSize: CGSize,
         removeBinFrame: CGRect
     ) {
+        guard activeDrag?.existingStickerID == placement.id else { return }
+
+        if abs(translation.width) < 4 && abs(translation.height) < 4 && inFlightScaleMultiplier == 1.0 && inFlightRotationDelta == .zero {
+            activeDrag = nil
+            inFlightScaleMultiplier = 1.0
+            inFlightRotationDelta = .zero
+            return
+        }
+
         let origin = stickerCenter(for: placement, in: cardSize)
         let proposedCenter = CGPoint(x: origin.x + translation.width, y: origin.y + translation.height)
 
@@ -451,9 +474,10 @@ struct MemberCard: View {
         return MemberCardStickerArtworkView(
             assetName: drag.assetName,
             size: size,
-            foldProgress: 1
+            foldProgress: drag.isExisting ? 1 : 0
         )
             .rotationEffect(displayRotation)
+            .offset(y: reduceMotion ? 0 : -12)
             .shadow(color: .black.opacity(0.28), radius: 20, x: 2, y: 14)
             .scaleEffect(reduceMotion ? 1 : 1.05)
             .accessibilityHidden(true)

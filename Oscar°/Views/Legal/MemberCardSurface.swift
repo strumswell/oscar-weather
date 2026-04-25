@@ -17,11 +17,10 @@ struct MemberCardSurface: View {
     let onCardTap: () -> Void
     let onApplyChanges: () -> Void
     let onStickerTap: (UUID) -> Void
+    let onStickerPressChanged: (MemberCardStickerPlacement, Bool) -> Void
     let onStickerDragChanged: (MemberCardStickerPlacement, CGSize) -> Void
     let onStickerDragEnded: (MemberCardStickerPlacement, CGSize) -> Void
     let onStickerTransformEnded: (MemberCardStickerPlacement, Double, Angle) -> Void
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
@@ -163,12 +162,11 @@ struct MemberCardSurface: View {
         .overlay {
             RoundedRectangle(cornerRadius: MemberCard.cornerRadius)
                 .strokeBorder(
-                    isDropTargeted ? .white.opacity(0.86) : .white.opacity(0.18),
-                    lineWidth: isDropTargeted ? 2.4 : 1
+                    .white.opacity(0.18),
+                    lineWidth: 1
                 )
         }
         .shadow(color: .black.opacity(0.2), radius: 22, y: 14)
-        .scaleEffect(isDropTargeted && !reduceMotion ? 1.01 : 1)
         .contentShape(RoundedRectangle(cornerRadius: MemberCard.cornerRadius))
     }
 
@@ -182,10 +180,14 @@ struct MemberCardSurface: View {
                         isSelected: selectedStickerID == placement.id,
                         isEditing: isEditing,
                         isActivelyDragged: activeStickerID == placement.id,
+                        isGestureLocked: activeStickerID != nil && activeStickerID != placement.id,
                         foldProgress: foldProgress(for: placement.id),
                         coordinateSpaceName: MemberCard.coordinateSpaceName,
                         onTap: {
                             onStickerTap(placement.id)
+                        },
+                        onPressChanged: { isPressed in
+                            onStickerPressChanged(placement, isPressed)
                         },
                         onDragChanged: { translation in
                             onStickerDragChanged(placement, translation)
@@ -201,12 +203,18 @@ struct MemberCardSurface: View {
                         x: displayPlacement.xRatio * proxy.size.width,
                         y: displayPlacement.yRatio * proxy.size.height
                     )
-                    .zIndex(displayPlacement.zIndex)
+                    .zIndex(activeStickerID == placement.id ? 400 : displayPlacement.zIndex)
+                    .opacity(activeStickerID == placement.id && shouldShowActiveStickerOverlay(in: proxy.size) ? 0 : 1)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .accessibilityElement(children: .contain)
+    }
+
+    private func shouldShowActiveStickerOverlay(in size: CGSize) -> Bool {
+        guard let activeStickerCenter else { return false }
+        return activeStickerCenter.y > size.height - 12
     }
 
     private func displayedPlacement(for placement: MemberCardStickerPlacement, in size: CGSize) -> MemberCardStickerPlacement {
