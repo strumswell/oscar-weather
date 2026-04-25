@@ -263,37 +263,32 @@ struct AQIChart: View {
         }
     }
 
-    private func annotationRows(for dataPoint: AQIDataPoint) -> [(label: String, value: Double, seriesColor: Color, severityColor: Color)] {
+    private func annotationRows(for dataPoint: AQIDataPoint) -> [(label: String, value: Double, seriesColor: Color)] {
         [
             (
                 "PM2.5",
                 dataPoint.pm25,
-                seriesColors["PM2.5", default: .blue],
-                EnvironmentMetric.forAQI(id: "pm25", label: "PM", subscript_: "2.5", value: dataPoint.pm25).color
+                seriesColors["PM2.5", default: .blue]
             ),
             (
                 "PM10",
                 dataPoint.pm10,
-                seriesColors["PM10", default: .cyan],
-                EnvironmentMetric.forAQI(id: "pm10", label: "PM", subscript_: "10", value: dataPoint.pm10).color
+                seriesColors["PM10", default: .cyan]
             ),
             (
                 "NO₂",
                 dataPoint.no2,
-                seriesColors["NO₂", default: .orange],
-                EnvironmentMetric.forAQI(id: "no2", label: "NO", subscript_: "2", value: dataPoint.no2).color
+                seriesColors["NO₂", default: .orange]
             ),
             (
                 "O₃",
                 dataPoint.o3,
-                seriesColors["O₃", default: .green],
-                EnvironmentMetric.forAQI(id: "o3", label: "O", subscript_: "3", value: dataPoint.o3).color
+                seriesColors["O₃", default: .green]
             ),
             (
                 "SO₂",
                 dataPoint.so2,
-                seriesColors["SO₂", default: .yellow],
-                EnvironmentMetric.forAQI(id: "so2", label: "SO", subscript_: "2", value: dataPoint.so2).color
+                seriesColors["SO₂", default: .yellow]
             ),
         ]
     }
@@ -321,7 +316,7 @@ struct AQIChart: View {
 
 private struct AQIChartAnnotationView: View {
     let time: String
-    let rows: [(label: String, value: Double, seriesColor: Color, severityColor: Color)]
+    let rows: [(label: String, value: Double, seriesColor: Color)]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -337,7 +332,7 @@ private struct AQIChartAnnotationView: View {
 
                     Text("\(row.label): \(Int(row.value))")
                         .font(.caption2)
-                        .foregroundStyle(row.severityColor)
+                        .foregroundStyle(.primary)
                 }
             }
         }

@@ -144,7 +144,7 @@ struct PollenChart: View {
 
                                             Text("\(row.label): \(row.rawValue, specifier: "%.0f")")
                                                 .font(.caption2)
-                                                .foregroundStyle(row.severityColor)
+                                                .foregroundStyle(.primary)
                                         }
                                     }
                                 }
@@ -259,7 +259,7 @@ struct PollenChart: View {
         )
     }
 
-    private func selectedRows(for selectedDate: Date) -> [(time: Date, label: String, rawValue: Double, lineColor: Color, severityColor: Color)] {
+    private func selectedRows(for selectedDate: Date) -> [(time: Date, label: String, rawValue: Double, lineColor: Color)] {
         series.compactMap { pollenSeries in
             guard let point = pollenSeries.points.min(by: {
                 abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate))
@@ -267,19 +267,11 @@ struct PollenChart: View {
                 return nil
             }
 
-            let severityColor =
-                EnvironmentMetric.forPollen(
-                    type: pollenSeries.type,
-                    label: pollenSeries.label,
-                    value: point.rawValue
-                )?.color ?? pollenSeries.lineColor
-
             return (
                 time: point.time,
                 label: pollenSeries.label,
                 rawValue: point.rawValue,
-                lineColor: pollenSeries.lineColor,
-                severityColor: severityColor
+                lineColor: pollenSeries.lineColor
             )
         }
     }

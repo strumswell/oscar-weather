@@ -100,9 +100,15 @@ struct UVChart: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
 
-                            Text("UV: \(selectedData.value, specifier: "%.1f")")
-                                .font(.caption2)
-                                .foregroundStyle(EnvironmentMetric.forUV(value: selectedData.value).color)
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(.white)
+                                    .frame(width: 6, height: 6)
+
+                                Text("UV: \(selectedData.value, specifier: "%.1f")")
+                                    .font(.caption2)
+                                    .foregroundStyle(.primary)
+                            }
                         }
                         .padding(8)
                         .background(.ultraThinMaterial.opacity(0.9), in: .rect(cornerRadius: 8))

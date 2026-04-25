@@ -69,7 +69,7 @@ struct HourlyView: View {
             }
           }
           .scrollTargetLayout()
-          .font(.body)
+          .font(.system(size: 18))
           .padding(.leading)
         }
         .scrollIndicators(.hidden)
