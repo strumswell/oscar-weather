@@ -13,6 +13,7 @@ struct ET0EvapotranspirationChart: View {
   var time: [Double]
   var unit: String
   var maxTimeRange: ClosedRange<Date>
+  var referenceDate: Date
   
   @State private var selectedDate: Date?
 
@@ -23,6 +24,10 @@ struct ET0EvapotranspirationChart: View {
     }
   }
 
+  private var currentDataPoint: (time: Date, et0: Double)? {
+    et0Data.first(where: { $0.time >= referenceDate }) ?? et0Data.last
+  }
+
   var body: some View {
     VStack(alignment: .leading) {
       Chart {
@@ -31,11 +36,14 @@ struct ET0EvapotranspirationChart: View {
           LineMark(
             x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(timeValue))),
             y: .value("ET0", et0Value),
-            series: .value("Series", "ET0 FAO (\(unit))")
+            series: .value("Series", timeValue < referenceDate.timeIntervalSince1970 ? "ET0-past" : "ET0-future")
           )
           .interpolationMethod(.catmullRom)
-          .foregroundStyle(.blue)
+          .foregroundStyle(timeValue < referenceDate.timeIntervalSince1970 ? .blue.opacity(0.42) : .blue)
+          .lineStyle(timeValue < referenceDate.timeIntervalSince1970 ? .init(lineWidth: 2, dash: [7, 5]) : .init(lineWidth: 2))
         }
+
+        currentPointMarks
         
         // Interactive selection indicator
         if let selectedDate {
@@ -51,7 +59,7 @@ struct ET0EvapotranspirationChart: View {
             ) {
               if let selectedData = getSelectedET0Data(for: selectedDate) {
                 VStack(alignment: .center, spacing: 2) {
-                  Text(formatTimeToHHMM(date: selectedDate))
+                  Text(HourlyChartUtilities.timeString(from: selectedDate))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                   
@@ -66,7 +74,7 @@ struct ET0EvapotranspirationChart: View {
                 }
                 .padding(8)
                 .background(.ultraThinMaterial.opacity(0.9))
-                .cornerRadius(8)
+                .clipShape(.rect(cornerRadius: 8))
                 .shadow(radius: 4)
               }
             }
@@ -83,9 +91,9 @@ struct ET0EvapotranspirationChart: View {
                 y: .fit(to: .chart)
               )
             ) {
-              Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
+              Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                 .font(.caption.weight(.medium))
-                .foregroundColor(.primary.opacity(0.7))
+                .foregroundStyle(.primary.opacity(0.7))
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
                 .background(.ultraThinMaterial, in: .capsule)
@@ -114,11 +122,25 @@ struct ET0EvapotranspirationChart: View {
   private func getSelectedET0Data(for selectedDate: Date) -> (time: Date, et0: Double)? {
     return et0Data.min(by: { abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate)) })
   }
-  
-  /// Formats time to HH:MM format
-  private func formatTimeToHHMM(date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "HH:mm"
-    return formatter.string(from: date)
+
+  @ChartContentBuilder
+  private var currentPointMarks: some ChartContent {
+    if let currentDataPoint {
+      PointMark(
+        x: .value("Current Hour", currentDataPoint.time),
+        y: .value("ET0", currentDataPoint.et0)
+      )
+      .symbol(.circle)
+      .symbolSize(90)
+      .foregroundStyle(.black)
+
+      PointMark(
+        x: .value("Current Hour", currentDataPoint.time),
+        y: .value("ET0", currentDataPoint.et0)
+      )
+      .symbol(.circle)
+      .symbolSize(42)
+      .foregroundStyle(.white)
+    }
   }
 }

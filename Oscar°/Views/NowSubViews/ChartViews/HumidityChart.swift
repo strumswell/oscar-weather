@@ -13,6 +13,7 @@ struct HumidityChart: View {
   var time: [Double]
   var unit: String
   var maxTimeRange: ClosedRange<Date>
+  var referenceDate: Date
   
   @State private var selectedDate: Date?
 
@@ -23,13 +24,17 @@ struct HumidityChart: View {
     }
   }
 
+  private var currentDataPoint: (time: Date, humidity: Double)? {
+    humidityData.first(where: { $0.time >= referenceDate }) ?? humidityData.last
+  }
+
   var body: some View {
     VStack(alignment: .leading) {
       Chart {
         if #available(iOS 18, *) {
           // Area plot with gradient for humidity
           AreaPlot(
-            humidityData,
+            humidityData.filter { $0.time >= referenceDate },
             x: .value("Hour", \.time),
             y: .value("Luftfeuchtigkeit (\(unit))", \.humidity)
           )
@@ -42,12 +47,21 @@ struct HumidityChart: View {
           )
           .interpolationMethod(.catmullRom)
           
-          // Line plot on top
           LinePlot(
-            humidityData,
+            humidityData.filter { $0.time <= referenceDate },
             x: .value("Hour", \.time),
             y: .value("Luftfeuchtigkeit (\(unit))", \.humidity),
-            series: .value("Series", "Humidity")
+            series: .value("Series", "Humidity-past")
+          )
+          .foregroundStyle(.green.opacity(0.42))
+          .interpolationMethod(.catmullRom)
+          .lineStyle(.init(lineWidth: 2.5, dash: [7, 5]))
+
+          LinePlot(
+            humidityData.filter { $0.time >= referenceDate },
+            x: .value("Hour", \.time),
+            y: .value("Luftfeuchtigkeit (\(unit))", \.humidity),
+            series: .value("Series", "Humidity-future")
           )
           .foregroundStyle(.green)
           .interpolationMethod(.catmullRom)
@@ -61,7 +75,7 @@ struct HumidityChart: View {
               y: .value("Luftfeuchtigkeit (\(unit))", humidityValue)
             )
             .interpolationMethod(.catmullRom)
-            .foregroundStyle(.green.opacity(0.3))
+            .foregroundStyle(timeValue < referenceDate.timeIntervalSince1970 ? .green.opacity(0.12) : .green.opacity(0.3))
           }
           
           ForEach(Array(zip(time, humidity).enumerated()), id: \.offset) { index, pair in
@@ -69,13 +83,15 @@ struct HumidityChart: View {
             LineMark(
               x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(timeValue))),
               y: .value("Luftfeuchtigkeit (\(unit))", humidityValue),
-              series: .value("Series", "Humidity")
+              series: .value("Series", timeValue < referenceDate.timeIntervalSince1970 ? "Humidity-past" : "Humidity-future")
             )
             .interpolationMethod(.catmullRom)
-            .foregroundStyle(.green)
-            .lineStyle(.init(lineWidth: 2.5))
+            .foregroundStyle(timeValue < referenceDate.timeIntervalSince1970 ? .green.opacity(0.42) : .green)
+            .lineStyle(timeValue < referenceDate.timeIntervalSince1970 ? .init(lineWidth: 2.5, dash: [7, 5]) : .init(lineWidth: 2.5))
           }
         }
+
+        currentPointMarks
         
         // Interactive selection indicator
         if let selectedDate {
@@ -91,7 +107,7 @@ struct HumidityChart: View {
             ) {
               if let selectedData = getSelectedHumidityData(for: selectedDate) {
                 VStack(alignment: .center, spacing: 2) {
-                  Text(formatTimeToHHMM(date: selectedDate))
+                  Text(HourlyChartUtilities.timeString(from: selectedDate))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                   
@@ -106,7 +122,7 @@ struct HumidityChart: View {
                 }
                 .padding(8)
                 .background(.ultraThinMaterial.opacity(0.9))
-                .cornerRadius(8)
+                .clipShape(.rect(cornerRadius: 8))
                 .shadow(radius: 4)
               }
             }
@@ -123,9 +139,9 @@ struct HumidityChart: View {
                 y: .fit(to: .chart)
               )
             ) {
-              Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
+              Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                 .font(.caption.weight(.medium))
-                .foregroundColor(.primary.opacity(0.7))
+                .foregroundStyle(.primary.opacity(0.7))
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
                 .background(.ultraThinMaterial, in: .capsule)
@@ -154,11 +170,25 @@ struct HumidityChart: View {
   private func getSelectedHumidityData(for selectedDate: Date) -> (time: Date, humidity: Double)? {
     return humidityData.min(by: { abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate)) })
   }
-  
-  /// Formats time to HH:MM format
-  private func formatTimeToHHMM(date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "HH:mm"
-    return formatter.string(from: date)
+
+  @ChartContentBuilder
+  private var currentPointMarks: some ChartContent {
+    if let currentDataPoint {
+      PointMark(
+        x: .value("Current Hour", currentDataPoint.time),
+        y: .value("Luftfeuchtigkeit", currentDataPoint.humidity)
+      )
+      .symbol(.circle)
+      .symbolSize(90)
+      .foregroundStyle(.black)
+
+      PointMark(
+        x: .value("Current Hour", currentDataPoint.time),
+        y: .value("Luftfeuchtigkeit", currentDataPoint.humidity)
+      )
+      .symbol(.circle)
+      .symbolSize(42)
+      .foregroundStyle(.white)
+    }
   }
 }

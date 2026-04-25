@@ -677,7 +677,7 @@ enum WeatherColormap {
     }
 
     // (fraction 0…1 from bottom/min, label text) for the vertical legend
-    var verticalLabels: [(Double, String)] {
+    var verticalLabels: [(Double, LocalizedStringKey)] {
         switch self {
         case .radar:
             return [

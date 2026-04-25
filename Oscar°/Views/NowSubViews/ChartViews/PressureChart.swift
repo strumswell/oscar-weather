@@ -13,6 +13,7 @@ struct PressureChart: View {
   var time: [Double]
   var unit: String
   var maxTimeRange: ClosedRange<Date>
+  var referenceDate: Date
   
   @State private var selectedDate: Date?
 
@@ -23,17 +24,21 @@ struct PressureChart: View {
     }
   }
 
+  private var currentDataPoint: (time: Date, pressure: Double)? {
+    pressureData.first(where: { $0.time >= referenceDate }) ?? pressureData.last
+  }
+
   var body: some View {
     VStack(alignment: .leading) {
       let minPressure = pressure.min() ?? 0
       let maxPressure = pressure.max() ?? 100
-      let tickValues = calculateTicks(from: minPressure, to: maxPressure, count: 4)
+      let tickValues = HourlyChartUtilities.ticks(from: minPressure, to: maxPressure, count: 4)
 
       Chart {
         if #available(iOS 18, *) {
           // Area plot with gradient
           AreaPlot(
-            pressureData,
+            pressureData.filter { $0.time >= referenceDate },
             x: .value("Hour", \.time),
             y: .value("Luftdruck (\(unit))", \.pressure)
           )
@@ -46,12 +51,21 @@ struct PressureChart: View {
           )
           .interpolationMethod(.catmullRom)
           
-          // Line plot on top
           LinePlot(
-            pressureData,
+            pressureData.filter { $0.time <= referenceDate },
             x: .value("Hour", \.time),
             y: .value("Luftdruck (\(unit))", \.pressure),
-            series: .value("Series", "Pressure")
+            series: .value("Series", "Pressure-past")
+          )
+          .foregroundStyle(.purple.opacity(0.42))
+          .interpolationMethod(.catmullRom)
+          .lineStyle(.init(lineWidth: 2.5, dash: [7, 5]))
+
+          LinePlot(
+            pressureData.filter { $0.time >= referenceDate },
+            x: .value("Hour", \.time),
+            y: .value("Luftdruck (\(unit))", \.pressure),
+            series: .value("Series", "Pressure-future")
           )
           .foregroundStyle(.purple)
           .interpolationMethod(.catmullRom)
@@ -65,7 +79,7 @@ struct PressureChart: View {
               y: .value("Luftdruck (\(unit))", pressureValue)
             )
             .interpolationMethod(.catmullRom)
-            .foregroundStyle(.purple.opacity(0.2))
+            .foregroundStyle(timeValue < referenceDate.timeIntervalSince1970 ? .purple.opacity(0.08) : .purple.opacity(0.2))
           }
           
           ForEach(Array(zip(time, pressure).enumerated()), id: \.offset) { index, pair in
@@ -73,13 +87,15 @@ struct PressureChart: View {
             LineMark(
               x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(timeValue))),
               y: .value("Luftdruck (\(unit))", pressureValue),
-              series: .value("Series", "Pressure")
+              series: .value("Series", timeValue < referenceDate.timeIntervalSince1970 ? "Pressure-past" : "Pressure-future")
             )
             .interpolationMethod(.catmullRom)
-            .foregroundStyle(.purple)
-            .lineStyle(.init(lineWidth: 2.5))
+            .foregroundStyle(timeValue < referenceDate.timeIntervalSince1970 ? .purple.opacity(0.42) : .purple)
+            .lineStyle(timeValue < referenceDate.timeIntervalSince1970 ? .init(lineWidth: 2.5, dash: [7, 5]) : .init(lineWidth: 2.5))
           }
         }
+
+        currentPointMarks
         
         // Interactive selection indicator
         if let selectedDate {
@@ -95,7 +111,7 @@ struct PressureChart: View {
             ) {
               if let selectedData = getSelectedPressureData(for: selectedDate) {
                 VStack(alignment: .center, spacing: 2) {
-                  Text(formatTimeToHHMM(date: selectedDate))
+                  Text(HourlyChartUtilities.timeString(from: selectedDate))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                   
@@ -110,7 +126,7 @@ struct PressureChart: View {
                 }
                 .padding(8)
                 .background(.ultraThinMaterial.opacity(0.9))
-                .cornerRadius(8)
+                .clipShape(.rect(cornerRadius: 8))
                 .shadow(radius: 4)
               }
             }
@@ -127,9 +143,9 @@ struct PressureChart: View {
                 y: .fit(to: .chart)
               )
             ) {
-              Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
+              Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                 .font(.caption.weight(.medium))
-                .foregroundColor(.primary.opacity(0.7))
+                .foregroundStyle(.primary.opacity(0.7))
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
                 .background(.ultraThinMaterial, in: .capsule)
@@ -168,11 +184,25 @@ struct PressureChart: View {
   private func getSelectedPressureData(for selectedDate: Date) -> (time: Date, pressure: Double)? {
     return pressureData.min(by: { abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate)) })
   }
-  
-  /// Formats time to HH:MM format
-  private func formatTimeToHHMM(date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "HH:mm"
-    return formatter.string(from: date)
+
+  @ChartContentBuilder
+  private var currentPointMarks: some ChartContent {
+    if let currentDataPoint {
+      PointMark(
+        x: .value("Current Hour", currentDataPoint.time),
+        y: .value("Luftdruck", currentDataPoint.pressure)
+      )
+      .symbol(.circle)
+      .symbolSize(90)
+      .foregroundStyle(.black)
+
+      PointMark(
+        x: .value("Current Hour", currentDataPoint.time),
+        y: .value("Luftdruck", currentDataPoint.pressure)
+      )
+      .symbol(.circle)
+      .symbolSize(42)
+      .foregroundStyle(.white)
+    }
   }
 }

@@ -107,6 +107,11 @@
 		259187D32C715BBD00611B0F /* SoilMoistureChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259187D22C715BBD00611B0F /* SoilMoistureChart.swift */; };
 		259187D52C715BE000611B0F /* SoilTemperatureChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259187D42C715BE000611B0F /* SoilTemperatureChart.swift */; };
 		259187D72C715C2400611B0F /* ET0EvapotranspirationChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259187D62C715C2400611B0F /* ET0EvapotranspirationChart.swift */; };
+		AD0000112FAA100000000001 /* HourlyDetailChartCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000102FAA100000000001 /* HourlyDetailChartCard.swift */; };
+		AD0000132FAA100000000001 /* HourlyDetailInfoCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000122FAA100000000001 /* HourlyDetailInfoCard.swift */; };
+		AD0000192FAA100000000001 /* HourlyChartUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000182FAA100000000001 /* HourlyChartUtilities.swift */; };
+		AD00001B2FAA100000000001 /* HourlyDetailSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD00001A2FAA100000000001 /* HourlyDetailSection.swift */; };
+		AD00001D2FAA100000000001 /* HourlyDetailSegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD00001C2FAA100000000001 /* HourlyDetailSegmentedControl.swift */; };
 		8AEDBB52B17646EFA514F51B /* HourlyFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF4E7D970804126A8E2426E /* HourlyFormatting.swift */; };
 		97E748E0D8EE4D26BFD730A1 /* HourlySunEventCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 443B0BCEAF65489F8D23049A /* HourlySunEventCard.swift */; };
 		BC37CFDDDE3440109D308038 /* HourlyForecastBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A9B239ECE548BBA9F7076C /* HourlyForecastBuilder.swift */; };
@@ -325,6 +330,11 @@
 		259187D22C715BBD00611B0F /* SoilMoistureChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoilMoistureChart.swift; sourceTree = "<group>"; };
 		259187D42C715BE000611B0F /* SoilTemperatureChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoilTemperatureChart.swift; sourceTree = "<group>"; };
 		259187D62C715C2400611B0F /* ET0EvapotranspirationChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ET0EvapotranspirationChart.swift; sourceTree = "<group>"; };
+		AD0000102FAA100000000001 /* HourlyDetailChartCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyDetailChartCard.swift; sourceTree = "<group>"; };
+		AD0000122FAA100000000001 /* HourlyDetailInfoCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyDetailInfoCard.swift; sourceTree = "<group>"; };
+		AD0000182FAA100000000001 /* HourlyChartUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyChartUtilities.swift; sourceTree = "<group>"; };
+		AD00001A2FAA100000000001 /* HourlyDetailSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyDetailSection.swift; sourceTree = "<group>"; };
+		AD00001C2FAA100000000001 /* HourlyDetailSegmentedControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyDetailSegmentedControl.swift; sourceTree = "<group>"; };
 		259623CF2A2BD6BF00BA75F6 /* HomeProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeProvider.swift; sourceTree = "<group>"; };
 		259623D12A2BD72C00BA75F6 /* NowTodayWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowTodayWidget.swift; sourceTree = "<group>"; };
 		259704E42757D7E800DFCA53 /* AlertDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertDetailView.swift; sourceTree = "<group>"; };
@@ -567,6 +577,7 @@
 				AB0001002F9A00000000001A /* EnvironmentDetail */,
 				259187C42C715A7C00611B0F /* ChartViews */,
 				AE6B252842654C7EBD787CCE /* Hourly */,
+				AD0000002FAA100000000001 /* HourlyDetail */,
 				25ED4A4627A2F5C60050C4A9 /* HeadView.swift */,
 				3E6117072544B27600B68120 /* HourlyView.swift */,
 				253F84F62C20B8ED00844A9E /* HourlyDetailView.swift */,
@@ -598,6 +609,17 @@
 			path = Hourly;
 			sourceTree = "<group>";
 		};
+		AD0000002FAA100000000001 /* HourlyDetail */ = {
+			isa = PBXGroup;
+			children = (
+				AD0000102FAA100000000001 /* HourlyDetailChartCard.swift */,
+				AD0000122FAA100000000001 /* HourlyDetailInfoCard.swift */,
+				AD00001A2FAA100000000001 /* HourlyDetailSection.swift */,
+				AD00001C2FAA100000000001 /* HourlyDetailSegmentedControl.swift */,
+			);
+			path = HourlyDetail;
+			sourceTree = "<group>";
+		};
 		256FDAC12BCB14B200E18655 /* GlobalRadarWidget */ = {
 			isa = PBXGroup;
 			children = (
@@ -621,6 +643,7 @@
 				259187D22C715BBD00611B0F /* SoilMoistureChart.swift */,
 				259187D42C715BE000611B0F /* SoilTemperatureChart.swift */,
 				259187D62C715C2400611B0F /* ET0EvapotranspirationChart.swift */,
+				AD0000182FAA100000000001 /* HourlyChartUtilities.swift */,
 			);
 			path = ChartViews;
 			sourceTree = "<group>";
@@ -1134,6 +1157,7 @@
 				251BFE7D2E48DC7600D35589 /* AtmosphericRenderer.swift in Sources */,
 				251BFE7E2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift in Sources */,
 				259187CB2C715B2900611B0F /* PrecipitationChart.swift in Sources */,
+				AD0000192FAA100000000001 /* HourlyChartUtilities.swift in Sources */,
 				25ED79B429F1A7DF002E0AAB /* Cloud.swift in Sources */,
 				252FC3B42ECE830300981FF3 /* RadarColorMapping.swift in Sources */,
 				3E61170C2544B2D300B68120 /* DailyView.swift in Sources */,
@@ -1168,6 +1192,10 @@
 				25A1D10B2F8E000100000001 /* StickerShaders.metal in Sources */,
 				25ED79AB29F1A7DF002E0AAB /* Meteor.swift in Sources */,
 				259187C92C715AEA00611B0F /* TemperatureChart.swift in Sources */,
+				AD0000112FAA100000000001 /* HourlyDetailChartCard.swift in Sources */,
+				AD0000132FAA100000000001 /* HourlyDetailInfoCard.swift in Sources */,
+				AD00001B2FAA100000000001 /* HourlyDetailSection.swift in Sources */,
+				AD00001D2FAA100000000001 /* HourlyDetailSegmentedControl.swift in Sources */,
 				FCC024D264034F7099FC962D /* HourlyForecastItem.swift in Sources */,
 				8AEDBB52B17646EFA514F51B /* HourlyFormatting.swift in Sources */,
 				BC37CFDDDE3440109D308038 /* HourlyForecastBuilder.swift in Sources */,

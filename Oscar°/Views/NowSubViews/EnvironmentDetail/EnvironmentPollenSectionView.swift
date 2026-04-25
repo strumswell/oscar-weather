@@ -28,7 +28,7 @@ struct EnvironmentPollenSectionView: View {
                     EnvironmentDetailHeaderView(
                         title: "Pollen",
                         value: dominantPollen?.label ?? "--",
-                        badge: dominantPollen?.tierLabel ?? "Keine Daten",
+                        badge: dominantPollen.map { LocalizedStringKey($0.tierLabel) } ?? "Keine Daten",
                         color: dominantPollenSeverityColor,
                         subtitle: nil
                     )

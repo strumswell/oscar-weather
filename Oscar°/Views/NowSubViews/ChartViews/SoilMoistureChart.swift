@@ -17,6 +17,7 @@ struct SoilMoistureChart: View {
   var time: [Double]
   var unit: String
   var maxTimeRange: ClosedRange<Date>
+  var referenceDate: Date
   
   @State private var selectedDate: Date?
 
@@ -32,68 +33,36 @@ struct SoilMoistureChart: View {
     }
   }
 
+  private var currentDataPoint: (time: Date, moisture0_1: Double?, moisture1_3: Double?, moisture3_9: Double?, moisture9_27: Double?, moisture27_81: Double?)? {
+    soilMoistureData.first(where: { $0.time >= referenceDate }) ?? soilMoistureData.last
+  }
+
   var body: some View {
     VStack(alignment: .leading) {
       Chart {
-        ForEach(Array(zip(time, soilMoisture0_1cm).enumerated()), id: \.offset) { index, pair in
-          if let moistureValue = pair.1 {
-            LineMark(
-              x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(pair.0))),
-              y: .value("0-1cm", moistureValue),
-              series: .value("Series", "Bodenwassergehalt 0-1cm (\(unit))")
-            )
-            .interpolationMethod(.catmullRom)
-            .foregroundStyle(.brown)
+        ForEach(soilMoistureData, id: \.time) { data in
+          if let moisture0_1 = data.moisture0_1 {
+            soilLineMark(data: data, label: "0-1cm", value: moisture0_1, color: .brown, pastColor: .brown.opacity(0.42), lineWidth: 2)
+          }
+
+          if let moisture1_3 = data.moisture1_3 {
+            soilLineMark(data: data, label: "1-3cm", value: moisture1_3, color: .brown.opacity(0.6), pastColor: .brown.opacity(0.3), lineWidth: 2)
+          }
+
+          if let moisture3_9 = data.moisture3_9 {
+            soilLineMark(data: data, label: "3-9cm", value: moisture3_9, color: .brown.opacity(0.4), pastColor: .brown.opacity(0.22), lineWidth: 2)
+          }
+
+          if let moisture9_27 = data.moisture9_27 {
+            soilLineMark(data: data, label: "9-27cm", value: moisture9_27, color: .brown.opacity(0.2), pastColor: .brown.opacity(0.13), lineWidth: 2)
+          }
+
+          if let moisture27_81 = data.moisture27_81 {
+            soilLineMark(data: data, label: "27-81cm", value: moisture27_81, color: .brown.opacity(0.1), pastColor: .brown.opacity(0.08), lineWidth: 2)
           }
         }
 
-        ForEach(Array(zip(time, soilMoisture1_3cm).enumerated()), id: \.offset) { index, pair in
-          if let moistureValue = pair.1 {
-            LineMark(
-              x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(pair.0))),
-              y: .value("1-3cm", moistureValue),
-              series: .value("Series", "Bodenwassergehalt 1-3cm (\(unit))")
-            )
-            .interpolationMethod(.catmullRom)
-            .foregroundStyle(.brown.opacity(0.6))
-          }
-        }
-
-        ForEach(Array(zip(time, soilMoisture3_9cm).enumerated()), id: \.offset) { index, pair in
-          if let moistureValue = pair.1 {
-            LineMark(
-              x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(pair.0))),
-              y: .value("3-9cm", moistureValue),
-              series: .value("Series", "Bodenwassergehalt 3-9cm (\(unit))")
-            )
-            .interpolationMethod(.catmullRom)
-            .foregroundStyle(.brown.opacity(0.4))
-          }
-        }
-
-        ForEach(Array(zip(time, soilMoisture9_27cm).enumerated()), id: \.offset) { index, pair in
-          if let moistureValue = pair.1 {
-            LineMark(
-              x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(pair.0))),
-              y: .value("9-27cm", moistureValue),
-              series: .value("Series", "Bodenwassergehalt 9-27cm (\(unit))")
-            )
-            .interpolationMethod(.catmullRom)
-            .foregroundStyle(.brown.opacity(0.2))
-          }
-        }
-
-        ForEach(Array(zip(time, soilMoisture27_81cm).enumerated()), id: \.offset) { index, pair in
-          if let moistureValue = pair.1 {
-            LineMark(
-              x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(pair.0))),
-              y: .value("27-81cm", moistureValue),
-              series: .value("Series", "Bodenwassergehalt 27-81cm (\(unit))")
-            )
-            .interpolationMethod(.catmullRom)
-            .foregroundStyle(.brown.opacity(0.1))
-          }
-        }
+        currentPointMarks
         
         // Interactive selection indicator
         if let selectedDate {
@@ -109,7 +78,7 @@ struct SoilMoistureChart: View {
             ) {
               if let selectedData = getSelectedSoilMoistureData(for: selectedDate) {
                 VStack(alignment: .center, spacing: 2) {
-                  Text(formatTimeToHHMM(date: selectedDate))
+                  Text(HourlyChartUtilities.timeString(from: selectedDate))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                   
@@ -162,7 +131,7 @@ struct SoilMoistureChart: View {
                 }
                 .padding(8)
                 .background(.ultraThinMaterial.opacity(0.9))
-                .cornerRadius(8)
+                .clipShape(.rect(cornerRadius: 8))
                 .shadow(radius: 4)
               }
             }
@@ -179,9 +148,9 @@ struct SoilMoistureChart: View {
                 y: .fit(to: .chart)
               )
             ) {
-              Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
+              Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                 .font(.caption.weight(.medium))
-                .foregroundColor(.primary.opacity(0.7))
+                .foregroundStyle(.primary.opacity(0.7))
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
                 .background(.regularMaterial, in: .capsule)
@@ -214,33 +183,67 @@ struct SoilMoistureChart: View {
   private func getSelectedSoilMoistureData(for selectedDate: Date) -> (time: Date, moisture0_1: Double?, moisture1_3: Double?, moisture3_9: Double?, moisture9_27: Double?, moisture27_81: Double?)? {
     return soilMoistureData.min(by: { abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate)) })
   }
-  
-  /// Formats time to HH:MM format
-  private func formatTimeToHHMM(date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "HH:mm"
-    return formatter.string(from: date)
-  }
-  
-  /// Identifies the indices where the day changes in the time array
-  private func dayChangeIndices(time: [Double]) -> [Int] {
-    var indices: [Int] = []
-    for i in 1..<time.count {
-      let currentDate = Date(timeIntervalSince1970: time[i])
-      let previousDate = Date(timeIntervalSince1970: time[i - 1])
-      let calendar = Calendar.current
-      if !calendar.isDate(currentDate, inSameDayAs: previousDate) {
-        indices.append(i)
-      }
-    }
-    return indices
+
+  @ChartContentBuilder
+  private func soilLineMark(
+    data: (time: Date, moisture0_1: Double?, moisture1_3: Double?, moisture3_9: Double?, moisture9_27: Double?, moisture27_81: Double?),
+    label: String,
+    value: Double,
+    color: Color,
+    pastColor: Color,
+    lineWidth: Double
+  ) -> some ChartContent {
+    let isPast = data.time < referenceDate
+
+    LineMark(
+      x: .value("Hour", data.time),
+      y: .value(label, value),
+      series: .value("Series", "\(label)-\(isPast ? "past" : "future")")
+    )
+    .interpolationMethod(.catmullRom)
+    .foregroundStyle(isPast ? pastColor : color)
+    .lineStyle(isPast ? .init(lineWidth: lineWidth, dash: [7, 5]) : .init(lineWidth: lineWidth))
   }
 
-  /// Returns a short abbreviation for the day of the week from a Date
-  private func dayAbbreviation(from date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.locale = Locale.current
-    formatter.dateFormat = "E"  // Short day abbreviation, e.g., Mon, Tue
-    return formatter.string(from: date)
+  @ChartContentBuilder
+  private var currentPointMarks: some ChartContent {
+    if let currentDataPoint {
+      if let moisture0_1 = currentDataPoint.moisture0_1 {
+        currentPointMark(series: "0-1cm", value: moisture0_1)
+      }
+      if let moisture1_3 = currentDataPoint.moisture1_3 {
+        currentPointMark(series: "1-3cm", value: moisture1_3)
+      }
+      if let moisture3_9 = currentDataPoint.moisture3_9 {
+        currentPointMark(series: "3-9cm", value: moisture3_9)
+      }
+      if let moisture9_27 = currentDataPoint.moisture9_27 {
+        currentPointMark(series: "9-27cm", value: moisture9_27)
+      }
+      if let moisture27_81 = currentDataPoint.moisture27_81 {
+        currentPointMark(series: "27-81cm", value: moisture27_81)
+      }
+    }
+  }
+
+  @ChartContentBuilder
+  private func currentPointMark(series: String, value: Double) -> some ChartContent {
+    if let currentDataPoint {
+      PointMark(
+        x: .value("Current Hour", currentDataPoint.time),
+        y: .value(series, value)
+      )
+      .symbol(.circle)
+      .symbolSize(90)
+      .foregroundStyle(.black)
+
+      PointMark(
+        x: .value("Current Hour", currentDataPoint.time),
+        y: .value(series, value)
+      )
+      .symbol(.circle)
+      .symbolSize(42)
+      .foregroundStyle(.white)
+    }
   }
 }

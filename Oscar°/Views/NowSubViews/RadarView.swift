@@ -170,7 +170,7 @@ struct RadarView: View {
         }
     }
 
-    private func layerButton(_ title: String, isActive: Bool, action: @escaping () -> Void) -> some View {
+    private func layerButton(_ title: LocalizedStringKey, isActive: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             if isActive {
                 Label(title, systemImage: "checkmark")

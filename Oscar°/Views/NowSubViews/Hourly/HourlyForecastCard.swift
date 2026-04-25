@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HourlyForecastCard: View {
   let item: HourlyForecastItem
+  private let minimumWidth: CGFloat = 52
 
   var body: some View {
     VStack {
@@ -20,6 +21,7 @@ struct HourlyForecastCard: View {
       Text(item.temperature)
         .contentTransition(.numericText())
     }
+    .frame(minWidth: minimumWidth)
     .padding(.horizontal, 12)
     .padding(.vertical, 12)
     .background(.thinMaterial)

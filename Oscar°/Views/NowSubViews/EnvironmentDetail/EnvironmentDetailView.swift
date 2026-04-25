@@ -135,59 +135,14 @@ struct EnvironmentDetailView: View {
             VStack(spacing: 0) {
                 EnvironmentDetailSegmentedControl(selectedSection: $selectedSection)
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        switch selectedSection {
-                        case .aqi:
-                            EnvironmentAirQualitySectionView(
-                                currentAQI: currentAQI,
-                                currentAQIBadge: currentAQI.map(aqiStatusKey(for:)) ?? "Keine Daten",
-                                currentAQIColor: currentAQIColor,
-                                aqiComponents: aqiComponents,
-                                mainPollutant: mainPollutant,
-                                time: time,
-                                aqi: weather.air.hourly?.european_aqi ?? [],
-                                pm25: weather.air.hourly?.european_aqi_pm2_5 ?? [],
-                                pm10: weather.air.hourly?.european_aqi_pm10 ?? [],
-                                no2: weather.air.hourly?.european_aqi_no2 ?? [],
-                                o3: weather.air.hourly?.european_aqi_o3 ?? [],
-                                so2: weather.air.hourly?.european_aqi_so2 ?? [],
-                                maxTimeRange: maxTimeRange,
-                                referenceDate: referenceDate,
-                                chartScrollPosition: $chartScrollPosition
-                            )
-                        case .uv:
-                            EnvironmentUVSectionView(
-                                currentUV: currentUV,
-                                currentUVBadge: currentUV.map(uvStatusKey(for:)) ?? "Keine Daten",
-                                currentUVColor: currentUVColor,
-                                riskTitle: currentUV.map(uvRiskTitleKey(for:)) ?? "Keine Daten",
-                                riskBody: currentUV.map(uvRiskBodyKey(for:)) ?? "Für die aktuelle Stunde liegen keine UV-Daten vor.",
-                                uvIndex: weather.air.hourly?.uv_index ?? [],
-                                time: time,
-                                maxTimeRange: maxTimeRange,
-                                referenceDate: referenceDate,
-                                chartScrollPosition: $chartScrollPosition
-                            )
-                        case .pollen:
-                            EnvironmentPollenSectionView(
-                                currentPollen: currentPollen,
-                                dominantPollen: dominantPollen,
-                                dominantPollenSeverityColor: dominantPollenSeverityColor,
-                                time: time,
-                                alder: weather.air.hourly?.alder_pollen ?? [],
-                                birch: weather.air.hourly?.birch_pollen ?? [],
-                                grass: weather.air.hourly?.grass_pollen ?? [],
-                                mugwort: weather.air.hourly?.mugwort_pollen ?? [],
-                                ragweed: weather.air.hourly?.ragweed_pollen ?? [],
-                                maxTimeRange: maxTimeRange,
-                                referenceDate: referenceDate,
-                                chartScrollPosition: $chartScrollPosition
-                            )
-                        }
+                TabView(selection: $selectedSection) {
+                    ForEach(EnvironmentDetailSection.allCases) { section in
+                        sectionPage(for: section)
+                            .tag(section)
                     }
-                    .padding()
                 }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .ignoresSafeArea(.container, edges: .bottom)
             }
             .navigationTitle("Umweltdetails")
             .navigationBarTitleDisplayMode(.inline)
@@ -202,6 +157,70 @@ struct EnvironmentDetailView: View {
             .onChange(of: time) { _, _ in
                 initializeChartPositionIfNeeded(force: true)
             }
+        }
+    }
+
+    @ViewBuilder
+    private func sectionPage(for section: EnvironmentDetailSection) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                sectionContent(for: section)
+            }
+            .padding()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.container, edges: .bottom)
+    }
+
+    @ViewBuilder
+    private func sectionContent(for section: EnvironmentDetailSection) -> some View {
+        switch section {
+        case .aqi:
+            EnvironmentAirQualitySectionView(
+                currentAQI: currentAQI,
+                currentAQIBadge: currentAQI.map { LocalizedStringKey(aqiStatusKey(for: $0)) } ?? "Keine Daten",
+                currentAQIColor: currentAQIColor,
+                aqiComponents: aqiComponents,
+                mainPollutant: mainPollutant,
+                time: time,
+                aqi: weather.air.hourly?.european_aqi ?? [],
+                pm25: weather.air.hourly?.european_aqi_pm2_5 ?? [],
+                pm10: weather.air.hourly?.european_aqi_pm10 ?? [],
+                no2: weather.air.hourly?.european_aqi_no2 ?? [],
+                o3: weather.air.hourly?.european_aqi_o3 ?? [],
+                so2: weather.air.hourly?.european_aqi_so2 ?? [],
+                maxTimeRange: maxTimeRange,
+                referenceDate: referenceDate,
+                chartScrollPosition: $chartScrollPosition
+            )
+        case .uv:
+            EnvironmentUVSectionView(
+                currentUV: currentUV,
+                currentUVBadge: currentUV.map { LocalizedStringKey(uvStatusKey(for: $0)) } ?? "Keine Daten",
+                currentUVColor: currentUVColor,
+                riskTitle: currentUV.map(uvRiskTitleKey(for:)) ?? "Keine Daten",
+                riskBody: currentUV.map(uvRiskBodyKey(for:)) ?? "Für die aktuelle Stunde liegen keine UV-Daten vor.",
+                uvIndex: weather.air.hourly?.uv_index ?? [],
+                time: time,
+                maxTimeRange: maxTimeRange,
+                referenceDate: referenceDate,
+                chartScrollPosition: $chartScrollPosition
+            )
+        case .pollen:
+            EnvironmentPollenSectionView(
+                currentPollen: currentPollen,
+                dominantPollen: dominantPollen,
+                dominantPollenSeverityColor: dominantPollenSeverityColor,
+                time: time,
+                alder: weather.air.hourly?.alder_pollen ?? [],
+                birch: weather.air.hourly?.birch_pollen ?? [],
+                grass: weather.air.hourly?.grass_pollen ?? [],
+                mugwort: weather.air.hourly?.mugwort_pollen ?? [],
+                ragweed: weather.air.hourly?.ragweed_pollen ?? [],
+                maxTimeRange: maxTimeRange,
+                referenceDate: referenceDate,
+                chartScrollPosition: $chartScrollPosition
+            )
         }
     }
 

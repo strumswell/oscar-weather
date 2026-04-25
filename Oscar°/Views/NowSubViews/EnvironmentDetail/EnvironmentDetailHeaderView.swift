@@ -3,9 +3,9 @@ import SwiftUI
 struct EnvironmentDetailHeaderView: View {
     let title: LocalizedStringKey
     let value: String
-    let badge: String
+    let badge: LocalizedStringKey?
     let color: Color
-    let subtitle: String?
+    let subtitle: LocalizedStringKey?
 
     var body: some View {
         Text(title)
@@ -17,16 +17,18 @@ struct EnvironmentDetailHeaderView: View {
                 .font(.system(size: 42, weight: .bold, design: .rounded))
                 .foregroundStyle(.primary)
 
-            Text(LocalizedStringKey(badge))
-                .font(.caption.weight(.semibold))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(color.opacity(0.18), in: .capsule)
-                .foregroundStyle(color)
+            if let badge {
+                Text(badge)
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(color.opacity(0.18), in: .capsule)
+                    .foregroundStyle(color)
+            }
         }
 
         if let subtitle {
-            Text(verbatim: subtitle)
+            Text(subtitle)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

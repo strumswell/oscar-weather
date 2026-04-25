@@ -14,6 +14,7 @@ struct PrecipitationChart: View {
   var time: [Double]
   var unit: String
   var maxTimeRange: ClosedRange<Date>
+  var referenceDate: Date
   
   @State private var selectedDate: Date?
 
@@ -56,7 +57,7 @@ struct PrecipitationChart: View {
             )
             .foregroundStyle(
               .linearGradient(
-                colors: [.cyan, .cyan.opacity(0.6)],
+                colors: data.time < referenceDate ? [.cyan.opacity(0.36), .cyan.opacity(0.2)] : [.cyan, .cyan.opacity(0.6)],
                 startPoint: .top,
                 endPoint: .bottom
               )
@@ -71,7 +72,7 @@ struct PrecipitationChart: View {
             )
             .foregroundStyle(
               .linearGradient(
-                colors: [.blue, .blue.opacity(0.7)],
+                colors: data.time < referenceDate ? [.blue.opacity(0.36), .blue.opacity(0.2)] : [.blue, .blue.opacity(0.7)],
                 startPoint: .top,
                 endPoint: .bottom
               )
@@ -79,7 +80,7 @@ struct PrecipitationChart: View {
             .cornerRadius(2)
           }
         }
-        
+
         // Interactive selection indicator
         if let selectedDate {
           RuleMark(x: .value("Selected", selectedDate))
@@ -94,7 +95,7 @@ struct PrecipitationChart: View {
             ) {
               if let selectedData = getSelectedPrecipitationData(for: selectedDate) {
                 VStack(alignment: .center, spacing: 2) {
-                  Text(formatTimeToHHMM(date: selectedDate))
+                  Text(HourlyChartUtilities.timeString(from: selectedDate))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                   
@@ -130,7 +131,7 @@ struct PrecipitationChart: View {
                 }
                 .padding(8)
                 .background(.ultraThinMaterial.opacity(0.9))
-                .cornerRadius(8)
+                .clipShape(.rect(cornerRadius: 8))
                 .shadow(radius: 4)
               }
             }
@@ -147,9 +148,9 @@ struct PrecipitationChart: View {
                 y: .fit(to: .chart)
               )
             ) {
-              Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
+              Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                 .font(.caption.weight(.medium))
-                .foregroundColor(.primary.opacity(0.7))
+                .foregroundStyle(.primary.opacity(0.7))
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
                 .background(.ultraThinMaterial, in: .capsule)
@@ -189,12 +190,5 @@ struct PrecipitationChart: View {
   /// Gets the nearest precipitation data for a selected date
   private func getSelectedPrecipitationData(for selectedDate: Date) -> (time: Date, precipitation: Double, snowfall: Double)? {
     return precipitationData.min(by: { abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate)) })
-  }
-  
-  /// Formats time to HH:MM format
-  private func formatTimeToHHMM(date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "HH:mm"
-    return formatter.string(from: date)
   }
 }

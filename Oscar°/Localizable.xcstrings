@@ -616,6 +616,23 @@
         }
       }
     },
+    "Allgemein" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "General"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genel"
+          }
+        }
+      }
+    },
     "Allow notifications in iOS Settings to receive rain alerts and weather alerts in Central Europe." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -676,6 +693,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Domuz Otu"
+          }
+        }
+      }
+    },
+    "Angenehm" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comfortable"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rahat"
           }
         }
       }
@@ -842,6 +876,23 @@
         }
       }
     },
+    "Boden" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ground"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toprak"
+          }
+        }
+      }
+    },
     "Bodennahes Ozon bildet sich bei starker Sonneneinstrahlung aus Abgasen. Es kann Husten, Reizungen und eine verringerte Lungenfunktion auslösen." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -866,6 +917,7 @@
       }
     },
     "Bodentemperatur" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -882,6 +934,7 @@
       }
     },
     "Bodenwassergehalt" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1140,6 +1193,7 @@
       }
     },
     "Durchschnittlicher Wassergehalt des Bodens als volumetrisches Mischungsverhältnis in verschiedenen Tiefen." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1193,6 +1247,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Birimler"
+          }
+        }
+      }
+    },
+    "Einordnung" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Context"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Değerlendirme"
           }
         }
       }
@@ -1278,7 +1349,42 @@
         }
       }
     },
+    "ET₀ beschreibt, wie viel Wasser eine gut versorgte Referenzfläche an die Luft abgibt. Für heute summieren sich die stündlichen Werte auf %@. Bei Millimeter-Angaben entspricht 1 mm ungefähr 1 Liter Wasser pro Quadratmeter." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ET₀ describes how much water a well-watered reference surface releases into the air. Today's hourly values add up to %@. For millimeter values, 1 mm is roughly 1 liter of water per square meter."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ET₀, iyi sulanmış bir referans yüzeyin havaya ne kadar su verdiğini açıklar. Bugünün saatlik değerleri toplam %@ eder. Milimetre değerlerinde 1 mm yaklaşık olarak metrekare başına 1 litre suya karşılık gelir."
+          }
+        }
+      }
+    },
+    "ET₀ beschreibt, wie viel Wasser eine gut versorgte Referenzfläche an die Luft abgibt. Für heute summieren sich die stündlichen Werte auf %@. Das entspricht ungefähr %@ Litern Wasser pro Quadratmeter." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ET₀ describes how much water a well-watered reference surface releases into the air. Today's hourly values add up to %@. That is roughly %@ liters of water per square meter."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ET₀, iyi sulanmış bir referans yüzeyin havaya ne kadar su verdiğini açıklar. Bugünün saatlik değerleri toplam %@ eder. Bu, metrekare başına yaklaşık %@ litre suya karşılık gelir."
+          }
+        }
+      }
+    },
     "ET₀ ist die Referenz-Evapotranspiration eines gut bewässerten Grasfeldes und dient zur Schätzung des Bewässerungsbedarfs von Pflanzen." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1363,6 +1469,23 @@
         }
       }
     },
+    "Fallend" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falling"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düşüyor"
+          }
+        }
+      }
+    },
     "Fertig" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1382,6 +1505,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bitti"
+          }
+        }
+      }
+    },
+    "Feucht" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Humid"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nemli"
           }
         }
       }
@@ -1493,6 +1633,26 @@
         }
       }
     },
+    "Für diesen Standort liegen aktuell keine stündlichen Details vor." : {
+
+    },
+    "Gefühlt %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feels like %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hissedilen %@"
+          }
+        }
+      }
+    },
     "Gefühlte Temperatur" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1593,6 +1753,23 @@
     },
     "GFS GRAPES - China Meteorological Administration (CMA)" : {
       "shouldTranslate" : false
+    },
+    "Global (NOAA GFS)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Global (NOAA GFS)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küresel (NOAA GFS)"
+          }
+        }
+      }
     },
     "Gräser" : {
       "comment" : "Pollen type name",
@@ -1919,6 +2096,23 @@
         }
       }
     },
+    "Keine stündlichen Daten" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hourly data"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saatlik veri yok"
+          }
+        }
+      }
+    },
     "km/h" : {
       "shouldTranslate" : false
     },
@@ -1944,6 +2138,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "tane/m³"
+          }
+        }
+      }
+    },
+    "Leicht" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hafif"
           }
         }
       }
@@ -1993,6 +2204,7 @@
       }
     },
     "Luftdruck" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2026,6 +2238,7 @@
       }
     },
     "Luftfeuchtigkeit" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2087,6 +2300,23 @@
         }
       }
     },
+    "Lufttemperatur und gefühlte Temperatur" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Air temperature and apparent temperature"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava sıcaklığı ve hissedilen sıcaklık"
+          }
+        }
+      }
+    },
     "m/s" : {
       "shouldTranslate" : false
     },
@@ -2132,6 +2362,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bugünün en yüksek değeri"
+          }
+        }
+      }
+    },
+    "Meeresspiegel-Luftdruck" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sea-level air pressure"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deniz seviyesi hava basıncı"
           }
         }
       }
@@ -2312,6 +2559,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yağış"
+          }
+        }
+      }
+    },
+    "Niesel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drizzle"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çiseleme"
           }
         }
       }
@@ -2997,6 +3261,7 @@
       }
     },
     "Referenz-Evapotranspiration (ET₀)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3008,6 +3273,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Referans Evapotranspirasyon (ET₀)"
+          }
+        }
+      }
+    },
+    "Regen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur"
+          }
+        }
+      }
+    },
+    "Regen und Schnee pro Stunde" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain and snow per hour"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saatlik yağmur ve kar"
+          }
+        }
+      }
+    },
+    "Regenradar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain Radar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur Radarı"
+          }
+        }
+      }
+    },
+    "Regenvorhersage" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain Forecast"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur Tahmini"
           }
         }
       }
@@ -3300,6 +3633,7 @@
       }
     },
     "Sinkender Luftdruck deutet auf schlechtes Wetter oder Stürme hin, steigender Luftdruck auf gutes Wetter oder Hochdruckgebiete." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3358,6 +3692,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Diğer"
+          }
+        }
+      }
+    },
+    "Stabil" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stable"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sabit"
+          }
+        }
+      }
+    },
+    "Stark" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heavy"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şiddetli"
+          }
+        }
+      }
+    },
+    "Steigend" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rising"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yükseliyor"
           }
         }
       }
@@ -3495,6 +3880,7 @@
       }
     },
     "Temperatur" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3539,6 +3925,40 @@
         }
       }
     },
+    "Temperatur in mehreren Bodentiefen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature at multiple soil depths"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birden fazla toprak derinliğinde sıcaklık"
+          }
+        }
+      }
+    },
+    "Temperaturvorhersage" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature Forecast"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıcaklık Tahmini"
+          }
+        }
+      }
+    },
     "Time" : {
       "localizations" : {
         "de" : {
@@ -3579,6 +3999,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tomorrow Companies Inc. tarafından temsil edilen Tomorrow.io, ücretsiz katmanı kapsamında çeşitli harita katmanları sunar. Bunlar arasında küresel yağmur radarı, sıcaklık, rüzgar hızı, rüzgar yönü, bulutlar ve nem yer alır."
+          }
+        }
+      }
+    },
+    "Trocken" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dry"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuru"
           }
         }
       }
@@ -3791,6 +4228,23 @@
     "UV: %.1f" : {
 
     },
+    "Volumetrischer Wassergehalt je Bodentiefe" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volumetric water content by soil depth"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toprak derinliğine göre hacimsel su içeriği"
+          }
+        }
+      }
+    },
     "W_compass" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3810,6 +4264,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "B"
+          }
+        }
+      }
+    },
+    "Wasserverlust einer Referenzfläche" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water loss from a reference surface"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Referans yüzeyden su kaybı"
           }
         }
       }
@@ -3893,6 +4364,7 @@
       }
     },
     "Wind" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3904,6 +4376,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rüzgar"
+          }
+        }
+      }
+    },
+    "Wind & Druck" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wind & Pressure"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rüzgar ve Basınç"
           }
         }
       }
@@ -3921,6 +4410,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rüzgar hızı"
+          }
+        }
+      }
+    },
+    "Windgeschwindigkeit in mehreren Höhen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wind speed at multiple heights"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birden fazla yükseklikte rüzgar hızı"
+          }
+        }
+      }
+    },
+    "Windvorhersage" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wind Forecast"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rüzgar Tahmini"
           }
         }
       }
@@ -3944,6 +4467,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saat"
+          }
+        }
+      }
+    },
+    "Zentraleuropa (DWD ICON-D2)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Central Europe (DWD ICON-D2)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta Avrupa (DWD ICON-D2)"
+          }
+        }
+      }
+    },
+    "Zentraleuropa (DWD Radar)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Central Europe (DWD Radar)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta Avrupa (DWD Radarı)"
           }
         }
       }

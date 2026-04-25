@@ -2,7 +2,7 @@ import SwiftUI
 
 struct EnvironmentUVSectionView: View {
     let currentUV: Double?
-    let currentUVBadge: String
+    let currentUVBadge: LocalizedStringKey
     let currentUVColor: Color
     let riskTitle: String
     let riskBody: String

@@ -16,6 +16,7 @@ struct SoilTemperatureChart: View {
   var time: [Double]
   var unit: String
   var maxTimeRange: ClosedRange<Date>
+  var referenceDate: Date
   
   @State private var selectedDate: Date?
 
@@ -30,123 +31,32 @@ struct SoilTemperatureChart: View {
     }
   }
 
+  private var currentDataPoint: (time: Date, temp0: Double?, temp6: Double?, temp18: Double?, temp54: Double?)? {
+    soilTempData.first(where: { $0.time >= referenceDate }) ?? soilTempData.last
+  }
+
   var body: some View {
     VStack(alignment: .leading) {
       Chart {
-        if #available(iOS 18, *) {
-          // 54cm depth (deepest, most stable)
-          ForEach(soilTempData, id: \.time) { data in
-            if let temp54 = data.temp54 {
-              LinePlot(
-                [(time: data.time, temp: temp54)],
-                x: .value("Hour", \.time),
-                y: .value("54cm (\(unit))", \.temp),
-                series: .value("Series", "54cm")
-              )
-              .foregroundStyle(.brown.opacity(0.3))
-              .interpolationMethod(.catmullRom)
-              .lineStyle(.init(lineWidth: 2))
-            }
+        ForEach(soilTempData, id: \.time) { data in
+          if let temp54 = data.temp54 {
+            soilLineMark(data: data, label: "54cm", value: temp54, color: .brown.opacity(0.3), pastColor: .brown.opacity(0.16), lineWidth: 2)
           }
-          
-          // 18cm depth
-          ForEach(soilTempData, id: \.time) { data in
-            if let temp18 = data.temp18 {
-              LinePlot(
-                [(time: data.time, temp: temp18)],
-                x: .value("Hour", \.time),
-                y: .value("18cm (\(unit))", \.temp),
-                series: .value("Series", "18cm")
-              )
-              .foregroundStyle(.brown.opacity(0.5))
-              .interpolationMethod(.catmullRom)
-              .lineStyle(.init(lineWidth: 2.5))
-            }
+
+          if let temp18 = data.temp18 {
+            soilLineMark(data: data, label: "18cm", value: temp18, color: .brown.opacity(0.5), pastColor: .brown.opacity(0.24), lineWidth: 2.5)
           }
-          
-          // 6cm depth
-          ForEach(soilTempData, id: \.time) { data in
-            if let temp6 = data.temp6 {
-              LinePlot(
-                [(time: data.time, temp: temp6)],
-                x: .value("Hour", \.time),
-                y: .value("6cm (\(unit))", \.temp),
-                series: .value("Series", "6cm")
-              )
-              .foregroundStyle(.brown.opacity(0.7))
-              .interpolationMethod(.catmullRom)
-              .lineStyle(.init(lineWidth: 3))
-            }
+
+          if let temp6 = data.temp6 {
+            soilLineMark(data: data, label: "6cm", value: temp6, color: .brown.opacity(0.7), pastColor: .brown.opacity(0.34), lineWidth: 3)
           }
-          
-          // 0cm depth (surface)
-          ForEach(soilTempData, id: \.time) { data in
-            if let temp0 = data.temp0 {
-              LinePlot(
-                [(time: data.time, temp: temp0)],
-                x: .value("Hour", \.time),
-                y: .value("0cm (\(unit))", \.temp),
-                series: .value("Series", "0cm")
-              )
-              .foregroundStyle(.brown)
-              .interpolationMethod(.catmullRom)
-              .lineStyle(.init(lineWidth: 3.5))
-            }
-          }
-        } else {
-          // iOS 17 fallback
-          ForEach(Array(zip(time, soilTemp54cm).enumerated()), id: \.offset) { index, pair in
-            if let tempValue = pair.1 {
-              LineMark(
-                x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(pair.0))),
-                y: .value("54cm (\(unit))", tempValue),
-                series: .value("Series", "54cm")
-              )
-              .interpolationMethod(.catmullRom)
-              .foregroundStyle(.brown.opacity(0.3))
-              .lineStyle(.init(lineWidth: 2))
-            }
-          }
-          
-          ForEach(Array(zip(time, soilTemp18cm).enumerated()), id: \.offset) { index, pair in
-            if let tempValue = pair.1 {
-              LineMark(
-                x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(pair.0))),
-                y: .value("18cm (\(unit))", tempValue),
-                series: .value("Series", "18cm")
-              )
-              .interpolationMethod(.catmullRom)
-              .foregroundStyle(.brown.opacity(0.5))
-              .lineStyle(.init(lineWidth: 2.5))
-            }
-          }
-          
-          ForEach(Array(zip(time, soilTemp6cm).enumerated()), id: \.offset) { index, pair in
-            if let tempValue = pair.1 {
-              LineMark(
-                x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(pair.0))),
-                y: .value("6cm (\(unit))", tempValue),
-                series: .value("Series", "6cm")
-              )
-              .interpolationMethod(.catmullRom)
-              .foregroundStyle(.brown.opacity(0.7))
-              .lineStyle(.init(lineWidth: 3))
-            }
-          }
-          
-          ForEach(Array(zip(time, soilTemp0cm).enumerated()), id: \.offset) { index, pair in
-            if let tempValue = pair.1 {
-              LineMark(
-                x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(pair.0))),
-                y: .value("0cm (\(unit))", tempValue),
-                series: .value("Series", "0cm")
-              )
-              .interpolationMethod(.catmullRom)
-              .foregroundStyle(.brown)
-              .lineStyle(.init(lineWidth: 3.5))
-            }
+
+          if let temp0 = data.temp0 {
+            soilLineMark(data: data, label: "0cm", value: temp0, color: .brown, pastColor: .brown.opacity(0.42), lineWidth: 3.5)
           }
         }
+
+        currentPointMarks
         
         // Interactive selection indicator
         if let selectedDate {
@@ -162,7 +72,7 @@ struct SoilTemperatureChart: View {
             ) {
               if let selectedData = getSelectedSoilTempData(for: selectedDate) {
                 VStack(alignment: .center, spacing: 2) {
-                  Text(formatTimeToHHMM(date: selectedDate))
+                  Text(HourlyChartUtilities.timeString(from: selectedDate))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                   
@@ -206,7 +116,7 @@ struct SoilTemperatureChart: View {
                 }
                 .padding(8)
                 .background(.ultraThinMaterial.opacity(0.9))
-                .cornerRadius(8)
+                .clipShape(.rect(cornerRadius: 8))
                 .shadow(radius: 4)
               }
             }
@@ -223,9 +133,9 @@ struct SoilTemperatureChart: View {
                 y: .fit(to: .chart)
               )
             ) {
-              Text(dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
+              Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
                 .font(.caption.weight(.medium))
-                .foregroundColor(.primary.opacity(0.7))
+                .foregroundStyle(.primary.opacity(0.7))
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
                 .background(.regularMaterial, in: .capsule)
@@ -257,11 +167,64 @@ struct SoilTemperatureChart: View {
   private func getSelectedSoilTempData(for selectedDate: Date) -> (time: Date, temp0: Double?, temp6: Double?, temp18: Double?, temp54: Double?)? {
     return soilTempData.min(by: { abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate)) })
   }
-  
-  /// Formats time to HH:MM format
-  private func formatTimeToHHMM(date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "HH:mm"
-    return formatter.string(from: date)
+
+  @ChartContentBuilder
+  private func soilLineMark(
+    data: (time: Date, temp0: Double?, temp6: Double?, temp18: Double?, temp54: Double?),
+    label: String,
+    value: Double,
+    color: Color,
+    pastColor: Color,
+    lineWidth: Double
+  ) -> some ChartContent {
+    let isPast = data.time < referenceDate
+
+    LineMark(
+      x: .value("Hour", data.time),
+      y: .value("\(label) (\(unit))", value),
+      series: .value("Series", "\(label)-\(isPast ? "past" : "future")")
+    )
+    .interpolationMethod(.catmullRom)
+    .foregroundStyle(isPast ? pastColor : color)
+    .lineStyle(isPast ? .init(lineWidth: lineWidth, dash: [7, 5]) : .init(lineWidth: lineWidth))
+  }
+
+  @ChartContentBuilder
+  private var currentPointMarks: some ChartContent {
+    if let currentDataPoint {
+      if let temp0 = currentDataPoint.temp0 {
+        currentPointMark(series: "0cm", value: temp0)
+      }
+      if let temp6 = currentDataPoint.temp6 {
+        currentPointMark(series: "6cm", value: temp6)
+      }
+      if let temp18 = currentDataPoint.temp18 {
+        currentPointMark(series: "18cm", value: temp18)
+      }
+      if let temp54 = currentDataPoint.temp54 {
+        currentPointMark(series: "54cm", value: temp54)
+      }
+    }
+  }
+
+  @ChartContentBuilder
+  private func currentPointMark(series: String, value: Double) -> some ChartContent {
+    if let currentDataPoint {
+      PointMark(
+        x: .value("Current Hour", currentDataPoint.time),
+        y: .value(series, value)
+      )
+      .symbol(.circle)
+      .symbolSize(90)
+      .foregroundStyle(.black)
+
+      PointMark(
+        x: .value("Current Hour", currentDataPoint.time),
+        y: .value(series, value)
+      )
+      .symbol(.circle)
+      .symbolSize(42)
+      .foregroundStyle(.white)
+    }
   }
 }

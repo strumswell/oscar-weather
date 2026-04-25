@@ -2,7 +2,7 @@ import SwiftUI
 
 struct EnvironmentAirQualitySectionView: View {
     let currentAQI: Double?
-    let currentAQIBadge: String
+    let currentAQIBadge: LocalizedStringKey
     let currentAQIColor: Color
     let aqiComponents: [AQIComponentSnapshot]
     let mainPollutant: AQIComponentSnapshot?
