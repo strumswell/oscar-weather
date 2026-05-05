@@ -212,6 +212,10 @@
 		AB0001122F9A00000000001A /* EnvironmentUVSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0001112F9A00000000001A /* EnvironmentUVSectionView.swift */; };
 		AB0001142F9A00000000001A /* EnvironmentPollenSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0001132F9A00000000001A /* EnvironmentPollenSectionView.swift */; };
 		AC0000022FAA000000000001 /* NotificationSettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0000012FAA000000000001 /* NotificationSettingsManager.swift */; };
+		AC1000032FAA200000000001 /* RainRadarActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1000012FAA200000000001 /* RainRadarActivityAttributes.swift */; };
+		AC1000042FAA200000000001 /* RainRadarActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1000012FAA200000000001 /* RainRadarActivityAttributes.swift */; };
+		AC1000052FAA200000000001 /* RainRadarLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1000022FAA200000000001 /* RainRadarLiveActivityManager.swift */; };
+		AC1000062FAA200000000001 /* RainRadarLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1000072FAA200000000001 /* RainRadarLiveActivityWidget.swift */; };
 		D2CE14A38C6521B8E277CF62 /* WindParticleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C05DF774DD1215A6E465D9AD /* WindParticleView.swift */; };
 		D580749BDBEC4BFE98D9ED6A /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 4EBF1FE0D46648989064EF72 /* Sentry */; };
 /* End PBXBuildFile section */
@@ -429,6 +433,9 @@
 		AB0001112F9A00000000001A /* EnvironmentUVSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentUVSectionView.swift; sourceTree = "<group>"; };
 		AB0001132F9A00000000001A /* EnvironmentPollenSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentPollenSectionView.swift; sourceTree = "<group>"; };
 		AC0000012FAA000000000001 /* NotificationSettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsManager.swift; sourceTree = "<group>"; };
+		AC1000012FAA200000000001 /* RainRadarActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainRadarActivityAttributes.swift; sourceTree = "<group>"; };
+		AC1000022FAA200000000001 /* RainRadarLiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainRadarLiveActivityManager.swift; sourceTree = "<group>"; };
+		AC1000072FAA200000000001 /* RainRadarLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainRadarLiveActivityWidget.swift; sourceTree = "<group>"; };
 		C05DF774DD1215A6E465D9AD /* WindParticleView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WindParticleView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -776,6 +783,7 @@
 			isa = PBXGroup;
 			children = (
 				251BFE7C2E48DC7600D35589 /* Rendering */,
+				AC1000102FAA200000000001 /* LiveActivities */,
 				AC0000002FAA000000000001 /* Notifications */,
 				25CB17E62B470429001D973A /* Extensions */,
 				25BEDCE126CACF2900D90D6B /* Storage */,
@@ -813,6 +821,7 @@
 		3EB8902E251A55950028FED0 /* Oscar°Widget */ = {
 			isa = PBXGroup;
 			children = (
+				AC1000112FAA200000000001 /* LiveActivities */,
 				259623CE2A2BD6A000BA75F6 /* Home */,
 				2546516B29E4941700D8C13D /* Models */,
 				2546516829E4933800D8C13D /* Lockscreen */,
@@ -853,6 +862,23 @@
 				25A1C0052F8D000100000001 /* NotificationSettingsView.swift */,
 			);
 			path = Notifications;
+			sourceTree = "<group>";
+		};
+		AC1000102FAA200000000001 /* LiveActivities */ = {
+			isa = PBXGroup;
+			children = (
+				AC1000012FAA200000000001 /* RainRadarActivityAttributes.swift */,
+				AC1000022FAA200000000001 /* RainRadarLiveActivityManager.swift */,
+			);
+			path = LiveActivities;
+			sourceTree = "<group>";
+		};
+		AC1000112FAA200000000001 /* LiveActivities */ = {
+			isa = PBXGroup;
+			children = (
+				AC1000072FAA200000000001 /* RainRadarLiveActivityWidget.swift */,
+			);
+			path = LiveActivities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1141,6 +1167,8 @@
 				25A1C0022F8D000100000001 /* APIContactIdentity.swift in Sources */,
 				2536438126DACCB800C8A952 /* LegalView.swift in Sources */,
 				AC0000022FAA000000000001 /* NotificationSettingsManager.swift in Sources */,
+				AC1000032FAA200000000001 /* RainRadarActivityAttributes.swift in Sources */,
+				AC1000052FAA200000000001 /* RainRadarLiveActivityManager.swift in Sources */,
 				25A1C0062F8D000100000001 /* NotificationSettingsView.swift in Sources */,
 				259187CD2C715B5900611B0F /* HumidityChart.swift in Sources */,
 				AA0000132F9A00000000001A /* AQIChart.swift in Sources */,
@@ -1263,6 +1291,8 @@
 				259623D62A2BD97C00BA75F6 /* Color-Custom.swift in Sources */,
 				2598E93A2C729273004A9D5E /* CacheMiddleware.swift in Sources */,
 				3ED4AEB0254551DE0057DF2F /* OscarWidgetsBundle.swift in Sources */,
+				AC1000042FAA200000000001 /* RainRadarActivityAttributes.swift in Sources */,
+				AC1000062FAA200000000001 /* RainRadarLiveActivityWidget.swift in Sources */,
 				256FDAC92BCB164C00E18655 /* GlobalRadarWidget.swift in Sources */,
 				2505C94D29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift in Sources */,
 				253F709C2B5333BE0075D093 /* APIResultExtensions.swift in Sources */,

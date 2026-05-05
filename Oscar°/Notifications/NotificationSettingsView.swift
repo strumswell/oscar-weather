@@ -34,6 +34,12 @@ struct NotificationSettingsView: View {
                     String(localized: "Weather alerts (Beta)"),
                     isOn: weatherAlertsEnabledBinding
                 )
+
+                Toggle(
+                    String(localized: "Live rain status"),
+                    isOn: liveRainStatusEnabledBinding
+                )
+                .disabled(!notificationSettingsManager.rainAlertsEnabled)
             }
             .disabled(isUpdating)
 
@@ -68,7 +74,7 @@ struct NotificationSettingsView: View {
             if !notificationSettingsManager.rainAlertsEnabled && !notificationSettingsManager.weatherAlertsEnabled {
                 return String(localized: "Both beta alert types are currently turned off. They are only available for Central Europe.")
             }
-            return String(localized: "Oscar can send beta rain alerts and beta weather alerts for your current location in Central Europe. Turn each alert type on or off below.")
+            return String(localized: "Oscar can send beta rain alerts, live rain status, and beta weather alerts for your current location in Central Europe.")
         case .denied:
             return String(localized: "Mitteilungen sind auf Systemebene deaktiviert.")
         case .notDetermined:
@@ -101,6 +107,17 @@ struct NotificationSettingsView: View {
                     if newValue && !enabled {
                         showPermissionAlert = true
                     }
+                }
+            }
+        )
+    }
+
+    private var liveRainStatusEnabledBinding: Binding<Bool> {
+        Binding(
+            get: { notificationSettingsManager.liveRainStatusEnabled },
+            set: { newValue in
+                runUpdate {
+                    _ = await notificationSettingsManager.setLiveRainStatusEnabled(newValue)
                 }
             }
         )

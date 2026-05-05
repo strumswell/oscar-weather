@@ -21,6 +21,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
     @Published private(set) var enabled: Bool
     @Published private(set) var rainAlertsEnabled: Bool
     @Published private(set) var weatherAlertsEnabled: Bool
+    @Published private(set) var liveRainStatusEnabled: Bool
     @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
     private let baseURL = URL(string: radarBaseURL)!
@@ -28,6 +29,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
 
     private let rainAlertsEnabledKey = "notificationRainAlertsEnabled"
     private let weatherAlertsEnabledKey = "notificationWeatherAlertsEnabled"
+    private let liveRainStatusEnabledKey = "notificationLiveRainStatusEnabled"
     private let cachedDeviceTokenKey = "rainAlertDeviceToken"
     private let lastSentDeviceTokenKey = "rainAlertLastSentDeviceToken"
     private let subscriptionKey = "rainAlertSubscriptionId"
@@ -35,14 +37,17 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
     private let lastSentAPNsEnvironmentKey = "notificationLastSentAPNsEnvironment"
     private let lastSentStateKey = "notificationLastSentState"
     private let installationRegistrationCompletedKey = "notificationInstallationRegistrationCompleted"
+    private let pendingLiveActivityPushToStartTokenKey = "notificationPendingLiveActivityPushToStartToken"
 
     private override init() {
         let defaults = UserDefaults.standard
         let storedRainAlertsEnabled = defaults.bool(forKey: rainAlertsEnabledKey)
         let storedWeatherAlertsEnabled = defaults.bool(forKey: weatherAlertsEnabledKey)
+        let storedLiveRainStatusEnabled = defaults.object(forKey: liveRainStatusEnabledKey) as? Bool ?? storedRainAlertsEnabled
 
         rainAlertsEnabled = storedRainAlertsEnabled
         weatherAlertsEnabled = storedWeatherAlertsEnabled
+        liveRainStatusEnabled = storedLiveRainStatusEnabled
         enabled = storedRainAlertsEnabled || storedWeatherAlertsEnabled
         super.init()
     }
@@ -57,6 +62,10 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
             UIApplication.shared.registerForRemoteNotifications()
         } else {
             notificationLogger.info("Lifecycle: launch skipped APNs registration; authorization=\(self.authorizationStatus.debugName, privacy: .public) enabled=\(self.enabled, privacy: .public) storedCredentials=\(self.hasStoredSubscriptionCredentials, privacy: .public)")
+        }
+
+        if liveRainStatusEnabled {
+            RainRadarLiveActivityManager.shared.startMonitoring()
         }
     }
 
@@ -73,6 +82,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
             }
 
             setRainAlertsEnabledLocally(true)
+            setLiveRainStatusEnabledLocally(true)
             refreshEnabledState()
             notificationLogger.info("Lifecycle: rain alerts enabled locally; registerForRemoteNotifications")
             UIApplication.shared.registerForRemoteNotifications()
@@ -80,6 +90,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
         }
 
         setRainAlertsEnabledLocally(false)
+        setLiveRainStatusEnabledLocally(false)
         refreshEnabledState()
         notificationLogger.info("Lifecycle: rain alerts disabled locally; syncing subscription")
         await syncSubscriptionForCurrentState(forceRegister: false)
@@ -112,6 +123,16 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
         return true
     }
 
+    func setLiveRainStatusEnabled(_ enabled: Bool) async -> Bool {
+        notificationLogger.info("Lifecycle: setLiveRainStatusEnabled requested -> \(enabled, privacy: .public)")
+        setLiveRainStatusEnabledLocally(enabled)
+        await syncSubscriptionForCurrentState(forceRegister: false)
+        if enabled {
+            RainRadarLiveActivityManager.shared.startMonitoring()
+        }
+        return true
+    }
+
     @available(*, unavailable, message: "Use the individual alert toggles instead.")
     func enableNotifications() async -> Bool {
         let granted = hasNotificationAuthorization ? true : await requestNotificationPermission()
@@ -130,6 +151,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
     func disableNotifications() async {
         setRainAlertsEnabledLocally(false)
         setWeatherAlertsEnabledLocally(false)
+        setLiveRainStatusEnabledLocally(false)
         refreshEnabledState()
         await syncSubscriptionForCurrentState(forceRegister: false)
     }
@@ -181,6 +203,11 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
         UserDefaults.standard.set(enabled, forKey: weatherAlertsEnabledKey)
     }
 
+    private func setLiveRainStatusEnabledLocally(_ enabled: Bool) {
+        liveRainStatusEnabled = enabled
+        UserDefaults.standard.set(enabled, forKey: liveRainStatusEnabledKey)
+    }
+
     private func refreshEnabledState() {
         enabled = rainAlertsEnabled || weatherAlertsEnabled
     }
@@ -189,6 +216,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
         [
             "rainAlertsEnabled": rainAlertsEnabled,
             "weatherAlertsEnabled": weatherAlertsEnabled,
+            "liveActivityEnabled": liveRainStatusEnabled,
         ]
     }
 
@@ -264,6 +292,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
             language: language,
             rainAlertsEnabled: rainAlertsEnabled,
             weatherAlertsEnabled: weatherAlertsEnabled,
+            liveRainStatusEnabled: liveRainStatusEnabled,
             apnsEnvironment: apnsEnvironment
         )
 
@@ -338,6 +367,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
             persistLastSentSubscriptionState(state)
             UserDefaults.standard.set(true, forKey: installationRegistrationCompletedKey)
             notificationLogger.info("Lifecycle: subscription register request succeeded; subscriptionIdLength=\(registerResponse.subscriptionId.count, privacy: .public)")
+            await syncPendingLiveActivityPushToStartToken()
         } catch {
             notificationLogger.error("Lifecycle: subscription register request threw error=\(error.localizedDescription, privacy: .public)")
         }
@@ -377,6 +407,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
                 Keychain.save(key: lastSentDeviceTokenKey, value: token)
                 persistLastSentSubscriptionState(state)
                 notificationLogger.info("Lifecycle: subscription patch request succeeded; status=\(httpResponse.statusCode, privacy: .public)")
+                await syncPendingLiveActivityPushToStartToken()
                 return .success
             }
             notificationLogger.error("Lifecycle: subscription patch request failed; status=\(httpResponse.statusCode, privacy: .public)")
@@ -385,6 +416,65 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
             notificationLogger.error("Lifecycle: subscription patch request threw error=\(error.localizedDescription, privacy: .public)")
             return .failure
         }
+    }
+
+    func syncLiveActivityPushToStartToken(_ token: String) async {
+        UserDefaults.standard.set(token, forKey: pendingLiveActivityPushToStartTokenKey)
+        await syncLiveActivityToken(path: "push-to-start-token", body: ["token": token])
+    }
+
+    func syncLiveActivityUpdateToken(activityId: String, token: String) async {
+        await syncLiveActivityToken(path: "update-token", body: ["activityId": activityId, "token": token])
+    }
+
+    private func syncLiveActivityToken(path: String, body: [String: Any]) async {
+        guard liveRainStatusEnabled else {
+            notificationLogger.info("Lifecycle: Live Activity token sync skipped; liveRainStatus disabled")
+            return
+        }
+        guard let subscriptionId = Keychain.load(key: subscriptionKey),
+              let apiKey = Keychain.load(key: apiKeyKey),
+              let url = URL(string: "/notifications/\(subscriptionId)/live-activity/\(path)", relativeTo: baseURL),
+              let httpBody = try? JSONSerialization.data(withJSONObject: body)
+        else {
+            notificationLogger.info("Lifecycle: Live Activity token sync skipped; missing subscription credentials")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addAPIContactIdentity()
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.httpBody = httpBody
+
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse else {
+                notificationLogger.error("Lifecycle: Live Activity token sync failed; response missing HTTPURLResponse")
+                return
+            }
+            if (200...299).contains(httpResponse.statusCode) {
+                notificationLogger.info("Lifecycle: Live Activity token sync succeeded; path=\(path, privacy: .public)")
+                if path == "push-to-start-token" {
+                    UserDefaults.standard.removeObject(forKey: pendingLiveActivityPushToStartTokenKey)
+                }
+            } else {
+                notificationLogger.error("Lifecycle: Live Activity token sync failed; path=\(path, privacy: .public) status=\(httpResponse.statusCode, privacy: .public)")
+            }
+        } catch {
+            notificationLogger.error("Lifecycle: Live Activity token sync threw error=\(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    private func syncPendingLiveActivityPushToStartToken() async {
+        guard let token = UserDefaults.standard.string(forKey: pendingLiveActivityPushToStartTokenKey),
+              !token.isEmpty
+        else {
+            return
+        }
+
+        await syncLiveActivityToken(path: "push-to-start-token", body: ["token": token])
     }
 
     private enum PatchResult {
@@ -406,6 +496,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
         let language: String
         let rainAlertsEnabled: Bool
         let weatherAlertsEnabled: Bool
+        let liveRainStatusEnabled: Bool
         let apnsEnvironment: APNsEnvironment
     }
 
