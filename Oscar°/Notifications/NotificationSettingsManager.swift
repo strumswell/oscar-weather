@@ -85,6 +85,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
             setLiveRainStatusEnabledLocally(true)
             refreshEnabledState()
             notificationLogger.info("Lifecycle: rain alerts enabled locally; registerForRemoteNotifications")
+            RainRadarLiveActivityManager.shared.startMonitoring()
             UIApplication.shared.registerForRemoteNotifications()
             return true
         }

@@ -17,13 +17,13 @@ final class RainRadarLiveActivityManager {
     private init() {}
 
     func startMonitoring() {
-        guard !isMonitoring else { return }
-        isMonitoring = true
-
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
             logger.info("Live Activity monitoring skipped; activities disabled")
             return
         }
+
+        guard !isMonitoring else { return }
+        isMonitoring = true
 
         if #available(iOS 17.2, *) {
             Task { await observePushToStartTokens() }
@@ -69,4 +69,3 @@ private extension Data {
         map { String(format: "%02x", $0) }.joined()
     }
 }
-
