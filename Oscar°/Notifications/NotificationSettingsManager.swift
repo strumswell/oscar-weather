@@ -38,6 +38,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
     private let lastSentStateKey = "notificationLastSentState"
     private let installationRegistrationCompletedKey = "notificationInstallationRegistrationCompleted"
     private let pendingLiveActivityPushToStartTokenKey = "notificationPendingLiveActivityPushToStartToken"
+    private let latestLiveActivityPushToStartTokenKey = "notificationLatestLiveActivityPushToStartToken"
 
     private override init() {
         let defaults = UserDefaults.standard
@@ -420,6 +421,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
     }
 
     func syncLiveActivityPushToStartToken(_ token: String) async {
+        UserDefaults.standard.set(token, forKey: latestLiveActivityPushToStartTokenKey)
         UserDefaults.standard.set(token, forKey: pendingLiveActivityPushToStartTokenKey)
         await syncLiveActivityToken(path: "push-to-start-token", body: ["token": token])
     }
@@ -469,7 +471,9 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
     }
 
     private func syncPendingLiveActivityPushToStartToken() async {
-        guard let token = UserDefaults.standard.string(forKey: pendingLiveActivityPushToStartTokenKey),
+        let token = UserDefaults.standard.string(forKey: pendingLiveActivityPushToStartTokenKey)
+            ?? UserDefaults.standard.string(forKey: latestLiveActivityPushToStartTokenKey)
+        guard let token,
               !token.isEmpty
         else {
             return
