@@ -33,6 +33,14 @@ struct LegalView: View {
             } label: {
               UnitSettingsLabel()
             }
+
+            Divider()
+
+            settingsNavigationLink {
+              AppIconSettingsView()
+            } label: {
+              AppIconSettingsLabel()
+            }
           }
 
           section("Über") {

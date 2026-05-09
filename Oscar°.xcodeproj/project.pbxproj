@@ -20,6 +20,8 @@
 		2512E9592C398CCA004670E4 /* SettingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D72B2627C67016001F43FC /* SettingService.swift */; };
 		2512E95E2C398CCB004670E4 /* SettingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D72B2627C67016001F43FC /* SettingService.swift */; };
 		2512E9672C399B7D004670E4 /* UnitSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9662C399B7D004670E4 /* UnitSettings.swift */; };
+		2512E9682C399B7D004670E4 /* AppIconCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9692C399B7D004670E4 /* AppIconCatalog.swift */; };
+		2512E96A2C399B7D004670E4 /* AppIconSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E96B2C399B7D004670E4 /* AppIconSettingsView.swift */; };
 		251440892D86E0E400E48037 /* RainViewerAttribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251440882D86E0E400E48037 /* RainViewerAttribution.swift */; };
 		2516BD562BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
 		2516BD572BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
@@ -289,6 +291,8 @@
 		2512E94C2C398060004670E4 /* TomorrowAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TomorrowAttribution.swift; sourceTree = "<group>"; };
 		2512E9512C398188004670E4 /* DWDAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DWDAttribution.swift; sourceTree = "<group>"; };
 		2512E9662C399B7D004670E4 /* UnitSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitSettings.swift; sourceTree = "<group>"; };
+		2512E9692C399B7D004670E4 /* AppIconCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconCatalog.swift; sourceTree = "<group>"; };
+		2512E96B2C399B7D004670E4 /* AppIconSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconSettingsView.swift; sourceTree = "<group>"; };
 		251440882D86E0E400E48037 /* RainViewerAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainViewerAttribution.swift; sourceTree = "<group>"; };
 		2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		2519538D2F124B27003D5302 /* RadarImageOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarImageOverlay.swift; sourceTree = "<group>"; };
@@ -506,6 +510,8 @@
 				251440882D86E0E400E48037 /* RainViewerAttribution.swift */,
 				2512E9512C398188004670E4 /* DWDAttribution.swift */,
 				2512E9662C399B7D004670E4 /* UnitSettings.swift */,
+				2512E9692C399B7D004670E4 /* AppIconCatalog.swift */,
+				2512E96B2C399B7D004670E4 /* AppIconSettingsView.swift */,
 			);
 			path = Legal;
 			sourceTree = "<group>";
@@ -1203,6 +1209,8 @@
 				3E22B523251D151300D86A58 /* WeatherApp.swift in Sources */,
 				3EB89017251A55700028FED0 /* NowView.swift in Sources */,
 				2512E9672C399B7D004670E4 /* UnitSettings.swift in Sources */,
+				2512E9682C399B7D004670E4 /* AppIconCatalog.swift in Sources */,
+				2512E96A2C399B7D004670E4 /* AppIconSettingsView.swift in Sources */,
 				25ED79B529F1A7DF002E0AAB /* Color-Custom.swift in Sources */,
 				25CB17DE2B46EB61001D973A /* LegalTextView.swift in Sources */,
 				25DA7A1A27A420970062E02B /* MapDetailView.swift in Sources */,
@@ -1595,6 +1603,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIconChillDay AppIconChillDayRadar AppIconChillNight AppIconClassicHalloween AppIconClassicJungle AppIconFlatOscarBlack AppIconFlatOscarClassic AppIconFlatOscarKawaii AppIconFlatOscarSky AppIconFlatOscarSun AppIconMechaEUOscar AppIconMechaOscar AppIconSpaceShipOscar AppIconTVClassic AppIconTVClimateChangeOscar AppIconTVRainyOscar AppIconTVSunnyOscar";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Oscar°/Oscar°.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -1625,6 +1634,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "AppIconChillDay AppIconChillDayRadar AppIconChillNight AppIconClassicHalloween AppIconClassicJungle AppIconFlatOscarBlack AppIconFlatOscarClassic AppIconFlatOscarKawaii AppIconFlatOscarSky AppIconFlatOscarSun AppIconMechaEUOscar AppIconMechaOscar AppIconSpaceShipOscar AppIconTVClassic AppIconTVClimateChangeOscar AppIconTVRainyOscar AppIconTVSunnyOscar";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Oscar°/Oscar°.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";

@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "" : {
+
+    },
     "... wurde in liebevoller Erinnerung an diejenigen entwickelt, die nicht mehr unter uns sind. In unseren Herzen und Gedanken bleiben sie jedoch für immer lebendig." : {
       "localizations" : {
         "de" : {
@@ -714,6 +717,121 @@
         }
       }
     },
+    "App-Symbol" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App-Symbol"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Icon"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama Simgesi"
+          }
+        }
+      }
+    },
+    "app_icon_error_change_failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS konnte das App-Symbol nicht auf %1$@ setzen. Aktuelles Symbol: %2$@. Fehler: %3$@ (%4$@ %5$ld)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS could not change the app icon to %1$@. Current icon: %2$@. Error: %3$@ (%4$@ %5$ld)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS uygulama simgesini %1$@ olarak değiştiremedi. Geçerli simge: %2$@. Hata: %3$@ (%4$@ %5$ld)"
+          }
+        }
+      }
+    },
+    "app_icon_error_system_prompt_unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS konnte die Systemabfrage zum Ändern des App-Symbols nicht öffnen. Das passiert häufig im Simulator. Bitte App neu öffnen und erneut versuchen. Aktuelles Symbol: %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS could not open the system prompt for changing the app icon. This often happens in the simulator. Please reopen the app and try again. Current icon: %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS uygulama simgesini değiştirmek için sistem istemini açamadı. Bu durum simülatörde sık görülür. Lütfen uygulamayı yeniden açıp tekrar deneyin. Geçerli simge: %@."
+          }
+        }
+      }
+    },
+    "app_icon_error_unsupported" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Gerät unterstützt keine alternativen App-Symbole."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This device does not support alternate app icons."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu cihaz alternatif uygulama simgelerini desteklemiyor."
+          }
+        }
+      }
+    },
+    "app_icon_ai_disclosure" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle App-Symbole außer dem originalen App-Symbol wurden mit Hilfe von KI-Tools erstellt. Wenn du Designer:in bist oder einfach Lust hast, ein eigenes App-Symbol beizusteuern, schreib mir an design@bolte.id."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All app icons except the original app icon were created with the help of AI tools. If you are a designer or just an enthusiast who would be willing to create a custom app icon, write me at design@bolte.id."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orijinal uygulama simgesi dışındaki tüm uygulama simgeleri yapay zeka araçlarının yardımıyla oluşturuldu. Tasarımcıysan ya da özel bir uygulama simgesi hazırlamak isteyen bir meraklıysan bana design@bolte.id adresinden yaz."
+          }
+        }
+      }
+    },
     "AQI" : {
       "comment" : "Environment AQI",
       "extractionState" : "stale",
@@ -759,6 +877,29 @@
         }
       },
       "shouldTranslate" : false
+    },
+    "Ausgewählt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewählt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçili"
+          }
+        }
+      }
     },
     "Bei diesem UV-Wert besteht nur eine geringe gesundheitliche Gefährdung. Meist sind keine besonderen Schutzmaßnahmen erforderlich." : {
       "extractionState" : "manual",
@@ -4446,6 +4587,166 @@
             "value" : "Rüzgar Tahmini"
           }
         }
+      }
+    },
+    "App-Symbol konnte nicht geändert werden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "App-Symbol konnte nicht geändert werden" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "App Icon Could Not Be Changed" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Uygulama Simgesi Değiştirilemedi" } }
+      }
+    },
+    "Chill" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Chill" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Chill" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Sakin" } }
+      }
+    },
+    "Dschungel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dschungel" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Jungle" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Orman" } }
+      }
+    },
+    "Einfach" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Einfach" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Simple" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Sade" } }
+      }
+    },
+    "EU-Mecha" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "EU-Mecha" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "EU Mecha" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "AB Mecha" } }
+      }
+    },
+    "Halloween" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Halloween" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Halloween" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Cadılar Bayramı" } }
+      }
+    },
+    "Himmel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Himmel" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sky" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Gökyüzü" } }
+      }
+    },
+    "Kawaii" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Kawaii" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Kawaii" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Kawaii" } }
+      }
+    },
+    "Klimakatastrophe" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Klimakatastrophe" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Climate Crisis" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "İklim Krizi" } }
+      }
+    },
+    "Mecha" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mecha" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mecha" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Mecha" } }
+      }
+    },
+    "Mono" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mono" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mono" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Mono" } }
+      }
+    },
+    "Nacht" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nacht" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Night" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Gece" } }
+      }
+    },
+    "Original" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Original" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Original" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Orijinal" } }
+      }
+    },
+    "Original 2" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Original 2" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Original 2" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Orijinal 2" } }
+      }
+    },
+    "Regnerisch" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Regnerisch" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Rainy" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Yağmurlu" } }
+      }
+    },
+    "Sonnig" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Sonnig" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sunny" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Güneşli" } }
+      }
+    },
+    "Space" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Space" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Space" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Uzay" } }
+      }
+    },
+    "Tag" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Tag" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Day" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Gündüz" } }
+      }
+    },
+    "TV" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "TV" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "TV" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "TV" } }
+      }
+    },
+    "Weltraum" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Weltraum" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Space" } },
+        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Uzay" } }
       }
     },
     "Zeitpunkt" : {

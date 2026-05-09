@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "tv-rainy-oscar.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

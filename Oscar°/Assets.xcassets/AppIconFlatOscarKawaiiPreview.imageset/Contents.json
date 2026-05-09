@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "flat-oscar-kawaii.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
