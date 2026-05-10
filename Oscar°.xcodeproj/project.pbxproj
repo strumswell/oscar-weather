@@ -28,10 +28,11 @@
 		2516BD582BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
 		2519538F2F124B27003D5302 /* RadarImageOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2519538D2F124B27003D5302 /* RadarImageOverlay.swift */; };
 		251953902F124B27003D5302 /* RadarTimelineControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2519538E2F124B27003D5302 /* RadarTimelineControls.swift */; };
-		251BFE7D2E48DC7600D35589 /* AtmosphericRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFE7A2E48DC7600D35589 /* AtmosphericRenderer.swift */; };
 		251BFE7E2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */; };
-		251BFEBE2E48F33800D35589 /* AtmosphericRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFE7A2E48DC7600D35589 /* AtmosphericRenderer.swift */; };
 		251BFEC42E48F34000D35589 /* WeatherAtmosphericAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */; };
+		251BFED12FB000000000001 /* AtmosphereSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFED02FB000000000001 /* AtmosphereSnapshot.swift */; };
+		251BFED22FB000000000001 /* AtmosphereSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFED02FB000000000001 /* AtmosphereSnapshot.swift */; };
+		251BFED42FB000000000001 /* AtmosphereShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 251BFED32FB000000000001 /* AtmosphereShaders.metal */; };
 		251FE39127C5674400D26F0F /* WMSTileOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251FE39027C5674400D26F0F /* WMSTileOverlay.swift */; };
 		2523367F27C3EB3900C2111A /* RainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2523367E27C3EB3900C2111A /* RainView.swift */; };
 		252FC3B42ECE830300981FF3 /* RadarColorMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 252FC3B32ECE830200981FF3 /* RadarColorMapping.swift */; };
@@ -297,8 +298,9 @@
 		2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		2519538D2F124B27003D5302 /* RadarImageOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarImageOverlay.swift; sourceTree = "<group>"; };
 		2519538E2F124B27003D5302 /* RadarTimelineControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarTimelineControls.swift; sourceTree = "<group>"; };
-		251BFE7A2E48DC7600D35589 /* AtmosphericRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphericRenderer.swift; sourceTree = "<group>"; };
 		251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAtmosphericAdapter.swift; sourceTree = "<group>"; };
+		251BFED02FB000000000001 /* AtmosphereSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereSnapshot.swift; sourceTree = "<group>"; };
+		251BFED32FB000000000001 /* AtmosphereShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = AtmosphereShaders.metal; sourceTree = "<group>"; };
 		251FE39027C5674400D26F0F /* WMSTileOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WMSTileOverlay.swift; sourceTree = "<group>"; };
 		2523367E27C3EB3900C2111A /* RainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainView.swift; sourceTree = "<group>"; };
 		252FC3B32ECE830200981FF3 /* RadarColorMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarColorMapping.swift; sourceTree = "<group>"; };
@@ -519,8 +521,9 @@
 		251BFE7C2E48DC7600D35589 /* Rendering */ = {
 			isa = PBXGroup;
 			children = (
-				251BFE7A2E48DC7600D35589 /* AtmosphericRenderer.swift */,
 				251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */,
+				251BFED02FB000000000001 /* AtmosphereSnapshot.swift */,
+				251BFED32FB000000000001 /* AtmosphereShaders.metal */,
 			);
 			path = Rendering;
 			sourceTree = "<group>";
@@ -1188,8 +1191,9 @@
 				258EE2ED2B5EF4E900AE942B /* RetryClientMiddleware.swift in Sources */,
 				25ED79BE29F1A7DF002E0AAB /* Array-GradientStop.swift in Sources */,
 				2533940A27C43F810087C220 /* AlertView.swift in Sources */,
-				251BFE7D2E48DC7600D35589 /* AtmosphericRenderer.swift in Sources */,
 				251BFE7E2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift in Sources */,
+				251BFED12FB000000000001 /* AtmosphereSnapshot.swift in Sources */,
+				251BFED42FB000000000001 /* AtmosphereShaders.metal in Sources */,
 				259187CB2C715B2900611B0F /* PrecipitationChart.swift in Sources */,
 				AD0000192FAA100000000001 /* HourlyChartUtilities.swift in Sources */,
 				25ED79B429F1A7DF002E0AAB /* Cloud.swift in Sources */,
@@ -1279,7 +1283,7 @@
 				25DEA6152BCDA4CA00D403D5 /* WMSTileOverlay.swift in Sources */,
 				25761D5029F1CF14006976BE /* Storm.swift in Sources */,
 				253F70962B5319DD0075D093 /* CityService.swift in Sources */,
-				251BFEBE2E48F33800D35589 /* AtmosphericRenderer.swift in Sources */,
+				251BFED22FB000000000001 /* AtmosphereSnapshot.swift in Sources */,
 				259623D02A2BD6BF00BA75F6 /* HomeProvider.swift in Sources */,
 				251BFEC42E48F34000D35589 /* WeatherAtmosphericAdapter.swift in Sources */,
 				258EE2F62B5EF58100AE942B /* RetryClientMiddleware.swift in Sources */,

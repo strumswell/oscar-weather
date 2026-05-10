@@ -13,46 +13,20 @@ class CloudGroup {
     var lastUpdate = Date.now
 
     init(thickness: Cloud.Thickness) {
-        let cloudsToCreate: Int
-        let cloudScale: ClosedRange<Double>
+        let profile = CloudProfile(thickness: thickness)
+        opacity = profile.opacity
 
-        switch thickness {
-        case .none:
-            cloudsToCreate = 0
-            opacity = 1
-            cloudScale = 1...1
+        for i in 0..<profile.count {
+            let scale = Double.random(in: profile.scale)
+            let imageNumber = profile.imagePool[i % profile.imagePool.count]
 
-        case .thin:
-            cloudsToCreate = 10
-            opacity = 0.6
-            cloudScale = 0.2...0.4
-
-        case .light:
-            cloudsToCreate = 10
-            opacity = 0.7
-            cloudScale = 0.4...0.6
-
-        case .regular:
-            cloudsToCreate = 15
-            opacity = 0.8
-            cloudScale = 0.7...0.9
-
-        case .thick:
-            cloudsToCreate = 25
-            opacity = 0.9
-            cloudScale = 1.0...1.3
-
-        case .ultra:
-            cloudsToCreate = 40
-            opacity = 1
-            cloudScale = 1.2...1.6
-        }
-
-        for i in 0..<cloudsToCreate {
-            let scale = Double.random(in: cloudScale)
-            let imageNumber = i % 8
-
-            let cloud = Cloud(imageNumber: imageNumber, scale: scale)
+            let cloud = Cloud(
+                imageNumber: imageNumber,
+                scale: scale,
+                xRange: profile.xRange,
+                yRange: profile.yRange,
+                speedRange: profile.speed
+            )
             clouds.append(cloud)
         }
     }
@@ -68,7 +42,7 @@ class CloudGroup {
         for cloud in clouds {
             cloud.position.x -= delta * cloud.speed
 
-            let offScreenDistance = max(400, 400 * cloud.scale)
+            let offScreenDistance = max(620, 420 * cloud.scale)
 
             if cloud.position.x < -offScreenDistance {
                 cloud.position.x = offScreenDistance
@@ -76,5 +50,73 @@ class CloudGroup {
         }
 
         lastUpdate = date
+    }
+}
+
+private struct CloudProfile {
+    let count: Int
+    let opacity: Double
+    let scale: ClosedRange<Double>
+    let xRange: ClosedRange<Double>
+    let yRange: ClosedRange<Double>
+    let speed: ClosedRange<Double>
+    let imagePool: [Int]
+
+    init(thickness: Cloud.Thickness) {
+        switch thickness {
+        case .none:
+            count = 0
+            opacity = 1
+            scale = 1...1
+            xRange = -400...400
+            yRange = -50...200
+            speed = 4...12
+            imagePool = [1]
+
+        case .thin:
+            count = 6
+            opacity = 0.56
+            scale = 0.26...0.46
+            xRange = -460...460
+            yRange = -70...130
+            speed = 2...6
+            imagePool = [1, 2, 5, 6, 6]
+
+        case .light:
+            count = 11
+            opacity = 0.74
+            scale = 0.42...0.76
+            xRange = -500...500
+            yRange = -95...210
+            speed = 2...7
+            imagePool = [1, 2, 4, 5, 6, 6, 0]
+
+        case .regular:
+            count = 14
+            opacity = 0.82
+            scale = 0.54...0.92
+            xRange = -540...540
+            yRange = -110...240
+            speed = 2...8
+            imagePool = [1, 2, 4, 5, 6, 6, 0, 3]
+
+        case .thick:
+            count = 24
+            opacity = 0.94
+            scale = 0.78...1.28
+            xRange = -580...580
+            yRange = -140...280
+            speed = 2...9
+            imagePool = [0, 2, 3, 4, 4, 5, 6, 6, 1]
+
+        case .ultra:
+            count = 36
+            opacity = 1
+            scale = 0.95...1.55
+            xRange = -620...620
+            yRange = -170...320
+            speed = 2...10
+            imagePool = [0, 2, 3, 4, 4, 5, 6, 6, 1, 7]
+        }
     }
 }

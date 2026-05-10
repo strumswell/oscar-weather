@@ -717,25 +717,25 @@
         }
       }
     },
-    "App-Symbol" : {
+    "app_icon_ai_disclosure" : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App-Symbol"
+            "value" : "Alle App-Symbole außer dem originalen App-Symbol wurden mit Hilfe von KI-Tools erstellt. Wenn du Designer:in bist oder einfach Lust hast, ein eigenes App-Symbol beizusteuern, schreib mir an design@bolte.id."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App Icon"
+            "value" : "All app icons except the original app icon were created with the help of AI tools. If you are a designer or just an enthusiast who would be willing to create a custom app icon, write me at design@bolte.id."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uygulama Simgesi"
+            "value" : "Orijinal uygulama simgesi dışındaki tüm uygulama simgeleri yapay zeka araçlarının yardımıyla oluşturuldu. Tasarımcıysan ya da özel bir uygulama simgesi hazırlamak isteyen bir meraklıysan bana design@bolte.id adresinden yaz."
           }
         }
       }
@@ -809,25 +809,48 @@
         }
       }
     },
-    "app_icon_ai_disclosure" : {
+    "App-Symbol" : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alle App-Symbole außer dem originalen App-Symbol wurden mit Hilfe von KI-Tools erstellt. Wenn du Designer:in bist oder einfach Lust hast, ein eigenes App-Symbol beizusteuern, schreib mir an design@bolte.id."
+            "value" : "App-Symbol"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "All app icons except the original app icon were created with the help of AI tools. If you are a designer or just an enthusiast who would be willing to create a custom app icon, write me at design@bolte.id."
+            "value" : "App Icon"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Orijinal uygulama simgesi dışındaki tüm uygulama simgeleri yapay zeka araçlarının yardımıyla oluşturuldu. Tasarımcıysan ya da özel bir uygulama simgesi hazırlamak isteyen bir meraklıysan bana design@bolte.id adresinden yaz."
+            "value" : "Uygulama Simgesi"
+          }
+        }
+      }
+    },
+    "App-Symbol konnte nicht geändert werden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App-Symbol konnte nicht geändert werden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Icon Could Not Be Changed"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama Simgesi Değiştirilemedi"
           }
         }
       }
@@ -866,6 +889,9 @@
         }
       },
       "shouldTranslate" : false
+    },
+    "Atmosphere" : {
+
     },
     "Attribution 4.0 International (CC BY 4.0)" : {
       "localizations" : {
@@ -1197,6 +1223,42 @@
         }
       }
     },
+    "Chill" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chill"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chill"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sakin"
+          }
+        }
+      }
+    },
+    "Cloud: %.2f / %.2f" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cloud: %1$.2f / %2$.2f"
+          }
+        }
+      }
+    },
+    "Condition: %@" : {
+
+    },
     "COSMO 2I & 5M - AM ARPAE ARPAP" : {
       "localizations" : {
         "en" : {
@@ -1333,6 +1395,29 @@
         }
       }
     },
+    "Dschungel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dschungel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jungle"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orman"
+          }
+        }
+      }
+    },
     "Durchschnittlicher Wassergehalt des Bodens als volumetrisches Mischungsverhältnis in verschiedenen Tiefen." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1372,6 +1457,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "D"
+          }
+        }
+      }
+    },
+    "Einfach" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einfach"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sade"
           }
         }
       }
@@ -1537,6 +1645,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ET₀, iyi sulanan bir çim alanın referans evapotranspirasyonudur ve bitkilerin sulama gereksinimlerini tahmin etmek için kullanılır."
+          }
+        }
+      }
+    },
+    "EU-Mecha" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EU-Mecha"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "EU Mecha"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AB Mecha"
           }
         }
       }
@@ -1953,6 +2084,29 @@
         }
       }
     },
+    "Halloween" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halloween"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halloween"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cadılar Bayramı"
+          }
+        }
+      }
+    },
     "HARMONIE - DMI" : {
       "shouldTranslate" : false
     },
@@ -1978,6 +2132,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ana kirletici"
+          }
+        }
+      }
+    },
+    "Haze: %.2f Turbidity: %.2f" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Haze: %1$.2f Turbidity: %2$.2f"
           }
         }
       }
@@ -2024,6 +2188,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bugün"
+          }
+        }
+      }
+    },
+    "Himmel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Himmel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sky"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gökyüzü"
           }
         }
       }
@@ -2145,6 +2332,29 @@
         }
       }
     },
+    "Kawaii" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kawaii"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kawaii"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kawaii"
+          }
+        }
+      }
+    },
     "Kein Regen" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2254,6 +2464,29 @@
         }
       }
     },
+    "Klimakatastrophe" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klimakatastrophe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Climate Crisis"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İklim Krizi"
+          }
+        }
+      }
+    },
     "km/h" : {
       "shouldTranslate" : false
     },
@@ -2318,9 +2551,6 @@
           }
         }
       }
-    },
-    "Loading queries" : {
-
     },
     "Location" : {
       "localizations" : {
@@ -2507,6 +2737,29 @@
         }
       }
     },
+    "Mecha" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mecha"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mecha"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mecha"
+          }
+        }
+      }
+    },
     "Meeresspiegel-Luftdruck" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2635,6 +2888,29 @@
     "mm/h" : {
       "shouldTranslate" : false
     },
+    "Mono" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mono"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mono"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mono"
+          }
+        }
+      }
+    },
     "mph" : {
       "shouldTranslate" : false
     },
@@ -2660,6 +2936,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "K"
+          }
+        }
+      }
+    },
+    "Nacht" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nacht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Night"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gece"
           }
         }
       }
@@ -2747,9 +3046,6 @@
     },
     "NOAA Global Forecast System (GFS)" : {
       "shouldTranslate" : false
-    },
-    "None" : {
-
     },
     "Notifications" : {
       "extractionState" : "stale",
@@ -2945,6 +3241,52 @@
     },
     "open-meteo.com" : {
       "shouldTranslate" : false
+    },
+    "Original" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Original"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Original"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orijinal"
+          }
+        }
+      }
+    },
+    "Original 2" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Original 2"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Original 2"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orijinal 2"
+          }
+        }
+      }
     },
     "Orte" : {
       "extractionState" : "manual",
@@ -3222,6 +3564,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "polen/m³"
+          }
+        }
+      }
+    },
+    "Precip: %.2f mm / %.2f" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Precip: %1$.2f mm / %2$.2f"
           }
         }
       }
@@ -3532,6 +3884,29 @@
         }
       }
     },
+    "Regnerisch" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regnerisch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rainy"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmurlu"
+          }
+        }
+      }
+    },
     "Relative Luftfeuchtigkeit" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3790,6 +4165,16 @@
         }
       }
     },
+    "Snow: %.2f mm / %.2f" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Snow: %1$.2f mm / %2$.2f"
+          }
+        }
+      }
+    },
     "SO" : {
       "comment" : "Environment SO",
       "extractionState" : "stale",
@@ -3814,6 +4199,29 @@
         }
       }
     },
+    "Sonnig" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonnig"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunny"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güneşli"
+          }
+        }
+      }
+    },
     "Sonstiges" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3833,6 +4241,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Diğer"
+          }
+        }
+      }
+    },
+    "Space" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Space"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Space"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzay"
           }
         }
       }
@@ -3974,6 +4405,9 @@
         }
       }
     },
+    "Sun: %.1f°" : {
+
+    },
     "SW_compass" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4016,6 +4450,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sistem Ayarlarını Aç"
+          }
+        }
+      }
+    },
+    "Tag" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tag"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gündüz"
           }
         }
       }
@@ -4203,6 +4660,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bildirim almak için yağmur uyarılarını veya hava durumu uyarılarını açın. Bunun için yaklaşık konumunuz bir Oscar sunucusunda saklanacaktır."
+          }
+        }
+      }
+    },
+    "TV" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TV"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TV"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TV"
           }
         }
       }
@@ -4488,6 +4968,29 @@
         }
       }
     },
+    "Weltraum" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weltraum"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Space"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzay"
+          }
+        }
+      }
+    },
     "Wetterdaten werden geladen…" : {
       "localizations" : {
         "en" : {
@@ -4587,166 +5090,6 @@
             "value" : "Rüzgar Tahmini"
           }
         }
-      }
-    },
-    "App-Symbol konnte nicht geändert werden" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "App-Symbol konnte nicht geändert werden" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "App Icon Could Not Be Changed" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Uygulama Simgesi Değiştirilemedi" } }
-      }
-    },
-    "Chill" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Chill" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Chill" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Sakin" } }
-      }
-    },
-    "Dschungel" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Dschungel" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Jungle" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Orman" } }
-      }
-    },
-    "Einfach" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Einfach" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Simple" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Sade" } }
-      }
-    },
-    "EU-Mecha" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "EU-Mecha" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "EU Mecha" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "AB Mecha" } }
-      }
-    },
-    "Halloween" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Halloween" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Halloween" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Cadılar Bayramı" } }
-      }
-    },
-    "Himmel" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Himmel" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sky" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Gökyüzü" } }
-      }
-    },
-    "Kawaii" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Kawaii" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Kawaii" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Kawaii" } }
-      }
-    },
-    "Klimakatastrophe" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Klimakatastrophe" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Climate Crisis" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "İklim Krizi" } }
-      }
-    },
-    "Mecha" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mecha" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mecha" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Mecha" } }
-      }
-    },
-    "Mono" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mono" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Mono" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Mono" } }
-      }
-    },
-    "Nacht" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Nacht" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Night" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Gece" } }
-      }
-    },
-    "Original" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Original" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Original" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Orijinal" } }
-      }
-    },
-    "Original 2" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Original 2" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Original 2" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Orijinal 2" } }
-      }
-    },
-    "Regnerisch" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Regnerisch" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Rainy" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Yağmurlu" } }
-      }
-    },
-    "Sonnig" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Sonnig" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sunny" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Güneşli" } }
-      }
-    },
-    "Space" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Space" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Space" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Uzay" } }
-      }
-    },
-    "Tag" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Tag" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Day" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Gündüz" } }
-      }
-    },
-    "TV" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "TV" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "TV" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "TV" } }
-      }
-    },
-    "Weltraum" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Weltraum" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Space" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Uzay" } }
       }
     },
     "Zeitpunkt" : {

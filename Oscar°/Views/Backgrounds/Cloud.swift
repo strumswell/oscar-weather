@@ -14,15 +14,22 @@ class Cloud {
 
     var position: CGPoint
     let imageNumber: Int
-    let speed = Double.random(in: 4...12)
+    let speed: Double
     let scale: Double
 
-    init(imageNumber: Int, scale: Double) {
+    init(
+        imageNumber: Int,
+        scale: Double,
+        xRange: ClosedRange<Double>,
+        yRange: ClosedRange<Double>,
+        speedRange: ClosedRange<Double>
+    ) {
         self.imageNumber = imageNumber
         self.scale = scale
+        self.speed = Double.random(in: speedRange)
 
-        let startX = Double.random(in: -400...400)
-        let startY = Double.random(in: -50...200)
+        let startX = Double.random(in: xRange)
+        let startY = Double.random(in: yRange)
         position = CGPoint(x: startX, y: startY)
     }
 }

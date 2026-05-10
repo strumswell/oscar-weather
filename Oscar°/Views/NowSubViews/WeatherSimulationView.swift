@@ -5,346 +5,161 @@
 //  Created by Philipp Bolte on 02.01.24.
 //
 
-import SwiftUI
 import CoreLocation
+import SwiftUI
 
 struct WeatherSimulationView: View {
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
-    
-    private let atmosphericAdapter = WeatherAtmosphericAdapter()
-    
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
-        ZStack {
-            if !weather.isLoading && weather.forecast.hourly != nil {
-                StarsView()
-                if getCloudDensity() != Cloud.Thickness.thick {
-                    SunView(progress: weather.time)
+        let snapshot = AtmosphereWeatherMapper.snapshot(from: weather, at: location.coordinates)
+
+        GeometryReader { proxy in
+            ZStack {
+                if !weather.isLoading && weather.forecast.hourly != nil {
+                    AtmosphereSkyShaderView(
+                        snapshot: snapshot,
+                        size: proxy.size
+                    )
+
+                    StarsView()
+                        .opacity(Double(snapshot.nightAmount) * Double(1 - snapshot.cloudCoverage * 0.85))
+
+                    if shouldShowSun(snapshot) {
+                        SunView(progress: Double(snapshot.timeOfDay))
+                            .opacity(Double((1 - snapshot.cloudDensity * 0.45) * snapshot.phase))
+                    }
+
+                    CloudsView(
+                        thickness: cloudThickness(for: snapshot),
+                        topTint: AtmosphereSampler.cloudTopTint(snapshot: snapshot),
+                        bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snapshot)
+                    )
+                    .id(String(describing: cloudThickness(for: snapshot)))
+                    .opacity(Double(min(1, snapshot.cloudDensity + snapshot.cloudCoverage * 0.25)))
+
+                    if shouldShowStorm(snapshot) {
+                        StormView(
+                            type: stormContents(for: snapshot),
+                            direction: stormDirection(for: snapshot),
+                            strength: stormStrength(for: snapshot)
+                        )
+                        .id(String(describing: stormContents(for: snapshot)))
+                        .opacity(reduceMotion ? 0.55 : 1)
+                    }
+                } else {
+                    AtmosphereSampler.skyGradient(snapshot: .fallback)
                 }
-                CloudsView(
-                    thickness: getCloudDensity(),
-                    topTint: getAtmosphericCloudTopTint(),
-                    bottomTint: getAtmosphericCloudBottomTint()
-                )
-                if shouldDisplayStorm {
-                    StormView(type: getStormType(), direction: .degrees(30), strength: getStormIntensity())
+
+                if weather.debug {
+                    debugOverlay(snapshot: snapshot)
                 }
             }
-            if weather.debug {
-                VStack {
-                    Text(weather.isLoading.description)
-                    Text(String(reflecting: weather.forecast.hourly == nil))
-                    Text("Loading queries")
-                        .padding(.top, 20)
-                    if weather.loadingQueries.isEmpty {
-                        Text("None")
-                    } else {
-                        ForEach(weather.loadingQueries.sorted(), id: \.self) { query in
-                            Text(query.displayName)
-                        }
-                    }
-                }
+            .preferredColorScheme(.dark)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(AtmosphereSampler.skyGradient(snapshot: snapshot))
+        }
+        .ignoresSafeArea()
+    }
+
+    private func debugOverlay(snapshot: AtmosphereSnapshot) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Atmosphere")
+                .font(.caption.bold())
+            Text("Condition: \(String(describing: snapshot.condition))")
+            Text("Cloud: \(snapshot.cloudCoverage, specifier: "%.2f") / \(snapshot.cloudDensity, specifier: "%.2f")")
+            Text("Precip: \(snapshot.precipitationAmount, specifier: "%.2f") mm / \(snapshot.precipitationIntensity, specifier: "%.2f")")
+            Text("Snow: \(snapshot.snowfallAmount, specifier: "%.2f") mm / \(snapshot.snowfallIntensity, specifier: "%.2f")")
+            Text("Haze: \(snapshot.haze, specifier: "%.2f") Turbidity: \(snapshot.turbidity, specifier: "%.2f")")
+            Text("Sun: \(snapshot.sunElevation * 180 / .pi, specifier: "%.1f")°")
+            Text(weather.isLoading.description)
+            if !weather.loadingQueries.isEmpty {
+                Text(weather.loadingQueries.sorted().map(\.displayName).joined(separator: ", "))
             }
         }
-        .preferredColorScheme(.dark)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(atmosphericBackgroundGradient)
+        .font(.caption2.monospaced())
+        .foregroundStyle(.white)
+        .padding(10)
+        .background(.black.opacity(0.45), in: RoundedRectangle(cornerRadius: 8))
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(.top, 64)
+        .padding(.horizontal, 12)
+    }
+
+    private func shouldShowSun(_ snapshot: AtmosphereSnapshot) -> Bool {
+        snapshot.phase > 0.08 && snapshot.cloudDensity < 0.82 && snapshot.precipitationIntensity < 0.55
+    }
+
+    private func shouldShowStorm(_ snapshot: AtmosphereSnapshot) -> Bool {
+        max(snapshot.precipitationIntensity, snapshot.snowfallIntensity) > 0.05
+    }
+
+    private func cloudThickness(for snapshot: AtmosphereSnapshot) -> Cloud.Thickness {
+        switch snapshot.cloudCoverage {
+        case ..<0.08:
+            return .none
+        case ..<0.25:
+            return .thin
+        case ..<0.45:
+            return .light
+        case ..<0.68:
+            return .regular
+        case ..<0.92:
+            return .thick
+        default:
+            return .ultra
+        }
+    }
+
+    private func stormContents(for snapshot: AtmosphereSnapshot) -> Storm.Contents {
+        snapshot.condition == .snow ? .snow : .rain
+    }
+
+    private func stormDirection(for snapshot: AtmosphereSnapshot) -> Angle {
+        let horizontalSlant = min(35, max(-35, Double(sin(snapshot.windDirection)) * Double(snapshot.windSpeed) * 55))
+        return .degrees(horizontalSlant)
+    }
+
+    private func stormStrength(for snapshot: AtmosphereSnapshot) -> Int {
+        let isSnow = snapshot.condition == .snow
+        let intensity = isSnow ? snapshot.snowfallIntensity : snapshot.precipitationIntensity
+        let base = isSnow ? 90 : 45
+        return max(12, min(220, Int(Double(base) + Double(intensity) * 170)))
+    }
+}
+
+private struct AtmosphereSkyShaderView: View {
+    let snapshot: AtmosphereSnapshot
+    let size: CGSize
+
+    var body: some View {
+        Rectangle()
+            .fill(skyShader(seed: Float(snapshot.timestamp)))
+    }
+
+    private func skyShader(seed: Float) -> Shader {
+        Shader(
+            function: ShaderFunction(library: .default, name: "atmosphereSky"),
+            arguments: [
+                .float2(Float(size.width), Float(size.height)),
+                .float(seed),
+                .float(snapshot.sunElevation),
+                .float(snapshot.phase),
+                .float(snapshot.cloudDensity),
+                .float(snapshot.precipitationIntensity),
+                .float(snapshot.snowfallIntensity),
+                .float(snapshot.thunderIntensity),
+                .float(snapshot.haze),
+                .float(snapshot.turbidity)
+            ]
+        )
     }
 }
 
 #Preview {
     WeatherSimulationView()
-}
-
-extension WeatherSimulationView {
-    /// Atmospheric physics-based background gradient
-    var atmosphericBackgroundGradient: LinearGradient {
-        // Only use atmospheric rendering if location is available
-        guard location.coordinates.latitude != 0 && location.coordinates.longitude != 0 else {
-            if weather.debug {
-                print("🌍 WeatherSimulationView: Using legacy gradient - Location not available: \(location.coordinates)")
-            }
-            return legacyBackgroundGradient
-        }
-        
-        if weather.debug {
-            print("🌍 WeatherSimulationView: Using atmospheric renderer at \(location.coordinates)")
-        }
-        
-        return atmosphericAdapter.generateAtmosphericSkyGradient(
-            from: weather,
-            at: location.coordinates
-        )
-    }
-    
-    /// Legacy gradient system as fallback
-    var legacyBackgroundGradient: LinearGradient {
-        LinearGradient(colors: [
-            getBackgroundTopStops().interpolated(amount: weather.time),
-            getBackgroundBottomStops().interpolated(amount: weather.time)
-        ], startPoint: .top, endPoint: .bottom)
-    }
-    
-    /// Get atmospheric color for cloud top tinting
-    func getAtmosphericCloudTopTint() -> Color {
-        guard location.coordinates.latitude != 0 && location.coordinates.longitude != 0 else {
-            // Fallback to legacy system if no location
-            return getCloudTopStops().interpolated(amount: weather.time)
-        }
-        
-        return atmosphericAdapter.getAtmosphericCloudColor(
-            from: weather,
-            at: location.coordinates,
-            isTop: true
-        )
-    }
-    
-    /// Get atmospheric color for cloud bottom tinting
-    func getAtmosphericCloudBottomTint() -> Color {
-        guard location.coordinates.latitude != 0 && location.coordinates.longitude != 0 else {
-            // Fallback to legacy system if no location
-            return getCloudBottomStops().interpolated(amount: weather.time)
-        }
-        
-        return atmosphericAdapter.getAtmosphericCloudColor(
-            from: weather,
-            at: location.coordinates,
-            isTop: false
-        )
-    }
-
-    var shouldDisplayStorm: Bool {
-        (weather.forecast.current?.weathercode ?? 0 >= 51 && weather.forecast.current?.precipitation ?? 0 > 0) || weather.radar.isRaining()
-    }
-    
-    func getBackgroundTopStops() -> [Gradient.Stop] {
-        if (weather.forecast.hourly == nil) {
-            return [
-                .init(color: .midnightStart, location: 0),
-                .init(color: .midnightStart, location: 0.25),
-                .init(color: .sunriseStart, location: 0.33),
-                .init(color: .sunnyDayStart, location: 0.38),
-                .init(color: .sunnyDayStart, location: 0.65),
-                .init(color: .sunsetStart, location: 0.69),
-                .init(color: .midnightStart, location: 0.8),
-                .init(color: .midnightStart, location: 1)
-            ]
-        }
-        
-        let dayLength = 86400.0
-        let dayBegin = weather.forecast.hourly?.time.first ?? 0
-        let sunrise = weather.forecast.daily?.sunrise?.first ?? 0
-        let sunset = weather.forecast.daily?.sunset?.first ?? 0
-        
-        if (weather.forecast.current?.weathercode ?? 0 >= 51 && weather.forecast.current?.precipitation ?? 0 > 0) || weather.radar.isRaining() {
-            return [
-                .init(color: .midnightStart, location: 0),
-                .init(color: .midnightStart, location: (sunrise - dayBegin)/dayLength - 0.08),
-                .init(color: .rainyStart, location: (sunrise - dayBegin)/dayLength),
-                .init(color: .rainyStart, location: (sunrise - dayBegin)/dayLength + 0.05),
-                .init(color: .rainyStart, location: (sunset - dayBegin)/dayLength - 0.08),
-                .init(color: .rainyStart, location: (sunset - dayBegin)/dayLength),
-                .init(color: .midnightStart, location: (sunset - dayBegin)/dayLength + 0.04),
-                .init(color: .midnightStart, location: 1)
-            ]
-        }
-        
-        return [
-            .init(color: .midnightStart, location: 0),
-            .init(color: .midnightStart, location: (sunrise - dayBegin)/dayLength - 0.08),
-            .init(color: .sunriseStart, location: (sunrise - dayBegin)/dayLength),
-            .init(color: .sunnyDayStart, location: (sunrise - dayBegin)/dayLength + 0.05),
-            .init(color: .sunnyDayStart, location: (sunset - dayBegin)/dayLength - 0.08),
-            .init(color: .sunsetStart, location: (sunset - dayBegin)/dayLength),
-            .init(color: .midnightStart, location: (sunset - dayBegin)/dayLength + 0.04),
-            .init(color: .midnightStart, location: 1)
-        ]
-    }
-    
-    func getBackgroundBottomStops() -> [Gradient.Stop] {
-        if (weather.forecast.hourly == nil) {
-            return [
-                .init(color: .midnightEnd, location: 0),
-                .init(color: .midnightEnd, location: 0.25),
-                .init(color: .sunriseEnd, location: 0.33),
-                .init(color: .sunnyDayEnd, location: 0.38),
-                .init(color: .sunnyDayEnd, location: 0.65),
-                .init(color: .sunsetEnd, location: 0.69),
-                .init(color: .midnightEnd, location: 0.8),
-                .init(color: .midnightEnd, location: 1)
-            ]
-        }
-        
-        let dayLength = 86400.0
-        let dayBegin = weather.forecast.hourly?.time.first ?? 0
-        let sunrise = weather.forecast.daily?.sunrise?.first ?? 0
-        let sunset = weather.forecast.daily?.sunset?.first ?? 0
-        
-        if (weather.forecast.current?.weathercode ?? 0 >= 51 && weather.forecast.current?.precipitation ?? 0 > 0) || weather.radar.isRaining() {
-            return [
-                .init(color: .midnightEnd, location: 0),
-                .init(color: .midnightEnd, location: (sunrise - dayBegin)/dayLength - 0.08),
-                .init(color: .rainyEnd, location: (sunrise - dayBegin)/dayLength),
-                .init(color: .rainyEnd, location: (sunrise - dayBegin)/dayLength + 0.05),
-                .init(color: .rainyEnd, location: (sunset - dayBegin)/dayLength - 0.08),
-                .init(color: .rainyEnd, location: (sunset - dayBegin)/dayLength),
-                .init(color: .midnightEnd, location: (sunset - dayBegin)/dayLength + 0.015),
-                .init(color: .midnightEnd, location: 1)
-            ]
-        }
-        
-        return [
-            .init(color: .midnightEnd, location: 0),
-            .init(color: .midnightEnd, location: (sunrise - dayBegin)/dayLength - 0.08),
-            .init(color: .sunriseEnd, location: (sunrise - dayBegin)/dayLength),
-            .init(color: .sunnyDayEnd, location: (sunrise - dayBegin)/dayLength + 0.05),
-            .init(color: .sunnyDayEnd, location: (sunset - dayBegin)/dayLength - 0.08),
-            .init(color: .sunsetEnd, location: (sunset - dayBegin)/dayLength),
-            .init(color: .midnightEnd, location: (sunset - dayBegin)/dayLength + 0.015),
-            .init(color: .midnightEnd, location: 1)
-        ]
-    }
-    
-    func getCloudTopStops() -> [Gradient.Stop] {
-        if (weather.forecast.hourly == nil) {
-            return [
-                .init(color: .darkCloudStart, location: 0),
-                .init(color: .darkCloudStart, location: 0.25),
-                .init(color: .sunriseCloudStart, location: 0.33),
-                .init(color: .lightCloudStart, location: 0.38),
-                .init(color: .lightCloudStart, location: 0.7),
-                .init(color: .sunsetCloudStart, location: 0.78),
-                .init(color: .darkCloudStart, location: 0.82),
-                .init(color: .darkCloudStart, location: 1)
-            ]
-        }
-        
-        let dayLength = 86400.0
-        let dayBegin = weather.forecast.hourly?.time.first ?? 0
-        let sunrise = weather.forecast.daily?.sunrise?.first ?? 0
-        let sunset = weather.forecast.daily?.sunset?.first ?? 0
-        
-        if (weather.forecast.current?.weathercode ?? 0 >= 51 && weather.forecast.current?.precipitation ?? 0 > 0) || weather.radar.isRaining() {
-            return [
-                .init(color: .darkCloudStart, location: 0),
-                .init(color: .darkCloudStart, location: (sunrise - dayBegin)/dayLength - 0.08),
-                .init(color: .rainCloudStart, location: (sunrise - dayBegin)/dayLength),
-                .init(color: .rainCloudStart, location: (sunrise - dayBegin)/dayLength + 0.05),
-                .init(color: .rainCloudStart, location: (sunset - dayBegin)/dayLength - 0.08),
-                .init(color: .rainCloudStart, location: (sunset - dayBegin)/dayLength),
-                .init(color: .darkCloudStart, location: (sunset - dayBegin)/dayLength + 0.015),
-                .init(color: .darkCloudStart, location: 1)
-            ]
-        }
-        
-        return [
-            .init(color: .darkCloudStart, location: 0),
-            .init(color: .darkCloudStart, location: (sunrise - dayBegin)/dayLength - 0.08),
-            .init(color: .sunriseCloudStart, location: (sunrise - dayBegin)/dayLength),
-            .init(color: .lightCloudStart, location: (sunrise - dayBegin)/dayLength + 0.05),
-            .init(color: .lightCloudStart, location: (sunset - dayBegin)/dayLength - 0.08),
-            .init(color: .sunsetCloudStart, location: (sunset - dayBegin)/dayLength),
-            .init(color: .darkCloudStart, location: (sunset - dayBegin)/dayLength + 0.015),
-            .init(color: .darkCloudStart, location: 1)
-        ]
-    }
-    
-    func getCloudBottomStops() -> [Gradient.Stop] {
-        if (weather.forecast.hourly == nil) {
-            return [
-                .init(color: .darkCloudEnd, location: 0),
-                .init(color: .darkCloudEnd, location: 0.25),
-                .init(color: .sunriseCloudEnd, location: 0.33),
-                .init(color: .lightCloudEnd, location: 0.38),
-                .init(color: .lightCloudEnd, location: 0.7),
-                .init(color: .sunsetCloudEnd, location: 0.78),
-                .init(color: .darkCloudEnd, location: 0.92),
-                .init(color: .darkCloudEnd, location: 1)
-            ]
-        }
-        
-        let dayLength = 86400.0
-        let dayBegin = weather.forecast.hourly?.time.first ?? 0
-        let sunrise = weather.forecast.daily?.sunrise?.first ?? 0
-        let sunset = weather.forecast.daily?.sunset?.first ?? 0
-        
-        if (weather.forecast.current?.weathercode ?? 0 >= 51 && weather.forecast.current?.precipitation ?? 0 > 0) || weather.radar.isRaining() {
-            return [
-                .init(color: .darkCloudEnd, location: 0),
-                .init(color: .darkCloudEnd, location: (sunrise - dayBegin)/dayLength - 0.08),
-                .init(color: .rainCloudEnd, location: (sunrise - dayBegin)/dayLength),
-                .init(color: .rainCloudEnd, location: (sunrise - dayBegin)/dayLength + 0.05),
-                .init(color: .rainCloudEnd, location: (sunset - dayBegin)/dayLength - 0.08),
-                .init(color: .rainCloudEnd, location: (sunset - dayBegin)/dayLength),
-                .init(color: .darkCloudEnd, location: (sunset - dayBegin)/dayLength + 0.04),
-                .init(color: .darkCloudEnd, location: 1)
-            ]
-        }
-        
-        return [
-            .init(color: .darkCloudEnd, location: 0),
-            .init(color: .darkCloudEnd, location: (sunrise - dayBegin)/dayLength - 0.08),
-            .init(color: .sunriseCloudEnd, location: (sunrise - dayBegin)/dayLength),
-            .init(color: .lightCloudEnd, location: (sunrise - dayBegin)/dayLength + 0.05),
-            .init(color: .lightCloudEnd, location: (sunset - dayBegin)/dayLength - 0.08),
-            .init(color: .sunsetCloudEnd, location: (sunset - dayBegin)/dayLength),
-            .init(color: .darkCloudEnd, location: (sunset - dayBegin)/dayLength + 0.04),
-            .init(color: .darkCloudEnd, location: 1)
-        ]
-    }
-    
-    public func getCloudDensity() -> Cloud.Thickness {
-        switch weather.forecast.current?.weathercode {
-        case 0:
-            return Cloud.Thickness.none
-        case 1:
-            return Cloud.Thickness.light
-        case 2:
-            return Cloud.Thickness.regular
-        case 3:
-            return Cloud.Thickness.thick
-        default:
-            return Cloud.Thickness.thick
-        }
-    }
-    
-    public func getStormType() -> Storm.Contents {
-        switch weather.forecast.current?.weathercode {
-        case 51, 53, 55, 61, 63, 65, 66, 67, 95, 96, 99:
-            return Storm.Contents.rain
-        case 71, 73, 75, 77, 85, 86:
-            return Storm.Contents.snow
-        default:
-            return Storm.Contents.none
-        }
-    }
-    
-    public func getStormIntensity() -> Int {
-        switch weather.forecast.current?.weathercode {
-        case 51, 53, 55, 56, 57:
-            return 30
-        case 61:
-            return 40
-        case 63:
-            return 50
-        case 65, 67:
-            return 70
-        case 71:
-            return 90
-        case 73:
-            return 150
-        case 75:
-            return 300
-        case 77:
-            return 50
-        case 80, 85, 95, 99:
-            return 20
-        case 81:
-            return 80
-        case 82, 86:
-            return 90
-        default:
-            return 40
-        }
-    }
+        .environment(Weather.mock)
+        .environment(Location())
 }
