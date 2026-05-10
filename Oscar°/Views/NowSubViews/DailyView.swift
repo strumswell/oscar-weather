@@ -2,6 +2,9 @@ import SwiftUI
 
 struct DailyView: View {
   @Environment(Weather.self) private var weather: Weather
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @State private var showDetailView = false
+  @State private var detailPresentationCount = 0
 
   var body: some View {
     // Cap at 12 days to keep View from getting too large with too much (unreliable) data
@@ -13,77 +16,87 @@ struct DailyView: View {
     let temperatureUnit = weather.forecast.daily_units?.temperature_2m_min ?? "°C"
     let precipitationUnit = weather.forecast.daily_units?.precipitation_sum ?? "mm"
 
-    VStack(alignment: .leading) {
-      Text(heading)
-        .font(.title3)
-        .bold()
-        .foregroundColor(Color(UIColor.label))
-        .padding([.leading, .top, .bottom])
+    Button(action: presentDetails) {
+      VStack(alignment: .leading) {
+        Text(heading)
+          .font(.title3)
+          .bold()
+          .foregroundColor(Color(UIColor.label))
+          .padding([.leading, .top, .bottom])
 
-      VStack {
-        if showsPlaceholders {
-          ForEach(0..<placeholderDayCount, id: \.self) { _ in
-            DailyPlaceholderRow()
-              .redacted(reason: .placeholder)
-          }
-        } else {
-          ForEach(Array(0..<dayNumber), id: \.self) { dayPos in
-            let dayMinTemp = weather.forecast.daily?.temperature_2m_min?[dayPos] ?? 0
-            let dayMaxTemp = weather.forecast.daily?.temperature_2m_max?[dayPos] ?? 0
-            HStack {
-              Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0))
-                .foregroundColor(Color(UIColor.label))
-                .bold()
-                .frame(width: 45, alignment: .leading)
-              Image(getWeatherIcon(pos: dayPos))
-                .resizable()
-                .scaledToFit()
-                .frame(width: 30, height: 30)
-              VStack {
-                Text(
-                  "\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") \(precipitationUnit)"
-                )
-                .font(.caption)
-                .foregroundColor(Color(UIColor.label))
-                .contentTransition(.numericText())
-              }
-              .frame(width: 50)
-              Text(roundTemperatureString(temperature: dayMinTemp))
-                .frame(width: 37, alignment: .trailing)
-                .contentTransition(.numericText())
-              TemperatureRangeView(
-                low: dayMinTemp, high: dayMaxTemp,
-                minTemp: temperatureScale.min, maxTemp: temperatureScale.max,
-                unit: temperatureUnit
-              )
-              .frame(height: 5)
-              Text(roundTemperatureString(temperature: dayMaxTemp))
-                .frame(width: 37, alignment: .leading)
-                .contentTransition(.numericText())
+        VStack {
+          if showsPlaceholders {
+            ForEach(0..<placeholderDayCount, id: \.self) { _ in
+              DailyPlaceholderRow()
+                .redacted(reason: .placeholder)
             }
-            .padding(.vertical, 4)
+          } else {
+            ForEach(Array(0..<dayNumber), id: \.self) { dayPos in
+              let dayMinTemp = weather.forecast.daily?.temperature_2m_min?[dayPos] ?? 0
+              let dayMaxTemp = weather.forecast.daily?.temperature_2m_max?[dayPos] ?? 0
+              HStack {
+                Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0))
+                  .foregroundColor(Color(UIColor.label))
+                  .bold()
+                  .frame(width: 45, alignment: .leading)
+                Image(getWeatherIcon(pos: dayPos))
+                  .resizable()
+                  .scaledToFit()
+                  .frame(width: 30, height: 30)
+                VStack {
+                  Text(
+                    "\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") \(precipitationUnit)"
+                  )
+                  .font(.caption)
+                  .foregroundColor(Color(UIColor.label))
+                  .contentTransition(.numericText())
+                }
+                .frame(width: 50)
+                Text(roundTemperatureString(temperature: dayMinTemp))
+                  .frame(width: 37, alignment: .trailing)
+                  .contentTransition(.numericText())
+                TemperatureRangeView(
+                  low: dayMinTemp, high: dayMaxTemp,
+                  minTemp: temperatureScale.min, maxTemp: temperatureScale.max,
+                  unit: temperatureUnit
+                )
+                .frame(height: 5)
+                Text(roundTemperatureString(temperature: dayMaxTemp))
+                  .frame(width: 37, alignment: .leading)
+                  .contentTransition(.numericText())
+              }
+              .padding(.vertical, 4)
+            }
           }
         }
-      }
-      .padding(.horizontal, 20)
-      .padding(.vertical, 10)
-      .background(.thinMaterial)
-      .cornerRadius(10)
-      .overlay(
-        RoundedRectangle(cornerRadius: 10)
-          .stroke(Color(UIColor(.secondary.opacity(0.075))), lineWidth: 1)
-      )
-      .font(.system(size: 18))
-      .padding([.leading, .trailing])
-      .opacity(weather.isLoading ? 0.3 : 1.0)
-      .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+        .background(.thinMaterial)
+        .cornerRadius(10)
+        .overlay(
+          RoundedRectangle(cornerRadius: 10)
+            .stroke(Color(UIColor(.secondary.opacity(0.075))), lineWidth: 1)
+        )
+        .font(.system(size: 18))
+        .padding([.leading, .trailing])
+        .opacity(weather.isLoading ? 0.3 : 1.0)
+        .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
 
+      }
     }
+    .buttonStyle(.plain)
+    .disabled(!hasDailyDetailData)
+    .accessibilityLabel(Text("Tägliche Details"))
+    .accessibilityHint(Text("Öffnet die tägliche Ensemble-Vorhersage"))
     .scrollTransition { content, phase in
       content
         .opacity(phase.isIdentity ? 1 : 0.8)
-        .scaleEffect(phase.isIdentity ? 1 : 0.99)
-        .blur(radius: phase.isIdentity ? 0 : 0.5)
+        .scaleEffect(reduceMotion || phase.isIdentity ? 1 : 0.99)
+        .blur(radius: reduceMotion || phase.isIdentity ? 0 : 0.5)
+    }
+    .sensoryFeedback(.impact, trigger: detailPresentationCount)
+    .sheet(isPresented: $showDetailView) {
+      DailyDetailView()
     }
   }
 }
@@ -111,6 +124,10 @@ extension DailyView {
     ].min() ?? 0
 
     return min(availableCount, 12)
+  }
+
+  private var hasDailyDetailData: Bool {
+    dailyDisplayCount > 0 && !weather.isLoading
   }
 
   private var displayedTemperatureScale: (min: Double, max: Double) {
@@ -150,6 +167,12 @@ extension DailyView {
     default:
       return "09d"
     }
+  }
+
+  private func presentDetails() {
+    guard hasDailyDetailData else { return }
+    detailPresentationCount += 1
+    showDetailView = true
   }
 }
 

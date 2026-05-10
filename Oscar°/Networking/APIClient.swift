@@ -20,6 +20,7 @@ class APIClient {
   var openMeteo: Client
   var openMeteoAqi: Client
   var openMeteoGeo: Client
+  var openMeteoEnsemble: Client
   var brightsky: Client
   var canadaWeather: Client
   var rainViewer: Client
@@ -29,6 +30,7 @@ class APIClient {
     openMeteo = APIClient.get(url: try! Servers.server1())
     openMeteoAqi = APIClient.get(url: try! Servers.server2())
     openMeteoGeo = APIClient.get(url: try! Servers.server3())
+    openMeteoEnsemble = APIClient.get(url: URL(string: "https://ensemble-api.open-meteo.com")!)
     brightsky = APIClient.get(url: try! Servers.server4())
     canadaWeather = APIClient.get(url: try! Servers.server5())
     rainViewer = APIClient.get(url: try! Servers.server6())
@@ -204,6 +206,57 @@ class APIClient {
     case .undocumented(statusCode: _, _):
       return fallbackForecast
     }
+  }
+
+  func getDailyEnsembleForecast(
+    coordinates: CLLocationCoordinate2D,
+    model: DailyEnsembleModel = .ecmwfAIFS025Ensemble
+  ) async throws -> DailyEnsembleForecastResponse {
+    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
+    var components = URLComponents(string: "https://ensemble-api.open-meteo.com/v1/ensemble")!
+    components.queryItems = [
+      URLQueryItem(name: "latitude", value: String(outboundCoordinates.latitude)),
+      URLQueryItem(name: "longitude", value: String(outboundCoordinates.longitude)),
+      URLQueryItem(
+        name: "daily",
+        value: [
+          "temperature_2m_min",
+          "temperature_2m_max",
+          "precipitation_sum",
+          "wind_speed_10m_min",
+          "wind_speed_10m_max",
+          "wind_direction_10m_dominant",
+        ].joined(separator: ",")
+      ),
+      URLQueryItem(name: "models", value: model.rawValue),
+      URLQueryItem(name: "timezone", value: "auto"),
+      URLQueryItem(name: "forecast_days", value: "35"),
+    ]
+
+    guard let url = components.url else {
+      throw URLError(.badURL)
+    }
+
+    let cacheKey = url.absoluteString
+    let decoder = JSONDecoder()
+    if let cachedData = await DailyEnsembleForecastCache.shared.data(for: cacheKey) {
+      return try decoder.decode(DailyEnsembleForecastResponse.self, from: cachedData)
+    }
+
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    request.cachePolicy = .reloadIgnoringLocalCacheData
+    request.setValue(APIContactIdentity.userAgent, forHTTPHeaderField: "User-Agent")
+
+    let (data, response) = try await URLSession.shared.data(for: request)
+    guard let httpResponse = response as? HTTPURLResponse,
+      (200...299).contains(httpResponse.statusCode)
+    else {
+      throw URLError(.badServerResponse)
+    }
+
+    await DailyEnsembleForecastCache.shared.set(data, for: cacheKey)
+    return try decoder.decode(DailyEnsembleForecastResponse.self, from: data)
   }
 
   func getAlerts(coordinates: CLLocationCoordinate2D) async throws -> AlertResponse {

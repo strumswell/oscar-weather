@@ -25,7 +25,85 @@ servers:
     description: "Public Weather Service from Canada"
   - url: https://api.rainviewer.com
     description: "Public RainViewer endpoint"
+  - url: https://ensemble-api.open-meteo.com
+    description: "Public Open-Meteo ensemble endpoint"
 paths:
+  /v1/ensemble:
+    servers:
+      - url: https://ensemble-api.open-meteo.com
+    get:
+      operationId: getEnsembleForecast
+      tags:
+        - Weather Forecast APIs
+      summary: Daily ensemble weather forecast for coordinates
+      description: Daily ensemble weather variables for given WGS84 latitude and longitude coordinates.
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: number
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: number
+        - name: daily
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - temperature_2m_min
+                - temperature_2m_max
+                - precipitation_sum
+                - wind_speed_10m_min
+                - wind_speed_10m_max
+                - wind_direction_10m_dominant
+        - name: models
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - ecmwf_aifs025_ensemble
+              - ncep_aigefs025
+              - ncep_gefs05
+              - icon_global_eps
+              - icon_eu_eps
+        - name: timezone
+          in: query
+          schema:
+            type: string
+        - name: forecast_days
+          in: query
+          schema:
+            type: integer
+            enum:
+              - 35
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnsembleForecastResponse"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  reason:
+                    type: string
   /v1/forecast:
     servers:
       - url: https://api.open-meteo.com
@@ -1125,6 +1203,73 @@ components:
           type: array
           items:
             type: number
+      required:
+        - time
+    EnsembleForecastResponse:
+      type: object
+      properties:
+        latitude:
+          type: number
+        longitude:
+          type: number
+        generationtime_ms:
+          type: number
+        utc_offset_seconds:
+          type: integer
+        timezone:
+          type: string
+        timezone_abbreviation:
+          type: string
+        elevation:
+          type: number
+        daily_units:
+          type: object
+          additionalProperties:
+            type: string
+        daily:
+          $ref: "#/components/schemas/EnsembleDailyResponse"
+      required:
+        - daily
+    EnsembleDailyResponse:
+      type: object
+      description: Base daily fields plus optional dynamic ensemble member fields, for example temperature_2m_min_member01.
+      additionalProperties:
+        oneOf:
+          - type: array
+            items:
+              type: [number, null]
+          - type: array
+            items:
+              type: string
+      properties:
+        time:
+          type: array
+          items:
+            type: string
+        temperature_2m_min:
+          type: array
+          items:
+            type: [number, null]
+        temperature_2m_max:
+          type: array
+          items:
+            type: [number, null]
+        precipitation_sum:
+          type: array
+          items:
+            type: [number, null]
+        wind_speed_10m_min:
+          type: array
+          items:
+            type: [number, null]
+        wind_speed_10m_max:
+          type: array
+          items:
+            type: [number, null]
+        wind_direction_10m_dominant:
+          type: array
+          items:
+            type: [number, null]
       required:
         - time
     CurrentWeather:

@@ -31,18 +31,18 @@ static float3 atmosphereBaseSky(float horizon, float sunElevation, float cloudDe
 
     float3 day = atmosphereMix3(float3(0.20, 0.48, 0.86), float3(0.68, 0.84, 0.95), h);
     float3 golden = atmosphereMix3(float3(0.38, 0.56, 0.84), float3(0.98, 0.66, 0.48), h * 0.92);
-    float3 twilight = atmosphereMix3(float3(0.08, 0.13, 0.30), float3(0.72, 0.34, 0.30), h * 0.72);
-    float3 night = atmosphereMix3(float3(0.025, 0.045, 0.105), float3(0.055, 0.065, 0.13), h);
+    float3 twilight = atmosphereMix3(float3(0.05, 0.08, 0.22), float3(0.18, 0.13, 0.34), h * 0.60);
+    float3 night = atmosphereMix3(float3(0.022, 0.040, 0.095), float3(0.042, 0.052, 0.11), h);
 
     float3 color;
-    if (elevationDegrees >= 8.0) {
+    if (elevationDegrees >= 6.0) {
         color = day;
-    } else if (elevationDegrees >= -2.0) {
-        color = atmosphereMix3(golden, day, atmosphereSmoothstep(-2.0, 8.0, elevationDegrees));
-    } else if (elevationDegrees >= -10.0) {
-        color = atmosphereMix3(twilight, golden, atmosphereSmoothstep(-10.0, -2.0, elevationDegrees));
+    } else if (elevationDegrees >= 0.0) {
+        color = atmosphereMix3(golden, day, atmosphereSmoothstep(0.0, 6.0, elevationDegrees));
+    } else if (elevationDegrees >= -6.0) {
+        color = atmosphereMix3(twilight, golden, atmosphereSmoothstep(-6.0, 0.0, elevationDegrees));
     } else {
-        color = atmosphereMix3(night, twilight, atmosphereSmoothstep(-18.0, -10.0, elevationDegrees));
+        color = atmosphereMix3(night, twilight, atmosphereSmoothstep(-18.0, -6.0, elevationDegrees));
     }
 
     float gray = dot(color, float3(0.299, 0.587, 0.114));

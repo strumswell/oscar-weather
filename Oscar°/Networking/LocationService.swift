@@ -73,16 +73,33 @@ class LocationService: NSObject, CLLocationManagerDelegate  {
         return gpsLocation
     }
     
+    /// Ortsteil-level overrides for small villages that CLGeocoder collapses into their Gemeinde.
+    /// Each entry: (name, minLat, maxLat, minLon, maxLon) from OSM relation bounding boxes.
+    private static let localityOverrides: [(name: String, minLat: Double, maxLat: Double, minLon: Double, maxLon: Double)] = [
+        ("Hessen", 52.00414699991591, 52.02869882742752, 10.763293296975537, 10.797439784181817),
+    ]
+
+    private static func localityOverride(for coordinate: CLLocationCoordinate2D) -> String? {
+        localityOverrides.first {
+            coordinate.latitude >= $0.minLat && coordinate.latitude <= $0.maxLat &&
+            coordinate.longitude >= $0.minLon && coordinate.longitude <= $0.maxLon
+        }?.name
+    }
+
     /// Get current location name of the user's GPS reverse-geocoded cooridinates or city, if selected
     func getLocationName() async -> String {
         let selectedCity = city.getSelectedCity()
-        
+
         if (selectedCity !== nil) {
             return selectedCity!.label ?? ""
         }
-            
-        let geocoder = CLGeocoder()
+
         let coordinates = gpsLocation
+        if let override = LocationService.localityOverride(for: coordinates) {
+            return override
+        }
+
+        let geocoder = CLGeocoder()
         let location = CLLocation(latitude: coordinates.latitude, longitude: coordinates.longitude)
         do {
             let placemarks = try await geocoder.reverseGeocodeLocation(location)

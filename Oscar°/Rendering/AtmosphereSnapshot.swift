@@ -125,7 +125,7 @@ enum AtmosphereWeatherMapper {
         let timeOfDay = Float(((localTimestamp.truncatingRemainder(dividingBy: 86_400)) + 86_400)
             .truncatingRemainder(dividingBy: 86_400) / 86_400)
         let phase = daylightPhase(sunElevation: sunElevation)
-        let nightAmount = 1 - smoothstep(-18, -4, sunElevation * 180 / .pi)
+        let nightAmount = 1 - smoothstep(-12, 0, sunElevation * 180 / .pi)
         let cloudDensity = cloudDensityFor(
             condition: condition,
             cloudCoverage: cloudCoverage,
@@ -303,10 +303,10 @@ enum AtmosphereWeatherMapper {
 
     private static func daylightPhase(sunElevation: Float) -> Float {
         let degrees = sunElevation * 180 / .pi
-        if degrees >= 8 { return 1 }
-        if degrees >= -2 { return smoothstep(-2, 8, degrees) }
-        if degrees >= -8 { return 0.45 * smoothstep(-8, -2, degrees) }
-        if degrees >= -18 { return 0.15 * smoothstep(-18, -8, degrees) }
+        if degrees >= 6 { return 1 }
+        if degrees >= 0 { return smoothstep(0, 6, degrees) }
+        if degrees >= -6 { return 0.35 * smoothstep(-6, 0, degrees) }
+        if degrees >= -18 { return 0.1 * smoothstep(-18, -6, degrees) }
         return 0
     }
 
@@ -360,27 +360,27 @@ enum AtmosphereSampler {
         let dayHorizon = simd_float3(0.68, 0.84, 0.95)
         let goldenZenith = simd_float3(0.38, 0.56, 0.84)
         let goldenHorizon = simd_float3(0.98, 0.66, 0.48)
-        let twilightZenith = simd_float3(0.08, 0.13, 0.30)
-        let twilightHorizon = simd_float3(0.72, 0.34, 0.30)
-        let nightZenith = simd_float3(0.025, 0.045, 0.105)
-        let nightHorizon = simd_float3(0.055, 0.065, 0.13)
+        let twilightZenith = simd_float3(0.05, 0.08, 0.22)
+        let twilightHorizon = simd_float3(0.18, 0.13, 0.34)
+        let nightZenith = simd_float3(0.022, 0.040, 0.095)
+        let nightHorizon = simd_float3(0.042, 0.052, 0.11)
 
         let h = smoothstep(0, 1, horizonFactor)
         let day = mix(dayZenith, dayHorizon, t: h)
         let golden = mix(goldenZenith, goldenHorizon, t: h * 0.92)
-        let twilight = mix(twilightZenith, twilightHorizon, t: h * 0.72)
+        let twilight = mix(twilightZenith, twilightHorizon, t: h * 0.60)
         let night = mix(nightZenith, nightHorizon, t: h)
 
         let elevationDegrees = snapshot.sunElevation * 180 / .pi
         var color: simd_float3
-        if elevationDegrees >= 8 {
+        if elevationDegrees >= 6 {
             color = day
-        } else if elevationDegrees >= -2 {
-            color = mix(golden, day, t: smoothstep(-2, 8, elevationDegrees))
-        } else if elevationDegrees >= -10 {
-            color = mix(twilight, golden, t: smoothstep(-10, -2, elevationDegrees))
+        } else if elevationDegrees >= 0 {
+            color = mix(golden, day, t: smoothstep(0, 6, elevationDegrees))
+        } else if elevationDegrees >= -6 {
+            color = mix(twilight, golden, t: smoothstep(-6, 0, elevationDegrees))
         } else {
-            color = mix(night, twilight, t: smoothstep(-18, -10, elevationDegrees))
+            color = mix(night, twilight, t: smoothstep(-18, -6, elevationDegrees))
         }
 
         let gray = simd_float3(repeating: (color.x + color.y + color.z) / 3)
@@ -396,11 +396,15 @@ enum AtmosphereSampler {
 
     private static func cloudColor(snapshot: AtmosphereSnapshot, top: Bool) -> Color {
         let base = colorVector(for: color(for: snapshot, horizonFactor: top ? 0.32 : 0.62))
-        let bright = top ? simd_float3(0.92, 0.92, 0.90) : simd_float3(0.54, 0.56, 0.60)
-        let storm = top ? simd_float3(0.42, 0.44, 0.48) : simd_float3(0.15, 0.16, 0.20)
+        let nightDim = 1 - snapshot.nightAmount * 0.7
+        let bright = (top ? simd_float3(0.92, 0.92, 0.90) : simd_float3(0.54, 0.56, 0.60)) * nightDim
+        let storm = (top ? simd_float3(0.42, 0.44, 0.48) : simd_float3(0.15, 0.16, 0.20)) * nightDim
         let rain = mix(bright, storm, t: max(snapshot.precipitationIntensity, snapshot.thunderIntensity))
         let color = mix(bright, rain, t: snapshot.cloudDensity)
-        return rgbColor(clamp(mix(color, base, t: 0.28 + snapshot.nightAmount * 0.35)))
+        let elevDeg = snapshot.sunElevation * 180 / .pi
+        let sunsetProximity = 1 - min(1, abs(min(max(elevDeg, -6), 6)) / 6)
+        let tintFactor = 0.28 + snapshot.nightAmount * 0.4 + sunsetProximity * 0.32
+        return rgbColor(clamp(mix(color, base, t: tintFactor)))
     }
 
     private static func colorVector(for color: Color) -> simd_float3 {
