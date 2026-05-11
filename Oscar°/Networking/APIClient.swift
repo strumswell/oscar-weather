@@ -64,6 +64,8 @@ class APIClient {
         cloudcover: 0.0, time: 0.0, temperature: 0.0, windspeed: 0.0, wind_direction_10m: 0.0,
         weathercode: 0.0))
 
+    let windSpeedUnit = WindSpeedUnit(settingValue: settingService.settings?.windSpeedUnit)
+
     var query: Operations.getForecast.Input.Query = .init(
       latitude: outboundCoordinates.latitude,
       longitude: outboundCoordinates.longitude,
@@ -87,7 +89,7 @@ class APIClient {
       temperature_unit: Operations.getForecast.Input.Query.temperature_unitPayload(
         rawValue: settingService.settings?.temperatureUnit ?? "celsius"),
       windspeed_unit: Operations.getForecast.Input.Query.windspeed_unitPayload(
-        rawValue: settingService.settings?.windSpeedUnit ?? "kmh"),
+        rawValue: windSpeedUnit.apiRawValue),
       precipitation_unit: Operations.getForecast.Input.Query.precipitation_unitPayload(
         rawValue: settingService.settings?.precipitationUnit ?? "mm"),
       timeformat: .unixtime,
@@ -229,6 +231,10 @@ class APIClient {
         ].joined(separator: ",")
       ),
       URLQueryItem(name: "models", value: model.rawValue),
+      URLQueryItem(
+        name: "wind_speed_unit",
+        value: WindSpeedUnit(settingValue: settingService.settings?.windSpeedUnit).apiRawValue
+      ),
       URLQueryItem(name: "timezone", value: "auto"),
       URLQueryItem(name: "forecast_days", value: "35"),
     ]

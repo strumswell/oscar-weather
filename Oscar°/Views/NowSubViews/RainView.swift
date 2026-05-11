@@ -48,7 +48,7 @@ struct RainView: View {
                             )
                         ) {
                             VStack(alignment: .center) {
-                                Text(formatTimeToHHMM(date: rawSelectedDate))
+                                Text(SettingService.formattedTime(rawSelectedDate))
                                     .font(.system(size: 11)).foregroundStyle(.gray)
                                 VStack {
                                     Text(getNearestPrecipitation(for: rawSelectedDate)).bold().foregroundStyle(.blue)
@@ -103,10 +103,7 @@ struct RainView: View {
     }
     
     func getFormattedTime(time: Date?) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        formatter.dateStyle = .none
-        return formatter.string(from: time ?? Date())
+        SettingService.formattedTime(time ?? Date())
     }
     
     func getMaxPreci() -> Double {
@@ -127,9 +124,4 @@ struct RainView: View {
         return "\(Double(precipitation) / 10.0)"
     }
     
-    func formatTimeToHHMM(date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: date)
-    }
 }

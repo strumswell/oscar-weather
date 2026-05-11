@@ -3,22 +3,19 @@ import Foundation
 enum HourlyFormatting {
   static func hourString(timestamp: Double, timeZone: TimeZone) -> String {
     let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
-    var calendar = Calendar.current
-    calendar.timeZone = timeZone
-    let hours = calendar.component(.hour, from: date)
 
-    return String(format: "%02d %@", hours, String(localized: "Uhr"))
-      .trimmingCharacters(in: .whitespaces)
+    if SettingService.resolvedTimeFormatPreference == .h24 {
+      return "\(SettingService.formattedTime(date, timeZone: timeZone, showsMinutes: false)) \(String(localized: "Uhr"))"
+        .trimmingCharacters(in: .whitespaces)
+    }
+
+    return SettingService.formattedTime(date, timeZone: timeZone, showsMinutes: false)
   }
 
   static func timeString(timestamp: Double, timeZone: TimeZone) -> String {
     let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
-    var calendar = Calendar.current
-    calendar.timeZone = timeZone
-    let hours = calendar.component(.hour, from: date)
-    let minutes = calendar.component(.minute, from: date)
 
-    return String(format: "%02d:%02d", hours, minutes)
+    return SettingService.formattedTime(date, timeZone: timeZone)
   }
 
   static func weekdayString(timestamp: Double, timeZone: TimeZone) -> String {

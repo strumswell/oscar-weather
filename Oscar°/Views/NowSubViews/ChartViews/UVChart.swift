@@ -96,7 +96,7 @@ struct UVChart: View {
                         overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))
                     ) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(formatTimeToHHMM(date: selectedData.time))
+                            Text(SettingService.formattedTime(selectedData.time))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
 
@@ -136,8 +136,12 @@ struct UVChart: View {
         }
         .chartLegend(.hidden)
         .chartXAxis {
-            AxisMarks(values: .stride(by: .hour, count: 6)) {
-                AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .omitted)))
+            AxisMarks(values: .stride(by: .hour, count: 6)) { value in
+                AxisValueLabel {
+                    if let date = value.as(Date.self) {
+                        Text(HourlyChartUtilities.hourString(from: date))
+                    }
+                }
                 AxisGridLine()
                 AxisTick()
             }
@@ -188,9 +192,4 @@ struct UVChart: View {
         }
     }
 
-    private func formatTimeToHHMM(date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: date)
-    }
 }

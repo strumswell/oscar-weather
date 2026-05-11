@@ -89,6 +89,12 @@
         }
       }
     },
+    "12 Stunden" : {
+
+    },
+    "24 Stunden" : {
+
+    },
     "Aktuelle Temperatur und heute zu erwartende Temperaturen" : {
       "comment" : "LS Widget",
       "localizations" : {
@@ -112,8 +118,44 @@
         }
       }
     },
+    "Äste brechen, kleinere Schäden sind möglich." : {
+
+    },
+    "Bäume können entwurzeln, Gebäude können Schaden nehmen." : {
+
+    },
+    "Bäume schwanken, Gehen gegen den Wind wird mühsam." : {
+
+    },
+    "Blätter rascheln, Wind ist im Gesicht spürbar." : {
+
+    },
+    "Dicke Äste bewegen sich, Drähte können pfeifen." : {
+
+    },
+    "Dünne Zweige bewegen sich, Wimpel strecken sich." : {
+
+    },
     "E_compass" : {
       "comment" : "East"
+    },
+    "Frische Brise" : {
+
+    },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+
+    },
+    "Große Bäume bewegen sich, Zweige können brechen." : {
+
+    },
+    "Leichte Brise" : {
+
+    },
+    "Leiser Zug" : {
+
+    },
+    "Mäßige Brise" : {
+
     },
     "N_compass" : {
       "comment" : "North"
@@ -123,6 +165,18 @@
     },
     "NW_compass" : {
       "comment" : "North-West"
+    },
+    "Orkan" : {
+
+    },
+    "Orkanartiger Sturm" : {
+
+    },
+    "Rauch driftet leicht, Windfahnen bleiben ruhig." : {
+
+    },
+    "Rauch steigt fast senkrecht auf." : {
+
     },
     "Regen" : {
       "comment" : "LS Widget Regen",
@@ -173,11 +227,38 @@
     "S_compass" : {
       "comment" : "South"
     },
+    "Schwache Brise" : {
+
+    },
+    "Schwere Sturmschäden, im Binnenland selten." : {
+
+    },
+    "Schwere Verwüstungen, sehr selten im Landesinneren." : {
+
+    },
+    "Schwerer Sturm" : {
+
+    },
     "SE_compass" : {
       "comment" : "South-East"
     },
+    "Starker Wind" : {
+
+    },
+    "Steifer Wind" : {
+
+    },
+    "Sturm" : {
+
+    },
+    "Stürmischer Wind" : {
+
+    },
     "SW_compass" : {
       "comment" : "South-West"
+    },
+    "System" : {
+
     },
     "Temperatur" : {
       "comment" : "LS Temperatur",
@@ -204,6 +285,12 @@
     },
     "W_compass" : {
       "comment" : "West"
+    },
+    "Windstille" : {
+
+    },
+    "Zweige bewegen sich, loses Papier hebt ab." : {
+
     }
   },
   "version" : "1.0"

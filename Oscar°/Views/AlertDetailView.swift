@@ -132,11 +132,7 @@ extension AlertDetailView {
     }
     
     func formatDate(date: Date) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .short
-        dateFormatter.timeStyle = .short
-        dateFormatter.locale = Locale(identifier: "de")
-        return dateFormatter.string(from: date)
+        SettingService.formattedDateTime(date)
     }
     
     func parseISO8601Date(_ dateString: String) -> Date? {

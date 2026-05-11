@@ -10,11 +10,6 @@ import WidgetKit
 
 struct GlobalRadarEntryWidget: View {
     var entry: GlobalRadarProvider.Entry
-    let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter
-    }()
 
     var body: some View {
         ZStack {
@@ -33,7 +28,7 @@ struct GlobalRadarEntryWidget: View {
             
             VStack {
                 HStack {
-                    Text(dateFormatter.string(from: entry.date))
+                    Text(SettingService.formattedTime(entry.date))
                         .font(.footnote)
                         .foregroundColor(.white)
                         .padding(.horizontal, 5)

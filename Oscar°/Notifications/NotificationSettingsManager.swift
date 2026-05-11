@@ -180,6 +180,11 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
         await refreshAuthorizationStatus()
     }
 
+    func syncTimeFormatPreferenceUpdate() async {
+        notificationLogger.info("Lifecycle: time format preference changed; syncing subscription")
+        await syncSubscriptionForCurrentState(forceRegister: false)
+    }
+
     private var hasNotificationAuthorization: Bool {
         authorizationStatus == .authorized || authorizationStatus == .provisional || authorizationStatus == .ephemeral
     }
@@ -272,6 +277,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
             "locationName": cityName,
             "timezone": TimeZone.current.identifier,
             "language": language,
+            "timeFormat": SettingService.resolvedTimeFormatAPIValue,
             "apnsEnvironment": apnsEnvironment.rawValue,
         ]
         patchBody.merge(notificationSettingsPayload()) { _, new in new }
@@ -285,6 +291,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
             locationName: cityName,
             timezone: TimeZone.current.identifier,
             language: language,
+            timeFormat: SettingService.resolvedTimeFormatAPIValue,
             rainAlertsEnabled: rainAlertsEnabled,
             weatherAlertsEnabled: weatherAlertsEnabled,
             liveRainStatusEnabled: false,
@@ -444,6 +451,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
         let locationName: String
         let timezone: String
         let language: String
+        let timeFormat: String
         let rainAlertsEnabled: Bool
         let weatherAlertsEnabled: Bool
         let liveRainStatusEnabled: Bool

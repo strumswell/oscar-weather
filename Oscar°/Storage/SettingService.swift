@@ -2,11 +2,52 @@ import CoreData
 import SwiftUI
 import Combine
 
+enum TimeFormatPreference: String, CaseIterable, Identifiable {
+    case system
+    case h24
+    case h12
+
+    var id: String { rawValue }
+
+    var resolvedAPIValue: String {
+        switch self {
+        case .system:
+            return Self.systemResolvedAPIValue
+        case .h24:
+            return "h24"
+        case .h12:
+            return "h12"
+        }
+    }
+
+    var label: LocalizedStringKey {
+        switch self {
+        case .system:
+            return "System"
+        case .h24:
+            return "24 Stunden"
+        case .h12:
+            return "12 Stunden"
+        }
+    }
+
+    static var systemResolvedAPIValue: String {
+        let dateFormat = DateFormatter.dateFormat(
+            fromTemplate: "j",
+            options: 0,
+            locale: .autoupdatingCurrent
+        ) ?? ""
+        return dateFormat.contains("a") ? "h12" : "h24"
+    }
+}
+
 public class SettingService: ObservableObject {
     @Published var settings: Settings?
     private let context: NSManagedObjectContext
     private let pc = PersistenceController.shared
     private let nc = NotificationCenter.default
+    private static let timeFormatPreferenceKey = "timeFormatPreference"
+    private static let defaults = UserDefaults(suiteName: "group.cloud.bolte.Oscar") ?? .standard
 
     init() {
         self.context = pc.container.viewContext
@@ -86,5 +127,69 @@ public class SettingService: ObservableObject {
         settings?.precipitationUnit = unit
         save()
         nc.post(name: Notification.Name("UnitChanged"), object: nil)
+    }
+
+    var timeFormatPreference: TimeFormatPreference {
+        get {
+            let rawValue = Self.defaults.string(forKey: Self.timeFormatPreferenceKey)
+            return TimeFormatPreference(rawValue: rawValue ?? "") ?? .system
+        }
+        set {
+            objectWillChange.send()
+            Self.defaults.set(newValue.rawValue, forKey: Self.timeFormatPreferenceKey)
+            nc.post(name: Notification.Name("UnitChanged"), object: nil)
+        }
+    }
+
+    static var resolvedTimeFormatAPIValue: String {
+        resolvedTimeFormatPreference.resolvedAPIValue
+    }
+
+    static var resolvedTimeFormatPreference: TimeFormatPreference {
+        let rawValue = defaults.string(forKey: timeFormatPreferenceKey)
+        return TimeFormatPreference(rawValue: rawValue ?? "") ?? .system
+    }
+
+    static func formattedTime(
+        _ date: Date,
+        timeZone: TimeZone? = nil,
+        showsMinutes: Bool = true
+    ) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = .autoupdatingCurrent
+        if let timeZone {
+            formatter.timeZone = timeZone
+        }
+
+        switch resolvedTimeFormatPreference {
+        case .system:
+            formatter.dateStyle = .none
+            formatter.timeStyle = showsMinutes ? .short : .none
+            if !showsMinutes {
+                formatter.dateFormat = DateFormatter.dateFormat(
+                    fromTemplate: "j",
+                    options: 0,
+                    locale: .autoupdatingCurrent
+                )
+            }
+        case .h24:
+            formatter.dateFormat = showsMinutes ? "HH:mm" : "HH"
+        case .h12:
+            formatter.dateFormat = showsMinutes ? "h:mm a" : "h a"
+        }
+
+        return formatter.string(from: date)
+    }
+
+    static func formattedDateTime(_ date: Date, timeZone: TimeZone? = nil) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = .autoupdatingCurrent
+        dateFormatter.dateStyle = .short
+        dateFormatter.timeStyle = .none
+        if let timeZone {
+            dateFormatter.timeZone = timeZone
+        }
+
+        return "\(dateFormatter.string(from: date)), \(formattedTime(date, timeZone: timeZone))"
     }
 }

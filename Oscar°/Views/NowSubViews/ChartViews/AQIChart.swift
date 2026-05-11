@@ -94,8 +94,12 @@ struct AQIChart: View {
             }
             .chartLegend(.hidden)
             .chartXAxis {
-                AxisMarks(values: .stride(by: .hour, count: 6)) {
-                    AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .omitted)))
+                AxisMarks(values: .stride(by: .hour, count: 6)) { value in
+                    AxisValueLabel {
+            if let date = value.as(Date.self) {
+              Text(HourlyChartUtilities.hourString(from: date))
+            }
+          }
                     AxisGridLine()
                     AxisTick()
                 }
@@ -159,7 +163,7 @@ struct AQIChart: View {
                     overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))
                 ) {
                     AQIChartAnnotationView(
-                        time: formatTimeToHHMM(date: selectedData.time),
+                        time: SettingService.formattedTime(selectedData.time),
                         rows: annotationRows(for: selectedData)
                     )
                 }
@@ -307,11 +311,6 @@ struct AQIChart: View {
         "\(series)-\(isPast ? "past" : "future")"
     }
 
-    private func formatTimeToHHMM(date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: date)
-    }
 }
 
 private struct AQIChartAnnotationView: View {

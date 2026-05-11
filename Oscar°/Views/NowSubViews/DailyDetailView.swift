@@ -4,6 +4,7 @@ import SwiftUI
 struct DailyDetailView: View {
   @Environment(Location.self) private var location: Location
   @Environment(\.dismiss) private var dismiss
+  @ObservedObject private var settingsService = SettingService()
 
   @State private var detailModel = DetailModel()
   @State private var selectedSection: DailyDetailSection = .temperature
@@ -13,12 +14,24 @@ struct DailyDetailView: View {
     detailModel.response?.dayPoints ?? []
   }
 
+  private var windSpeedSetting: WindSpeedUnit {
+    WindSpeedUnit(settingValue: settingsService.settings?.windSpeedUnit)
+  }
+
+  private var windPoints: [DailyEnsembleDayPoint] {
+    guard windSpeedSetting.usesBeaufortDisplay else { return points }
+    return points.map { $0.convertingWindSpeedsToBeaufort() }
+  }
+
   private var temperatureUnit: String {
     detailModel.response?.dailyUnits["temperature_2m_min"] ?? "°C"
   }
 
   private var windSpeedUnit: String {
-    detailModel.response?.dailyUnits["wind_speed_10m_min"] ?? "km/h"
+    if windSpeedSetting.usesBeaufortDisplay {
+      return windSpeedSetting.displayUnit
+    }
+    return detailModel.response?.dailyUnits["wind_speed_10m_min"] ?? "km/h"
   }
 
   private var precipitationUnit: String {
@@ -27,6 +40,23 @@ struct DailyDetailView: View {
 
   private var currentCoordinate: CLLocationCoordinate2D {
     location.coordinates
+  }
+
+  private var modelContextText: String {
+    let model = detailModel.selectedModel
+
+    switch model {
+    case .ecmwfAIFS025Ensemble:
+      return String(localized: "AIFS eignet sich gut für mittelfristige Unsicherheit, lokale Details können geglättet wirken.")
+    case .ncepAIGFS025:
+      return String(localized: "AI GEFS ist ein guter Kompromiss für die nächsten ein bis zwei Wochen.")
+    case .ncepGEFS05:
+      return String(localized: "GEFS zeigt lange Trends, ist aber wegen des groben Gitters weniger lokal.")
+    case .iconGlobalEPS:
+      return String(localized: "ICON Global EPS passt für kurze bis mittlere Trends weltweit.")
+    case .iconEUEPS:
+      return String(localized: "ICON EU EPS ist für Europa feiner aufgelöst, reicht aber nur wenige Tage.")
+    }
   }
 
   var body: some View {
@@ -90,11 +120,13 @@ struct DailyDetailView: View {
           case .wind:
             windSection
             if !points.isEmpty {
-              DailyEnsembleWindSummaryCard(points: points, unit: windSpeedUnit)
+              DailyEnsembleWindSummaryCard(points: windPoints, unit: windSpeedUnit)
             }
           }
-          ensembleBasicsCard
-          modelAssessmentCard
+          ensembleContextCard
+          if section == .wind && windSpeedSetting.usesBeaufortDisplay {
+            BeaufortScaleInfoCard()
+          }
         }
         .padding()
       }
@@ -154,7 +186,7 @@ struct DailyDetailView: View {
         DailyDetailLoadingChart()
       } else {
         DailyEnsembleWindChart(
-          points: points,
+          points: windPoints,
           unit: windSpeedUnit
         )
       }
@@ -178,18 +210,23 @@ struct DailyDetailView: View {
     }
   }
 
-  private var ensembleBasicsCard: some View {
+  private var ensembleContextCard: some View {
     EnvironmentDetailCard {
       Text("Ensemble-Vorhersage")
         .font(.caption.weight(.semibold))
         .foregroundStyle(.secondary)
 
-      Text("Unsicherheit sichtbar machen")
-        .font(.system(size: 30, weight: .bold, design: .rounded))
+      Text("Unsicherheit & Modell")
+        .font(.headline.weight(.semibold))
         .foregroundStyle(.primary)
         .fixedSize(horizontal: false, vertical: true)
 
-      Text("Ein Ensemble vergleicht mehrere leicht unterschiedliche Modellläufe. Dadurch wird sichtbar, wie stabil oder unsicher die Vorhersage in den nächsten Tagen ist.")
+      Text(
+        String(
+          format: String(localized: "Mehrere Modellläufe zeigen, wie stabil die Vorhersage ist. %@"),
+          modelContextText
+        )
+      )
         .font(.subheadline)
         .foregroundStyle(.secondary)
 
@@ -199,24 +236,6 @@ struct DailyDetailView: View {
         detailPill(detailModel.selectedModel.region, color: .green)
       }
       .padding(.top, 2)
-    }
-  }
-
-  private var modelAssessmentCard: some View {
-    let model = detailModel.selectedModel
-
-    return EnvironmentDetailCard {
-      Text("Einordnung")
-        .font(.caption.weight(.semibold))
-        .foregroundStyle(.secondary)
-
-      Text("Wann dieses Modell passt")
-        .font(.headline.weight(.semibold))
-        .foregroundStyle(.primary)
-
-      Text(model.shortAssessment)
-        .font(.subheadline)
-        .foregroundStyle(.secondary)
     }
   }
 
@@ -313,5 +332,32 @@ private struct DailyDetailLoadingChart: View {
       ProgressView()
     }
     .frame(height: 220)
+  }
+}
+
+private extension DailyEnsembleDayPoint {
+  func convertingWindSpeedsToBeaufort() -> DailyEnsembleDayPoint {
+    DailyEnsembleDayPoint(
+      id: id,
+      date: date,
+      temperatureMin: temperatureMin,
+      temperatureMax: temperatureMax,
+      temperatureMinMemberLow: temperatureMinMemberLow,
+      temperatureMinMemberHigh: temperatureMinMemberHigh,
+      temperatureMaxMemberLow: temperatureMaxMemberLow,
+      temperatureMaxMemberHigh: temperatureMaxMemberHigh,
+      precipitationSum: precipitationSum,
+      precipitationSumMemberLow: precipitationSumMemberLow,
+      precipitationSumMemberHigh: precipitationSumMemberHigh,
+      windSpeedMin: BeaufortScale.value(forKilometersPerHour: windSpeedMin),
+      windSpeedMax: BeaufortScale.value(forKilometersPerHour: windSpeedMax),
+      windSpeedMinMemberLow: BeaufortScale.value(forKilometersPerHour: windSpeedMinMemberLow),
+      windSpeedMinMemberHigh: BeaufortScale.value(forKilometersPerHour: windSpeedMinMemberHigh),
+      windSpeedMaxMemberLow: BeaufortScale.value(forKilometersPerHour: windSpeedMaxMemberLow),
+      windSpeedMaxMemberHigh: BeaufortScale.value(forKilometersPerHour: windSpeedMaxMemberHigh),
+      windDirection: windDirection,
+      windDirectionMemberLow: windDirectionMemberLow,
+      windDirectionMemberHigh: windDirectionMemberHigh
+    )
   }
 }

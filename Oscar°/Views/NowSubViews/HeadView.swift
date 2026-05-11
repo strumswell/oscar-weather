@@ -11,7 +11,18 @@ struct HeadView: View {
   @Namespace private var transition
   @Environment(Weather.self) private var weather: Weather
   @Environment(Location.self) private var location: Location
+  @ObservedObject private var settingsService = SettingService()
   @State private var isLocationSheetPresented = false
+
+  private var windSpeedUnit: WindSpeedUnit {
+    WindSpeedUnit(settingValue: settingsService.settings?.windSpeedUnit)
+  }
+
+  private var currentWindSpeed: Double? {
+    let speed = weather.forecast.current?.windspeed
+    guard windSpeedUnit.usesBeaufortDisplay else { return speed }
+    return BeaufortScale.value(forKilometersPerHour: speed)
+  }
 
   var body: some View {
     HStack {
@@ -82,9 +93,7 @@ struct HeadView: View {
         Image(systemName: "wind")
           .frame(width: 30, height: 30)
           .foregroundColor(Color(UIColor.label))
-        Text(
-          "\(weather.forecast.current?.windspeed ?? 0, specifier: "%.1f") \(weather.forecast.hourly_units?.windspeed_10m ?? "km/h")"
-        )
+        Text(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h"))
         .foregroundColor(Color(UIColor.label))
         .contentTransition(.numericText())
         Image(systemName: "location")

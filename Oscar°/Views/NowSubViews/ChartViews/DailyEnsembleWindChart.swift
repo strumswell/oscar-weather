@@ -254,8 +254,7 @@ struct DailyEnsembleWindChart: View {
   }
 
   private func formatted(_ value: Double?) -> String {
-    guard let value else { return "--" }
-    return "\(String(format: "%.1f", value)) \(unit)"
+    WindSpeedFormatter.string(value, unit: unit)
   }
 
   private func invertWindDirection(_ degrees: Double) -> Double {

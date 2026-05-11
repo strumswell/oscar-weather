@@ -163,7 +163,11 @@ struct PrecipitationChart: View {
       ])
       .chartXAxis {
         AxisMarks(values: .stride(by: .hour, count: 6)) { value in
-          AxisValueLabel(format: .dateTime.hour(.twoDigits(amPM: .omitted)))
+          AxisValueLabel {
+            if let date = value.as(Date.self) {
+              Text(HourlyChartUtilities.hourString(from: date))
+            }
+          }
           AxisGridLine()
           AxisTick()
         }

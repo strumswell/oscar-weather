@@ -202,28 +202,28 @@ struct WindChart: View {
                         .frame(width: 8, height: 8)
                         .rotationEffect(.degrees(invertWindDirection(selectedData.direction10m)))
                         .foregroundStyle(.white)
-                      Text("\(selectedData.speed10m, specifier: "%.1f") \(unit) (10m)")
+                      Text("\(formatted(selectedData.speed10m)) (10m)")
                         .font(.caption2)
                         .foregroundStyle(.white)
                     }
                     
                     HStack(spacing: 4) {
                       Circle().fill(.teal.opacity(0.7)).frame(width: 6, height: 6)
-                      Text("\(selectedData.speed80m, specifier: "%.1f") \(unit) (80m)")
+                      Text("\(formatted(selectedData.speed80m)) (80m)")
                         .font(.caption2)
                         .foregroundStyle(.white)
                     }
                     
                     HStack(spacing: 4) {
                       Circle().fill(.teal.opacity(0.5)).frame(width: 6, height: 6)
-                      Text("\(selectedData.speed120m, specifier: "%.1f") \(unit) (120m)")
+                      Text("\(formatted(selectedData.speed120m)) (120m)")
                         .font(.caption2)
                         .foregroundStyle(.white)
                     }
                     
                     HStack(spacing: 4) {
                       Circle().fill(.teal.opacity(0.3)).frame(width: 6, height: 6)
-                      Text("\(selectedData.speed180m, specifier: "%.1f") \(unit) (180m)")
+                      Text("\(formatted(selectedData.speed180m)) (180m)")
                         .font(.caption2)
                         .foregroundStyle(.white)
                     }
@@ -265,7 +265,11 @@ struct WindChart: View {
       ])
       .chartXAxis {
         AxisMarks(values: .stride(by: .hour, count: 6)) { value in
-          AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .omitted)))
+          AxisValueLabel {
+            if let date = value.as(Date.self) {
+              Text(HourlyChartUtilities.hourString(from: date))
+            }
+          }
           AxisGridLine()
           AxisTick()
         }
@@ -280,6 +284,10 @@ struct WindChart: View {
 
   private func invertWindDirection(_ direction: Double) -> Double {
     return (direction + 180).truncatingRemainder(dividingBy: 360)
+  }
+
+  private func formatted(_ value: Double?) -> String {
+    WindSpeedFormatter.string(value, unit: unit)
   }
   
   /// Gets the nearest comprehensive wind data for a selected date

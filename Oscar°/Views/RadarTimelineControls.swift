@@ -164,7 +164,7 @@ struct OscarRadarTimelineControls: View {
         guard let timestamp,
               let date = ISO8601DateFormatter.parseRadarDate(timestamp)
         else { return "--:--" }
-        return DateFormatter.shortTime.string(from: date)
+        return SettingService.formattedTime(date)
     }
 
     private func day(from timestamp: String?) -> String {
@@ -204,7 +204,7 @@ struct RadarTimestampBadge: View {
 
     private var formattedTime: String {
         guard let date = ISO8601DateFormatter.parseRadarDate(timestamp) else { return "--:--" }
-        return DateFormatter.shortTime.string(from: date)
+        return SettingService.formattedTime(date)
     }
 }
 
@@ -253,13 +253,6 @@ extension ISO8601DateFormatter {
 }
 
 extension DateFormatter {
-    static let shortTime: DateFormatter = {
-        let f = DateFormatter()
-        f.dateStyle = .none
-        f.timeStyle = .short
-        return f
-    }()
-
     static let shortDay: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "EEEE"
@@ -420,7 +413,7 @@ struct WeatherTileTimelineControls: View {
 
     private func timeFrom(_ ts: String?) -> String {
         guard let ts, let date = ISO8601DateFormatter.parseRadarDate(ts) else { return "--:--" }
-        return DateFormatter.shortTime.string(from: date)
+        return SettingService.formattedTime(date)
     }
 
     private func dayFrom(_ ts: String?) -> String {

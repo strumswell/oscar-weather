@@ -29,6 +29,7 @@ struct UnitSettings: View {
                     Text("m/s").tag("ms")
                     Text("mph").tag("mph")
                     Text("kn").tag("kn")
+                    Text("Bft").tag("bft")
                 }
                 
                 Picker(String(localized: "Niederschlag"), selection: Binding(
@@ -37,6 +38,20 @@ struct UnitSettings: View {
                 )) {
                     Text("mm").tag("mm")
                     Text("inch").tag("inch")
+                }
+
+                Picker(String(localized: "Zeitformat"), selection: Binding(
+                    get: { settingsService.timeFormatPreference },
+                    set: { preference in
+                        settingsService.timeFormatPreference = preference
+                        Task {
+                            await NotificationSettingsManager.shared.syncTimeFormatPreferenceUpdate()
+                        }
+                    }
+                )) {
+                    ForEach(TimeFormatPreference.allCases) { preference in
+                        Text(preference.label).tag(preference)
+                    }
                 }
             }
         }

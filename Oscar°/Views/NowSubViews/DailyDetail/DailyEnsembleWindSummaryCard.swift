@@ -71,7 +71,7 @@ struct DailyEnsembleWindSummaryCard: View {
       statRow(
         label: "Unsicherster Tag",
         subtitle: "Windböen",
-        value: fuzziestMaxDay.map { "±\(String(format: "%.1f", $0.span / 2)) \(unit)" } ?? "--",
+        value: fuzziestMaxDay.map { uncertainty($0.span / 2) } ?? "--",
         valueColor: .orange,
         date: fuzziestMaxDay.map { shortDate($0.point.date) }
       )
@@ -79,7 +79,7 @@ struct DailyEnsembleWindSummaryCard: View {
       statRow(
         label: "Unsicherster Tag",
         subtitle: "Windstillen",
-        value: fuzziestMinDay.map { "±\(String(format: "%.1f", $0.span / 2)) \(unit)" } ?? "--",
+        value: fuzziestMinDay.map { uncertainty($0.span / 2) } ?? "--",
         valueColor: .orange,
         date: fuzziestMinDay.map { shortDate($0.point.date) }
       )
@@ -87,7 +87,7 @@ struct DailyEnsembleWindSummaryCard: View {
       statRow(
         label: "Ø Bandbreite",
         subtitle: "Windböen",
-        value: avgMaxSpan.map { "\(String(format: "%.1f", $0)) \(unit)" } ?? "--",
+        value: avgMaxSpan.map { WindSpeedFormatter.string($0, unit: unit) } ?? "--",
         valueColor: .secondary,
         date: nil
       )
@@ -95,7 +95,7 @@ struct DailyEnsembleWindSummaryCard: View {
       statRow(
         label: "Ø Bandbreite",
         subtitle: "Windstillen",
-        value: avgMinSpan.map { "\(String(format: "%.1f", $0)) \(unit)" } ?? "--",
+        value: avgMinSpan.map { WindSpeedFormatter.string($0, unit: unit) } ?? "--",
         valueColor: .secondary,
         date: nil
       )
@@ -103,8 +103,11 @@ struct DailyEnsembleWindSummaryCard: View {
   }
 
   private func formatted(_ value: Double?) -> String {
-    guard let value else { return "--" }
-    return "\(String(format: "%.1f", value)) \(unit)"
+    WindSpeedFormatter.string(value, unit: unit)
+  }
+
+  private func uncertainty(_ value: Double) -> String {
+    "±\(WindSpeedFormatter.string(value, unit: unit))"
   }
 
   private func shortDate(_ date: Date) -> String {

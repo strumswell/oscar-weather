@@ -176,7 +176,7 @@ private extension RainRadarActivityAttributes.ContentState {
     }
 
     func footerText(isStale: Bool) -> String {
-        let date = DateFormatter.liveActivityTime.string(from: lastObservedDate)
+        let date = SettingService.formattedTime(lastObservedDate)
         if isStale {
             return String(localized: "Last radar update \(date)")
         }
@@ -188,14 +188,6 @@ private extension RainRadarActivityAttributes.ContentState {
     }
 }
 
-private extension DateFormatter {
-    static let liveActivityTime: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter
-    }()
-}
-
 private extension ISO8601DateFormatter {
     static let liveActivity: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
@@ -203,4 +195,3 @@ private extension ISO8601DateFormatter {
         return formatter
     }()
 }
-

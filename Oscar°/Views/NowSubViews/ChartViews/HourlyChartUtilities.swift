@@ -24,7 +24,11 @@ enum HourlyChartUtilities {
     }
 
     static func timeString(from date: Date) -> String {
-        date.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits))
+        SettingService.formattedTime(date)
+    }
+
+    static func hourString(from date: Date) -> String {
+        SettingService.formattedTime(date, showsMinutes: false)
     }
 
     static func ticks(from minValue: Double, to maxValue: Double, count: Int) -> [Double] {

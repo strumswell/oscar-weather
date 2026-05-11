@@ -11,11 +11,6 @@
         @Environment(\.widgetRenderingMode) var widgetRenderingMode
 
         var entry: RadarProvider.Entry
-        let dateFormatter: DateFormatter = {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "HH:mm"
-            return formatter
-        }()
 
         var body: some View {
             ZStack(alignment: .center) {
@@ -33,7 +28,7 @@
 
                 VStack {
                     HStack {
-                        Text(dateFormatter.string(from: entry.frameDate))
+                        Text(SettingService.formattedTime(entry.frameDate))
                             .font(.footnote)
                             .foregroundColor(.white)
                             .padding(.horizontal, 5)

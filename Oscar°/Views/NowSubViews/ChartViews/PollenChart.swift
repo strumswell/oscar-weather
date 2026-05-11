@@ -132,7 +132,7 @@ struct PollenChart: View {
 
                             if !selectedRows.isEmpty {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(formatTimeToHHMM(date: selectedRows[0].time))
+                                    Text(SettingService.formattedTime(selectedRows[0].time))
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
 
@@ -175,8 +175,12 @@ struct PollenChart: View {
             }
             .chartLegend(.hidden)
             .chartXAxis {
-                AxisMarks(values: .stride(by: .hour, count: 6)) {
-                    AxisValueLabel(format: .dateTime.hour(.defaultDigits(amPM: .omitted)))
+                AxisMarks(values: .stride(by: .hour, count: 6)) { value in
+                    AxisValueLabel {
+            if let date = value.as(Date.self) {
+              Text(HourlyChartUtilities.hourString(from: date))
+            }
+          }
                     AxisGridLine()
                     AxisTick()
                 }
@@ -280,11 +284,6 @@ struct PollenChart: View {
         "\(label)-\(isPast ? "past" : "future")"
     }
 
-    private func formatTimeToHHMM(date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: date)
-    }
 }
 
 private struct PollenChartLegendView: View {

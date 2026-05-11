@@ -3,6 +3,7 @@ import SwiftUI
 struct HourlyDetailView: View {
     @Environment(Weather.self) private var weather: Weather
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var settingsService = SettingService()
 
     @State private var chartScrollPosition = Date.now
     @State private var didSetInitialChartPosition = false
@@ -31,6 +32,10 @@ struct HourlyDetailView: View {
     private var referenceDate: Date {
         guard let currentIndex else { return Date.now }
         return Date(timeIntervalSince1970: time[currentIndex])
+    }
+
+    private var windSpeedUnit: WindSpeedUnit {
+        WindSpeedUnit(settingValue: settingsService.settings?.windSpeedUnit)
     }
 
     private var initialChartScrollPosition: Date {
@@ -114,6 +119,9 @@ struct HourlyDetailView: View {
         case .wind:
             windSection
             pressureSection
+            if windSpeedUnit.usesBeaufortDisplay {
+                BeaufortScaleInfoCard()
+            }
         case .ground:
             soilTemperatureSection
             soilMoistureSection
@@ -197,33 +205,39 @@ struct HourlyDetailView: View {
     }
 
     private var windSection: some View {
-        let windspeed10m = weather.forecast.hourly?.windspeed_10m ?? []
-        let windspeed80m = weather.forecast.hourly?.windspeed_80m ?? []
-        let windspeed120m = weather.forecast.hourly?.windspeed_120m ?? []
-        let windspeed180m = (weather.forecast.hourly?.windspeed_180m ?? []).map { $0 ?? 0 }
+        let rawWindspeed10m = weather.forecast.hourly?.windspeed_10m ?? []
+        let rawWindspeed80m = weather.forecast.hourly?.windspeed_80m ?? []
+        let rawWindspeed120m = weather.forecast.hourly?.windspeed_120m ?? []
+        let rawWindspeed180m = (weather.forecast.hourly?.windspeed_180m ?? []).map { $0 ?? 0 }
+        let windspeed10m = displayedWindSpeeds(rawWindspeed10m)
+        let windspeed80m = displayedWindSpeeds(rawWindspeed80m)
+        let windspeed120m = displayedWindSpeeds(rawWindspeed120m)
+        let windspeed180m = displayedWindSpeeds(rawWindspeed180m)
         let winddirection10m = weather.forecast.hourly?.winddirection_10m ?? []
-        let unit = weather.forecast.hourly_units?.windspeed_10m ?? "km/h"
+        let unit = windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h"
         let currentDirection = currentValue(from: winddirection10m)
 
-        return HourlyDetailChartCard(
-            title: "Wind",
-            value: formatted(currentValue(from: windspeed10m), decimals: 1, unit: unit),
-            badge: currentDirection.map { LocalizedStringKey(windDirectionName(for: $0)) } ?? "Keine Daten",
-            color: .teal,
-            subtitle: "Windgeschwindigkeit in mehreren Höhen"
-        ) {
-            WindChart(
-                windspeed10m: windspeed10m,
-                windspeed80m: windspeed80m,
-                windspeed120m: windspeed120m,
-                windspeed180m: windspeed180m,
-                winddirection10m: winddirection10m,
-                time: time,
-                unit: unit,
-                maxTimeRange: maxTimeRange,
-                referenceDate: referenceDate
-            )
-            .chartScrollPosition(x: $chartScrollPosition)
+        return VStack(alignment: .leading, spacing: 16) {
+            HourlyDetailChartCard(
+                title: "Wind",
+                value: WindSpeedFormatter.string(currentValue(from: windspeed10m), unit: unit),
+                badge: currentDirection.map { LocalizedStringKey(windDirectionName(for: $0)) } ?? "Keine Daten",
+                color: .teal,
+                subtitle: "Windgeschwindigkeit in mehreren Höhen"
+            ) {
+                WindChart(
+                    windspeed10m: windspeed10m,
+                    windspeed80m: windspeed80m,
+                    windspeed120m: windspeed120m,
+                    windspeed180m: windspeed180m,
+                    winddirection10m: winddirection10m,
+                    time: time,
+                    unit: unit,
+                    maxTimeRange: maxTimeRange,
+                    referenceDate: referenceDate
+                )
+                .chartScrollPosition(x: $chartScrollPosition)
+            }
         }
     }
 
@@ -365,6 +379,11 @@ struct HourlyDetailView: View {
 
     private func formatted(_ value: Double, decimals: Int, unit: String) -> String {
         String(format: "%.\(decimals)f %@", value, unit)
+    }
+
+    private func displayedWindSpeeds(_ values: [Double]) -> [Double] {
+        guard windSpeedUnit.usesBeaufortDisplay else { return values }
+        return BeaufortScale.convertedValues(fromKilometersPerHour: values)
     }
 
     private func apparentTemperatureBadge(for apparentTemperature: Double?, unit: String) -> LocalizedStringKey {
