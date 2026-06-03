@@ -37,6 +37,14 @@ struct LegalView: View {
             Divider()
 
             settingsNavigationLink {
+              ForecastSettingsView()
+            } label: {
+              ForecastSettingsLabel()
+            }
+
+            Divider()
+
+            settingsNavigationLink {
               AppIconSettingsView()
             } label: {
               AppIconSettingsLabel()

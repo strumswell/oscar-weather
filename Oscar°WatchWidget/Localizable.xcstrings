@@ -127,6 +127,9 @@
     "Bäume schwanken, Gehen gegen den Wind wird mühsam." : {
 
     },
+    "Benutzerdefiniert" : {
+
+    },
     "Blätter rascheln, Wind ist im Gesicht spürbar." : {
 
     },
@@ -142,10 +145,13 @@
     "Frische Brise" : {
 
     },
+    "Große Bäume bewegen sich, Zweige können brechen." : {
+
+    },
     "Größere Zweige und kleine Bäume bewegen sich." : {
 
     },
-    "Große Bäume bewegen sich, Zweige können brechen." : {
+    "Im Tagesverlauf markieren" : {
 
     },
     "Leichte Brise" : {
@@ -242,6 +248,9 @@
     "SE_compass" : {
       "comment" : "South-East"
     },
+    "Sonnenaufgang bis Sonnenuntergang" : {
+
+    },
     "Starker Wind" : {
 
     },
@@ -285,6 +294,9 @@
     },
     "W_compass" : {
       "comment" : "West"
+    },
+    "Werte ersetzen" : {
+
     },
     "Windstille" : {
 

@@ -1211,6 +1211,29 @@
         }
       }
     },
+    "Benutzerdefiniert" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benutzerdefiniert"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel"
+          }
+        }
+      }
+    },
     "Beta User" : {
       "localizations" : {
         "tr" : {
@@ -1825,6 +1848,29 @@
         }
       }
     },
+    "Ende" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ende"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bitiş"
+          }
+        }
+      }
+    },
     "Ensemble-Details" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2413,23 +2459,6 @@
         }
       }
     },
-    "Große Bäume bewegen sich, Zweige können brechen." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Large trees move and branches can break."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
-          }
-        }
-      }
-    },
     "Größere Zweige und kleine Bäume bewegen sich." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2443,6 +2472,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
+          }
+        }
+      }
+    },
+    "Große Bäume bewegen sich, Zweige können brechen." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Large trees move and branches can break."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
           }
         }
       }
@@ -2624,6 +2670,50 @@
         }
       }
     },
+    "Tageswerte begrenzen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tageswerte begrenzen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limit daily values"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlük değerleri sınırla"
+          }
+        }
+      }
+    },
+    "Begrenzt Hoch/Tief auf einen Zeitraum, z. B. für relevantere Tiefstwerte nach Sonnenaufgang." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Begrenzt Hoch/Tief auf einen Zeitraum, z. B. für relevantere Tiefstwerte nach Sonnenaufgang."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limits high/low to a time period, for example to make lows after sunrise more relevant."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En yüksek/en düşük değerleri bir zaman aralığıyla sınırlar; örneğin güneş doğduktan sonraki düşük değerleri daha anlamlı hale getirir."
+          }
+        }
+      }
+    },
     "Hohe gesundheitliche Gefährdung, Schutzmaßnahmen sind erforderlich." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2686,6 +2776,29 @@
     },
     "IFS & AIFS - ECMWF" : {
       "shouldTranslate" : false
+    },
+    "Im Tagesverlauf markieren" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Tagesverlauf markieren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark in daily range"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlük aralıkta işaretle"
+          }
+        }
+      }
     },
     "Impressum" : {
       "extractionState" : "manual",
@@ -5081,6 +5194,29 @@
         }
       }
     },
+    "Sonnenaufgang bis Sonnenuntergang" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonnenaufgang bis Sonnenuntergang"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunrise to sunset"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gün doğumundan gün batımına"
+          }
+        }
+      }
+    },
     "Sonnig" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5214,6 +5350,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "En Yağışlı Gün"
+          }
+        }
+      }
+    },
+    "Start" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başlangıç"
           }
         }
       }
@@ -5984,6 +6143,28 @@
         }
       }
     },
+    "Vorhersage" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorhersage"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forecast"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tahmin"
+          }
+        }
+      }
+    },
     "W_compass" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6003,6 +6184,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "B"
+          }
+        }
+      }
+    },
+    "Wähle, ob die Tageswerte ersetzt oder im 24-Stunden-Bereich markiert werden." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle, ob die Tageswerte ersetzt oder im 24-Stunden-Bereich markiert werden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose whether daytime values replace the daily values or are marked within the 24-hour range."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gündüz değerlerinin günlük değerlerin yerine geçmesini veya 24 saatlik aralıkta işaretlenmesini seç."
           }
         }
       }
@@ -6139,6 +6342,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uzay"
+          }
+        }
+      }
+    },
+    "Werte ersetzen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Werte ersetzen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace values"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Değerleri değiştir"
           }
         }
       }
@@ -6364,6 +6590,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saat"
+          }
+        }
+      }
+    },
+    "Zeitraum" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeitraum"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Range"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aralık"
           }
         }
       }

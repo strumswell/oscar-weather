@@ -47,6 +47,11 @@ public class SettingService: ObservableObject {
     private let pc = PersistenceController.shared
     private let nc = NotificationCenter.default
     private static let timeFormatPreferenceKey = "timeFormatPreference"
+    private static let dailyForecastDaytimeTemperaturesEnabledKey = "dailyForecastDaytimeTemperaturesEnabled"
+    private static let dailyForecastDaytimeTemperatureDisplayModeKey = "dailyForecastDaytimeTemperatureDisplayMode"
+    private static let dailyForecastDaytimeTemperatureRangeModeKey = "dailyForecastDaytimeTemperatureRangeMode"
+    private static let dailyForecastDaytimeCustomStartHourKey = "dailyForecastDaytimeCustomStartHour"
+    private static let dailyForecastDaytimeCustomEndHourKey = "dailyForecastDaytimeCustomEndHour"
     private static let defaults = UserDefaults(suiteName: "group.cloud.bolte.Oscar") ?? .standard
 
     init() {
@@ -141,6 +146,76 @@ public class SettingService: ObservableObject {
         }
     }
 
+    var dailyForecastDaytimeTemperaturesEnabled: Bool {
+        get {
+            Self.defaults.bool(forKey: Self.dailyForecastDaytimeTemperaturesEnabledKey)
+        }
+        set {
+            objectWillChange.send()
+            Self.defaults.set(newValue, forKey: Self.dailyForecastDaytimeTemperaturesEnabledKey)
+            nc.post(name: Notification.Name("UnitChanged"), object: nil)
+        }
+    }
+
+    var dailyForecastDaytimeTemperatureDisplayMode: ForecastDaytimeTemperatureDisplayMode {
+        get {
+            let rawValue = Self.defaults.string(forKey: Self.dailyForecastDaytimeTemperatureDisplayModeKey)
+            return ForecastDaytimeTemperatureDisplayMode(rawValue: rawValue ?? "") ?? .replaceValues
+        }
+        set {
+            objectWillChange.send()
+            Self.defaults.set(newValue.rawValue, forKey: Self.dailyForecastDaytimeTemperatureDisplayModeKey)
+            nc.post(name: Notification.Name("UnitChanged"), object: nil)
+        }
+    }
+
+    var dailyForecastDaytimeTemperatureRangeMode: ForecastDaytimeTemperatureRangeMode {
+        get {
+            let rawValue = Self.defaults.string(forKey: Self.dailyForecastDaytimeTemperatureRangeModeKey)
+            return ForecastDaytimeTemperatureRangeMode(rawValue: rawValue ?? "") ?? .sunriseSunset
+        }
+        set {
+            objectWillChange.send()
+            Self.defaults.set(newValue.rawValue, forKey: Self.dailyForecastDaytimeTemperatureRangeModeKey)
+            nc.post(name: Notification.Name("UnitChanged"), object: nil)
+        }
+    }
+
+    var dailyForecastDaytimeCustomStartHour: Int {
+        guard Self.defaults.object(forKey: Self.dailyForecastDaytimeCustomStartHourKey) != nil else {
+            return 9
+        }
+
+        return Self.clampedHour(Self.defaults.integer(forKey: Self.dailyForecastDaytimeCustomStartHourKey))
+    }
+
+    var dailyForecastDaytimeCustomEndHour: Int {
+        guard Self.defaults.object(forKey: Self.dailyForecastDaytimeCustomEndHourKey) != nil else {
+            return 18
+        }
+
+        return Self.clampedHour(Self.defaults.integer(forKey: Self.dailyForecastDaytimeCustomEndHourKey))
+    }
+
+    func updateDailyForecastDaytimeCustomStartHour(_ hour: Int) {
+        let startHour = Self.clampedHour(hour)
+        let endHour = max(startHour, dailyForecastDaytimeCustomEndHour)
+        updateDailyForecastDaytimeCustomHours(startHour: startHour, endHour: endHour)
+    }
+
+    func updateDailyForecastDaytimeCustomEndHour(_ hour: Int) {
+        let endHour = Self.clampedHour(hour)
+        let startHour = min(dailyForecastDaytimeCustomStartHour, endHour)
+        updateDailyForecastDaytimeCustomHours(startHour: startHour, endHour: endHour)
+    }
+
+    private func updateDailyForecastDaytimeCustomHours(startHour: Int, endHour: Int) {
+        objectWillChange.send()
+        Self.defaults.set(startHour, forKey: Self.dailyForecastDaytimeCustomStartHourKey)
+        Self.defaults.set(endHour, forKey: Self.dailyForecastDaytimeCustomEndHourKey)
+        nc.post(name: Notification.Name("UnitChanged"), object: nil)
+    }
+
     static var resolvedTimeFormatAPIValue: String {
         resolvedTimeFormatPreference.resolvedAPIValue
     }
@@ -148,6 +223,10 @@ public class SettingService: ObservableObject {
     static var resolvedTimeFormatPreference: TimeFormatPreference {
         let rawValue = defaults.string(forKey: timeFormatPreferenceKey)
         return TimeFormatPreference(rawValue: rawValue ?? "") ?? .system
+    }
+
+    private static func clampedHour(_ hour: Int) -> Int {
+        min(max(hour, 0), 23)
     }
 
     static func formattedTime(

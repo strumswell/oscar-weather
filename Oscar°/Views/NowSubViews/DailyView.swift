@@ -3,6 +3,7 @@ import SwiftUI
 struct DailyView: View {
   @Environment(Weather.self) private var weather: Weather
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @ObservedObject private var settingsService = SettingService()
   @State private var showDetailView = false
   @State private var detailPresentationCount = 0
 
@@ -32,8 +33,7 @@ struct DailyView: View {
             }
           } else {
             ForEach(Array(0..<dayNumber), id: \.self) { dayPos in
-              let dayMinTemp = weather.forecast.daily?.temperature_2m_min?[dayPos] ?? 0
-              let dayMaxTemp = weather.forecast.daily?.temperature_2m_max?[dayPos] ?? 0
+              let rowTemperatures = temperatureRow(for: dayPos)
               HStack {
                 Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0))
                   .foregroundColor(Color(UIColor.label))
@@ -52,16 +52,18 @@ struct DailyView: View {
                   .contentTransition(.numericText())
                 }
                 .frame(width: 50)
-                Text(roundTemperatureString(temperature: dayMinTemp))
+                Text(roundTemperatureString(temperature: rowTemperatures.labelLow))
                   .frame(width: 37, alignment: .trailing)
                   .contentTransition(.numericText())
                 TemperatureRangeView(
-                  low: dayMinTemp, high: dayMaxTemp,
+                  low: rowTemperatures.barLow, high: rowTemperatures.barHigh,
+                  focusLow: rowTemperatures.focusLow,
+                  focusHigh: rowTemperatures.focusHigh,
                   minTemp: temperatureScale.min, maxTemp: temperatureScale.max,
                   unit: temperatureUnit
                 )
-                .frame(height: 5)
-                Text(roundTemperatureString(temperature: dayMaxTemp))
+                .frame(height: rowTemperatures.focusLow == nil ? 5 : 28)
+                Text(roundTemperatureString(temperature: rowTemperatures.labelHigh))
                   .frame(width: 37, alignment: .leading)
                   .contentTransition(.numericText())
               }
@@ -131,13 +133,111 @@ extension DailyView {
   }
 
   private var displayedTemperatureScale: (min: Double, max: Double) {
-    let displayedMinimums = Array(weather.forecast.daily?.temperature_2m_min?.prefix(dailyDisplayCount) ?? [])
-    let displayedMaximums = Array(weather.forecast.daily?.temperature_2m_max?.prefix(dailyDisplayCount) ?? [])
-    let allTemperatures = displayedMinimums + displayedMaximums
+    let rowTemperatures = (0..<dailyDisplayCount).map { temperatureRow(for: $0) }
+    let allTemperatures = rowTemperatures.flatMap { row in
+      [
+        row.barLow,
+        row.barHigh,
+        row.focusLow,
+        row.focusHigh
+      ].compactMap { $0 }
+    }
     let minTemp = allTemperatures.min() ?? 0
     let maxTemp = allTemperatures.max() ?? 40
 
     return (minTemp, maxTemp)
+  }
+
+  private func temperatureRow(for dayIndex: Int) -> DailyTemperatureRow {
+    let dailyLow = dailyTemperature(weather.forecast.daily?.temperature_2m_min, at: dayIndex) ?? 0
+    let dailyHigh = dailyTemperature(weather.forecast.daily?.temperature_2m_max, at: dayIndex) ?? 0
+
+    guard settingsService.dailyForecastDaytimeTemperaturesEnabled else {
+      return DailyTemperatureRow.dailyOnly(low: dailyLow, high: dailyHigh)
+    }
+
+    guard let timeframeTemperatures = timeframeTemperatures(for: dayIndex) else {
+      return DailyTemperatureRow.dailyOnly(low: dailyLow, high: dailyHigh)
+    }
+
+    switch settingsService.dailyForecastDaytimeTemperatureDisplayMode {
+    case .replaceValues:
+      return DailyTemperatureRow.dailyOnly(
+        low: timeframeTemperatures.low,
+        high: timeframeTemperatures.high
+      )
+    case .overlayOnDailyRange:
+      return DailyTemperatureRow(
+        labelLow: dailyLow,
+        labelHigh: dailyHigh,
+        barLow: dailyLow,
+        barHigh: dailyHigh,
+        focusLow: timeframeTemperatures.low,
+        focusHigh: timeframeTemperatures.high
+      )
+    }
+  }
+
+  private func timeframeTemperatures(for dayIndex: Int) -> (low: Double, high: Double)? {
+    guard let hourlyTimes = weather.forecast.hourly?.time,
+          let hourlyTemperatures = weather.forecast.hourly?.temperature_2m,
+          let interval = daytimeTemperatureInterval(for: dayIndex) else {
+      return nil
+    }
+
+    let intervalTemperatures = zip(hourlyTimes, hourlyTemperatures)
+      .compactMap { timestamp, temperature -> Double? in
+        guard timestamp >= interval.start && timestamp <= interval.end else { return nil }
+        return temperature
+      }
+
+    guard let low = intervalTemperatures.min(),
+          let high = intervalTemperatures.max() else {
+      return nil
+    }
+
+    return (low, high)
+  }
+
+  private func daytimeTemperatureInterval(for dayIndex: Int) -> (start: Double, end: Double)? {
+    switch settingsService.dailyForecastDaytimeTemperatureRangeMode {
+    case .sunriseSunset:
+      guard let sunrise = dailyTemperature(weather.forecast.daily?.sunrise, at: dayIndex),
+            let sunset = dailyTemperature(weather.forecast.daily?.sunset, at: dayIndex),
+            sunrise <= sunset else {
+        return nil
+      }
+
+      return (sunrise, sunset)
+    case .customHours:
+      guard let dayTimestamp = dailyTemperature(weather.forecast.daily?.time, at: dayIndex) else {
+        return nil
+      }
+
+      let timeZone = TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? .current
+      var calendar = Calendar(identifier: .gregorian)
+      calendar.timeZone = timeZone
+
+      let dayDate = Date(timeIntervalSince1970: TimeInterval(dayTimestamp))
+      let startHour = settingsService.dailyForecastDaytimeCustomStartHour
+      let endHour = settingsService.dailyForecastDaytimeCustomEndHour
+
+      guard let startDate = calendar.date(bySettingHour: startHour, minute: 0, second: 0, of: dayDate),
+            let endDate = calendar.date(bySettingHour: endHour, minute: 0, second: 0, of: dayDate),
+            startDate <= endDate else {
+        return nil
+      }
+
+      return (startDate.timeIntervalSince1970, endDate.timeIntervalSince1970)
+    }
+  }
+
+  private func dailyTemperature(_ values: [Double]?, at index: Int) -> Double? {
+    guard let values, values.indices.contains(index) else {
+      return nil
+    }
+
+    return values[index]
   }
 
   public func getWeekDay(timestamp: Double) -> String {
@@ -199,159 +299,5 @@ private struct DailyPlaceholderRow: View {
     .foregroundStyle(.secondary.opacity(0.28))
     .padding(.vertical, 4)
     .accessibilityHidden(true)
-  }
-}
-
-struct TemperatureRangeView: View {
-  let low: Double
-  let high: Double
-  let minTemp: Double
-  let maxTemp: Double
-  let unit: String
-
-  var body: some View {
-    GeometryReader { geometry in
-      let width = geometry.size.width
-      let lowPosition = position(for: min(low, high), in: width)
-      let highPosition = position(for: max(low, high), in: width)
-      let selectedWidth = maxTemp == minTemp ? width : max(highPosition - lowPosition, 0)
-
-      ZStack(alignment: .leading) {
-        Capsule()
-          .fill(Color.gray.opacity(0.3))
-          .frame(width: width, height: 4)
-        globalGradient
-          .frame(width: width, height: 4)
-          .mask(alignment: .leading) {
-            Capsule()
-              .frame(width: selectedWidth, height: 4)
-              .offset(x: lowPosition)
-          }
-      }
-      .alignmentGuide(VerticalAlignment.center) { d in d[VerticalAlignment.center] }
-    }
-  }
-
-  private var globalGradient: LinearGradient {
-    LinearGradient(
-      stops: gradientStops(),
-      startPoint: .leading,
-      endPoint: .trailing
-    )
-  }
-
-  func position(for temperature: Double, in width: CGFloat) -> CGFloat {
-    let range = maxTemp - minTemp
-    guard range > 0 else {
-      return temperature <= minTemp ? 0 : width
-    }
-
-    let scale = ((temperature - minTemp) / range).clamped(to: 0...1)
-    return CGFloat(scale) * width
-  }
-
-  private func gradientStops() -> [Gradient.Stop] {
-    let thresholds = temperatureThresholds(for: unit)
-    let range = maxTemp - minTemp
-
-    guard range > 0 else {
-      return [
-        .init(color: color(for: minTemp, unit: unit), location: 0),
-        .init(color: color(for: minTemp, unit: unit), location: 1)
-      ]
-    }
-
-    var stops: [Gradient.Stop] = [
-      .init(color: color(for: minTemp, unit: unit), location: 0)
-    ]
-
-    for threshold in thresholds where threshold > minTemp && threshold < maxTemp {
-      let location = (threshold - minTemp) / range
-      stops.append(.init(color: color(for: threshold, unit: unit), location: location))
-    }
-
-    stops.append(.init(color: color(for: maxTemp, unit: unit), location: 1))
-    return stops
-  }
-
-  private func temperatureThresholds(for unit: String) -> [Double] {
-    switch unit {
-    case "°F":
-      return [32, 50, 68, 86]
-    case "K":
-      return [273, 283, 293, 303]
-    default:
-      return [0, 10, 20, 30]
-    }
-  }
-
-  func color(for temperature: Double, unit: String) -> Color {
-    switch unit {
-    case "°C":
-      return colorForCelsius(temperature)
-    case "°F":
-      return colorForFahrenheit(temperature)
-    case "K":
-      return colorForKelvin(temperature)
-    default:
-      return colorForCelsius(temperature)  // Default to Celsius if unit is unknown
-    }
-  }
-
-  private func colorForCelsius(_ temperature: Double) -> Color {
-    switch temperature {
-    case ..<0:
-      return .blue
-    case 0..<10:
-      return .green
-    case 10..<20:
-      return .yellow
-    case 20..<30:
-      return .orange
-    case 30...:
-      return .red
-    default:
-      return .purple
-    }
-  }
-
-  private func colorForFahrenheit(_ temperature: Double) -> Color {
-    switch temperature {
-    case ..<32:
-      return .blue
-    case 32..<50:
-      return .green
-    case 50..<68:
-      return .yellow
-    case 68..<86:
-      return .orange
-    case 86...:
-      return .red
-    default:
-      return .purple
-    }
-  }
-
-  private func colorForKelvin(_ temperature: Double) -> Color {
-    switch temperature {
-    case ..<273:
-      return .blue
-    case 273..<283:
-      return .green
-    case 283..<293:
-      return .yellow
-    case 293..<303:
-      return .orange
-    case 303...:
-      return .red
-    default:
-      return .purple
-    }
-  }
-}
-
-extension Double {
-  fileprivate func clamped(to limits: ClosedRange<Self>) -> Self {
-    min(max(self, limits.lowerBound), limits.upperBound)
   }
 }
