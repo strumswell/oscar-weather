@@ -227,6 +227,9 @@
 		AD0000192FAA100000000001 /* HourlyChartUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000182FAA100000000001 /* HourlyChartUtilities.swift */; };
 		AD00001B2FAA100000000001 /* HourlyDetailSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD00001A2FAA100000000001 /* HourlyDetailSection.swift */; };
 		AD00001D2FAA100000000001 /* HourlyDetailSegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD00001C2FAA100000000001 /* HourlyDetailSegmentedControl.swift */; };
+		AD00001F2FAA100000000001 /* SynchronizedChartScroll.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD00001E2FAA100000000001 /* SynchronizedChartScroll.swift */; };
+		AD0000212FAA100000000001 /* ChartScrollSynchronizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000202FAA100000000001 /* ChartScrollSynchronizer.swift */; };
+		AD0000232FAA100000000001 /* ChartScrollViewLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000222FAA100000000001 /* ChartScrollViewLocator.swift */; };
 		AD1000022FBB000000000001 /* DailyEnsembleForecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1000012FBB000000000001 /* DailyEnsembleForecast.swift */; };
 		AD1000032FBB000000000001 /* DailyEnsembleForecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1000012FBB000000000001 /* DailyEnsembleForecast.swift */; };
 		AD1000042FBB000000000001 /* DailyEnsembleForecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1000012FBB000000000001 /* DailyEnsembleForecast.swift */; };
@@ -472,6 +475,9 @@
 		AD0000182FAA100000000001 /* HourlyChartUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyChartUtilities.swift; sourceTree = "<group>"; };
 		AD00001A2FAA100000000001 /* HourlyDetailSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyDetailSection.swift; sourceTree = "<group>"; };
 		AD00001C2FAA100000000001 /* HourlyDetailSegmentedControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyDetailSegmentedControl.swift; sourceTree = "<group>"; };
+		AD00001E2FAA100000000001 /* SynchronizedChartScroll.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynchronizedChartScroll.swift; sourceTree = "<group>"; };
+		AD0000202FAA100000000001 /* ChartScrollSynchronizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartScrollSynchronizer.swift; sourceTree = "<group>"; };
+		AD0000222FAA100000000001 /* ChartScrollViewLocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartScrollViewLocator.swift; sourceTree = "<group>"; };
 		AD1000012FBB000000000001 /* DailyEnsembleForecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyEnsembleForecast.swift; sourceTree = "<group>"; };
 		AD1000052FBB000000000001 /* DailyDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyDetailView.swift; sourceTree = "<group>"; };
 		AD1000072FBB000000000001 /* DailyEnsembleTemperatureChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyEnsembleTemperatureChart.swift; sourceTree = "<group>"; };
@@ -681,6 +687,7 @@
 		259187C42C715A7C00611B0F /* ChartViews */ = {
 			isa = PBXGroup;
 			children = (
+				AD0000242FAA100000000001 /* ChartScrollSynchronization */,
 				259187C82C715AEA00611B0F /* TemperatureChart.swift */,
 				259187CA2C715B2900611B0F /* PrecipitationChart.swift */,
 				259187CC2C715B5900611B0F /* HumidityChart.swift */,
@@ -939,6 +946,16 @@
 				AD00001C2FAA100000000001 /* HourlyDetailSegmentedControl.swift */,
 			);
 			path = HourlyDetail;
+			sourceTree = "<group>";
+		};
+		AD0000242FAA100000000001 /* ChartScrollSynchronization */ = {
+			isa = PBXGroup;
+			children = (
+				AD0000202FAA100000000001 /* ChartScrollSynchronizer.swift */,
+				AD0000222FAA100000000001 /* ChartScrollViewLocator.swift */,
+				AD00001E2FAA100000000001 /* SynchronizedChartScroll.swift */,
+			);
+			path = ChartScrollSynchronization;
 			sourceTree = "<group>";
 		};
 		AD2000002FCC000000000001 /* DailyDetail */ = {
@@ -1286,6 +1303,9 @@
 				251BFED42FB000000000001 /* AtmosphereShaders.metal in Sources */,
 				259187CB2C715B2900611B0F /* PrecipitationChart.swift in Sources */,
 				AD0000192FAA100000000001 /* HourlyChartUtilities.swift in Sources */,
+				AD00001F2FAA100000000001 /* SynchronizedChartScroll.swift in Sources */,
+				AD0000212FAA100000000001 /* ChartScrollSynchronizer.swift in Sources */,
+				AD0000232FAA100000000001 /* ChartScrollViewLocator.swift in Sources */,
 				25ED79B429F1A7DF002E0AAB /* Cloud.swift in Sources */,
 				252FC3B42ECE830300981FF3 /* RadarColorMapping.swift in Sources */,
 				3E61170C2544B2D300B68120 /* DailyView.swift in Sources */,

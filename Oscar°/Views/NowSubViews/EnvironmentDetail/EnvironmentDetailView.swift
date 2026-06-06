@@ -5,8 +5,8 @@ struct EnvironmentDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedSection: EnvironmentDetailSection
-    @State private var chartScrollPosition = Date.now
-    @State private var didSetInitialChartPosition = false
+    @State private var chartScrollSynchronizer = ChartScrollSynchronizer()
+    @State private var chartTimelineVersion = 0
 
     init(scrollTo: EnvironmentDetailSection) {
         _selectedSection = State(initialValue: scrollTo)
@@ -151,11 +151,9 @@ struct EnvironmentDetailView: View {
                     Button(String(localized: "Fertig"), action: dismiss.callAsFunction)
                 }
             }
-            .onAppear {
-                initializeChartPositionIfNeeded()
-            }
             .onChange(of: time) { _, _ in
-                initializeChartPositionIfNeeded(force: true)
+                chartScrollSynchronizer.reset()
+                chartTimelineVersion &+= 1
             }
         }
     }
@@ -191,7 +189,9 @@ struct EnvironmentDetailView: View {
                 so2: weather.air.hourly?.european_aqi_so2 ?? [],
                 maxTimeRange: maxTimeRange,
                 referenceDate: referenceDate,
-                chartScrollPosition: $chartScrollPosition
+                initialChartScrollPosition: initialChartScrollPosition,
+                chartScrollSynchronizer: chartScrollSynchronizer,
+                chartTimelineVersion: chartTimelineVersion
             )
         case .uv:
             EnvironmentUVSectionView(
@@ -204,7 +204,9 @@ struct EnvironmentDetailView: View {
                 time: time,
                 maxTimeRange: maxTimeRange,
                 referenceDate: referenceDate,
-                chartScrollPosition: $chartScrollPosition
+                initialChartScrollPosition: initialChartScrollPosition,
+                chartScrollSynchronizer: chartScrollSynchronizer,
+                chartTimelineVersion: chartTimelineVersion
             )
         case .pollen:
             EnvironmentPollenSectionView(
@@ -219,17 +221,11 @@ struct EnvironmentDetailView: View {
                 ragweed: weather.air.hourly?.ragweed_pollen ?? [],
                 maxTimeRange: maxTimeRange,
                 referenceDate: referenceDate,
-                chartScrollPosition: $chartScrollPosition
+                initialChartScrollPosition: initialChartScrollPosition,
+                chartScrollSynchronizer: chartScrollSynchronizer,
+                chartTimelineVersion: chartTimelineVersion
             )
         }
-    }
-
-    private func initializeChartPositionIfNeeded(force: Bool = false) {
-        guard !time.isEmpty else { return }
-        guard force || !didSetInitialChartPosition else { return }
-
-        chartScrollPosition = initialChartScrollPosition
-        didSetInitialChartPosition = true
     }
 
     private func currentValue(from values: [Double]?) -> Double? {

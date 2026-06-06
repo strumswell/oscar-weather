@@ -5,8 +5,8 @@ struct HourlyDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var settingsService = SettingService()
 
-    @State private var chartScrollPosition = Date.now
-    @State private var didSetInitialChartPosition = false
+    @State private var chartScrollSynchronizer = ChartScrollSynchronizer()
+    @State private var chartTimelineVersion = 0
     @State private var dismissalFeedback = false
     @State private var selectedSection: HourlyDetailSection = .atmosphere
 
@@ -88,11 +88,9 @@ struct HourlyDetailView: View {
                 }
             }
             .sensoryFeedback(.success, trigger: dismissalFeedback)
-            .task {
-                initializeChartPositionIfNeeded()
-            }
             .onChange(of: time) { _, _ in
-                initializeChartPositionIfNeeded(force: true)
+                chartScrollSynchronizer.reset()
+                chartTimelineVersion &+= 1
             }
         }
     }
@@ -151,7 +149,11 @@ struct HourlyDetailView: View {
                 maxTimeRange: maxTimeRange,
                 referenceDate: referenceDate
             )
-            .chartScrollPosition(x: $chartScrollPosition)
+            .synchronizedChartScroll(
+                initialX: initialChartScrollPosition,
+                using: chartScrollSynchronizer
+            )
+            .id(chartTimelineVersion)
         }
     }
 
@@ -178,7 +180,11 @@ struct HourlyDetailView: View {
                 maxTimeRange: maxTimeRange,
                 referenceDate: referenceDate
             )
-            .chartScrollPosition(x: $chartScrollPosition)
+            .synchronizedChartScroll(
+                initialX: initialChartScrollPosition,
+                using: chartScrollSynchronizer
+            )
+            .id(chartTimelineVersion)
         }
     }
 
@@ -200,7 +206,11 @@ struct HourlyDetailView: View {
                 maxTimeRange: maxTimeRange,
                 referenceDate: referenceDate
             )
-            .chartScrollPosition(x: $chartScrollPosition)
+            .synchronizedChartScroll(
+                initialX: initialChartScrollPosition,
+                using: chartScrollSynchronizer
+            )
+            .id(chartTimelineVersion)
         }
     }
 
@@ -236,7 +246,11 @@ struct HourlyDetailView: View {
                     maxTimeRange: maxTimeRange,
                     referenceDate: referenceDate
                 )
-                .chartScrollPosition(x: $chartScrollPosition)
+                .synchronizedChartScroll(
+                    initialX: initialChartScrollPosition,
+                    using: chartScrollSynchronizer
+                )
+                .id(chartTimelineVersion)
             }
         }
     }
@@ -260,7 +274,11 @@ struct HourlyDetailView: View {
                     maxTimeRange: maxTimeRange,
                     referenceDate: referenceDate
                 )
-                .chartScrollPosition(x: $chartScrollPosition)
+                .synchronizedChartScroll(
+                    initialX: initialChartScrollPosition,
+                    using: chartScrollSynchronizer
+                )
+                .id(chartTimelineVersion)
             }
 
             HourlyDetailInfoCard(
@@ -293,7 +311,11 @@ struct HourlyDetailView: View {
                 maxTimeRange: maxTimeRange,
                 referenceDate: referenceDate
             )
-            .chartScrollPosition(x: $chartScrollPosition)
+            .synchronizedChartScroll(
+                initialX: initialChartScrollPosition,
+                using: chartScrollSynchronizer
+            )
+            .id(chartTimelineVersion)
         }
     }
 
@@ -322,7 +344,11 @@ struct HourlyDetailView: View {
                 maxTimeRange: maxTimeRange,
                 referenceDate: referenceDate
             )
-            .chartScrollPosition(x: $chartScrollPosition)
+            .synchronizedChartScroll(
+                initialX: initialChartScrollPosition,
+                using: chartScrollSynchronizer
+            )
+            .id(chartTimelineVersion)
         }
     }
 
@@ -344,7 +370,11 @@ struct HourlyDetailView: View {
                     maxTimeRange: maxTimeRange,
                     referenceDate: referenceDate
                 )
-                .chartScrollPosition(x: $chartScrollPosition)
+                .synchronizedChartScroll(
+                    initialX: initialChartScrollPosition,
+                    using: chartScrollSynchronizer
+                )
+                .id(chartTimelineVersion)
             }
 
             HourlyDetailInfoCard(
@@ -352,14 +382,6 @@ struct HourlyDetailView: View {
                 message: evapotranspirationExplanation(for: et0, unit: unit)
             )
         }
-    }
-
-    private func initializeChartPositionIfNeeded(force: Bool = false) {
-        guard !time.isEmpty else { return }
-        guard force || !didSetInitialChartPosition else { return }
-
-        chartScrollPosition = initialChartScrollPosition
-        didSetInitialChartPosition = true
     }
 
     private func currentValue(from values: [Double]) -> Double? {

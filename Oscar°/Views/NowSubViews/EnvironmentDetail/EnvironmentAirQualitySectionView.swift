@@ -15,7 +15,9 @@ struct EnvironmentAirQualitySectionView: View {
     let so2: [Double]
     let maxTimeRange: ClosedRange<Date>
     let referenceDate: Date
-    @Binding var chartScrollPosition: Date
+    let initialChartScrollPosition: Date
+    let chartScrollSynchronizer: ChartScrollSynchronizer
+    let chartTimelineVersion: Int
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -39,7 +41,11 @@ struct EnvironmentAirQualitySectionView: View {
                     maxTimeRange: maxTimeRange,
                     referenceDate: referenceDate
                 )
-                .chartScrollPosition(x: $chartScrollPosition)
+                .synchronizedChartScroll(
+                    initialX: initialChartScrollPosition,
+                    using: chartScrollSynchronizer
+                )
+                .id(chartTimelineVersion)
             }
 
             EnvironmentDetailCard {
