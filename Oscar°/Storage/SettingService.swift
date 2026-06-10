@@ -1,6 +1,6 @@
 import CoreData
 import SwiftUI
-import Combine
+import OSLog
 
 enum TimeFormatPreference: String, CaseIterable, Identifiable {
     case system
@@ -41,8 +41,70 @@ enum TimeFormatPreference: String, CaseIterable, Identifiable {
     }
 }
 
-public class SettingService: ObservableObject {
-    @Published var settings: Settings?
+@Observable
+public final class SettingService {
+    static let shared = SettingService()
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "Oscar",
+        category: "Storage"
+    )
+    var settings: Settings?
+    var oscarRadarLayer: Bool {
+        didSet {
+            UserDefaults.standard.set(oscarRadarLayer, forKey: "oscarRadarLayer")
+        }
+    }
+    var activeTileLayerRaw: String? {
+        didSet {
+            UserDefaults.standard.set(activeTileLayerRaw, forKey: "activeTileLayer")
+        }
+    }
+    var timeFormatPreference: TimeFormatPreference {
+        didSet {
+            Self.defaults.set(timeFormatPreference.rawValue, forKey: Self.timeFormatPreferenceKey)
+            nc.post(name: .unitChanged, object: nil)
+        }
+    }
+    var dailyForecastDaytimeTemperaturesEnabled: Bool {
+        didSet {
+            Self.defaults.set(
+                dailyForecastDaytimeTemperaturesEnabled,
+                forKey: Self.dailyForecastDaytimeTemperaturesEnabledKey
+            )
+        }
+    }
+    var dailyForecastDaytimeTemperatureDisplayMode: ForecastDaytimeTemperatureDisplayMode {
+        didSet {
+            Self.defaults.set(
+                dailyForecastDaytimeTemperatureDisplayMode.rawValue,
+                forKey: Self.dailyForecastDaytimeTemperatureDisplayModeKey
+            )
+        }
+    }
+    var dailyForecastDaytimeTemperatureRangeMode: ForecastDaytimeTemperatureRangeMode {
+        didSet {
+            Self.defaults.set(
+                dailyForecastDaytimeTemperatureRangeMode.rawValue,
+                forKey: Self.dailyForecastDaytimeTemperatureRangeModeKey
+            )
+        }
+    }
+    var dailyForecastDaytimeCustomStartHour: Int {
+        didSet {
+            Self.defaults.set(
+                dailyForecastDaytimeCustomStartHour,
+                forKey: Self.dailyForecastDaytimeCustomStartHourKey
+            )
+        }
+    }
+    var dailyForecastDaytimeCustomEndHour: Int {
+        didSet {
+            Self.defaults.set(
+                dailyForecastDaytimeCustomEndHour,
+                forKey: Self.dailyForecastDaytimeCustomEndHourKey
+            )
+        }
+    }
     private let context: NSManagedObjectContext
     private let pc = PersistenceController.shared
     private let nc = NotificationCenter.default
@@ -53,8 +115,42 @@ public class SettingService: ObservableObject {
     private static let dailyForecastDaytimeCustomStartHourKey = "dailyForecastDaytimeCustomStartHour"
     private static let dailyForecastDaytimeCustomEndHourKey = "dailyForecastDaytimeCustomEndHour"
     private static let defaults = UserDefaults(suiteName: "group.cloud.bolte.Oscar") ?? .standard
+    private static let formatterLock = NSLock()
+    private static var formatterCache: [String: DateFormatter] = [:]
 
-    init() {
+    private init() {
+        oscarRadarLayer = UserDefaults.standard.bool(forKey: "oscarRadarLayer")
+        activeTileLayerRaw = UserDefaults.standard.string(forKey: "activeTileLayer")
+        timeFormatPreference = TimeFormatPreference(
+            rawValue: Self.defaults.string(forKey: Self.timeFormatPreferenceKey) ?? ""
+        ) ?? .system
+        dailyForecastDaytimeTemperaturesEnabled = Self.defaults.bool(
+            forKey: Self.dailyForecastDaytimeTemperaturesEnabledKey
+        )
+        dailyForecastDaytimeTemperatureDisplayMode = ForecastDaytimeTemperatureDisplayMode(
+            rawValue: Self.defaults.string(
+                forKey: Self.dailyForecastDaytimeTemperatureDisplayModeKey
+            ) ?? ""
+        ) ?? .replaceValues
+        dailyForecastDaytimeTemperatureRangeMode = ForecastDaytimeTemperatureRangeMode(
+            rawValue: Self.defaults.string(
+                forKey: Self.dailyForecastDaytimeTemperatureRangeModeKey
+            ) ?? ""
+        ) ?? .sunriseSunset
+        dailyForecastDaytimeCustomStartHour = Self.defaults.object(
+            forKey: Self.dailyForecastDaytimeCustomStartHourKey
+        ) == nil
+            ? 9
+            : Self.clampedHour(
+                Self.defaults.integer(forKey: Self.dailyForecastDaytimeCustomStartHourKey)
+            )
+        dailyForecastDaytimeCustomEndHour = Self.defaults.object(
+            forKey: Self.dailyForecastDaytimeCustomEndHourKey
+        ) == nil
+            ? 18
+            : Self.clampedHour(
+                Self.defaults.integer(forKey: Self.dailyForecastDaytimeCustomEndHourKey)
+            )
         self.context = pc.container.viewContext
         self.update()
     }
@@ -64,8 +160,8 @@ public class SettingService: ObservableObject {
             try self.context.save()
             update()
         } catch {
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            Self.logger.error("Settings save failed: \(error.localizedDescription, privacy: .public)")
+            context.rollback()
         }
     }
     
@@ -93,108 +189,26 @@ public class SettingService: ObservableObject {
                 self.settings = result.first!
             }
         } catch {
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            Self.logger.error("Settings fetch failed: \(error.localizedDescription, privacy: .public)")
+            return
         }
     }
-    
-    var oscarRadarLayer: Bool {
-        get { UserDefaults.standard.bool(forKey: "oscarRadarLayer") }
-        set {
-            objectWillChange.send()
-            UserDefaults.standard.set(newValue, forKey: "oscarRadarLayer")
-        }
-    }
-
-    /// Raw storage for the active tile layer key (ICON-D2 or GFS).
-    /// Use the `activeTileLayer: WeatherTileLayer?` extension accessor on iOS.
-    var activeTileLayerRaw: String? {
-        get { UserDefaults.standard.string(forKey: "activeTileLayer") }
-        set {
-            objectWillChange.send()
-            UserDefaults.standard.set(newValue, forKey: "activeTileLayer")
-        }
-    }
-
     func updateTemperatureUnit(_ unit: String) {
         settings?.temperatureUnit = unit
         save()
-        nc.post(name: Notification.Name("UnitChanged"), object: nil)
+        nc.post(name: .unitChanged, object: nil)
     }
     
     func updateWindSpeedUnit(_ unit: String) {
         settings?.windSpeedUnit = unit
         save()
-        nc.post(name: Notification.Name("UnitChanged"), object: nil)
+        nc.post(name: .unitChanged, object: nil)
     }
     
     func updatePrecipitationUnit(_ unit: String) {
         settings?.precipitationUnit = unit
         save()
-        nc.post(name: Notification.Name("UnitChanged"), object: nil)
-    }
-
-    var timeFormatPreference: TimeFormatPreference {
-        get {
-            let rawValue = Self.defaults.string(forKey: Self.timeFormatPreferenceKey)
-            return TimeFormatPreference(rawValue: rawValue ?? "") ?? .system
-        }
-        set {
-            objectWillChange.send()
-            Self.defaults.set(newValue.rawValue, forKey: Self.timeFormatPreferenceKey)
-            nc.post(name: Notification.Name("UnitChanged"), object: nil)
-        }
-    }
-
-    var dailyForecastDaytimeTemperaturesEnabled: Bool {
-        get {
-            Self.defaults.bool(forKey: Self.dailyForecastDaytimeTemperaturesEnabledKey)
-        }
-        set {
-            objectWillChange.send()
-            Self.defaults.set(newValue, forKey: Self.dailyForecastDaytimeTemperaturesEnabledKey)
-            nc.post(name: Notification.Name("UnitChanged"), object: nil)
-        }
-    }
-
-    var dailyForecastDaytimeTemperatureDisplayMode: ForecastDaytimeTemperatureDisplayMode {
-        get {
-            let rawValue = Self.defaults.string(forKey: Self.dailyForecastDaytimeTemperatureDisplayModeKey)
-            return ForecastDaytimeTemperatureDisplayMode(rawValue: rawValue ?? "") ?? .replaceValues
-        }
-        set {
-            objectWillChange.send()
-            Self.defaults.set(newValue.rawValue, forKey: Self.dailyForecastDaytimeTemperatureDisplayModeKey)
-            nc.post(name: Notification.Name("UnitChanged"), object: nil)
-        }
-    }
-
-    var dailyForecastDaytimeTemperatureRangeMode: ForecastDaytimeTemperatureRangeMode {
-        get {
-            let rawValue = Self.defaults.string(forKey: Self.dailyForecastDaytimeTemperatureRangeModeKey)
-            return ForecastDaytimeTemperatureRangeMode(rawValue: rawValue ?? "") ?? .sunriseSunset
-        }
-        set {
-            objectWillChange.send()
-            Self.defaults.set(newValue.rawValue, forKey: Self.dailyForecastDaytimeTemperatureRangeModeKey)
-            nc.post(name: Notification.Name("UnitChanged"), object: nil)
-        }
-    }
-
-    var dailyForecastDaytimeCustomStartHour: Int {
-        guard Self.defaults.object(forKey: Self.dailyForecastDaytimeCustomStartHourKey) != nil else {
-            return 9
-        }
-
-        return Self.clampedHour(Self.defaults.integer(forKey: Self.dailyForecastDaytimeCustomStartHourKey))
-    }
-
-    var dailyForecastDaytimeCustomEndHour: Int {
-        guard Self.defaults.object(forKey: Self.dailyForecastDaytimeCustomEndHourKey) != nil else {
-            return 18
-        }
-
-        return Self.clampedHour(Self.defaults.integer(forKey: Self.dailyForecastDaytimeCustomEndHourKey))
+        nc.post(name: .unitChanged, object: nil)
     }
 
     func updateDailyForecastDaytimeCustomStartHour(_ hour: Int) {
@@ -210,10 +224,8 @@ public class SettingService: ObservableObject {
     }
 
     private func updateDailyForecastDaytimeCustomHours(startHour: Int, endHour: Int) {
-        objectWillChange.send()
-        Self.defaults.set(startHour, forKey: Self.dailyForecastDaytimeCustomStartHourKey)
-        Self.defaults.set(endHour, forKey: Self.dailyForecastDaytimeCustomEndHourKey)
-        nc.post(name: Notification.Name("UnitChanged"), object: nil)
+        dailyForecastDaytimeCustomStartHour = startHour
+        dailyForecastDaytimeCustomEndHour = endHour
     }
 
     static var resolvedTimeFormatAPIValue: String {
@@ -234,41 +246,64 @@ public class SettingService: ObservableObject {
         timeZone: TimeZone? = nil,
         showsMinutes: Bool = true
     ) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = .autoupdatingCurrent
-        if let timeZone {
-            formatter.timeZone = timeZone
-        }
-
-        switch resolvedTimeFormatPreference {
-        case .system:
-            formatter.dateStyle = .none
-            formatter.timeStyle = showsMinutes ? .short : .none
-            if !showsMinutes {
-                formatter.dateFormat = DateFormatter.dateFormat(
-                    fromTemplate: "j",
-                    options: 0,
-                    locale: .autoupdatingCurrent
-                )
+        let mode = resolvedTimeFormatPreference
+        let key = "time|\(mode.rawValue)|\(showsMinutes)|\(timeZone?.identifier ?? "local")"
+        return format(date, key: key) {
+            $0.locale = .autoupdatingCurrent
+            $0.timeZone = timeZone
+            switch mode {
+            case .system:
+                $0.dateStyle = .none
+                $0.timeStyle = showsMinutes ? .short : .none
+                if !showsMinutes {
+                    $0.dateFormat = DateFormatter.dateFormat(
+                        fromTemplate: "j",
+                        options: 0,
+                        locale: .autoupdatingCurrent
+                    )
+                }
+            case .h24:
+                $0.dateFormat = showsMinutes ? "HH:mm" : "HH"
+            case .h12:
+                $0.dateFormat = showsMinutes ? "h:mm a" : "h a"
             }
-        case .h24:
-            formatter.dateFormat = showsMinutes ? "HH:mm" : "HH"
-        case .h12:
-            formatter.dateFormat = showsMinutes ? "h:mm a" : "h a"
         }
-
-        return formatter.string(from: date)
     }
 
     static func formattedDateTime(_ date: Date, timeZone: TimeZone? = nil) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = .autoupdatingCurrent
-        dateFormatter.dateStyle = .short
-        dateFormatter.timeStyle = .none
-        if let timeZone {
-            dateFormatter.timeZone = timeZone
+        let key = "date|\(timeZone?.identifier ?? "local")"
+        let dateString = format(date, key: key) {
+            $0.locale = .autoupdatingCurrent
+            $0.timeZone = timeZone
+            $0.dateStyle = .short
+            $0.timeStyle = .none
         }
+        return "\(dateString), \(formattedTime(date, timeZone: timeZone))"
+    }
 
-        return "\(dateFormatter.string(from: date)), \(formattedTime(date, timeZone: timeZone))"
+    static func formattedWeekday(_ date: Date, timeZone: TimeZone) -> String {
+        format(date, key: "weekday|\(timeZone.identifier)") {
+            $0.locale = .autoupdatingCurrent
+            $0.timeZone = timeZone
+            $0.dateFormat = "EEEE"
+        }
+    }
+
+    private static func format(
+        _ date: Date,
+        key: String,
+        configure: (DateFormatter) -> Void
+    ) -> String {
+        formatterLock.withLock {
+            let formatter: DateFormatter
+            if let cached = formatterCache[key] {
+                formatter = cached
+            } else {
+                formatter = DateFormatter()
+                configure(formatter)
+                formatterCache[key] = formatter
+            }
+            return formatter.string(from: date)
+        }
     }
 }

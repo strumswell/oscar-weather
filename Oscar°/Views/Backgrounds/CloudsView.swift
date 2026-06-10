@@ -12,15 +12,18 @@ struct CloudsView: View {
     var cloudGroup: CloudGroup
     let topTint: Color
     let bottomTint: Color
+    let paused: Bool
 
     var body: some View {
-        TimelineView(.animation) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: paused)) { timeline in
             if isShown {
                 Canvas { context, size in
                     cloudGroup.update(date: timeline.date)
                     context.opacity = cloudGroup.opacity
                     
-                    let resolvedImages = (0..<8).map { i -> GraphicsContext.ResolvedImage in
+                    let usedImageNumbers = Set(cloudGroup.clouds.map(\.imageNumber))
+                    let resolvedImages = Dictionary(
+                        uniqueKeysWithValues: usedImageNumbers.map { i -> (Int, GraphicsContext.ResolvedImage) in
                         let sourceImage = Image("cloud\(i)")
                         var resolved = context.resolve(sourceImage)
                         
@@ -30,13 +33,16 @@ struct CloudsView: View {
                             endPoint: CGPoint(x: 0, y: resolved.size.height)
                         )
                         
-                        return resolved
-                    }
+                            return (i, resolved)
+                        }
+                    )
                     
                     for cloud in cloudGroup.clouds {
                         context.translateBy(x: cloud.position.x, y: cloud.position.y)
                         context.scaleBy(x: cloud.scale, y: cloud.scale)
-                        context.draw(resolvedImages[cloud.imageNumber], at: .zero, anchor: .topLeading)
+                        if let image = resolvedImages[cloud.imageNumber] {
+                            context.draw(image, at: .zero, anchor: .topLeading)
+                        }
                         context.transform = .identity
                     }
                 }
@@ -52,10 +58,16 @@ struct CloudsView: View {
         }
     }
 
-    init(thickness: Cloud.Thickness, topTint: Color, bottomTint: Color) {
+    init(
+        thickness: Cloud.Thickness,
+        topTint: Color,
+        bottomTint: Color,
+        paused: Bool = false
+    ) {
         cloudGroup = CloudGroup(thickness: thickness)
         self.topTint = topTint
         self.bottomTint = bottomTint
+        self.paused = paused
     }
 }
 

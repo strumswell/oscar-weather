@@ -4,7 +4,7 @@ import SwiftUI
 struct DailyDetailView: View {
   @Environment(Location.self) private var location: Location
   @Environment(\.dismiss) private var dismiss
-  @ObservedObject private var settingsService = SettingService()
+  private let settingsService = SettingService.shared
 
   @State private var detailModel = DetailModel()
   @State private var selectedSection: DailyDetailSection = .temperature
@@ -265,7 +265,7 @@ extension DailyDetailView {
     var isLoading = false
     var errorMessage: String?
 
-    private let client = APIClient()
+    private let client = APIClient.shared
     private var loadedKeys: Set<String> = []
 
     func load(coordinates: CLLocationCoordinate2D, force: Bool = false) async {

@@ -9,6 +9,7 @@ import CoreLocation
 import SwiftUI
 
 struct WeatherSimulationView: View {
+    var animationsPaused = false
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -18,33 +19,76 @@ struct WeatherSimulationView: View {
 
         GeometryReader { proxy in
             ZStack {
-                if !weather.isLoading && weather.forecast.hourly != nil {
+                if weather.forecast.hourly != nil {
                     AtmosphereSkyShaderView(
                         snapshot: snapshot,
                         size: proxy.size
                     )
 
-                    StarsView()
-                        .opacity(Double(snapshot.nightAmount) * Double(1 - snapshot.cloudCoverage * 0.85))
+                    let moonProgress = moonAltitudeProgress(snapshot)
+                    let moonLayout = moonProgress.map { progress in
+                        (
+                            x: 0.12 + 0.76 * progress,
+                            y: 0.345 - 0.135 * sin(.pi * progress)
+                        )
+                    }
+
+                    let starOpacity = Double(snapshot.nightAmount)
+                        * Double(1 - snapshot.cloudCoverage * 0.85)
+                    if starOpacity > 0.02 {
+                        StarsView(
+                            paused: animationsPaused,
+                            occlusionCenter: moonLayout.map {
+                                CGPoint(
+                                    x: proxy.size.width * $0.x,
+                                    y: proxy.size.height * $0.y
+                                )
+                            },
+                            occlusionRadius: MoonView.diameter / 2 + 8
+                        )
+                        .opacity(starOpacity)
+                    }
+
+                    if let moonProgress, let moonLayout {
+                        MoonView(
+                            phase: MoonPhase.phaseFraction(),
+                            altitudeProgress: moonProgress,
+                            xFraction: moonLayout.x,
+                            yFraction: moonLayout.y,
+                            isSouthernHemisphere: location.coordinates.latitude < 0
+                        )
+                        // Quick fade-in at dusk, then fully opaque — a
+                        // translucent moon reads washed-out against the sky.
+                        // Clouds dim it, but never below ~⅓.
+                        .opacity(
+                            Double(min(1, max(0, (snapshot.nightAmount - 0.3) / 0.25)))
+                                * Double(1 - snapshot.cloudDensity * 0.65)
+                        )
+                        .blur(radius: CGFloat(snapshot.cloudDensity) * 2.5)
+                    }
 
                     if shouldShowSun(snapshot) {
                         SunView(progress: Double(snapshot.timeOfDay))
                             .opacity(Double((1 - snapshot.cloudDensity * 0.45) * snapshot.phase))
                     }
 
-                    CloudsView(
-                        thickness: cloudThickness(for: snapshot),
-                        topTint: AtmosphereSampler.cloudTopTint(snapshot: snapshot),
-                        bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snapshot)
-                    )
-                    .id(String(describing: cloudThickness(for: snapshot)))
-                    .opacity(Double(min(1, snapshot.cloudDensity + snapshot.cloudCoverage * 0.25)))
+                    if snapshot.cloudDensity + snapshot.cloudCoverage > 0.02 {
+                        CloudsView(
+                            thickness: cloudThickness(for: snapshot),
+                            topTint: AtmosphereSampler.cloudTopTint(snapshot: snapshot),
+                            bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snapshot),
+                            paused: animationsPaused
+                        )
+                        .id(String(describing: cloudThickness(for: snapshot)))
+                        .opacity(Double(min(1, snapshot.cloudDensity + snapshot.cloudCoverage * 0.25)))
+                    }
 
                     if shouldShowStorm(snapshot) {
                         StormView(
                             type: stormContents(for: snapshot),
                             direction: stormDirection(for: snapshot),
-                            strength: stormStrength(for: snapshot)
+                            strength: stormStrength(for: snapshot),
+                            paused: animationsPaused
                         )
                         .id(String(describing: stormContents(for: snapshot)))
                         .opacity(reduceMotion ? 0.55 : 1)
@@ -94,6 +138,28 @@ struct WeatherSimulationView: View {
 
     private func shouldShowStorm(_ snapshot: AtmosphereSnapshot) -> Bool {
         max(snapshot.precipitationIntensity, snapshot.snowfallIntensity) > 0.05
+    }
+
+    /// The moon's pass across the sky (0 = rise, 0.5 = transit, 1 = set),
+    /// or nil when it's below the horizon, the sky is too bright, the phase
+    /// is too new to see, or clouds hide it.
+    /// Debug mode pins the moon at transit for visual checks.
+    private func moonAltitudeProgress(_ snapshot: AtmosphereSnapshot) -> Double? {
+        if weather.debug {
+            return 0.5
+        }
+
+        let phase = MoonPhase.phaseFraction()
+        guard snapshot.nightAmount > 0.3,
+              snapshot.cloudDensity < 0.7,
+              MoonPhase.illumination(for: phase) >= 0.05 else {
+            return nil
+        }
+
+        return MoonPhase.altitudeProgress(
+            timeOfDay: Double(snapshot.timeOfDay),
+            phase: phase
+        )
     }
 
     private func cloudThickness(for snapshot: AtmosphereSnapshot) -> Cloud.Thickness {

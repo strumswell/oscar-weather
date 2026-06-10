@@ -5,6 +5,7 @@
 //  Created by Philipp Bolte on 22.09.20.
 //
 
+import CoreLocation
 import SwiftUI
 import OSLog
 import Sentry
@@ -83,7 +84,6 @@ struct WeatherApp: App {
     @State private var weather = Weather()
     @State private var location = Location()
     private let locationService = LocationService.shared
-    private let client = APIClient()
     private let persistenceController = PersistenceController.shared
     private let notificationSettingsManager = NotificationSettingsManager.shared
     
@@ -95,79 +95,25 @@ struct WeatherApp: App {
                 .environment(location)
                 .preferredColorScheme(.dark)
                 .task {
-                    await updateState()
+                    if weather.lastUpdated == nil,
+                       let snapshot = WeatherSnapshotStore.load() {
+                        locationService.update()
+                        let current = CLLocation(
+                            latitude: locationService.getCoordinates().latitude,
+                            longitude: locationService.getCoordinates().longitude
+                        )
+                        let cached = CLLocation(
+                            latitude: snapshot.coordinates.latitude,
+                            longitude: snapshot.coordinates.longitude
+                        )
+                        if current.distance(from: cached) < 50_000 {
+                            weather.apply(snapshot: snapshot, location: location)
+                        }
+                    }
+                    await weather.refresh(location: location)
                     await notificationSettingsManager.configureOnLaunch()
                 }
                 .sentryTrace("NowView")
-        }
-    }
-}
-
-extension WeatherApp {
-    private enum WeatherUpdateResponse {
-        case forecast(Operations.getForecast.Output.Ok.Body.jsonPayload)
-        case airQuality(Operations.getAirQuality.Output.Ok.Body.jsonPayload)
-        case radar(Components.Schemas.RadarResponse)
-    }
-
-    public func updateState() async {
-        do {
-            if weather.isLoading { return }
-            weather.isLoading = true
-            weather.clearLoadingQueries()
-            
-            locationService.update()
-            location = await locationService.getLocation()
-
-            let coordinates = location.coordinates
-            var forecastResponse: Operations.getForecast.Output.Ok.Body.jsonPayload?
-            var airQualityResponse: Operations.getAirQuality.Output.Ok.Body.jsonPayload?
-            var radarResponse: Components.Schemas.RadarResponse?
-
-            try await withThrowingTaskGroup(of: WeatherUpdateResponse.self) { group in
-                weather.markLoading(.forecast)
-                group.addTask { .forecast(try await client.getForecast(coordinates: coordinates)) }
-
-                weather.markLoading(.airQuality)
-                group.addTask { .airQuality(try await client.getAirQuality(coordinates: coordinates)) }
-
-                weather.markLoading(.rainRadar)
-                group.addTask { .radar(try await client.getRainRadar(coordinates: coordinates)) }
-
-                for try await response in group {
-                    switch response {
-                    case .forecast(let response):
-                        forecastResponse = response
-                        weather.markFinished(.forecast)
-                    case .airQuality(let response):
-                        airQualityResponse = response
-                        weather.markFinished(.airQuality)
-                    case .radar(let response):
-                        radarResponse = response
-                        weather.markFinished(.rainRadar)
-                    }
-                }
-            }
-
-            guard let forecastResponse, let airQualityResponse, let radarResponse else {
-                throw URLError(.badServerResponse)
-            }
-
-            weather.forecast = forecastResponse
-            weather.air = airQualityResponse
-            weather.radar = radarResponse
-            weather.updateTime()
-            weather.isLoading = false
-            
-            weather.markLoading(.alerts)
-            let alertsResponse = try await client.getAlerts(coordinates: location.coordinates)
-            weather.alerts = alertsResponse
-            weather.markFinished(.alerts)
-        } catch {
-            print(error)
-            weather.error = error.localizedDescription
-            weather.isLoading = false
-            weather.clearLoadingQueries()
         }
     }
 }

@@ -11,7 +11,7 @@ import UIKit
 
 struct RadarView: View {
     @Environment(Location.self) private var location: Location
-    @ObservedObject var settingsService: SettingService
+    let settingsService: SettingService
     @State private var lastRefresh = Date()
     var showLayerSettings: Bool
     var locationService = LocationService.shared
@@ -236,7 +236,7 @@ struct WebMapServiceConstants {
 }
 
 struct RadarMapView: UIViewRepresentable {
-    @ObservedObject var settingsService: SettingService
+    let settingsService: SettingService
     var overlayOpacity: Double
     var coordinates: CLLocationCoordinate2D
     var cities: [City]
@@ -396,7 +396,7 @@ struct RadarMapView: UIViewRepresentable {
             }
 
             let task = Task {
-                let rainViewerData = try await APIClient().getRainViewerMaps()
+                let rainViewerData = try await APIClient.shared.getRainViewerMaps()
                 let host = rainViewerData.host ?? "https://tilecache.rainviewer.com"
                 let radarTemplate = rainViewerData.radar?.past?.last.map {
                     "\(host)\($0.path ?? "")/256/{z}/{x}/{y}/4/1_1.png"

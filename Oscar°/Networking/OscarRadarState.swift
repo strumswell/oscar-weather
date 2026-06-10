@@ -41,20 +41,31 @@ enum MapInteractionState {
     case playing
 }
 
-private func closestTimestampIndex(in timestamps: [String]) -> Int {
-    let now = Date()
-    let fmt = ISO8601DateFormatter()
-    fmt.formatOptions = [.withInternetDateTime]
-    let fmtFrac = ISO8601DateFormatter()
-    fmtFrac.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+private enum FrameDateParser {
+    static let plain: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
+    static let fractional: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+}
 
+private func parseFrameDate(_ timestamp: String) -> Date? {
+    FrameDateParser.fractional.date(from: timestamp)
+        ?? FrameDateParser.plain.date(from: timestamp)
+        ?? Double(timestamp).map { Date(timeIntervalSince1970: $0) }
+}
+
+private func closestTimestampIndex(in dates: [Date?]) -> Int {
+    let now = Date()
     var bestIndex = 0
     var bestDiff = TimeInterval.infinity
 
-    for (index, timestamp) in timestamps.enumerated() {
-        let date = fmtFrac.date(from: timestamp)
-            ?? fmt.date(from: timestamp)
-            ?? Double(timestamp).map { Date(timeIntervalSince1970: $0) }
+    for (index, date) in dates.enumerated() {
         guard let date else { continue }
 
         let diff = abs(now.timeIntervalSince(date))
@@ -165,6 +176,7 @@ final class OscarRadarState {
 
     @ObservationIgnored private var playbackTimer: Timer?
     @ObservationIgnored private var frameInfos: [OscarFrameInfo] = []
+    @ObservationIgnored private var frameDates: [Date?] = []
     @ObservationIgnored private var loadSessionID = UUID()
     @ObservationIgnored private var suppressSelectionSideEffects = false
     @ObservationIgnored private var bootstrapTask: Task<Void, Never>?
@@ -200,8 +212,8 @@ final class OscarRadarState {
     /// True only when the selected position is the frame closest to real time.
     /// Deliberately not a threshold check — only the "natural now" frame is LIVE.
     var isCurrentFrameLive: Bool {
-        guard !frameTimestamps.isEmpty else { return false }
-        return currentFrameIndex == closestTimestampIndex(in: frameTimestamps)
+        guard !frameDates.isEmpty else { return false }
+        return currentFrameIndex == closestTimestampIndex(in: frameDates)
     }
 
     var hasAnyLoadedFrame: Bool {
@@ -243,7 +255,11 @@ final class OscarRadarState {
 
     private static var cachedFrameInfos: [OscarFrameInfo] = []
     private static var cachedBounds: OscarBoundsInfo?
-    private static var cachedImages: [String: CGImage] = [:]
+    private static let imageCache: NSCache<NSString, CGImage> = {
+        let cache = NSCache<NSString, CGImage>()
+        cache.totalCostLimit = 128 * 1024 * 1024
+        return cache
+    }()
     private static var lastFetchedTime: Date?
     private static let cacheDuration: TimeInterval = 10 * 60
 
@@ -253,9 +269,7 @@ final class OscarRadarState {
     }
 
     static func purgeDecodedCaches() {
-        cacheLock.withLock {
-            cachedImages.removeAll()
-        }
+        imageCache.removeAllObjects()
     }
 
     // MARK: - Loading
@@ -358,12 +372,14 @@ final class OscarRadarState {
                 }
 
                 let timestamps = fetchedFrameInfos.map(\.timestamp)
-                let closest = closestTimestampIndex(in: timestamps)
+                let dates = timestamps.map(parseFrameDate)
+                let closest = closestTimestampIndex(in: dates)
 
                 self.suppressSelectionSideEffects = true
                 self.bounds = boundsInfo.asDomain
                 self.frameInfos = fetchedFrameInfos
                 self.frameTimestamps = timestamps
+                self.frameDates = dates
                 self.frames = Array(repeating: nil, count: fetchedFrameInfos.count)
                 self.currentFrameIndex = closest
                 self.suppressSelectionSideEffects = false
@@ -498,7 +514,7 @@ final class OscarRadarState {
             if isCacheValid, let bounds = cachedBounds, !cachedFrameInfos.isEmpty {
                 return (cachedFrameInfos, bounds)
             }
-            cachedImages.removeAll()
+            imageCache.removeAllObjects()
             return nil
         }) {
             return cached
@@ -519,7 +535,7 @@ final class OscarRadarState {
 
     /// Returns a cached CGImage for the frame, or downloads and caches it if missing.
     private static func loadImage(for frameInfo: OscarFrameInfo) async -> CGImage? {
-        if let cached = cacheLock.withLock({ cachedImages[frameInfo.key] }) {
+        if let cached = imageCache.object(forKey: frameInfo.key as NSString) {
             return cached
         }
 
@@ -530,9 +546,11 @@ final class OscarRadarState {
             let (data, _) = try await URLSession.shared.data(for: request)
             guard let uiImage = UIImage(data: data) else { return nil }
             guard let cgImage = prepareForRenderer(uiImage) else { return nil }
-            cacheLock.withLock {
-                cachedImages[frameInfo.key] = cgImage
-            }
+            imageCache.setObject(
+                cgImage,
+                forKey: frameInfo.key as NSString,
+                cost: cgImage.width * cgImage.height * 4
+            )
             return cgImage
         } catch {
             return nil
@@ -690,18 +708,20 @@ final class GFSImageLayerState {
     @ObservationIgnored private var focusedLoadTask: Task<Void, Never>?
     @ObservationIgnored private var playbackTimer: Timer?
     @ObservationIgnored private var frameInfos: [TileFrameInfo] = []
+    @ObservationIgnored private var frameDates: [Date?] = []
     @ObservationIgnored private var loadSessionID = UUID()
     @ObservationIgnored private var suppressSelectionSideEffects = false
     @ObservationIgnored private let renderMode: MapRenderMode
 
     // Shared across instances — survives layer switches.
-    private static let cacheLock = NSLock()
-    private static var imageCache: [String: CGImage] = [:]
+    private static let imageCache: NSCache<NSString, CGImage> = {
+        let cache = NSCache<NSString, CGImage>()
+        cache.totalCostLimit = 128 * 1024 * 1024
+        return cache
+    }()
 
     static func purgeDecodedCaches() {
-        cacheLock.withLock {
-            imageCache.removeAll()
-        }
+        imageCache.removeAllObjects()
     }
 
     init(renderMode: MapRenderMode = .fullscreen) {
@@ -844,6 +864,7 @@ final class GFSImageLayerState {
         error = nil
         frames = []
         frameTimestamps = []
+        frameDates = []
         frameKeys = []
         frameInfos = []
         bounds = OscarRadarBounds(north: 85.051, south: -85.051, west: -180, east: 180)
@@ -871,13 +892,15 @@ final class GFSImageLayerState {
 
                 // 2. Pre-size array so the scrubber can render immediately.
                 let timestamps = fetchedFrameInfos.map(\.validTime)
+                let dates = timestamps.map(parseFrameDate)
                 let keys = fetchedFrameInfos.map(\.key)
-                let closest = closestTimestampIndex(in: timestamps)
+                let closest = closestTimestampIndex(in: dates)
 
                 self.suppressSelectionSideEffects = true
                 self.frameInfos = fetchedFrameInfos
                 self.frames = Array(repeating: nil, count: fetchedFrameInfos.count)
                 self.frameTimestamps = timestamps
+                self.frameDates = dates
                 self.frameKeys = keys
                 self.bounds = fetchedBounds
                 self.currentFrameIndex = closest
@@ -1009,7 +1032,7 @@ final class GFSImageLayerState {
         let info = frameInfos[index]
         let cacheKey = "\(layer.rawValue)/\(info.key)"
 
-        let cached = Self.cacheLock.withLock { Self.imageCache[cacheKey] }
+        let cached = Self.imageCache.object(forKey: cacheKey as NSString)
 
         let cgImage: CGImage?
         if let cached {
@@ -1028,9 +1051,11 @@ final class GFSImageLayerState {
                   let decoded = OscarRadarState.prepareForRenderer(uiImage) else {
                 return false
             }
-            Self.cacheLock.withLock {
-                Self.imageCache[cacheKey] = decoded
-            }
+            Self.imageCache.setObject(
+                decoded,
+                forKey: cacheKey as NSString,
+                cost: decoded.width * decoded.height * 4
+            )
             cgImage = decoded
         }
 

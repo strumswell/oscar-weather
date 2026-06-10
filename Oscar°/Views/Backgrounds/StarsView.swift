@@ -8,6 +8,11 @@
 import SwiftUI
 
 struct StarsView: View {
+    var paused = false
+    /// Stars within `occlusionRadius` of this point (canvas coordinates)
+    /// are skipped so they don't shine through the moon's disc.
+    var occlusionCenter: CGPoint? = nil
+    var occlusionRadius: CGFloat = 0
     @State var isShown = false
     @State var starField = StarField()
     @State var meteorShower = MeteorShower()
@@ -31,7 +36,7 @@ struct StarsView: View {
     }
 
     var body: some View {
-        TimelineView(.animation) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: paused)) { timeline in
             if starOpacity > 0.01 {
                 Canvas { context, size in
                     let timeInterval = timeline.date.timeIntervalSince1970
@@ -62,31 +67,42 @@ struct StarsView: View {
                     context.addFilter(.blur(radius: 0.3))
                     
                     for (index, star) in starField.stars.enumerated() {
+                        // Fade stars over a soft band around the moon instead
+                        // of popping them out at the disc edge.
+                        var occlusionFade = 1.0
+                        if let occlusionCenter {
+                            let distance = hypot(star.x - occlusionCenter.x, star.y - occlusionCenter.y)
+                            occlusionFade = min(max((distance - occlusionRadius) / 28, 0), 1)
+                            if occlusionFade <= 0.01 {
+                                continue
+                            }
+                        }
+
                         let path = Path(ellipseIn: CGRect(x: star.x, y: star.y, width: star.size, height: star.size))
-                        
+
                         if star.flickerInterval == 0 {
                             // flashing star
                             var flashLevel = sin(Double(index) + timeInterval * 4)
                             flashLevel = abs(flashLevel)
                             flashLevel /= 1.5
-                            context.opacity = 0.5 + flashLevel
+                            context.opacity = (0.5 + flashLevel) * occlusionFade
                         } else {
                             // blooming star
                             var flashLevel = sin(Double(index) + timeInterval)
                             flashLevel *= star.flickerInterval
                             flashLevel -= star.flickerInterval - 1
-                            
+
                             if flashLevel > 0 {
                                 var contextCopy = context
-                                contextCopy.opacity = flashLevel
+                                contextCopy.opacity = flashLevel * occlusionFade
                                 contextCopy.addFilter(.blur(radius: 3))
-                                
+
                                 contextCopy.fill(path, with: .color(white: 1))
                                 contextCopy.fill(path, with: .color(white: 1))
                                 contextCopy.fill(path, with: .color(white: 1))
                             }
-                            
-                            context.opacity = 1
+
+                            context.opacity = occlusionFade
                         }
                         
                         if index.isMultiple(of: 5) {

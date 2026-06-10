@@ -27,12 +27,10 @@ struct HourlyView: View {
     )
   }
 
-  private var shouldShowPlaceholders: Bool {
-    weather.isLoading && items.isEmpty
-  }
-
   var body: some View {
     let shouldReduceMotion = reduceMotion
+    let items = self.items
+    let shouldShowPlaceholders = weather.isLoading && items.isEmpty
 
     Button(action: presentDetails) {
       VStack(alignment: .leading) {
@@ -76,7 +74,9 @@ struct HourlyView: View {
         .scrollTargetBehavior(.viewAligned)
         .frame(maxWidth: .infinity)
       }
-      .opacity(weather.isLoading || weather.forecast.hourly == nil ? 0.3 : 1.0)
+      .opacity(
+        (weather.isLoading && !weather.hasContent) || weather.forecast.hourly == nil ? 0.3 : 1.0
+      )
       .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
     }
     .buttonStyle(.plain)

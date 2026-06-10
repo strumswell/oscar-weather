@@ -17,6 +17,8 @@ enum AlertResponse {
 
 // TODO: Caching for API results
 class APIClient {
+  static let shared = APIClient()
+
   var openMeteo: Client
   var openMeteoAqi: Client
   var openMeteoGeo: Client
@@ -34,7 +36,7 @@ class APIClient {
     brightsky = APIClient.get(url: try! Servers.server4())
     canadaWeather = APIClient.get(url: try! Servers.server5())
     rainViewer = APIClient.get(url: try! Servers.server6())
-    settingService = SettingService()
+    settingService = SettingService.shared
   }
 
   class func get(url: URL) -> Client {
@@ -55,7 +57,8 @@ class APIClient {
 
   func getForecast(
     coordinates: CLLocationCoordinate2D,
-    forecastDays: Operations.getForecast.Input.Query.forecast_daysPayload? = ._14
+    forecastDays: Operations.getForecast.Input.Query.forecast_daysPayload? = ._14,
+    hourly: [Operations.getForecast.Input.Query.hourlyPayloadPayload]? = nil
   ) async throws -> Operations.getForecast.Output.Ok.Body.jsonPayload {
     let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
     let fallbackForecast: Operations.getForecast.Output.Ok.Body.jsonPayload = .init(
@@ -65,19 +68,20 @@ class APIClient {
         weathercode: 0.0))
 
     let windSpeedUnit = WindSpeedUnit(settingValue: settingService.settings?.windSpeedUnit)
+    let hourlyFields = hourly ?? [
+      .temperature_2m, .apparent_temperature, .precipitation, .snowfall, .weathercode,
+      .cloudcover,
+      .windspeed_10m, .windspeed_80m, .windspeed_120m, .windspeed_180m, .winddirection_10m,
+      .precipitation_probability, .is_day, .relativehumidity_2m, .pressure_msl,
+      .soil_temperature_0cm, .soil_temperature_6cm, .soil_temperature_18cm,
+      .soil_temperature_54cm, .soil_moisture_0_1cm, .soil_moisture_1_3cm, .soil_moisture_3_9cm,
+      .soil_moisture_9_27cm, .soil_moisture_27_81cm, .et0_fao_evapotranspiration,
+    ]
 
     var query: Operations.getForecast.Input.Query = .init(
       latitude: outboundCoordinates.latitude,
       longitude: outboundCoordinates.longitude,
-      hourly: [
-        .temperature_2m, .apparent_temperature, .precipitation, .snowfall, .weathercode,
-        .cloudcover,
-        .windspeed_10m, .windspeed_80m, .windspeed_120m, .windspeed_180m, .winddirection_10m,
-        .precipitation_probability, .is_day, .relativehumidity_2m, .pressure_msl,
-        .soil_temperature_0cm, .soil_temperature_6cm, .soil_temperature_18cm,
-        .soil_temperature_54cm, .soil_moisture_0_1cm, .soil_moisture_1_3cm, .soil_moisture_3_9cm,
-        .soil_moisture_9_27cm, .soil_moisture_27_81cm, .et0_fao_evapotranspiration,
-      ],
+      hourly: hourlyFields,
       daily: [
         .precipitation_probability_max, .precipitation_sum, .sunrise, .sunset, .temperature_2m_max,
         .temperature_2m_min, .weathercode,
@@ -128,34 +132,33 @@ class APIClient {
         switch response.body {
         case .json(let result):
           // Merge the daily forecasts: first 7 days from ICON, next 7 days from best_match
-          if var iconDaily = iconForecast.daily {
-            if let bestMatchDaily = result.daily {
-              // Take the last 7 days from best_match forecast
-              let startIndex = 7  // Skip first 7 days
-              let times = bestMatchDaily.time.suffix(from: startIndex)
-              let maxTemps = bestMatchDaily.temperature_2m_max!.suffix(from: startIndex)
-              let minTemps = bestMatchDaily.temperature_2m_min!.suffix(from: startIndex)
-              let precip = bestMatchDaily.precipitation_sum!.suffix(from: startIndex)
-              let precipProb = bestMatchDaily.precipitation_probability_max!.suffix(
-                from: startIndex)
-              let codes = bestMatchDaily.weathercode!.suffix(from: startIndex)
-              let sunrises = bestMatchDaily.sunrise!.suffix(from: startIndex)
-              let sunsets = bestMatchDaily.sunset!.suffix(from: startIndex)
-
-              // Since we know these arrays exist in bestMatchDaily, we can safely append them
-              iconDaily.time.append(contentsOf: times)
-              iconDaily.temperature_2m_max?.append(contentsOf: maxTemps)
-              iconDaily.temperature_2m_min?.append(contentsOf: minTemps)
-              iconDaily.precipitation_sum?.append(contentsOf: precip)
-              iconDaily.precipitation_probability_max?.append(contentsOf: precipProb)
-              iconDaily.weathercode?.append(contentsOf: codes)
-              iconDaily.sunrise?.append(contentsOf: sunrises)
-              iconDaily.sunset?.append(contentsOf: sunsets)
-
-              iconForecast.daily = iconDaily
-              return iconForecast
-            }
+          guard var iconDaily = iconForecast.daily,
+            let bestMatchDaily = result.daily,
+            bestMatchDaily.time.count > 7,
+            let maxTemps = bestMatchDaily.temperature_2m_max,
+            let minTemps = bestMatchDaily.temperature_2m_min,
+            let precip = bestMatchDaily.precipitation_sum,
+            let precipProb = bestMatchDaily.precipitation_probability_max,
+            let codes = bestMatchDaily.weathercode,
+            let sunrises = bestMatchDaily.sunrise,
+            let sunsets = bestMatchDaily.sunset
+          else {
+            return iconForecast
           }
+
+          let startIndex = 7
+          iconDaily.time.append(contentsOf: bestMatchDaily.time.suffix(from: startIndex))
+          iconDaily.temperature_2m_max?.append(contentsOf: maxTemps.suffix(from: startIndex))
+          iconDaily.temperature_2m_min?.append(contentsOf: minTemps.suffix(from: startIndex))
+          iconDaily.precipitation_sum?.append(contentsOf: precip.suffix(from: startIndex))
+          iconDaily.precipitation_probability_max?.append(
+            contentsOf: precipProb.suffix(from: startIndex))
+          iconDaily.weathercode?.append(contentsOf: codes.suffix(from: startIndex))
+          iconDaily.sunrise?.append(contentsOf: sunrises.suffix(from: startIndex))
+          iconDaily.sunset?.append(contentsOf: sunsets.suffix(from: startIndex))
+
+          iconForecast.daily = iconDaily
+          return iconForecast
         }
       case .badRequest(_), .undocumented(statusCode: _, _):
         return iconForecast  // Return just the ICON forecast if best_match fails
@@ -265,8 +268,18 @@ class APIClient {
     return try decoder.decode(DailyEnsembleForecastResponse.self, from: data)
   }
 
-  func getAlerts(coordinates: CLLocationCoordinate2D) async throws -> AlertResponse {
-    if isCanadianLocation(coordinates) {
+  func getAlerts(
+    coordinates: CLLocationCoordinate2D,
+    countryCode: String? = nil
+  ) async throws -> AlertResponse {
+    let useCanadian: Bool
+    if let countryCode {
+      useCanadian = countryCode == "CA"
+    } else {
+      useCanadian = isCanadianLocation(coordinates)
+    }
+
+    if useCanadian {
       return try await getCanadianWeatherAlerts(coordinates: coordinates)
     } else {
       return try await getBrightskyAlerts(coordinates: coordinates)
@@ -274,9 +287,15 @@ class APIClient {
   }
 
   private func isCanadianLocation(_ coordinates: CLLocationCoordinate2D) -> Bool {
-    // Rough bounding box for Canada
-    return coordinates.latitude >= 41.0 && coordinates.latitude <= 84.0
-      && coordinates.longitude >= -141.0 && coordinates.longitude <= -52.0
+    guard coordinates.latitude <= 84.0,
+      coordinates.longitude >= -141.0,
+      coordinates.longitude <= -52.0
+    else {
+      return false
+    }
+
+    let minimumLatitude = coordinates.longitude < -95.0 ? 49.0 : 45.0
+    return coordinates.latitude >= minimumLatitude
   }
 
   private func getBrightskyAlerts(coordinates: CLLocationCoordinate2D) async throws -> AlertResponse

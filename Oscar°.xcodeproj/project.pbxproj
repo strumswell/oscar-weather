@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AD4000022FE2000000000001 /* NotificationNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4000012FE2000000000001 /* NotificationNames.swift */; };
+		AD4000032FE2000000000001 /* NotificationNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4000012FE2000000000001 /* NotificationNames.swift */; };
+		AD4000042FE2000000000001 /* NotificationNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4000012FE2000000000001 /* NotificationNames.swift */; };
+		AD4000052FE2000000000001 /* NotificationNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4000012FE2000000000001 /* NotificationNames.swift */; };
+		AD4000072FE2000000000001 /* WeatherSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4000062FE2000000000001 /* WeatherSnapshotStore.swift */; };
+		AD40000A2FE2000000000001 /* WeatherSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4000062FE2000000000001 /* WeatherSnapshotStore.swift */; };
+		AD40000B2FE2000000000001 /* WeatherSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4000062FE2000000000001 /* WeatherSnapshotStore.swift */; };
+		AD4000092FE2000000000001 /* MoonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4000082FE2000000000001 /* MoonView.swift */; };
 		1C7CB7C571034CB8B433A801 /* HourlyPlaceholderCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 734BBABC1E39450CA3239943 /* HourlyPlaceholderCard.swift */; };
 		250163DA2B093C0B00EEF882 /* CityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25E30B2A26CD9B31007F468D /* CityService.swift */; };
 		2502F6F72D2F3D2600636DC9 /* WeatherObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2502F6F62D2F3D2600636DC9 /* WeatherObservable.swift */; };
@@ -312,6 +320,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AD4000012FE2000000000001 /* NotificationNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationNames.swift; sourceTree = "<group>"; };
+		AD4000062FE2000000000001 /* WeatherSnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherSnapshotStore.swift; sourceTree = "<group>"; };
+		AD4000082FE2000000000001 /* MoonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonView.swift; sourceTree = "<group>"; };
 		2502F6F62D2F3D2600636DC9 /* WeatherObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherObservable.swift; sourceTree = "<group>"; };
 		2505C94C29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecipitationLockscreenWidget.swift; sourceTree = "<group>"; };
 		2512E9402C37C765004670E4 /* OpenMeteoAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenMeteoAttribution.swift; sourceTree = "<group>"; };
@@ -730,6 +741,7 @@
 			children = (
 				25E30B2A26CD9B31007F468D /* CityService.swift */,
 				25D72B2627C67016001F43FC /* SettingService.swift */,
+				AD4000062FE2000000000001 /* WeatherSnapshotStore.swift */,
 				2512E9712F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift */,
 				2512E9752F70B000004670E4 /* ForecastDaytimeTemperatureDisplayMode.swift */,
 				25BEDCE526CACFC900D90D6B /* PersistenceController.swift */,
@@ -761,6 +773,7 @@
 		25CB17E62B470429001D973A /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				AD4000012FE2000000000001 /* NotificationNames.swift */,
 				25CB17E72B47043A001D973A /* GlobalViewExtensions.swift */,
 				25CB17E92B470461001D973A /* APIResultExtensions.swift */,
 				257EB3702BD8328A00E46468 /* HapticsExtension.swift */,
@@ -771,6 +784,7 @@
 		25ED799329F1A79D002E0AAB /* Backgrounds */ = {
 			isa = PBXGroup;
 			children = (
+				AD4000082FE2000000000001 /* MoonView.swift */,
 				25ED79A929F1A7DF002E0AAB /* Array-GradientStop.swift */,
 				25ED799F29F1A7DE002E0AAB /* Cloud.swift */,
 				25ED799E29F1A7DE002E0AAB /* CloudGroup.swift */,
@@ -1209,6 +1223,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AD4000052FE2000000000001 /* NotificationNames.swift in Sources */,
 				25CB17EC2B4704E1001D973A /* LocationManager.swift in Sources */,
 				25429BD529E5F94100D5979F /* ContentView.swift in Sources */,
 				25429BD329E5F94100D5979F /* Oscar_WatchApp.swift in Sources */,
@@ -1219,6 +1234,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AD4000032FE2000000000001 /* NotificationNames.swift in Sources */,
+				AD40000A2FE2000000000001 /* WeatherSnapshotStore.swift in Sources */,
 				2598E93C2C729274004A9D5E /* CacheMiddleware.swift in Sources */,
 				25429C0229E5FAF600D5979F /* OMDayTemperature.swift in Sources */,
 				257EB3692BD8322A00E46468 /* RetryClientMiddleware.swift in Sources */,
@@ -1249,6 +1266,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AD4000022FE2000000000001 /* NotificationNames.swift in Sources */,
+				AD4000072FE2000000000001 /* WeatherSnapshotStore.swift in Sources */,
+				AD4000092FE2000000000001 /* MoonView.swift in Sources */,
 				253F84F72C20B8ED00844A9E /* HourlyDetailView.swift in Sources */,
 				AB0001022F9A00000000001A /* EnvironmentDetailSection.swift in Sources */,
 				AB0001042F9A00000000001A /* AQIComponentSnapshot.swift in Sources */,
@@ -1391,6 +1411,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AD4000042FE2000000000001 /* NotificationNames.swift in Sources */,
+				AD40000B2FE2000000000001 /* WeatherSnapshotStore.swift in Sources */,
 				25761D5129F1D083006976BE /* StormDrop.swift in Sources */,
 				253F70972B5319EC0075D093 /* PersistenceController.swift in Sources */,
 				2546516D29E494DB00D8C13D /* OMDayTemperature.swift in Sources */,

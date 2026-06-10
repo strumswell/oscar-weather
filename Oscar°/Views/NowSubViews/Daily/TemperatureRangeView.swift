@@ -91,7 +91,7 @@ struct TemperatureRangeView: View {
 
     return ZStack(alignment: .leading) {
       Text(roundTemperatureString(temperature: temperature))
-        .font(.system(size: 9, weight: .semibold, design: .rounded))
+        .font(.caption2.weight(.semibold))
         .lineLimit(1)
         .minimumScaleFactor(0.7)
         .foregroundStyle(Color(UIColor.label))

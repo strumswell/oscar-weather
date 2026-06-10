@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct UnitSettings: View {
-    @ObservedObject var settingsService: SettingService = SettingService()
+    private let settingsService = SettingService.shared
 
     var body: some View {
         NavigationView {

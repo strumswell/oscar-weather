@@ -33,7 +33,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate, ObservableObject {
     internal func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {        
         if status == .authorizedWhenInUse || status == .authorizedAlways {
             fetchCurrentCoordinates()
-            nc.post(name: Notification.Name("ChangedLocation"), object: nil)
+            nc.post(name: .changedLocation, object: nil)
         }
     }
     
@@ -41,7 +41,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate, ObservableObject {
         if let location = locations.last {
             if (location.distance(from: CLLocation(latitude: (gpsLocation?.latitude ?? 52.01), longitude: (gpsLocation?.longitude ?? 10.77))) > 2500) { // if distance change > 2.5 km
                 self.gpsLocation = location.coordinate
-                nc.post(name: Notification.Name("ChangedLocation"), object: nil) // notify view
+                nc.post(name: .changedLocation, object: nil) // notify view
             }
         }
     }

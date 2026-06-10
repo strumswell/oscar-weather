@@ -14,10 +14,12 @@ import SwiftUI
 class Location {
     var coordinates: CLLocationCoordinate2D
     var name: String
+    var countryCode: String?
     
     init() {
         coordinates = CLLocationCoordinate2D(latitude: 52.52, longitude: 13.4)
         name = ""
+        countryCode = nil
     }
 }
 
@@ -25,11 +27,16 @@ class Location {
 class LocationService: NSObject, CLLocationManagerDelegate  {
     static let shared = LocationService()
     static let outboundCoordinateDecimalPlaces = 3
-    var city = CityServiceNew.shared
+    var city = CityService.shared
     var authStatus: CLAuthorizationStatus?
     var gpsLocation: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 52.52, longitude: 13.4)
     private let manager = CLLocationManager()
     private let notificationCenter = NotificationCenter.default
+    private var lastGeocoded: (
+        coordinate: CLLocationCoordinate2D,
+        name: String,
+        countryCode: String?
+    )?
 
     private override init() {
         super.init()
@@ -88,15 +95,34 @@ class LocationService: NSObject, CLLocationManagerDelegate  {
 
     /// Get current location name of the user's GPS reverse-geocoded cooridinates or city, if selected
     func getLocationName() async -> String {
+        await getPlacemarkInfo().name
+    }
+
+    /// Get the current location name and country code, if reverse geocoding is available.
+    func getPlacemarkInfo() async -> (name: String, countryCode: String?) {
         let selectedCity = city.getSelectedCity()
 
         if (selectedCity !== nil) {
-            return selectedCity!.label ?? ""
+            return (selectedCity!.label ?? "", nil)
         }
 
         let coordinates = gpsLocation
+        if let lastGeocoded {
+            let currentLocation = CLLocation(
+                latitude: coordinates.latitude,
+                longitude: coordinates.longitude
+            )
+            let cachedLocation = CLLocation(
+                latitude: lastGeocoded.coordinate.latitude,
+                longitude: lastGeocoded.coordinate.longitude
+            )
+            if currentLocation.distance(from: cachedLocation) < 2_000 {
+                return (lastGeocoded.name, lastGeocoded.countryCode)
+            }
+        }
+
         if let override = LocationService.localityOverride(for: coordinates) {
-            return override
+            return (override, nil)
         }
 
         let geocoder = CLGeocoder()
@@ -104,23 +130,28 @@ class LocationService: NSObject, CLLocationManagerDelegate  {
         do {
             let placemarks = try await geocoder.reverseGeocodeLocation(location)
             if let placemark = placemarks.first {
-                return placemark.locality ?? ""
+                let name = placemark.locality ?? ""
+                if !name.isEmpty {
+                    lastGeocoded = (coordinates, name, placemark.isoCountryCode)
+                }
+                return (name, placemark.isoCountryCode)
             }
         } catch {
             print("Error reverse geocoding: \(error)")
         }
 
-        return ""
+        return ("", nil)
     }
     
     /// Get current Location object of the user's GPS reverse-geocoded cooridinates or city, if selected
     func getLocation() async -> Location {
         let coordinates = getCoordinates()
-        let name = await getLocationName()
+        let info = await getPlacemarkInfo()
         
         let location = Location()
         location.coordinates = coordinates
-        location.name = name
+        location.name = info.name
+        location.countryCode = info.countryCode
         
         return location
     }
@@ -128,7 +159,7 @@ class LocationService: NSObject, CLLocationManagerDelegate  {
     internal func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         if status == .authorizedWhenInUse || status == .authorizedAlways {
             updateGPSCoordinates()
-            notificationCenter.post(name: Notification.Name("ChangedLocation"), object: nil)
+            notificationCenter.post(name: .changedLocation, object: nil)
         }
     }
     
@@ -136,7 +167,7 @@ class LocationService: NSObject, CLLocationManagerDelegate  {
         if let location = locations.last {
             if (location.distance(from: CLLocation(latitude: gpsLocation.latitude , longitude: gpsLocation.longitude )) > 2500) { // if distance change > 2.5 km
                 gpsLocation = location.coordinate
-                notificationCenter.post(name: Notification.Name("ChangedLocation"), object: nil) // notify view
+                notificationCenter.post(name: .changedLocation, object: nil) // notify view
             }
         }
     }

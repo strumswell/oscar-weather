@@ -6,7 +6,7 @@
 import SwiftUI
 
 struct ForecastSettingsView: View {
-  @ObservedObject private var settingsService = SettingService()
+  private let settingsService = SettingService.shared
 
   var body: some View {
     NavigationView {
@@ -85,7 +85,7 @@ struct ForecastSettingsLabel: View {
   var body: some View {
     HStack {
       Image(systemName: "calendar")
-        .font(.system(size: 16, weight: .semibold))
+        .font(.body.weight(.semibold))
         .frame(width: 30, height: 30)
         .foregroundColor(.white)
         .background(Color.teal)

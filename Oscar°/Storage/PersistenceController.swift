@@ -6,9 +6,14 @@
 //
 
 import CoreData
+import OSLog
 
 struct PersistenceController {
     static let shared = PersistenceController()
+    fileprivate static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "Oscar",
+        category: "Storage"
+    )
     
     let container: NSPersistentContainer
 
@@ -24,6 +29,9 @@ struct PersistenceController {
         
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
+                Self.logger.fault(
+                    "Persistent store load failed: \(error.localizedDescription, privacy: .public)"
+                )
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
         })
@@ -34,6 +42,9 @@ struct PersistenceController {
 public extension URL {
     static func storeURL(for appGroup: String, dbName: String) -> URL {
         guard let fileContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup) else {
+            PersistenceController.logger.fault(
+                "Shared file container could not be created for \(appGroup, privacy: .public)"
+            )
             fatalError("Shared file container could not be created.")
         }
         return fileContainer.appendingPathComponent("\(dbName).sqlite")

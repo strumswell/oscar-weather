@@ -21,7 +21,7 @@ struct TemperatureLockScreenEntry: TimelineEntry {
 }
 
 struct LockscreenProvider: TimelineProvider {
-    let client = APIClient()
+    let client = APIClient.shared
     let locationService = LocationService.shared
     
     init() {
@@ -43,8 +43,11 @@ struct LockscreenProvider: TimelineProvider {
         Task {
             let coordinates = locationService.getCoordinates()
             
-            // TODO: Do a different API call to get JUST the data we need here. The call gets too much.
-            async let weatherRequest = client.getForecast(coordinates: coordinates, forecastDays: ._1)
+            async let weatherRequest = client.getForecast(
+                coordinates: coordinates,
+                forecastDays: ._1,
+                hourly: [.precipitation_probability]
+            )
             async let radarRequest = client.getRainRadar(coordinates: coordinates)
             let (weather, radar) = try await (weatherRequest, radarRequest)
                         

@@ -78,7 +78,9 @@ struct AQIView: View {
             .scrollTargetBehavior(.viewAligned)
             .frame(maxWidth: .infinity)
             .padding(.bottom, 20)
-            .opacity(weather.isLoading || weather.air.hourly == nil ? 0.3 : 1.0)
+            .opacity(
+                (weather.isLoading && !weather.hasContent) || weather.air.hourly == nil ? 0.3 : 1.0
+            )
             .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
         }
         .sheet(item: $detailAnchor, content: EnvironmentDetailView.init)

@@ -19,11 +19,10 @@ enum HourlyFormatting {
   }
 
   static func weekdayString(timestamp: Double, timeZone: TimeZone) -> String {
-    let formatter = DateFormatter()
-    formatter.timeZone = timeZone
-    formatter.dateFormat = "EEEE"
-
-    return formatter.string(from: Date(timeIntervalSince1970: TimeInterval(timestamp)))
+    SettingService.formattedWeekday(
+      Date(timeIntervalSince1970: TimeInterval(timestamp)),
+      timeZone: timeZone
+    )
   }
 
   static func temperatureString(_ temperature: Double?) -> String {

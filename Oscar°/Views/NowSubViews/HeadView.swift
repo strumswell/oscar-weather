@@ -11,7 +11,8 @@ struct HeadView: View {
   @Namespace private var transition
   @Environment(Weather.self) private var weather: Weather
   @Environment(Location.self) private var location: Location
-  @ObservedObject private var settingsService = SettingService()
+  @ScaledMetric(relativeTo: .largeTitle) private var temperatureFontSize: CGFloat = 120
+  private let settingsService = SettingService.shared
   @State private var isLocationSheetPresented = false
 
   private var windSpeedUnit: WindSpeedUnit {
@@ -45,10 +46,11 @@ struct HeadView: View {
                 .font(.title2)
                 .fontWeight(.bold)
                 .lineSpacing(10)
-                .foregroundColor(Color(UIColor.label))        }
+                .foregroundColor(Color(UIColor.label))
+        }
       Spacer()
     }
-    .opacity(weather.isLoading ? 0.3 : 1.0)
+    .opacity(weather.isLoading && !weather.hasContent ? 0.3 : 1.0)
     .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
     .shadow(radius: 5)
     .onTapGesture {
@@ -76,7 +78,9 @@ struct HeadView: View {
         Spacer()
         Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
           .foregroundColor(Color(UIColor.label))
-          .font(.system(size: 120))
+          .font(.system(size: temperatureFontSize))
+          .minimumScaleFactor(0.5)
+          .lineLimit(1)
           .shadow(radius: 15)
           .contentTransition(.numericText())
       }
@@ -109,7 +113,7 @@ struct HeadView: View {
           .padding(.bottom, 20)
       }
     }
-    .opacity(weather.isLoading ? 0.3 : 1.0)
+    .opacity(weather.isLoading && !weather.hasContent ? 0.3 : 1.0)
     .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
     .scrollTransition { content, phase in
       content
@@ -118,6 +122,7 @@ struct HeadView: View {
         .blur(radius: phase.isIdentity ? 0 : 0.5)
     }
   }
+
 }
 
 extension HeadView {

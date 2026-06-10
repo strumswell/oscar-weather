@@ -43,7 +43,12 @@ class Weather {
     var time: Double
     var radar: Components.Schemas.RadarResponse
     var error: String = ""
+    var lastUpdated: Date?
     var debug = false
+
+    var hasContent: Bool {
+        lastUpdated != nil
+    }
     
     init() {
         time = 0
@@ -74,23 +79,119 @@ class Weather {
     func clearLoadingQueries() {
         loadingQueries.removeAll()
     }
-    
-    private func currentTimeScaled() -> Double {
-        let now = Date()
-        let calendar = Calendar.current
-        
-        let hour = calendar.component(.hour, from: now)
-        let minute = calendar.component(.minute, from: now)
-        let second = calendar.component(.second, from: now)
-        
-        let totalSeconds = hour * 3600 + minute * 60 + second
-        let secondsInADay = 24 * 3600
-        
-        return Double(totalSeconds) / Double(secondsInADay)
-    }
 }
 
 extension Weather {
+    private enum UpdateResponse {
+        case forecast(Operations.getForecast.Output.Ok.Body.jsonPayload)
+        case airQuality(Operations.getAirQuality.Output.Ok.Body.jsonPayload)
+        case radar(Components.Schemas.RadarResponse)
+    }
+
+    @MainActor
+    func refresh(
+        location: Location,
+        client: APIClient = .shared,
+        locationService: LocationService = .shared
+    ) async {
+        guard !isLoading else { return }
+        isLoading = true
+        error = ""
+        clearLoadingQueries()
+        defer {
+            isLoading = false
+            clearLoadingQueries()
+        }
+
+        locationService.update()
+        let info = await locationService.getPlacemarkInfo()
+        location.coordinates = locationService.getCoordinates()
+        location.name = info.name
+        location.countryCode = info.countryCode
+
+        let coordinates = location.coordinates
+
+        do {
+            var forecastResponse: Operations.getForecast.Output.Ok.Body.jsonPayload?
+            var airQualityResponse: Operations.getAirQuality.Output.Ok.Body.jsonPayload?
+            var radarResponse: Components.Schemas.RadarResponse?
+
+            try await withThrowingTaskGroup(of: UpdateResponse.self) { group in
+                markLoading(.forecast)
+                group.addTask {
+                    .forecast(try await client.getForecast(coordinates: coordinates))
+                }
+
+                markLoading(.airQuality)
+                group.addTask {
+                    .airQuality(try await client.getAirQuality(coordinates: coordinates))
+                }
+
+                markLoading(.rainRadar)
+                group.addTask {
+                    .radar(try await client.getRainRadar(coordinates: coordinates))
+                }
+
+                for try await response in group {
+                    switch response {
+                    case .forecast(let response):
+                        forecastResponse = response
+                        markFinished(.forecast)
+                    case .airQuality(let response):
+                        airQualityResponse = response
+                        markFinished(.airQuality)
+                    case .radar(let response):
+                        radarResponse = response
+                        markFinished(.rainRadar)
+                    }
+                }
+            }
+
+            guard let forecastResponse, let airQualityResponse, let radarResponse else {
+                throw URLError(.badServerResponse)
+            }
+
+            forecast = forecastResponse
+            air = airQualityResponse
+            radar = radarResponse
+            updateTime()
+            lastUpdated = .now
+            isLoading = false
+
+            let snapshot = WeatherSnapshot(
+                forecast: forecastResponse,
+                air: airQualityResponse,
+                radar: radarResponse,
+                coordinates: CodableCoordinate(coordinates),
+                locationName: location.name,
+                savedAt: lastUpdated ?? .now
+            )
+            Task.detached {
+                WeatherSnapshotStore.save(snapshot)
+            }
+
+            markLoading(.alerts)
+            alerts = try await client.getAlerts(
+                coordinates: coordinates,
+                countryCode: location.countryCode
+            )
+            markFinished(.alerts)
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+
+    @MainActor
+    func apply(snapshot: WeatherSnapshot, location: Location) {
+        forecast = snapshot.forecast
+        air = snapshot.air
+        radar = snapshot.radar
+        updateTime()
+        lastUpdated = snapshot.savedAt
+        location.coordinates = snapshot.coordinates.coordinate
+        location.name = snapshot.locationName
+    }
+
     static var mock: Weather {
         let mockWeather = Weather()
         

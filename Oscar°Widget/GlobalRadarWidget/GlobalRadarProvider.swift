@@ -160,7 +160,7 @@ struct GlobalRadarProvider: TimelineProvider {
   private func fetchTileImage(x: Int, y: Int, z: Int, completion: @escaping (UIImage?) -> Void) {
     Task {
       do {
-        let rainViewerData = try await APIClient().getRainViewerMaps()
+        let rainViewerData = try await APIClient.shared.getRainViewerMaps()
 
         if let mostRecentFrame = rainViewerData.radar?.past?.last {
           let host = rainViewerData.host ?? "https://tilecache.rainviewer.com"

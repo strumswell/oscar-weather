@@ -1124,6 +1124,28 @@
         }
       }
     },
+    "Begrenzt Hoch/Tief auf einen Zeitraum, z. B. für relevantere Tiefstwerte nach Sonnenaufgang." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Begrenzt Hoch/Tief auf einen Zeitraum, z. B. für relevantere Tiefstwerte nach Sonnenaufgang."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limits high/low to a time period, for example to make lows after sunrise more relevant."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En yüksek/en düşük değerleri bir zaman aralığıyla sınırlar; örneğin güneş doğduktan sonraki düşük değerleri daha anlamlı hale getirir."
+          }
+        }
+      }
+    },
     "Bei diesem UV-Wert besteht nur eine geringe gesundheitliche Gefährdung. Meist sind keine besonderen Schutzmaßnahmen erforderlich." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2459,23 +2481,6 @@
         }
       }
     },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Larger branches and small trees move."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
-          }
-        }
-      }
-    },
     "Große Bäume bewegen sich, Zweige können brechen." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2489,6 +2494,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
+          }
+        }
+      }
+    },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Larger branches and small trees move."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
           }
         }
       }
@@ -2666,50 +2688,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yüksek"
-          }
-        }
-      }
-    },
-    "Tageswerte begrenzen" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tageswerte begrenzen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Limit daily values"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Günlük değerleri sınırla"
-          }
-        }
-      }
-    },
-    "Begrenzt Hoch/Tief auf einen Zeitraum, z. B. für relevantere Tiefstwerte nach Sonnenaufgang." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Begrenzt Hoch/Tief auf einen Zeitraum, z. B. für relevantere Tiefstwerte nach Sonnenaufgang."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Limits high/low to a time period, for example to make lows after sunrise more relevant."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En yüksek/en düşük değerleri bir zaman aralığıyla sınırlar; örneğin güneş doğduktan sonraki düşük değerleri daha anlamlı hale getirir."
           }
         }
       }
@@ -5667,6 +5645,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Günlük En Düşük"
+          }
+        }
+      }
+    },
+    "Tageswerte begrenzen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tageswerte begrenzen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limit daily values"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlük değerleri sınırla"
           }
         }
       }

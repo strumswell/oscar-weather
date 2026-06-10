@@ -10,9 +10,10 @@ import SwiftUI
 struct StormView: View {
     @State private var isShown = false
     let storm: Storm
+    let paused: Bool
 
     var body: some View {
-        TimelineView(.animation) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: paused)) { timeline in
             if isShown {
                 Canvas { context, size in
                     storm.update(date: timeline.date, size: size)
@@ -41,8 +42,9 @@ struct StormView: View {
         }
     }
 
-    init(type: Storm.Contents, direction: Angle, strength: Int) {
+    init(type: Storm.Contents, direction: Angle, strength: Int, paused: Bool = false) {
         storm = Storm(type: type, direction: direction, strength: strength)
+        self.paused = paused
     }
 }
 

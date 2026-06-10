@@ -6,7 +6,7 @@ struct SearchCityView: View {
     @State private var searchIsActive = false
     @State private var searchResult: Components.Schemas.SearchResponse = .init()
     @State private var refreshID = UUID()
-    private var client = APIClient()
+    private let client = APIClient.shared
     private var locationService = LocationService.shared
 
     var body: some View {
@@ -100,7 +100,7 @@ struct SearchCityView: View {
             }
         }
         .searchable(text: $searchText, isPresented: $searchIsActive, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Suchen..."))
-        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("CityToggle"))) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: .cityToggle)) { _ in
             refreshID = UUID()
         }
         .onChange(of: searchText, {

@@ -224,6 +224,10 @@ final class WindParticleView: UIView {
 
         let fw = Float(w)
         let fh = Float(h)
+        let visibleRect = mapView.visibleMapRect
+        let isAxisAligned = mapView.camera.heading == 0 && mapView.camera.pitch == 0
+        let mapPointsPerPixelX = visibleRect.width / Double(w)
+        let mapPointsPerPixelY = visibleRect.height / Double(h)
 
         for i in particles.indices {
             if particles[i].age >= particles[i].ttl {
@@ -233,10 +237,18 @@ final class WindParticleView: UIView {
 
             let sx = particles[i].x
             let sy = particles[i].y
-            let coord = mapView.convert(
-                CGPoint(x: CGFloat(sx), y: CGFloat(sy)),
-                toCoordinateFrom: self
-            )
+            let coord: CLLocationCoordinate2D
+            if isAxisAligned {
+                coord = MKMapPoint(
+                    x: visibleRect.minX + Double(sx) * mapPointsPerPixelX,
+                    y: visibleRect.minY + Double(sy) * mapPointsPerPixelY
+                ).coordinate
+            } else {
+                coord = mapView.convert(
+                    CGPoint(x: CGFloat(sx), y: CGFloat(sy)),
+                    toCoordinateFrom: self
+                )
+            }
 
             guard let wind = sampleWind(at: coord) else {
                 particles[i].age = particles[i].ttl
@@ -250,7 +262,16 @@ final class WindParticleView: UIView {
                 latitude: coord.latitude + dLat,
                 longitude: coord.longitude + dLon
             )
-            let newPt = mapView.convert(newCoord, toPointTo: self)
+            let newPt: CGPoint
+            if isAxisAligned {
+                let mapPoint = MKMapPoint(newCoord)
+                newPt = CGPoint(
+                    x: (mapPoint.x - visibleRect.minX) / mapPointsPerPixelX,
+                    y: (mapPoint.y - visibleRect.minY) / mapPointsPerPixelY
+                )
+            } else {
+                newPt = mapView.convert(newCoord, toPointTo: self)
+            }
 
             var dx = Float(newPt.x) - sx
             var dy = Float(newPt.y) - sy

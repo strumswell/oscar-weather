@@ -5,132 +5,18 @@
 //  Created by Philipp Bolte on 18.08.21.
 //
 import CoreData
+import CoreLocation
 import SwiftUI
-import Combine
-import MapKit
 import WidgetKit
-
-public class CityService: ObservableObject {
-
-    @Published var cities: [City]
-
-    private let context: NSManagedObjectContext
-    private let pc = PersistenceController.shared
-    private let nc = NotificationCenter.default
-
-    init() {
-        self.cities = []
-        self.context = pc.container.viewContext
-        self.update()
-    }
-    
-    private func save() {
-        do {
-            try self.context.save()
-            update()
-            nc.post(name: Notification.Name("CityToggle"), object: nil)
-        } catch {
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-        }
-    }
-    
-    func update() {
-        do {
-            let fetchRequest: NSFetchRequest<City>
-            fetchRequest = City.fetchRequest()
-            self.cities = try self.context.fetch(fetchRequest)
-        } catch {
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-        }
-    }
-
-    #if os(iOS)
-    func addCity(searchResult: MKLocalSearchCompletion) {
-        self.getCoordinates(searchCompletion: searchResult) { coords in
-            let label = searchResult.title.split(separator: ",")[0].description
-
-            if ((self.cities.filter{$0.label == label}).count < 1) {
-                let newCity = City(context: self.context)
-                newCity.label = label
-                newCity.lat = coords.latitude
-                newCity.lon = coords.longitude
-                newCity.selected = false
-                                            
-                self.save()
-            } else {
-                self.save()
-            }
-        }
-    }
-    #endif
-    
-    func addCity(city: Array<String>) {
-        let newCity = City(context: self.context)
-        newCity.label = city[0].split(separator: ",")[0].description
-        newCity.lat = (city[1] as NSString).doubleValue
-        newCity.lon = (city[2] as NSString).doubleValue
-        newCity.selected = (city[3] as NSString).boolValue
-        self.save()
-    }
-    
-    func deleteCity(offsets: IndexSet) {
-            offsets.map { cities[$0] }.forEach(context.delete)
-            save()
-    }
-    
-    func disableAllCities() {
-        for city in cities {
-            city.selected = false
-        }
-        save()
-    }
-    
-    func toggleActiveCity(city: City) {
-        if (city.selected) {
-            city.selected = false
-        } else {
-            for city in cities {
-                city.selected = false
-            }
-            city.selected = true
-        }
-        save()
-    }
-    
-    func getSelectedCity() -> Optional<City> {
-        let selectedCities = self.cities.filter{$0.selected}
-        if (selectedCities.isEmpty) {
-            return nil
-        }
-        return selectedCities.first!
-    }
-    
-    func getSelectedCityCoordinates() ->Optional<CLLocationCoordinate2D> {
-        let selectedCity = getSelectedCity()
-        if let city = selectedCity {
-            return CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
-        }
-        return nil
-    }
-    
-    #if os(iOS)
-    private func getCoordinates(searchCompletion: MKLocalSearchCompletion, completion: @escaping (CLLocationCoordinate2D) -> Void) {
-        let searchRequest = MKLocalSearch.Request(completion: searchCompletion)
-        let search = MKLocalSearch(request: searchRequest)
-        
-        search.start { response, error in
-            let coordinates = response?.mapItems[0].placemark.coordinate ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
-            completion(coordinates)
-        }
-    }
-    #endif
-}
+import OSLog
 
 @Observable
-public class CityServiceNew {
-    static let shared = CityServiceNew()
+public class CityService {
+    static let shared = CityService()
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "Oscar",
+        category: "Storage"
+    )
     var cities: [City]
 
     private let context: NSManagedObjectContext
@@ -147,11 +33,11 @@ public class CityServiceNew {
         do {
             try self.context.save()
             update()
-            nc.post(name: Notification.Name("CityToggle"), object: nil)
+            nc.post(name: .cityToggle, object: nil)
             WidgetCenter.shared.reloadAllTimelines()
         } catch {
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            Self.logger.error("City save failed: \(error.localizedDescription, privacy: .public)")
+            context.rollback()
         }
     }
     
@@ -162,8 +48,8 @@ public class CityServiceNew {
             fetchRequest.sortDescriptors = [NSSortDescriptor(key: "orderIndex", ascending: true)]
             self.cities = try self.context.fetch(fetchRequest)
         } catch {
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            Self.logger.error("City fetch failed: \(error.localizedDescription, privacy: .public)")
+            return
         }
     }
 
@@ -198,7 +84,6 @@ public class CityServiceNew {
             city.selected = false
         }
         save()
-        //nc.post(name: Notification.Name("CityToggle"), object: nil)
     }
     
     func toggleActiveCity(city: City) {
@@ -209,7 +94,6 @@ public class CityServiceNew {
         // Select the clicked city
         city.selected = true
         self.save()
-        //nc.post(name: Notification.Name("CityToggle"), object: nil)
     }
     
     func moveCity(from source: IndexSet, to destination: Int) {
@@ -241,19 +125,6 @@ public class CityServiceNew {
         }
         return nil
     }
-    
-    #if os(iOS)
-    private func getCoordinates(searchCompletion: MKLocalSearchCompletion, completion: @escaping (CLLocationCoordinate2D) -> Void) {
-        let searchRequest = MKLocalSearch.Request(completion: searchCompletion)
-        let search = MKLocalSearch(request: searchRequest)
-        
-        search.start { response, error in
-            let coordinates = response?.mapItems[0].placemark.coordinate ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
-            completion(coordinates)
-        }
-    }
-    #endif
-    
     private func hasEntitiesWithoutOrderId() -> Bool {
         let fetchRequest: NSFetchRequest<City> = City.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "orderIndex == nil")
@@ -317,7 +188,3 @@ public class CityServiceNew {
         return self.cities.first { $0.lat == latitude && $0.lon == longitude }
     }
 }
-
-
-
-

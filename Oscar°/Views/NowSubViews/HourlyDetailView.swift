@@ -3,7 +3,7 @@ import SwiftUI
 struct HourlyDetailView: View {
     @Environment(Weather.self) private var weather: Weather
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject private var settingsService = SettingService()
+    private let settingsService = SettingService.shared
 
     @State private var chartScrollSynchronizer = ChartScrollSynchronizer()
     @State private var chartTimelineVersion = 0

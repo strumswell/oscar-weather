@@ -8,6 +8,8 @@ struct HourlyForecastCard: View {
     VStack {
       Text(item.hour)
         .bold()
+        .lineLimit(1)
+        .minimumScaleFactor(0.75)
       Text(item.precipitation)
         .font(.footnote)
         .foregroundStyle(.secondary)
@@ -20,6 +22,8 @@ struct HourlyForecastCard: View {
         .accessibilityHidden(true)
       Text(item.temperature)
         .contentTransition(.numericText())
+        .lineLimit(1)
+        .minimumScaleFactor(0.75)
     }
     .frame(minWidth: minimumWidth)
     .padding(.horizontal, 12)

@@ -22,7 +22,7 @@ struct HomeEntry: TimelineEntry {
 }
 
 class HomeProvider: TimelineProvider {
-    let client = APIClient()
+    let client = APIClient.shared
     let locationService = LocationService.shared
     private let atmosphericAdapter = WeatherAtmosphericAdapter()
     
@@ -48,8 +48,14 @@ class HomeProvider: TimelineProvider {
             let coordinates = locationService.getCoordinates()
             let locationName = await locationService.getLocationName()
 
-            // TODO: Do a different API call to get JUST the data we need here. The call gets too much.
-            async let weatherRequest = client.getForecast(coordinates: coordinates, forecastDays: ._1)
+            async let weatherRequest = client.getForecast(
+                coordinates: coordinates,
+                forecastDays: ._1,
+                hourly: [
+                    .weathercode, .cloudcover, .relativehumidity_2m, .pressure_msl,
+                    .precipitation, .snowfall, .windspeed_10m, .winddirection_10m,
+                ]
+            )
             async let radarRequest = client.getRainRadar(coordinates: coordinates)
             let (weather, radar) = try await (weatherRequest, radarRequest)
             

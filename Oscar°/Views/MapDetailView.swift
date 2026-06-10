@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MapDetailView: View {
-    @ObservedObject var settingsService: SettingService
+    let settingsService: SettingService
     @Environment(\.presentationMode) var presentationMode
     @State private var oscarRadarState = OscarRadarState(renderMode: .fullscreen)
     @State private var gfsImageState = GFSImageLayerState(renderMode: .fullscreen)

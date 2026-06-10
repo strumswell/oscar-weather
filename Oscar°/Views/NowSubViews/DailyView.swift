@@ -3,7 +3,7 @@ import SwiftUI
 struct DailyView: View {
   @Environment(Weather.self) private var weather: Weather
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
-  @ObservedObject private var settingsService = SettingService()
+  private let settingsService = SettingService.shared
   @State private var showDetailView = false
   @State private var detailPresentationCount = 0
 
@@ -79,9 +79,9 @@ struct DailyView: View {
           RoundedRectangle(cornerRadius: 10)
             .stroke(Color(UIColor(.secondary.opacity(0.075))), lineWidth: 1)
         )
-        .font(.system(size: 18))
+        .font(.body)
         .padding([.leading, .trailing])
-        .opacity(weather.isLoading ? 0.3 : 1.0)
+        .opacity(weather.isLoading && !weather.hasContent ? 0.3 : 1.0)
         .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
 
       }
