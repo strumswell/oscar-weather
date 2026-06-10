@@ -3,8 +3,8 @@ import SwiftUI
 struct DailyView: View {
   @Environment(Weather.self) private var weather: Weather
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @Environment(NowPresentationCoordinator.self) private var presentation
   private let settingsService = SettingService.shared
-  @State private var showDetailView = false
   @State private var detailPresentationCount = 0
 
   var body: some View {
@@ -97,9 +97,6 @@ struct DailyView: View {
         .blur(radius: reduceMotion || phase.isIdentity ? 0 : 0.5)
     }
     .sensoryFeedback(.impact, trigger: detailPresentationCount)
-    .sheet(isPresented: $showDetailView) {
-      DailyDetailView()
-    }
   }
 }
 
@@ -272,7 +269,7 @@ extension DailyView {
   private func presentDetails() {
     guard hasDailyDetailData else { return }
     detailPresentationCount += 1
-    showDetailView = true
+    presentation.present(.daily)
   }
 }
 

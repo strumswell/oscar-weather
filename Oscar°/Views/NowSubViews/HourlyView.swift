@@ -10,7 +10,7 @@ import SwiftUI
 struct HourlyView: View {
   @Environment(Weather.self) private var weather: Weather
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
-  @State private var showDetailView = false
+  @Environment(NowPresentationCoordinator.self) private var presentation
   @State private var detailPresentationCount = 0
 
   private var items: [HourlyTimelineItem] {
@@ -90,9 +90,6 @@ struct HourlyView: View {
         .blur(radius: shouldReduceMotion || phase.isIdentity ? 0 : 0.5)
     }
     .sensoryFeedback(.impact, trigger: detailPresentationCount)
-    .sheet(isPresented: $showDetailView) {
-      HourlyDetailView()
-    }
   }
 
   @ViewBuilder
@@ -111,7 +108,7 @@ struct HourlyView: View {
     }
 
     detailPresentationCount += 1
-    showDetailView = true
+    presentation.present(.hourly)
   }
 }
 
@@ -119,4 +116,5 @@ struct HourlyView: View {
   HourlyView()
     .frame(height: 200)
     .environment(Weather.mock)
+    .environment(NowPresentationCoordinator())
 }

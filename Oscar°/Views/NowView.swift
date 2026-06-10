@@ -18,24 +18,21 @@ struct NowView: View {
     private let settingsService = SettingService.shared
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
-    @State private var isMapSheetPresented = false
+    @Namespace private var sheetTransition
     @State private var tapCount = 0
-    @State private var skyIsVisible = true
+    @State private var presentation = NowPresentationCoordinator()
     @State private var oscarRadarState = OscarRadarState(renderMode: .preview)
     @State private var gfsImageState = GFSImageLayerState(renderMode: .preview)
 
     var body: some View {
         ZStack {
-            WeatherSimulationView(animationsPaused: !skyIsVisible)
+            WeatherSimulationView(animationsPaused: presentation.sheet != nil)
             ScrollView(.vertical, showsIndicators: false) {
                 ZStack {
                     VStack(alignment: .leading) {
                         
-                        HeadView()
+                        HeadView(locationTransition: sheetTransition)
                             .padding(.top, 50)
-                            .onScrollVisibilityChange(threshold: 0.1) { visible in
-                                skyIsVisible = visible
-                            }
                             .onTapGesture {
                                 self.tapCount += 1
                                 if self.tapCount == 10 {
@@ -135,22 +132,14 @@ struct NowView: View {
             .refreshable {
                 await weather.refresh(location: location)
             }
-
-            if weather.isLoading && weather.hasContent {
-                RefreshPill()
-                    // Scale is declared on the pill itself so the spring
-                    // pops it in place instead of scaling the whole overlay.
-                    .transition(.scale(scale: 0.4).combined(with: .opacity))
-                    // The ZStack ignores the safe area; keep the pill just
-                    // below the status bar / Dynamic Island.
-                    .padding(.top, topSafeAreaInset + 4)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                    .allowsHitTesting(false)
-            }
         }
-        .animation(.spring(duration: 0.5, bounce: 0.3), value: weather.isLoading && weather.hasContent)
-        .sheet(isPresented: $isMapSheetPresented) {
-            MapDetailView(settingsService: settingsService)
+        .environment(presentation)
+        .sheet(item: $presentation.sheet) { sheet in
+            NowSheetView(
+                sheet: sheet,
+                settingsService: settingsService,
+                locationTransition: sheetTransition
+            )
         }
         .background(.thinMaterial)
         .edgesIgnoringSafeArea(.all)
@@ -199,17 +188,9 @@ struct NowView: View {
 }
 
 extension NowView {
-    private var topSafeAreaInset: CGFloat {
-        let window = UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap(\.windows)
-            .first { $0.isKeyWindow }
-        return window?.safeAreaInsets.top ?? 59
-    }
-
     private func presentMap() {
         UIApplication.shared.playHapticFeedback()
-        isMapSheetPresented = true
+        presentation.present(.map)
     }
 
     private func openRadarMap() {
@@ -220,30 +201,5 @@ extension NowView {
         settingsService.oscarRadarLayer = true
         gfsImageState.pause()
         presentMap()
-    }
-}
-
-/// Small breathing pill shown while fresh data loads behind
-/// already-visible (cached) content. Sits just below the Dynamic Island.
-///
-/// Two superimposed sine waves (slightly detuned, so the pattern never
-/// visibly repeats) drive the width; the opacity and glow trail the width
-/// by a third of a breath. That phase lag is what makes it feel organic
-/// instead of ticking back and forth. Never fades out fully.
-private struct RefreshPill: View {
-    var body: some View {
-        TimelineView(.animation) { timeline in
-            let t = timeline.date.timeIntervalSinceReferenceDate
-            let breathWave = sin(t * 2 * .pi / 2.8)
-            let driftWave = sin(t * 2 * .pi / 7.3 + 1.2)
-            let breath = 0.5 + 0.5 * (breathWave * 0.85 + driftWave * 0.15)
-            let glow = 0.5 + 0.5 * sin(t * 2 * .pi / 2.8 - .pi / 3)
-
-            Capsule()
-                .fill(.white)
-                .frame(width: 34 + 34 * breath, height: 4.5)
-                .opacity(0.28 + 0.38 * glow)
-                .shadow(color: .white.opacity(0.20 + 0.30 * glow), radius: 5)
-        }
     }
 }

@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct AlertView: View {
-    @State private var isAlterSheetPresented = false
     @Environment(Weather.self) private var weather: Weather
+    @Environment(NowPresentationCoordinator.self) private var presentation
     
     var body: some View {
         HStack {
@@ -32,10 +32,7 @@ struct AlertView: View {
         )
         .onTapGesture {
             UIApplication.shared.playHapticFeedback()
-            isAlterSheetPresented.toggle()
-        }
-        .sheet(isPresented: $isAlterSheetPresented) {
-            AlertListView()
+            presentation.present(.alerts)
         }
         .padding(.top, -10)
         .shadow(radius: 15)

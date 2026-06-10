@@ -16,6 +16,8 @@ struct WeatherSimulationView: View {
 
     var body: some View {
         let snapshot = AtmosphereWeatherMapper.snapshot(from: weather, at: location.coordinates)
+        let cloudThickness = cloudThickness(for: snapshot)
+        let cloudsVisible = snapshot.cloudDensity + snapshot.cloudCoverage > 0.02
 
         GeometryReader { proxy in
             ZStack {
@@ -72,16 +74,21 @@ struct WeatherSimulationView: View {
                             .opacity(Double((1 - snapshot.cloudDensity * 0.45) * snapshot.phase))
                     }
 
-                    if snapshot.cloudDensity + snapshot.cloudCoverage > 0.02 {
-                        CloudsView(
-                            thickness: cloudThickness(for: snapshot),
-                            topTint: AtmosphereSampler.cloudTopTint(snapshot: snapshot),
-                            bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snapshot),
-                            paused: animationsPaused
-                        )
-                        .id(String(describing: cloudThickness(for: snapshot)))
-                        .opacity(Double(min(1, snapshot.cloudDensity + snapshot.cloudCoverage * 0.25)))
+                    ZStack {
+                        if cloudsVisible {
+                            CloudsView(
+                                thickness: cloudThickness,
+                                topTint: AtmosphereSampler.cloudTopTint(snapshot: snapshot),
+                                bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snapshot),
+                                paused: animationsPaused
+                            )
+                            .id(cloudThickness)
+                            .transition(.opacity)
+                            .opacity(Double(min(1, snapshot.cloudDensity + snapshot.cloudCoverage * 0.25)))
+                        }
                     }
+                    .animation(.easeInOut(duration: 0.8), value: cloudThickness)
+                    .animation(.easeInOut(duration: 0.8), value: cloudsVisible)
 
                     if shouldShowStorm(snapshot) {
                         StormView(

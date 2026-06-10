@@ -8,7 +8,7 @@
 import SwiftUI
 
 class Cloud {
-    enum Thickness: CaseIterable {
+    enum Thickness: CaseIterable, Hashable {
         case none, thin, light, regular, thick, ultra
     }
 

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AQIView: View {
     @Environment(Weather.self) private var weather: Weather
-    @State private var detailAnchor: EnvironmentDetailSection?
+    @Environment(NowPresentationCoordinator.self) private var presentation
 
     private var metrics: [EnvironmentMetric] {
         let h = weather.air.hourly
@@ -83,7 +83,6 @@ struct AQIView: View {
             )
             .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
         }
-        .sheet(item: $detailAnchor, content: EnvironmentDetailView.init)
         .scrollTransition { content, phase in
             content
                 .opacity(phase.isIdentity ? 1 : 0.8)
@@ -93,7 +92,7 @@ struct AQIView: View {
     }
 
     private func presentDetail(for metric: EnvironmentMetric) {
-        detailAnchor = detailSection(for: metric)
+        presentation.present(.environment(detailSection(for: metric)))
     }
 
     private func detailSection(for metric: EnvironmentMetric) -> EnvironmentDetailSection {

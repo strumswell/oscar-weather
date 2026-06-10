@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LegalTextView: View {
-    @State private var isLegalSheetPresented = false
+    @Environment(NowPresentationCoordinator.self) private var presentation
 
     var body: some View {
         HStack {
@@ -34,14 +34,12 @@ struct LegalTextView: View {
         }
         .onTapGesture {
             UIApplication.shared.playHapticFeedback()
-            isLegalSheetPresented.toggle()
-        }
-        .sheet(isPresented: $isLegalSheetPresented) {
-            LegalView()
+            presentation.present(.legal)
         }
     }
 }
 
 #Preview {
     LegalTextView()
+        .environment(NowPresentationCoordinator())
 }

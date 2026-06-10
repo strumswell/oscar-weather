@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AD5000022FE3000000000001 /* NowSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD5000012FE3000000000001 /* NowSheet.swift */; };
+		AD5000042FE3000000000001 /* NowPresentationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD5000032FE3000000000001 /* NowPresentationCoordinator.swift */; };
+		AD5000062FE3000000000001 /* NowSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD5000052FE3000000000001 /* NowSheetView.swift */; };
 		AD4000022FE2000000000001 /* NotificationNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4000012FE2000000000001 /* NotificationNames.swift */; };
 		AD4000032FE2000000000001 /* NotificationNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4000012FE2000000000001 /* NotificationNames.swift */; };
 		AD4000042FE2000000000001 /* NotificationNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4000012FE2000000000001 /* NotificationNames.swift */; };
@@ -320,6 +323,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AD5000012FE3000000000001 /* NowSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowSheet.swift; sourceTree = "<group>"; };
+		AD5000032FE3000000000001 /* NowPresentationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPresentationCoordinator.swift; sourceTree = "<group>"; };
+		AD5000052FE3000000000001 /* NowSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowSheetView.swift; sourceTree = "<group>"; };
 		AD4000012FE2000000000001 /* NotificationNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationNames.swift; sourceTree = "<group>"; };
 		AD4000062FE2000000000001 /* WeatherSnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherSnapshotStore.swift; sourceTree = "<group>"; };
 		AD4000082FE2000000000001 /* MoonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoonView.swift; sourceTree = "<group>"; };
@@ -810,6 +816,9 @@
 				2512E9392C37C751004670E4 /* Legal */,
 				25ED799329F1A79D002E0AAB /* Backgrounds */,
 				255C23AE258F93900066B2BD /* NowSubViews */,
+				AD5000012FE3000000000001 /* NowSheet.swift */,
+				AD5000032FE3000000000001 /* NowPresentationCoordinator.swift */,
+				AD5000052FE3000000000001 /* NowSheetView.swift */,
 				3EB89016251A55700028FED0 /* NowView.swift */,
 				255950942B45B16000122324 /* SearchCityView.swift */,
 				2536438026DACCB800C8A952 /* LegalView.swift */,
@@ -1266,6 +1275,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AD5000022FE3000000000001 /* NowSheet.swift in Sources */,
+				AD5000042FE3000000000001 /* NowPresentationCoordinator.swift in Sources */,
+				AD5000062FE3000000000001 /* NowSheetView.swift in Sources */,
 				AD4000022FE2000000000001 /* NotificationNames.swift in Sources */,
 				AD4000072FE2000000000001 /* WeatherSnapshotStore.swift in Sources */,
 				AD4000092FE2000000000001 /* MoonView.swift in Sources */,

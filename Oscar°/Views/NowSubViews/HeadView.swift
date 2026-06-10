@@ -8,12 +8,12 @@ import CoreLocation
 import SwiftUI
 
 struct HeadView: View {
-  @Namespace private var transition
+  let locationTransition: Namespace.ID
   @Environment(Weather.self) private var weather: Weather
   @Environment(Location.self) private var location: Location
+  @Environment(NowPresentationCoordinator.self) private var presentation
   @ScaledMetric(relativeTo: .largeTitle) private var temperatureFontSize: CGFloat = 120
   private let settingsService = SettingService.shared
-  @State private var isLocationSheetPresented = false
 
   private var windSpeedUnit: WindSpeedUnit {
     WindSpeedUnit(settingValue: settingsService.settings?.windSpeedUnit)
@@ -38,7 +38,7 @@ struct HeadView: View {
                     .lineSpacing(10)
                     .foregroundColor(Color(UIColor.label))
             }
-            .matchedTransitionSource(id: "locationName", in: transition)
+            .matchedTransitionSource(id: NowSheet.locationTransitionID, in: locationTransition)
         } else {
             Image(systemName: "magnifyingglass")
               .foregroundColor(Color(UIColor.label))
@@ -55,19 +55,7 @@ struct HeadView: View {
     .shadow(radius: 5)
     .onTapGesture {
       UIApplication.shared.playHapticFeedback()
-      isLocationSheetPresented.toggle()
-    }
-    .sheet(isPresented: $isLocationSheetPresented) {
-        if #available(iOS 18.0, *) {
-            SearchCityView()
-                .presentationDetents([.large])
-                .navigationTransition(
-                    .zoom(sourceID: "locationName", in: transition)
-                )
-        } else {
-            SearchCityView()
-                .presentationDetents([.large])
-      }
+      presentation.present(.location)
     }
     .padding(.bottom, 35)
     .padding(.leading, -20)

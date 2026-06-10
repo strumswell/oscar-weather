@@ -13,7 +13,7 @@ struct StormView: View {
     let paused: Bool
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: paused)) { timeline in
+        TimelineView(.animation(paused: paused)) { timeline in
             if isShown {
                 Canvas { context, size in
                     storm.update(date: timeline.date, size: size)
