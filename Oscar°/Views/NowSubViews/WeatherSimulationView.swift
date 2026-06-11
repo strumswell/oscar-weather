@@ -12,34 +12,51 @@ struct WeatherSimulationView: View {
     var animationsPaused = false
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
+    @Environment(AtmosphereDebugState.self) private var debugState: AtmosphereDebugState?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        let snapshot = AtmosphereWeatherMapper.snapshot(from: weather, at: location.coordinates)
+        let overrides = (weather.debug && debugState?.overrideEnabled == true) ? debugState : nil
+        let snapshot = overrides?.snapshot
+            ?? AtmosphereWeatherMapper.snapshot(from: weather, at: location.coordinates)
+        let moonPhase = overrides?.moonPhase ?? MoonPhase.phaseFraction()
         let cloudThickness = cloudThickness(for: snapshot)
         let cloudsVisible = snapshot.cloudDensity + snapshot.cloudCoverage > 0.02
+        let effectivePaused = animationsPaused || reduceMotion
 
         GeometryReader { proxy in
             ZStack {
-                if weather.forecast.hourly != nil {
-                    AtmosphereSkyShaderView(
-                        snapshot: snapshot,
-                        size: proxy.size
+                if weather.forecast.hourly != nil || overrides != nil {
+                    let moonProgress = moonAltitudeProgress(
+                        snapshot,
+                        phase: moonPhase,
+                        overriding: overrides != nil
                     )
-
-                    let moonProgress = moonAltitudeProgress(snapshot)
                     let moonLayout = moonProgress.map { progress in
                         (
                             x: 0.12 + 0.76 * progress,
                             y: 0.345 - 0.135 * sin(.pi * progress)
                         )
                     }
+                    // How much the moon brightens the night: phase × altitude.
+                    let moonGlow = moonProgress.map {
+                        Float(MoonPhase.illumination(for: moonPhase))
+                            * snapshot.nightAmount
+                            * Float(sin(.pi * $0))
+                    } ?? 0
+
+                    AtmosphereSkyShaderView(
+                        snapshot: snapshot,
+                        size: proxy.size,
+                        moonGlow: moonGlow,
+                        paused: effectivePaused
+                    )
 
                     let starOpacity = Double(snapshot.nightAmount)
                         * Double(1 - snapshot.cloudCoverage * 0.85)
                     if starOpacity > 0.02 {
                         StarsView(
-                            paused: animationsPaused,
+                            paused: effectivePaused,
                             occlusionCenter: moonLayout.map {
                                 CGPoint(
                                     x: proxy.size.width * $0.x,
@@ -53,7 +70,7 @@ struct WeatherSimulationView: View {
 
                     if let moonProgress, let moonLayout {
                         MoonView(
-                            phase: MoonPhase.phaseFraction(),
+                            phase: moonPhase,
                             altitudeProgress: moonProgress,
                             xFraction: moonLayout.x,
                             yFraction: moonLayout.y,
@@ -78,9 +95,9 @@ struct WeatherSimulationView: View {
                         if cloudsVisible {
                             CloudsView(
                                 thickness: cloudThickness,
-                                topTint: AtmosphereSampler.cloudTopTint(snapshot: snapshot),
-                                bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snapshot),
-                                paused: animationsPaused
+                                topTint: AtmosphereSampler.cloudTopTint(snapshot: snapshot, moonGlow: moonGlow),
+                                bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snapshot, moonGlow: moonGlow),
+                                paused: effectivePaused
                             )
                             .id(cloudThickness)
                             .transition(.opacity)
@@ -90,22 +107,41 @@ struct WeatherSimulationView: View {
                     .animation(.easeInOut(duration: 0.8), value: cloudThickness)
                     .animation(.easeInOut(duration: 0.8), value: cloudsVisible)
 
-                    if shouldShowStorm(snapshot) {
-                        StormView(
-                            type: stormContents(for: snapshot),
-                            direction: stormDirection(for: snapshot),
-                            strength: stormStrength(for: snapshot),
-                            paused: animationsPaused
-                        )
-                        .id(String(describing: stormContents(for: snapshot)))
-                        .opacity(reduceMotion ? 0.55 : 1)
+                    // Fog banks sit in front of the clouds, near the ground.
+                    let fogVisible = snapshot.condition == .fog
+                    ZStack {
+                        if fogVisible {
+                            FogView(
+                                density: Double(snapshot.haze),
+                                nightAmount: Double(snapshot.nightAmount),
+                                paused: effectivePaused
+                            )
+                            .transition(.opacity)
+                        }
                     }
+                    .animation(.easeInOut(duration: 1.2), value: fogVisible)
+
+                    let stormVisible = shouldShowStorm(snapshot)
+                    ZStack {
+                        if stormVisible {
+                            StormView(
+                                type: stormContents(for: snapshot),
+                                direction: stormDirection(for: snapshot),
+                                strength: stormStrength(for: snapshot),
+                                paused: effectivePaused
+                            )
+                            .id(String(describing: stormContents(for: snapshot)))
+                            .transition(.opacity)
+                            .opacity(reduceMotion ? 0.55 : 1)
+                        }
+                    }
+                    .animation(.easeInOut(duration: 0.8), value: stormVisible)
                 } else {
                     AtmosphereSampler.skyGradient(snapshot: .fallback)
                 }
 
                 if weather.debug {
-                    debugOverlay(snapshot: snapshot)
+                    AtmosphereDebugOverlay(snapshot: snapshot)
                 }
             }
             .preferredColorScheme(.dark)
@@ -113,30 +149,6 @@ struct WeatherSimulationView: View {
             .background(AtmosphereSampler.skyGradient(snapshot: snapshot))
         }
         .ignoresSafeArea()
-    }
-
-    private func debugOverlay(snapshot: AtmosphereSnapshot) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Atmosphere")
-                .font(.caption.bold())
-            Text("Condition: \(String(describing: snapshot.condition))")
-            Text("Cloud: \(snapshot.cloudCoverage, specifier: "%.2f") / \(snapshot.cloudDensity, specifier: "%.2f")")
-            Text("Precip: \(snapshot.precipitationAmount, specifier: "%.2f") mm / \(snapshot.precipitationIntensity, specifier: "%.2f")")
-            Text("Snow: \(snapshot.snowfallAmount, specifier: "%.2f") mm / \(snapshot.snowfallIntensity, specifier: "%.2f")")
-            Text("Haze: \(snapshot.haze, specifier: "%.2f") Turbidity: \(snapshot.turbidity, specifier: "%.2f")")
-            Text("Sun: \(snapshot.sunElevation * 180 / .pi, specifier: "%.1f")°")
-            Text(weather.isLoading.description)
-            if !weather.loadingQueries.isEmpty {
-                Text(weather.loadingQueries.sorted().map(\.displayName).joined(separator: ", "))
-            }
-        }
-        .font(.caption2.monospaced())
-        .foregroundStyle(.white)
-        .padding(10)
-        .background(.black.opacity(0.45), in: RoundedRectangle(cornerRadius: 8))
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(.top, 64)
-        .padding(.horizontal, 12)
     }
 
     private func shouldShowSun(_ snapshot: AtmosphereSnapshot) -> Bool {
@@ -150,13 +162,17 @@ struct WeatherSimulationView: View {
     /// The moon's pass across the sky (0 = rise, 0.5 = transit, 1 = set),
     /// or nil when it's below the horizon, the sky is too bright, the phase
     /// is too new to see, or clouds hide it.
-    /// Debug mode pins the moon at transit for visual checks.
-    private func moonAltitudeProgress(_ snapshot: AtmosphereSnapshot) -> Double? {
-        if weather.debug {
+    /// Plain debug mode pins the moon at transit for visual checks; with
+    /// overrides active it follows the scrubbed time and phase naturally.
+    private func moonAltitudeProgress(
+        _ snapshot: AtmosphereSnapshot,
+        phase: Double,
+        overriding: Bool
+    ) -> Double? {
+        if weather.debug && !overriding {
             return 0.5
         }
 
-        let phase = MoonPhase.phaseFraction()
         guard snapshot.nightAmount > 0.3,
               snapshot.cloudDensity < 0.7,
               MoonPhase.illumination(for: phase) >= 0.05 else {
@@ -206,28 +222,103 @@ struct WeatherSimulationView: View {
 private struct AtmosphereSkyShaderView: View {
     let snapshot: AtmosphereSnapshot
     let size: CGSize
+    var moonGlow: Float = 0
+    var paused: Bool = false
 
     var body: some View {
-        Rectangle()
-            .fill(skyShader(seed: Float(snapshot.timestamp)))
+        // Lightning flashes need a live clock; any other sky is a static
+        // frame that only changes with the snapshot.
+        if snapshot.thunderIntensity > 0.05 {
+            TimelineView(.animation(minimumInterval: 1.0 / 20.0, paused: paused)) { timeline in
+                sky(time: shaderTime(timeline.date.timeIntervalSinceReferenceDate))
+            }
+        } else {
+            sky(time: shaderTime(snapshot.timestamp))
+        }
     }
 
-    private func skyShader(seed: Float) -> Shader {
+    private func sky(time: Float) -> some View {
+        Rectangle().fill(skyShader(time: time))
+    }
+
+    /// Wraps the clock so it survives the trip into Float precision.
+    private func shaderTime(_ seconds: Double) -> Float {
+        Float(seconds.truncatingRemainder(dividingBy: 4096))
+    }
+
+    /// Mirrors SunView.sunX so the shader's glow lobe tracks the drawn sun.
+    private var sunX: Float {
+        (snapshot.timeOfDay - 0.3) * 1.8
+    }
+
+    private func skyShader(time: Float) -> Shader {
         Shader(
             function: ShaderFunction(library: .default, name: "atmosphereSky"),
             arguments: [
                 .float2(Float(size.width), Float(size.height)),
-                .float(seed),
+                .float(time),
                 .float(snapshot.sunElevation),
-                .float(snapshot.phase),
                 .float(snapshot.cloudDensity),
                 .float(snapshot.precipitationIntensity),
                 .float(snapshot.snowfallIntensity),
                 .float(snapshot.thunderIntensity),
                 .float(snapshot.haze),
-                .float(snapshot.turbidity)
+                .float(snapshot.turbidity),
+                .float(sunX),
+                .float(moonGlow)
             ]
         )
+    }
+}
+
+/// Drifting ground-fog banks for the fog condition: an even haze plus three
+/// soft bands swaying on detuned sine paths across the lower half.
+private struct FogView: View {
+    let density: Double
+    let nightAmount: Double
+    var paused: Bool = false
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 20.0, paused: paused)) { timeline in
+            let t = timeline.date.timeIntervalSinceReferenceDate
+            GeometryReader { proxy in
+                let width = proxy.size.width
+                let height = proxy.size.height
+                let shade = 0.85 - 0.5 * nightAmount
+
+                ZStack {
+                    // Even ground haze under the drifting banks.
+                    LinearGradient(
+                        colors: [.clear, Color(white: shade).opacity(0.30 * density)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: height * 0.5)
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+
+                    ForEach(0..<3, id: \.self) { band in
+                        let phase = Double(band) * 2.1
+                        let period = 38.0 + Double(band) * 11.0
+                        let sway = sin(t * 2 * .pi / period + phase)
+
+                        Ellipse()
+                            .fill(Color(white: shade))
+                            .frame(
+                                width: width * 1.7,
+                                height: height * (0.13 + 0.03 * Double(band))
+                            )
+                            .blur(radius: 30)
+                            .opacity((0.16 + 0.07 * Double(band)) * density)
+                            .position(
+                                x: width * (0.5 + 0.22 * sway),
+                                y: height * (0.58 + 0.14 * Double(band))
+                            )
+                    }
+                }
+            }
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
     }
 }
 

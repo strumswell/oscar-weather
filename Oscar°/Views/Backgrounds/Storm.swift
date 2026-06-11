@@ -15,8 +15,10 @@ class Storm {
     var drops = [StormDrop]()
     var lastUpdate = Date.now
     var image: Image
+    private let type: Contents
 
     init(type: Contents, direction: Angle, strength: Int) {
+        self.type = type
         switch type {
         case .snow:
             image = Image("snowParticle")
@@ -26,6 +28,19 @@ class Storm {
 
         for _ in 0..<strength {
             drops.append(StormDrop(type: type, direction: direction + .degrees(90)))
+        }
+    }
+
+    /// Matches the live drop count to the latest forecast intensity without
+    /// resetting drops that are already falling. New drops pick up the
+    /// current wind direction; existing ones keep theirs.
+    func sync(strength: Int, direction: Angle) {
+        if drops.count < strength {
+            for _ in drops.count..<strength {
+                drops.append(StormDrop(type: type, direction: direction + .degrees(90)))
+            }
+        } else if drops.count > strength {
+            drops.removeLast(drops.count - strength)
         }
     }
 

@@ -21,6 +21,7 @@ struct NowView: View {
     @Namespace private var sheetTransition
     @State private var tapCount = 0
     @State private var presentation = NowPresentationCoordinator()
+    @State private var atmosphereDebug = AtmosphereDebugState()
     @State private var oscarRadarState = OscarRadarState(renderMode: .preview)
     @State private var gfsImageState = GFSImageLayerState(renderMode: .preview)
 
@@ -132,8 +133,15 @@ struct NowView: View {
             .refreshable {
                 await weather.refresh(location: location)
             }
+            if weather.debug {
+                AtmosphereDebugPanel(state: atmosphereDebug)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 40)
+            }
         }
         .environment(presentation)
+        .environment(atmosphereDebug)
         .sheet(item: $presentation.sheet) { sheet in
             NowSheetView(
                 sheet: sheet,

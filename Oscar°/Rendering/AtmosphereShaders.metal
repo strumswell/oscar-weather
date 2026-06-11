@@ -89,7 +89,6 @@ static float3 atmosphereBaseSky(float horizon, float sunElevation, float cloudDe
     float2 size,
     float time,
     float sunElevation,
-    float phase,
     float cloudDensity,
     float precipitation,
     float snow,
@@ -120,6 +119,14 @@ static float3 atmosphereBaseSky(float horizon, float sunElevation, float cloudDe
     float horizonGlow = horizonBand * (0.10 + turbidity * 0.14) * sunsetBand;
     color += float3(1.0, 0.62, 0.42) * horizonGlow * (0.35 + 0.65 * lobe);
     color += float3(0.42, 0.26, 0.38) * horizonBand * sunsetBand * 0.07 * (1.0 - lobe);
+
+    // Subtle circumsolar brightening so clear daytime skies aren't a flat
+    // ramp. Anchored where SunView draws the sun (y ≈ 0.08 of the screen).
+    float dayBand = atmosphereSmoothstep(6.0, 18.0, elevationDegrees);
+    float2 sunDelta = float2(uv.x - sunX, (uv.y - 0.08) * (safeSize.y / safeSize.x));
+    float circumsolar = exp(-dot(sunDelta, sunDelta) * 7.0);
+    color += float3(0.16, 0.15, 0.11) * circumsolar * dayBand
+        * (0.55 + 0.45 * turbidity) * (1.0 - cloudDensity * 0.85);
 
     // Slow large-scale mottling so overcast skies aren't a flat ramp.
     float2 noiseUV = uv * float2(3.0, 2.2);

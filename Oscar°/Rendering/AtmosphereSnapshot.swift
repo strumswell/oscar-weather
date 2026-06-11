@@ -251,7 +251,10 @@ enum AtmosphereWeatherMapper {
         return clamp(max(pm25, max(pm10, no2)) / 100, 0, 1)
     }
 
-    private static func cloudDensityFor(
+    // Internal (not private): the debug-mode snapshot builder in
+    // Debug/AtmosphereDebugSnapshot.swift reuses these derivations so
+    // synthetic states match the live mapper.
+    static func cloudDensityFor(
         condition: AtmosphereConditionFamily,
         cloudCoverage: Float,
         humidity: Float,
@@ -301,7 +304,7 @@ enum AtmosphereWeatherMapper {
         return asin(sin(declination) * sin(latitude) + cos(declination) * cos(latitude) * cos(hourAngle))
     }
 
-    private static func daylightPhase(sunElevation: Float) -> Float {
+    static func daylightPhase(sunElevation: Float) -> Float {
         let degrees = sunElevation * 180 / .pi
         if degrees >= 6 { return 1 }
         if degrees >= 0 { return smoothstep(0, 6, degrees) }
@@ -310,12 +313,12 @@ enum AtmosphereWeatherMapper {
         return 0
     }
 
-    private static func smoothstep(_ edge0: Float, _ edge1: Float, _ value: Float) -> Float {
+    static func smoothstep(_ edge0: Float, _ edge1: Float, _ value: Float) -> Float {
         let x = clamp((value - edge0) / (edge1 - edge0), 0, 1)
         return x * x * (3 - 2 * x)
     }
 
-    private static func clamp(_ value: Float, _ lower: Float, _ upper: Float) -> Float {
+    static func clamp(_ value: Float, _ lower: Float, _ upper: Float) -> Float {
         min(max(value, lower), upper)
     }
 }
@@ -347,12 +350,12 @@ enum AtmosphereSampler {
         ]
     }
 
-    static func cloudTopTint(snapshot: AtmosphereSnapshot) -> Color {
-        cloudColor(snapshot: snapshot, top: true)
+    static func cloudTopTint(snapshot: AtmosphereSnapshot, moonGlow: Float = 0) -> Color {
+        cloudColor(snapshot: snapshot, top: true, moonGlow: moonGlow)
     }
 
-    static func cloudBottomTint(snapshot: AtmosphereSnapshot) -> Color {
-        cloudColor(snapshot: snapshot, top: false)
+    static func cloudBottomTint(snapshot: AtmosphereSnapshot, moonGlow: Float = 0) -> Color {
+        cloudColor(snapshot: snapshot, top: false, moonGlow: moonGlow)
     }
 
     private static func color(for snapshot: AtmosphereSnapshot, horizonFactor: Float) -> Color {
@@ -361,7 +364,8 @@ enum AtmosphereSampler {
         let goldenZenith = simd_float3(0.38, 0.56, 0.84)
         let goldenHorizon = simd_float3(0.98, 0.66, 0.48)
         let twilightZenith = simd_float3(0.05, 0.08, 0.22)
-        let twilightHorizon = simd_float3(0.18, 0.13, 0.34)
+        // Warm plum, matching the Metal shader's post-sunset horizon.
+        let twilightHorizon = simd_float3(0.30, 0.17, 0.33)
         let nightZenith = simd_float3(0.022, 0.040, 0.095)
         let nightHorizon = simd_float3(0.042, 0.052, 0.11)
 
@@ -394,17 +398,53 @@ enum AtmosphereSampler {
         return rgbColor(clamp(color))
     }
 
-    private static func cloudColor(snapshot: AtmosphereSnapshot, top: Bool) -> Color {
+    private static func cloudColor(snapshot: AtmosphereSnapshot, top: Bool, moonGlow: Float) -> Color {
         let base = colorVector(for: color(for: snapshot, horizonFactor: top ? 0.32 : 0.62))
-        let nightDim = 1 - snapshot.nightAmount * 0.7
+        // Bright-moon nights dim the clouds less ("silver lining").
+        let nightDim = 1 - snapshot.nightAmount * (0.7 - 0.25 * moonGlow)
         let bright = (top ? simd_float3(0.92, 0.92, 0.90) : simd_float3(0.54, 0.56, 0.60)) * nightDim
-        let storm = (top ? simd_float3(0.42, 0.44, 0.48) : simd_float3(0.15, 0.16, 0.20)) * nightDim
+        var storm = (top ? simd_float3(0.42, 0.44, 0.48) : simd_float3(0.15, 0.16, 0.20)) * nightDim
+        // Severe storms drift toward teal — the real "green sky" of
+        // hail-heavy cells. It's a daytime phenomenon, shows mainly in the
+        // bright cloud body, and ordinary thunderstorms stay grey
+        // (thunderIntensity floors at 0.55 for any thunderstorm code).
+        let severity = max(0, (snapshot.thunderIntensity - 0.55) / 0.45)
+        let stormDaylight = 1 - snapshot.nightAmount
+        let tealStrength = severity * stormDaylight * (top ? 0.5 : 0.15)
+        storm = mix(storm, simd_float3(0.28, 0.40, 0.42) * nightDim, t: tealStrength)
         let rain = mix(bright, storm, t: max(snapshot.precipitationIntensity, snapshot.thunderIntensity))
-        let color = mix(bright, rain, t: snapshot.cloudDensity)
+        var cloud = mix(bright, rain, t: snapshot.cloudDensity)
+
         let elevDeg = snapshot.sunElevation * 180 / .pi
         let sunsetProximity = 1 - min(1, abs(min(max(elevDeg, -6), 6)) / 6)
-        let tintFactor = 0.28 + snapshot.nightAmount * 0.4 + sunsetProximity * 0.32
-        return rgbColor(clamp(mix(color, base, t: tintFactor)))
+        // Golden hour lights clouds from below: warm bottoms, cool blue-grey
+        // tops. Heavy decks block the low sun, so the effect fades with
+        // density and rain.
+        let underlight = sunsetProximity * (1 - max(snapshot.precipitationIntensity, snapshot.cloudDensity * 0.7))
+        if top {
+            cloud = mix(cloud, simd_float3(0.46, 0.48, 0.62), t: underlight * 0.40)
+        } else {
+            cloud = mix(cloud, simd_float3(0.99, 0.62, 0.40), t: underlight * 0.65)
+        }
+
+        // Less sky-mixing at sunset than before, so the warm light survives.
+        let tintFactor = 0.28 + snapshot.nightAmount * 0.4 + sunsetProximity * 0.12
+        var result = mix(cloud, base, t: tintFactor)
+
+        // Never let the cloud melt into the sky behind it.
+        let sky = colorVector(for: color(for: snapshot, horizonFactor: 0.45))
+        let separation: Float = 0.06
+        let difference = luminance(result) - luminance(sky)
+        if abs(difference) < separation {
+            let direction: Float = difference >= 0 ? 1 : -1
+            result += simd_float3(repeating: direction * (separation - abs(difference)))
+        }
+
+        return rgbColor(clamp(result))
+    }
+
+    private static func luminance(_ color: simd_float3) -> Float {
+        color.x * 0.299 + color.y * 0.587 + color.z * 0.114
     }
 
     private static func colorVector(for color: Color) -> simd_float3 {

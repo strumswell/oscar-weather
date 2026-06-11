@@ -17,7 +17,6 @@ struct CloudsView: View {
         TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: paused)) { timeline in
             Canvas { context, size in
                 cloudGroup.update(date: timeline.date)
-                context.opacity = cloudGroup.opacity
 
                 let usedImageNumbers = Set(cloudGroup.clouds.map(\.imageNumber))
                 let resolvedImages = Dictionary(
@@ -35,7 +34,15 @@ struct CloudsView: View {
                     }
                 )
 
+                // Atmospheric perspective: smaller (farther) clouds sit
+                // closer to the sky, big near ones keep full presence.
+                let scales = cloudGroup.clouds.map(\.scale)
+                let minScale = scales.min() ?? 1
+                let scaleSpan = (scales.max() ?? 1) - minScale
+
                 for cloud in cloudGroup.clouds {
+                    let depth = scaleSpan < 0.01 ? 1.0 : (cloud.scale - minScale) / scaleSpan
+                    context.opacity = cloudGroup.opacity * (0.55 + 0.45 * depth)
                     context.translateBy(x: cloud.position.x, y: cloud.position.y)
                     context.scaleBy(x: cloud.scale, y: cloud.scale)
                     if let image = resolvedImages[cloud.imageNumber] {

@@ -8,43 +8,45 @@
 import SwiftUI
 
 struct StormView: View {
-    @State private var isShown = false
-    let storm: Storm
+    let type: Storm.Contents
+    let direction: Angle
+    let strength: Int
     let paused: Bool
+    // State-owned so body re-evaluations don't reset every falling drop;
+    // the call site's .id() swaps it out when the contents change.
+    @State private var storm: Storm
 
     var body: some View {
+        // Falling precipitation runs at full display refresh — moving
+        // particles judder visibly at capped frame rates on ProMotion.
         TimelineView(.animation(paused: paused)) { timeline in
-            if isShown {
-                Canvas { context, size in
-                    storm.update(date: timeline.date, size: size)
-                    
-                    for drop in storm.drops {
-                        var contextCopy = context
-                        
-                        let xPos = drop.x * size.width
-                        let yPos = drop.y * size.height
-                        
-                        contextCopy.opacity = drop.opacity
-                        contextCopy.translateBy(x: xPos, y: yPos)
-                        contextCopy.rotate(by: drop.direction + drop.rotation)
-                        contextCopy.scaleBy(x: drop.xScale, y: drop.yScale)
-                        contextCopy.draw(storm.image, at: .zero)
-                    }
+            Canvas { context, size in
+                storm.sync(strength: strength, direction: direction)
+                storm.update(date: timeline.date, size: size)
+
+                for drop in storm.drops {
+                    var contextCopy = context
+
+                    let xPos = drop.x * size.width
+                    let yPos = drop.y * size.height
+
+                    contextCopy.opacity = drop.opacity
+                    contextCopy.translateBy(x: xPos, y: yPos)
+                    contextCopy.rotate(by: drop.direction + drop.rotation)
+                    contextCopy.scaleBy(x: drop.xScale, y: drop.yScale)
+                    contextCopy.draw(storm.image, at: .zero)
                 }
-                .transition(.opacity)
             }
         }
         .ignoresSafeArea()
-        .onAppear {
-            withAnimation(.easeInOut(duration: 1.0)) {
-                self.isShown = true
-            }
-        }
     }
 
     init(type: Storm.Contents, direction: Angle, strength: Int, paused: Bool = false) {
-        storm = Storm(type: type, direction: direction, strength: strength)
+        self.type = type
+        self.direction = direction
+        self.strength = strength
         self.paused = paused
+        _storm = State(initialValue: Storm(type: type, direction: direction, strength: strength))
     }
 }
 

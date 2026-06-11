@@ -53,6 +53,10 @@
 		251BFE7E2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */; };
 		251BFEC42E48F34000D35589 /* WeatherAtmosphericAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */; };
 		251BFED12FB000000000001 /* AtmosphereSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFED02FB000000000001 /* AtmosphereSnapshot.swift */; };
+		AD6000022FE4000000000001 /* AtmosphereDebugState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6000012FE4000000000001 /* AtmosphereDebugState.swift */; };
+		AD6000042FE4000000000001 /* AtmosphereDebugSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6000032FE4000000000001 /* AtmosphereDebugSnapshot.swift */; };
+		AD6000062FE4000000000001 /* AtmosphereDebugPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6000052FE4000000000001 /* AtmosphereDebugPanel.swift */; };
+		AD6000082FE4000000000001 /* AtmosphereDebugOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6000072FE4000000000001 /* AtmosphereDebugOverlay.swift */; };
 		251BFED22FB000000000001 /* AtmosphereSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFED02FB000000000001 /* AtmosphereSnapshot.swift */; };
 		251BFED42FB000000000001 /* AtmosphereShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 251BFED32FB000000000001 /* AtmosphereShaders.metal */; };
 		251FE39127C5674400D26F0F /* WMSTileOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251FE39027C5674400D26F0F /* WMSTileOverlay.swift */; };
@@ -351,6 +355,10 @@
 		2519538E2F124B27003D5302 /* RadarTimelineControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarTimelineControls.swift; sourceTree = "<group>"; };
 		251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAtmosphericAdapter.swift; sourceTree = "<group>"; };
 		251BFED02FB000000000001 /* AtmosphereSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereSnapshot.swift; sourceTree = "<group>"; };
+		AD6000012FE4000000000001 /* AtmosphereDebugState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereDebugState.swift; sourceTree = "<group>"; };
+		AD6000032FE4000000000001 /* AtmosphereDebugSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereDebugSnapshot.swift; sourceTree = "<group>"; };
+		AD6000052FE4000000000001 /* AtmosphereDebugPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereDebugPanel.swift; sourceTree = "<group>"; };
+		AD6000072FE4000000000001 /* AtmosphereDebugOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereDebugOverlay.swift; sourceTree = "<group>"; };
 		251BFED32FB000000000001 /* AtmosphereShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = AtmosphereShaders.metal; sourceTree = "<group>"; };
 		251FE39027C5674400D26F0F /* WMSTileOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WMSTileOverlay.swift; sourceTree = "<group>"; };
 		2523367E27C3EB3900C2111A /* RainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainView.swift; sourceTree = "<group>"; };
@@ -593,6 +601,17 @@
 				251BFED32FB000000000001 /* AtmosphereShaders.metal */,
 			);
 			path = Rendering;
+			sourceTree = "<group>";
+		};
+		AD6000002FE4000000000001 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				AD6000012FE4000000000001 /* AtmosphereDebugState.swift */,
+				AD6000032FE4000000000001 /* AtmosphereDebugSnapshot.swift */,
+				AD6000052FE4000000000001 /* AtmosphereDebugPanel.swift */,
+				AD6000072FE4000000000001 /* AtmosphereDebugOverlay.swift */,
+			);
+			path = Debug;
 			sourceTree = "<group>";
 		};
 		25429BD129E5F94100D5979F /* Oscar°Watch Watch App */ = {
@@ -862,6 +881,7 @@
 			isa = PBXGroup;
 			children = (
 				251BFE7C2E48DC7600D35589 /* Rendering */,
+				AD6000002FE4000000000001 /* Debug */,
 				AC1000102FAA200000000001 /* LiveActivities */,
 				AC0000002FAA000000000001 /* Notifications */,
 				25CB17E62B470429001D973A /* Extensions */,
@@ -1332,6 +1352,10 @@
 				2533940A27C43F810087C220 /* AlertView.swift in Sources */,
 				251BFE7E2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift in Sources */,
 				251BFED12FB000000000001 /* AtmosphereSnapshot.swift in Sources */,
+				AD6000022FE4000000000001 /* AtmosphereDebugState.swift in Sources */,
+				AD6000042FE4000000000001 /* AtmosphereDebugSnapshot.swift in Sources */,
+				AD6000062FE4000000000001 /* AtmosphereDebugPanel.swift in Sources */,
+				AD6000082FE4000000000001 /* AtmosphereDebugOverlay.swift in Sources */,
 				251BFED42FB000000000001 /* AtmosphereShaders.metal in Sources */,
 				259187CB2C715B2900611B0F /* PrecipitationChart.swift in Sources */,
 				AD0000192FAA100000000001 /* HourlyChartUtilities.swift in Sources */,
