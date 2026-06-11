@@ -45,66 +45,74 @@ class HomeProvider: TimelineProvider {
         locationService.update()
 
         Task {
-            let coordinates = locationService.getCoordinates()
-            let locationName = await locationService.getLocationName()
+            do {
+                let coordinates = locationService.getCoordinates()
+                let locationName = await locationService.getLocationName()
 
-            async let weatherRequest = client.getForecast(
-                coordinates: coordinates,
-                forecastDays: ._1,
-                hourly: [
-                    .weathercode, .cloudcover, .relativehumidity_2m, .pressure_msl,
-                    .precipitation, .snowfall, .windspeed_10m, .winddirection_10m,
-                ]
-            )
-            async let radarRequest = client.getRainRadar(coordinates: coordinates)
-            let (weather, radar) = try await (weatherRequest, radarRequest)
-            
-            let dayBegin = weather.hourly?.time.first ?? 0
-            let currentTime = (Date.now.timeIntervalSince1970-Double(dayBegin))/86400.0
-            
-            let temperatureMin = weather.daily?.temperature_2m_min?.first ?? 0
-            let temperatureMax = weather.daily?.temperature_2m_max?.first ?? 0
-            let temperatureNow = weather.current?.temperature ?? 0
-            let weathercode = weather.current?.weathercode ?? 0
-            let isDay = weather.current?.is_day ?? 0
-            let precipitation = weather.current?.precipitation ?? 0          
-            
-            // Create Weather object for atmospheric rendering
-            let weatherForRendering = Weather()
-            weatherForRendering.time = currentTime
-            weatherForRendering.forecast = weather // Use the existing forecast data
-            weatherForRendering.radar = radar
-            weatherForRendering.debug = true // Enable debug for troubleshooting
-            
-            // Get atmospheric gradient for widget background (full 12-sample gradient)
-            let backgroundGradient = atmosphericAdapter.getWidgetFullGradient(
-                from: weatherForRendering,
-                at: coordinates
-            )
+                async let weatherRequest = client.getForecast(
+                    coordinates: coordinates,
+                    forecastDays: ._1,
+                    hourly: [
+                        .weathercode, .cloudcover, .relativehumidity_2m, .pressure_msl,
+                        .precipitation, .snowfall, .windspeed_10m, .winddirection_10m,
+                    ]
+                )
+                async let radarRequest = client.getRainRadar(coordinates: coordinates)
+                let (weather, radar) = try await (weatherRequest, radarRequest)
 
-            // Debug output for troubleshooting
-            if weatherForRendering.debug {
-                print("🔧 Widget Debug - Location: \(coordinates)")
-                print("🔧 Widget Debug - Time: \(currentTime)")
-                print("🔧 Widget Debug - Weather code: \(weathercode)")
-                print("🔧 Widget Debug - Temperature: \(temperatureNow)")
-                print("🔧 Widget Debug - Using full atmospheric gradient")
+                let dayBegin = weather.hourly?.time.first ?? 0
+                let currentTime = (Date.now.timeIntervalSince1970-Double(dayBegin))/86400.0
+
+                let temperatureMin = weather.daily?.temperature_2m_min?.first ?? 0
+                let temperatureMax = weather.daily?.temperature_2m_max?.first ?? 0
+                let temperatureNow = weather.current?.temperature ?? 0
+                let weathercode = weather.current?.weathercode ?? 0
+                let isDay = weather.current?.is_day ?? 0
+                let precipitation = weather.current?.precipitation ?? 0
+
+                // Create Weather object for atmospheric rendering
+                let weatherForRendering = Weather()
+                weatherForRendering.time = currentTime
+                weatherForRendering.forecast = weather // Use the existing forecast data
+                weatherForRendering.radar = radar
+                weatherForRendering.debug = true // Enable debug for troubleshooting
+
+                // Get atmospheric gradient for widget background (full 12-sample gradient)
+                let backgroundGradient = atmosphericAdapter.getWidgetFullGradient(
+                    from: weatherForRendering,
+                    at: coordinates
+                )
+
+                // Debug output for troubleshooting
+                if weatherForRendering.debug {
+                    print("🔧 Widget Debug - Location: \(coordinates)")
+                    print("🔧 Widget Debug - Time: \(currentTime)")
+                    print("🔧 Widget Debug - Weather code: \(weathercode)")
+                    print("🔧 Widget Debug - Temperature: \(temperatureNow)")
+                    print("🔧 Widget Debug - Using full atmospheric gradient")
+                }
+
+                let entry = HomeEntry(
+                    date: Date(),
+                    location: locationName,
+                    temperatureMin: temperatureMin,
+                    temperatureMax: temperatureMax,
+                    temperatureNow: temperatureNow,
+                    icon: getWeatherIcon(weathercode: weathercode, isDay: isDay, isRaining: radar.isRaining(), precipitation: precipitation),
+                    backgroundGradient: backgroundGradient
+                )
+
+                let currentDate = Date()
+                let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 30, to: currentDate)!
+                let timeline = Timeline(entries:[entry], policy: .after(nextUpdateDate))
+                completion(timeline)
+            } catch {
+                // completion must always be called: a dropped timeline request kills the
+                // refresh chain and the widget never updates again. An empty timeline keeps
+                // the last rendered entry on screen and retries once the API is back.
+                let retryDate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+                completion(Timeline(entries: [], policy: .after(retryDate)))
             }
-
-            let entry = HomeEntry(
-                date: Date(),
-                location: locationName,
-                temperatureMin: temperatureMin,
-                temperatureMax: temperatureMax,
-                temperatureNow: temperatureNow,
-                icon: getWeatherIcon(weathercode: weathercode, isDay: isDay, isRaining: radar.isRaining(), precipitation: precipitation),
-                backgroundGradient: backgroundGradient
-            )
-            
-            let currentDate = Date()
-            let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 30, to: currentDate)!
-            let timeline = Timeline(entries:[entry], policy: .after(nextUpdateDate))
-            completion(timeline)
         }
     }
     

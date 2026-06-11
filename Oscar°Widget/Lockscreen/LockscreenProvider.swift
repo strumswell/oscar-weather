@@ -41,35 +41,43 @@ struct LockscreenProvider: TimelineProvider {
         locationService.update()
 
         Task {
-            let coordinates = locationService.getCoordinates()
-            
-            async let weatherRequest = client.getForecast(
-                coordinates: coordinates,
-                forecastDays: ._1,
-                hourly: [.precipitation_probability]
-            )
-            async let radarRequest = client.getRainRadar(coordinates: coordinates)
-            let (weather, radar) = try await (weatherRequest, radarRequest)
-                        
-            let temperatureMin = weather.daily?.temperature_2m_min?.first ?? 0
-            let temperatureMax = weather.daily?.temperature_2m_max?.first ?? 0
-            let temperatureNow = weather.current?.temperature ?? 0
-            let weathercode = weather.current?.weathercode ?? 0
-            let isDay = weather.current?.is_day ?? 0
-            
-            // TODO: Respect radar data for precipitation + probability
-            let precipitation = weather.current?.precipitation ?? 0.0
-            let precipitationProbability = weather.hourly?.precipitation_probability?[getLocalizedHourIndex(weather: weather)]
-            
-            let isRaining = radar.isRaining()
-            let icon = getWeatherIcon(weathercode: weathercode, isDay: isDay, isRaining: isRaining, precipitation: precipitation)
-            
-            let entry = TemperatureLockScreenEntry(date: Date(), temperatureMin: temperatureMin, temperatureMax: temperatureMax, temperatureNow: temperatureNow, icon: icon, precipitation: precipitation, precipitationProbability: Int(precipitationProbability ?? 0))
-            
-            let currentDate = Date()
-            let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 30, to: currentDate)!
-            let timeline = Timeline(entries:[entry], policy: .after(nextUpdateDate))
-            completion(timeline)
+            do {
+                let coordinates = locationService.getCoordinates()
+
+                async let weatherRequest = client.getForecast(
+                    coordinates: coordinates,
+                    forecastDays: ._1,
+                    hourly: [.precipitation_probability]
+                )
+                async let radarRequest = client.getRainRadar(coordinates: coordinates)
+                let (weather, radar) = try await (weatherRequest, radarRequest)
+
+                let temperatureMin = weather.daily?.temperature_2m_min?.first ?? 0
+                let temperatureMax = weather.daily?.temperature_2m_max?.first ?? 0
+                let temperatureNow = weather.current?.temperature ?? 0
+                let weathercode = weather.current?.weathercode ?? 0
+                let isDay = weather.current?.is_day ?? 0
+
+                // TODO: Respect radar data for precipitation + probability
+                let precipitation = weather.current?.precipitation ?? 0.0
+                let precipitationProbability = weather.hourly?.precipitation_probability?[getLocalizedHourIndex(weather: weather)]
+
+                let isRaining = radar.isRaining()
+                let icon = getWeatherIcon(weathercode: weathercode, isDay: isDay, isRaining: isRaining, precipitation: precipitation)
+
+                let entry = TemperatureLockScreenEntry(date: Date(), temperatureMin: temperatureMin, temperatureMax: temperatureMax, temperatureNow: temperatureNow, icon: icon, precipitation: precipitation, precipitationProbability: Int(precipitationProbability ?? 0))
+
+                let currentDate = Date()
+                let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 30, to: currentDate)!
+                let timeline = Timeline(entries:[entry], policy: .after(nextUpdateDate))
+                completion(timeline)
+            } catch {
+                // completion must always be called: a dropped timeline request kills the
+                // refresh chain and the widget never updates again. An empty timeline keeps
+                // the last rendered entry on screen and retries once the API is back.
+                let retryDate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+                completion(Timeline(entries: [], policy: .after(retryDate)))
+            }
         }
     }
     
