@@ -384,7 +384,7 @@ enum AtmosphereSampler {
         } else if elevationDegrees >= -6 {
             color = mix(twilight, golden, t: smoothstep(-6, 0, elevationDegrees))
         } else {
-            color = mix(night, twilight, t: smoothstep(-18, -6, elevationDegrees))
+            color = mix(night, twilight, t: smoothstep(-14, -6, elevationDegrees))
         }
 
         let gray = simd_float3(repeating: (color.x + color.y + color.z) / 3)

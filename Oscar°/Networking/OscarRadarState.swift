@@ -673,7 +673,7 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
 
 // MARK: - GFS Full-World Image Layer State
 
-let radarBaseURL = "https://radar.oscars.love"
+let radarBaseURL = "https://server.oscars.love"
 
 @MainActor
 @Observable

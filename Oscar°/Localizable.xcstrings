@@ -243,6 +243,29 @@
     "%@ Bft" : {
       "shouldTranslate" : false
     },
+    "%@ Tage" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Tage"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ days"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ gün"
+          }
+        }
+      }
+    },
     "%@, %@" : {
       "localizations" : {
         "de" : {
@@ -716,6 +739,29 @@
         }
       }
     },
+    "alle %lld Std." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "alle %lld Std."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "every %lld h"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld saatte bir"
+          }
+        }
+      }
+    },
     "Allgemein" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1041,6 +1087,29 @@
         }
       }
     },
+    "Australien" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Australien"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Australia"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avustralya"
+          }
+        }
+      }
+    },
     "Außerhalb der Modellabdeckung" : {
       "localizations" : {
         "en" : {
@@ -1053,6 +1122,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Modelin kapsama alanı dışında"
+          }
+        }
+      }
+    },
+    "Außerhalb des Modells – Automatik aktiv." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Außerhalb des Modells – Automatik aktiv."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Outside model area – using auto."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model alanı dışında – otomatik."
+          }
+        }
+      }
+    },
+    "Automatisch" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otomatik"
           }
         }
       }
@@ -1508,6 +1623,29 @@
         }
       }
     },
+    "China" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "China"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "China"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çin"
+          }
+        }
+      }
+    },
     "Cloud: %.2f / %.2f" : {
       "localizations" : {
         "de" : {
@@ -1834,7 +1972,6 @@
       }
     },
     "Einstellungen" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2044,6 +2181,29 @@
         }
       }
     },
+    "Europa" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Europa"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Europe"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avrupa"
+          }
+        }
+      }
+    },
     "Extrem" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2188,6 +2348,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tahmin"
+          }
+        }
+      }
+    },
+    "Frankreich & Europa" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frankreich & Europa"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "France & Europe"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fransa ve Avrupa"
           }
         }
       }
@@ -2466,6 +2649,75 @@
         }
       }
     },
+    "Globales 0,25°-Modell (Open-Data, ca. 2 Std. Verzögerung)." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Globales 0,25°-Modell (Open-Data, ca. 2 Std. Verzögerung)."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Global 0.25° model (open data, approx. 2 h delay)."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küresel 0,25° model (açık veri, yaklaşık 2 saat gecikme)."
+          }
+        }
+      }
+    },
+    "Globales Modell des australischen Wetterdienstes." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Globales Modell des australischen Wetterdienstes."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Global model from the Australian weather service."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avustralya hava durumu servisinin küresel modeli."
+          }
+        }
+      }
+    },
+    "Globales Modell des chinesischen Wetterdienstes." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Globales Modell des chinesischen Wetterdienstes."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Global model from the Chinese weather service."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çin hava durumu servisinin küresel modeli."
+          }
+        }
+      }
+    },
     "Gräser" : {
       "comment" : "Pollen type name",
       "extractionState" : "stale",
@@ -2514,6 +2766,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
+          }
+        }
+      }
+    },
+    "Großbritannien" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Großbritannien"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "United Kingdom"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birleşik Krallık"
           }
         }
       }
@@ -2695,6 +2970,52 @@
         }
       }
     },
+    "Hochauflösendes Modell für Italien." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hochauflösendes Modell für Italien."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High-resolution model for Italy."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İtalya için yüksek çözünürlüklü model."
+          }
+        }
+      }
+    },
+    "Hochauflösendes Regionalmodell, weltweit durch ECMWF ergänzt." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hochauflösendes Regionalmodell, weltweit durch ECMWF ergänzt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High-resolution regional model, extended worldwide by ECMWF."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüksek çözünürlüklü bölgesel model, ECMWF ile dünya genelinde tamamlanır."
+          }
+        }
+      }
+    },
     "Hohe gesundheitliche Gefährdung, Schutzmaßnahmen sind erforderlich." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2806,6 +3127,52 @@
     },
     "inch" : {
       "shouldTranslate" : false
+    },
+    "Italien" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Italien"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Italy"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İtalya"
+          }
+        }
+      }
+    },
+    "Japan" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Japan"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Japan"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Japonya"
+          }
+        }
+      }
     },
     "Jetzt" : {
       "extractionState" : "manual",
@@ -3023,6 +3390,29 @@
         }
       }
     },
+    "KI-basiertes Wettermodell von ECMWF." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KI-basiertes Wettermodell von ECMWF."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI-based weather model from ECMWF."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ECMWF'nin yapay zeka tabanlı hava durumu modeli."
+          }
+        }
+      }
+    },
     "Klimakatastrophe" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3051,6 +3441,29 @@
     },
     "kn" : {
       "shouldTranslate" : false
+    },
+    "Korea" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Korea"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Korea"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kore"
+          }
+        }
+      }
     },
     "Körner/m³" : {
       "extractionState" : "manual",
@@ -3599,6 +4012,29 @@
         }
       }
     },
+    "Mitteleuropa & Alpen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mitteleuropa & Alpen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Central Europe & Alps"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta Avrupa ve Alpler"
+          }
+        }
+      }
+    },
     "Mittlere gesundheitliche Gefährdung, Schutzmaßnahmen sind erforderlich." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3719,6 +4155,52 @@
         }
       }
     },
+    "Nationale Wetterdienste" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nationale Wetterdienste"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "National weather services"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ulusal hava durumu servisleri"
+          }
+        }
+      }
+    },
+    "Native 9-km-Auflösung direkt von ECMWF, stündlich bis +90 Std." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Native 9-km-Auflösung direkt von ECMWF, stündlich bis +90 Std."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Native 9 km resolution directly from ECMWF, hourly up to +90 h."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doğrudan ECMWF'den 9 km doğal çözünürlük, +90 saate kadar saatlik."
+          }
+        }
+      }
+    },
     "NE_compass" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3738,6 +4220,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "KD"
+          }
+        }
+      }
+    },
+    "Niederlande & Westeuropa" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niederlande & Westeuropa"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Netherlands & Western Europe"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hollanda ve Batı Avrupa"
           }
         }
       }
@@ -3820,6 +4325,52 @@
     "NOAA Global Forecast System (GFS)" : {
       "shouldTranslate" : false
     },
+    "Nordamerika" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nordamerika"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "North America"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuzey Amerika"
+          }
+        }
+      }
+    },
+    "Nordeuropa" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nordeuropa"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Northern Europe"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuzey Avrupa"
+          }
+        }
+      }
+    },
     "Notifications" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3885,6 +4436,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oscar'da bildirimler kapalı. Mevcut konumunuz için yağmur uyarıları ve hava durumu uyarıları almak üzere bunları açın."
+          }
+        }
+      }
+    },
+    "Nur %@ – andere Orte liefern keine Daten" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur %@ – andere Orte liefern keine Daten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only %@ – other locations return no data"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yalnızca %@ – diğer konumlar veri döndürmez"
           }
         }
       }
@@ -4064,6 +4637,28 @@
     },
     "open-meteo.com" : {
       "shouldTranslate" : false
+    },
+    "Optimiert für %@ · weltweite Daten" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optimiert für %@ · weltweite Daten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optimized for %@ · worldwide data"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ için optimize · dünya geneli veri"
+          }
+        }
+      }
     },
     "Original" : {
       "extractionState" : "manual",
@@ -4586,6 +5181,7 @@
       }
     },
     "Rechtliche\nInformationen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5287,6 +5883,50 @@
         }
       }
     },
+    "Standardmäßig wählt Oscar automatisch das beste Wettermodell. Fortgeschrittene Nutzer können ein bestimmtes Modell erzwingen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standardmäßig wählt Oscar automatisch das beste Wettermodell. Fortgeschrittene Nutzer können ein bestimmtes Modell erzwingen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By default, Oscar automatically picks the best weather model. Advanced users can force a specific model."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar varsayılan olarak en iyi hava durumu modelini otomatik seçer. İleri düzey kullanıcılar belirli bir modeli zorlayabilir."
+          }
+        }
+      }
+    },
+    "Standardmäßig wählt Oscar für jeden Ort automatisch das beste Modell und kombiniert mehrere Wetterdienste. Empfohlen für die meisten Nutzer." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standardmäßig wählt Oscar für jeden Ort automatisch das beste Modell und kombiniert mehrere Wetterdienste. Empfohlen für die meisten Nutzer."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By default, Oscar automatically picks the best model for each location and combines several weather services. Recommended for most users."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar varsayılan olarak her konum için en iyi modeli otomatik seçer ve birden fazla hava durumu servisini birleştirir. Çoğu kullanıcı için önerilir."
+          }
+        }
+      }
+    },
     "Stark" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5417,6 +6057,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Azot dioksit çoğunlukla karayolu trafiği ve ısıtma sistemlerindeki yanma süreçlerinden kaynaklanır. Solunum yollarını tahriş eder ve astım ile diğer akciğer hastalıklarını kötüleştirebilir."
+          }
+        }
+      }
+    },
+    "stündlich" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "stündlich"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hourly"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "saatlik"
           }
         }
       }
@@ -5942,6 +6605,28 @@
         }
       }
     },
+    "Überschreibe die automatische Auswahl nur, wenn du weißt, was du tust. Die meisten Modelle liefern weltweite Daten, sind aber auf ihre Heimatregion optimiert. Einige decken nur ihre Region ab und liefern teils weniger Daten als die automatische Auswahl." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überschreibe die automatische Auswahl nur, wenn du weißt, was du tust. Die meisten Modelle liefern weltweite Daten, sind aber auf ihre Heimatregion optimiert. Einige decken nur ihre Region ab und liefern teils weniger Daten als die automatische Auswahl."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only override the automatic selection if you know what you're doing. Most models provide worldwide data but are optimized for their home region. Some only cover their region and may provide less data than the automatic selection."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otomatik seçimi yalnızca ne yaptığınızı biliyorsanız geçersiz kılın. Çoğu model dünya genelinde veri sağlar ancak kendi bölgesi için optimize edilmiştir. Bazıları yalnızca kendi bölgesini kapsar ve otomatik seçime kıyasla daha az veri sağlayabilir."
+          }
+        }
+      }
+    },
     "Uhr" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6082,6 +6767,29 @@
         }
       }
     },
+    "USA" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "USA"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "USA"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ABD"
+          }
+        }
+      }
+    },
     "UV" : {
       "comment" : "Environment UV",
       "extractionState" : "stale",
@@ -6212,6 +6920,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gündüz değerlerinin günlük değerlerin yerine geçmesini veya 24 saatlik aralıkta işaretlenmesini seç."
+          }
+        }
+      }
+    },
+    "Wählt für jeden Ort weltweit automatisch das beste Modell und kombiniert mehrere Wetterdienste." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wählt für jeden Ort weltweit automatisch das beste Modell und kombiniert mehrere Wetterdienste."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatically picks the best model for any location worldwide and combines several weather services."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dünya genelinde her konum için otomatik olarak en iyi modeli seçer ve birden fazla hava durumu servisini birleştirir."
           }
         }
       }

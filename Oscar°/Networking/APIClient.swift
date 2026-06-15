@@ -29,7 +29,10 @@ class APIClient {
   var settingService: SettingService
 
   init() {
-    openMeteo = APIClient.get(url: try! Servers.server1())
+    openMeteo = APIClient.get(
+      url: try! Servers.server1(),
+      prepending: [ForecastSanitizingMiddleware()]
+    )
     openMeteoAqi = APIClient.get(url: try! Servers.server2())
     openMeteoGeo = APIClient.get(url: try! Servers.server3())
     openMeteoEnsemble = APIClient.get(url: URL(string: "https://ensemble-api.open-meteo.com")!)
@@ -39,11 +42,11 @@ class APIClient {
     settingService = SettingService.shared
   }
 
-  class func get(url: URL) -> Client {
+  class func get(url: URL, prepending middlewares: [any ClientMiddleware] = []) -> Client {
     return Client(
       serverURL: url,
       transport: URLSessionTransport(),
-      middlewares: [
+      middlewares: middlewares + [
         CachingMiddleware(cacheTime: 60),
         ContactIdentityMiddleware(),
         RetryingMiddleware(
@@ -101,8 +104,14 @@ class APIClient {
       forecast_days: forecastDays
     )
 
+    let modelPreference = SettingService.resolvedForecastModelPreference
+
+    // A user-forced model overrides the automatic best_match and regional logic below.
+    if modelPreference != .bestMatch {
+      query.models = Operations.getForecast.Input.Query.modelsPayload(rawValue: modelPreference.apiValue)
+    }
     // For regions where ICON model is better
-    if coordinates.country() == .spain || coordinates.country() == .portugal  //|| coordinates.country() == .centralEurope
+    else if coordinates.country() == .spain || coordinates.country() == .portugal  //|| coordinates.country() == .centralEurope
     {
       // First request: Get 7 days with ICON model
       query.models = .icon_seamless
@@ -177,7 +186,47 @@ class APIClient {
         return result
       }
     case .badRequest(_), .undocumented(statusCode: _, _):
+      // A user-forced model may have no data for this location ("No data is available for this
+      // location"). Fall back to best_match and let the UI notify the user.
+      if modelPreference != .bestMatch,
+        let fallback = try await fallbackToBestMatch(query: query, failedModel: modelPreference)
+      {
+        return fallback
+      }
       return fallbackForecast
+    }
+  }
+
+  /// Re-requests the forecast with `best_match` after a forced model returned no data, and posts a
+  /// notification so the app can inform the user. Returns `nil` if `best_match` also fails.
+  private func fallbackToBestMatch(
+    query: Operations.getForecast.Input.Query,
+    failedModel: ForecastModelPreference
+  ) async throws -> Operations.getForecast.Output.Ok.Body.jsonPayload? {
+    var query = query
+    query.models = .best_match
+
+    let response = try await openMeteo.getForecast(.init(query: query))
+    switch response {
+    case let .ok(response):
+      switch response.body {
+      case .json(let result):
+        notifyModelFallback(failedModel)
+        return result
+      }
+    case .badRequest(_), .undocumented(statusCode: _, _):
+      return nil
+    }
+  }
+
+  private func notifyModelFallback(_ model: ForecastModelPreference) {
+    let modelName = model.name
+    DispatchQueue.main.async {
+      NotificationCenter.default.post(
+        name: .forecastModelFallback,
+        object: nil,
+        userInfo: ["modelName": modelName]
+      )
     }
   }
 

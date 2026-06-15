@@ -12,6 +12,21 @@ struct ForecastSettingsView: View {
     NavigationView {
       List {
         Section {
+          NavigationLink {
+            ForecastModelSettingsView()
+          } label: {
+            HStack {
+              Text("Wettermodell")
+              Spacer()
+              Text(settingsService.forecastModelPreference.name)
+                .foregroundStyle(.secondary)
+            }
+          }
+        } footer: {
+          Text("Standardmäßig wählt Oscar automatisch das beste Wettermodell. Fortgeschrittene Nutzer können ein bestimmtes Modell erzwingen.")
+        }
+
+        Section {
           Toggle(isOn: Binding(
             get: { settingsService.dailyForecastDaytimeTemperaturesEnabled },
             set: { settingsService.dailyForecastDaytimeTemperaturesEnabled = $0 }

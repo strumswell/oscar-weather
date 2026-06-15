@@ -24,14 +24,26 @@ struct NowView: View {
     @State private var atmosphereDebug = AtmosphereDebugState()
     @State private var oscarRadarState = OscarRadarState(renderMode: .preview)
     @State private var gfsImageState = GFSImageLayerState(renderMode: .preview)
+    @State private var manualRefreshInFlight = false
+    @State private var showRefreshIndicator = false
+    @State private var modelFallbackToast: String?
 
     var body: some View {
+        let refreshPending = weather.isLoading && weather.hasContent && !manualRefreshInFlight
+
         ZStack {
-            WeatherSimulationView(animationsPaused: presentation.sheet != nil)
+            WeatherSimulationView(isCoveredBySheet: presentation.sheet != nil)
             ScrollView(.vertical, showsIndicators: false) {
                 ZStack {
                     VStack(alignment: .leading) {
-                        
+                        if showRefreshIndicator {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .tint(Color(UIColor.label))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 20)
+                                .transition(.move(edge: .top).combined(with: .opacity))
+                        }
                         HeadView(locationTransition: sheetTransition)
                             .padding(.top, 50)
                             .onTapGesture {
@@ -43,8 +55,6 @@ struct NowView: View {
                                 }
                             }
                         RainView(openRadarMap: openRadarMap)
-                            .opacity(weather.isLoading && !weather.hasContent ? 0.3 : 1.0)
-                            .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
                         HourlyView()
                         DailyView()
                         VStack(alignment: .leading) {
@@ -67,8 +77,6 @@ struct NowView: View {
                                 .frame(height: 350)
                                 .cornerRadius(10)
                                 .padding()
-                                .opacity(weather.isLoading && !weather.hasContent ? 0.3 : 1.0)
-                                .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
                                 .onTapGesture {
                                     presentMap()
                                 }
@@ -127,17 +135,43 @@ struct NowView: View {
                             }
                         }
                     }
+                    .animation(.easeInOut(duration: 0.3), value: showRefreshIndicator)
                 }
             }
             .padding(.top, 40)
             .refreshable {
+                manualRefreshInFlight = true
                 await weather.refresh(location: location)
+                manualRefreshInFlight = false
+            }
+            .task(id: refreshPending) {
+                guard refreshPending else {
+                    showRefreshIndicator = false
+                    return
+                }
+                if (try? await Task.sleep(for: .milliseconds(500))) != nil {
+                    showRefreshIndicator = true
+                }
             }
             if weather.debug {
                 AtmosphereDebugPanel(state: atmosphereDebug)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                     .padding(.horizontal, 12)
                     .padding(.bottom, 40)
+            }
+
+            if let message = modelFallbackToast, presentation.sheet == nil {
+                ToastBanner(message: message)
+                    .padding(.top, 60)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .zIndex(2)
+                    .task {
+                        // Start the dismiss timer only once the toast is actually on screen
+                        // (e.g. after the settings sheet that triggered the change is closed).
+                        try? await Task.sleep(for: .seconds(5))
+                        withAnimation(.easeInOut(duration: 0.3)) { modelFallbackToast = nil }
+                    }
             }
         }
         .environment(presentation)
@@ -188,10 +222,35 @@ struct NowView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .unitChanged, object: nil)) { _ in
+            // Clear any stale fallback notice; the upcoming refresh re-posts one if it still applies.
+            modelFallbackToast = nil
             Task {
                 await weather.refresh(location: location)
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .forecastModelFallback)) { _ in
+            withAnimation(.spring(duration: 0.4)) {
+                modelFallbackToast = String(localized: "Außerhalb des Modells – Automatik aktiv.")
+            }
+        }
+    }
+}
+
+struct ToastBanner: View {
+    let message: String
+
+    var body: some View {
+        Text(message)
+            .font(.footnote.weight(.medium))
+            .foregroundStyle(Color(UIColor.label))
+            .lineLimit(1)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 9)
+            .background(.regularMaterial, in: Capsule())
+            .overlay(Capsule().stroke(Color.primary.opacity(0.08), lineWidth: 1))
+            .shadow(color: .black.opacity(0.15), radius: 10, y: 3)
+            .accessibilityElement()
+            .accessibilityLabel(Text(message))
     }
 }
 

@@ -11,7 +11,7 @@ struct StormView: View {
     let type: Storm.Contents
     let direction: Angle
     let strength: Int
-    let paused: Bool
+    let pacing: SimulationPacing
     // State-owned so body re-evaluations don't reset every falling drop;
     // the call site's .id() swaps it out when the contents change.
     @State private var storm: Storm
@@ -19,7 +19,7 @@ struct StormView: View {
     var body: some View {
         // Falling precipitation runs at full display refresh — moving
         // particles judder visibly at capped frame rates on ProMotion.
-        TimelineView(.animation(paused: paused)) { timeline in
+        TimelineView(.animation(minimumInterval: pacing.minimumInterval(base: nil), paused: pacing.isPaused)) { timeline in
             Canvas { context, size in
                 storm.sync(strength: strength, direction: direction)
                 storm.update(date: timeline.date, size: size)
@@ -41,11 +41,11 @@ struct StormView: View {
         .ignoresSafeArea()
     }
 
-    init(type: Storm.Contents, direction: Angle, strength: Int, paused: Bool = false) {
+    init(type: Storm.Contents, direction: Angle, strength: Int, pacing: SimulationPacing = .active) {
         self.type = type
         self.direction = direction
         self.strength = strength
-        self.paused = paused
+        self.pacing = pacing
         _storm = State(initialValue: Storm(type: type, direction: direction, strength: strength))
     }
 }

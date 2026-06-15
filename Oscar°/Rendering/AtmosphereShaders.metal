@@ -65,7 +65,7 @@ static float3 atmosphereBaseSky(float horizon, float sunElevation, float cloudDe
     } else if (elevationDegrees >= -6.0) {
         color = atmosphereMix3(twilight, golden, atmosphereSmoothstep(-6.0, 0.0, elevationDegrees));
     } else {
-        color = atmosphereMix3(night, twilight, atmosphereSmoothstep(-18.0, -6.0, elevationDegrees));
+        color = atmosphereMix3(night, twilight, atmosphereSmoothstep(-14.0, -6.0, elevationDegrees));
     }
 
     color = atmosphereToDisplay(color);

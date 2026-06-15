@@ -21,10 +21,7 @@ struct HourlyView: View {
   }
 
   private var hasHourlyDetailData: Bool {
-    HourlyForecastBuilder.hasHourlyDetailData(
-      forecast: weather.forecast,
-      isLoading: weather.isLoading
-    )
+    HourlyForecastBuilder.hasHourlyDetailData(forecast: weather.forecast)
   }
 
   var body: some View {
@@ -74,10 +71,6 @@ struct HourlyView: View {
         .scrollTargetBehavior(.viewAligned)
         .frame(maxWidth: .infinity)
       }
-      .opacity(
-        (weather.isLoading && !weather.hasContent) || weather.forecast.hourly == nil ? 0.3 : 1.0
-      )
-      .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
     }
     .buttonStyle(.plain)
     .disabled(!hasHourlyDetailData)

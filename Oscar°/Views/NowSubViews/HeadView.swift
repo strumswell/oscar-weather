@@ -50,8 +50,6 @@ struct HeadView: View {
         }
       Spacer()
     }
-    .opacity(weather.isLoading && !weather.hasContent ? 0.3 : 1.0)
-    .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
     .shadow(radius: 5)
     .onTapGesture {
       UIApplication.shared.playHapticFeedback()
@@ -101,8 +99,6 @@ struct HeadView: View {
           .padding(.bottom, 20)
       }
     }
-    .opacity(weather.isLoading && !weather.hasContent ? 0.3 : 1.0)
-    .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
     .scrollTransition { content, phase in
       content
         .opacity(phase.isIdentity ? 1 : 0.8)

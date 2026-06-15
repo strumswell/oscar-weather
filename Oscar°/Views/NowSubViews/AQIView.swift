@@ -78,10 +78,6 @@ struct AQIView: View {
             .scrollTargetBehavior(.viewAligned)
             .frame(maxWidth: .infinity)
             .padding(.bottom, 20)
-            .opacity(
-                (weather.isLoading && !weather.hasContent) || weather.air.hourly == nil ? 0.3 : 1.0
-            )
-            .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
         }
         .scrollTransition { content, phase in
             content

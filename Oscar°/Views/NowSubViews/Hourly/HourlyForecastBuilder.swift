@@ -58,8 +58,8 @@ enum HourlyForecastBuilder {
     return items
   }
 
-  static func hasHourlyDetailData(forecast: Operations.getForecast.Output.Ok.Body.jsonPayload, isLoading: Bool) -> Bool {
-    !isLoading && !(forecast.hourly?.time.isEmpty ?? true)
+  static func hasHourlyDetailData(forecast: Operations.getForecast.Output.Ok.Body.jsonPayload) -> Bool {
+    !(forecast.hourly?.time.isEmpty ?? true)
   }
 
   private static func localizedHourIndex(currentTime: Double?, hours: [Double]) -> Int {

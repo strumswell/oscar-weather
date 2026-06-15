@@ -105,6 +105,12 @@ public final class SettingService {
             )
         }
     }
+    var forecastModelPreference: ForecastModelPreference {
+        didSet {
+            Self.defaults.set(forecastModelPreference.rawValue, forKey: Self.forecastModelPreferenceKey)
+            nc.post(name: .unitChanged, object: nil)
+        }
+    }
     private let context: NSManagedObjectContext
     private let pc = PersistenceController.shared
     private let nc = NotificationCenter.default
@@ -114,6 +120,7 @@ public final class SettingService {
     private static let dailyForecastDaytimeTemperatureRangeModeKey = "dailyForecastDaytimeTemperatureRangeMode"
     private static let dailyForecastDaytimeCustomStartHourKey = "dailyForecastDaytimeCustomStartHour"
     private static let dailyForecastDaytimeCustomEndHourKey = "dailyForecastDaytimeCustomEndHour"
+    private static let forecastModelPreferenceKey = "forecastModelPreference"
     private static let defaults = UserDefaults(suiteName: "group.cloud.bolte.Oscar") ?? .standard
     private static let formatterLock = NSLock()
     private static var formatterCache: [String: DateFormatter] = [:]
@@ -151,6 +158,9 @@ public final class SettingService {
             : Self.clampedHour(
                 Self.defaults.integer(forKey: Self.dailyForecastDaytimeCustomEndHourKey)
             )
+        forecastModelPreference = ForecastModelPreference(
+            rawValue: Self.defaults.string(forKey: Self.forecastModelPreferenceKey) ?? ""
+        ) ?? .bestMatch
         self.context = pc.container.viewContext
         self.update()
     }
@@ -235,6 +245,12 @@ public final class SettingService {
     static var resolvedTimeFormatPreference: TimeFormatPreference {
         let rawValue = defaults.string(forKey: timeFormatPreferenceKey)
         return TimeFormatPreference(rawValue: rawValue ?? "") ?? .system
+    }
+
+    /// Reads the selected forecast model from shared defaults. Safe to call from extensions.
+    static var resolvedForecastModelPreference: ForecastModelPreference {
+        let rawValue = defaults.string(forKey: forecastModelPreferenceKey)
+        return ForecastModelPreference(rawValue: rawValue ?? "") ?? .bestMatch
     }
 
     private static func clampedHour(_ hour: Int) -> Int {

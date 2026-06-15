@@ -14,7 +14,7 @@ struct RadarProvider: TimelineProvider {
     let radarOverlayAlpha: CGFloat = 0.7
     let mapColorType: UIUserInterfaceStyle = .dark
 
-    private static let baseURL = "https://radar.oscars.love"
+    private static let baseURL = "https://server.oscars.love"
     private static let mapSpanMeters = 65_000.0
 
     init() {

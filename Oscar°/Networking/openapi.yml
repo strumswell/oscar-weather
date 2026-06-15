@@ -279,7 +279,23 @@ paths:
             type: string
             enum:
               - best_match
+              - ecmwf_ifs
+              - ecmwf_ifs025
+              - ecmwf_aifs025_single
               - icon_seamless
+              - gfs_seamless
+              - meteofrance_seamless
+              - ukmo_seamless
+              - kma_seamless
+              - jma_seamless
+              - meteoswiss_icon_seamless
+              - metno_seamless
+              - gem_seamless
+              - bom_access_global
+              - cma_grapes_global
+              - knmi_seamless
+              - dmi_seamless
+              - italia_meteo_arpae_icon_2i
       responses:
         200:
           description: OK

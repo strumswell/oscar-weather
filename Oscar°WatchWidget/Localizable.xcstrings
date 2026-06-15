@@ -23,6 +23,9 @@
         }
       }
     },
+    "%@ Tage" : {
+
+    },
     "%lld" : {
       "localizations" : {
         "de" : {
@@ -118,7 +121,16 @@
         }
       }
     },
+    "alle %lld Std." : {
+
+    },
     "Äste brechen, kleinere Schäden sind möglich." : {
+
+    },
+    "Australien" : {
+
+    },
+    "Automatisch" : {
 
     },
     "Bäume können entwurzeln, Gebäude können Schaden nehmen." : {
@@ -133,6 +145,9 @@
     "Blätter rascheln, Wind ist im Gesicht spürbar." : {
 
     },
+    "China" : {
+
+    },
     "Dicke Äste bewegen sich, Drähte können pfeifen." : {
 
     },
@@ -142,7 +157,28 @@
     "E_compass" : {
       "comment" : "East"
     },
+    "ECMWF" : {
+
+    },
+    "Europa" : {
+
+    },
+    "Frankreich & Europa" : {
+
+    },
     "Frische Brise" : {
+
+    },
+    "Globales 0,25°-Modell (Open-Data, ca. 2 Std. Verzögerung)." : {
+
+    },
+    "Globales Modell des australischen Wetterdienstes." : {
+
+    },
+    "Globales Modell des chinesischen Wetterdienstes." : {
+
+    },
+    "Großbritannien" : {
 
     },
     "Große Bäume bewegen sich, Zweige können brechen." : {
@@ -151,7 +187,25 @@
     "Größere Zweige und kleine Bäume bewegen sich." : {
 
     },
+    "Hochauflösendes Modell für Italien." : {
+
+    },
+    "Hochauflösendes Regionalmodell, weltweit durch ECMWF ergänzt." : {
+
+    },
     "Im Tagesverlauf markieren" : {
+
+    },
+    "Italien" : {
+
+    },
+    "Japan" : {
+
+    },
+    "KI-basiertes Wettermodell von ECMWF." : {
+
+    },
+    "Korea" : {
 
     },
     "Leichte Brise" : {
@@ -163,11 +217,29 @@
     "Mäßige Brise" : {
 
     },
+    "Mitteleuropa & Alpen" : {
+
+    },
     "N_compass" : {
       "comment" : "North"
     },
+    "Nationale Wetterdienste" : {
+
+    },
+    "Native 9-km-Auflösung direkt von ECMWF, stündlich bis +90 Std." : {
+
+    },
     "NE_compass" : {
       "comment" : "North-East"
+    },
+    "Niederlande & Westeuropa" : {
+
+    },
+    "Nordamerika" : {
+
+    },
+    "Nordeuropa" : {
+
     },
     "NW_compass" : {
       "comment" : "North-West"
@@ -257,6 +329,9 @@
     "Steifer Wind" : {
 
     },
+    "stündlich" : {
+
+    },
     "Sturm" : {
 
     },
@@ -292,8 +367,14 @@
         }
       }
     },
+    "USA" : {
+
+    },
     "W_compass" : {
       "comment" : "West"
+    },
+    "Wählt für jeden Ort weltweit automatisch das beste Modell und kombiniert mehrere Wetterdienste." : {
+
     },
     "Werte ersetzen" : {
 

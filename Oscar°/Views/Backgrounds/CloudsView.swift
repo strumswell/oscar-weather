@@ -11,10 +11,10 @@ struct CloudsView: View {
     @State private var cloudGroup: CloudGroup
     let topTint: Color
     let bottomTint: Color
-    let paused: Bool
+    let pacing: SimulationPacing
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: paused)) { timeline in
+        TimelineView(.animation(minimumInterval: pacing.minimumInterval(base: 1.0 / 30.0), paused: pacing.isPaused)) { timeline in
             Canvas { context, size in
                 cloudGroup.update(date: timeline.date)
 
@@ -60,12 +60,12 @@ struct CloudsView: View {
         thickness: Cloud.Thickness,
         topTint: Color,
         bottomTint: Color,
-        paused: Bool = false
+        pacing: SimulationPacing = .active
     ) {
         _cloudGroup = State(initialValue: CloudGroup(thickness: thickness))
         self.topTint = topTint
         self.bottomTint = bottomTint
-        self.paused = paused
+        self.pacing = pacing
     }
 }
 

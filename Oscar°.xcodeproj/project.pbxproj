@@ -34,6 +34,7 @@
 		2512E9672C399B7D004670E4 /* UnitSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9662C399B7D004670E4 /* UnitSettings.swift */; };
 		2512E9682C399B7D004670E4 /* AppIconCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9692C399B7D004670E4 /* AppIconCatalog.swift */; };
 		2512E9692F70AA00004670E4 /* ForecastSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9682F70AA00004670E4 /* ForecastSettingsView.swift */; };
+		572B0099860B428FB5545BF9 /* ForecastModelSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 744ED7295B254D8D9025BE39 /* ForecastModelSettingsView.swift */; };
 		2512E96A2C399B7D004670E4 /* AppIconSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E96B2C399B7D004670E4 /* AppIconSettingsView.swift */; };
 		2512E9702F70B000004670E4 /* ForecastDisplayModeOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E96F2F70B000004670E4 /* ForecastDisplayModeOption.swift */; };
 		2512E9722F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9712F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift */; };
@@ -42,6 +43,9 @@
 		2512E9762F70B000004670E4 /* ForecastDaytimeTemperatureDisplayMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9752F70B000004670E4 /* ForecastDaytimeTemperatureDisplayMode.swift */; };
 		2512E9772F70B000004670E4 /* ForecastDaytimeTemperatureDisplayMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9752F70B000004670E4 /* ForecastDaytimeTemperatureDisplayMode.swift */; };
 		2512E9782F70B000004670E4 /* ForecastDaytimeTemperatureDisplayMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9752F70B000004670E4 /* ForecastDaytimeTemperatureDisplayMode.swift */; };
+		DED0CCDD2FD8464697D6AEB7 /* ForecastModelPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = A160F27B289249EBAB4BD512 /* ForecastModelPreference.swift */; };
+		5256949F24F84BC9A5CB0DFE /* ForecastModelPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = A160F27B289249EBAB4BD512 /* ForecastModelPreference.swift */; };
+		7866B1FB8F6D4EA9AAEC3607 /* ForecastModelPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = A160F27B289249EBAB4BD512 /* ForecastModelPreference.swift */; };
 		2512E97A2F70B000004670E4 /* DailyTemperatureRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9792F70B000004670E4 /* DailyTemperatureRow.swift */; };
 		2512E97C2F70B000004670E4 /* TemperatureRangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E97B2F70B000004670E4 /* TemperatureRangeView.swift */; };
 		251440892D86E0E400E48037 /* RainViewerAttribution.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251440882D86E0E400E48037 /* RainViewerAttribution.swift */; };
@@ -143,6 +147,9 @@
 		2598E9362C7291D2004A9D5E /* CacheMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2598E9352C7291D2004A9D5E /* CacheMiddleware.swift */; };
 		2598E93A2C729273004A9D5E /* CacheMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2598E9352C7291D2004A9D5E /* CacheMiddleware.swift */; };
 		2598E93C2C729274004A9D5E /* CacheMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2598E9352C7291D2004A9D5E /* CacheMiddleware.swift */; };
+		27CB790C1F0C4B2E8B8D4675 /* ForecastSanitizingMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD4C99740CB4E98913B4BC6 /* ForecastSanitizingMiddleware.swift */; };
+		28830655F3EF4C9D9B1E72FD /* ForecastSanitizingMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD4C99740CB4E98913B4BC6 /* ForecastSanitizingMiddleware.swift */; };
+		3CA2D5A0065D45D394BED588 /* ForecastSanitizingMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD4C99740CB4E98913B4BC6 /* ForecastSanitizingMiddleware.swift */; };
 		259EDA6C29ABC19F00F94996 /* RainRadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259EDA6B29ABC19F00F94996 /* RainRadarView.swift */; };
 		25A0CEDD26C4068300DD4A79 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A0CEDC26C4068300DD4A79 /* RadarView.swift */; };
 		25A1C0022F8D000100000001 /* APIContactIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1C0012F8D000100000001 /* APIContactIdentity.swift */; };
@@ -342,11 +349,13 @@
 		2512E9512C398188004670E4 /* DWDAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DWDAttribution.swift; sourceTree = "<group>"; };
 		2512E9662C399B7D004670E4 /* UnitSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitSettings.swift; sourceTree = "<group>"; };
 		2512E9682F70AA00004670E4 /* ForecastSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastSettingsView.swift; sourceTree = "<group>"; };
+		744ED7295B254D8D9025BE39 /* ForecastModelSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastModelSettingsView.swift; sourceTree = "<group>"; };
 		2512E9692C399B7D004670E4 /* AppIconCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconCatalog.swift; sourceTree = "<group>"; };
 		2512E96B2C399B7D004670E4 /* AppIconSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconSettingsView.swift; sourceTree = "<group>"; };
 		2512E96F2F70B000004670E4 /* ForecastDisplayModeOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDisplayModeOption.swift; sourceTree = "<group>"; };
 		2512E9712F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDaytimeTemperatureRangeMode.swift; sourceTree = "<group>"; };
 		2512E9752F70B000004670E4 /* ForecastDaytimeTemperatureDisplayMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDaytimeTemperatureDisplayMode.swift; sourceTree = "<group>"; };
+		A160F27B289249EBAB4BD512 /* ForecastModelPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastModelPreference.swift; sourceTree = "<group>"; };
 		2512E9792F70B000004670E4 /* DailyTemperatureRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyTemperatureRow.swift; sourceTree = "<group>"; };
 		2512E97B2F70B000004670E4 /* TemperatureRangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureRangeView.swift; sourceTree = "<group>"; };
 		251440882D86E0E400E48037 /* RainViewerAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainViewerAttribution.swift; sourceTree = "<group>"; };
@@ -403,6 +412,7 @@
 		259623D12A2BD72C00BA75F6 /* NowTodayWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowTodayWidget.swift; sourceTree = "<group>"; };
 		259704E42757D7E800DFCA53 /* AlertDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertDetailView.swift; sourceTree = "<group>"; };
 		2598E9352C7291D2004A9D5E /* CacheMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheMiddleware.swift; sourceTree = "<group>"; };
+		1DD4C99740CB4E98913B4BC6 /* ForecastSanitizingMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastSanitizingMiddleware.swift; sourceTree = "<group>"; };
 		259EDA6B29ABC19F00F94996 /* RainRadarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainRadarView.swift; sourceTree = "<group>"; };
 		25A0CEDC26C4068300DD4A79 /* RadarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarView.swift; sourceTree = "<group>"; };
 		25A1C0012F8D000100000001 /* APIContactIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIContactIdentity.swift; sourceTree = "<group>"; };
@@ -586,6 +596,7 @@
 				2512E9512C398188004670E4 /* DWDAttribution.swift */,
 				2512E9662C399B7D004670E4 /* UnitSettings.swift */,
 				2512E9682F70AA00004670E4 /* ForecastSettingsView.swift */,
+				744ED7295B254D8D9025BE39 /* ForecastModelSettingsView.swift */,
 				2512E96F2F70B000004670E4 /* ForecastDisplayModeOption.swift */,
 				2512E9692C399B7D004670E4 /* AppIconCatalog.swift */,
 				2512E96B2C399B7D004670E4 /* AppIconSettingsView.swift */,
@@ -769,6 +780,7 @@
 				AD4000062FE2000000000001 /* WeatherSnapshotStore.swift */,
 				2512E9712F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift */,
 				2512E9752F70B000004670E4 /* ForecastDaytimeTemperatureDisplayMode.swift */,
+				A160F27B289249EBAB4BD512 /* ForecastModelPreference.swift */,
 				25BEDCE526CACFC900D90D6B /* PersistenceController.swift */,
 				25BEDCE226CACF7D00D90D6B /* DataModels.xcdatamodeld */,
 			);
@@ -788,6 +800,7 @@
 				253BA18B2B0941670070BD5E /* LocationService.swift */,
 				258EE2EC2B5EF4E900AE942B /* RetryClientMiddleware.swift */,
 				2598E9352C7291D2004A9D5E /* CacheMiddleware.swift */,
+				1DD4C99740CB4E98913B4BC6 /* ForecastSanitizingMiddleware.swift */,
 				2502F6F62D2F3D2600636DC9 /* WeatherObservable.swift */,
 				2589E7CD2F4B55CD005BB633 /* OscarRadarState.swift */,
 				44F71A4B1D6AC81B4BBA20CA /* WindFieldCache.swift */,
@@ -1266,6 +1279,7 @@
 				AD4000032FE2000000000001 /* NotificationNames.swift in Sources */,
 				AD40000A2FE2000000000001 /* WeatherSnapshotStore.swift in Sources */,
 				2598E93C2C729274004A9D5E /* CacheMiddleware.swift in Sources */,
+				27CB790C1F0C4B2E8B8D4675 /* ForecastSanitizingMiddleware.swift in Sources */,
 				25429C0229E5FAF600D5979F /* OMDayTemperature.swift in Sources */,
 				257EB3692BD8322A00E46468 /* RetryClientMiddleware.swift in Sources */,
 				25A1C0042F8D000100000001 /* APIContactIdentity.swift in Sources */,
@@ -1286,6 +1300,7 @@
 				AD1000032FBB000000000001 /* DailyEnsembleForecast.swift in Sources */,
 				2512E9732F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift in Sources */,
 				2512E9772F70B000004670E4 /* ForecastDaytimeTemperatureDisplayMode.swift in Sources */,
+				DED0CCDD2FD8464697D6AEB7 /* ForecastModelPreference.swift in Sources */,
 				2512E95E2C398CCB004670E4 /* SettingService.swift in Sources */,
 				257EB3792BD832C000E46468 /* PersistenceController.swift in Sources */,
 			);
@@ -1370,6 +1385,7 @@
 				25D72B2727C67016001F43FC /* SettingService.swift in Sources */,
 				2512E9722F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift in Sources */,
 				2512E9762F70B000004670E4 /* ForecastDaytimeTemperatureDisplayMode.swift in Sources */,
+				5256949F24F84BC9A5CB0DFE /* ForecastModelPreference.swift in Sources */,
 				25ED79BD29F1A7DF002E0AAB /* SunView.swift in Sources */,
 				2512E9412C37C765004670E4 /* OpenMeteoAttribution.swift in Sources */,
 				2512E9482C397DEB004670E4 /* BrightSkyAttribution.swift in Sources */,
@@ -1384,6 +1400,7 @@
 				3EB89017251A55700028FED0 /* NowView.swift in Sources */,
 				2512E9672C399B7D004670E4 /* UnitSettings.swift in Sources */,
 				2512E9692F70AA00004670E4 /* ForecastSettingsView.swift in Sources */,
+				572B0099860B428FB5545BF9 /* ForecastModelSettingsView.swift in Sources */,
 				2512E9702F70B000004670E4 /* ForecastDisplayModeOption.swift in Sources */,
 				2512E9682C399B7D004670E4 /* AppIconCatalog.swift in Sources */,
 				2512E96A2C399B7D004670E4 /* AppIconSettingsView.swift in Sources */,
@@ -1422,6 +1439,7 @@
 				259704E52757D7E800DFCA53 /* AlertDetailView.swift in Sources */,
 				251440892D86E0E400E48037 /* RainViewerAttribution.swift in Sources */,
 				2598E9362C7291D2004A9D5E /* CacheMiddleware.swift in Sources */,
+				28830655F3EF4C9D9B1E72FD /* ForecastSanitizingMiddleware.swift in Sources */,
 				254CA7BA2F85A4BD0014801D /* NOAAAttribution.swift in Sources */,
 				2519538F2F124B27003D5302 /* RadarImageOverlay.swift in Sources */,
 				251953902F124B27003D5302 /* RadarTimelineControls.swift in Sources */,
@@ -1475,11 +1493,13 @@
 				253F70892950FA0F000BD4C0 /* RadarWidget.swift in Sources */,
 				2512E9742F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift in Sources */,
 				2512E9782F70B000004670E4 /* ForecastDaytimeTemperatureDisplayMode.swift in Sources */,
+				7866B1FB8F6D4EA9AAEC3607 /* ForecastModelPreference.swift in Sources */,
 				2512E9592C398CCA004670E4 /* SettingService.swift in Sources */,
 				259623D32A2BD79200BA75F6 /* NowTodayWidget.swift in Sources */,
 				2546516729E492E500D8C13D /* RadarProvider.swift in Sources */,
 				259623D62A2BD97C00BA75F6 /* Color-Custom.swift in Sources */,
 				2598E93A2C729273004A9D5E /* CacheMiddleware.swift in Sources */,
+				3CA2D5A0065D45D394BED588 /* ForecastSanitizingMiddleware.swift in Sources */,
 				3ED4AEB0254551DE0057DF2F /* OscarWidgetsBundle.swift in Sources */,
 				AC1000042FAA200000000001 /* RainRadarActivityAttributes.swift in Sources */,
 				AC1000062FAA200000000001 /* RainRadarLiveActivityWidget.swift in Sources */,

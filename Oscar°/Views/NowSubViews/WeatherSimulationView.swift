@@ -8,8 +8,22 @@
 import CoreLocation
 import SwiftUI
 
+enum SimulationPacing: Equatable {
+    case active
+    case background
+    case still
+
+    static let backgroundFPS: Double = 8
+
+    func minimumInterval(base: Double?) -> Double? {
+        self == .background ? 1.0 / Self.backgroundFPS : base
+    }
+
+    var isPaused: Bool { self == .still }
+}
+
 struct WeatherSimulationView: View {
-    var animationsPaused = false
+    var isCoveredBySheet = false
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
     @Environment(AtmosphereDebugState.self) private var debugState: AtmosphereDebugState?
@@ -22,7 +36,7 @@ struct WeatherSimulationView: View {
         let moonPhase = overrides?.moonPhase ?? MoonPhase.phaseFraction()
         let cloudThickness = cloudThickness(for: snapshot)
         let cloudsVisible = snapshot.cloudDensity + snapshot.cloudCoverage > 0.02
-        let effectivePaused = animationsPaused || reduceMotion
+        let pacing: SimulationPacing = reduceMotion ? .still : (isCoveredBySheet ? .background : .active)
 
         GeometryReader { proxy in
             ZStack {
@@ -49,14 +63,14 @@ struct WeatherSimulationView: View {
                         snapshot: snapshot,
                         size: proxy.size,
                         moonGlow: moonGlow,
-                        paused: effectivePaused
+                        pacing: pacing
                     )
 
                     let starOpacity = Double(snapshot.nightAmount)
                         * Double(1 - snapshot.cloudCoverage * 0.85)
                     if starOpacity > 0.02 {
                         StarsView(
-                            paused: effectivePaused,
+                            pacing: pacing,
                             occlusionCenter: moonLayout.map {
                                 CGPoint(
                                     x: proxy.size.width * $0.x,
@@ -97,7 +111,7 @@ struct WeatherSimulationView: View {
                                 thickness: cloudThickness,
                                 topTint: AtmosphereSampler.cloudTopTint(snapshot: snapshot, moonGlow: moonGlow),
                                 bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snapshot, moonGlow: moonGlow),
-                                paused: effectivePaused
+                                pacing: pacing
                             )
                             .id(cloudThickness)
                             .transition(.opacity)
@@ -114,7 +128,7 @@ struct WeatherSimulationView: View {
                             FogView(
                                 density: Double(snapshot.haze),
                                 nightAmount: Double(snapshot.nightAmount),
-                                paused: effectivePaused
+                                pacing: pacing
                             )
                             .transition(.opacity)
                         }
@@ -128,7 +142,7 @@ struct WeatherSimulationView: View {
                                 type: stormContents(for: snapshot),
                                 direction: stormDirection(for: snapshot),
                                 strength: stormStrength(for: snapshot),
-                                paused: effectivePaused
+                                pacing: pacing
                             )
                             .id(String(describing: stormContents(for: snapshot)))
                             .transition(.opacity)
@@ -223,13 +237,13 @@ private struct AtmosphereSkyShaderView: View {
     let snapshot: AtmosphereSnapshot
     let size: CGSize
     var moonGlow: Float = 0
-    var paused: Bool = false
+    var pacing: SimulationPacing = .active
 
     var body: some View {
         // Lightning flashes need a live clock; any other sky is a static
         // frame that only changes with the snapshot.
         if snapshot.thunderIntensity > 0.05 {
-            TimelineView(.animation(minimumInterval: 1.0 / 20.0, paused: paused)) { timeline in
+            TimelineView(.animation(minimumInterval: pacing.minimumInterval(base: 1.0 / 20.0), paused: pacing.isPaused)) { timeline in
                 sky(time: shaderTime(timeline.date.timeIntervalSinceReferenceDate))
             }
         } else {
@@ -276,10 +290,10 @@ private struct AtmosphereSkyShaderView: View {
 private struct FogView: View {
     let density: Double
     let nightAmount: Double
-    var paused: Bool = false
+    var pacing: SimulationPacing = .active
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 20.0, paused: paused)) { timeline in
+        TimelineView(.animation(minimumInterval: pacing.minimumInterval(base: 1.0 / 20.0), paused: pacing.isPaused)) { timeline in
             let t = timeline.date.timeIntervalSinceReferenceDate
             GeometryReader { proxy in
                 let width = proxy.size.width

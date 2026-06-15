@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct StarsView: View {
-    var paused = false
+    var pacing: SimulationPacing = .active
     /// Stars within `occlusionRadius` of this point (canvas coordinates)
     /// are skipped so they don't shine through the moon's disc.
     var occlusionCenter: CGPoint? = nil
@@ -36,7 +36,7 @@ struct StarsView: View {
     }
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: paused)) { timeline in
+        TimelineView(.animation(minimumInterval: pacing.minimumInterval(base: 1.0 / 30.0), paused: pacing.isPaused)) { timeline in
             if starOpacity > 0.01 {
                 Canvas { context, size in
                     let timeInterval = timeline.date.timeIntervalSince1970

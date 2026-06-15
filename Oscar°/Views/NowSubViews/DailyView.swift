@@ -81,8 +81,6 @@ struct DailyView: View {
         )
         .font(.body)
         .padding([.leading, .trailing])
-        .opacity(weather.isLoading && !weather.hasContent ? 0.3 : 1.0)
-        .animation(.easeInOut(duration: 0.3), value: weather.isLoading)
 
       }
     }
@@ -126,7 +124,7 @@ extension DailyView {
   }
 
   private var hasDailyDetailData: Bool {
-    dailyDisplayCount > 0 && !weather.isLoading
+    dailyDisplayCount > 0
   }
 
   private var displayedTemperatureScale: (min: Double, max: Double) {

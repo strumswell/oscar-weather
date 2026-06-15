@@ -13,14 +13,14 @@ struct LegalTextView: View {
     var body: some View {
         HStack {
             Spacer()
-            Image(systemName: "info.circle.fill")
+            Image(systemName: "gearshape")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 20, height: 20)
+                .frame(width: 15, height: 15)
                 .foregroundColor(Color(UIColor.label))
-            Text("Rechtliche\nInformationen")
+            Text("Einstellungen")
                 .foregroundColor(Color(UIColor.label))
-                .font(.system(size: 10))
+                .font(.system(size: 12))
                 .bold()
             Spacer()
         }
