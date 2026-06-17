@@ -26,6 +26,7 @@ struct NowView: View {
     @State private var gfsImageState = GFSImageLayerState(renderMode: .preview)
     @State private var manualRefreshInFlight = false
     @State private var showRefreshIndicator = false
+    @State private var indicatorShownAt: Date?
     @State private var modelFallbackToast: String?
 
     var body: some View {
@@ -82,6 +83,7 @@ struct NowView: View {
                                 }
                                 .task {
                                     if settingsService.oscarRadarLayer {
+                                        oscarRadarState.setRegion(settingsService.oscarRadarRegion)
                                         await oscarRadarState.loadCurrentFrame()
                                     } else if let layer = settingsService.activeTileLayer {
                                         await gfsImageState.loadLayer(layer)
@@ -90,12 +92,18 @@ struct NowView: View {
                                 .onChange(of: settingsService.oscarRadarLayer) { _, isEnabled in
                                     if isEnabled {
                                         gfsImageState.pause()
+                                        oscarRadarState.setRegion(settingsService.oscarRadarRegion)
                                         if oscarRadarState.frames.isEmpty {
                                             Task { await oscarRadarState.loadCurrentFrame() }
                                         }
                                     } else {
                                         oscarRadarState.pause()
                                     }
+                                }
+                                .onChange(of: settingsService.oscarRadarRegion) { _, newRegion in
+                                    guard settingsService.oscarRadarLayer else { return }
+                                    oscarRadarState.setRegion(newRegion)
+                                    Task { await oscarRadarState.reloadForCurrentRegion() }
                                 }
                                 .onChange(of: settingsService.activeTileLayer) { _, newLayer in
                                     if let layer = newLayer {
@@ -118,7 +126,7 @@ struct NowView: View {
                                 Text(String(reflecting: weather.air))
                                 Text("Radar")
                                     .padding(.top, 20)
-                                Text(String(reflecting: weather.radar))
+                                Text(String(reflecting: weather.precipSeries))
                                 Text("Alerts")
                                     .padding(.top, 20)
                                 Text(String(reflecting: weather.alerts))
@@ -145,12 +153,22 @@ struct NowView: View {
                 manualRefreshInFlight = false
             }
             .task(id: refreshPending) {
-                guard refreshPending else {
-                    showRefreshIndicator = false
-                    return
-                }
-                if (try? await Task.sleep(for: .milliseconds(500))) != nil {
+                if refreshPending {
+                    // Debounce: only show the spinner if loading lingers past 500ms,
+                    // so quick refreshes don't flash it.
+                    guard (try? await Task.sleep(for: .milliseconds(500))) != nil else { return }
+                    indicatorShownAt = .now
                     showRefreshIndicator = true
+                } else if showRefreshIndicator {
+                    // Keep it on screen for a brief minimum so it never flickers off instantly.
+                    if let shownAt = indicatorShownAt {
+                        let remaining = 0.5 - Date.now.timeIntervalSince(shownAt)
+                        if remaining > 0 {
+                            try? await Task.sleep(for: .seconds(remaining))
+                        }
+                    }
+                    showRefreshIndicator = false
+                    indicatorShownAt = nil
                 }
             }
             if weather.debug {

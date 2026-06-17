@@ -10,6 +10,17 @@ struct OscarRadarBounds: Equatable {
     let east: Double
 }
 
+/// Radar coverage the user can choose between in the map's layer menu.
+/// Mirrors oscar-server's two radar sources: high-res DWD (Germany) and the
+/// pan-European EUMETNET OPERA composite.
+enum RadarRegion: String, CaseIterable, Equatable, Sendable {
+    case germany
+    case europe
+
+    /// Path component used in oscar-server radar URLs (`/radar/{pathComponent}/…`).
+    var pathComponent: String { rawValue }
+}
+
 struct OscarRadarFrame: Identifiable {
     let id = UUID()
     let key: String
@@ -160,6 +171,9 @@ final class OscarRadarState {
     private(set) var frameTimestamps: [String] = []
 
     var bounds: OscarRadarBounds?
+    /// Active radar coverage (DWD Germany vs. OPERA Europe). Use `setRegion(_:)`
+    /// to change it — it clears loaded frames so the next load re-fetches.
+    private(set) var region: RadarRegion = .germany
     var isLoading: Bool = false
     var currentFrameIndex: Int = 0 {
         didSet {
@@ -253,23 +267,63 @@ final class OscarRadarState {
 
     // MARK: - Shared Cache
 
-    private static var cachedFrameInfos: [OscarFrameInfo] = []
-    private static var cachedBounds: OscarBoundsInfo?
+    // Keyed by region: frame keys are bare timestamps that collide across
+    // germany/europe, so caches must be region-qualified.
+    private static var cachedFrameInfos: [RadarRegion: [OscarFrameInfo]] = [:]
+    private static var cachedBounds: [RadarRegion: OscarBoundsInfo] = [:]
     private static let imageCache: NSCache<NSString, CGImage> = {
         let cache = NSCache<NSString, CGImage>()
         cache.totalCostLimit = 128 * 1024 * 1024
         return cache
     }()
-    private static var lastFetchedTime: Date?
+    private static var lastFetchedTime: [RadarRegion: Date] = [:]
     private static let cacheDuration: TimeInterval = 10 * 60
 
-    private static var isCacheValid: Bool {
-        guard let last = lastFetchedTime else { return false }
+    private static func isCacheValid(for region: RadarRegion) -> Bool {
+        guard let last = lastFetchedTime[region] else { return false }
         return Date().timeIntervalSince(last) < cacheDuration
     }
 
     static func purgeDecodedCaches() {
         imageCache.removeAllObjects()
+    }
+
+    // MARK: - Region
+
+    /// Switches radar coverage. Clears the loaded frames + in-flight work so the
+    /// next `loadCurrentFrame()`/`loadAllFrames()` fetches the new region. No-op
+    /// if the region is unchanged.
+    func setRegion(_ newRegion: RadarRegion) {
+        guard newRegion != region else { return }
+        region = newRegion
+
+        bootstrapTask?.cancel()
+        focusedLoadTask?.cancel()
+        backgroundPreloadTask?.cancel()
+        pause()
+
+        loadSessionID = UUID()
+        suppressSelectionSideEffects = true
+        frames = []
+        frameInfos = []
+        frameTimestamps = []
+        frameDates = []
+        bounds = nil
+        loadingFrameIndices.removeAll()
+        renderFrameIndex = nil
+        currentFrameIndex = 0
+        suppressSelectionSideEffects = false
+    }
+
+    /// Reloads for the active region, picking the load depth that matches the
+    /// configured render mode (preview = current frame only, fullscreen = all).
+    func reloadForCurrentRegion() async {
+        switch renderMode {
+        case .preview:
+            await loadCurrentFrame()
+        case .fullscreen:
+            await loadAllFrames()
+        }
     }
 
     // MARK: - Loading
@@ -364,7 +418,7 @@ final class OscarRadarState {
             guard let self else { return }
 
             do {
-                let (fetchedFrameInfos, boundsInfo) = try await Self.fetchFrameInfos()
+                let (fetchedFrameInfos, boundsInfo) = try await Self.fetchFrameInfos(region: self.region)
                 guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
                 guard !fetchedFrameInfos.isEmpty else {
                     self.isLoading = false
@@ -475,7 +529,7 @@ final class OscarRadarState {
         loadingFrameIndices.insert(index)
         defer { loadingFrameIndices.remove(index) }
 
-        guard let cgImage = await Self.loadImage(for: frameInfos[index]),
+        guard let cgImage = await Self.loadImage(for: frameInfos[index], region: region),
               loadSessionID == sessionID,
               frameInfos.indices.contains(index),
               frames.indices.contains(index) else {
@@ -509,37 +563,46 @@ final class OscarRadarState {
 
     /// Fetches frame metadata from the server, or returns the cached list if still valid.
     /// Clears the image cache when the metadata expires, since frame keys will have changed.
-    private static func fetchFrameInfos() async throws -> ([OscarFrameInfo], OscarBoundsInfo) {
-        if let cached = cacheLock.withLock({
-            if isCacheValid, let bounds = cachedBounds, !cachedFrameInfos.isEmpty {
-                return (cachedFrameInfos, bounds)
+    private static func fetchFrameInfos(region: RadarRegion) async throws -> ([OscarFrameInfo], OscarBoundsInfo) {
+        if let cached = cacheLock.withLock({ () -> ([OscarFrameInfo], OscarBoundsInfo)? in
+            if isCacheValid(for: region),
+               let bounds = cachedBounds[region],
+               let infos = cachedFrameInfos[region], !infos.isEmpty {
+                return (infos, bounds)
             }
-            imageCache.removeAllObjects()
             return nil
         }) {
             return cached
         }
 
-        guard let url = URL(string: "\(baseURL)/radar/frames") else { throw URLError(.badURL) }
+        guard let url = URL(string: "\(baseURL)/radar/\(region.pathComponent)/frames") else {
+            throw URLError(.badURL)
+        }
         var request = URLRequest(url: url)
         request.addAPIContactIdentity()
         let (data, _) = try await URLSession.shared.data(for: request)
         let response = try JSONDecoder().decode(OscarFramesResponse.self, from: data)
+        // The image is rendered in Web Mercator; `image_bounds` is the lat/lon of
+        // that Mercator rectangle and is what the overlay must span. `bounds` is
+        // the tighter data footprint and would misproject the image — most visibly
+        // for the large OPERA (Europe) extent.
+        let overlayBounds = response.imageBounds ?? response.bounds
         cacheLock.withLock {
-            cachedFrameInfos = response.frames
-            cachedBounds = response.bounds
-            lastFetchedTime = Date()
+            cachedFrameInfos[region] = response.frames
+            cachedBounds[region] = overlayBounds
+            lastFetchedTime[region] = Date()
         }
-        return (response.frames, response.bounds)
+        return (response.frames, overlayBounds)
     }
 
     /// Returns a cached CGImage for the frame, or downloads and caches it if missing.
-    private static func loadImage(for frameInfo: OscarFrameInfo) async -> CGImage? {
-        if let cached = imageCache.object(forKey: frameInfo.key as NSString) {
+    private static func loadImage(for frameInfo: OscarFrameInfo, region: RadarRegion) async -> CGImage? {
+        let cacheKey = "\(region.pathComponent):\(frameInfo.key)" as NSString
+        if let cached = imageCache.object(forKey: cacheKey) {
             return cached
         }
 
-        guard let url = URL(string: "\(baseURL)/radar/image/\(frameInfo.key).webp?cmap=plasma") else { return nil }
+        guard let url = URL(string: "\(baseURL)/radar/\(region.pathComponent)/frames/\(frameInfo.key)/image?cmap=plasma") else { return nil }
         do {
             var request = URLRequest(url: url)
             request.addAPIContactIdentity()
@@ -548,7 +611,7 @@ final class OscarRadarState {
             guard let cgImage = prepareForRenderer(uiImage) else { return nil }
             imageCache.setObject(
                 cgImage,
-                forKey: frameInfo.key as NSString,
+                forKey: cacheKey,
                 cost: cgImage.width * cgImage.height * 4
             )
             return cgImage
@@ -592,6 +655,13 @@ final class OscarRadarState {
 private struct OscarFramesResponse: Decodable {
     let frames: [OscarFrameInfo]
     let bounds: OscarBoundsInfo
+    let imageBounds: OscarBoundsInfo?
+
+    enum CodingKeys: String, CodingKey {
+        case frames
+        case bounds
+        case imageBounds = "image_bounds"
+    }
 }
 
 private struct OscarFrameInfo: Decodable {
@@ -621,6 +691,13 @@ extension SettingService {
         get { activeTileLayerRaw.flatMap { WeatherTileLayer(rawValue: $0) } }
         set { activeTileLayerRaw = newValue?.rawValue }
     }
+
+    /// Which oscar-server radar coverage the user selected for the map. Backed by
+    /// `oscarRadarRegionRaw`; defaults to Germany (DWD).
+    var oscarRadarRegion: RadarRegion {
+        get { RadarRegion(rawValue: oscarRadarRegionRaw) ?? .germany }
+        set { oscarRadarRegionRaw = newValue.rawValue }
+    }
 }
 
 // MARK: WeatherTileLayer
@@ -635,8 +712,8 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
 
     var framesEndpoint: String {
         switch self {
-        case .iconPrecip, .iconTemp, .iconWind: return "icon/frames"
-        case .gfsPrecip, .gfsTemp, .gfsWind:   return "gfs/frames"
+        case .iconPrecip, .iconTemp, .iconWind: return "models/icon/frames"
+        case .gfsPrecip, .gfsTemp, .gfsWind:   return "models/gfs/frames"
         }
     }
 
@@ -651,15 +728,16 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
         }
     }
 
-    /// Full-world image endpoint path for each layer.
-    var imagePath: String? {
+    /// Frames-path prefix for full-world image requests. Combined with the frame
+    /// key and variable: `{imagePath}/{frameKey}/{variableSegment}/image`.
+    var imagePath: String? { framesEndpoint }
+
+    /// Variable path segment in oscar-server model URLs.
+    var variableSegment: String {
         switch self {
-        case .iconPrecip: return "icon/precip-image"
-        case .iconTemp:   return "icon/temp-image"
-        case .iconWind:   return "icon/wind-image"
-        case .gfsPrecip:  return "gfs/prate-image"
-        case .gfsTemp:    return "gfs/temp-image"
-        case .gfsWind:    return "gfs/wind-image"
+        case .iconPrecip, .gfsPrecip: return "precipitation"
+        case .iconTemp, .gfsTemp:     return "temperature"
+        case .iconWind, .gfsWind:     return "wind"
         }
     }
 
@@ -672,8 +750,6 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
 }
 
 // MARK: - GFS Full-World Image Layer State
-
-let radarBaseURL = "https://server.oscars.love"
 
 @MainActor
 @Observable
@@ -1039,7 +1115,7 @@ final class GFSImageLayerState {
             cgImage = cached
         } else {
             guard !Task.isCancelled,
-                  let url = URL(string: "\(Self.baseURL)/\(imagePath)/\(info.key)") else {
+                  let url = URL(string: "\(Self.baseURL)/\(imagePath)/\(info.key)/\(layer.variableSegment)/image") else {
                 return false
             }
             var req = URLRequest(url: url)

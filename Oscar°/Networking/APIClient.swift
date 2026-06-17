@@ -10,6 +10,11 @@ import Foundation
 import OpenAPIRuntime
 import OpenAPIURLSession
 
+/// Base URL of the companion oscar-server backend (radar, models, precip series,
+/// notifications). Defined here because `APIClient` is a member of every target
+/// (incl. the watch widget extension), unlike the MapKit-dependent radar files.
+let radarBaseURL = "https://server.oscars.love"
+
 enum AlertResponse {
   case brightsky(Operations.getAlerts.Output.Ok.Body.jsonPayload)
   case canadian(Operations.getCanadianWeatherAlerts.Output.Ok.Body.jsonPayload)
@@ -436,6 +441,30 @@ class APIClient {
     case .undocumented:
       return .init()
     }
+  }
+
+  /// Per-location precipitation timeline (observations + nowcast, mm/h) from
+  /// oscar-server's `/radar/series`. Auto-routes DWD inside Germany / OPERA
+  /// elsewhere in Europe. Hand-written (oscar-server is not part of the
+  /// generated OpenAPI client). Returns `nil` when unavailable / out of coverage.
+  func getRadarSeries(coordinates: CLLocationCoordinate2D) async throws
+    -> PrecipSeriesResponse?
+  {
+    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
+    guard
+      let url = URL(
+        string:
+          "\(radarBaseURL)/radar/series?lat=\(outboundCoordinates.latitude)&lon=\(outboundCoordinates.longitude)"
+      )
+    else { return nil }
+
+    var request = URLRequest(url: url)
+    request.addAPIContactIdentity()
+    guard let (data, response) = try? await URLSession.shared.data(for: request),
+      let http = response as? HTTPURLResponse,
+      http.statusCode == 200
+    else { return nil }
+    return try? JSONDecoder().decode(PrecipSeriesResponse.self, from: data)
   }
 
   func getRainViewerMaps() async throws -> Components.Schemas.RainViewerResponse {

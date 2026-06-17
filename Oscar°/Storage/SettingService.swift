@@ -59,6 +59,11 @@ public final class SettingService {
             UserDefaults.standard.set(activeTileLayerRaw, forKey: "activeTileLayer")
         }
     }
+    var oscarRadarRegionRaw: String {
+        didSet {
+            UserDefaults.standard.set(oscarRadarRegionRaw, forKey: "oscarRadarRegion")
+        }
+    }
     var timeFormatPreference: TimeFormatPreference {
         didSet {
             Self.defaults.set(timeFormatPreference.rawValue, forKey: Self.timeFormatPreferenceKey)
@@ -128,6 +133,7 @@ public final class SettingService {
     private init() {
         oscarRadarLayer = UserDefaults.standard.bool(forKey: "oscarRadarLayer")
         activeTileLayerRaw = UserDefaults.standard.string(forKey: "activeTileLayer")
+        oscarRadarRegionRaw = UserDefaults.standard.string(forKey: "oscarRadarRegion") ?? "germany"
         timeFormatPreference = TimeFormatPreference(
             rawValue: Self.defaults.string(forKey: Self.timeFormatPreferenceKey) ?? ""
         ) ?? .system

@@ -57,8 +57,8 @@ class HomeProvider: TimelineProvider {
                         .precipitation, .snowfall, .windspeed_10m, .winddirection_10m,
                     ]
                 )
-                async let radarRequest = client.getRainRadar(coordinates: coordinates)
-                let (weather, radar) = try await (weatherRequest, radarRequest)
+                async let radarRequest = client.getRadarSeries(coordinates: coordinates)
+                let (weather, precipSeries) = try await (weatherRequest, radarRequest)
 
                 let dayBegin = weather.hourly?.time.first ?? 0
                 let currentTime = (Date.now.timeIntervalSince1970-Double(dayBegin))/86400.0
@@ -74,7 +74,7 @@ class HomeProvider: TimelineProvider {
                 let weatherForRendering = Weather()
                 weatherForRendering.time = currentTime
                 weatherForRendering.forecast = weather // Use the existing forecast data
-                weatherForRendering.radar = radar
+                weatherForRendering.precipSeries = precipSeries
                 weatherForRendering.debug = true // Enable debug for troubleshooting
 
                 // Get atmospheric gradient for widget background (full 12-sample gradient)
@@ -98,7 +98,7 @@ class HomeProvider: TimelineProvider {
                     temperatureMin: temperatureMin,
                     temperatureMax: temperatureMax,
                     temperatureNow: temperatureNow,
-                    icon: getWeatherIcon(weathercode: weathercode, isDay: isDay, isRaining: radar.isRaining(), precipitation: precipitation),
+                    icon: getWeatherIcon(weathercode: weathercode, isDay: isDay, isRaining: precipSeries?.isRaining() ?? false, precipitation: precipitation),
                     backgroundGradient: backgroundGradient
                 )
 

@@ -102,7 +102,7 @@ enum AtmosphereWeatherMapper {
             ?? weather.forecast.current?.precipitation
             ?? 0)
         let snowfall = Float(value(at: hourlyIndex, in: weather.forecast.hourly?.snowfall) ?? 0)
-        let radarIntensity = radarPrecipitationIntensity(weather.radar)
+        let radarIntensity = radarPrecipitationIntensity(weather.precipSeries)
         let precipitationIntensity = max(
             clamp(precipitation / 8, 0, 1),
             radarIntensity
@@ -218,28 +218,11 @@ enum AtmosphereWeatherMapper {
         clamp(value / max, 0, 1)
     }
 
-    private static func radarPrecipitationIntensity(_ radar: Components.Schemas.RadarResponse) -> Float {
-        guard let frame = radar.radar?.first,
-              let precipitation = frame.precipitation_5 else {
-            return 0
-        }
-
-        var total: Float = 0
-        var maxValue: Float = 0
-        var count: Float = 0
-
-        for row in precipitation {
-            for cell in row {
-                let value = Float(cell) / 10
-                total += value
-                maxValue = max(maxValue, value)
-                count += 1
-            }
-        }
-
-        guard count > 0 else { return 0 }
-        let average = total / count
-        return clamp(max(average / 3, maxValue / 12), 0, 1)
+    private static func radarPrecipitationIntensity(_ series: PrecipSeriesResponse?) -> Float {
+        guard let series else { return 0 }
+        // `currentPrecipitation` is the rate (mm/h) at the frame nearest "now".
+        // ~6 mm/h maps to full intensity (moderate-to-heavy rain).
+        return clamp(Float(series.currentPrecipitation) / 6, 0, 1)
     }
 
     private static func airQualityHaze(weather: Weather, timestamp: Double) -> Float {

@@ -53,10 +53,20 @@ struct TemperatureRangeView: View {
             }
             .offset(y: barYOffset)
 
+          let labelOffsets = separatedLabelOffsets(
+            lowPosition: focusLowPosition,
+            highPosition: focusHighPosition,
+            width: width,
+            separate: shouldShowFocusMarker(for: focusLowValue)
+              && shouldShowFocusMarker(for: focusHighValue)
+              && focusLowValue != focusHighValue
+          )
+
           if shouldShowFocusMarker(for: focusLowValue) {
             focusMarker(
               temperature: focusLowValue,
               xPosition: focusLowPosition,
+              labelOffset: labelOffsets.low,
               availableWidth: width,
               barYOffset: barYOffset
             )
@@ -67,6 +77,7 @@ struct TemperatureRangeView: View {
             focusMarker(
               temperature: focusHighValue,
               xPosition: focusHighPosition,
+              labelOffset: labelOffsets.high,
               availableWidth: width,
               barYOffset: barYOffset
             )
@@ -78,16 +89,18 @@ struct TemperatureRangeView: View {
     }
   }
 
+  private static let focusLabelWidth: CGFloat = 28
+  private static let focusLabelMinGap: CGFloat = focusLabelWidth + 2
+
   private func focusMarker(
     temperature: Double,
     xPosition: CGFloat,
+    labelOffset: CGFloat,
     availableWidth: CGFloat,
     barYOffset: CGFloat
   ) -> some View {
     let dotSize: CGFloat = 8
-    let labelWidth: CGFloat = 28
     let dotOffset = min(max(xPosition - dotSize / 2, 0), max(availableWidth - dotSize, 0))
-    let labelOffset = min(max(xPosition - labelWidth / 2, 0), max(availableWidth - labelWidth, 0))
 
     return ZStack(alignment: .leading) {
       Text(roundTemperatureString(temperature: temperature))
@@ -95,7 +108,7 @@ struct TemperatureRangeView: View {
         .lineLimit(1)
         .minimumScaleFactor(0.7)
         .foregroundStyle(Color(UIColor.label))
-        .frame(width: labelWidth)
+        .frame(width: Self.focusLabelWidth)
         .offset(x: labelOffset, y: 1)
 
       Circle()
@@ -107,6 +120,40 @@ struct TemperatureRangeView: View {
         )
         .offset(x: dotOffset, y: barYOffset)
     }
+  }
+
+  /// Centers each label on its value, then — when both are shown and distinct — pushes
+  /// them apart to a minimum gap around their midpoint so the text never overlaps.
+  /// The dots keep their true positions; only the labels move.
+  private func separatedLabelOffsets(
+    lowPosition: CGFloat,
+    highPosition: CGFloat,
+    width: CGFloat,
+    separate: Bool
+  ) -> (low: CGFloat, high: CGFloat) {
+    let maxOffset = max(width - Self.focusLabelWidth, 0)
+    func centered(_ x: CGFloat) -> CGFloat {
+      min(max(x - Self.focusLabelWidth / 2, 0), maxOffset)
+    }
+
+    let low = centered(lowPosition)
+    let high = centered(highPosition)
+    guard separate, high - low < Self.focusLabelMinGap else {
+      return (low, high)
+    }
+
+    let mid = (low + high) / 2
+    var newLow = mid - Self.focusLabelMinGap / 2
+    var newHigh = mid + Self.focusLabelMinGap / 2
+    if newLow < 0 {
+      newHigh -= newLow
+      newLow = 0
+    }
+    if newHigh > maxOffset {
+      newLow -= (newHigh - maxOffset)
+      newHigh = maxOffset
+    }
+    return (max(newLow, 0), newHigh)
   }
 
   private func shouldShowFocusMarker(for temperature: Double) -> Bool {

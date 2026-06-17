@@ -134,7 +134,7 @@ struct OscarRadarTimelineControls: View {
     private var selectedTime: String { shortTime(from: radarState.currentFrameTimestamp) }
 
     private var dwdBadge: some View {
-        Text("DWD Radar")
+        Text(radarState.region == .europe ? "OPERA Radar" : "DWD Radar")
             .font(.caption2.weight(.semibold))
             .foregroundStyle(.primary)
             .padding(.horizontal, 8)

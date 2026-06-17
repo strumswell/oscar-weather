@@ -69,6 +69,7 @@ struct HeadView: View {
           .lineLimit(1)
           .shadow(radius: 15)
           .contentTransition(.numericText())
+          .animation(.default, value: weather.forecast.current?.temperature)
       }
       .padding(.bottom, 170)
 
@@ -80,12 +81,14 @@ struct HeadView: View {
         Text("\(weather.forecast.current?.cloudcover ?? 0, specifier: "%.0f") %")
           .foregroundColor(Color(UIColor.label))
           .contentTransition(.numericText())
+          .animation(.default, value: weather.forecast.current?.cloudcover)
         Image(systemName: "wind")
           .frame(width: 30, height: 30)
           .foregroundColor(Color(UIColor.label))
         Text(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h"))
         .foregroundColor(Color(UIColor.label))
         .contentTransition(.numericText())
+        .animation(.default, value: currentWindSpeed)
         Image(systemName: "location")
           .frame(width: 30, height: 30)
           .foregroundColor(Color(UIColor.label))

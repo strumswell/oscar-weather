@@ -112,11 +112,22 @@ struct RadarView: View {
         Menu {
             // ── Zentraleuropa (DWD) ────────────────────────────────────────
             Section("Zentraleuropa (DWD Radar)") {
-                layerButton("Regenradar", isActive: settingsService.oscarRadarLayer) {
-                    activateDWDRadar()
+                layerButton("Regenradar",
+                            isActive: settingsService.oscarRadarLayer
+                                   && settingsService.oscarRadarRegion == .germany) {
+                    activateOscarRadar(.germany)
                 }
             }
-            
+
+            // ── Europa (OPERA) ─────────────────────────────────────────────
+            Section("Europa (OPERA Radar)") {
+                layerButton("Regenradar",
+                            isActive: settingsService.oscarRadarLayer
+                                   && settingsService.oscarRadarRegion == .europe) {
+                    activateOscarRadar(.europe)
+                }
+            }
+
             // ── Zentraleuropa (DWD) ────────────────────────────────────────
             Section("Zentraleuropa (DWD ICON-D2)") {
                 layerButton("Regenvorhersage",
@@ -207,10 +218,11 @@ struct RadarView: View {
         gfsImageState?.pause()
     }
 
-    private func activateDWDRadar() {
+    private func activateOscarRadar(_ region: RadarRegion) {
         settingsService.activeTileLayer = nil
         settingsService.settings?.rainviewerLayer = false
         settingsService.settings?.dwdLayer = false
+        settingsService.oscarRadarRegion = region
         settingsService.save()
         settingsService.oscarRadarLayer = true
         gfsImageState?.pause()
@@ -253,9 +265,11 @@ struct RadarMapView: UIViewRepresentable {
     private final class LegacyDWDTileOverlay: WMSTileOverlay {}
     private final class OscarRadarArrowTileOverlay: MKTileOverlay {
         var frameID: String
+        var regionPath: String
 
-        init(frameID: String) {
+        init(frameID: String, regionPath: String) {
             self.frameID = frameID
+            self.regionPath = regionPath
             super.init(urlTemplate: nil)
             canReplaceMapContent = false
         }
@@ -265,7 +279,7 @@ struct RadarMapView: UIViewRepresentable {
             result: @escaping (Data?, Error?) -> Void
         ) {
             guard let url = URL(
-                string: "\(RadarMapView.oscarRadarArrowHost)/radar/vector-tiles/\(frameID)/\(path.z)/\(path.x)/\(path.y).webp"
+                string: "\(RadarMapView.oscarRadarArrowHost)/radar/\(regionPath)/frames/\(frameID)/vectors/\(path.z)/\(path.x)/\(path.y)"
             ) else {
                 result(nil, nil)
                 return
@@ -313,6 +327,7 @@ struct RadarMapView: UIViewRepresentable {
         var lastRenderedFrameIndex: Int = -1
         var lastRenderedOscarFrameKey: String?
         var hasRenderedOscarFrame = false
+        var lastOscarBounds: OscarRadarBounds?
         var gfsImageRenderer: OscarRadarAnimatingRenderer?
         var lastGFSImageFrameIndex: Int = -1
         var lastGFSImageFrameKey: String?
@@ -364,10 +379,11 @@ struct RadarMapView: UIViewRepresentable {
             }
         }
 
-        func syncOscarArrowOverlay(frameKey: String, on mapView: MKMapView) {
+        func syncOscarArrowOverlay(frameKey: String, regionPath: String, on mapView: MKMapView) {
             if let overlay = oscarArrowOverlay {
-                if overlay.frameID != frameKey {
+                if overlay.frameID != frameKey || overlay.regionPath != regionPath {
                     overlay.frameID = frameKey
+                    overlay.regionPath = regionPath
                     (mapView.renderer(for: overlay) as? MKTileOverlayRenderer)?.reloadData()
                 }
                 if !mapView.overlays.contains(where: { ($0 as AnyObject) === overlay }) {
@@ -376,7 +392,7 @@ struct RadarMapView: UIViewRepresentable {
                 return
             }
 
-            let overlay = OscarRadarArrowTileOverlay(frameID: frameKey)
+            let overlay = OscarRadarArrowTileOverlay(frameID: frameKey, regionPath: regionPath)
             oscarArrowOverlay = overlay
             mapView.addOverlay(overlay, level: .aboveLabels)
         }
@@ -676,12 +692,34 @@ struct RadarMapView: UIViewRepresentable {
                 context.coordinator.rainViewerInfraredOverlayID = nil
             }
 
-            // ── Oscar DWD radar (animated image overlay) ──────────────────
+            // ── Oscar radar (DWD Germany / OPERA Europe animated image overlay) ──
             if settingsService.oscarRadarLayer {
                 if let oscarState = oscarRadarState,
                    let frame = oscarState.currentFrame,
                    let bounds = oscarState.bounds
                 {
+                    // DWD and OPERA have different image extents. When the region (and
+                    // thus `bounds`) changes, the existing overlay's bounding rect is
+                    // stale and would stretch the new image into the old region's
+                    // rectangle (e.g. the German image drifting over France/the Channel).
+                    // Tear the overlay down so it re-anchors to the new bounds.
+                    let boundsDidChange = context.coordinator.lastOscarBounds != bounds
+                    if boundsDidChange {
+                        context.coordinator.animatingRenderer?.stopAnimation()
+                        mapView.removeOverlays(oscarOverlays)
+                        context.coordinator.animatingRenderer = nil
+                        context.coordinator.lastRenderedFrameIndex = -1
+                        context.coordinator.lastRenderedOscarFrameKey = nil
+                        context.coordinator.hasRenderedOscarFrame = false
+                        context.coordinator.lastOscarBounds = bounds
+                    }
+
+                    let hasImageOverlay = mapView.overlays.contains { $0 is OscarRadarImageOverlay }
+                    if !hasImageOverlay {
+                        let overlay = OscarRadarImageOverlay(bounds: bounds)
+                        mapView.addOverlay(overlay, level: .aboveRoads)
+                    }
+
                     let renderedIndex = oscarState.renderFrameIndex ?? oscarState.currentFrameIndex
                     let frameKeyDidChange = context.coordinator.lastRenderedOscarFrameKey != frame.key
 
@@ -698,16 +736,15 @@ struct RadarMapView: UIViewRepresentable {
                         context.coordinator.hasRenderedOscarFrame = true
                     }
 
-                    if oscarOverlays.isEmpty {
-                        let overlay = OscarRadarImageOverlay(bounds: bounds)
-                        mapView.addOverlay(overlay, level: .aboveRoads)
-                    }
-
                     if let r = context.coordinator.animatingRenderer {
                         r.stopAnimation()
                     }
 
-                    context.coordinator.syncOscarArrowOverlay(frameKey: frame.key, on: mapView)
+                    context.coordinator.syncOscarArrowOverlay(
+                        frameKey: frame.key,
+                        regionPath: settingsService.oscarRadarRegion.pathComponent,
+                        on: mapView
+                    )
                 }
             } else {
                 mapView.removeOverlays(oscarOverlays)
@@ -717,6 +754,7 @@ struct RadarMapView: UIViewRepresentable {
                 context.coordinator.lastRenderedFrameIndex = -1
                 context.coordinator.lastRenderedOscarFrameKey = nil
                 context.coordinator.hasRenderedOscarFrame = false
+                context.coordinator.lastOscarBounds = nil
             }
 
             // ── Full-world image overlay (ICON-D2 / GFS) ─────────────────

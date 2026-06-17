@@ -49,8 +49,8 @@ struct LockscreenProvider: TimelineProvider {
                     forecastDays: ._1,
                     hourly: [.precipitation_probability]
                 )
-                async let radarRequest = client.getRainRadar(coordinates: coordinates)
-                let (weather, radar) = try await (weatherRequest, radarRequest)
+                async let radarRequest = client.getRadarSeries(coordinates: coordinates)
+                let (weather, precipSeries) = try await (weatherRequest, radarRequest)
 
                 let temperatureMin = weather.daily?.temperature_2m_min?.first ?? 0
                 let temperatureMax = weather.daily?.temperature_2m_max?.first ?? 0
@@ -62,7 +62,7 @@ struct LockscreenProvider: TimelineProvider {
                 let precipitation = weather.current?.precipitation ?? 0.0
                 let precipitationProbability = weather.hourly?.precipitation_probability?[getLocalizedHourIndex(weather: weather)]
 
-                let isRaining = radar.isRaining()
+                let isRaining = precipSeries?.isRaining() ?? false
                 let icon = getWeatherIcon(weathercode: weathercode, isDay: isDay, isRaining: isRaining, precipitation: precipitation)
 
                 let entry = TemperatureLockScreenEntry(date: Date(), temperatureMin: temperatureMin, temperatureMax: temperatureMax, temperatureNow: temperatureNow, icon: icon, precipitation: precipitation, precipitationProbability: Int(precipitationProbability ?? 0))

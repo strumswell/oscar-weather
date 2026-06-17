@@ -51,6 +51,33 @@ extension Components.Schemas.RadarResponse {
     }
 }
 
+extension PrecipSeriesResponse {
+    /// The point nearest to "now", preferring observed frames over nowcast.
+    private func nearestToNow() -> PrecipPoint? {
+        let now = Date()
+        let observed = series.filter { !$0.isForecast }
+        let candidates = observed.isEmpty ? series : observed
+        return candidates.min {
+            abs($0.timestamp.timeIntervalSince(now)) < abs($1.timestamp.timeIntervalSince(now))
+        }
+    }
+
+    /// Current precipitation rate in mm/h at "now" (nearest observed frame).
+    var currentPrecipitation: Double {
+        nearestToNow()?.precipitation ?? 0
+    }
+
+    /// Whether it is raining right now at the location.
+    func isRaining() -> Bool {
+        currentPrecipitation > 0
+    }
+
+    /// Whether any frame in the series (observed or nowcast) shows precipitation.
+    func isExpectingRain() -> Bool {
+        series.contains { $0.precipitation > 0 }
+    }
+}
+
 extension Array {
     var middle: Element? {
         guard count != 0 else { return nil }

@@ -17,6 +17,7 @@ struct AQIGaugeCard: View {
                 Text("\(Int(metric.rawValue))")
                     .foregroundStyle(metric.color)
                     .contentTransition(.numericText())
+                    .animation(.default, value: metric.rawValue)
             } minimumValueLabel: {
                 Text(metric.gaugeMinLabel)
                     .foregroundStyle(.secondary)

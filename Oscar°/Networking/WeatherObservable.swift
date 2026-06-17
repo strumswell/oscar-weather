@@ -36,12 +36,13 @@ enum WeatherLoadingQuery: String, CaseIterable, Comparable {
 @Observable
 class Weather {
     var isLoading: Bool = false
+    @ObservationIgnored private var isRefreshing = false
     var loadingQueries: Set<WeatherLoadingQuery> = []
     var forecast: Operations.getForecast.Output.Ok.Body.jsonPayload
     var alerts: AlertResponse
     var air: Operations.getAirQuality.Output.Ok.Body.jsonPayload
     var time: Double
-    var radar: Components.Schemas.RadarResponse
+    var precipSeries: PrecipSeriesResponse?
     var error: String = ""
     var lastUpdated: Date?
     var debug = false
@@ -59,7 +60,7 @@ class Weather {
         )
         alerts = .brightsky(.init())
         air = Operations.getAirQuality.Output.Ok.Body.jsonPayload.init(latitude: 0, longitude: 0, hourly: nil)
-        radar = .init()
+        precipSeries = nil
     }
     
     // Update internal clock used for day simulation background
@@ -85,7 +86,7 @@ extension Weather {
     private enum UpdateResponse {
         case forecast(Operations.getForecast.Output.Ok.Body.jsonPayload)
         case airQuality(Operations.getAirQuality.Output.Ok.Body.jsonPayload)
-        case radar(Components.Schemas.RadarResponse)
+        case precipSeries(PrecipSeriesResponse?)
     }
 
     @MainActor
@@ -94,11 +95,17 @@ extension Weather {
         client: APIClient = .shared,
         locationService: LocationService = .shared
     ) async {
-        guard !isLoading else { return }
+        // Guard re-entrancy with a dedicated flag, not `isLoading`: the latter is cleared
+        // early (once the main data lands) so the spinner hides promptly, but the function
+        // keeps running through the trailing alerts fetch — a second refresh must not start
+        // in that window.
+        guard !isRefreshing else { return }
+        isRefreshing = true
         isLoading = true
         error = ""
         clearLoadingQueries()
         defer {
+            isRefreshing = false
             isLoading = false
             clearLoadingQueries()
         }
@@ -114,7 +121,7 @@ extension Weather {
         do {
             var forecastResponse: Operations.getForecast.Output.Ok.Body.jsonPayload?
             var airQualityResponse: Operations.getAirQuality.Output.Ok.Body.jsonPayload?
-            var radarResponse: Components.Schemas.RadarResponse?
+            var precipSeriesResponse: PrecipSeriesResponse?
 
             try await withThrowingTaskGroup(of: UpdateResponse.self) { group in
                 markLoading(.forecast)
@@ -129,7 +136,7 @@ extension Weather {
 
                 markLoading(.rainRadar)
                 group.addTask {
-                    .radar(try await client.getRainRadar(coordinates: coordinates))
+                    .precipSeries(try await client.getRadarSeries(coordinates: coordinates))
                 }
 
                 for try await response in group {
@@ -140,20 +147,22 @@ extension Weather {
                     case .airQuality(let response):
                         airQualityResponse = response
                         markFinished(.airQuality)
-                    case .radar(let response):
-                        radarResponse = response
+                    case .precipSeries(let response):
+                        precipSeriesResponse = response
                         markFinished(.rainRadar)
                     }
                 }
             }
 
-            guard let forecastResponse, let airQualityResponse, let radarResponse else {
+            // precipSeries may legitimately be nil (location outside radar coverage),
+            // so only forecast + air quality are required for a successful refresh.
+            guard let forecastResponse, let airQualityResponse else {
                 throw URLError(.badServerResponse)
             }
 
             forecast = forecastResponse
             air = airQualityResponse
-            radar = radarResponse
+            precipSeries = precipSeriesResponse
             updateTime()
             lastUpdated = .now
             isLoading = false
@@ -161,7 +170,7 @@ extension Weather {
             let snapshot = WeatherSnapshot(
                 forecast: forecastResponse,
                 air: airQualityResponse,
-                radar: radarResponse,
+                precipSeries: precipSeriesResponse,
                 coordinates: CodableCoordinate(coordinates),
                 locationName: location.name,
                 savedAt: lastUpdated ?? .now
@@ -185,7 +194,7 @@ extension Weather {
     func apply(snapshot: WeatherSnapshot, location: Location) {
         forecast = snapshot.forecast
         air = snapshot.air
-        radar = snapshot.radar
+        precipSeries = snapshot.precipSeries
         updateTime()
         lastUpdated = snapshot.savedAt
         location.coordinates = snapshot.coordinates.coordinate
@@ -247,8 +256,8 @@ extension Weather {
         mockWeather.time = 0.5 // Midday
         mockWeather.alerts = .brightsky(.init()) // Empty alerts
         mockWeather.air = Operations.getAirQuality.Output.Ok.Body.jsonPayload(latitude: 51.34, longitude: 12.379999, hourly: nil)
-        mockWeather.radar = .init() // Empty radar
-        
+        mockWeather.precipSeries = nil // No radar series
+
         return mockWeather
     }
 }

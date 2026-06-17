@@ -197,7 +197,9 @@ private struct DailyEnsemblePrecipitationChartContainer<Content: ChartContent, L
     guard let start = points.first?.date, let end = points.last?.date else {
       return Date.now...Date.now.addingTimeInterval(86_400)
     }
-    return start...end
+    // Pad half a day on each side so the first/last bars (which span ±0.28 day
+    // around their date) stay fully inside the plot instead of clipping at the edges.
+    return start.addingTimeInterval(-0.5 * 86_400)...end.addingTimeInterval(0.5 * 86_400)
   }
 }
 

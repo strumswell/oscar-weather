@@ -125,17 +125,25 @@ class LocationService: NSObject, CLLocationManagerDelegate  {
             return (override, nil)
         }
 
-        let geocoder = CLGeocoder()
-        let location = CLLocation(latitude: coordinates.latitude, longitude: coordinates.longitude)
+        let latitude = coordinates.latitude
+        let longitude = coordinates.longitude
         do {
-            let placemarks = try await geocoder.reverseGeocodeLocation(location)
-            if let placemark = placemarks.first {
-                let name = placemark.locality ?? ""
-                if !name.isEmpty {
-                    lastGeocoded = (coordinates, name, placemark.isoCountryCode)
+            // Bound the reverse geocode: CLGeocoder has no timeout of its own and can
+            // stall indefinitely (e.g. on a flaky network right after foregrounding),
+            // which would otherwise hang the whole refresh.
+            let geocoded = try await withTimeout(seconds: 6) {
+                let geocoder = CLGeocoder()
+                let location = CLLocation(latitude: latitude, longitude: longitude)
+                let placemarks = try await geocoder.reverseGeocodeLocation(location)
+                guard let placemark = placemarks.first else {
+                    return (name: "", countryCode: String?.none)
                 }
-                return (name, placemark.isoCountryCode)
+                return (name: placemark.locality ?? "", countryCode: placemark.isoCountryCode)
             }
+            if !geocoded.name.isEmpty {
+                lastGeocoded = (coordinates, geocoded.name, geocoded.countryCode)
+            }
+            return (geocoded.name, geocoded.countryCode)
         } catch {
             print("Error reverse geocoding: \(error)")
         }
@@ -187,16 +195,42 @@ class LocationService: NSObject, CLLocationManagerDelegate  {
 
 extension CLGeocoder {
     func reverseGeocodeLocation(_ location: CLLocation) async throws -> [CLPlacemark] {
-        return try await withCheckedThrowingContinuation { continuation in
-            self.reverseGeocodeLocation(location) { placemarks, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else if let placemarks = placemarks {
-                    continuation.resume(returning: placemarks)
-                } else {
-                    continuation.resume(throwing: NSError(domain: "CLGeocoderError", code: 0, userInfo: nil))
+        // Cancellation-aware so an enclosing timeout can actually unblock it: cancelling
+        // the task calls `cancelGeocode()`, which fires the completion handler instead of
+        // leaving the continuation (and any awaiting task group) suspended forever.
+        try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                self.reverseGeocodeLocation(location) { placemarks, error in
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                    } else if let placemarks = placemarks {
+                        continuation.resume(returning: placemarks)
+                    } else {
+                        continuation.resume(throwing: NSError(domain: "CLGeocoderError", code: 0, userInfo: nil))
+                    }
                 }
             }
+        } onCancel: {
+            cancelGeocode()
         }
+    }
+}
+
+private struct TimeoutError: Error {}
+
+/// Runs `operation`, throwing `TimeoutError` if it does not finish within `seconds`.
+/// The operation task is cancelled when the timeout wins.
+private func withTimeout<T: Sendable>(
+    seconds: Double,
+    _ operation: @escaping @Sendable () async throws -> T
+) async throws -> T {
+    try await withThrowingTaskGroup(of: T.self) { group in
+        group.addTask { try await operation() }
+        group.addTask {
+            try await Task.sleep(for: .seconds(seconds))
+            throw TimeoutError()
+        }
+        defer { group.cancelAll() }
+        return try await group.next()!
     }
 }

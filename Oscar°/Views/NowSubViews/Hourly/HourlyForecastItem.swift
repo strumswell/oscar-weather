@@ -12,6 +12,15 @@ enum HourlyTimelineItem: Identifiable {
       return item.id
     }
   }
+
+  var timestamp: Double {
+    switch self {
+    case .forecast(let item):
+      return item.timestamp
+    case .sunEvent(let item):
+      return item.timestamp
+    }
+  }
 }
 
 struct HourlyForecastItem: Identifiable {

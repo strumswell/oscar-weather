@@ -1551,6 +1551,9 @@
       },
       "shouldTranslate" : false
     },
+    "BrightSky (Debug)" : {
+
+    },
     "BrightSky ist eine Open-Source-Wetter-API, die offene Wetterdaten vom DWD aufbereiten und für Oscar in Form von Wetterwarnung und Radardaten für Deutschland zur Verfügung stellen. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu BrightSky, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro." : {
       "localizations" : {
         "en" : {
@@ -1871,9 +1874,6 @@
           }
         }
       }
-    },
-    "DWD Radar" : {
-      "shouldTranslate" : false
     },
     "E_compass" : {
       "extractionState" : "manual",
@@ -2200,6 +2200,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avrupa"
+          }
+        }
+      }
+    },
+    "Europa (OPERA Radar)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Europe (OPERA Radar)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avrupa (OPERA Radarı)"
           }
         }
       }
@@ -2736,6 +2753,29 @@
         }
       }
     },
+    "Großbritannien" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Großbritannien"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "United Kingdom"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birleşik Krallık"
+          }
+        }
+      }
+    },
     "Große Bäume bewegen sich, Zweige können brechen." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2766,29 +2806,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
-          }
-        }
-      }
-    },
-    "Großbritannien" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Großbritannien"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "United Kingdom"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Birleşik Krallık"
           }
         }
       }
@@ -4083,6 +4100,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mono"
+          }
+        }
+      }
+    },
+    "Morgen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomorrow"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yarın"
           }
         }
       }
@@ -7387,6 +7427,9 @@
           }
         }
       }
+    },
+    "Zurück zum Anfang der stündlichen Vorhersage" : {
+
     },
     "Zweige bewegen sich, loses Papier hebt ab." : {
       "extractionState" : "stale",

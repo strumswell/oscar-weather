@@ -51,6 +51,7 @@ struct MapDetailView: View {
             }
             .task {
                 if settingsService.oscarRadarLayer {
+                    oscarRadarState.setRegion(settingsService.oscarRadarRegion)
                     await oscarRadarState.loadAllFrames()
                 } else if let layer = settingsService.activeTileLayer {
                     await gfsImageState.loadLayer(layer)
@@ -59,12 +60,18 @@ struct MapDetailView: View {
             .onChange(of: settingsService.oscarRadarLayer) { _, isEnabled in
                 if isEnabled {
                     gfsImageState.pause()
+                    oscarRadarState.setRegion(settingsService.oscarRadarRegion)
                     if oscarRadarState.frames.isEmpty {
                         Task { await oscarRadarState.loadAllFrames() }
                     }
                 } else {
                     oscarRadarState.pause()
                 }
+            }
+            .onChange(of: settingsService.oscarRadarRegion) { _, newRegion in
+                guard settingsService.oscarRadarLayer else { return }
+                oscarRadarState.setRegion(newRegion)
+                Task { await oscarRadarState.reloadForCurrentRegion() }
             }
             .onChange(of: settingsService.activeTileLayer) { _, newLayer in
                 if let layer = newLayer {

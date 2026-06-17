@@ -15,6 +15,7 @@ struct HourlyForecastCard: View {
         .foregroundStyle(.secondary)
         .padding(.top, 3)
         .contentTransition(.numericText())
+        .animation(.default, value: item.precipitation)
       Image(item.iconName)
         .resizable()
         .scaledToFit()
@@ -22,6 +23,7 @@ struct HourlyForecastCard: View {
         .accessibilityHidden(true)
       Text(item.temperature)
         .contentTransition(.numericText())
+        .animation(.default, value: item.temperature)
         .lineLimit(1)
         .minimumScaleFactor(0.75)
     }

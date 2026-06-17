@@ -25,6 +25,23 @@ enum HourlyFormatting {
     )
   }
 
+  /// Day label for the hourly strip's scroll indicator: "Heute"/"Morgen" for the first
+  /// two days, then the full, locale-aware weekday name ("Montag", "Dienstag", …).
+  static func dayLabel(timestamp: Double, timeZone: TimeZone, now: Date) -> String {
+    let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
+    var calendar = Calendar.current
+    calendar.timeZone = timeZone
+
+    if calendar.isDate(date, inSameDayAs: now) {
+      return String(localized: "Heute")
+    }
+    if let tomorrow = calendar.date(byAdding: .day, value: 1, to: now),
+       calendar.isDate(date, inSameDayAs: tomorrow) {
+      return String(localized: "Morgen")
+    }
+    return SettingService.formattedWeekday(date, timeZone: timeZone)
+  }
+
   static func temperatureString(_ temperature: Double?) -> String {
     guard let temperature else {
       return ""

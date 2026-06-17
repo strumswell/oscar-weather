@@ -12,6 +12,7 @@ struct HourlyView: View {
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @Environment(NowPresentationCoordinator.self) private var presentation
   @State private var detailPresentationCount = 0
+  @State private var leadingItemID: String?
 
   private var items: [HourlyTimelineItem] {
     HourlyForecastBuilder.makeItems(
@@ -28,15 +29,41 @@ struct HourlyView: View {
     let shouldReduceMotion = reduceMotion
     let items = self.items
     let shouldShowPlaceholders = weather.isLoading && items.isEmpty
+    let timeZone = TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? .current
+    let now = Date(timeIntervalSince1970: weather.forecast.current?.time ?? 0)
+    let firstID = items.first?.id
+    let leadingItem = items.first { $0.id == leadingItemID }
+    let dayLabel = leadingItem.map {
+      HourlyFormatting.dayLabel(timestamp: $0.timestamp, timeZone: timeZone, now: now)
+    }
+    let showDayBadge = leadingItemID != nil && leadingItemID != firstID && dayLabel != nil
 
-    Button(action: presentDetails) {
-      VStack(alignment: .leading) {
+    VStack(alignment: .leading) {
+      HStack {
         Text("Stündlich")
           .font(.title3)
           .bold()
           .foregroundStyle(.primary)
-          .padding(.leading)
+          .contentShape(.rect)
+          .onTapGesture { scrollToStart() }
+          .accessibilityAddTraits(.isButton)
+          .accessibilityHint(Text("Zurück zum Anfang der stündlichen Vorhersage"))
 
+        Spacer()
+
+        if showDayBadge, let dayLabel {
+          Text(dayLabel)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .contentTransition(.numericText())
+            .transition(.opacity)
+        }
+      }
+      .padding(.horizontal)
+      .animation(.snappy, value: dayLabel)
+      .animation(.snappy, value: showDayBadge)
+
+      Button(action: presentDetails) {
         ScrollView(.horizontal) {
           LazyHStack(spacing: 12) {
             if shouldShowPlaceholders {
@@ -69,13 +96,15 @@ struct HourlyView: View {
         }
         .scrollIndicators(.hidden)
         .scrollTargetBehavior(.viewAligned)
+        .scrollPosition(id: $leadingItemID)
+        .contentMargins(.trailing, 16, for: .scrollContent)
         .frame(maxWidth: .infinity)
       }
+      .buttonStyle(.plain)
+      .disabled(!hasHourlyDetailData)
+      .accessibilityLabel(Text("Stündliche Details"))
+      .accessibilityHint(Text("Öffnet die stündliche Wettervorhersage"))
     }
-    .buttonStyle(.plain)
-    .disabled(!hasHourlyDetailData)
-    .accessibilityLabel(Text("Stündliche Details"))
-    .accessibilityHint(Text("Öffnet die stündliche Wettervorhersage"))
     .scrollTransition { content, phase in
       content
         .opacity(phase.isIdentity ? 1 : 0.8)
@@ -102,6 +131,16 @@ struct HourlyView: View {
 
     detailPresentationCount += 1
     presentation.present(.hourly)
+  }
+
+  private func scrollToStart() {
+    // Only act when actually scrolled away from the start (nil = untouched = already there).
+    guard let firstID = items.first?.id, let current = leadingItemID, current != firstID else {
+      return
+    }
+
+    UIApplication.shared.playHapticFeedback()
+    withAnimation(.snappy) { leadingItemID = firstID }
   }
 }
 
