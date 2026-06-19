@@ -82,8 +82,8 @@ enum AtmosphereWeatherMapper {
         let weatherCode = Int(weather.forecast.current?.weathercode
             ?? value(at: hourlyIndex, in: weather.forecast.hourly?.weathercode)
             ?? 0)
-        let condition = conditionFamily(for: weatherCode)
-        let cloudCoverage = normalized(
+        var condition = conditionFamily(for: weatherCode)
+        var cloudCoverage = normalized(
             Float(weather.forecast.current?.cloudcover
                   ?? value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover)
                   ?? 0),
@@ -107,6 +107,13 @@ enum AtmosphereWeatherMapper {
             clamp(precipitation / 8, 0, 1),
             radarIntensity
         )
+        // Radar sees rain the forecast doesn't: a blue, sunny sky can't be right while
+        // precipitation reaches the ground. Lift a dry forecast to an overcast, rainy
+        // scene so the sky/clouds/sun agree with the rain animation that already shows.
+        if radarIntensity > 0.1, condition == .clear || condition == .partlyCloudy {
+            condition = .rain
+            cloudCoverage = max(cloudCoverage, clamp(0.55 + radarIntensity * 0.45, 0, 1))
+        }
         let snowfallIntensity = condition == .snow ? max(clamp(snowfall / 6, 0, 1), precipitationIntensity * 0.6) : 0
         let thunderIntensity = condition == .thunderstorm ? max(0.55, precipitationIntensity) : 0
         let windSpeed = Float(weather.forecast.current?.windspeed

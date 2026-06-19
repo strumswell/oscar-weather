@@ -83,10 +83,19 @@ class Weather {
 }
 
 extension Weather {
+    private enum RadarOutcome {
+        /// The fetch completed; the value is the series, or nil for a server-confirmed
+        /// "no coverage here" (204/404). Either way it is safe to assign.
+        case fetched(PrecipSeriesResponse?)
+        /// The fetch failed (transport error / cancellation / bad status / decode).
+        /// The previous series must be kept rather than wiped.
+        case failed
+    }
+
     private enum UpdateResponse {
         case forecast(Operations.getForecast.Output.Ok.Body.jsonPayload)
         case airQuality(Operations.getAirQuality.Output.Ok.Body.jsonPayload)
-        case precipSeries(PrecipSeriesResponse?)
+        case precipSeries(RadarOutcome)
     }
 
     @MainActor
@@ -121,7 +130,7 @@ extension Weather {
         do {
             var forecastResponse: Operations.getForecast.Output.Ok.Body.jsonPayload?
             var airQualityResponse: Operations.getAirQuality.Output.Ok.Body.jsonPayload?
-            var precipSeriesResponse: PrecipSeriesResponse?
+            var radarOutcome: RadarOutcome = .failed
 
             try await withThrowingTaskGroup(of: UpdateResponse.self) { group in
                 markLoading(.forecast)
@@ -136,7 +145,11 @@ extension Weather {
 
                 markLoading(.rainRadar)
                 group.addTask {
-                    .precipSeries(try await client.getRadarSeries(coordinates: coordinates))
+                    // Radar is best-effort: swallow its error here so a radar failure
+                    // never cancels the group (which forecast/air require) and is
+                    // reported as `.failed` so we keep the last-known-good series.
+                    do { return .precipSeries(.fetched(try await client.getRadarSeries(coordinates: coordinates))) }
+                    catch { return .precipSeries(.failed) }
                 }
 
                 for try await response in group {
@@ -147,8 +160,8 @@ extension Weather {
                     case .airQuality(let response):
                         airQualityResponse = response
                         markFinished(.airQuality)
-                    case .precipSeries(let response):
-                        precipSeriesResponse = response
+                    case .precipSeries(let outcome):
+                        radarOutcome = outcome
                         markFinished(.rainRadar)
                     }
                 }
@@ -162,7 +175,12 @@ extension Weather {
 
             forecast = forecastResponse
             air = airQualityResponse
-            precipSeries = precipSeriesResponse
+            // Only overwrite radar on a successful fetch. A transient failure or a
+            // cancelled request must not wipe the series the chart + rain animation
+            // depend on — keep the previous value until a real update arrives.
+            if case .fetched(let value) = radarOutcome {
+                precipSeries = value
+            }
             updateTime()
             lastUpdated = .now
             isLoading = false
@@ -170,7 +188,7 @@ extension Weather {
             let snapshot = WeatherSnapshot(
                 forecast: forecastResponse,
                 air: airQualityResponse,
-                precipSeries: precipSeriesResponse,
+                precipSeries: precipSeries,
                 coordinates: CodableCoordinate(coordinates),
                 locationName: location.name,
                 savedAt: lastUpdated ?? .now

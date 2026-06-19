@@ -16,6 +16,11 @@ struct RadarProvider: TimelineProvider {
 
     private static let baseURL = "https://server.oscars.love"
     private static let mapSpanMeters = 65_000.0
+    // oscar-server radar coverage. Mirrors the app's default DWD/Germany source
+    // (the old `/radar/frames` endpoint this widget used was the DWD store).
+    // Honoring the in-app region choice would need an app-group-backed setting,
+    // since SettingService uses `UserDefaults.standard`, which isn't shared here.
+    private static let region = "germany"
 
     init() {
         locationService.update()
@@ -70,7 +75,7 @@ struct RadarProvider: TimelineProvider {
             region: region,
             zoom: radarTileZoom,
             frameKey: frame.key,
-            path: "radar/tiles"
+            kind: "tiles"
         )
         let arrowTileZoom = resolvedArrowTileZoom(snapshot: snapshot, region: region)
         let arrowTileSpecs = computeTileSpecs(
@@ -78,7 +83,7 @@ struct RadarProvider: TimelineProvider {
             region: region,
             zoom: arrowTileZoom,
             frameKey: frame.key,
-            path: "radar/vector-tiles"
+            kind: "vectors"
         )
 
         let radarTiles = await fetchRadarTiles(tileSpecs: tileSpecs)
@@ -137,7 +142,7 @@ struct RadarProvider: TimelineProvider {
     // MARK: - Oscar radar
 
     private func fetchLatestOscarFrame() async -> OscarWidgetRadarFrame? {
-        guard let url = URL(string: "\(Self.baseURL)/radar/frames") else { return nil }
+        guard let url = URL(string: "\(Self.baseURL)/radar/\(Self.region)/frames") else { return nil }
 
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
@@ -242,7 +247,7 @@ struct RadarProvider: TimelineProvider {
         region: MKCoordinateRegion,
         zoom: Int,
         frameKey: String,
-        path: String
+        kind: String
     ) -> [TileSpec] {
         let minLon = region.center.longitude - region.span.longitudeDelta / 2
         let maxLon = region.center.longitude + region.span.longitudeDelta / 2
@@ -265,7 +270,7 @@ struct RadarProvider: TimelineProvider {
                 let se = snapshot.point(for: CLLocationCoordinate2D(latitude: sLat, longitude: eLon))
                 let rect = CGRect(x: nw.x, y: nw.y, width: se.x - nw.x, height: se.y - nw.y)
 
-                guard let url = URL(string: "\(Self.baseURL)/\(path)/\(frameKey)/\(zoom)/\(tx)/\(ty).webp") else {
+                guard let url = URL(string: "\(Self.baseURL)/radar/\(Self.region)/frames/\(frameKey)/\(kind)/\(zoom)/\(tx)/\(ty)") else {
                     continue
                 }
                 specs.append(TileSpec(url: url, rect: rect))

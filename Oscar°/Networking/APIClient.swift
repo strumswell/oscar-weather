@@ -446,7 +446,12 @@ class APIClient {
   /// Per-location precipitation timeline (observations + nowcast, mm/h) from
   /// oscar-server's `/radar/series`. Auto-routes DWD inside Germany / OPERA
   /// elsewhere in Europe. Hand-written (oscar-server is not part of the
-  /// generated OpenAPI client). Returns `nil` when unavailable / out of coverage.
+  /// generated OpenAPI client).
+  ///
+  /// Returns `nil` only when the server *successfully* reports no coverage for
+  /// this location (204/404). Any real failure — transport error, cancellation,
+  /// unexpected status, or a decode failure — is thrown, so callers can tell
+  /// "no rain here" apart from "couldn't fetch" and avoid discarding good data.
   func getRadarSeries(coordinates: CLLocationCoordinate2D) async throws
     -> PrecipSeriesResponse?
   {
@@ -460,11 +465,11 @@ class APIClient {
 
     var request = URLRequest(url: url)
     request.addAPIContactIdentity()
-    guard let (data, response) = try? await URLSession.shared.data(for: request),
-      let http = response as? HTTPURLResponse,
-      http.statusCode == 200
-    else { return nil }
-    return try? JSONDecoder().decode(PrecipSeriesResponse.self, from: data)
+    let (data, response) = try await URLSession.shared.data(for: request)
+    guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+    if http.statusCode == 204 || http.statusCode == 404 { return nil }
+    guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
+    return try JSONDecoder().decode(PrecipSeriesResponse.self, from: data)
   }
 
   func getRainViewerMaps() async throws -> Components.Schemas.RainViewerResponse {

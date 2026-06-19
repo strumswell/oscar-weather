@@ -147,8 +147,13 @@ struct NowView: View {
             }
             .padding(.top, 40)
             .refreshable {
+                // Run the refresh in an unstructured task so it doesn't inherit the
+                // pull-to-refresh gesture's cancellation. SwiftUI cancels the
+                // `.refreshable` action task when the refresh control resolves, which
+                // would otherwise abort the still-in-flight radar/alerts requests
+                // (forecast/air usually survive as cache hits) and discard good data.
                 manualRefreshInFlight = true
-                await weather.refresh(location: location)
+                await Task { await weather.refresh(location: location) }.value
                 manualRefreshInFlight = false
             }
             .task(id: refreshPending) {
