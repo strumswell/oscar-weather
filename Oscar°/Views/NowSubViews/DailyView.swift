@@ -49,14 +49,10 @@ struct DailyView: View {
                   )
                   .font(.caption)
                   .foregroundColor(Color(UIColor.label))
-                  .contentTransition(.numericText())
-                  .animation(.default, value: weather.forecast.daily?.precipitation_sum?[dayPos])
                 }
                 .frame(width: 50)
                 Text(roundTemperatureString(temperature: rowTemperatures.labelLow))
                   .frame(width: 37, alignment: .trailing)
-                  .contentTransition(.numericText())
-                  .animation(.default, value: rowTemperatures.labelLow)
                 TemperatureRangeView(
                   low: rowTemperatures.barLow, high: rowTemperatures.barHigh,
                   focusLow: rowTemperatures.focusLow,
@@ -67,8 +63,6 @@ struct DailyView: View {
                 .frame(height: rowTemperatures.focusLow == nil ? 5 : 28)
                 Text(roundTemperatureString(temperature: rowTemperatures.labelHigh))
                   .frame(width: 37, alignment: .leading)
-                  .contentTransition(.numericText())
-                  .animation(.default, value: rowTemperatures.labelHigh)
               }
               .padding(.vertical, 4)
             }

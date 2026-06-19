@@ -26,7 +26,6 @@ struct NowView: View {
     @State private var gfsImageState = GFSImageLayerState(renderMode: .preview)
     @State private var manualRefreshInFlight = false
     @State private var showRefreshIndicator = false
-    @State private var indicatorShownAt: Date?
     @State private var modelFallbackToast: String?
 
     var body: some View {
@@ -153,23 +152,19 @@ struct NowView: View {
                 manualRefreshInFlight = false
             }
             .task(id: refreshPending) {
-                if refreshPending {
-                    // Debounce: only show the spinner if loading lingers past 500ms,
-                    // so quick refreshes don't flash it.
-                    guard (try? await Task.sleep(for: .milliseconds(500))) != nil else { return }
-                    indicatorShownAt = .now
-                    showRefreshIndicator = true
-                } else if showRefreshIndicator {
-                    // Keep it on screen for a brief minimum so it never flickers off instantly.
-                    if let shownAt = indicatorShownAt {
-                        let remaining = 0.5 - Date.now.timeIntervalSince(shownAt)
-                        if remaining > 0 {
-                            try? await Task.sleep(for: .seconds(remaining))
-                        }
-                    }
+                // Hide first, before any await: this runs immediately whenever loading
+                // is no longer pending (including when the view re-appears coming back
+                // from background), so the indicator can never get stranded on by the
+                // task being cancelled/recreated across the scene-phase change.
+                guard refreshPending else {
                     showRefreshIndicator = false
-                    indicatorShownAt = nil
+                    return
                 }
+                // Debounce: only show the spinner if loading lingers past 500ms, so
+                // quick refreshes don't flash it.
+                guard (try? await Task.sleep(for: .milliseconds(500))) != nil else { return }
+                guard refreshPending else { return }
+                showRefreshIndicator = true
             }
             if weather.debug {
                 AtmosphereDebugPanel(state: atmosphereDebug)

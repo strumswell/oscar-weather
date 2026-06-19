@@ -54,7 +54,7 @@ struct HourlyView: View {
         if showDayBadge, let dayLabel {
           Text(dayLabel)
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(.secondary)
+            .foregroundStyle(.primary.opacity(0.8))
             .contentTransition(.numericText())
             .transition(.opacity)
         }

@@ -60,10 +60,7 @@ struct RainView: View {
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.secondary)
                         .padding(.leading)
-                    PrecipitationSeriesChart(
-                        points: brightskyPoints,
-                        isLoading: brightskyComparison == nil
-                    )
+                    PrecipitationSeriesChart(points: brightskyPoints)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 20)
                     .background(.thinMaterial)
@@ -118,7 +115,6 @@ struct PrecipChartPoint: Identifiable {
 /// primary oscar-server series and the BrightSky debug comparison.
 private struct PrecipitationSeriesChart: View {
     let points: [PrecipChartPoint]
-    var isLoading: Bool = false
 
     @State private var rawSelectedDate: Date?
 
@@ -191,11 +187,6 @@ private struct PrecipitationSeriesChart: View {
             }
         }
         .chartXSelection(value: $rawSelectedDate)
-        .overlay {
-            if isLoading {
-                ProgressView()
-            }
-        }
     }
 
     private func nearestPrecipitation(for date: Date) -> String {
