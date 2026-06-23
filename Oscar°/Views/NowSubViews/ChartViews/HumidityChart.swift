@@ -30,8 +30,14 @@ struct HumidityChart: View {
 
   var body: some View {
     VStack(alignment: .leading) {
-      Chart {
-        if #available(iOS 18, *) {
+      // Branch on availability at the View level rather than inside the
+      // Chart's ChartContentBuilder: an `if #available` there produces a
+      // `_ConditionalContent` whose ChartContent conformance is iOS 27+ only
+      // (a warning in Swift 6 mode, and a runtime crash on iOS 27). Routing
+      // each plot variant through the generic `chart(plot:)` helper keeps the
+      // plot's ChartContent type concrete and avoids that.
+      if #available(iOS 18, *) {
+        chart {
           // Area plot with gradient for humidity
           AreaPlot(
             humidityData.filter { $0.time >= referenceDate },
@@ -46,7 +52,7 @@ struct HumidityChart: View {
             )
           )
           .interpolationMethod(.catmullRom)
-          
+
           LinePlot(
             humidityData.filter { $0.time <= referenceDate },
             x: .value("Hour", \.time),
@@ -66,7 +72,9 @@ struct HumidityChart: View {
           .foregroundStyle(.green)
           .interpolationMethod(.catmullRom)
           .lineStyle(.init(lineWidth: 2.5))
-        } else {
+        }
+      } else {
+        chart {
           // iOS 17 fallback with area marks
           ForEach(Array(zip(time, humidity).enumerated()), id: \.offset) { index, pair in
             let (timeValue, humidityValue) = pair
@@ -77,7 +85,7 @@ struct HumidityChart: View {
             .interpolationMethod(.catmullRom)
             .foregroundStyle(timeValue < referenceDate.timeIntervalSince1970 ? .green.opacity(0.12) : .green.opacity(0.3))
           }
-          
+
           ForEach(Array(zip(time, humidity).enumerated()), id: \.offset) { index, pair in
             let (timeValue, humidityValue) = pair
             LineMark(
@@ -90,84 +98,97 @@ struct HumidityChart: View {
             .lineStyle(timeValue < referenceDate.timeIntervalSince1970 ? .init(lineWidth: 2.5, dash: [7, 5]) : .init(lineWidth: 2.5))
           }
         }
+      }
+    }
+  }
 
-        currentPointMarks
-        
-        // Interactive selection indicator
-        if let selectedDate {
-          RuleMark(x: .value("Selected", selectedDate))
-            .foregroundStyle(.gray.opacity(0.3))
-            .lineStyle(.init(lineWidth: 2))
-            .annotation(
-              position: .topTrailing, spacing: 0,
-              overflowResolution: .init(
-                x: .fit(to: .chart),
-                y: .fit(to: .chart)
-              )
-            ) {
-              if let selectedData = getSelectedHumidityData(for: selectedDate) {
-                VStack(alignment: .center, spacing: 2) {
-                  Text(HourlyChartUtilities.timeString(from: selectedDate))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                  
-                  VStack(alignment: .leading, spacing: 1) {
-                    HStack(spacing: 4) {
-                      Circle().fill(.green).frame(width: 6, height: 6)
-                      Text("\(selectedData.humidity, specifier: "%.0f")\(unit)")
-                        .font(.caption2)
-                        .foregroundStyle(.white)
-                    }
+  /// Builds the humidity chart around the supplied plot content, applying the
+  /// shared marks, axes, and scales. Generic over the plot's `ChartContent`
+  /// type so each availability branch passes a concrete type.
+  @ViewBuilder
+  private func chart<Plot: ChartContent>(@ChartContentBuilder plot: () -> Plot) -> some View {
+    Chart {
+      plot()
+
+      currentPointMarks
+
+      // Interactive selection indicator
+      if let selectedDate {
+        RuleMark(x: .value("Selected", selectedDate))
+          .foregroundStyle(.gray.opacity(0.3))
+          .lineStyle(.init(lineWidth: 2))
+          .annotation(
+            position: .topTrailing, spacing: 0,
+            overflowResolution: .init(
+              x: .fit(to: .chart),
+              y: .fit(to: .chart)
+            )
+          ) {
+            if let selectedData = getSelectedHumidityData(for: selectedDate) {
+              VStack(alignment: .center, spacing: 2) {
+                Text(HourlyChartUtilities.timeString(from: selectedDate))
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+
+                VStack(alignment: .leading, spacing: 1) {
+                  HStack(spacing: 4) {
+                    Circle().fill(.green).frame(width: 6, height: 6)
+                    Text("\(selectedData.humidity, specifier: "%.0f")\(unit)")
+                      .font(.caption2)
+                      .foregroundStyle(.white)
                   }
                 }
-                .padding(8)
-                .background(.ultraThinMaterial.opacity(0.9))
-                .clipShape(.rect(cornerRadius: 8))
-                .shadow(radius: 4)
               }
-            }
-        }
-
-        ForEach(dayChangeIndices(time: time), id: \.self) { index in
-          RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
-            .foregroundStyle(.gray.opacity(0.6))
-            .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [8, 4]))
-            .annotation(
-              position: .topTrailing, spacing: 8,
-              overflowResolution: .init(
-                x: .fit(to: .chart),
-                y: .fit(to: .chart)
-              )
-            ) {
-              Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.primary.opacity(0.7))
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(.ultraThinMaterial, in: .capsule)
-            }
-        }
-      }
-      .chartForegroundStyleScale([
-        String(localized: "Relative Luftfeuchtigkeit") + " (\(unit))": .green
-      ])
-      .chartXAxis {
-        AxisMarks(values: .stride(by: .hour, count: 6)) { value in
-          AxisValueLabel {
-            if let date = value.as(Date.self) {
-              Text(HourlyChartUtilities.hourString(from: date))
+              .padding(8)
+              .background(.ultraThinMaterial.opacity(0.9))
+              .clipShape(.rect(cornerRadius: 8))
+              .shadow(radius: 4)
             }
           }
-          AxisGridLine()
-          AxisTick()
-        }
       }
-      .chartXScale(domain: maxTimeRange)
-      .chartScrollableAxes(.horizontal)
-      .chartXVisibleDomain(length: 129600)
-      .chartXSelection(value: $selectedDate)
-      .frame(height: 175)
+
+      ForEach(dayChangeIndices(time: time), id: \.self) { index in
+        RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
+          .foregroundStyle(.gray.opacity(0.6))
+          .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [8, 4]))
+          .annotation(
+            position: .topTrailing, spacing: 8,
+            overflowResolution: .init(
+              x: .fit(to: .chart),
+              y: .fit(to: .chart)
+            )
+          ) {
+            Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
+              .font(.caption.weight(.medium))
+              .foregroundStyle(.primary.opacity(0.7))
+              .padding(.horizontal, 6)
+              .padding(.vertical, 2)
+              .background(.ultraThinMaterial, in: .capsule)
+          }
+      }
     }
+    .chartForegroundStyleScale([
+      String(localized: "Relative Luftfeuchtigkeit") + " (\(unit))": .green
+    ])
+    .chartXAxis {
+      AxisMarks(values: .stride(by: .hour, count: 6)) { value in
+        AxisValueLabel {
+          if let date = value.as(Date.self) {
+            Text(HourlyChartUtilities.hourString(from: date))
+          }
+        }
+        AxisGridLine()
+        AxisTick()
+      }
+    }
+    // Anchor the y-scale to 0 so the area fills all the way down to 0%
+    // (relative humidity's natural floor) and never below it.
+    .chartYScale(domain: 0...100)
+    .chartXScale(domain: maxTimeRange)
+    .chartScrollableAxes(.horizontal)
+    .chartXVisibleDomain(length: 129600)
+    .chartXSelection(value: $selectedDate)
+    .frame(height: 175)
   }
   
   /// Gets the nearest humidity data for a selected date

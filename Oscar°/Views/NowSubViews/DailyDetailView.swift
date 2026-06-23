@@ -48,6 +48,10 @@ struct DailyDetailView: View {
     switch model {
     case .ecmwfAIFS025Ensemble:
       return String(localized: "AIFS eignet sich gut für mittelfristige Unsicherheit, lokale Details können geglättet wirken.")
+    case .ecmwfIFS025Ensemble:
+      return String(localized: "IFS ENS liefert eine breit gestreute Unsicherheit für die mittlere Frist.")
+    case .googleWeatherNext2Ensemble:
+      return String(localized: "WeatherNext 2 ist ein KI-Modell und gut für mittelfristige Trends geeignet.")
     case .ncepAIGFS025:
       return String(localized: "AI GEFS ist ein guter Kompromiss für die nächsten ein bis zwei Wochen.")
     case .ncepGEFS05:

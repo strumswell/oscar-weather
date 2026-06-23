@@ -171,6 +171,22 @@ struct RadarView: View {
                     activateRainviewer()
                 }
             }
+
+            // ── Rendering (Beta) ───────────────────────────────────────────
+            // Value-grid path (DWD radar): server sends the raw 8-bit grid, the device
+            // colormaps it — lower RAM and transfer than the prerendered image.
+            Section("Radar-Rendering (Beta)") {
+                Toggle("Vektor-Grid", isOn: Binding(
+                    get: { settingsService.radarUsesValueGrid },
+                    set: { newValue in
+                        settingsService.radarUsesValueGrid = newValue
+                        OscarRadarState.purgeDecodedCaches()
+                        if settingsService.oscarRadarLayer {
+                            Task { await oscarRadarState?.reloadForCurrentRegion() }
+                        }
+                    }
+                ))
+            }
         } label: {
             Image(systemName: "map.fill")
                 .resizable()

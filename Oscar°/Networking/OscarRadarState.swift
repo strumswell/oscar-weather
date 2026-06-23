@@ -1,5 +1,6 @@
 import Foundation
 import MapKit
+import Metal
 import Observation
 import UIKit
 
@@ -21,11 +22,77 @@ enum RadarRegion: String, CaseIterable, Equatable, Sendable {
     var pathComponent: String { rawValue }
 }
 
-struct OscarRadarFrame: Identifiable {
+@MainActor
+final class OscarRadarFrame: Identifiable {
     let id = UUID()
     let key: String
     let timestamp: String
-    let cgImage: CGImage  // pre-decoded + pre-flipped for MapKit's CG coordinate system
+
+    private enum Source {
+        case image(CGImage)                                   // raster path: ready to draw
+        case grid(indices: [UInt8], width: Int, height: Int)  // grid path: 8-bit, colormap on demand
+    }
+    private let source: Source
+
+    init(key: String, timestamp: String, cgImage: CGImage) {
+        self.key = key; self.timestamp = timestamp; self.source = .image(cgImage)
+    }
+    init(key: String, timestamp: String, gridIndices: [UInt8], width: Int, height: Int) {
+        self.key = key; self.timestamp = timestamp
+        self.source = .grid(indices: gridIndices, width: width, height: height)
+    }
+
+    /// Cost-bounded cache of materialized RGBA images for grid frames, so the heavy decoded
+    /// bitmaps exist only for a sliding window of frames while `frames` holds the compact
+    /// 8-bit buffers — that's the whole RAM win. Sized (by bytes) to cover a realistic scrub
+    /// window so dragging through the timeline hits warm images instead of recolormapping;
+    /// frames outside the window are re-materialized off-main by the load pipeline when the
+    /// playhead nears them. Keyed by frame key (grid is Germany-only, so keys don't collide).
+    private static let materializedImages: NSCache<NSString, CGImage> = {
+        let cache = NSCache<NSString, CGImage>()
+        cache.totalCostLimit = 96 * 1024 * 1024   // ~18 DWD frames at 1.3 MP; bounded
+        return cache
+    }()
+
+    static func purgeMaterialized() { materializedImages.removeAllObjects() }
+
+    /// True when `cgImage` can return without doing any colormap work: raster frames are
+    /// always ready; grid frames only once their RGBA image is cached. The load pipeline
+    /// uses this to decide whether a frame still needs off-main materialization.
+    var isReadyToDraw: Bool {
+        switch source {
+        case .image: return true
+        case .grid: return Self.materializedImages.object(forKey: key as NSString) != nil
+        }
+    }
+
+    /// The drawable image. Raster frames return their decoded image directly; grid frames
+    /// return their cached materialized image. The CPU colormap here is only a last-resort
+    /// fallback for the rare case the render path reaches a grid frame before the pipeline
+    /// has materialized it (see `ensureMaterialized`) — normal scrubbing never hits it.
+    var cgImage: CGImage? {
+        switch source {
+        case .image(let image):
+            return image
+        case .grid(let indices, let width, let height):
+            if let cached = Self.materializedImages.object(forKey: key as NSString) { return cached }
+            guard let image = OscarRadarState.colormapIndices(indices, width: width, height: height) else { return nil }
+            Self.materializedImages.setObject(image, forKey: key as NSString, cost: width * height * 4)
+            return image
+        }
+    }
+
+    /// Colormaps this grid frame's index buffer on the GPU (off the main thread) and caches
+    /// the result, so the render path only ever reads a ready image. No-op for raster frames
+    /// or when already cached. Called from the load/preload pipeline — never the draw path.
+    func ensureMaterialized() async {
+        guard case let .grid(indices, width, height) = source,
+              Self.materializedImages.object(forKey: key as NSString) == nil else { return }
+        let palette = await OscarRadarState.resolvedPalette()
+        guard let image = await RadarGridColormapper.makeImage(
+            indices: indices, width: width, height: height, palette: palette) else { return }
+        Self.materializedImages.setObject(image, forKey: key as NSString, cost: width * height * 4)
+    }
 }
 
 enum MapRenderMode {
@@ -286,6 +353,7 @@ final class OscarRadarState {
 
     static func purgeDecodedCaches() {
         imageCache.removeAllObjects()
+        OscarRadarFrame.purgeMaterialized()
     }
 
     // MARK: - Region
@@ -515,9 +583,14 @@ final class OscarRadarState {
             return false
         }
 
-        if frames[index] != nil {
+        if let existing = frames[index] {
             if renderFrameIndex == nil {
                 renderFrameIndex = index
+            }
+            // Re-warm grid frames whose materialized image was evicted from the window cache,
+            // off-main, so the playhead never reaches one that needs a main-thread colormap.
+            if !existing.isReadyToDraw {
+                await existing.ensureMaterialized()
             }
             return true
         }
@@ -529,20 +602,40 @@ final class OscarRadarState {
         loadingFrameIndices.insert(index)
         defer { loadingFrameIndices.remove(index) }
 
-        guard let cgImage = await Self.loadImage(for: frameInfos[index], region: region),
+        let info = frameInfos[index]
+        // Grid path is Germany/DWD only for now; Europe always uses the raster image.
+        let useGrid = UserDefaults.standard.bool(forKey: "radarUsesValueGrid") && region == .germany
+
+        let loadedFrame: OscarRadarFrame?
+        if useGrid {
+            await Self.warmPalette()
+            if let grid = await Self.loadGridIndices(for: info, region: region) {
+                loadedFrame = OscarRadarFrame(key: info.key, timestamp: info.timestamp,
+                                              gridIndices: grid.indices, width: grid.width, height: grid.height)
+            } else {
+                loadedFrame = nil
+            }
+        } else if let image = await Self.loadRasterImage(for: info, region: region) {
+            loadedFrame = OscarRadarFrame(key: info.key, timestamp: info.timestamp, cgImage: image)
+        } else {
+            loadedFrame = nil
+        }
+
+        guard let loadedFrame,
               loadSessionID == sessionID,
               frameInfos.indices.contains(index),
               frames.indices.contains(index) else {
             return false
         }
 
+        // Colormap grid frames on the GPU off-main *before* publishing them, so the render
+        // path only ever reads a ready image (no-op for raster). The await can suspend, so
+        // re-validate the session/array afterwards.
+        await loadedFrame.ensureMaterialized()
+        guard loadSessionID == sessionID, frames.indices.contains(index) else { return false }
+
         var updated = frames
-        let info = frameInfos[index]
-        updated[index] = OscarRadarFrame(
-            key: info.key,
-            timestamp: info.timestamp,
-            cgImage: cgImage
-        )
+        updated[index] = loadedFrame
         frames = updated
 
         if renderFrameIndex == nil || currentFrameIndex == index {
@@ -595,26 +688,49 @@ final class OscarRadarState {
         return (response.frames, overlayBounds)
     }
 
-    /// Returns a cached CGImage for the frame, or downloads and caches it if missing.
-    private static func loadImage(for frameInfo: OscarFrameInfo, region: RadarRegion) async -> CGImage? {
+    /// Raster path (today): server-colormapped image, decoded + flipped. Cached as a full
+    /// RGBA CGImage in the shared 128 MB cache so re-opens/region switches skip the decode.
+    private static func loadRasterImage(for frameInfo: OscarFrameInfo, region: RadarRegion) async -> CGImage? {
         let cacheKey = "\(region.pathComponent):\(frameInfo.key)" as NSString
-        if let cached = imageCache.object(forKey: cacheKey) {
-            return cached
-        }
+        if let cached = imageCache.object(forKey: cacheKey) { return cached }
+        guard let image = await loadColormappedImage(for: frameInfo, region: region) else { return nil }
+        imageCache.setObject(image, forKey: cacheKey, cost: image.width * image.height * 4)
+        return image
+    }
 
+    private static func loadColormappedImage(for frameInfo: OscarFrameInfo, region: RadarRegion) async -> CGImage? {
         guard let url = URL(string: "\(baseURL)/radar/\(region.pathComponent)/frames/\(frameInfo.key)/image?cmap=plasma") else { return nil }
         do {
             var request = URLRequest(url: url)
             request.addAPIContactIdentity()
             let (data, _) = try await URLSession.shared.data(for: request)
             guard let uiImage = UIImage(data: data) else { return nil }
-            guard let cgImage = prepareForRenderer(uiImage) else { return nil }
-            imageCache.setObject(
-                cgImage,
-                forKey: cacheKey,
-                cost: cgImage.width * cgImage.height * 4
-            )
-            return cgImage
+            return prepareForRenderer(uiImage)
+        } catch {
+            return nil
+        }
+    }
+
+    /// Grid path: download the raw 8-bit value grid and decode it to a compact index
+    /// buffer. Colormapping to a full RGBA image is deferred to `OscarRadarFrame.cgImage`
+    /// (only the on-screen frames), so the cached buffer stays ~4× smaller than an RGBA frame.
+    private static func loadGridIndices(for frameInfo: OscarFrameInfo, region: RadarRegion) async -> (indices: [UInt8], width: Int, height: Int)? {
+        guard let url = URL(string: "\(baseURL)/radar/\(region.pathComponent)/frames/\(frameInfo.key)/grid") else { return nil }
+        do {
+            var request = URLRequest(url: url)
+            request.addAPIContactIdentity()
+            let (data, _) = try await URLSession.shared.data(for: request)
+            guard let grid = UIImage(data: data)?.cgImage else { return nil }
+            let w = grid.width, h = grid.height
+            var indices = [UInt8](repeating: 0, count: w * h)
+            let ok = indices.withUnsafeMutableBytes { raw -> Bool in
+                guard let ctx = CGContext(data: raw.baseAddress, width: w, height: h, bitsPerComponent: 8,
+                                          bytesPerRow: w, space: CGColorSpaceCreateDeviceGray(),
+                                          bitmapInfo: CGImageAlphaInfo.none.rawValue) else { return false }
+                ctx.draw(grid, in: CGRect(x: 0, y: 0, width: CGFloat(w), height: CGFloat(h)))
+                return true
+            }
+            return ok ? (indices, w, h) : nil
         } catch {
             return nil
         }
@@ -642,11 +758,259 @@ final class OscarRadarState {
         return ctx.makeImage()
     }
 
+    // MARK: - Value-grid colormap (client-side rendering path)
+
+    // Resolves once (server-preferred, local fallback); every grid frame colormaps against it.
+    private static var cachedPalette: [PixelRGBA]?
+
+    /// The resolved 256-entry plasma palette (warming it on first call). Used by the off-main
+    /// GPU materialization path; resolution is cheap (one cached network fetch, then memory).
+    static func resolvedPalette() async -> [PixelRGBA] {
+        await warmPalette()
+        return cachedPalette ?? RadarPlasma.buildPalette()
+    }
+
+    /// Resolves the 256-entry plasma palette: server `/colormaps/plasma` preferred, local
+    /// `RadarPlasma` fallback (kept in sync with the server) if it's unavailable.
+    private static func warmPalette() async {
+        if cachedPalette != nil { return }
+        if let url = URL(string: "\(baseURL)/colormaps/plasma") {
+            var request = URLRequest(url: url)
+            request.addAPIContactIdentity()
+            if let (data, _) = try? await URLSession.shared.data(for: request), data.count == 256 * 4 {
+                cachedPalette = (0..<256).map {
+                    let o = $0 * 4
+                    return PixelRGBA(r: data[o], g: data[o + 1], b: data[o + 2], a: data[o + 3])
+                }
+                return
+            }
+        }
+        if cachedPalette == nil { cachedPalette = RadarPlasma.buildPalette() }
+    }
+
+    /// Colormaps an 8-bit index buffer to a pre-flipped RGBA image (the renderer expects
+    /// row 0 at the bottom), matching the raster path's CGImage shape.
+    static func colormapIndices(_ indices: [UInt8], width w: Int, height h: Int) -> CGImage? {
+        let palette = cachedPalette ?? RadarPlasma.buildPalette()
+        var out = [UInt8](repeating: 0, count: w * h * 4)
+        palette.withUnsafeBufferPointer { pal in
+            indices.withUnsafeBufferPointer { g in
+                out.withUnsafeMutableBufferPointer { o in
+                    for y in 0..<h {
+                        let srcRow = (h - 1 - y) * w
+                        let dstRow = y * w * 4
+                        for x in 0..<w {
+                            let c = pal[Int(g[srcRow + x])]
+                            let d = dstRow + x * 4
+                            o[d] = c.r; o[d + 1] = c.g; o[d + 2] = c.b; o[d + 3] = c.a
+                        }
+                    }
+                }
+            }
+        }
+        guard let cf = CFDataCreate(nil, out, out.count),
+              let provider = CGDataProvider(data: cf) else { return nil }
+        return CGImage(
+            width: w, height: h, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: w * 4,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+            provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent
+        )
+    }
+
     deinit {
         bootstrapTask?.cancel()
         focusedLoadTask?.cancel()
         backgroundPreloadTask?.cancel()
         playbackTimer?.invalidate()
+    }
+}
+
+// MARK: - Value grid palette
+
+struct PixelRGBA { let r: UInt8; let g: UInt8; let b: UInt8; let a: UInt8 }
+
+/// Local fallback for the server `/colormaps/plasma` palette — kept in sync with
+/// oscar-server's `Colormaps.plasma` so on-device rendering matches the raster path
+/// when the palette endpoint is unreachable. idx 0 = transparent; sqrt-spaced.
+private enum RadarPlasma {
+    private struct Stop { let value: Double; let color: PixelRGBA }
+
+    private static func colorHex(_ hex: String) -> PixelRGBA {
+        let v = UInt32(hex.dropFirst(), radix: 16) ?? 0
+        return PixelRGBA(r: UInt8((v >> 16) & 255), g: UInt8((v >> 8) & 255), b: UInt8(v & 255), a: 255)
+    }
+    private static func mmPer5(_ hourly: Double) -> Double { hourly / 12 }
+    private static func dbzToMmH(_ dbz: Double) -> Double {
+        let t: [(Double, Double)] = [(5, 0.07), (10, 0.15), (15, 0.3), (20, 0.6), (25, 1.3),
+            (30, 2.7), (35, 5.6), (40, 11.53), (45, 23.7), (50, 48.6), (55, 100), (60, 205), (65, 421)]
+        if dbz <= t[0].0 { return t[0].1 }
+        for p in zip(t, t.dropFirst()) where dbz <= p.1.0 {
+            return p.0.1 + (p.1.1 - p.0.1) * (dbz - p.0.0) / (p.1.0 - p.0.0)
+        }
+        let p = (t[t.count - 2], t[t.count - 1])
+        return p.0.1 + (p.1.1 - p.0.1) * (dbz - p.0.0) / (p.1.0 - p.0.0)
+    }
+    private static let stops: [Stop] = {
+        let bins: [(Double, String)] = [(1, "#99ffff"), (5.5, "#32ffff"), (10, "#00caca"),
+            (14.5, "#009934"), (19, "#4cbf19"), (23.5, "#98cb03"), (28, "#cce603"), (32.5, "#ffff00"),
+            (37, "#ffc400"), (41.5, "#ff8901"), (46, "#ff0000"), (50.5, "#b40000"), (55, "#4848ff"),
+            (60, "#0000c9"), (65, "#990199"), (75, "#fe33ff")]
+        return [Stop(value: 0, color: PixelRGBA(r: 0, g: 0, b: 0, a: 0))]
+            + bins.map { Stop(value: mmPer5(dbzToMmH($0.0)), color: colorHex($0.1)) }
+    }()
+    private static let dbzMax = 85.0
+
+    private static func sample(_ value: Double) -> PixelRGBA {
+        guard let first = stops.first, let last = stops.last else { return PixelRGBA(r: 0, g: 0, b: 0, a: 0) }
+        if value <= first.value { return first.color }
+        if value >= last.value { return last.color }
+        for p in zip(stops, stops.dropFirst()) where value >= p.0.value && value < p.1.value {
+            let f = (value - p.0.value) / (p.1.value - p.0.value)
+            func mix(_ a: UInt8, _ b: UInt8) -> UInt8 {
+                UInt8(clamping: Int((Double(a) + f * (Double(b) - Double(a))).rounded()))
+            }
+            return PixelRGBA(r: mix(p.0.color.r, p.1.color.r), g: mix(p.0.color.g, p.1.color.g),
+                             b: mix(p.0.color.b, p.1.color.b), a: mix(p.0.color.a, p.1.color.a))
+        }
+        return last.color
+    }
+
+    static func buildPalette() -> [PixelRGBA] {
+        var pal = [PixelRGBA](repeating: PixelRGBA(r: 0, g: 0, b: 0, a: 0), count: 256)
+        for i in 1..<256 {
+            pal[i] = sample(mmPer5(dbzToMmH(Double(i) / 255 * dbzMax)))
+        }
+        return pal
+    }
+}
+
+// MARK: - GPU value-grid colormapper
+
+/// Ferries a CGImage out of a detached task. CGImage is an immutable, thread-safe
+/// CoreGraphics object but isn't formally `Sendable`, so this box vouches for it.
+private struct SendableCGImage: @unchecked Sendable { let image: CGImage? }
+
+/// Maps an 8-bit value-grid index buffer + 256-entry RGBA palette to a drawable RGBA
+/// `CGImage` on the GPU, off the main thread, via a runtime-compiled Metal compute shader
+/// (a 1-D palette lookup per pixel). Falls back to a CPU loop when Metal is unavailable.
+/// Output is vertically flipped (row 0 at the bottom) to match the MapKit overlay renderer,
+/// exactly like the raster path's `prepareForRenderer`, and uses straight RGBA under
+/// `premultipliedLast` — valid because the plasma palette's alpha is only ever 0 (index 0,
+/// rgb=0) or 255, so premultiplied equals straight.
+enum RadarGridColormapper {
+    private struct GPU {
+        let device: MTLDevice
+        let queue: MTLCommandQueue
+        let pipeline: MTLComputePipelineState
+    }
+
+    // Built once. nil if the device lacks Metal or the shader fails to compile → CPU path.
+    private static let gpu: GPU? = makeGPU()
+
+    private static let shaderSource = """
+    #include <metal_stdlib>
+    using namespace metal;
+    kernel void radar_colormap(
+        device const uchar*  indices [[buffer(0)]],
+        device const uchar4* palette [[buffer(1)]],
+        device uchar4*       out     [[buffer(2)]],
+        constant uint2&      dims    [[buffer(3)]],
+        uint2 gid [[thread_position_in_grid]]
+    ) {
+        if (gid.x >= dims.x || gid.y >= dims.y) { return; }
+        uint srcRow = (dims.y - 1 - gid.y) * dims.x;   // vertical flip for MapKit
+        uint dst    = gid.y * dims.x + gid.x;
+        out[dst] = palette[indices[srcRow + gid.x]];
+    }
+    """
+
+    private static func makeGPU() -> GPU? {
+        guard let device = MTLCreateSystemDefaultDevice(),
+              let queue = device.makeCommandQueue(),
+              let library = try? device.makeLibrary(source: shaderSource, options: nil),
+              let function = library.makeFunction(name: "radar_colormap"),
+              let pipeline = try? device.makeComputePipelineState(function: function) else { return nil }
+        return GPU(device: device, queue: queue, pipeline: pipeline)
+    }
+
+    /// Colormap off the main thread (GPU, CPU fallback). Returns a pre-flipped RGBA image
+    /// matching the raster path's CGImage shape.
+    static func makeImage(indices: [UInt8], width: Int, height: Int, palette: [PixelRGBA]) async -> CGImage? {
+        await Task.detached(priority: .userInitiated) {
+            SendableCGImage(image: render(indices: indices, width: width, height: height, palette: palette))
+        }.value.image
+    }
+
+    private static func render(indices: [UInt8], width w: Int, height h: Int, palette: [PixelRGBA]) -> CGImage? {
+        guard w > 0, h > 0, indices.count >= w * h, palette.count >= 256 else { return nil }
+        if let image = gpuRender(indices: indices, width: w, height: h, palette: palette) { return image }
+        return cpuRender(indices: indices, width: w, height: h, palette: palette)
+    }
+
+    private static func gpuRender(indices: [UInt8], width w: Int, height h: Int, palette: [PixelRGBA]) -> CGImage? {
+        guard let gpu else { return nil }
+        let device = gpu.device
+        let pixels = w * h
+        var paletteBytes = [UInt8](repeating: 0, count: 256 * 4)
+        for i in 0..<256 {
+            let p = palette[i], o = i * 4
+            paletteBytes[o] = p.r; paletteBytes[o + 1] = p.g; paletteBytes[o + 2] = p.b; paletteBytes[o + 3] = p.a
+        }
+        var dims = SIMD2<UInt32>(UInt32(w), UInt32(h))
+
+        guard let inBuf = device.makeBuffer(bytes: indices, length: pixels, options: .storageModeShared),
+              let palBuf = device.makeBuffer(bytes: paletteBytes, length: paletteBytes.count, options: .storageModeShared),
+              let outBuf = device.makeBuffer(length: pixels * 4, options: .storageModeShared),
+              let command = gpu.queue.makeCommandBuffer(),
+              let encoder = command.makeComputeCommandEncoder() else { return nil }
+
+        encoder.setComputePipelineState(gpu.pipeline)
+        encoder.setBuffer(inBuf, offset: 0, index: 0)
+        encoder.setBuffer(palBuf, offset: 0, index: 1)
+        encoder.setBuffer(outBuf, offset: 0, index: 2)
+        encoder.setBytes(&dims, length: MemoryLayout<SIMD2<UInt32>>.stride, index: 3)
+        let group = MTLSize(width: 16, height: 16, depth: 1)
+        let grid = MTLSize(width: (w + 15) / 16, height: (h + 15) / 16, depth: 1)
+        encoder.dispatchThreadgroups(grid, threadsPerThreadgroup: group)
+        encoder.endEncoding()
+        command.commit()
+        command.waitUntilCompleted()
+        guard command.status == .completed else { return nil }
+
+        // storageModeShared → CPU-visible after completion; copy into CFData the CGImage owns.
+        let rgba = Data(bytes: outBuf.contents(), count: pixels * 4)
+        return makeCGImage(rgba: rgba, width: w, height: h)
+    }
+
+    private static func cpuRender(indices: [UInt8], width w: Int, height h: Int, palette: [PixelRGBA]) -> CGImage? {
+        var out = [UInt8](repeating: 0, count: w * h * 4)
+        palette.withUnsafeBufferPointer { pal in
+            indices.withUnsafeBufferPointer { g in
+                out.withUnsafeMutableBufferPointer { o in
+                    for y in 0..<h {
+                        let srcRow = (h - 1 - y) * w
+                        let dstRow = y * w * 4
+                        for x in 0..<w {
+                            let c = pal[Int(g[srcRow + x])]
+                            let d = dstRow + x * 4
+                            o[d] = c.r; o[d + 1] = c.g; o[d + 2] = c.b; o[d + 3] = c.a
+                        }
+                    }
+                }
+            }
+        }
+        return makeCGImage(rgba: Data(out), width: w, height: h)
+    }
+
+    private static func makeCGImage(rgba: Data, width w: Int, height h: Int) -> CGImage? {
+        guard let provider = CGDataProvider(data: rgba as CFData) else { return nil }
+        return CGImage(
+            width: w, height: h, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: w * 4,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+            provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent
+        )
     }
 }
 

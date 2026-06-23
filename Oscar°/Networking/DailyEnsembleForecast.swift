@@ -4,6 +4,8 @@ import Foundation
 
 enum DailyEnsembleModel: String, CaseIterable, Identifiable {
   case ecmwfAIFS025Ensemble = "ecmwf_aifs025_ensemble"
+  case ecmwfIFS025Ensemble = "ecmwf_ifs025_ensemble"
+  case googleWeatherNext2Ensemble = "google_weathernext2_ensemble"
   case ncepAIGFS025 = "ncep_aigefs025"
   case ncepGEFS05 = "ncep_gefs05"
   case iconGlobalEPS = "icon_global_eps"
@@ -15,6 +17,10 @@ enum DailyEnsembleModel: String, CaseIterable, Identifiable {
     switch self {
     case .ecmwfAIFS025Ensemble:
       return "AIFS"
+    case .ecmwfIFS025Ensemble:
+      return "IFS ENS"
+    case .googleWeatherNext2Ensemble:
+      return "WeatherNext2"
     case .ncepAIGFS025:
       return "AI GEFS"
     case .ncepGEFS05:
@@ -28,8 +34,10 @@ enum DailyEnsembleModel: String, CaseIterable, Identifiable {
 
   var providerName: String {
     switch self {
-    case .ecmwfAIFS025Ensemble:
+    case .ecmwfAIFS025Ensemble, .ecmwfIFS025Ensemble:
       return "ECMWF"
+    case .googleWeatherNext2Ensemble:
+      return "Google"
     case .ncepAIGFS025, .ncepGEFS05:
       return "NOAA"
     case .iconGlobalEPS, .iconEUEPS:
@@ -41,6 +49,10 @@ enum DailyEnsembleModel: String, CaseIterable, Identifiable {
     switch self {
     case .ecmwfAIFS025Ensemble:
       return "AIFS 0.25°"
+    case .ecmwfIFS025Ensemble:
+      return "IFS ENS 0.25°"
+    case .googleWeatherNext2Ensemble:
+      return "WeatherNext 2"
     case .ncepAIGFS025:
       return "AIGFS 0.25°"
     case .ncepGEFS05:
@@ -63,7 +75,7 @@ enum DailyEnsembleModel: String, CaseIterable, Identifiable {
 
   var resolution: String {
     switch self {
-    case .ecmwfAIFS025Ensemble, .ncepAIGFS025:
+    case .ecmwfAIFS025Ensemble, .ecmwfIFS025Ensemble, .ncepAIGFS025, .googleWeatherNext2Ensemble:
       return "25 km, 6-stündlich"
     case .ncepGEFS05:
       return "50 km, 3-stündlich"
@@ -76,8 +88,10 @@ enum DailyEnsembleModel: String, CaseIterable, Identifiable {
 
   var members: Int {
     switch self {
-    case .ecmwfAIFS025Ensemble:
+    case .ecmwfAIFS025Ensemble, .ecmwfIFS025Ensemble:
       return 51
+    case .googleWeatherNext2Ensemble:
+      return 35
     case .ncepAIGFS025, .ncepGEFS05:
       return 31
     case .iconGlobalEPS, .iconEUEPS:
@@ -87,7 +101,7 @@ enum DailyEnsembleModel: String, CaseIterable, Identifiable {
 
   var forecastLength: String {
     switch self {
-    case .ecmwfAIFS025Ensemble:
+    case .ecmwfAIFS025Ensemble, .ecmwfIFS025Ensemble, .googleWeatherNext2Ensemble:
       return "15 Tage"
     case .ncepAIGFS025:
       return "16 Tage"
@@ -104,7 +118,7 @@ enum DailyEnsembleModel: String, CaseIterable, Identifiable {
     switch self {
     case .ecmwfAIFS025Ensemble, .ncepAIGFS025, .ncepGEFS05, .iconEUEPS:
       return "alle 6 Stunden"
-    case .iconGlobalEPS:
+    case .ecmwfIFS025Ensemble, .googleWeatherNext2Ensemble, .iconGlobalEPS:
       return "alle 12 Stunden"
     }
   }
@@ -112,6 +126,8 @@ enum DailyEnsembleModel: String, CaseIterable, Identifiable {
   var menuSubtitle: String {
     switch self {
     case .ecmwfAIFS025Ensemble: return "25 km · 15 Tage"
+    case .ecmwfIFS025Ensemble: return "25 km · 15 Tage"
+    case .googleWeatherNext2Ensemble: return "25 km · 15 Tage"
     case .ncepAIGFS025: return "25 km · 16 Tage"
     case .ncepGEFS05: return "50 km · 35 Tage"
     case .iconGlobalEPS: return "26 km · 7,5 Tage"
@@ -121,13 +137,15 @@ enum DailyEnsembleModel: String, CaseIterable, Identifiable {
 
   enum Provider: String, CaseIterable {
     case ecmwf = "ECMWF"
+    case google = "Google"
     case noaa = "NOAA"
     case dwd = "DWD"
   }
 
   var provider: Provider {
     switch self {
-    case .ecmwfAIFS025Ensemble: return .ecmwf
+    case .ecmwfAIFS025Ensemble, .ecmwfIFS025Ensemble: return .ecmwf
+    case .googleWeatherNext2Ensemble: return .google
     case .ncepAIGFS025, .ncepGEFS05: return .noaa
     case .iconGlobalEPS, .iconEUEPS: return .dwd
     }
@@ -143,6 +161,10 @@ enum DailyEnsembleModel: String, CaseIterable, Identifiable {
     switch self {
     case .ecmwfAIFS025Ensemble:
       return "Mit 51 Mitgliedern und globaler 25-km-Abdeckung eignet sich AIFS gut, um mittelfristige Unsicherheit bis etwa 15 Tage einzuordnen. Da das Modell 6-stündlich und nicht hochaufgelöst ist, können lokale Details bei Wind und Temperatur geglättet wirken."
+    case .ecmwfIFS025Ensemble:
+      return "Das klassische ECMWF-Ensemble (EPS) mit 51 Mitgliedern bei 0,25°-Auflösung. Gilt weithin als Referenz für mittelfristige Vorhersagen bis 15 Tage – besonders zuverlässig für synoptische Ereignisse auf globaler Skala."
+    case .googleWeatherNext2Ensemble:
+      return "Googles KI-basiertes Ensemble mit globaler Abdeckung und bis zu 15 Tagen Reichweite. Mit 35 Mitgliedern bei 25-km-Gitter eignet es sich gut, um mittelfristige Unsicherheit einzuordnen."
     case .ncepAIGFS025:
       return "Die globale 25-km-Abdeckung und bis zu 16 Tage Reichweite sind ein guter Kompromiss für die nächsten ein bis zwei Wochen. Die 6-stündliche Auflösung macht genaue Timing-Details allerdings gröber als bei 3-stündlichen Ensembles."
     case .ncepGEFS05:
@@ -265,22 +287,22 @@ extension DailyEnsembleForecastResponse {
       let point = DailyEnsembleDayPoint(
         id: index,
         date: date,
-        temperatureMin: daily.temperature2mMin.value(at: index),
-        temperatureMax: daily.temperature2mMax.value(at: index),
-        temperatureMinMemberLow: daily.temperature2mMinMembers.extreme(at: index, including: daily.temperature2mMin.value(at: index), using: <),
-        temperatureMinMemberHigh: daily.temperature2mMinMembers.extreme(at: index, including: daily.temperature2mMin.value(at: index), using: >),
-        temperatureMaxMemberLow: daily.temperature2mMaxMembers.extreme(at: index, including: daily.temperature2mMax.value(at: index), using: <),
-        temperatureMaxMemberHigh: daily.temperature2mMaxMembers.extreme(at: index, including: daily.temperature2mMax.value(at: index), using: >),
-        precipitationSum: daily.precipitationSum.value(at: index),
-        precipitationSumMemberLow: daily.precipitationSumMembers.extreme(at: index, including: daily.precipitationSum.value(at: index), using: <),
-        precipitationSumMemberHigh: daily.precipitationSumMembers.extreme(at: index, including: daily.precipitationSum.value(at: index), using: >),
-        windSpeedMin: daily.windSpeed10mMin.value(at: index),
-        windSpeedMax: daily.windSpeed10mMax.value(at: index),
-        windSpeedMinMemberLow: daily.windSpeed10mMinMembers.extreme(at: index, including: daily.windSpeed10mMin.value(at: index), using: <),
-        windSpeedMinMemberHigh: daily.windSpeed10mMinMembers.extreme(at: index, including: daily.windSpeed10mMin.value(at: index), using: >),
-        windSpeedMaxMemberLow: daily.windSpeed10mMaxMembers.extreme(at: index, including: daily.windSpeed10mMax.value(at: index), using: <),
-        windSpeedMaxMemberHigh: daily.windSpeed10mMaxMembers.extreme(at: index, including: daily.windSpeed10mMax.value(at: index), using: >),
-        windDirection: daily.windDirection10mDominant.value(at: index),
+        temperatureMin: daily.temperature2mMinMembers.mean(at: index),
+        temperatureMax: daily.temperature2mMaxMembers.mean(at: index),
+        temperatureMinMemberLow: daily.temperature2mMinMembers.extreme(at: index, using: <),
+        temperatureMinMemberHigh: daily.temperature2mMinMembers.extreme(at: index, using: >),
+        temperatureMaxMemberLow: daily.temperature2mMaxMembers.extreme(at: index, using: <),
+        temperatureMaxMemberHigh: daily.temperature2mMaxMembers.extreme(at: index, using: >),
+        precipitationSum: daily.precipitationSumMembers.mean(at: index),
+        precipitationSumMemberLow: daily.precipitationSumMembers.extreme(at: index, using: <),
+        precipitationSumMemberHigh: daily.precipitationSumMembers.extreme(at: index, using: >),
+        windSpeedMin: daily.windSpeed10mMinMembers.mean(at: index),
+        windSpeedMax: daily.windSpeed10mMaxMembers.mean(at: index),
+        windSpeedMinMemberLow: daily.windSpeed10mMinMembers.extreme(at: index, using: <),
+        windSpeedMinMemberHigh: daily.windSpeed10mMinMembers.extreme(at: index, using: >),
+        windSpeedMaxMemberLow: daily.windSpeed10mMaxMembers.extreme(at: index, using: <),
+        windSpeedMaxMemberHigh: daily.windSpeed10mMaxMembers.extreme(at: index, using: >),
+        windDirection: daily.windDirection10mDominantMembers.mean(at: index),
         windDirectionMemberLow: daily.windDirection10mDominantMembers.extreme(at: index, using: <),
         windDirectionMemberHigh: daily.windDirection10mDominantMembers.extreme(at: index, using: >)
       )
@@ -415,12 +437,9 @@ private extension Array where Element == [Double?] {
     compactMap { $0.value(at: index) }.min(by: areInIncreasingOrder)
   }
 
-  func extreme(
-    at index: Int,
-    including controlValue: Double?,
-    using areInIncreasingOrder: (Double, Double) -> Bool
-  ) -> Double? {
-    (compactMap { $0.value(at: index) } + [controlValue].compactMap { $0 })
-      .min(by: areInIncreasingOrder)
+  func mean(at index: Int) -> Double? {
+    let values = compactMap { $0.value(at: index) }
+    guard !values.isEmpty else { return nil }
+    return values.reduce(0, +) / Double(values.count)
   }
 }

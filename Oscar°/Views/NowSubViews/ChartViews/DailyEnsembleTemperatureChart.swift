@@ -158,14 +158,14 @@ struct DailyEnsembleTemperatureChart: View {
               Text(selectedPoint.date, format: .dateTime.weekday(.abbreviated).day().month(.abbreviated))
                 .font(.caption)
                 .foregroundStyle(.secondary)
-              valueRow(color: .blue, label: "Min", value: selectedPoint.temperatureMin)
+              valueRow(color: .blue, label: "Ø Min", value: selectedPoint.temperatureMin)
               rangeRow(
                 color: .blue.opacity(0.55),
                 label: "Min-Band",
                 low: selectedPoint.temperatureMinMemberLow,
                 high: selectedPoint.temperatureMinMemberHigh
               )
-              valueRow(color: .red, label: "Max", value: selectedPoint.temperatureMax)
+              valueRow(color: .red, label: "Ø Max", value: selectedPoint.temperatureMax)
               rangeRow(
                 color: .red.opacity(0.55),
                 label: "Max-Band",
@@ -218,9 +218,9 @@ struct DailyEnsembleTemperatureChart: View {
 
   private var legend: some View {
     HStack(spacing: 12) {
-      legendItem(color: .blue, label: "Minimum")
+      legendItem(color: .blue, label: "Ø Min")
       legendItem(color: .blue.opacity(0.35), label: "Min-Band")
-      legendItem(color: .red, label: "Maximum")
+      legendItem(color: .red, label: "Ø Max")
       legendItem(color: .red.opacity(0.35), label: "Max-Band")
     }
     .frame(maxWidth: .infinity, alignment: .leading)

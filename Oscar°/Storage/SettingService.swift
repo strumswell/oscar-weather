@@ -64,6 +64,14 @@ public final class SettingService {
             UserDefaults.standard.set(oscarRadarRegionRaw, forKey: "oscarRadarRegion")
         }
     }
+    /// When true, the radar fetches the raw 8-bit value grid and colormaps it on-device
+    /// instead of downloading the server-colormapped image. Read directly from
+    /// UserDefaults in OscarRadarState's background loader via the "radarUsesValueGrid" key.
+    var radarUsesValueGrid: Bool {
+        didSet {
+            UserDefaults.standard.set(radarUsesValueGrid, forKey: "radarUsesValueGrid")
+        }
+    }
     var timeFormatPreference: TimeFormatPreference {
         didSet {
             Self.defaults.set(timeFormatPreference.rawValue, forKey: Self.timeFormatPreferenceKey)
@@ -134,6 +142,7 @@ public final class SettingService {
         oscarRadarLayer = UserDefaults.standard.bool(forKey: "oscarRadarLayer")
         activeTileLayerRaw = UserDefaults.standard.string(forKey: "activeTileLayer")
         oscarRadarRegionRaw = UserDefaults.standard.string(forKey: "oscarRadarRegion") ?? "germany"
+        radarUsesValueGrid = UserDefaults.standard.bool(forKey: "radarUsesValueGrid")
         timeFormatPreference = TimeFormatPreference(
             rawValue: Self.defaults.string(forKey: Self.timeFormatPreferenceKey) ?? ""
         ) ?? .system

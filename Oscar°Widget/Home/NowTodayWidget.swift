@@ -45,10 +45,10 @@ struct NowTodayEntryView: View {
         .widgetAccentable()
         .padding()
         .foregroundColor(.white)
-        .background(
+        .background {
             entry.backgroundGradient
                 .opacity(widgetRenderingMode == .accented ? 0 : 1)
-        )
+        }
         .containerBackground(.clear, for: .widget)
     }
 }

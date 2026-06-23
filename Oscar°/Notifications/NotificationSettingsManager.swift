@@ -39,6 +39,11 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
     private let installationRegistrationCompletedKey = "notificationInstallationRegistrationCompleted"
     private let pendingLiveActivityPushToStartTokenKey = "notificationPendingLiveActivityPushToStartToken"
     private let latestLiveActivityPushToStartTokenKey = "notificationLatestLiveActivityPushToStartToken"
+    private let legacyDeregistrationCompletedKey = "notificationDidDeregisterLegacyRadarSubscription"
+
+    /// Old notification backend the app used before migrating to ``radarBaseURL`` (server.oscars.love).
+    /// Kept only so the client can best-effort de-register its legacy subscription once during migration.
+    private let legacyRadarBaseURL = URL(string: "https://radar.oscars.love")!
 
     private override init() {
         let defaults = UserDefaults.standard
@@ -55,6 +60,11 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
     func configureOnLaunch() async {
         UNUserNotificationCenter.current().delegate = self
         notificationLogger.info("Lifecycle: configureOnLaunch started; enabled=\(self.enabled, privacy: .public) storedCredentials=\(self.hasStoredSubscriptionCredentials, privacy: .public)")
+
+        // Migration: drop this device's subscription on the legacy radar.oscars.love server before
+        // anything re-registers against the new server and overwrites the stored credentials.
+        deregisterLegacyRadarSubscriptionIfNeeded()
+
         await refreshAuthorizationStatus()
 
         if hasNotificationAuthorization && (enabled || hasStoredSubscriptionCredentials) {
@@ -372,6 +382,61 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
             clearPendingLiveActivityTokens()
         } catch {
             notificationLogger.error("Lifecycle: subscription register request threw error=\(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// Best-effort, one-time removal of this device's subscription from the legacy
+    /// radar.oscars.love backend during the migration to server.oscars.love.
+    ///
+    /// This runs synchronously before any sync against the new server, so the credentials
+    /// still stored in the Keychain belong to the legacy subscription. They are captured
+    /// here and the actual DELETE is fired without blocking launch — a slow or offline
+    /// legacy server must never delay APNs registration.
+    ///
+    /// It is intentionally fire-once: the completion flag is set up front so we never try
+    /// again, even if the request fails. The legacy server may already be decommissioned
+    /// (offline) or the device may already be gone from it (404); both are expected and
+    /// handled by silently giving up. The request is hardcoded to the legacy host, so even
+    /// if the stored credentials already point at the new server the call simply 404s.
+    private func deregisterLegacyRadarSubscriptionIfNeeded() {
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: legacyDeregistrationCompletedKey) else { return }
+
+        // Fire-once: regardless of outcome (deleted, already gone, or legacy server
+        // offline) we never attempt this again.
+        defaults.set(true, forKey: legacyDeregistrationCompletedKey)
+
+        guard let subscriptionId = Keychain.load(key: subscriptionKey),
+              let apiKey = Keychain.load(key: apiKeyKey)
+        else {
+            // Nothing was ever registered (e.g. fresh install); no legacy cleanup required.
+            notificationLogger.info("Lifecycle: legacy radar de-registration skipped; no stored credentials")
+            return
+        }
+
+        guard let url = URL(string: "/notifications/\(subscriptionId)", relativeTo: legacyRadarBaseURL) else { return }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.addAPIContactIdentity()
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 10
+
+        notificationLogger.info("Lifecycle: legacy radar de-registration request started")
+
+        // Fire-and-forget: `request` already captured the legacy credentials by value, so a
+        // later re-registration overwriting the Keychain cannot affect it, and launch is
+        // never blocked on the legacy host.
+        Task.detached {
+            do {
+                let (_, response) = try await URLSession.shared.data(for: request)
+                let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+                // 204 = deleted, 404 = already gone; any other status is ignored (best-effort).
+                notificationLogger.info("Lifecycle: legacy radar de-registration finished; status=\(statusCode, privacy: .public)")
+            } catch {
+                // Legacy server offline/unreachable — silently give up.
+                notificationLogger.info("Lifecycle: legacy radar de-registration could not reach legacy server; giving up silently (\(error.localizedDescription, privacy: .public))")
+            }
         }
     }
 

@@ -16,7 +16,7 @@ struct DailyEnsemblePrecipitationSumChart: View {
       yUpperBound: yUpperBound,
       legend: {
         HStack(spacing: 12) {
-          legendItem(color: .blue, label: "Summe")
+          legendItem(color: .blue, label: "Ø Summe")
           legendItem(color: .blue.opacity(0.35), label: "Band")
         }
       }
@@ -99,7 +99,7 @@ struct DailyEnsemblePrecipitationSumChart: View {
             Text(selectedPoint.date, format: .dateTime.weekday(.abbreviated).day().month(.abbreviated))
               .font(.caption)
               .foregroundStyle(.secondary)
-            valueRow(color: .blue, label: "Summe", value: selectedPoint.precipitationSum, unit: unit)
+            valueRow(color: .blue, label: "Ø Summe", value: selectedPoint.precipitationSum, unit: unit)
             rangeRow(
               color: .blue.opacity(0.55),
               label: "Band",

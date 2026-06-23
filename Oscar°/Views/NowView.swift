@@ -18,6 +18,7 @@ struct NowView: View {
     private let settingsService = SettingService.shared
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
+    @Environment(\.scenePhase) private var scenePhase
     @Namespace private var sheetTransition
     @State private var tapCount = 0
     @State private var presentation = NowPresentationCoordinator()
@@ -29,7 +30,15 @@ struct NowView: View {
     @State private var modelFallbackToast: String?
 
     var body: some View {
-        let refreshPending = weather.isLoading && weather.hasContent && !manualRefreshInFlight
+        // Drive the pull-down spinner only while the scene is actually active. Coming
+        // back from the background, `willEnterForeground` starts a refresh before the app
+        // is on-screen; if we debounced from that moment, the spinner's whole show/hide
+        // cycle could play out during the invisible transition and the user would catch
+        // only its tail — a jump as the view snapped back up. Gating on `.active` measures
+        // the debounce from when the app is visible, so a refresh that finishes around the
+        // time the app appears shows no spinner, and a genuinely slow one shows a full,
+        // on-screen cycle.
+        let spinnerPending = weather.isLoading && weather.hasContent && !manualRefreshInFlight && scenePhase == .active
 
         ZStack {
             WeatherSimulationView(isCoveredBySheet: presentation.sheet != nil)
@@ -156,19 +165,19 @@ struct NowView: View {
                 await Task { await weather.refresh(location: location) }.value
                 manualRefreshInFlight = false
             }
-            .task(id: refreshPending) {
-                // Hide first, before any await: this runs immediately whenever loading
-                // is no longer pending (including when the view re-appears coming back
-                // from background), so the indicator can never get stranded on by the
-                // task being cancelled/recreated across the scene-phase change.
-                guard refreshPending else {
+            .task(id: spinnerPending) {
+                // Hide first, before any await: this runs immediately whenever the spinner
+                // is no longer pending (loading finished, or the scene left `.active`), so
+                // the indicator can never get stranded on by the task being cancelled/
+                // recreated across a scene-phase change.
+                guard spinnerPending else {
                     showRefreshIndicator = false
                     return
                 }
-                // Debounce: only show the spinner if loading lingers past 500ms, so
-                // quick refreshes don't flash it.
+                // Debounce: only show the spinner if loading lingers past 500ms of
+                // on-screen time, so quick refreshes don't flash it.
                 guard (try? await Task.sleep(for: .milliseconds(500))) != nil else { return }
-                guard refreshPending else { return }
+                guard spinnerPending else { return }
                 showRefreshIndicator = true
             }
             if weather.debug {

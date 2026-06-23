@@ -133,14 +133,14 @@ struct DailyEnsembleWindChart: View {
               Text(selectedPoint.date, format: .dateTime.weekday(.abbreviated).day().month(.abbreviated))
                 .font(.caption)
                 .foregroundStyle(.secondary)
-              valueRow(color: .cyan, label: "Min", value: selectedPoint.windSpeedMin)
+              valueRow(color: .cyan, label: "Ø Min", value: selectedPoint.windSpeedMin)
               rangeRow(
                 color: .cyan.opacity(0.55),
                 label: "Min-Band",
                 low: selectedPoint.windSpeedMinMemberLow,
                 high: selectedPoint.windSpeedMinMemberHigh
               )
-              valueRow(color: .blue, label: "Max", value: selectedPoint.windSpeedMax)
+              valueRow(color: .blue, label: "Ø Max", value: selectedPoint.windSpeedMax)
               rangeRow(
                 color: .blue.opacity(0.55),
                 label: "Max-Band",
@@ -233,9 +233,9 @@ struct DailyEnsembleWindChart: View {
 
   private var legend: some View {
     HStack(spacing: 12) {
-      legendItem(color: .cyan, label: "Minimum")
+      legendItem(color: .cyan, label: "Ø Min")
       legendItem(color: .cyan.opacity(0.35), label: "Min-Band")
-      legendItem(color: .blue, label: "Maximum")
+      legendItem(color: .blue, label: "Ø Max")
       legendItem(color: .blue.opacity(0.35), label: "Max-Band")
     }
     .frame(maxWidth: .infinity, alignment: .leading)
