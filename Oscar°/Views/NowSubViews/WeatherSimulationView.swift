@@ -88,13 +88,14 @@ struct WeatherSimulationView: View {
                             altitudeProgress: moonProgress,
                             xFraction: moonLayout.x,
                             yFraction: moonLayout.y,
-                            isSouthernHemisphere: location.coordinates.latitude < 0
+                            isSouthernHemisphere: location.coordinates.latitude < 0,
+                            skyDarkness: Double(snapshot.nightAmount)
                         )
-                        // Quick fade-in at dusk, then fully opaque — a
-                        // translucent moon reads washed-out against the sky.
-                        // Clouds dim it, but never below ~⅓.
+                        // Visible whenever it's above the horizon: pale in
+                        // daylight, brightening as the sky darkens. Clouds dim
+                        // it, but never below ~⅓.
                         .opacity(
-                            Double(min(1, max(0, (snapshot.nightAmount - 0.3) / 0.25)))
+                            Double(0.35 + 0.65 * snapshot.nightAmount)
                                 * Double(1 - snapshot.cloudDensity * 0.65)
                         )
                         .blur(radius: CGFloat(snapshot.cloudDensity) * 2.5)
@@ -174,8 +175,8 @@ struct WeatherSimulationView: View {
     }
 
     /// The moon's pass across the sky (0 = rise, 0.5 = transit, 1 = set),
-    /// or nil when it's below the horizon, the sky is too bright, the phase
-    /// is too new to see, or clouds hide it.
+    /// or nil when it's below the horizon, the phase is too new to see, or
+    /// clouds hide it. Visible day and night, like the real moon.
     /// Plain debug mode pins the moon at transit for visual checks; with
     /// overrides active it follows the scrubbed time and phase naturally.
     private func moonAltitudeProgress(
@@ -187,8 +188,7 @@ struct WeatherSimulationView: View {
             return 0.5
         }
 
-        guard snapshot.nightAmount > 0.3,
-              snapshot.cloudDensity < 0.7,
+        guard snapshot.cloudDensity < 0.7,
               MoonPhase.illumination(for: phase) >= 0.05 else {
             return nil
         }

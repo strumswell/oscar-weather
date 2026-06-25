@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SearchCityView: View {
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
     @State private var searchIsActive = false
     @State private var searchResult: Components.Schemas.SearchResponse = .init()
@@ -34,13 +34,14 @@ struct SearchCityView: View {
                     }
                 }
             }
-            .navigationBarTitle(String(localized: "Orte"), displayMode: .inline)
+            .navigationTitle("Orte")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar(content: {
                 ToolbarItem(placement: .navigationBarTrailing, content: {
-                    Button(String(localized: "Fertig"), action: {
-                        presentationMode.wrappedValue.dismiss()
+                    Button(role: .close) {
+                        dismiss()
                         UIApplication.shared.playHapticFeedback()
-                    })
+                    }
                 })
             })
             

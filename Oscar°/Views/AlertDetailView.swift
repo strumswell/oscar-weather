@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct AlertListView: View {
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     @Environment(Weather.self) private var weather: Weather
-    
+
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 switch weather.alerts {
                 case .brightsky(let brightskyAlerts):
@@ -25,13 +25,14 @@ struct AlertListView: View {
                     }
                 }
             }
-            .navigationBarTitle(Text("Unwetterwarnungen"), displayMode: .inline)
+            .navigationTitle("Unwetterwarnungen")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar(content: {
-                ToolbarItem(placement: .navigationBarTrailing, content: {
-                    Button(String(localized: "Fertig"), action: {
-                        presentationMode.wrappedValue.dismiss()
+                ToolbarItem(placement: .topBarTrailing, content: {
+                    Button(role: .close) {
+                        dismiss()
                         UIApplication.shared.playHapticFeedback()
-                    })
+                    }
                 })
             })
         }

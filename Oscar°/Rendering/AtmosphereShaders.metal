@@ -54,7 +54,9 @@ static float3 atmosphereBaseSky(float horizon, float sunElevation, float cloudDe
     // Palette endpoints are authored in sRGB; blend them in linear space.
     float3 day = atmosphereMix3(atmosphereToLinear(float3(0.20, 0.48, 0.86)), atmosphereToLinear(float3(0.68, 0.84, 0.95)), h);
     float3 golden = atmosphereMix3(atmosphereToLinear(float3(0.38, 0.56, 0.84)), atmosphereToLinear(float3(0.98, 0.66, 0.48)), h * 0.92);
-    float3 twilight = atmosphereMix3(atmosphereToLinear(float3(0.05, 0.08, 0.22)), atmosphereToLinear(float3(0.30, 0.17, 0.33)), h * 0.60);
+    // Blue hour: ozone's Chappuis band strips red/orange over twilight's long
+    // light path, so the post-sunset sky trends deep cobalt, not warm plum.
+    float3 twilight = atmosphereMix3(atmosphereToLinear(float3(0.06, 0.11, 0.28)), atmosphereToLinear(float3(0.14, 0.26, 0.52)), h * 0.60);
     float3 night = atmosphereMix3(atmosphereToLinear(float3(0.022, 0.040, 0.095)), atmosphereToLinear(float3(0.042, 0.052, 0.11)), h);
 
     float3 color;
@@ -63,9 +65,11 @@ static float3 atmosphereBaseSky(float horizon, float sunElevation, float cloudDe
     } else if (elevationDegrees >= 0.0) {
         color = atmosphereMix3(golden, day, atmosphereSmoothstep(0.0, 6.0, elevationDegrees));
     } else if (elevationDegrees >= -6.0) {
-        color = atmosphereMix3(twilight, golden, atmosphereSmoothstep(-6.0, 0.0, elevationDegrees));
+        // Warm base collapses to cobalt by ~-4°; the localized horizon band
+        // below carries the residual sunset glow after that.
+        color = atmosphereMix3(twilight, golden, atmosphereSmoothstep(-4.0, 0.0, elevationDegrees));
     } else {
-        color = atmosphereMix3(night, twilight, atmosphereSmoothstep(-14.0, -6.0, elevationDegrees));
+        color = atmosphereMix3(night, twilight, atmosphereSmoothstep(-16.0, -6.0, elevationDegrees));
     }
 
     color = atmosphereToDisplay(color);
@@ -118,7 +122,10 @@ static float3 atmosphereBaseSky(float horizon, float sunElevation, float cloudDe
     float lobe = exp(-dx * dx * 6.0);
     float horizonGlow = horizonBand * (0.10 + turbidity * 0.14) * sunsetBand;
     color += float3(1.0, 0.62, 0.42) * horizonGlow * (0.35 + 0.65 * lobe);
-    color += float3(0.42, 0.26, 0.38) * horizonBand * sunsetBand * 0.07 * (1.0 - lobe);
+    // Belt of Venus: a faint pink arch on the anti-solar side, sitting above
+    // the horizon over the blue-grey Earth's shadow — not a purple wash.
+    float beltBand = exp(-abs(horizon - 0.62) * 7.0);
+    color += float3(0.55, 0.40, 0.48) * beltBand * sunsetBand * 0.045 * (1.0 - lobe);
 
     // Subtle circumsolar brightening so clear daytime skies aren't a flat
     // ramp. Anchored where SunView draws the sun (y ≈ 0.08 of the screen).

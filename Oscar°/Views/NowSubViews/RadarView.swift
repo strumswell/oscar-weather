@@ -14,6 +14,8 @@ struct RadarView: View {
     let settingsService: SettingService
     @State private var lastRefresh = Date()
     var showLayerSettings: Bool
+    var fullscreen: Bool = false
+    var onClose: (() -> Void)? = nil
     var locationService = LocationService.shared
     var userActionAllowed = true
     var showWindParticles = true
@@ -33,6 +35,9 @@ struct RadarView: View {
                 oscarRadarState: oscarRadarState,
                 gfsImageState: gfsImageState
             )
+            // Only the map bleeds to the edges in fullscreen; the floating
+            // controls below keep respecting the safe area.
+            .ignoresSafeArea(edges: fullscreen ? .all : [])
 
             // Timestamp badge + optional colormap legend — top-left
             VStack {
@@ -86,11 +91,18 @@ struct RadarView: View {
                 Spacer()
             }
 
-            if showLayerSettings {
+            if showLayerSettings || onClose != nil {
                 VStack {
-                    HStack {
+                    HStack(alignment: .top) {
                         Spacer()
-                        layerMenu
+                        VStack(spacing: 4) {
+                            if let onClose {
+                                closeButton(action: onClose)
+                            }
+                            if showLayerSettings {
+                                layerMenu
+                            }
+                        }
                     }
                     Spacer()
                 }
@@ -189,12 +201,23 @@ struct RadarView: View {
             }
         } label: {
             Image(systemName: "map.fill")
-                .resizable()
-                .frame(width: 25, height: 25)
-                .foregroundColor(.gray.opacity(0.9))
-                .padding(8)
-                .glassEffect(in: RoundedRectangle(cornerRadius: 8))
+                .font(.system(size: 20, weight: .semibold))
+                .frame(width: 18, height: 18)
         }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .controlSize(.large)
+    }
+
+    private func closeButton(action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: "xmark")
+                .font(.system(size: 20, weight: .semibold))
+                .frame(width: 18, height: 18)
+        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .controlSize(.large)
     }
 
     private func layerButton(_ title: LocalizedStringKey, isActive: Bool, action: @escaping () -> Void) -> some View {

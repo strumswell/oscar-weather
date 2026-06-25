@@ -27,6 +27,7 @@ struct NowView: View {
     @State private var gfsImageState = GFSImageLayerState(renderMode: .preview)
     @State private var manualRefreshInFlight = false
     @State private var showRefreshIndicator = false
+    @State private var spinnerShownAt: Date?
     @State private var modelFallbackToast: String?
 
     var body: some View {
@@ -41,7 +42,7 @@ struct NowView: View {
         let spinnerPending = weather.isLoading && weather.hasContent && !manualRefreshInFlight && scenePhase == .active
 
         ZStack {
-            WeatherSimulationView(isCoveredBySheet: presentation.sheet != nil)
+            WeatherSimulationView(isCoveredBySheet: presentation.sheet != nil || presentation.isMapPresented)
             ScrollView(.vertical, showsIndicators: false) {
                 ZStack {
                     VStack(alignment: .leading) {
@@ -166,18 +167,26 @@ struct NowView: View {
                 manualRefreshInFlight = false
             }
             .task(id: spinnerPending) {
-                // Hide first, before any await: this runs immediately whenever the spinner
-                // is no longer pending (loading finished, or the scene left `.active`), so
-                // the indicator can never get stranded on by the task being cancelled/
-                // recreated across a scene-phase change.
                 guard spinnerPending else {
+                    // Loading finished, or the scene left `.active`. If the spinner is
+                    // showing, hold it for a minimum on-screen time before hiding, so a
+                    // slow refresh that finishes just after the debounce reads as a clean
+                    // spinner rather than a brief flash. `try?` lets the hide run even if
+                    // this task is cancelled mid-hold, so the indicator can never get
+                    // stranded on.
+                    if showRefreshIndicator, let shownAt = spinnerShownAt {
+                        let remaining = 0.6 - Date.now.timeIntervalSince(shownAt)
+                        if remaining > 0 { try? await Task.sleep(for: .seconds(remaining)) }
+                    }
                     showRefreshIndicator = false
+                    spinnerShownAt = nil
                     return
                 }
                 // Debounce: only show the spinner if loading lingers past 500ms of
-                // on-screen time, so quick refreshes don't flash it.
+                // on-screen time, so quick (cache-hit) refreshes don't flash it.
                 guard (try? await Task.sleep(for: .milliseconds(500))) != nil else { return }
                 guard spinnerPending else { return }
+                spinnerShownAt = .now
                 showRefreshIndicator = true
             }
             if weather.debug {
@@ -187,7 +196,7 @@ struct NowView: View {
                     .padding(.bottom, 40)
             }
 
-            if let message = modelFallbackToast, presentation.sheet == nil {
+            if let message = modelFallbackToast, presentation.sheet == nil, !presentation.isMapPresented {
                 ToastBanner(message: message)
                     .padding(.top, 60)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -209,6 +218,11 @@ struct NowView: View {
                 settingsService: settingsService,
                 locationTransition: sheetTransition
             )
+        }
+        .fullScreenCover(isPresented: $presentation.isMapPresented) {
+            MapDetailView(settingsService: settingsService) {
+                presentation.isMapPresented = false
+            }
         }
         .background(.thinMaterial)
         .edgesIgnoringSafeArea(.all)
@@ -284,7 +298,7 @@ struct ToastBanner: View {
 extension NowView {
     private func presentMap() {
         UIApplication.shared.playHapticFeedback()
-        presentation.present(.map)
+        presentation.isMapPresented = true
     }
 
     private func openRadarMap() {

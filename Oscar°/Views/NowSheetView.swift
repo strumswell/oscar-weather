@@ -8,16 +8,9 @@ struct NowSheetView: View {
     var body: some View {
         switch sheet {
         case .location:
-            if #available(iOS 18.0, *) {
-                SearchCityView()
-                    .presentationDetents([.large])
-                    .navigationTransition(
-                        .zoom(sourceID: NowSheet.locationTransitionID, in: locationTransition)
-                    )
-            } else {
-                SearchCityView()
-                    .presentationDetents([.large])
-            }
+            SearchCityView()
+                .presentationDetents([.large])
+                .navigationTransition(.zoom(sourceID: NowSheet.locationTransitionID, in: locationTransition))
         case .hourly:
             HourlyDetailView()
         case .daily:
@@ -28,8 +21,6 @@ struct NowSheetView: View {
             AlertListView()
         case .legal:
             LegalView()
-        case .map:
-            MapDetailView(settingsService: settingsService)
         }
     }
 }

@@ -85,7 +85,7 @@ struct DailyDetailView: View {
         }
 
         ToolbarItem(placement: .topBarTrailing) {
-          Button(String(localized: "Fertig"), action: finish)
+          Button(role: .close, action: finish)
         }
       }
       .sensoryFeedback(.success, trigger: dismissalFeedback)

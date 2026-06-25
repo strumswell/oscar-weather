@@ -93,6 +93,9 @@ struct MoonView: View {
     let xFraction: Double
     let yFraction: Double
     let isSouthernHemisphere: Bool
+    /// 0 in full daylight … 1 at night. Suppresses the halo by day, where the
+    /// real moon shows as a pale disc with no glow.
+    var skyDarkness: Double = 1
 
     static let diameter: CGFloat = 68
     private static let glowTint = Color(red: 0.93, green: 0.95, blue: 1.0)
@@ -107,13 +110,13 @@ struct MoonView: View {
                     litShape
                         .fill(Self.glowTint)
                         .blur(radius: 24 + 14 * illumination)
-                        .opacity(0.50 + 0.45 * illumination)
+                        .opacity((0.50 + 0.45 * illumination) * skyDarkness)
 
                     // Tight glow hugging the lit limb.
                     litShape
                         .fill(.white)
                         .blur(radius: 6)
-                        .opacity(0.60 + 0.30 * illumination)
+                        .opacity((0.60 + 0.30 * illumination) * skyDarkness)
 
                     // The disc occludes the sky glow behind it; without this
                     // the halo washes the dark side grey.

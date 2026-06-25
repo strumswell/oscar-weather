@@ -353,9 +353,9 @@ enum AtmosphereSampler {
         let dayHorizon = simd_float3(0.68, 0.84, 0.95)
         let goldenZenith = simd_float3(0.38, 0.56, 0.84)
         let goldenHorizon = simd_float3(0.98, 0.66, 0.48)
-        let twilightZenith = simd_float3(0.05, 0.08, 0.22)
-        // Warm plum, matching the Metal shader's post-sunset horizon.
-        let twilightHorizon = simd_float3(0.30, 0.17, 0.33)
+        let twilightZenith = simd_float3(0.06, 0.11, 0.28)
+        // Blue hour: deep cobalt, not warm plum (ozone Chappuis absorption).
+        let twilightHorizon = simd_float3(0.14, 0.26, 0.52)
         let nightZenith = simd_float3(0.022, 0.040, 0.095)
         let nightHorizon = simd_float3(0.042, 0.052, 0.11)
 
@@ -372,9 +372,9 @@ enum AtmosphereSampler {
         } else if elevationDegrees >= 0 {
             color = mix(golden, day, t: smoothstep(0, 6, elevationDegrees))
         } else if elevationDegrees >= -6 {
-            color = mix(twilight, golden, t: smoothstep(-6, 0, elevationDegrees))
+            color = mix(twilight, golden, t: smoothstep(-4, 0, elevationDegrees))
         } else {
-            color = mix(night, twilight, t: smoothstep(-14, -6, elevationDegrees))
+            color = mix(night, twilight, t: smoothstep(-16, -6, elevationDegrees))
         }
 
         let gray = simd_float3(repeating: (color.x + color.y + color.z) / 3)

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 enum WeatherLoadingQuery: String, CaseIterable, Comparable {
     case forecast
@@ -210,13 +211,20 @@ extension Weather {
 
     @MainActor
     func apply(snapshot: WeatherSnapshot, location: Location) {
-        forecast = snapshot.forecast
-        air = snapshot.air
-        precipSeries = snapshot.precipSeries
-        updateTime()
-        lastUpdated = snapshot.savedAt
-        location.coordinates = snapshot.coordinates.coordinate
-        location.name = snapshot.locationName
+        // Cache hydration is the first state, not a transition the user is
+        // watching — apply it without the temperature roll. The following
+        // network refresh animates any genuine change.
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            forecast = snapshot.forecast
+            air = snapshot.air
+            precipSeries = snapshot.precipSeries
+            updateTime()
+            lastUpdated = snapshot.savedAt
+            location.coordinates = snapshot.coordinates.coordinate
+            location.name = snapshot.locationName
+        }
     }
 
     static var mock: Weather {

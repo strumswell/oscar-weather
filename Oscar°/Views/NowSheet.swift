@@ -7,7 +7,6 @@ enum NowSheet: Identifiable {
     case environment(EnvironmentDetailSection)
     case alerts
     case legal
-    case map
 
     static let locationTransitionID = "locationName"
 
@@ -25,8 +24,6 @@ enum NowSheet: Identifiable {
             "alerts"
         case .legal:
             "legal"
-        case .map:
-            "map"
         }
     }
 }

@@ -10,7 +10,7 @@ import UIKit
 
 struct LegalView: View {
   @Environment(\.colorScheme) var colorScheme
-  @Environment(\.presentationMode) var presentationMode
+  @Environment(\.dismiss) private var dismiss
 
   var body: some View {
     NavigationStack {
@@ -171,17 +171,16 @@ struct LegalView: View {
         .padding(.vertical, 16)
       }
       .background(Color(UIColor.systemGroupedBackground))
-      .navigationBarTitle("Rechtliches", displayMode: .inline)
+      .navigationTitle("Rechtliches")
+      .navigationBarTitleDisplayMode(.inline)
       .toolbar(content: {
         ToolbarItem(
           placement: .navigationBarTrailing,
           content: {
-            Button(
-              "Fertig",
-              action: {
-                presentationMode.wrappedValue.dismiss()
+            Button(role: .close) {
+                dismiss()
                 UIApplication.shared.playHapticFeedback()
-              })
+              }
           })
       })
     }

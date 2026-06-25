@@ -148,7 +148,7 @@ struct EnvironmentDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(String(localized: "Fertig"), action: dismiss.callAsFunction)
+                    Button(role: .close, action: dismiss.callAsFunction)
                 }
             }
             .onChange(of: time) { _, _ in

@@ -66,6 +66,16 @@
         }
       }
     },
+    "%@: %@ bis %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$@ bis %3$@"
+          }
+        }
+      }
+    },
     "%@°" : {
       "localizations" : {
         "en" : {
