@@ -120,12 +120,12 @@ enum MapInteractionState {
 }
 
 private enum FrameDateParser {
-    static let plain: ISO8601DateFormatter = {
+    nonisolated(unsafe) static let plain: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
         return formatter
     }()
-    static let fractional: ISO8601DateFormatter = {
+    nonisolated(unsafe) static let fractional: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter
@@ -255,7 +255,7 @@ final class OscarRadarState {
     private(set) var interactionState: MapInteractionState = .idle
     private(set) var isMapInteracting = false
 
-    @ObservationIgnored private var playbackTimer: Timer?
+    @ObservationIgnored nonisolated(unsafe) private var playbackTimer: Timer?
     @ObservationIgnored private var frameInfos: [OscarFrameInfo] = []
     @ObservationIgnored private var frameDates: [Date?] = []
     @ObservationIgnored private var loadSessionID = UUID()
@@ -1121,7 +1121,7 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
 @Observable
 final class GFSImageLayerState {
 
-    static let baseURL = radarBaseURL
+    nonisolated static let baseURL = radarBaseURL
 
     // Pre-sized when metadata arrives; slots fill in as images download.
     private(set) var frames: [CGImage?] = []
@@ -1148,7 +1148,7 @@ final class GFSImageLayerState {
     @ObservationIgnored private var loadTask: Task<Void, Never>?
     @ObservationIgnored private var backgroundPreloadTask: Task<Void, Never>?
     @ObservationIgnored private var focusedLoadTask: Task<Void, Never>?
-    @ObservationIgnored private var playbackTimer: Timer?
+    @ObservationIgnored nonisolated(unsafe) private var playbackTimer: Timer?
     @ObservationIgnored private var frameInfos: [TileFrameInfo] = []
     @ObservationIgnored private var frameDates: [Date?] = []
     @ObservationIgnored private var loadSessionID = UUID()

@@ -189,7 +189,7 @@ private extension RainRadarActivityAttributes.ContentState {
 }
 
 private extension ISO8601DateFormatter {
-    static let liveActivity: ISO8601DateFormatter = {
+    nonisolated(unsafe) static let liveActivity: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter

@@ -7,7 +7,7 @@ enum MemberCardStickerAlphaBounds {
         let bottomTrailingAnchor: CGPoint
     }
 
-    private static var cache: [String: Metrics] = [:]
+    nonisolated(unsafe) private static var cache: [String: Metrics] = [:]
 
     static func rect(for assetName: String, in size: CGFloat) -> CGRect {
         let normalized = metrics(for: assetName).bounds

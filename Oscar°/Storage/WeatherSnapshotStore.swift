@@ -70,12 +70,12 @@ struct PrecipPoint: Codable, Equatable {
 /// ISO8601 parsing/formatting shared by `PrecipPoint` (server emits millisecond
 /// fractional seconds, e.g. `2026-06-17T12:05:00.000Z`).
 enum PrecipSeriesDate {
-    private static let fractional: ISO8601DateFormatter = {
+    nonisolated(unsafe) private static let fractional: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return f
     }()
-    private static let plain: ISO8601DateFormatter = {
+    nonisolated(unsafe) private static let plain: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime]
         return f

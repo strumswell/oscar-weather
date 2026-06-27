@@ -21,33 +21,28 @@ struct HomeEntry: TimelineEntry {
     let backgroundGradient: LinearGradient
 }
 
-class HomeProvider: TimelineProvider {
+final class HomeProvider: TimelineProvider, Sendable {
     let client = APIClient.shared
-    let locationService = LocationService.shared
-    private let atmosphericAdapter = WeatherAtmosphericAdapter()
-    
-    init() {
-        locationService.update()
-    }
-    
+
     func placeholder(in context: Context) -> HomeEntry {
         let placeholderGradient = LinearGradient(colors: [.sunriseStart, .sunnyDayEnd], startPoint: .top, endPoint: .bottom)
         return HomeEntry(date: Date(), location: "Berlin", temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", backgroundGradient: placeholderGradient)
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (HomeEntry) -> ()) {
+    func getSnapshot(in context: Context, completion: @escaping @Sendable (HomeEntry) -> ()) {
         let placeholderGradient = LinearGradient(colors: [.sunriseStart, .sunnyDayEnd], startPoint: .top, endPoint: .bottom)
         let entry = HomeEntry(date: Date(), location: "Berlin", temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", backgroundGradient: placeholderGradient)
         completion(entry)
     }
     
-    func getTimeline(in context: Context, completion: @escaping (Timeline<HomeEntry>) -> ()) {
-        locationService.update()
-
+    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<HomeEntry>) -> ()) {
         Task {
             do {
-                let coordinates = locationService.getCoordinates()
-                let locationName = await locationService.getLocationName()
+                let coordinates = await MainActor.run {
+                    LocationService.shared.update()
+                    return LocationService.shared.getCoordinates()
+                }
+                let locationName = await LocationService.shared.getLocationName()
 
                 async let weatherRequest = client.getForecast(
                     coordinates: coordinates,
@@ -70,26 +65,17 @@ class HomeProvider: TimelineProvider {
                 let isDay = weather.current?.is_day ?? 0
                 let precipitation = weather.current?.precipitation ?? 0
 
-                // Create Weather object for atmospheric rendering
-                let weatherForRendering = Weather()
-                weatherForRendering.time = currentTime
-                weatherForRendering.forecast = weather // Use the existing forecast data
-                weatherForRendering.precipSeries = precipSeries
-                weatherForRendering.debug = true // Enable debug for troubleshooting
-
-                // Get atmospheric gradient for widget background (full 12-sample gradient)
-                let backgroundGradient = atmosphericAdapter.getWidgetFullGradient(
-                    from: weatherForRendering,
-                    at: coordinates
-                )
-
-                // Debug output for troubleshooting
-                if weatherForRendering.debug {
-                    print("🔧 Widget Debug - Location: \(coordinates)")
-                    print("🔧 Widget Debug - Time: \(currentTime)")
-                    print("🔧 Widget Debug - Weather code: \(weathercode)")
-                    print("🔧 Widget Debug - Temperature: \(temperatureNow)")
-                    print("🔧 Widget Debug - Using full atmospheric gradient")
+                // Build the atmospheric gradient on the main actor (Weather + adapter are
+                // @MainActor); only the resulting Sendable gradient crosses back.
+                let backgroundGradient = await MainActor.run {
+                    let weatherForRendering = Weather()
+                    weatherForRendering.time = currentTime
+                    weatherForRendering.forecast = weather
+                    weatherForRendering.precipSeries = precipSeries
+                    return WeatherAtmosphericAdapter().getWidgetFullGradient(
+                        from: weatherForRendering,
+                        at: coordinates
+                    )
                 }
 
                 let entry = HomeEntry(

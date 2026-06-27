@@ -10,7 +10,7 @@ import OpenAPIRuntime
 /// the start are dropped, every block is truncated to the range free of `null`s (so a short-range
 /// model shows only the days it covers), and required `current` scalars that came back `null` are
 /// filled with a neutral default. For `best_match` — which never returns `null` — it is a no-op.
-final class ForecastSanitizingMiddleware: ClientMiddleware {
+nonisolated final class ForecastSanitizingMiddleware: ClientMiddleware {
   /// Series the schema already declares nullable; their generated type tolerates `null`.
   private static let nullableHourly: Set<String> = [
     "precipitation_probability",

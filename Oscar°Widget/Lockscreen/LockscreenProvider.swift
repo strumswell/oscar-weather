@@ -22,27 +22,23 @@ struct TemperatureLockScreenEntry: TimelineEntry {
 
 struct LockscreenProvider: TimelineProvider {
     let client = APIClient.shared
-    let locationService = LocationService.shared
-    
-    init() {
-        locationService.update()
-    }
 
     func placeholder(in context: Context) -> TemperatureLockScreenEntry {
         TemperatureLockScreenEntry(date: Date(), temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", precipitation: 2.5, precipitationProbability: 72)
     }
     
-    func getSnapshot(in context: Context, completion: @escaping (TemperatureLockScreenEntry) -> ()) {
+    func getSnapshot(in context: Context, completion: @escaping @Sendable (TemperatureLockScreenEntry) -> ()) {
         let entry = TemperatureLockScreenEntry(date: Date(), temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", precipitation: 2.5, precipitationProbability: 72)
         completion(entry)
     }
     
-    func getTimeline(in context: Context, completion: @escaping (Timeline<TemperatureLockScreenEntry>) -> ()) {
-        locationService.update()
-
+    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<TemperatureLockScreenEntry>) -> ()) {
         Task {
             do {
-                let coordinates = locationService.getCoordinates()
+                let coordinates = await MainActor.run {
+                    LocationService.shared.update()
+                    return LocationService.shared.getCoordinates()
+                }
 
                 async let weatherRequest = client.getForecast(
                     coordinates: coordinates,

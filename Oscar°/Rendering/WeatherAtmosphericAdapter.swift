@@ -8,6 +8,7 @@
 import CoreLocation
 import SwiftUI
 
+@MainActor
 final class WeatherAtmosphericAdapter {
     func generateAtmosphericSkyGradient(
         from weather: Weather,

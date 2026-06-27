@@ -5,7 +5,7 @@ import MapKit
 
 private final class WindParticleDisplayLinkProxy: NSObject {
     weak var target: WindParticleView?
-    @objc func tick(_ link: CADisplayLink) { target?.tick(link) }
+    @MainActor @objc func tick(_ link: CADisplayLink) { target?.tick(link) }
 }
 
 // MARK: - Wind particle overlay
@@ -61,9 +61,9 @@ final class WindParticleView: UIView {
 
     private let imageView = UIImageView()
     private var bitmapContext: CGContext?
-    private var displayLink: CADisplayLink?
+    nonisolated(unsafe) private var displayLink: CADisplayLink?
     private var lastTimestamp: CFTimeInterval = 0
-    private var reduceMotionObserver: NSObjectProtocol?
+    nonisolated(unsafe) private var reduceMotionObserver: NSObjectProtocol?
 
     // MARK: - Init
 
@@ -91,7 +91,8 @@ final class WindParticleView: UIView {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.applyReduceMotionState()
+            // The observer is registered with `queue: .main`, so this fires on the main actor.
+            MainActor.assumeIsolated { self?.applyReduceMotionState() }
         }
     }
 

@@ -26,7 +26,7 @@ import OpenAPIRuntime
 /// A middleware that retries the request under certain conditions.
 ///
 /// Only meant to be used for illustrative purposes.
-struct RetryingMiddleware {
+nonisolated struct RetryingMiddleware {
 
   /// The failure signal that can lead to a retried request.
   enum RetryableSignal: Hashable {

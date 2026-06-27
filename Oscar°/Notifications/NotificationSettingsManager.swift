@@ -649,7 +649,7 @@ final class NotificationSettingsManager: NSObject, ObservableObject {
     }
 }
 
-extension NotificationSettingsManager: UNUserNotificationCenterDelegate {
+extension NotificationSettingsManager: @preconcurrency UNUserNotificationCenterDelegate {
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification

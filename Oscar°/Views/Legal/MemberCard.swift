@@ -500,7 +500,7 @@ struct MemberCard: View {
         "MemberCardLayoutSpace"
     }
 
-    static func imageName(for assetName: String) -> String {
+    nonisolated static func imageName(for assetName: String) -> String {
          return assetName
     }
 

@@ -208,11 +208,12 @@ final class OscarRadarAnimatingRenderer: MKOverlayRenderer {
 final class WeatherTileOverlay: MKTileOverlay {
     override func loadTile(
         at path: MKTileOverlayPath,
-        result: @escaping (Data?, Error?) -> Void
+        result: @escaping @Sendable (Data?, Error?) -> Void
     ) {
         let url = self.url(forTilePath: path)
-        var request = URLRequest(url: url)
-        request.addAPIContactIdentity()
+        var mutableRequest = URLRequest(url: url)
+        mutableRequest.addAPIContactIdentity()
+        let request = mutableRequest
 
         // Fast path: already in cache
         if let cached = URLCache.shared.cachedResponse(for: request), !cached.data.isEmpty {

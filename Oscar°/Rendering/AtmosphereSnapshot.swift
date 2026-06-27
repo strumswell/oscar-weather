@@ -90,7 +90,7 @@ struct AtmosphereSnapshot: Equatable {
 }
 
 enum AtmosphereWeatherMapper {
-    static func snapshot(from weather: Weather, at location: CLLocationCoordinate2D) -> AtmosphereSnapshot {
+    @MainActor static func snapshot(from weather: Weather, at location: CLLocationCoordinate2D) -> AtmosphereSnapshot {
         guard location.latitude != 0 || location.longitude != 0 else {
             return .fallback
         }
@@ -259,7 +259,7 @@ enum AtmosphereWeatherMapper {
         return clamp(Float(series.currentPrecipitation) / 6, 0, 1)
     }
 
-    private static func airQualityHaze(weather: Weather, timestamp: Double) -> Float {
+    @MainActor private static func airQualityHaze(weather: Weather, timestamp: Double) -> Float {
         guard let hourly = weather.air.hourly else { return 0 }
         let index = nearestIndex(to: timestamp, in: hourly.time)
         let pm25 = Float(value(at: index, in: hourly.european_aqi_pm2_5) ?? 0)

@@ -14,7 +14,7 @@ import UIKit
 
 final class AppDelegate: NSObject, UIApplicationDelegate {
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Notifications")
-    private var memoryWarningObserver: NSObjectProtocol?
+    nonisolated(unsafe) private var memoryWarningObserver: NSObjectProtocol?
 
     func application(
         _ application: UIApplication,

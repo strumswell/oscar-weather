@@ -10,7 +10,6 @@ struct RadarEntry: TimelineEntry {
 }
 
 struct RadarProvider: TimelineProvider {
-    let locationService = LocationService.shared
     let radarOverlayAlpha: CGFloat = 0.7
     let mapColorType: UIUserInterfaceStyle = .dark
 
@@ -23,10 +22,6 @@ struct RadarProvider: TimelineProvider {
         UserDefaults(suiteName: "group.cloud.bolte.Oscar")?.string(forKey: "oscarRadarRegion") ?? "germany"
     }
 
-    init() {
-        locationService.update()
-    }
-
     func placeholder(in context: Context) -> RadarEntry {
         // placeholder() must never fail; a missing/renamed asset would otherwise crash the
         // widget process on every gallery/redacted render.
@@ -34,15 +29,19 @@ struct RadarProvider: TimelineProvider {
         return RadarEntry(date: Date(), frameDate: Date(), image: image)
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (RadarEntry) -> Void) {
+    func getSnapshot(in context: Context, completion: @escaping @Sendable (RadarEntry) -> Void) {
+        let displaySize = context.displaySize
+        let family = context.family
         Task {
-            completion(await buildWidgetEntry(displaySize: context.displaySize, family: context.family))
+            completion(await buildWidgetEntry(displaySize: displaySize, family: family))
         }
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<RadarEntry>) -> Void) {
+    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<RadarEntry>) -> Void) {
+        let displaySize = context.displaySize
+        let family = context.family
         Task {
-            let entry = await buildWidgetEntry(displaySize: context.displaySize, family: context.family)
+            let entry = await buildWidgetEntry(displaySize: displaySize, family: family)
             let next = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
             completion(Timeline(entries: [entry], policy: .after(next)))
         }
@@ -51,8 +50,7 @@ struct RadarProvider: TimelineProvider {
     // MARK: - Main compositor
 
     private func buildWidgetEntry(displaySize: CGSize, family: WidgetFamily) async -> RadarEntry {
-        locationService.update()
-        let location = locationService.getCoordinates()
+        let location = await MainActor.run { LocationService.shared.update(); return LocationService.shared.getCoordinates() }
         let region = MKCoordinateRegion(
             center: location,
             latitudinalMeters: Self.mapSpanMeters,
@@ -60,10 +58,12 @@ struct RadarProvider: TimelineProvider {
         )
         let renderSize = snapshotSize(for: displaySize, family: family)
 
-        guard let (snapshot, mapImage) = await fetchSnapshot(region: region, size: renderSize) else {
+        guard let snap = await fetchSnapshot(region: region, size: renderSize) else {
             let fallback = UIImage(systemName: "wifi.exclamationmark") ?? UIImage()
             return RadarEntry(date: Date(), frameDate: Date(), image: fallback)
         }
+        let snapshot = snap.snapshot
+        let mapImage = snap.image
 
         guard let frame = await fetchLatestOscarFrame() else {
             return RadarEntry(
@@ -122,14 +122,21 @@ struct RadarProvider: TimelineProvider {
 
     // MARK: - Map snapshot
 
+    /// MKMapSnapshotter.Snapshot isn't Sendable, but the snapshotter hands back a single
+    /// fresh value per call that we use on one task — box it so it can cross the continuation.
+    private struct SendableMapSnapshot: @unchecked Sendable {
+        let snapshot: MKMapSnapshotter.Snapshot
+        let image: UIImage
+    }
+
     private func fetchSnapshot(
         region: MKCoordinateRegion,
         size: CGSize
-    ) async -> (MKMapSnapshotter.Snapshot, UIImage)? {
+    ) async -> SendableMapSnapshot? {
         let options = MKMapSnapshotter.Options()
         options.region = region
         options.size = size
-        options.scale = await UIScreen.main.scale
+        options.scale = 3
         options.traitCollection = UITraitCollection(userInterfaceStyle: mapColorType)
 
         return await withCheckedContinuation { continuation in
@@ -138,7 +145,7 @@ struct RadarProvider: TimelineProvider {
                     continuation.resume(returning: nil)
                     return
                 }
-                continuation.resume(returning: (snapshot, snapshot.image))
+                continuation.resume(returning: SendableMapSnapshot(snapshot: snapshot, image: snapshot.image))
             }
         }
     }

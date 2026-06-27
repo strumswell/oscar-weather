@@ -10,6 +10,7 @@ import CoreLocation
 import Combine
 import SwiftUI
 
+@MainActor
 @Observable
 class Location {
     var coordinates: CLLocationCoordinate2D
@@ -23,10 +24,11 @@ class Location {
     }
 }
 
+@MainActor
 @Observable
-class LocationService: NSObject, CLLocationManagerDelegate  {
+class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate  {
     static let shared = LocationService()
-    static let outboundCoordinateDecimalPlaces = 3
+    nonisolated static let outboundCoordinateDecimalPlaces = 3
     var city = CityService.shared
     var authStatus: CLAuthorizationStatus?
     var gpsLocation: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 52.52, longitude: 13.4)
@@ -132,9 +134,8 @@ class LocationService: NSObject, CLLocationManagerDelegate  {
             // stall indefinitely (e.g. on a flaky network right after foregrounding),
             // which would otherwise hang the whole refresh.
             let geocoded = try await withTimeout(seconds: 6) {
-                let geocoder = CLGeocoder()
                 let location = CLLocation(latitude: latitude, longitude: longitude)
-                let placemarks = try await geocoder.reverseGeocodeLocation(location)
+                let placemarks = try await reverseGeocode(location)
                 guard let placemark = placemarks.first else {
                     return (name: "", countryCode: String?.none)
                 }
@@ -180,39 +181,46 @@ class LocationService: NSObject, CLLocationManagerDelegate  {
         }
     }
 
-    static func outboundCoordinate(_ coordinate: CLLocationCoordinate2D) -> CLLocationCoordinate2D {
+    nonisolated static func outboundCoordinate(_ coordinate: CLLocationCoordinate2D) -> CLLocationCoordinate2D {
         CLLocationCoordinate2D(
             latitude: roundedOutboundCoordinate(coordinate.latitude),
             longitude: roundedOutboundCoordinate(coordinate.longitude)
         )
     }
 
-    static func roundedOutboundCoordinate(_ value: Double) -> Double {
+    nonisolated static func roundedOutboundCoordinate(_ value: Double) -> Double {
         let scale = pow(10.0, Double(outboundCoordinateDecimalPlaces))
         return (value * scale).rounded() / scale
     }
 }
 
-extension CLGeocoder {
-    func reverseGeocodeLocation(_ location: CLLocation) async throws -> [CLPlacemark] {
-        // Cancellation-aware so an enclosing timeout can actually unblock it: cancelling
-        // the task calls `cancelGeocode()`, which fires the completion handler instead of
-        // leaving the continuation (and any awaiting task group) suspended forever.
-        try await withTaskCancellationHandler {
-            try await withCheckedThrowingContinuation { continuation in
-                self.reverseGeocodeLocation(location) { placemarks, error in
-                    if let error = error {
-                        continuation.resume(throwing: error)
-                    } else if let placemarks = placemarks {
-                        continuation.resume(returning: placemarks)
-                    } else {
-                        continuation.resume(throwing: NSError(domain: "CLGeocoderError", code: 0, userInfo: nil))
-                    }
+/// CLGeocoder isn't `Sendable`, but `cancelGeocode()` is explicitly designed to be called
+/// concurrently with an in-flight request — exactly what the cancellation handler does below.
+/// Boxing the single-use geocoder lets the operation and cancel closures share it across the
+/// `sending`/`@Sendable` boundary without weakening any real guarantee.
+private struct SendableGeocoder: @unchecked Sendable {
+    let geocoder = CLGeocoder()
+}
+
+/// Reverse-geocodes a location, cancellation-aware so an enclosing timeout can unblock it:
+/// cancelling the task calls `cancelGeocode()`, which fires the completion handler instead of
+/// leaving the continuation (and any awaiting task group) suspended forever.
+private func reverseGeocode(_ location: CLLocation) async throws -> [CLPlacemark] {
+    let box = SendableGeocoder()
+    return try await withTaskCancellationHandler {
+        try await withCheckedThrowingContinuation { continuation in
+            box.geocoder.reverseGeocodeLocation(location) { placemarks, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else if let placemarks = placemarks {
+                    continuation.resume(returning: placemarks)
+                } else {
+                    continuation.resume(throwing: NSError(domain: "CLGeocoderError", code: 0, userInfo: nil))
                 }
             }
-        } onCancel: {
-            cancelGeocode()
         }
+    } onCancel: {
+        box.geocoder.cancelGeocode()
     }
 }
 

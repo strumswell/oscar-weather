@@ -51,7 +51,7 @@ final class ChartScrollSynchronizer {
 
     private var entries: [ObjectIdentifier: Entry] = [:]
     private weak var activeScrollView: UIScrollView?
-    private var displayLink: CADisplayLink?
+    nonisolated(unsafe) private var displayLink: CADisplayLink?
     private var lastNormalizedOffset: CGFloat?
     private var idleFrameCount = 0
 

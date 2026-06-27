@@ -10,6 +10,7 @@ import SwiftUI
 import WidgetKit
 import OSLog
 
+@MainActor
 @Observable
 public class CityService {
     static let shared = CityService()

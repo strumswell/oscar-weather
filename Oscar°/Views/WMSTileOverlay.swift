@@ -154,16 +154,18 @@ public class WMSTileOverlay : MKTileOverlay {
 
     public var applyColorTransform = false
 
-    public override func loadTile(at path: MKTileOverlayPath, result: @escaping (Data?, Error?) -> Void) {
+    public override func loadTile(at path: MKTileOverlayPath, result: @escaping @Sendable (Data?, Error?) -> Void) {
         let url1 = self.url(forTilePath: path)
         let filePath = getFilePathForURL(url: url1, folderName: TILE_CACHE)
+        let applyColorTransform = self.applyColorTransform
+        let enableTileCache = self.enableTileCache
 
         let file = FileManager.default
 
         if file.fileExists(atPath: filePath) {
             let tileData =  try? NSData(contentsOfFile: filePath, options: .dataReadingMapped)
             if applyColorTransform, let data = tileData as Data? {
-                applyColorTransformation(to: data, result: result)
+                Self.applyColorTransformation(to: data, result: result)
             } else {
                 result(tileData as Data?, nil)
             }
@@ -174,14 +176,14 @@ public class WMSTileOverlay : MKTileOverlay {
             request.setValue(APIContactIdentity.contactEmail, forHTTPHeaderField: "From")
 
             let session = URLSession.shared
-            session.dataTask(with: request as URLRequest, completionHandler: {(data, response, error) in
+            session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) in
 
                 if error != nil {
                     print("Error downloading tile")
                     result(nil, error)
                 }
                 else {
-                    if (self.enableTileCache) {
+                    if enableTileCache {
                         do {
                             try data?.write(to: URL(fileURLWithPath: filePath))
                         } catch let error {
@@ -189,8 +191,8 @@ public class WMSTileOverlay : MKTileOverlay {
                         }
                     }
 
-                    if self.applyColorTransform, let data = data {
-                        self.applyColorTransformation(to: data, result: result)
+                    if applyColorTransform, let data = data {
+                        Self.applyColorTransformation(to: data, result: result)
                     } else {
                         result(data, nil)
                     }
@@ -199,7 +201,7 @@ public class WMSTileOverlay : MKTileOverlay {
         }
     }
 
-    private func applyColorTransformation(to data: Data, result: @escaping (Data?, Error?) -> Void) {
+    private static func applyColorTransformation(to data: Data, result: @escaping @Sendable (Data?, Error?) -> Void) {
         guard let image = UIImage(data: data),
               let transformedImage = transformRadarColors(image: image),
               let transformedData = transformedImage.pngData() else {
@@ -209,7 +211,7 @@ public class WMSTileOverlay : MKTileOverlay {
         result(transformedData, nil)
     }
 
-    private func transformRadarColors(image: UIImage) -> UIImage? {
+    private static func transformRadarColors(image: UIImage) -> UIImage? {
         guard let cgImage = image.cgImage else { return nil }
 
         let width = cgImage.width
@@ -261,7 +263,7 @@ public class WMSTileOverlay : MKTileOverlay {
         return UIImage(cgImage: outputCGImage, scale: image.scale, orientation: image.imageOrientation)
     }
 
-    private func transformColor(r: UInt8, g: UInt8, b: UInt8, a: UInt8) -> (r: UInt8, g: UInt8, b: UInt8, a: UInt8) {
+    private static func transformColor(r: UInt8, g: UInt8, b: UInt8, a: UInt8) -> (r: UInt8, g: UInt8, b: UInt8, a: UInt8) {
         let rf = CGFloat(r) / 255.0
         let gf = CGFloat(g) / 255.0
         let bf = CGFloat(b) / 255.0

@@ -28,7 +28,7 @@ extension URLRequest {
   }
 }
 
-struct ContactIdentityMiddleware: ClientMiddleware {
+nonisolated struct ContactIdentityMiddleware: ClientMiddleware {
   func intercept(
     _ request: HTTPRequest,
     body: HTTPBody?,

@@ -21,17 +21,16 @@ enum AlertResponse {
 }
 
 // TODO: Caching for API results
-class APIClient {
+final class APIClient: Sendable {
   static let shared = APIClient()
 
-  var openMeteo: Client
-  var openMeteoAqi: Client
-  var openMeteoGeo: Client
-  var openMeteoEnsemble: Client
-  var brightsky: Client
-  var canadaWeather: Client
-  var rainViewer: Client
-  var settingService: SettingService
+  let openMeteo: Client
+  let openMeteoAqi: Client
+  let openMeteoGeo: Client
+  let openMeteoEnsemble: Client
+  let brightsky: Client
+  let canadaWeather: Client
+  let rainViewer: Client
 
   init() {
     openMeteo = APIClient.get(
@@ -44,7 +43,6 @@ class APIClient {
     brightsky = APIClient.get(url: try! Servers.server4())
     canadaWeather = APIClient.get(url: try! Servers.server5())
     rainViewer = APIClient.get(url: try! Servers.server6())
-    settingService = SettingService.shared
   }
 
   class func get(url: URL, prepending middlewares: [any ClientMiddleware] = []) -> Client {
@@ -75,9 +73,9 @@ class APIClient {
     // main actor up front rather than reading the managed object off its queue.
     let resolvedUnits = await MainActor.run {
       (
-        windSpeed: WindSpeedUnit(settingValue: settingService.settings?.windSpeedUnit),
-        temperature: settingService.settings?.temperatureUnit ?? "celsius",
-        precipitation: settingService.settings?.precipitationUnit ?? "mm"
+        windSpeed: WindSpeedUnit(settingValue: SettingService.shared.settings?.windSpeedUnit),
+        temperature: SettingService.shared.settings?.temperatureUnit ?? "celsius",
+        precipitation: SettingService.shared.settings?.precipitationUnit ?? "mm"
       )
     }
     let windSpeedUnit = resolvedUnits.windSpeed
@@ -282,6 +280,7 @@ class APIClient {
     model: DailyEnsembleModel = .ecmwfAIFS025Ensemble
   ) async throws -> DailyEnsembleForecastResponse {
     let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
+    let windSpeedUnit = await MainActor.run { WindSpeedUnit(settingValue: SettingService.shared.settings?.windSpeedUnit) }
     var components = URLComponents(string: "https://ensemble-api.open-meteo.com/v1/ensemble")!
     components.queryItems = [
       URLQueryItem(name: "latitude", value: String(outboundCoordinates.latitude)),
@@ -300,7 +299,7 @@ class APIClient {
       URLQueryItem(name: "models", value: model.rawValue),
       URLQueryItem(
         name: "wind_speed_unit",
-        value: WindSpeedUnit(settingValue: settingService.settings?.windSpeedUnit).apiRawValue
+        value: windSpeedUnit.apiRawValue
       ),
       URLQueryItem(name: "timezone", value: "auto"),
       URLQueryItem(name: "forecast_days", value: "35"),

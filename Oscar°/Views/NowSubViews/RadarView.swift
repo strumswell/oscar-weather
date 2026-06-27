@@ -297,7 +297,7 @@ struct RadarMapView: UIViewRepresentable {
     var oscarRadarState: OscarRadarState?
     var gfsImageState: GFSImageLayerState?
 
-    private static let oscarRadarArrowHost = radarBaseURL
+    nonisolated private static let oscarRadarArrowHost = radarBaseURL
 
     private final class RainViewerRadarTileOverlay: MKTileOverlay {}
     private final class RainViewerInfraredTileOverlay: MKTileOverlay {}
@@ -315,7 +315,7 @@ struct RadarMapView: UIViewRepresentable {
 
         override func loadTile(
             at path: MKTileOverlayPath,
-            result: @escaping (Data?, Error?) -> Void
+            result: @escaping @Sendable (Data?, Error?) -> Void
         ) {
             guard let url = URL(
                 string: "\(RadarMapView.oscarRadarArrowHost)/radar/\(regionPath)/frames/\(frameID)/vectors/\(path.z)/\(path.x)/\(path.y)"
@@ -324,8 +324,9 @@ struct RadarMapView: UIViewRepresentable {
                 return
             }
 
-            var request = URLRequest(url: url)
-            request.addAPIContactIdentity()
+            var mutableRequest = URLRequest(url: url)
+            mutableRequest.addAPIContactIdentity()
+            let request = mutableRequest
 
             if let cached = URLCache.shared.cachedResponse(for: request), !cached.data.isEmpty {
                 result(cached.data, nil)
@@ -382,7 +383,7 @@ struct RadarMapView: UIViewRepresentable {
         var windParticleView: WindParticleView?
         var lastWindFrameKey: String?
         private var selectedCityAnnotation: SelectedCityAnnotation?
-        private var mapInteractionEndWorkItem: DispatchWorkItem?
+        nonisolated(unsafe) private var mapInteractionEndWorkItem: DispatchWorkItem?
         private var isMapInteractionActive = false
         private var trackedMapGestureRecognizers: Set<ObjectIdentifier> = []
 

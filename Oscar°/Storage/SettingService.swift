@@ -41,6 +41,7 @@ enum TimeFormatPreference: String, CaseIterable, Identifiable {
     }
 }
 
+@MainActor
 @Observable
 public final class SettingService {
     static let shared = SettingService()
@@ -128,16 +129,16 @@ public final class SettingService {
     private let context: NSManagedObjectContext
     private let pc = PersistenceController.shared
     private let nc = NotificationCenter.default
-    private static let timeFormatPreferenceKey = "timeFormatPreference"
+    nonisolated private static let timeFormatPreferenceKey = "timeFormatPreference"
     private static let dailyForecastDaytimeTemperaturesEnabledKey = "dailyForecastDaytimeTemperaturesEnabled"
     private static let dailyForecastDaytimeTemperatureDisplayModeKey = "dailyForecastDaytimeTemperatureDisplayMode"
     private static let dailyForecastDaytimeTemperatureRangeModeKey = "dailyForecastDaytimeTemperatureRangeMode"
     private static let dailyForecastDaytimeCustomStartHourKey = "dailyForecastDaytimeCustomStartHour"
     private static let dailyForecastDaytimeCustomEndHourKey = "dailyForecastDaytimeCustomEndHour"
-    private static let forecastModelPreferenceKey = "forecastModelPreference"
-    private static let defaults = UserDefaults(suiteName: "group.cloud.bolte.Oscar") ?? .standard
-    private static let formatterLock = NSLock()
-    private static var formatterCache: [String: DateFormatter] = [:]
+    nonisolated private static let forecastModelPreferenceKey = "forecastModelPreference"
+    nonisolated(unsafe) private static let defaults = UserDefaults(suiteName: "group.cloud.bolte.Oscar") ?? .standard
+    nonisolated private static let formatterLock = NSLock()
+    nonisolated(unsafe) private static var formatterCache: [String: DateFormatter] = [:]
 
     private init() {
         oscarRadarLayer = UserDefaults.standard.bool(forKey: "oscarRadarLayer")
@@ -260,17 +261,17 @@ public final class SettingService {
         dailyForecastDaytimeCustomEndHour = endHour
     }
 
-    static var resolvedTimeFormatAPIValue: String {
+    nonisolated static var resolvedTimeFormatAPIValue: String {
         resolvedTimeFormatPreference.resolvedAPIValue
     }
 
-    static var resolvedTimeFormatPreference: TimeFormatPreference {
+    nonisolated static var resolvedTimeFormatPreference: TimeFormatPreference {
         let rawValue = defaults.string(forKey: timeFormatPreferenceKey)
         return TimeFormatPreference(rawValue: rawValue ?? "") ?? .system
     }
 
     /// Reads the selected forecast model from shared defaults. Safe to call from extensions.
-    static var resolvedForecastModelPreference: ForecastModelPreference {
+    nonisolated static var resolvedForecastModelPreference: ForecastModelPreference {
         let rawValue = defaults.string(forKey: forecastModelPreferenceKey)
         return ForecastModelPreference(rawValue: rawValue ?? "") ?? .bestMatch
     }
@@ -279,7 +280,7 @@ public final class SettingService {
         min(max(hour, 0), 23)
     }
 
-    static func formattedTime(
+    nonisolated static func formattedTime(
         _ date: Date,
         timeZone: TimeZone? = nil,
         showsMinutes: Bool = true
@@ -308,7 +309,7 @@ public final class SettingService {
         }
     }
 
-    static func formattedDateTime(_ date: Date, timeZone: TimeZone? = nil) -> String {
+    nonisolated static func formattedDateTime(_ date: Date, timeZone: TimeZone? = nil) -> String {
         let key = "date|\(timeZone?.identifier ?? "local")"
         let dateString = format(date, key: key) {
             $0.locale = .autoupdatingCurrent
@@ -319,7 +320,7 @@ public final class SettingService {
         return "\(dateString), \(formattedTime(date, timeZone: timeZone))"
     }
 
-    static func formattedWeekday(_ date: Date, timeZone: TimeZone) -> String {
+    nonisolated static func formattedWeekday(_ date: Date, timeZone: TimeZone) -> String {
         format(date, key: "weekday|\(timeZone.identifier)") {
             $0.locale = .autoupdatingCurrent
             $0.timeZone = timeZone
@@ -327,7 +328,7 @@ public final class SettingService {
         }
     }
 
-    private static func format(
+    nonisolated private static func format(
         _ date: Date,
         key: String,
         configure: (DateFormatter) -> Void

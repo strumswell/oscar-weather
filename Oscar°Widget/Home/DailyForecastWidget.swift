@@ -20,7 +20,7 @@ struct WidgetCity: AppEntity, Identifiable {
     static var typeDisplayRepresentation: TypeDisplayRepresentation {
         TypeDisplayRepresentation(name: "Ort")
     }
-    static var defaultQuery = WidgetCityQuery()
+    static let defaultQuery = WidgetCityQuery()
 
     var id: String
     var name: String
@@ -62,12 +62,11 @@ struct WidgetCityQuery: EntityQuery {
 enum WidgetCityStore {
     static func savedCities() -> [WidgetCity] {
         let context = PersistenceController.shared.container.viewContext
-        var cities: [WidgetCity] = []
-        context.performAndWait {
+        return context.performAndWait {
             let request: NSFetchRequest<City> = City.fetchRequest()
             request.sortDescriptors = [NSSortDescriptor(key: "orderIndex", ascending: true)]
-            guard let results = try? context.fetch(request) else { return }
-            cities = results.compactMap { city in
+            guard let results = try? context.fetch(request) else { return [] }
+            return results.compactMap { city in
                 guard let label = city.label else { return nil }
                 return WidgetCity(
                     id: "\(city.lat),\(city.lon)",
@@ -77,13 +76,12 @@ enum WidgetCityStore {
                 )
             }
         }
-        return cities
     }
 }
 
 struct SelectCityIntent: WidgetConfigurationIntent {
-    static var title: LocalizedStringResource = "Ort wählen"
-    static var description = IntentDescription("Wähle den Ort für die Tagesvorhersage.")
+    static let title: LocalizedStringResource = "Ort wählen"
+    static let description = IntentDescription("Wähle den Ort für die Tagesvorhersage.")
 
     @Parameter(title: "Ort")
     var city: WidgetCity?
@@ -170,7 +168,6 @@ struct DailyForecastEntry: TimelineEntry {
 
 struct DailyForecastProvider: AppIntentTimelineProvider {
     private let client = APIClient.shared
-    private let atmosphericAdapter = WeatherAtmosphericAdapter()
 
     func placeholder(in context: Context) -> DailyForecastEntry {
         .placeholder
@@ -191,7 +188,7 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
     }
 
     private func makeEntry(for configuration: SelectCityIntent) async throws -> DailyForecastEntry {
-        let resolved = try await resolveLocation(configuration.city)
+        let resolved = await resolveLocation(configuration.city)
         let coordinates = resolved.coordinates
 
         async let weatherRequest = client.getForecast(
@@ -248,12 +245,14 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
         let highs = days.map(\.high)
 
         let dayBegin = weather.hourly?.time.first ?? 0
-        let weatherForRendering = Weather()
-        weatherForRendering.time = (Date.now.timeIntervalSince1970 - Double(dayBegin)) / 86400.0
-        weatherForRendering.forecast = weather
-        weatherForRendering.precipSeries = precipSeries
-        let gradient = atmosphericAdapter.getWidgetFullGradient(
-            from: weatherForRendering, at: coordinates)
+        let gradient = await MainActor.run {
+            let weatherForRendering = Weather()
+            weatherForRendering.time = (Date.now.timeIntervalSince1970 - Double(dayBegin)) / 86400.0
+            weatherForRendering.forecast = weather
+            weatherForRendering.precipSeries = precipSeries
+            return WeatherAtmosphericAdapter().getWidgetFullGradient(
+                from: weatherForRendering, at: coordinates)
+        }
 
         return DailyForecastEntry(
             date: .now,
@@ -267,7 +266,7 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
         )
     }
 
-    private func resolveLocation(_ city: WidgetCity?) async throws
+    private func resolveLocation(_ city: WidgetCity?) async
         -> (coordinates: CLLocationCoordinate2D, name: String)
     {
         if let city, !city.isCurrentLocation, city.latitude.isFinite, city.longitude.isFinite {
@@ -276,10 +275,12 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
                 city.name
             )
         }
-        let locationService = LocationService.shared
-        locationService.update()
-        let name = await locationService.getLocationName()
-        return (locationService.getCoordinates(), name)
+        return await Task { @MainActor in
+            LocationService.shared.update()
+            let coordinate = LocationService.shared.getCoordinates()
+            let name = await LocationService.shared.getLocationName()
+            return (coordinates: coordinate, name: name)
+        }.value
     }
 
     private func value(_ array: [Double]?, _ index: Int) -> Double? {

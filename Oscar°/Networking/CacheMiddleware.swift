@@ -234,7 +234,7 @@ actor CacheStore {
   }
 }
 
-final class CachingMiddleware: ClientMiddleware {
+nonisolated final class CachingMiddleware: ClientMiddleware {
   private let cacheTime: TimeInterval
   private let cacheStore: CacheStore
 

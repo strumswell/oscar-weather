@@ -5,7 +5,7 @@ struct MemberCardStickerArtworkView: View, Animatable {
     let size: CGFloat
     var foldProgress: CGFloat
 
-    var animatableData: CGFloat {
+    nonisolated var animatableData: CGFloat {
         get { foldProgress }
         set { foldProgress = newValue }
     }

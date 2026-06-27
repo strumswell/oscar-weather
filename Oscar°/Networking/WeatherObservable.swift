@@ -47,6 +47,7 @@ enum WeatherLoadState {
     case failed
 }
 
+@MainActor
 @Observable
 class Weather {
     var isLoading: Bool = false
@@ -113,7 +114,6 @@ extension Weather {
         case precipSeries(RadarOutcome)
     }
 
-    @MainActor
     func refresh(
         location: Location,
         client: APIClient = .shared,
@@ -232,7 +232,6 @@ extension Weather {
         }
     }
 
-    @MainActor
     func apply(snapshot: WeatherSnapshot, location: Location) {
         // Cache hydration is the first state, not a transition the user is
         // watching — apply it without the temperature roll. The following

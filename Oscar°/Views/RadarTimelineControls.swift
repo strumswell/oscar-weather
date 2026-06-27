@@ -231,14 +231,14 @@ private struct PulsingDot: View {
 
 extension ISO8601DateFormatter {
     // Handles "2024-01-15T12:00:00+00:00" and "2024-01-15T12:00:00Z"
-    static let radarFormatter: ISO8601DateFormatter = {
+    nonisolated(unsafe) static let radarFormatter: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime]
         return f
     }()
 
     // Handles "2024-01-15T12:00:00.000Z" and similar with sub-second precision
-    private static let radarFormatterFractional: ISO8601DateFormatter = {
+    nonisolated(unsafe) private static let radarFormatterFractional: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return f
