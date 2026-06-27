@@ -60,7 +60,11 @@ struct LockscreenProvider: TimelineProvider {
 
                 // TODO: Respect radar data for precipitation + probability
                 let precipitation = weather.current?.precipitation ?? 0.0
-                let precipitationProbability = weather.hourly?.precipitation_probability?[getLocalizedHourIndex(weather: weather)]
+                // Optional chaining only guards nil, not out-of-bounds: precipitation_probability
+                // can be shorter than the time array, so index defensively.
+                let probabilities = weather.hourly?.precipitation_probability ?? []
+                let hourIndex = getLocalizedHourIndex(weather: weather)
+                let precipitationProbability = probabilities.indices.contains(hourIndex) ? probabilities[hourIndex] : nil
 
                 let isRaining = precipSeries?.isRaining() ?? false
                 let icon = getWeatherIcon(weathercode: weathercode, isDay: isDay, isRaining: isRaining, precipitation: precipitation)

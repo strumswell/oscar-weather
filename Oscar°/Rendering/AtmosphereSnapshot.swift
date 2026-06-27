@@ -60,6 +60,33 @@ struct AtmosphereSnapshot: Equatable {
         windDirection: 0,
         aqiHaze: 0
     )
+
+    /// A calm, clear twilight with visible stars. Used as the backdrop before any forecast
+    /// has loaded — first launch, or a cold-start fetch failure — instead of a flat gradient.
+    /// Deep civil twilight (sun ≈ 8° below the horizon): a blue dusk sky with the stars out
+    /// and no clouds, wind, or precipitation.
+    static let twilight = AtmosphereSnapshot(
+        timestamp: Date.now.timeIntervalSince1970,
+        timeOfDay: 0.9,
+        sunElevation: -0.14,
+        phase: 0,
+        nightAmount: 0.78,
+        condition: .clear,
+        cloudCoverage: 0,
+        cloudDensity: 0,
+        precipitationAmount: 0,
+        snowfallAmount: 0,
+        precipitationIntensity: 0,
+        snowfallIntensity: 0,
+        thunderIntensity: 0,
+        humidity: 0.45,
+        pressure: 1,
+        haze: 0.05,
+        turbidity: 0.18,
+        windSpeed: 0,
+        windDirection: 0,
+        aqiHaze: 0
+    )
 }
 
 enum AtmosphereWeatherMapper {

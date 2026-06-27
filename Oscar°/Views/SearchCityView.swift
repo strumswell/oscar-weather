@@ -37,7 +37,7 @@ struct SearchCityView: View {
             .navigationTitle("Orte")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(content: {
-                ToolbarItem(placement: .navigationBarTrailing, content: {
+                ToolbarItem(placement: .topBarTrailing, content: {
                     Button(role: .close) {
                         dismiss()
                         UIApplication.shared.playHapticFeedback()
@@ -53,16 +53,16 @@ struct SearchCityView: View {
                                 if (locationService.city.cities.filter {$0.selected == true}.count < 1) {
                                     HStack {
                                         Image(systemName: "location.fill")
-                                            .foregroundColor(.blue)
+                                            .foregroundStyle(.blue)
                                         Text("Aktueller Standort")
                                         Spacer()
                                         Image(systemName: "checkmark")
-                                            .foregroundColor(.blue)
+                                            .foregroundStyle(.blue)
                                     }
                                 } else {
                                     HStack {
                                         Image(systemName: "location.fill")
-                                            .foregroundColor(.blue)
+                                            .foregroundStyle(.blue)
                                         Text("Aktueller Standort")
                                         Spacer()
                                     }
@@ -79,7 +79,7 @@ struct SearchCityView: View {
                                         Text("\(city.label ?? "")")
                                         Spacer()
                                         Image(systemName: "checkmark")
-                                            .foregroundColor(.blue)
+                                            .foregroundStyle(.blue)
                                         
                                     } else {
                                         Text("\(city.label ?? "")")
@@ -123,8 +123,6 @@ extension SearchCityView {
 }
 
 // Preview
-struct SearchCityView_Previews: PreviewProvider {
-    static var previews: some View {
-        SearchCityView()
-    }
+#Preview {
+    SearchCityView()
 }

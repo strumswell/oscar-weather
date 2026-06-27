@@ -9,7 +9,7 @@ import SwiftUI
 
 struct NOAAAttribution: View {
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 Section(header: Text("Über")) {
                     Text("Oscar verwendet Prognosedaten des Global Forecast System (GFS), einem Wettervorhersagemodell der National Centers for Environmental Prediction (NCEP), bereitgestellt durch NOAA. NOAA/NWS-Daten sind in der Regel gemeinfrei, sofern nicht anders gekennzeichnet. Die Nutzung stellt keine Unterstützung, Empfehlung oder offizielle Verbindung zu NOAA, NWS oder NCEP dar.")
@@ -31,9 +31,9 @@ struct NOAALabel: View {
         HStack {
             Image(systemName: "globe.americas.fill")
                 .frame(width: 30, height: 30)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .background(Color.green)
-                .cornerRadius(5)
+                .clipShape(.rect(cornerRadius: 5))
             Text("NOAA Global Forecast System (GFS)")
         }
     }

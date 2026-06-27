@@ -31,8 +31,11 @@ struct WeatherSimulationView: View {
 
     var body: some View {
         let overrides = (weather.debug && debugState?.overrideEnabled == true) ? debugState : nil
+        let hasContent = weather.forecast.hourly != nil || overrides != nil
         let snapshot = overrides?.snapshot
-            ?? AtmosphereWeatherMapper.snapshot(from: weather, at: location.coordinates)
+            ?? (hasContent
+                ? AtmosphereWeatherMapper.snapshot(from: weather, at: location.coordinates)
+                : .twilight)
         let moonPhase = overrides?.moonPhase ?? MoonPhase.phaseFraction()
         let cloudThickness = cloudThickness(for: snapshot)
         let cloudsVisible = snapshot.cloudDensity + snapshot.cloudCoverage > 0.02
@@ -40,7 +43,7 @@ struct WeatherSimulationView: View {
 
         GeometryReader { proxy in
             ZStack {
-                if weather.forecast.hourly != nil || overrides != nil {
+                if hasContent {
                     let moonProgress = moonAltitudeProgress(
                         snapshot,
                         phase: moonPhase,
@@ -152,7 +155,16 @@ struct WeatherSimulationView: View {
                     }
                     .animation(.easeInOut(duration: 0.8), value: stormVisible)
                 } else {
-                    AtmosphereSampler.skyGradient(snapshot: .fallback)
+                    // No forecast yet (first launch, or a failed cold-start fetch): a calm
+                    // starry twilight rather than an empty gradient. The retry affordance lives
+                    // in NowView; this is purely the backdrop.
+                    AtmosphereSkyShaderView(snapshot: snapshot, size: proxy.size, pacing: pacing)
+
+                    let starOpacity = Double(snapshot.nightAmount)
+                    if starOpacity > 0.02 {
+                        StarsView(pacing: pacing)
+                            .opacity(starOpacity)
+                    }
                 }
 
                 if weather.debug {
@@ -193,9 +205,10 @@ struct WeatherSimulationView: View {
             return nil
         }
 
-        return MoonPhase.altitudeProgress(
-            timeOfDay: Double(snapshot.timeOfDay),
-            phase: phase
+        return MoonPhase.skyProgress(
+            date: Date(timeIntervalSince1970: snapshot.timestamp),
+            latitude: location.coordinates.latitude,
+            longitude: location.coordinates.longitude
         )
     }
 

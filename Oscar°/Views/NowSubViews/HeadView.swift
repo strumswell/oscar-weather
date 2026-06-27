@@ -31,22 +31,22 @@ struct HeadView: View {
         if #available(iOS 18.0, *) {
             HStack {
                 Image(systemName: "magnifyingglass")
-                  .foregroundColor(Color(UIColor.label))
+                  .foregroundStyle(Color(UIColor.label))
                 Text(location.name)
                     .font(.title2)
                     .fontWeight(.bold)
                     .lineSpacing(10)
-                    .foregroundColor(Color(UIColor.label))
+                    .foregroundStyle(Color(UIColor.label))
             }
             .matchedTransitionSource(id: NowSheet.locationTransitionID, in: locationTransition)
         } else {
             Image(systemName: "magnifyingglass")
-              .foregroundColor(Color(UIColor.label))
+              .foregroundStyle(Color(UIColor.label))
             Text(location.name)
                 .font(.title2)
                 .fontWeight(.bold)
                 .lineSpacing(10)
-                .foregroundColor(Color(UIColor.label))
+                .foregroundStyle(Color(UIColor.label))
         }
       Spacer()
     }
@@ -63,7 +63,7 @@ struct HeadView: View {
       VStack {
         Spacer()
         Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
-          .foregroundColor(Color(UIColor.label))
+          .foregroundStyle(Color(UIColor.label))
           .font(.system(size: temperatureFontSize))
           .minimumScaleFactor(0.5)
           .lineLimit(1)
@@ -77,17 +77,17 @@ struct HeadView: View {
         Spacer()
         Image(systemName: "cloud")
           .frame(width: 30, height: 30)
-          .foregroundColor(Color(UIColor.label))
+          .foregroundStyle(Color(UIColor.label))
         Text("\(weather.forecast.current?.cloudcover ?? 0, specifier: "%.0f") %")
-          .foregroundColor(Color(UIColor.label))
+          .foregroundStyle(Color(UIColor.label))
         Image(systemName: "wind")
           .frame(width: 30, height: 30)
-          .foregroundColor(Color(UIColor.label))
+          .foregroundStyle(Color(UIColor.label))
         Text(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h"))
-        .foregroundColor(Color(UIColor.label))
+        .foregroundStyle(Color(UIColor.label))
         Image(systemName: "location")
           .frame(width: 30, height: 30)
-          .foregroundColor(Color(UIColor.label))
+          .foregroundStyle(Color(UIColor.label))
         Text(weather.forecast.current?.getWindDirection() ?? "")
         Spacer()
       }

@@ -57,7 +57,7 @@ class APIClient {
         RetryingMiddleware(
           signals: [.code(429), .range(500..<600), .errorThrown],
           policy: .upToAttempts(count: 3),
-          delay: .constant(seconds: 1)
+          delay: .exponentialWithJitter(base: 0.5, maxSeconds: 8)
         ),
       ]
     )
@@ -69,13 +69,18 @@ class APIClient {
     hourly: [Operations.getForecast.Input.Query.hourlyPayloadPayload]? = nil
   ) async throws -> Operations.getForecast.Output.Ok.Body.jsonPayload {
     let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
-    let fallbackForecast: Operations.getForecast.Output.Ok.Body.jsonPayload = .init(
-      latitude: outboundCoordinates.latitude, longitude: outboundCoordinates.longitude,
-      current: .init(
-        cloudcover: 0.0, time: 0.0, temperature: 0.0, windspeed: 0.0, wind_direction_10m: 0.0,
-        weathercode: 0.0))
 
-    let windSpeedUnit = WindSpeedUnit(settingValue: settingService.settings?.windSpeedUnit)
+    // `settings` is a viewContext-bound NSManagedObject (main-queue confined), but this
+    // method runs on a background task-group executor. Resolve the unit settings on the
+    // main actor up front rather than reading the managed object off its queue.
+    let resolvedUnits = await MainActor.run {
+      (
+        windSpeed: WindSpeedUnit(settingValue: settingService.settings?.windSpeedUnit),
+        temperature: settingService.settings?.temperatureUnit ?? "celsius",
+        precipitation: settingService.settings?.precipitationUnit ?? "mm"
+      )
+    }
+    let windSpeedUnit = resolvedUnits.windSpeed
     let hourlyFields = hourly ?? [
       .temperature_2m, .apparent_temperature, .precipitation, .snowfall, .weathercode,
       .cloudcover,
@@ -99,11 +104,11 @@ class APIClient {
         .is_day,
       ],
       temperature_unit: Operations.getForecast.Input.Query.temperature_unitPayload(
-        rawValue: settingService.settings?.temperatureUnit ?? "celsius"),
+        rawValue: resolvedUnits.temperature),
       windspeed_unit: Operations.getForecast.Input.Query.windspeed_unitPayload(
         rawValue: windSpeedUnit.apiRawValue),
       precipitation_unit: Operations.getForecast.Input.Query.precipitation_unitPayload(
-        rawValue: settingService.settings?.precipitationUnit ?? "mm"),
+        rawValue: resolvedUnits.precipitation),
       timeformat: .unixtime,
       timezone: "auto",
       forecast_days: forecastDays
@@ -132,7 +137,9 @@ class APIClient {
           iconForecast = result
         }
       case .badRequest(_), .undocumented(statusCode: _, _):
-        return fallbackForecast
+        // No usable data for this location/model — surface the failure so refresh()
+        // keeps the last-known-good forecast instead of showing a fabricated one.
+        throw URLError(.badServerResponse)
       }
 
       // Second request: Get 14 days with best_match model
@@ -160,7 +167,11 @@ class APIClient {
             return iconForecast
           }
 
-          let startIndex = 7
+          // Append best_match days beyond what ICON actually returned, keyed off ICON's own
+          // day count rather than a hardcoded 7 (the sanitizer may trim ICON to fewer days),
+          // so the merged timeline stays contiguous and the parallel arrays stay aligned.
+          let startIndex = iconDaily.time.count
+          guard bestMatchDaily.time.count > startIndex else { return iconForecast }
           iconDaily.time.append(contentsOf: bestMatchDaily.time.suffix(from: startIndex))
           iconDaily.temperature_2m_max?.append(contentsOf: maxTemps.suffix(from: startIndex))
           iconDaily.temperature_2m_min?.append(contentsOf: minTemps.suffix(from: startIndex))
@@ -177,8 +188,6 @@ class APIClient {
       case .badRequest(_), .undocumented(statusCode: _, _):
         return iconForecast  // Return just the ICON forecast if best_match fails
       }
-
-      return iconForecast
     }
 
     // For all other regions, proceed with normal request
@@ -192,13 +201,14 @@ class APIClient {
       }
     case .badRequest(_), .undocumented(statusCode: _, _):
       // A user-forced model may have no data for this location ("No data is available for this
-      // location"). Fall back to best_match and let the UI notify the user.
+      // location"). Fall back to best_match first; if that also fails, surface the error so
+      // refresh() keeps the last-known-good forecast rather than showing a fabricated one.
       if modelPreference != .bestMatch,
         let fallback = try await fallbackToBestMatch(query: query, failedModel: modelPreference)
       {
         return fallback
       }
-      return fallbackForecast
+      throw URLError(.badServerResponse)
     }
   }
 
@@ -318,8 +328,11 @@ class APIClient {
       throw URLError(.badServerResponse)
     }
 
+    // Decode first so a malformed 200 body (schema drift, HTML error page) never poisons
+    // the cache for its 12h lifetime and re-throws on every subsequent call.
+    let decoded = try decoder.decode(DailyEnsembleForecastResponse.self, from: data)
     await DailyEnsembleForecastCache.shared.set(data, for: cacheKey)
-    return try decoder.decode(DailyEnsembleForecastResponse.self, from: data)
+    return decoded
   }
 
   func getAlerts(

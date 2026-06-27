@@ -175,7 +175,7 @@ struct LegalView: View {
       .navigationBarTitleDisplayMode(.inline)
       .toolbar(content: {
         ToolbarItem(
-          placement: .navigationBarTrailing,
+          placement: .topBarTrailing,
           content: {
             Button(role: .close) {
                 dismiss()
@@ -255,8 +255,6 @@ struct LegalView: View {
   }
 }
 
-struct LegalView_Previews: PreviewProvider {
-  static var previews: some View {
-    LegalView()
-  }
+#Preview {
+  LegalView()
 }

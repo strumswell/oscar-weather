@@ -61,7 +61,8 @@ public final class SettingService {
     }
     var oscarRadarRegionRaw: String {
         didSet {
-            UserDefaults.standard.set(oscarRadarRegionRaw, forKey: "oscarRadarRegion")
+            // Shared app group so the radar widget reads the same region.
+            Self.defaults.set(oscarRadarRegionRaw, forKey: "oscarRadarRegion")
         }
     }
     /// When true, the radar fetches the raw 8-bit value grid and colormaps it on-device
@@ -141,7 +142,13 @@ public final class SettingService {
     private init() {
         oscarRadarLayer = UserDefaults.standard.bool(forKey: "oscarRadarLayer")
         activeTileLayerRaw = UserDefaults.standard.string(forKey: "activeTileLayer")
-        oscarRadarRegionRaw = UserDefaults.standard.string(forKey: "oscarRadarRegion") ?? "germany"
+        // Prefer the shared app group; migrate a value written to standard defaults by older
+        // builds so the radar widget (which can only read the group) stays in sync.
+        let resolvedRadarRegion = Self.defaults.string(forKey: "oscarRadarRegion")
+            ?? UserDefaults.standard.string(forKey: "oscarRadarRegion")
+            ?? "germany"
+        oscarRadarRegionRaw = resolvedRadarRegion
+        Self.defaults.set(resolvedRadarRegion, forKey: "oscarRadarRegion")
         radarUsesValueGrid = UserDefaults.standard.bool(forKey: "radarUsesValueGrid")
         timeFormatPreference = TimeFormatPreference(
             rawValue: Self.defaults.string(forKey: Self.timeFormatPreferenceKey) ?? ""

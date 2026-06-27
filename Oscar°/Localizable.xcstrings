@@ -1818,6 +1818,9 @@
         }
       }
     },
+    "Die Wetterdaten konnten nicht geladen werden. Prüfe deine Verbindung und versuche es erneut." : {
+
+    },
     "Dschungel" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2106,6 +2109,9 @@
           }
         }
       }
+    },
+    "Erneut versuchen" : {
+
     },
     "ET₀ beschreibt, wie viel Wasser eine gut versorgte Referenzfläche an die Luft abgibt. Für heute summieren sich die stündlichen Werte auf %@. Bei Millimeter-Angaben entspricht 1 mm ungefähr 1 Liter Wasser pro Quadratmeter." : {
       "extractionState" : "stale",
@@ -2753,6 +2759,23 @@
         }
       }
     },
+    "Große Bäume bewegen sich, Zweige können brechen." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Large trees move and branches can break."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
+          }
+        }
+      }
+    },
     "Größere Zweige und kleine Bäume bewegen sich." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2789,23 +2812,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Birleşik Krallık"
-          }
-        }
-      }
-    },
-    "Große Bäume bewegen sich, Zweige können brechen." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Large trees move and branches can break."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
           }
         }
       }

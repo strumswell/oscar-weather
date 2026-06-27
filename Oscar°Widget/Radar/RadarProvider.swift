@@ -16,18 +16,22 @@ struct RadarProvider: TimelineProvider {
 
     private static let baseURL = "https://server.oscars.love"
     private static let mapSpanMeters = 65_000.0
-    // oscar-server radar coverage. Mirrors the app's default DWD/Germany source
-    // (the old `/radar/frames` endpoint this widget used was the DWD store).
-    // Honoring the in-app region choice would need an app-group-backed setting,
-    // since SettingService uses `UserDefaults.standard`, which isn't shared here.
-    private static let region = "germany"
+    // Mirrors the in-app radar region via the shared app group; falls back to Germany (the
+    // default DWD source) when unset. SettingService persists "oscarRadarRegion" to the group
+    // container so this widget stays in sync with the app.
+    private static var region: String {
+        UserDefaults(suiteName: "group.cloud.bolte.Oscar")?.string(forKey: "oscarRadarRegion") ?? "germany"
+    }
 
     init() {
         locationService.update()
     }
 
     func placeholder(in context: Context) -> RadarEntry {
-        RadarEntry(date: Date(), frameDate: Date(), image: UIImage(named: "rain")!)
+        // placeholder() must never fail; a missing/renamed asset would otherwise crash the
+        // widget process on every gallery/redacted render.
+        let image = UIImage(named: "rain") ?? UIImage(systemName: "cloud.rain") ?? UIImage()
+        return RadarEntry(date: Date(), frameDate: Date(), image: image)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (RadarEntry) -> Void) {

@@ -15,7 +15,7 @@ struct GlobalRadarProvider: TimelineProvider {
   }
 
   func placeholder(in context: Context) -> GlobalRadarEntry {
-    GlobalRadarEntry(date: Date(), image: UIImage(systemName: "map")!)
+    GlobalRadarEntry(date: Date(), image: UIImage(systemName: "map") ?? UIImage())
   }
 
   func getSnapshot(in context: Context, completion: @escaping (GlobalRadarEntry) -> Void) {
@@ -47,7 +47,7 @@ struct GlobalRadarProvider: TimelineProvider {
     captureMapSnapshot(at: coordinate, region: region) { snapshotImage in
       guard let snapshot = snapshotImage else {
         let errorEntry = GlobalRadarEntry(
-          date: Date(), image: UIImage(systemName: "exclamationmark.triangle")!)
+          date: Date(), image: UIImage(systemName: "exclamationmark.triangle") ?? UIImage())
         completion(errorEntry)
         return
       }

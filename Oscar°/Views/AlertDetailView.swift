@@ -52,7 +52,7 @@ struct AlertDetailView: View {
             HStack {
                 Image(systemName: "exclamationmark.circle.fill")
                     .resizable()
-                    .foregroundColor(.orange)
+                    .foregroundStyle(.orange)
                     .frame(width: 15, height: 15)
                 Text(getHeadline())
                     .font(.headline)

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct OpenMeteoAttribution: View {
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 Section(header: Text("Über")) {
                     Text("Open-Meteo ist eine Open-Source-Wetter-API, die offene Wetterdaten von verschiedenen internationalen Wetterdiensten sammelt. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu Open-Meteo, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro.")
@@ -72,9 +72,9 @@ struct OpenMeteoLabel: View {
         HStack {
             Image(systemName: "sun.max.fill")
                 .frame(width: 30, height: 30)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .background(Color.green)
-                .cornerRadius(5)
+                .clipShape(.rect(cornerRadius: 5))
             Text("Open-Meteo")
         }
     }

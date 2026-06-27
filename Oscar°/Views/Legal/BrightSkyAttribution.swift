@@ -9,7 +9,7 @@ import SwiftUI
 
 struct BrightSkyAttribution: View {
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 Section(header: Text("Über")) {
                     Text("BrightSky ist eine Open-Source-Wetter-API, die offene Wetterdaten vom DWD aufbereiten und für Oscar in Form von Wetterwarnung und Radardaten für Deutschland zur Verfügung stellen. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu BrightSky, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro.")
@@ -36,9 +36,9 @@ struct BrightSkyLabel: View {
         HStack {
             Image(systemName: "network")
                 .frame(width: 30, height: 30)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .background(Color.green)
-                .cornerRadius(5)
+                .clipShape(.rect(cornerRadius: 5))
             Text("BrightSky")
         }
     }

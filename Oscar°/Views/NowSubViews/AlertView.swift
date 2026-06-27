@@ -15,12 +15,12 @@ struct AlertView: View {
         HStack {
             Image(systemName: "exclamationmark.circle.fill")
                 .resizable()
-                .foregroundColor(.orange)
+                .foregroundStyle(.orange)
                 .frame(width: 15, height: 15)
             if hasAlert() {
                 Text(getFormattedHeadline())
                     .font(.caption2)
-                    .foregroundColor(.orange)
+                    .foregroundStyle(.orange)
                     .bold()
             }
         }

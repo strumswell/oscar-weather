@@ -11,7 +11,11 @@ import SwiftUI
 
 struct AtmosphereDebugPanel: View {
     @Bindable var state: AtmosphereDebugState
+    @Environment(Location.self) private var location
     @State private var expanded = true
+    @State private var moonReferenceDate = Date.now
+    @State private var moonRise: Date?
+    @State private var moonSet: Date?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -58,11 +62,50 @@ struct AtmosphereDebugPanel: View {
                 sliderRow("Haze/AQI", value: $state.aqiHaze, label: percentLabel(state.aqiHaze))
                 sliderRow("Moon", value: $state.moonPhase, label: moonLabel)
             }
+
+            if expanded {
+                moonInfoSection
+            }
         }
         .foregroundStyle(.white)
         .tint(.white)
         .padding(12)
         .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 12))
+        .task { recomputeMoon() }
+    }
+
+    /// Current (real, not overridden) moon phase plus the next moonrise/moonset for the
+    /// active location — handy for sanity-checking the rendered moon against an almanac.
+    private var moonInfoSection: some View {
+        let phase = MoonPhase.phaseFraction(for: moonReferenceDate)
+        return VStack(alignment: .leading, spacing: 2) {
+            Rectangle().fill(.white.opacity(0.2)).frame(height: 1)
+            infoRow("Moon", "\(MoonPhase.name(for: phase)) · \(percentLabel(MoonPhase.illumination(for: phase))) · φ\(String(format: "%.2f", phase))")
+            infoRow("Rise", moonRise.map { $0.formatted(date: .abbreviated, time: .shortened) } ?? "—")
+            infoRow("Set", moonSet.map { $0.formatted(date: .abbreviated, time: .shortened) } ?? "—")
+        }
+    }
+
+    private func infoRow(_ title: String, _ value: String) -> some View {
+        HStack(spacing: 8) {
+            Text(title)
+                .frame(width: 64, alignment: .leading)
+            Text(value)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .font(.caption2.monospaced())
+    }
+
+    private func recomputeMoon() {
+        let now = Date.now
+        moonReferenceDate = now
+        let (rise, set) = MoonPhase.riseAndSet(
+            after: now,
+            latitude: location.coordinates.latitude,
+            longitude: location.coordinates.longitude
+        )
+        moonRise = rise
+        moonSet = set
     }
 
     private func sliderRow(
@@ -101,4 +144,5 @@ struct AtmosphereDebugPanel: View {
         AtmosphereDebugPanel(state: AtmosphereDebugState())
             .padding()
     }
+    .environment(Location())
 }

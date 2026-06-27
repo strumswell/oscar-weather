@@ -26,7 +26,7 @@ struct MemoryView: View {
                         .multilineTextAlignment(.center)
                         .padding([.leading, .trailing], 50)
                 }
-                .foregroundColor(.white.opacity(0.9))
+                .foregroundStyle(.white.opacity(0.9))
                 .shadow(radius: 15)
                 .padding(.bottom, 60)
             }

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TomorrowAttribution: View {
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 Section(header: Text("Über")) {
                     Text("Tomorrow.io, vertreten durch die Tomorrow Companies Inc., stellt diverse Kartenlayer unter deren Free-Tier bereit. Darunter fallen unter anderem das globale Regenradar, Temperatur, Windgeschwindigkeit, Windrichtung, Wolken und Luftfeuchtigkeit.")
@@ -32,9 +32,9 @@ struct TomorrowLabel: View {
         HStack {
             Image(systemName: "map.fill")
                 .frame(width: 30, height: 30)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .background(Color.green)
-                .cornerRadius(5)
+                .clipShape(.rect(cornerRadius: 5))
             Text("Tomorrow")
         }
     }

@@ -722,6 +722,8 @@ final class OscarRadarState {
             let (data, _) = try await URLSession.shared.data(for: request)
             guard let grid = UIImage(data: data)?.cgImage else { return nil }
             let w = grid.width, h = grid.height
+            // Guard against a malformed/hostile grid causing an oversized allocation or w*h overflow.
+            guard w > 0, h > 0, w <= 8192, h <= 8192 else { return nil }
             var indices = [UInt8](repeating: 0, count: w * h)
             let ok = indices.withUnsafeMutableBytes { raw -> Bool in
                 guard let ctx = CGContext(data: raw.baseAddress, width: w, height: h, bitsPerComponent: 8,

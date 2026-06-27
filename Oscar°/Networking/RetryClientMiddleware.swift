@@ -59,6 +59,10 @@ struct RetryingMiddleware {
 
     /// Constant delay.
     case constant(seconds: TimeInterval)
+
+    /// Exponential backoff with full jitter, capped at `maxSeconds`. Honors a server
+    /// `Retry-After` header (delta-seconds form) when present.
+    case exponentialWithJitter(base: TimeInterval, maxSeconds: TimeInterval)
   }
 
   /// The signals that lead to the retry policy being evaluated.
@@ -110,11 +114,21 @@ extension RetryingMiddleware: ClientMiddleware {
       }
     }
 
-    func willRetry() async throws {
+    func willRetry(attempt: Int, response: HTTPResponse?) async throws {
       switch delay {
-      case .none: return
+      case .none:
+        return
       case .constant(let seconds):
-        try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+        try await Task.sleep(for: .seconds(seconds))
+      case .exponentialWithJitter(let base, let maxSeconds):
+        if let retryAfter = response?.retryAfterSeconds {
+          try await Task.sleep(for: .seconds(min(retryAfter, maxSeconds)))
+          return
+        }
+        // Full jitter: a random point in [0, cappedExponential] spreads retries so many
+        // clients don't hammer a rate-limited endpoint in lock-step.
+        let cappedExponential = min(base * pow(2, Double(attempt - 1)), maxSeconds)
+        try await Task.sleep(for: .seconds(Double.random(in: 0...cappedExponential)))
       }
     }
     let retryContext = "\(baseURL.host() ?? baseURL.absoluteString) \(operationID)"
@@ -136,7 +150,7 @@ extension RetryingMiddleware: ClientMiddleware {
           } else {
             print("Retrying \(retryContext) after error on attempt \(attempt)/\(maxAttemptCount)")
             print(error)
-            try await willRetry()
+            try await willRetry(attempt: attempt, response: nil)
             continue
           }
         }
@@ -148,13 +162,24 @@ extension RetryingMiddleware: ClientMiddleware {
         print(
           "Retrying \(retryContext) with code \(response.status.code) on attempt \(attempt)/\(maxAttemptCount)"
         )
-        try await willRetry()
+        try await willRetry(attempt: attempt, response: response)
         continue
       } else {
         return (response, responseBody)
       }
     }
     preconditionFailure("Unreachable")
+  }
+}
+
+private extension HTTPResponse {
+  /// The `Retry-After` header parsed as delta-seconds. The HTTP-date form is not handled.
+  var retryAfterSeconds: TimeInterval? {
+    guard let name = HTTPField.Name("Retry-After"),
+      let value = headerFields[name],
+      let seconds = TimeInterval(value)
+    else { return nil }
+    return seconds
   }
 }
 

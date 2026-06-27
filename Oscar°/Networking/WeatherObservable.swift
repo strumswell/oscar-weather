@@ -34,9 +34,23 @@ enum WeatherLoadingQuery: String, CaseIterable, Comparable {
     }
 }
 
+/// Coarse load phase used to drive the empty/error UI. Unlike `error` (a string wiped at the
+/// start of every refresh), `.failed` latches until a refresh actually produces content.
+enum WeatherLoadState {
+    /// No refresh has started yet.
+    case idle
+    /// A refresh is in flight and there is no content to show yet.
+    case loading
+    /// A refresh (or a cached hydrate) produced content.
+    case loaded
+    /// A cold-start refresh finished without producing any content (e.g. offline first launch).
+    case failed
+}
+
 @Observable
 class Weather {
     var isLoading: Bool = false
+    var loadState: WeatherLoadState = .idle
     @ObservationIgnored private var isRefreshing = false
     var loadingQueries: Set<WeatherLoadingQuery> = []
     var forecast: Operations.getForecast.Output.Ok.Body.jsonPayload
@@ -113,6 +127,9 @@ extension Weather {
         isRefreshing = true
         isLoading = true
         error = ""
+        // Only show the "loading" phase on the very first attempt; a retry after a failure
+        // keeps `.failed` on screen (so the retry card doesn't flicker away mid-retry).
+        if loadState == .idle { loadState = .loading }
         clearLoadingQueries()
         defer {
             isRefreshing = false
@@ -184,6 +201,7 @@ extension Weather {
             }
             updateTime()
             lastUpdated = .now
+            loadState = .loaded
             isLoading = false
 
             let snapshot = WeatherSnapshot(
@@ -206,6 +224,11 @@ extension Weather {
             markFinished(.alerts)
         } catch {
             self.error = error.localizedDescription
+            // Latch the failure: `error` is wiped at the start of every refresh, so a UI that
+            // keyed off it would lose the failed state as soon as a re-triggered refresh (e.g.
+            // a launch-time location update) cleared it. `loadState` stays `.failed` until a
+            // refresh actually succeeds.
+            if !hasContent { loadState = .failed }
         }
     }
 
@@ -225,6 +248,7 @@ extension Weather {
             location.coordinates = snapshot.coordinates.coordinate
             location.name = snapshot.locationName
         }
+        loadState = .loaded
     }
 
     static var mock: Weather {

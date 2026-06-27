@@ -22,7 +22,7 @@ struct DailyView: View {
         Text(heading)
           .font(.title3)
           .bold()
-          .foregroundColor(Color(UIColor.label))
+          .foregroundStyle(Color(UIColor.label))
           .padding([.leading, .top, .bottom])
 
         VStack {
@@ -36,7 +36,7 @@ struct DailyView: View {
               let rowTemperatures = temperatureRow(for: dayPos)
               HStack {
                 Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0))
-                  .foregroundColor(Color(UIColor.label))
+                  .foregroundStyle(Color(UIColor.label))
                   .bold()
                   .frame(width: 45, alignment: .leading)
                 Image(getWeatherIcon(pos: dayPos))
@@ -48,7 +48,7 @@ struct DailyView: View {
                     "\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") \(precipitationUnit)"
                   )
                   .font(.caption)
-                  .foregroundColor(Color(UIColor.label))
+                  .foregroundStyle(Color(UIColor.label))
                 }
                 .frame(width: 50)
                 Text(roundTemperatureString(temperature: rowTemperatures.labelLow))
@@ -71,7 +71,7 @@ struct DailyView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 10)
         .background(.thinMaterial)
-        .cornerRadius(10)
+        .clipShape(.rect(cornerRadius: 10))
         .overlay(
           RoundedRectangle(cornerRadius: 10)
             .stroke(Color(UIColor(.secondary.opacity(0.075))), lineWidth: 1)

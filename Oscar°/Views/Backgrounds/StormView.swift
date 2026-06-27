@@ -50,8 +50,6 @@ struct StormView: View {
     }
 }
 
-struct StormView_Previews: PreviewProvider {
-    static var previews: some View {
-        StormView(type: .rain, direction: .zero, strength: 200)
-    }
+#Preview {
+    StormView(type: .rain, direction: .zero, strength: 200)
 }

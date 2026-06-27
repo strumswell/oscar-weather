@@ -30,11 +30,11 @@
                     HStack {
                         Text(SettingService.formattedTime(entry.frameDate))
                             .font(.footnote)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .padding(.horizontal, 5)
                             .padding(.vertical, 2)
                             .background(widgetRenderingMode == .accented ? .gray.opacity(0.3) : .gray.opacity(0.6))
-                            .cornerRadius(5)
+                            .clipShape(.rect(cornerRadius: 5))
                             .widgetAccentable()
                         Spacer()
                     }
@@ -60,9 +60,6 @@
         }
     }
     
-    struct RadarWidget_Previews: PreviewProvider {
-        static var previews: some View {
-            RadarWidgetEntryView(entry: RadarEntry(date: Date(), frameDate: Date(), image: UIImage(named: "rain")!))
-                .previewContext(WidgetPreviewContext(family: .systemSmall))
-        }
+    #Preview {
+        RadarWidgetEntryView(entry: RadarEntry(date: Date(), frameDate: Date(), image: UIImage(named: "rain") ?? UIImage()))
     }

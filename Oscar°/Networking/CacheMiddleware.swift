@@ -320,8 +320,10 @@ final class CachingMiddleware: ClientMiddleware {
           print("Create cache for \(baseURL)")
           return (response, HTTPBody(data))
         } catch {
-          // If caching fails, still return the original response
-          return (response, responseBody)
+          // `responseBody` is a single-pass stream that the failed collect may have already
+          // partially consumed, so it can't be safely returned. Surface the error rather than
+          // handing a truncated body to the decoder.
+          throw error
         }
       }
 

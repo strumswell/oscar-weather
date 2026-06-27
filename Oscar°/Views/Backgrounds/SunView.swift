@@ -74,9 +74,7 @@ struct SunView: View {
     }
 }
 
-struct SunView_Previews: PreviewProvider {
-    static var previews: some View {
-        SunView(progress: 0.4)
-            .background(.black)
-    }
+#Preview {
+    SunView(progress: 0.4)
+        .background(.black)
 }

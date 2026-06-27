@@ -43,7 +43,8 @@ struct NowView: View {
 
         ZStack {
             WeatherSimulationView(isCoveredBySheet: presentation.sheet != nil || presentation.isMapPresented)
-            ScrollView(.vertical, showsIndicators: false) {
+            if weather.hasContent {
+            ScrollView(.vertical) {
                 ZStack {
                     VStack(alignment: .leading) {
                         if showRefreshIndicator {
@@ -71,7 +72,7 @@ struct NowView: View {
                             Text("Karte")
                                 .font(.title3)
                                 .bold()
-                                .foregroundColor(Color(UIColor.label))
+                                .foregroundStyle(Color(UIColor.label))
                                 .padding([.leading, .top])
                                 .onTapGesture {
                                     presentMap()
@@ -85,7 +86,7 @@ struct NowView: View {
                                 gfsImageState: gfsImageState
                             )
                                 .frame(height: 350)
-                                .cornerRadius(10)
+                                .clipShape(.rect(cornerRadius: 10))
                                 .padding()
                                 .onTapGesture {
                                     presentMap()
@@ -155,6 +156,7 @@ struct NowView: View {
                     .animation(.easeInOut(duration: 0.3), value: showRefreshIndicator)
                 }
             }
+            .scrollIndicators(.hidden)
             .padding(.top, 40)
             .refreshable {
                 // Run the refresh in an unstructured task so it doesn't inherit the
@@ -188,6 +190,15 @@ struct NowView: View {
                 guard spinnerPending else { return }
                 spinnerShownAt = .now
                 showRefreshIndicator = true
+            }
+            } else if weather.loadState == .failed {
+                // Cold start with no cached forecast and a failed fetch: offer a retry over the
+                // twilight backdrop instead of an empty screen (the all-zero forecast used to
+                // stand in here). `loadState` latches `.failed` so a re-triggered refresh that
+                // clears `error` can't flicker this away. Later errors keep last-known-good.
+                WeatherUnavailableView(isRetrying: weather.isLoading) {
+                    Task { await weather.refresh(location: location) }
+                }
             }
             if weather.debug {
                 AtmosphereDebugPanel(state: atmosphereDebug)
@@ -288,10 +299,35 @@ struct ToastBanner: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 9)
             .background(.regularMaterial, in: Capsule())
-            .overlay(Capsule().stroke(Color.primary.opacity(0.08), lineWidth: 1))
+            .overlay { Capsule().stroke(Color.primary.opacity(0.08), lineWidth: 1) }
             .shadow(color: .black.opacity(0.15), radius: 10, y: 3)
             .accessibilityElement()
             .accessibilityLabel(Text(message))
+    }
+}
+
+/// Shown over the twilight backdrop on a cold start when no forecast could be loaded and
+/// nothing is cached. Offers a retry; background observers also keep retrying on their own.
+private struct WeatherUnavailableView: View {
+    let isRetrying: Bool
+    let retry: () -> Void
+
+    var body: some View {
+        ContentUnavailableView {
+            Label("Wetter nicht verfügbar", systemImage: "cloud.slash")
+        } description: {
+            Text("Die Wetterdaten konnten nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.")
+        } actions: {
+            Button(action: retry) {
+                if isRetrying {
+                    ProgressView()
+                } else {
+                    Text("Erneut versuchen")
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(isRetrying)
+        }
     }
 }
 

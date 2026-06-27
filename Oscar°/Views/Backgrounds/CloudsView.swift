@@ -69,9 +69,7 @@ struct CloudsView: View {
     }
 }
 
-struct CloudsView_Previews: PreviewProvider {
-    static var previews: some View {
-        CloudsView(thickness: .regular, topTint: .white, bottomTint: .white)
-            .background(.blue)
-    }
+#Preview {
+    CloudsView(thickness: .regular, topTint: .white, bottomTint: .white)
+        .background(.blue)
 }

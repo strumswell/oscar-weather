@@ -9,7 +9,7 @@ struct ForecastSettingsView: View {
   private let settingsService = SettingService.shared
 
   var body: some View {
-    NavigationView {
+    NavigationStack {
       List {
         Section {
           NavigationLink {
@@ -102,9 +102,9 @@ struct ForecastSettingsLabel: View {
       Image(systemName: "calendar")
         .font(.body.weight(.semibold))
         .frame(width: 30, height: 30)
-        .foregroundColor(.white)
+        .foregroundStyle(.white)
         .background(Color.teal)
-        .cornerRadius(5)
+        .clipShape(.rect(cornerRadius: 5))
       Text("Vorhersage")
     }
   }

@@ -128,8 +128,6 @@ struct StarsView: View {
     }
 }
 
-struct StarsView_Previews: PreviewProvider {
-    static var previews: some View {
-        StarsView()
-    }
+#Preview {
+    StarsView()
 }

@@ -120,16 +120,14 @@ struct NotificationSettingsLabel: View {
         HStack {
             Image(systemName: "bell.badge.fill")
                 .frame(width: 30, height: 30)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .background(Color.blue)
-                .cornerRadius(5)
+                .clipShape(.rect(cornerRadius: 5))
             Text(String(localized: "Alerts"))
         }
     }
 }
 
-struct NotificationSettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        NotificationSettingsView()
-    }
+#Preview {
+    NotificationSettingsView()
 }

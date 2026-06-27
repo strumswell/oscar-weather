@@ -11,7 +11,7 @@ struct UnitSettings: View {
     private let settingsService = SettingService.shared
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 Picker(String(localized: "Temperatur"), selection: Binding(
                     get: { settingsService.settings?.temperatureUnit ?? "celsius" },
@@ -67,9 +67,9 @@ struct UnitSettingsLabel: View {
             Text("°C")
                 .fontWeight(.medium)
                 .frame(width: 30, height: 30)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .background(Color.orange)
-                .cornerRadius(5)
+                .clipShape(.rect(cornerRadius: 5))
             Text("Einheiten")
         }
     }

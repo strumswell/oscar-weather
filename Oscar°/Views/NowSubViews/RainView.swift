@@ -38,7 +38,7 @@ struct RainView: View {
                     Text("Radar")
                         .font(.system(size: 20))
                         .bold()
-                        .foregroundColor(Color(UIColor.label))
+                        .foregroundStyle(Color(UIColor.label))
                 }
                 .buttonStyle(.plain)
                 .padding([.leading, .top])
@@ -47,7 +47,7 @@ struct RainView: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 20)
                     .background(.thinMaterial)
-                    .cornerRadius(10)
+                    .clipShape(.rect(cornerRadius: 10))
                     .padding([.leading, .trailing, .bottom])
                     .frame(height: 180)
                     .contentShape(Rectangle())
@@ -64,7 +64,7 @@ struct RainView: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 20)
                     .background(.thinMaterial)
-                    .cornerRadius(10)
+                    .clipShape(.rect(cornerRadius: 10))
                     .padding([.leading, .trailing, .bottom])
                     .frame(height: 180)
                 }

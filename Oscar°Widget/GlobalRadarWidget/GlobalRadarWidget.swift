@@ -30,11 +30,11 @@ struct GlobalRadarEntryWidget: View {
                 HStack {
                     Text(SettingService.formattedTime(entry.date))
                         .font(.footnote)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .padding(.horizontal, 5)
                         .padding(.vertical, 2)
                         .background(Color.gray.opacity(0.6))
-                        .cornerRadius(5)
+                        .clipShape(.rect(cornerRadius: 5))
                     Spacer()
                 }
                 Spacer()

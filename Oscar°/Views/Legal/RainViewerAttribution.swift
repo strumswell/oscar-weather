@@ -9,7 +9,7 @@ import SwiftUI
 
 struct RainViewerAttribution: View {
   var body: some View {
-    NavigationView {
+    NavigationStack {
       List {
         Section(header: Text("Über")) {
           Text(
@@ -38,7 +38,7 @@ struct RainViewerLabel: View {
         .frame(width: 30, height: 30)
         .foregroundColor(.white)
         .background(.green)
-        .cornerRadius(5)
+        .clipShape(.rect(cornerRadius: 5))
       Text("RainViewer")
     }
   }
