@@ -24,6 +24,9 @@ struct StormView: View {
                 storm.sync(strength: strength, direction: direction)
                 storm.update(date: timeline.date, size: size)
 
+                // Resolve the particle image once per frame, not once per drop: at full display
+                // refresh with hundreds of drops that was thousands of redundant resolves/second.
+                let resolvedImage = context.resolve(storm.image)
                 for drop in storm.drops {
                     var contextCopy = context
 
@@ -34,7 +37,7 @@ struct StormView: View {
                     contextCopy.translateBy(x: xPos, y: yPos)
                     contextCopy.rotate(by: drop.direction + drop.rotation)
                     contextCopy.scaleBy(x: drop.xScale, y: drop.yScale)
-                    contextCopy.draw(storm.image, at: .zero)
+                    contextCopy.draw(resolvedImage, at: .zero)
                 }
             }
         }

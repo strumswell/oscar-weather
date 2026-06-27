@@ -65,8 +65,8 @@ struct ImageCircleView: View {
 }
 
 struct MemoryStars: View {
-    @State var starField = StarField()
-    @State var meteorShower = MeteorShower()
+    @State private var starField = StarField()
+    @State private var meteorShower = MeteorShower()
 
     var body: some View {
         TimelineView(.animation) { timeline in

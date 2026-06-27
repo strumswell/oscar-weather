@@ -7,6 +7,7 @@
 //  https://github.com/forsen/WMSKit/blob/master/WMSKit/WMSTileOverlay.swift
 import Foundation
 import MapKit
+import OSLog
 
 extension String {
 
@@ -38,6 +39,8 @@ extension String {
  [Demo project](https://github.com/forsen/WMSKitDemo/) – A demo project hostet at GitHub which demonstrates how to use this WMSKit
  */
 public class WMSTileOverlay : MKTileOverlay {
+
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Tiles")
 
     let TILE_CACHE = "TILE_CACHE"
     let enableTileCache = false
@@ -124,7 +127,7 @@ public class WMSTileOverlay : MKTileOverlay {
             do {
                 try fm.createDirectory(atPath: path, withIntermediateDirectories: true, attributes: nil)
             } catch let error {
-                print(error)
+                Self.logger.error("\(error.localizedDescription, privacy: .public)")
             }
         }
     }
@@ -148,7 +151,7 @@ public class WMSTileOverlay : MKTileOverlay {
         do {
             try data.write(toFile: localFilePath)
         } catch let error {
-            print(error)
+            Self.logger.error("\(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -179,7 +182,7 @@ public class WMSTileOverlay : MKTileOverlay {
             session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) in
 
                 if error != nil {
-                    print("Error downloading tile")
+                    Self.logger.error("Error downloading tile")
                     result(nil, error)
                 }
                 else {
@@ -187,7 +190,7 @@ public class WMSTileOverlay : MKTileOverlay {
                         do {
                             try data?.write(to: URL(fileURLWithPath: filePath))
                         } catch let error {
-                            print(error)
+                            Self.logger.error("\(error.localizedDescription, privacy: .public)")
                         }
                     }
 

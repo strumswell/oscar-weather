@@ -1,4 +1,5 @@
 import MapKit
+import OSLog
 import SwiftUI
 import WidgetKit
 
@@ -8,6 +9,9 @@ struct GlobalRadarEntry: TimelineEntry {
 }
 
 struct GlobalRadarProvider: TimelineProvider {
+  private static let logger = Logger(
+    subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "RadarWidget")
+
   func placeholder(in context: Context) -> GlobalRadarEntry {
     GlobalRadarEntry(date: Date(), image: UIImage(systemName: "map") ?? UIImage())
   }
@@ -192,7 +196,7 @@ struct GlobalRadarProvider: TimelineProvider {
           completion(nil)
         }
       } catch {
-        print("Error fetching RainViewer data: \(error)")
+        Self.logger.error("Error fetching RainViewer data: \(error.localizedDescription, privacy: .public)")
         completion(nil)
       }
     }

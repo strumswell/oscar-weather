@@ -69,14 +69,15 @@ struct NowView: View {
                         HourlyView()
                         DailyView()
                         VStack(alignment: .leading) {
-                            Text("Karte")
-                                .font(.title3)
-                                .bold()
-                                .foregroundStyle(Color(UIColor.label))
-                                .padding([.leading, .top])
-                                .onTapGesture {
-                                    presentMap()
-                                }
+                            Button(action: presentMap) {
+                                Text("Karte")
+                                    .font(.title3)
+                                    .bold()
+                                    .foregroundStyle(Color(UIColor.label))
+                                    .padding([.leading, .top])
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityHint(Text("Öffnet die Karte"))
                             RadarView(
                                 settingsService: settingsService,
                                 showLayerSettings: false,
@@ -91,6 +92,10 @@ struct NowView: View {
                                 .onTapGesture {
                                     presentMap()
                                 }
+                                .accessibilityAddTraits(.isButton)
+                                .accessibilityLabel(Text("Regenradar"))
+                                .accessibilityHint(Text("Öffnet die Karte"))
+                                .accessibilityAction { presentMap() }
                                 .task {
                                     if settingsService.oscarRadarLayer {
                                         oscarRadarState.setRegion(settingsService.oscarRadarRegion)

@@ -7,6 +7,13 @@ struct DailyView: View {
   private let settingsService = SettingService.shared
   @State private var detailPresentationCount = 0
 
+  // Column widths scale with Dynamic Type so the weekday and temperature labels keep their
+  // alignment without truncating at larger accessibility text sizes.
+  @ScaledMetric private var weekdayColumnWidth: CGFloat = 45
+  @ScaledMetric private var precipitationColumnWidth: CGFloat = 50
+  @ScaledMetric private var temperatureColumnWidth: CGFloat = 37
+  @ScaledMetric private var dayIconSize: CGFloat = 30
+
   var body: some View {
     // Cap at 12 days to keep View from getting too large with too much (unreliable) data
     let showsPlaceholders = shouldShowPlaceholders
@@ -38,11 +45,11 @@ struct DailyView: View {
                 Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0))
                   .foregroundStyle(Color(UIColor.label))
                   .bold()
-                  .frame(width: 45, alignment: .leading)
+                  .frame(width: weekdayColumnWidth, alignment: .leading)
                 Image(getWeatherIcon(pos: dayPos))
                   .resizable()
                   .scaledToFit()
-                  .frame(width: 30, height: 30)
+                  .frame(width: dayIconSize, height: dayIconSize)
                 VStack {
                   Text(
                     "\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") \(precipitationUnit)"
@@ -50,9 +57,9 @@ struct DailyView: View {
                   .font(.caption)
                   .foregroundStyle(Color(UIColor.label))
                 }
-                .frame(width: 50)
+                .frame(width: precipitationColumnWidth)
                 Text(roundTemperatureString(temperature: rowTemperatures.labelLow))
-                  .frame(width: 37, alignment: .trailing)
+                  .frame(width: temperatureColumnWidth, alignment: .trailing)
                 TemperatureRangeView(
                   low: rowTemperatures.barLow, high: rowTemperatures.barHigh,
                   focusLow: rowTemperatures.focusLow,
@@ -62,7 +69,7 @@ struct DailyView: View {
                 )
                 .frame(height: rowTemperatures.focusLow == nil ? 5 : 28)
                 Text(roundTemperatureString(temperature: rowTemperatures.labelHigh))
-                  .frame(width: 37, alignment: .leading)
+                  .frame(width: temperatureColumnWidth, alignment: .leading)
               }
               .padding(.vertical, 4)
             }

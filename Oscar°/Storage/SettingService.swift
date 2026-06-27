@@ -1,6 +1,7 @@
 import CoreData
 import SwiftUI
 import OSLog
+import WidgetKit
 
 enum TimeFormatPreference: String, CaseIterable, Identifiable {
     case system
@@ -136,6 +137,11 @@ public final class SettingService {
     private static let dailyForecastDaytimeCustomStartHourKey = "dailyForecastDaytimeCustomStartHour"
     private static let dailyForecastDaytimeCustomEndHourKey = "dailyForecastDaytimeCustomEndHour"
     nonisolated private static let forecastModelPreferenceKey = "forecastModelPreference"
+    // Units live in Core Data but are mirrored into shared defaults so the widget process (whose
+    // Core Data view is cached at launch) reads the current value. See resolvedTemperatureUnit.
+    nonisolated private static let temperatureUnitKey = "temperatureUnit"
+    nonisolated private static let windSpeedUnitKey = "windSpeedUnit"
+    nonisolated private static let precipitationUnitKey = "precipitationUnit"
     nonisolated(unsafe) private static let defaults = UserDefaults(suiteName: "group.cloud.bolte.Oscar") ?? .standard
     nonisolated private static let formatterLock = NSLock()
     nonisolated(unsafe) private static var formatterCache: [String: DateFormatter] = [:]
@@ -220,6 +226,7 @@ public final class SettingService {
                 self.save()
             } else {
                 self.settings = result.first!
+                mirrorUnitsToSharedDefaults()
             }
         } catch {
             Self.logger.error("Settings fetch failed: \(error.localizedDescription, privacy: .public)")
@@ -230,18 +237,30 @@ public final class SettingService {
         settings?.temperatureUnit = unit
         save()
         nc.post(name: .unitChanged, object: nil)
+        WidgetCenter.shared.reloadAllTimelines()
     }
-    
+
     func updateWindSpeedUnit(_ unit: String) {
         settings?.windSpeedUnit = unit
         save()
         nc.post(name: .unitChanged, object: nil)
+        WidgetCenter.shared.reloadAllTimelines()
     }
-    
+
     func updatePrecipitationUnit(_ unit: String) {
         settings?.precipitationUnit = unit
         save()
         nc.post(name: .unitChanged, object: nil)
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    /// Copies the Core Data unit settings into shared defaults. Called after every load/save so
+    /// the widget process (which can't see another process's Core Data writes) reads the latest
+    /// units when it builds a timeline.
+    private func mirrorUnitsToSharedDefaults() {
+        Self.defaults.set(settings?.temperatureUnit ?? "celsius", forKey: Self.temperatureUnitKey)
+        Self.defaults.set(settings?.windSpeedUnit ?? "kmh", forKey: Self.windSpeedUnitKey)
+        Self.defaults.set(settings?.precipitationUnit ?? "mm", forKey: Self.precipitationUnitKey)
     }
 
     func updateDailyForecastDaytimeCustomStartHour(_ hour: Int) {
@@ -274,6 +293,21 @@ public final class SettingService {
     nonisolated static var resolvedForecastModelPreference: ForecastModelPreference {
         let rawValue = defaults.string(forKey: forecastModelPreferenceKey)
         return ForecastModelPreference(rawValue: rawValue ?? "") ?? .bestMatch
+    }
+
+    /// Selected units read from shared defaults. Safe to call from the widget process, which must
+    /// not read units from the viewContext-bound `settings` (cached at process launch, blind to
+    /// the app's writes).
+    nonisolated static var resolvedTemperatureUnit: String {
+        defaults.string(forKey: temperatureUnitKey) ?? "celsius"
+    }
+
+    nonisolated static var resolvedWindSpeedUnit: String {
+        defaults.string(forKey: windSpeedUnitKey) ?? "kmh"
+    }
+
+    nonisolated static var resolvedPrecipitationUnit: String {
+        defaults.string(forKey: precipitationUnitKey) ?? "mm"
     }
 
     private static func clampedHour(_ hour: Int) -> Int {

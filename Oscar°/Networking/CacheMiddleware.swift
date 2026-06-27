@@ -2,8 +2,11 @@ import Foundation
 import CryptoKit
 import HTTPTypes
 import OpenAPIRuntime
+import OSLog
 
 actor CacheStore {
+  private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Cache")
+
   private struct CachedResponseMetadata: Codable {
     struct Header: Codable {
       let name: String
@@ -52,7 +55,7 @@ actor CacheStore {
     cache.removeAll()
     try? fileManager.removeItem(at: cacheDirectory)
     try? fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
-    print("Cache cleared")
+    Self.logger.debug("Cache cleared")
   }
   
   private func cleanOldEntries() {
@@ -67,7 +70,7 @@ actor CacheStore {
         removePersistedResponse(for: key)
       }
 
-      print("Cleaned \(oldKeys.count) old cache entries (older than 1 week)")
+      Self.logger.debug("Cleaned \(oldKeys.count, privacy: .public) old cache entries (older than 1 week)")
     }
 
     let overflowCount = cache.count - maxEntryCount
@@ -82,10 +85,10 @@ actor CacheStore {
         removePersistedResponse(for: key)
       }
 
-      print("Cleaned \(overflowKeys.count) old cache entries (cache size limit)")
+      Self.logger.debug("Cleaned \(overflowKeys.count, privacy: .public) old cache entries (cache size limit)")
     }
   }
-  
+
   private static func loadFromPersistentStorage(
     cacheDirectory: URL,
     fileManager: FileManager,
@@ -155,14 +158,14 @@ actor CacheStore {
         )
       }
 
-      print("Cleaned \(overflowKeys.count) old cache entries (cache size limit)")
+      Self.logger.debug("Cleaned \(overflowKeys.count, privacy: .public) old cache entries (cache size limit)")
     }
-    
+
     if cleanedCount > 0 {
-      print("Cleaned \(cleanedCount) expired cache entries (older than 1 week)")
+      Self.logger.debug("Cleaned \(cleanedCount, privacy: .public) expired cache entries (older than 1 week)")
     }
-    
-    print("Loaded \(loadedCount) cached items from persistent storage")
+
+    Self.logger.debug("Loaded \(loadedCount, privacy: .public) cached items from persistent storage")
     return loadedCache
   }
   
@@ -184,7 +187,7 @@ actor CacheStore {
       let metadataData = try JSONEncoder().encode(metadata)
       try metadataData.write(to: metadataFileURL(forFileStem: fileStem), options: .atomic)
     } catch {
-      print("Failed to write API cache entry: \(error.localizedDescription)")
+      Self.logger.error("Failed to write API cache entry: \(error.localizedDescription, privacy: .public)")
     }
   }
 
@@ -235,6 +238,7 @@ actor CacheStore {
 }
 
 nonisolated final class CachingMiddleware: ClientMiddleware {
+  private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Cache")
   private let cacheTime: TimeInterval
   private let cacheStore: CacheStore
 
@@ -304,7 +308,7 @@ nonisolated final class CachingMiddleware: ClientMiddleware {
     if let (timestamp, cachedResponse, cachedData) = await cacheStore.get(key),
       Date().timeIntervalSince(timestamp) < cacheTime
     {
-      print(" ---> Return cache for \(baseURL)")
+      Self.logger.debug(" ---> Return cache for \(baseURL, privacy: .public)")
       return (cachedResponse, HTTPBody(cachedData))
     }
 
@@ -317,7 +321,7 @@ nonisolated final class CachingMiddleware: ClientMiddleware {
         do {
           let data = try await Data(collecting: responseBody, upTo: 10 * 1024 * 1024)  // 10 MB limit
           await cacheStore.set(key, value: (Date(), response, data))
-          print("Create cache for \(baseURL)")
+          Self.logger.debug("Create cache for \(baseURL, privacy: .public)")
           return (response, HTTPBody(data))
         } catch {
           // `responseBody` is a single-pass stream that the failed collect may have already
@@ -329,7 +333,7 @@ nonisolated final class CachingMiddleware: ClientMiddleware {
 
       return (response, responseBody)
     } catch {
-      print("Error in CachingMiddleware: \(error.localizedDescription)")
+      Self.logger.error("Error in CachingMiddleware: \(error.localizedDescription, privacy: .public)")
       throw error
     }
   }

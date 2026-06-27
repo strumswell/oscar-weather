@@ -6,6 +6,7 @@
 //
 
 import MapKit
+import OSLog
 import SwiftUI
 import UIKit
 
@@ -188,8 +189,11 @@ struct RadarView: View {
             // Value-grid path (DWD radar): server sends the raw 8-bit grid, the device
             // colormaps it — lower RAM and transfer than the prerendered image.
             Section("Radar-Rendering (Beta)") {
+                // Read in body so @Observable tracks it; reading only inside the escaping
+                // Binding(get:) below would leave the toggle stale until the view is recreated.
+                let usesValueGrid = settingsService.radarUsesValueGrid
                 Toggle("Vektor-Grid", isOn: Binding(
-                    get: { settingsService.radarUsesValueGrid },
+                    get: { usesValueGrid },
                     set: { newValue in
                         settingsService.radarUsesValueGrid = newValue
                         OscarRadarState.purgeDecodedCaches()
@@ -287,6 +291,8 @@ struct WebMapServiceConstants {
 }
 
 struct RadarMapView: UIViewRepresentable {
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Radar")
+
     let settingsService: SettingService
     var overlayOpacity: Double
     var coordinates: CLLocationCoordinate2D
@@ -665,7 +671,7 @@ struct RadarMapView: UIViewRepresentable {
                             DispatchQueue.main.async {
                                 context.coordinator.isLoadingRainViewerRadar = false
                             }
-                            print("Error fetching RainViewer data: \(error)")
+                            Self.logger.error("Error fetching RainViewer data: \(error.localizedDescription, privacy: .public)")
                         }
                     }
                 }
@@ -723,7 +729,7 @@ struct RadarMapView: UIViewRepresentable {
                             DispatchQueue.main.async {
                                 context.coordinator.isLoadingRainViewerInfrared = false
                             }
-                            print("Error fetching RainViewer data: \(error)")
+                            Self.logger.error("Error fetching RainViewer data: \(error.localizedDescription, privacy: .public)")
                         }
                     }
                 }

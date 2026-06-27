@@ -36,7 +36,7 @@ struct RainViewerLabel: View {
     HStack {
       Image(systemName: "cloud.rain.fill")
         .frame(width: 30, height: 30)
-        .foregroundColor(.white)
+        .foregroundStyle(.white)
         .background(.green)
         .clipShape(.rect(cornerRadius: 5))
       Text("RainViewer")

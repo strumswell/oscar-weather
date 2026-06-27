@@ -134,7 +134,7 @@ public class CityService {
             let results = try context.fetch(fetchRequest)
             return !results.isEmpty
         } catch {
-            print("Error fetching entities without orderIndex: \(error)")
+            Self.logger.error("Error fetching entities without orderIndex: \(error.localizedDescription, privacy: .public)")
             return false
         }
     }
@@ -151,7 +151,7 @@ public class CityService {
 
             try context.save()
         } catch {
-            print("Error assigning orderIndexes: \(error)")
+            Self.logger.error("Error assigning orderIndexes: \(error.localizedDescription, privacy: .public)")
         }
     }
     
@@ -165,7 +165,7 @@ public class CityService {
             let results = try context.fetch(fetchRequest)
             return results.first?.orderIndex ?? 0
         } catch {
-            print("Error fetching max order index: \(error)")
+            Self.logger.error("Error fetching max order index: \(error.localizedDescription, privacy: .public)")
             return 0
         }
     }
@@ -181,7 +181,7 @@ public class CityService {
             }
             try context.save()
         } catch {
-            print("Error updating order indexes after deletion: \(error)")
+            Self.logger.error("Error updating order indexes after deletion: \(error.localizedDescription, privacy: .public)")
         }
     }
 

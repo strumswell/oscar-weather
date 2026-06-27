@@ -34,15 +34,27 @@ final class APIClient: Sendable {
 
   init() {
     openMeteo = APIClient.get(
-      url: try! Servers.server1(),
+      url: Self.serverURL(Servers.server1),
       prepending: [ForecastSanitizingMiddleware()]
     )
-    openMeteoAqi = APIClient.get(url: try! Servers.server2())
-    openMeteoGeo = APIClient.get(url: try! Servers.server3())
-    openMeteoEnsemble = APIClient.get(url: URL(string: "https://ensemble-api.open-meteo.com")!)
-    brightsky = APIClient.get(url: try! Servers.server4())
-    canadaWeather = APIClient.get(url: try! Servers.server5())
-    rainViewer = APIClient.get(url: try! Servers.server6())
+    openMeteoAqi = APIClient.get(url: Self.serverURL(Servers.server2))
+    openMeteoGeo = APIClient.get(url: Self.serverURL(Servers.server3))
+    openMeteoEnsemble = APIClient.get(url: Self.ensembleServerURL)
+    brightsky = APIClient.get(url: Self.serverURL(Servers.server4))
+    canadaWeather = APIClient.get(url: Self.serverURL(Servers.server5))
+    rainViewer = APIClient.get(url: Self.serverURL(Servers.server6))
+  }
+
+  private static let ensembleServerURL = URL(string: "https://ensemble-api.open-meteo.com")!
+
+  /// The generated `Servers.serverN()` build compile-time-constant base URLs; a failure is a
+  /// spec/build error, so fail loudly with a clear message instead of force-trying.
+  private static func serverURL(_ make: () throws -> URL) -> URL {
+    do {
+      return try make()
+    } catch {
+      fatalError("Failed to construct OpenAPI server URL: \(error.localizedDescription)")
+    }
   }
 
   class func get(url: URL, prepending middlewares: [any ClientMiddleware] = []) -> Client {
@@ -68,17 +80,12 @@ final class APIClient: Sendable {
   ) async throws -> Operations.getForecast.Output.Ok.Body.jsonPayload {
     let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
 
-    // `settings` is a viewContext-bound NSManagedObject (main-queue confined), but this
-    // method runs on a background task-group executor. Resolve the unit settings on the
-    // main actor up front rather than reading the managed object off its queue.
-    let resolvedUnits = await MainActor.run {
-      (
-        windSpeed: WindSpeedUnit(settingValue: SettingService.shared.settings?.windSpeedUnit),
-        temperature: SettingService.shared.settings?.temperatureUnit ?? "celsius",
-        precipitation: SettingService.shared.settings?.precipitationUnit ?? "mm"
-      )
-    }
-    let windSpeedUnit = resolvedUnits.windSpeed
+    // Read units from shared app-group defaults rather than the viewContext-bound managed object:
+    // the widget process caches its Core Data `settings` at launch and would otherwise keep
+    // requesting a stale unit (e.g. still Fahrenheit after the app switched to Celsius).
+    let temperatureUnit = SettingService.resolvedTemperatureUnit
+    let precipitationUnit = SettingService.resolvedPrecipitationUnit
+    let windSpeedUnit = WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit)
     let hourlyFields = hourly ?? [
       .temperature_2m, .apparent_temperature, .precipitation, .snowfall, .weathercode,
       .cloudcover,
@@ -102,11 +109,11 @@ final class APIClient: Sendable {
         .is_day,
       ],
       temperature_unit: Operations.getForecast.Input.Query.temperature_unitPayload(
-        rawValue: resolvedUnits.temperature),
+        rawValue: temperatureUnit),
       windspeed_unit: Operations.getForecast.Input.Query.windspeed_unitPayload(
         rawValue: windSpeedUnit.apiRawValue),
       precipitation_unit: Operations.getForecast.Input.Query.precipitation_unitPayload(
-        rawValue: resolvedUnits.precipitation),
+        rawValue: precipitationUnit),
       timeformat: .unixtime,
       timezone: "auto",
       forecast_days: forecastDays
@@ -280,7 +287,7 @@ final class APIClient: Sendable {
     model: DailyEnsembleModel = .ecmwfAIFS025Ensemble
   ) async throws -> DailyEnsembleForecastResponse {
     let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
-    let windSpeedUnit = await MainActor.run { WindSpeedUnit(settingValue: SettingService.shared.settings?.windSpeedUnit) }
+    let windSpeedUnit = WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit)
     var components = URLComponents(string: "https://ensemble-api.open-meteo.com/v1/ensemble")!
     components.queryItems = [
       URLQueryItem(name: "latitude", value: String(outboundCoordinates.latitude)),

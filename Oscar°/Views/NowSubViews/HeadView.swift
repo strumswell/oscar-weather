@@ -55,6 +55,13 @@ struct HeadView: View {
       UIApplication.shared.playHapticFeedback()
       presentation.present(.location)
     }
+    .accessibilityElement(children: .combine)
+    .accessibilityAddTraits(.isButton)
+    .accessibilityLabel(Text("Ort ändern, aktuell \(location.name)"))
+    .accessibilityAction {
+      UIApplication.shared.playHapticFeedback()
+      presentation.present(.location)
+    }
     .padding(.bottom, 35)
     .padding(.leading, -20)
     .padding(.top)

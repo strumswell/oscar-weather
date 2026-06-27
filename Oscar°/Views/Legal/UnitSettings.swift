@@ -11,10 +11,19 @@ struct UnitSettings: View {
     private let settingsService = SettingService.shared
 
     var body: some View {
+        // Read the observable values directly in `body` so @Observable registers the dependency
+        // and re-renders when a unit changes. Reading them only inside the Pickers' Binding(get:)
+        // closures — which escape and run outside body's observation scope — left the selection
+        // stale until the view was recreated.
+        let temperatureUnit = settingsService.settings?.temperatureUnit ?? "celsius"
+        let windSpeedUnit = settingsService.settings?.windSpeedUnit ?? "kmh"
+        let precipitationUnit = settingsService.settings?.precipitationUnit ?? "mm"
+        let timeFormatPreference = settingsService.timeFormatPreference
+
         NavigationStack {
             List {
                 Picker(String(localized: "Temperatur"), selection: Binding(
-                    get: { settingsService.settings?.temperatureUnit ?? "celsius" },
+                    get: { temperatureUnit },
                     set: { settingsService.updateTemperatureUnit($0) }
                 )) {
                     Text("°C").tag("celsius")
@@ -22,7 +31,7 @@ struct UnitSettings: View {
                 }
                 
                 Picker(String(localized: "Windgeschwindigkeit"), selection: Binding(
-                    get: { settingsService.settings?.windSpeedUnit ?? "kmh" },
+                    get: { windSpeedUnit },
                     set: { settingsService.updateWindSpeedUnit($0) }
                 )) {
                     Text("km/h").tag("kmh")
@@ -33,7 +42,7 @@ struct UnitSettings: View {
                 }
                 
                 Picker(String(localized: "Niederschlag"), selection: Binding(
-                    get: { settingsService.settings?.precipitationUnit ?? "mm" },
+                    get: { precipitationUnit },
                     set: { settingsService.updatePrecipitationUnit($0) }
                 )) {
                     Text("mm").tag("mm")
@@ -41,7 +50,7 @@ struct UnitSettings: View {
                 }
 
                 Picker(String(localized: "Zeitformat"), selection: Binding(
-                    get: { settingsService.timeFormatPreference },
+                    get: { timeFormatPreference },
                     set: { preference in
                         settingsService.timeFormatPreference = preference
                         Task {

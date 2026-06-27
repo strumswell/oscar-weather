@@ -238,9 +238,22 @@ enum AtmosphereWeatherMapper {
 
     private static func nearestIndex(to timestamp: Double, in times: [Double]?) -> Int? {
         guard let times, !times.isEmpty else { return nil }
-        return times.indices.min { lhs, rhs in
-            abs(times[lhs] - timestamp) < abs(times[rhs] - timestamp)
+        // Hourly times are sorted ascending: binary-search the insertion point and pick the
+        // closer neighbour — O(log n) instead of an O(n) scan on the per-snapshot path.
+        var low = 0
+        var high = times.count - 1
+        while low < high {
+            let mid = (low + high) / 2
+            if times[mid] < timestamp {
+                low = mid + 1
+            } else {
+                high = mid
+            }
         }
+        if low > 0, abs(times[low - 1] - timestamp) <= abs(times[low] - timestamp) {
+            return low - 1
+        }
+        return low
     }
 
     private static func value(at index: Int?, in values: [Double]?) -> Double? {
@@ -298,18 +311,26 @@ enum AtmosphereWeatherMapper {
         return clamp(cloudCoverage * 0.68 + humidity * 0.12 + precipitation * 0.2 + conditionBoost, 0, 1)
     }
 
+    /// Single reusable UTC calendar — the snapshot path runs per frame, so we shift the date by
+    /// the offset (below) instead of allocating a calendar with a per-call timezone each time.
+    nonisolated(unsafe) private static let utcCalendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC") ?? .current
+        return calendar
+    }()
+
     private static func solarElevation(
         date: Date,
         location: CLLocationCoordinate2D,
         utcOffsetSeconds: Int
     ) -> Float {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(secondsFromGMT: utcOffsetSeconds) ?? .current
-
-        let day = Float(calendar.ordinality(of: .day, in: .year, for: date) ?? 1)
-        let hour = Float(calendar.component(.hour, from: date))
-        let minute = Float(calendar.component(.minute, from: date))
-        let second = Float(calendar.component(.second, from: date))
+        // Represent local time by shifting the instant, then read components with the shared UTC calendar.
+        let localDate = Date(timeIntervalSince1970: date.timeIntervalSince1970 + Double(utcOffsetSeconds))
+        let day = Float(utcCalendar.ordinality(of: .day, in: .year, for: localDate) ?? 1)
+        let components = utcCalendar.dateComponents([.hour, .minute, .second], from: localDate)
+        let hour = Float(components.hour ?? 0)
+        let minute = Float(components.minute ?? 0)
+        let second = Float(components.second ?? 0)
         let clockHours = hour + minute / 60 + second / 3600
         let b = 2 * Float.pi * (day - 81) / 364
         let equationOfTime = 9.87 * sin(2 * b) - 7.53 * cos(b) - 1.5 * sin(b)

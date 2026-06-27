@@ -1,6 +1,7 @@
 import CoreLocation
 import CryptoKit
 import Foundation
+import OSLog
 
 enum DailyEnsembleModel: String, CaseIterable, Identifiable {
   case ecmwfAIFS025Ensemble = "ecmwf_aifs025_ensemble"
@@ -324,6 +325,11 @@ extension DailyEnsembleForecastResponse {
 actor DailyEnsembleForecastCache {
   static let shared = DailyEnsembleForecastCache()
 
+  private static let logger = Logger(
+    subsystem: Bundle.main.bundleIdentifier ?? "Oscar",
+    category: "Ensemble"
+  )
+
   private struct Metadata: Codable {
     let key: String
     let timestamp: Date
@@ -382,7 +388,7 @@ actor DailyEnsembleForecastCache {
       try data.write(to: bodyURL, options: .atomic)
       try JSONEncoder().encode(metadata).write(to: metadataURL, options: .atomic)
     } catch {
-      print("Failed to write ensemble cache entry: \(error.localizedDescription)")
+      Self.logger.error("Failed to write ensemble cache entry: \(error.localizedDescription, privacy: .public)")
     }
   }
 

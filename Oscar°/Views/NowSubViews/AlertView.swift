@@ -34,6 +34,13 @@ struct AlertView: View {
             UIApplication.shared.playHapticFeedback()
             presentation.present(.alerts)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint(Text("Öffnet die Wetterwarnungen"))
+        .accessibilityAction {
+            UIApplication.shared.playHapticFeedback()
+            presentation.present(.alerts)
+        }
         .padding(.top, -10)
         .shadow(radius: 15)
     }

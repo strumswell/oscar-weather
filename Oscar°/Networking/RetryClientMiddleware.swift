@@ -22,11 +22,14 @@
 import Foundation
 import HTTPTypes
 import OpenAPIRuntime
+import OSLog
 
 /// A middleware that retries the request under certain conditions.
 ///
 /// Only meant to be used for illustrative purposes.
 nonisolated struct RetryingMiddleware {
+
+  private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Retry")
 
   /// The failure signal that can lead to a retried request.
   enum RetryableSignal: Hashable {
@@ -100,16 +103,16 @@ extension RetryingMiddleware: ClientMiddleware {
   ) async throws -> (HTTPResponse, HTTPBody?) {
     let requestContext = "\(baseURL.host() ?? baseURL.absoluteString) \(operationID) \(request.method) \(request.path ?? "")"
     func logRequest(attempt: Int, maxAttemptCount: Int) {
-      print("Sending request \(requestContext) attempt \(attempt)/\(maxAttemptCount)")
+      Self.logger.debug("Sending request \(requestContext, privacy: .public) attempt \(attempt, privacy: .public)/\(maxAttemptCount, privacy: .public)")
     }
 
     guard case .upToAttempts(count: let maxAttemptCount) = policy else {
-      print("Sending request \(requestContext)")
+      Self.logger.debug("Sending request \(requestContext, privacy: .public)")
       return try await next(request, body, baseURL)
     }
     if let body {
       guard body.iterationBehavior == .multiple else {
-        print("Sending request \(requestContext)")
+        Self.logger.debug("Sending request \(requestContext, privacy: .public)")
         return try await next(request, body, baseURL)
       }
     }
@@ -148,8 +151,8 @@ extension RetryingMiddleware: ClientMiddleware {
           if attempt == maxAttemptCount {
             throw error
           } else {
-            print("Retrying \(retryContext) after error on attempt \(attempt)/\(maxAttemptCount)")
-            print(error)
+            Self.logger.error("Retrying \(retryContext, privacy: .public) after error on attempt \(attempt, privacy: .public)/\(maxAttemptCount, privacy: .public)")
+            Self.logger.error("\(error.localizedDescription, privacy: .public)")
             try await willRetry(attempt: attempt, response: nil)
             continue
           }
@@ -159,8 +162,8 @@ extension RetryingMiddleware: ClientMiddleware {
         (response, responseBody) = try await next(request, body, baseURL)
       }
       if signals.contains(response.status.code) && attempt < maxAttemptCount {
-        print(
-          "Retrying \(retryContext) with code \(response.status.code) on attempt \(attempt)/\(maxAttemptCount)"
+        Self.logger.debug(
+          "Retrying \(retryContext, privacy: .public) with code \(response.status.code, privacy: .public) on attempt \(attempt, privacy: .public)/\(maxAttemptCount, privacy: .public)"
         )
         try await willRetry(attempt: attempt, response: response)
         continue

@@ -21,6 +21,9 @@ class MeteorShower {
             createMeteor(in: size)
         }
 
+        // Collect spent meteors and remove them after the loop — mutating the Set mid-iteration
+        // triggers a copy-on-write on every removal and is fragile semantics.
+        var spent: [Meteor] = []
         for meteor in meteors {
             if meteor.isMovingRight {
                 meteor.x += delta * meteor.speed
@@ -31,11 +34,12 @@ class MeteorShower {
             meteor.speed -= delta * 900
 
             if meteor.speed < 0 {
-                meteors.remove(meteor)
+                spent.append(meteor)
             } else if meteor.length < 100 {
                 meteor.length += delta * 300
             }
         }
+        meteors.subtract(spent)
         
         lastUpdate = date
     }

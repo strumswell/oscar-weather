@@ -2759,23 +2759,6 @@
         }
       }
     },
-    "Große Bäume bewegen sich, Zweige können brechen." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Large trees move and branches can break."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
-          }
-        }
-      }
-    },
     "Größere Zweige und kleine Bäume bewegen sich." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2812,6 +2795,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Birleşik Krallık"
+          }
+        }
+      }
+    },
+    "Große Bäume bewegen sich, Zweige können brechen." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Large trees move and branches can break."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
           }
         }
       }
@@ -4589,6 +4589,12 @@
         }
       }
     },
+    "Öffnet die Karte" : {
+
+    },
+    "Öffnet die rechtlichen Hinweise" : {
+
+    },
     "Öffnet die stündliche Wettervorhersage" : {
 
     },
@@ -4607,6 +4613,9 @@
           }
         }
       }
+    },
+    "Öffnet die Wetterwarnungen" : {
+
     },
     "Öffnet stündliche Umweltdiagramme" : {
       "extractionState" : "manual",
@@ -4785,6 +4794,9 @@
           }
         }
       }
+    },
+    "Ort ändern, aktuell %@" : {
+
     },
     "Orte" : {
       "extractionState" : "manual",
@@ -5341,7 +5353,6 @@
       }
     },
     "Regenradar" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

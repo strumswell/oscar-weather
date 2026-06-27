@@ -15,14 +15,15 @@ import UserNotifications
 private let notificationLogger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Notifications")
 
 @MainActor
-final class NotificationSettingsManager: NSObject, ObservableObject {
+@Observable
+final class NotificationSettingsManager: NSObject {
     static let shared = NotificationSettingsManager()
 
-    @Published private(set) var enabled: Bool
-    @Published private(set) var rainAlertsEnabled: Bool
-    @Published private(set) var weatherAlertsEnabled: Bool
-    @Published private(set) var liveRainStatusEnabled: Bool
-    @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
+    private(set) var enabled: Bool
+    private(set) var rainAlertsEnabled: Bool
+    private(set) var weatherAlertsEnabled: Bool
+    private(set) var liveRainStatusEnabled: Bool
+    private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
     private let baseURL = URL(string: radarBaseURL)!
     private let locationService = LocationService.shared

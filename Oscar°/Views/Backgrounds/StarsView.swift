@@ -13,9 +13,9 @@ struct StarsView: View {
     /// are skipped so they don't shine through the moon's disc.
     var occlusionCenter: CGPoint? = nil
     var occlusionRadius: CGFloat = 0
-    @State var isShown = false
-    @State var starField = StarField()
-    @State var meteorShower = MeteorShower()
+    @State private var isShown = false
+    @State private var starField = StarField()
+    @State private var meteorShower = MeteorShower()
     
     @Environment(Weather.self) private var weather: Weather
     

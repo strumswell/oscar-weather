@@ -10,29 +10,30 @@ import UIKit
 
 @MainActor
 struct NotificationSettingsView: View {
-    @ObservedObject private var notificationSettingsManager: NotificationSettingsManager
+    private let notificationSettingsManager: NotificationSettingsManager
     @State private var isUpdating = false
     @State private var showPermissionAlert = false
 
-    init() {
-        _notificationSettingsManager = ObservedObject(wrappedValue: NotificationSettingsManager.shared)
-    }
-
-    init(notificationSettingsManager: NotificationSettingsManager) {
-        _notificationSettingsManager = ObservedObject(wrappedValue: notificationSettingsManager)
+    init(notificationSettingsManager: NotificationSettingsManager = .shared) {
+        self.notificationSettingsManager = notificationSettingsManager
     }
 
     var body: some View {
         Form {
             Section {
+                // Read in body so @Observable tracks these; the toggles then reflect external
+                // and async changes instead of going stale until the view is recreated.
+                let rainAlertsEnabled = notificationSettingsManager.rainAlertsEnabled
+                let weatherAlertsEnabled = notificationSettingsManager.weatherAlertsEnabled
+
                 Toggle(
                     String(localized: "Rain alerts (Beta)"),
-                    isOn: rainAlertsEnabledBinding
+                    isOn: rainAlertsBinding(currentValue: rainAlertsEnabled)
                 )
 
                 Toggle(
                     String(localized: "Weather alerts (Beta)"),
-                    isOn: weatherAlertsEnabledBinding
+                    isOn: weatherAlertsBinding(currentValue: weatherAlertsEnabled)
                 )
             }
             .disabled(isUpdating)
@@ -78,9 +79,9 @@ struct NotificationSettingsView: View {
         }
     }
 
-    private var rainAlertsEnabledBinding: Binding<Bool> {
+    private func rainAlertsBinding(currentValue: Bool) -> Binding<Bool> {
         Binding(
-            get: { notificationSettingsManager.rainAlertsEnabled },
+            get: { currentValue },
             set: { newValue in
                 runUpdate {
                     let enabled = await notificationSettingsManager.setRainAlertsEnabled(newValue)
@@ -92,9 +93,9 @@ struct NotificationSettingsView: View {
         )
     }
 
-    private var weatherAlertsEnabledBinding: Binding<Bool> {
+    private func weatherAlertsBinding(currentValue: Bool) -> Binding<Bool> {
         Binding(
-            get: { notificationSettingsManager.weatherAlertsEnabled },
+            get: { currentValue },
             set: { newValue in
                 runUpdate {
                     let enabled = await notificationSettingsManager.setWeatherAlertsEnabled(newValue)

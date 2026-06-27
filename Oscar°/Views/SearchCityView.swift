@@ -19,16 +19,17 @@ struct SearchCityView: View {
                     } else {
                         List {
                             ForEach(searchResult.results ?? [], id: \.self) { result in
-                                HStack {
+                                Button {
+                                    locationService.city.addCity(searchResult: result)
+                                    searchIsActive = false
+                                    searchText = ""
+                                    UIApplication.shared.hideKeyboard()
+                                } label: {
                                     Text(getFormattedLocationString(location: result))
-                                        .onTapGesture {
-                                            locationService.city.addCity(searchResult: result)
-                                            searchIsActive = false
-                                            searchText = ""
-                                            UIApplication.shared.hideKeyboard()
-                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .lineLimit(1)
                                 }
-                                .lineLimit(1)
+                                .buttonStyle(.plain)
                             }
                         }
                     }
@@ -60,36 +61,41 @@ struct SearchCityView: View {
                                             .foregroundStyle(.blue)
                                     }
                                 } else {
-                                    HStack {
-                                        Image(systemName: "location.fill")
-                                            .foregroundStyle(.blue)
-                                        Text("Aktueller Standort")
-                                        Spacer()
-                                    }
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
+                                    Button {
                                         locationService.city.disableAllCities()
+                                    } label: {
+                                        HStack {
+                                            Image(systemName: "location.fill")
+                                                .foregroundStyle(.blue)
+                                            Text("Aktueller Standort")
+                                            Spacer()
+                                        }
+                                        .contentShape(Rectangle())
                                     }
+                                    .buttonStyle(.plain)
                                 }
                             }
                             
                             ForEach(locationService.city.cities) { city in
-                                HStack {
-                                    if (city.selected) {
-                                        Text("\(city.label ?? "")")
-                                        Spacer()
-                                        Image(systemName: "checkmark")
-                                            .foregroundStyle(.blue)
-                                        
-                                    } else {
-                                        Text("\(city.label ?? "")")
-                                        Spacer()
-                                    }
-                                }
-                                .contentShape(Rectangle())
-                                .onTapGesture {
+                                Button {
                                     locationService.city.toggleActiveCity(city: city)
+                                } label: {
+                                    HStack {
+                                        if (city.selected) {
+                                            Text("\(city.label ?? "")")
+                                            Spacer()
+                                            Image(systemName: "checkmark")
+                                                .foregroundStyle(.blue)
+
+                                        } else {
+                                            Text("\(city.label ?? "")")
+                                            Spacer()
+                                        }
+                                    }
+                                    .contentShape(Rectangle())
                                 }
+                                .buttonStyle(.plain)
+                                .accessibilityValue(city.selected ? Text("Ausgewählt") : Text(""))
                                 .id("\(city.objectID.uriRepresentation())-\(city.selected)")
                             }
                             .onDelete(perform: locationService.city.deleteCity)

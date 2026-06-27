@@ -22,7 +22,7 @@ struct TemperatureChart: View {
   var unit: String
   var maxTimeRange: ClosedRange<Date>
   var referenceDate: Date
-  
+
   @State private var selectedDate: Date?
 
   var temperatureData: [TemperatureData] {
@@ -38,14 +38,19 @@ struct TemperatureChart: View {
     }
   }
 
-  private var currentDataPoint: TemperatureData? {
-    temperatureData.first(where: { $0.time >= referenceDate }) ?? temperatureData.last
-  }
-
   var body: some View {
-    VStack(alignment: .leading) {
+    // Build the series once per body evaluation. `.chartXSelection` mutates `selectedDate`
+    // on every drag sample, so body re-runs continuously while scrubbing — recomputing the
+    // mapped array and its filters here (instead of in each ForEach/helper) keeps that cheap.
+    let data = temperatureData
+    let past = data.filter { $0.time <= referenceDate }
+    let future = data.filter { $0.time >= referenceDate }
+    let dayChanges = HourlyChartUtilities.dayChangeIndices(time: data.map { $0.time })
+    let current = data.first(where: { $0.time >= referenceDate }) ?? data.last
+
+    return VStack(alignment: .leading) {
       Chart {
-        ForEach(temperatureData.filter { $0.time <= referenceDate }) { dataPoint in
+        ForEach(past) { dataPoint in
           LineMark(
             x: .value("Hour", dataPoint.time),
             y: .value("Temperature (\(unit))", dataPoint.temperature),
@@ -56,7 +61,7 @@ struct TemperatureChart: View {
           .lineStyle(.init(lineWidth: 3, dash: [7, 5]))
         }
 
-        ForEach(temperatureData.filter { $0.time >= referenceDate }) { dataPoint in
+        ForEach(future) { dataPoint in
           LineMark(
             x: .value("Hour", dataPoint.time),
             y: .value("Temperature (\(unit))", dataPoint.temperature),
@@ -67,7 +72,7 @@ struct TemperatureChart: View {
           .lineStyle(.init(lineWidth: 3))
         }
 
-        ForEach(temperatureData.filter { $0.time <= referenceDate }) { dataPoint in
+        ForEach(past) { dataPoint in
           LineMark(
             x: .value("Hour", dataPoint.time),
             y: .value("Gefühlte Temperature (\(unit))", dataPoint.apparentTemperature),
@@ -78,7 +83,7 @@ struct TemperatureChart: View {
           .lineStyle(.init(lineWidth: 3, dash: [7, 5]))
         }
 
-        ForEach(temperatureData.filter { $0.time >= referenceDate }) { dataPoint in
+        ForEach(future) { dataPoint in
           LineMark(
             x: .value("Hour", dataPoint.time),
             y: .value("Gefühlte Temperature (\(unit))", dataPoint.apparentTemperature),
@@ -89,8 +94,8 @@ struct TemperatureChart: View {
           .lineStyle(.init(lineWidth: 3))
         }
 
-        currentPointMarks
-        
+        currentPointMarks(for: current)
+
         // Interactive selection indicator
         if let selectedDate {
           RuleMark(x: .value("Selected", selectedDate))
@@ -103,12 +108,12 @@ struct TemperatureChart: View {
                 y: .fit(to: .chart)
               )
             ) {
-              if let selectedData = getSelectedTemperatureData(for: selectedDate) {
+              if let selectedData = getSelectedTemperatureData(for: selectedDate, in: data) {
                 VStack(alignment: .center, spacing: 2) {
                   Text(HourlyChartUtilities.timeString(from: selectedDate))
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                  
+
                   VStack(alignment: .leading, spacing: 1) {
                     HStack(spacing: 4) {
                       Circle().fill(.orange).frame(width: 6, height: 6)
@@ -116,7 +121,7 @@ struct TemperatureChart: View {
                         .font(.caption2)
                         .foregroundStyle(.white)
                     }
-                    
+
                     HStack(spacing: 4) {
                       Circle().fill(.red).frame(width: 6, height: 6)
                       Text("\(selectedData.apparentTemperature, specifier: "%.1f")\(unit)")
@@ -133,8 +138,8 @@ struct TemperatureChart: View {
             }
         }
 
-        ForEach(HourlyChartUtilities.dayChangeIndices(time: temperatureData.map { $0.time }), id: \.self) { index in
-          RuleMark(x: .value("Hour", temperatureData[index].time))
+        ForEach(dayChanges, id: \.self) { index in
+          RuleMark(x: .value("Hour", data[index].time))
             .foregroundStyle(.gray.opacity(0.6))
             .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [8, 4]))
             .annotation(
@@ -144,7 +149,7 @@ struct TemperatureChart: View {
                 y: .fit(to: .chart)
               )
             ) {
-              Text(HourlyChartUtilities.dayAbbreviation(from: temperatureData[index].time))
+              Text(HourlyChartUtilities.dayAbbreviation(from: data[index].time))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.primary.opacity(0.7))
                 .padding(.horizontal, 6)
@@ -177,36 +182,34 @@ struct TemperatureChart: View {
   }
 
   /// Gets the nearest temperature data for a selected date
-  func getSelectedTemperatureData(for selectedDate: Date) -> TemperatureData? {
-    return temperatureData.min(by: { abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate)) })
+  func getSelectedTemperatureData(for selectedDate: Date, in data: [TemperatureData]) -> TemperatureData? {
+    return data.min(by: { abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate)) })
   }
 
   @ChartContentBuilder
-  private var currentPointMarks: some ChartContent {
-    if let currentDataPoint {
-      currentPointMark(series: "Temperature", value: currentDataPoint.temperature)
-      currentPointMark(series: "Apparent Temperature", value: currentDataPoint.apparentTemperature)
+  private func currentPointMarks(for current: TemperatureData?) -> some ChartContent {
+    if let current {
+      currentPointMark(time: current.time, series: "Temperature", value: current.temperature)
+      currentPointMark(time: current.time, series: "Apparent Temperature", value: current.apparentTemperature)
     }
   }
 
   @ChartContentBuilder
-  private func currentPointMark(series: String, value: Double) -> some ChartContent {
-    if let currentDataPoint {
-      PointMark(
-        x: .value("Current Hour", currentDataPoint.time),
-        y: .value(series, value)
-      )
-      .symbol(.circle)
-      .symbolSize(90)
-      .foregroundStyle(.black)
+  private func currentPointMark(time: Date, series: String, value: Double) -> some ChartContent {
+    PointMark(
+      x: .value("Current Hour", time),
+      y: .value(series, value)
+    )
+    .symbol(.circle)
+    .symbolSize(90)
+    .foregroundStyle(.black)
 
-      PointMark(
-        x: .value("Current Hour", currentDataPoint.time),
-        y: .value(series, value)
-      )
-      .symbol(.circle)
-      .symbolSize(42)
-      .foregroundStyle(.white)
-    }
+    PointMark(
+      x: .value("Current Hour", time),
+      y: .value(series, value)
+    )
+    .symbol(.circle)
+    .symbolSize(42)
+    .foregroundStyle(.white)
   }
 }

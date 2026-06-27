@@ -6,86 +6,11 @@
 //  atmospheric sky gradient used by the Now widget.
 //
 
-import AppIntents
-import CoreData
 import CoreLocation
 import SwiftUI
 import WidgetKit
 
-// MARK: - Configurable city
-
-struct WidgetCity: AppEntity, Identifiable {
-    static let currentLocationID = "__current__"
-
-    static var typeDisplayRepresentation: TypeDisplayRepresentation {
-        TypeDisplayRepresentation(name: "Ort")
-    }
-    static let defaultQuery = WidgetCityQuery()
-
-    var id: String
-    var name: String
-    var latitude: Double
-    var longitude: Double
-
-    var isCurrentLocation: Bool { id == Self.currentLocationID }
-
-    var displayRepresentation: DisplayRepresentation {
-        DisplayRepresentation(
-            title: "\(name)",
-            image: .init(systemName: isCurrentLocation ? "location.fill" : "mappin")
-        )
-    }
-
-    static var currentLocation: WidgetCity {
-        WidgetCity(
-            id: currentLocationID,
-            name: String(localized: "Aktueller Standort"),
-            latitude: .nan,
-            longitude: .nan
-        )
-    }
-}
-
-struct WidgetCityQuery: EntityQuery {
-    func entities(for identifiers: [WidgetCity.ID]) async throws -> [WidgetCity] {
-        try await suggestedEntities().filter { identifiers.contains($0.id) }
-    }
-
-    func suggestedEntities() async throws -> [WidgetCity] {
-        [.currentLocation] + WidgetCityStore.savedCities()
-    }
-
-    func defaultResult() async -> WidgetCity? { .currentLocation }
-}
-
-/// Reads the saved cities from the Core Data store shared via the app group.
-enum WidgetCityStore {
-    static func savedCities() -> [WidgetCity] {
-        let context = PersistenceController.shared.container.viewContext
-        return context.performAndWait {
-            let request: NSFetchRequest<City> = City.fetchRequest()
-            request.sortDescriptors = [NSSortDescriptor(key: "orderIndex", ascending: true)]
-            guard let results = try? context.fetch(request) else { return [] }
-            return results.compactMap { city in
-                guard let label = city.label else { return nil }
-                return WidgetCity(
-                    id: "\(city.lat),\(city.lon)",
-                    name: label,
-                    latitude: city.lat,
-                    longitude: city.lon
-                )
-            }
-        }
-    }
-}
-
-struct SelectCityIntent: WidgetConfigurationIntent {
-    static let title: LocalizedStringResource = "Ort wählen"
-    static let description = IntentDescription("Wähle den Ort für die Tagesvorhersage.")
-
-    @Parameter(title: "Ort")
-    var city: WidgetCity?
-}
+// The configurable city options and SelectCityIntent live in WidgetCityIntent.swift.
 
 // MARK: - Weather symbol mapping
 
@@ -162,6 +87,23 @@ struct DailyForecastEntry: TimelineEntry {
                 colors: [.sunriseStart, .sunnyDayEnd], startPoint: .top, endPoint: .bottom)
         )
     }
+
+    /// Rendered when the forecast fetch fails: keeps the resolved location visible (with no rows)
+    /// so a configuration change always takes effect and a transient error never leaves the
+    /// previously selected city's data on screen. WidgetKit retries per the timeline policy.
+    static func unavailable(location: String) -> DailyForecastEntry {
+        DailyForecastEntry(
+            date: .now,
+            location: location,
+            days: [],
+            minTemp: 0,
+            maxTemp: 40,
+            temperatureUnit: "°C",
+            precipitationUnit: "mm",
+            backgroundGradient: LinearGradient(
+                colors: [.sunriseStart, .sunnyDayEnd], startPoint: .top, endPoint: .bottom)
+        )
+    }
 }
 
 // MARK: - Provider
@@ -174,23 +116,30 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
     }
 
     func snapshot(for configuration: SelectCityIntent, in context: Context) async -> DailyForecastEntry {
-        (try? await makeEntry(for: configuration)) ?? .placeholder
+        await makeEntry(for: configuration)
     }
 
     func timeline(for configuration: SelectCityIntent, in context: Context) async -> Timeline<DailyForecastEntry> {
+        // Always emit an entry for the resolved location — never an empty timeline, which would
+        // make WidgetKit keep the *previous* location's entry on screen after a config change.
+        let entry = await makeEntry(for: configuration)
+        let nextRefresh: TimeInterval = entry.days.isEmpty ? 15 * 60 : 60 * 60
+        return Timeline(entries: [entry], policy: .after(.now.addingTimeInterval(nextRefresh)))
+    }
+
+    private func makeEntry(for configuration: SelectCityIntent) async -> DailyForecastEntry {
+        let resolved = await resolveLocation(configuration.city)
         do {
-            let entry = try await makeEntry(for: configuration)
-            return Timeline(entries: [entry], policy: .after(.now.addingTimeInterval(60 * 60)))
+            return try await forecastEntry(coordinates: resolved.coordinates, locationName: resolved.name)
         } catch {
-            // Keep the last rendered entry on screen and retry shortly; never drop the chain.
-            return Timeline(entries: [], policy: .after(.now.addingTimeInterval(15 * 60)))
+            return .unavailable(location: resolved.name)
         }
     }
 
-    private func makeEntry(for configuration: SelectCityIntent) async throws -> DailyForecastEntry {
-        let resolved = await resolveLocation(configuration.city)
-        let coordinates = resolved.coordinates
-
+    private func forecastEntry(
+        coordinates: CLLocationCoordinate2D,
+        locationName: String
+    ) async throws -> DailyForecastEntry {
         async let weatherRequest = client.getForecast(
             coordinates: coordinates,
             forecastDays: ._14,
@@ -256,7 +205,7 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
 
         return DailyForecastEntry(
             date: .now,
-            location: resolved.name,
+            location: locationName,
             days: days,
             minTemp: lows.min() ?? 0,
             maxTemp: highs.max() ?? 40,
@@ -266,12 +215,19 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
         )
     }
 
-    private func resolveLocation(_ city: WidgetCity?) async
+    private func resolveLocation(_ cityID: String?) async
         -> (coordinates: CLLocationCoordinate2D, name: String)
     {
-        if let city, !city.isCurrentLocation, city.latitude.isFinite, city.longitude.isFinite {
+        if let cityID,
+           let city = WidgetCity(id: cityID),
+           !city.isCurrentLocation,
+           city.latitude.isFinite,
+           city.longitude.isFinite {
             return (
-                CLLocationCoordinate2D(latitude: city.latitude, longitude: city.longitude),
+                CLLocationCoordinate2D(
+                    latitude: city.latitude,
+                    longitude: city.longitude
+                ),
                 city.name
             )
         }

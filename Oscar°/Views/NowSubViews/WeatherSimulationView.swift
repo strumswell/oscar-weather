@@ -28,13 +28,18 @@ struct WeatherSimulationView: View {
     @Environment(Location.self) private var location: Location
     @Environment(AtmosphereDebugState.self) private var debugState: AtmosphereDebugState?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    // Memoizes the derived snapshot so a per-observation body re-eval doesn't redo the mapper
+    // every time; it recomputes only when the weather data, location, or a coarse time bucket
+    // changes. body still reads forecast.hourly + lastUpdated, so observation stays intact and a
+    // data change always invalidates the cache.
+    @State private var snapshotCache = AtmosphereSnapshotCache()
 
     var body: some View {
         let overrides = (weather.debug && debugState?.overrideEnabled == true) ? debugState : nil
         let hasContent = weather.forecast.hourly != nil || overrides != nil
         let snapshot = overrides?.snapshot
             ?? (hasContent
-                ? AtmosphereWeatherMapper.snapshot(from: weather, at: location.coordinates)
+                ? snapshotCache.snapshot(from: weather, at: location.coordinates)
                 : .twilight)
         let moonPhase = overrides?.moonPhase ?? MoonPhase.phaseFraction()
         let cloudThickness = cloudThickness(for: snapshot)
@@ -94,12 +99,12 @@ struct WeatherSimulationView: View {
                             isSouthernHemisphere: location.coordinates.latitude < 0,
                             skyDarkness: Double(snapshot.nightAmount)
                         )
-                        // Visible whenever it's above the horizon: pale in
-                        // daylight, brightening as the sky darkens. Clouds dim
-                        // it, but never below ~⅓.
+                        // Visible whenever it's above the horizon: pale in daylight, brightening
+                        // as the sky darkens. Clouds dim and blur it (below) but never hide it —
+                        // even full overcast keeps it at ~60% of its clear-sky opacity.
                         .opacity(
                             Double(0.35 + 0.65 * snapshot.nightAmount)
-                                * Double(1 - snapshot.cloudDensity * 0.65)
+                                * Double(1 - snapshot.cloudDensity * 0.4)
                         )
                         .blur(radius: CGFloat(snapshot.cloudDensity) * 2.5)
                     }
@@ -200,8 +205,10 @@ struct WeatherSimulationView: View {
             return 0.5
         }
 
-        guard snapshot.cloudDensity < 0.7,
-              MoonPhase.illumination(for: phase) >= 0.05 else {
+        // Never hard-gate on cloud cover: the moon stays visible even in full overcast (the
+        // opacity + blur on MoonView dim and soften it through the clouds). Only suppress it when
+        // the phase is too thin to be worth rendering.
+        guard MoonPhase.illumination(for: phase) >= 0.05 else {
             return nil
         }
 
@@ -243,6 +250,40 @@ struct WeatherSimulationView: View {
         let intensity = isSnow ? snapshot.snowfallIntensity : snapshot.precipitationIntensity
         let base = isSnow ? 90 : 45
         return max(12, min(220, Int(Double(base) + Double(intensity) * 170)))
+    }
+}
+
+/// Memoizes `AtmosphereWeatherMapper.snapshot` so the same derived snapshot is reused across body
+/// re-evaluations, recomputing only when the weather data (`lastUpdated`), location, or a coarse
+/// 60-second time bucket changes. Held via `@State` (the @State-as-cache pattern) and only ever
+/// touched on the main actor.
+@MainActor
+private final class AtmosphereSnapshotCache {
+    private struct Key: Equatable {
+        let lastUpdated: Date?
+        let latitude: Double
+        let longitude: Double
+        let timeBucket: Int
+    }
+
+    private var key: Key?
+    private var cached: AtmosphereSnapshot?
+
+    func snapshot(from weather: Weather, at location: CLLocationCoordinate2D) -> AtmosphereSnapshot {
+        let key = Key(
+            lastUpdated: weather.lastUpdated,
+            latitude: location.latitude,
+            longitude: location.longitude,
+            timeBucket: Int(Date.now.timeIntervalSince1970 / 60)
+        )
+        if key == self.key, let cached {
+            return cached
+        }
+
+        let snapshot = AtmosphereWeatherMapper.snapshot(from: weather, at: location)
+        self.key = key
+        self.cached = snapshot
+        return snapshot
     }
 }
 
@@ -306,12 +347,14 @@ private struct FogView: View {
     var pacing: SimulationPacing = .active
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: pacing.minimumInterval(base: 1.0 / 20.0), paused: pacing.isPaused)) { timeline in
-            let t = timeline.date.timeIntervalSinceReferenceDate
-            GeometryReader { proxy in
-                let width = proxy.size.width
-                let height = proxy.size.height
-                let shade = 0.85 - 0.5 * nightAmount
+        GeometryReader { proxy in
+            let width = proxy.size.width
+            let height = proxy.size.height
+            let shade = 0.85 - 0.5 * nightAmount
+            // Geometry is read once; only the sine sway needs the per-frame clock, so the
+            // timeline drives the inner content rather than re-laying-out every tick.
+            TimelineView(.animation(minimumInterval: pacing.minimumInterval(base: 1.0 / 20.0), paused: pacing.isPaused)) { timeline in
+                let t = timeline.date.timeIntervalSinceReferenceDate
 
                 ZStack {
                     // Even ground haze under the drifting banks.

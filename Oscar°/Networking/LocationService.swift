@@ -9,6 +9,7 @@ import Foundation
 import CoreLocation
 import Combine
 import SwiftUI
+import OSLog
 
 @MainActor
 @Observable
@@ -28,6 +29,7 @@ class Location {
 @Observable
 class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate  {
     static let shared = LocationService()
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Location")
     nonisolated static let outboundCoordinateDecimalPlaces = 3
     var city = CityService.shared
     var authStatus: CLAuthorizationStatus?
@@ -146,7 +148,7 @@ class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate  {
             }
             return (geocoded.name, geocoded.countryCode)
         } catch {
-            print("Error reverse geocoding: \(error)")
+            Self.logger.error("Error reverse geocoding: \(error.localizedDescription, privacy: .public)")
         }
 
         return ("", nil)

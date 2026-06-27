@@ -6,10 +6,13 @@
 //
 
 import CoreLocation
+import OSLog
 import SwiftUI
 
 @MainActor
 final class WeatherAtmosphericAdapter {
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Atmosphere")
+
     func generateAtmosphericSkyGradient(
         from weather: Weather,
         at location: CLLocationCoordinate2D
@@ -17,7 +20,7 @@ final class WeatherAtmosphericAdapter {
         let snapshot = AtmosphereWeatherMapper.snapshot(from: weather, at: location)
 
         if weather.debug {
-            print("AtmosphericAdapter: condition=\(snapshot.condition) cloud=\(snapshot.cloudCoverage) precip=\(snapshot.precipitationAmount)")
+            Self.logger.debug("AtmosphericAdapter: condition=\(String(describing: snapshot.condition), privacy: .public) cloud=\(snapshot.cloudCoverage, privacy: .public) precip=\(snapshot.precipitationAmount, privacy: .public)")
         }
 
         return AtmosphereSampler.skyGradient(snapshot: snapshot, sampleCount: 12)
