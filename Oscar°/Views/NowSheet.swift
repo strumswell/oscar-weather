@@ -5,6 +5,7 @@ enum NowSheet: Identifiable {
     case hourly
     case daily
     case environment(EnvironmentDetailSection)
+    case climate(ClimateSummary)
     case alerts
     case legal
 
@@ -20,6 +21,8 @@ enum NowSheet: Identifiable {
             "daily"
         case .environment(let section):
             "environment-\(section.rawValue)"
+        case .climate:
+            "climate"  // single instance; the summary payload doesn't affect identity
         case .alerts:
             "alerts"
         case .legal:

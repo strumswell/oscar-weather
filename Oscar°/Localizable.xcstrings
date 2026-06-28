@@ -196,6 +196,29 @@
         }
       }
     },
+    "%@ · %@°" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@°"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@°"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@°"
+          }
+        }
+      }
+    },
     "%@ (10m)" : {
 
     },
@@ -266,6 +289,29 @@
         }
       }
     },
+    "%@ von %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ von %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ of %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%2$@ yılın %1$@’i"
+          }
+        }
+      }
+    },
     "%@, %@" : {
       "localizations" : {
         "de" : {
@@ -325,6 +371,29 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@%2$@"
+          }
+        }
+      }
+    },
+    "%@°/Jahrzehnt" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@°/Jahrzehnt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@°/decade"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@°/on yıl"
           }
         }
       }
@@ -1676,6 +1745,120 @@
       },
       "shouldTranslate" : false
     },
+    "Das ist der %@. kälteste %@ seit %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das ist der %@. kälteste %@ seit %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is the No. %@ coldest %@ since %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu, %3$@ yılından bu yana %1$@. en soğuk %2$@."
+          }
+        }
+      }
+    },
+    "Das ist der %@. wärmste %@ seit %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das ist der %@. wärmste %@ seit %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is the No. %@ warmest %@ since %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu, %3$@ yılından bu yana %1$@. en sıcak %2$@."
+          }
+        }
+      }
+    },
+    "Das ist der kälteste %@ seit %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das ist der kälteste %@ seit %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is the coldest %@ since %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu, %2$@ yılından bu yana en soğuk %1$@."
+          }
+        }
+      }
+    },
+    "Das ist der wärmste %@ seit %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das ist der wärmste %@ seit %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is the warmest %@ since %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu, %2$@ yılından bu yana en sıcak %1$@."
+          }
+        }
+      }
+    },
+    "Datengrundlage ist die ERA5-Reanalyse: Wettermodelle verrechnen Messungen von Stationen, Satelliten, Flugzeugen und Bojen zu einem lückenlosen, weltweiten Verlauf zurück bis 1940." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datengrundlage ist die ERA5-Reanalyse: Wettermodelle verrechnen Messungen von Stationen, Satelliten, Flugzeugen und Bojen zu einem lückenlosen, weltweiten Verlauf zurück bis 1940."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The data comes from the ERA5 reanalysis: weather models combine measurements from stations, satellites, aircraft, and buoys into a gap-free, worldwide record reaching back to 1940."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veriler ERA5 yeniden analizinden gelir: hava modelleri istasyon, uydu, uçak ve şamandıra ölçümlerini 1940’a kadar uzanan kesintisiz, dünya çapında bir kayıtta birleştirir."
+          }
+        }
+      }
+    },
     "Datenquellen" : {
       "localizations" : {
         "de" : {
@@ -1717,6 +1900,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gizlilik"
+          }
+        }
+      }
+    },
+    "Der kälteste %@ seit %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der kälteste %@ seit %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The coldest %@ since %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%2$@ yılından bu yana en soğuk %1$@."
+          }
+        }
+      }
+    },
+    "Der wärmste %@ seit %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der wärmste %@ seit %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The warmest %@ since %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%2$@ yılından bu yana en sıcak %1$@."
           }
         }
       }
@@ -2313,6 +2542,28 @@
         }
       }
     },
+    "Farbskala von kühler als normal (blau) bis wärmer als normal (rot)." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Farbskala von kühler als normal (blau) bis wärmer als normal (rot)."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Color scale from cooler than normal (blue) to warmer than normal (red)."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renk ölçeği: normalden serin (mavi) ile normalden sıcak (kırmızı) arası."
+          }
+        }
+      }
+    },
     "Fertig" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2411,6 +2662,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tatlı esinti"
+          }
+        }
+      }
+    },
+    "Frost (%@)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frost (%@)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frost (%@)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Don (%@)"
           }
         }
       }
@@ -2759,6 +3033,23 @@
         }
       }
     },
+    "Große Bäume bewegen sich, Zweige können brechen." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Large trees move and branches can break."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
+          }
+        }
+      }
+    },
     "Größere Zweige und kleine Bäume bewegen sich." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2795,23 +3086,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Birleşik Krallık"
-          }
-        }
-      }
-    },
-    "Große Bäume bewegen sich, Zweige können brechen." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Large trees move and branches can break."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
           }
         }
       }
@@ -2924,6 +3198,28 @@
         }
       }
     },
+    "heute" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "heute"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "today"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bugün"
+          }
+        }
+      }
+    },
     "Heute" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2947,6 +3243,51 @@
         }
       }
     },
+    "Heute %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heute %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugün %@"
+          }
+        }
+      }
+    },
+    "Heute %@ · Normal %@ · Rekord %@ (%@)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heute %@ · Normal %@ · Rekord %@ (%@)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today %@ · Normal %@ · Record %@ (%@)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugün %@ · Normal %@ · Rekor %@ (%@)"
+          }
+        }
+      }
+    },
     "Himmel" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2966,6 +3307,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gökyüzü"
+          }
+        }
+      }
+    },
+    "Hitze (%@)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hitze (%@)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heat (%@)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıcak (%@)"
           }
         }
       }
@@ -3197,6 +3561,45 @@
         }
       }
     },
+    "Jeder Streifen ist die Tageshöchsttemperatur an diesem Kalendertag eines Jahres, im Vergleich zum Normalwert (1961–1990). Tippe und ziehe über die Streifen, um einzelne Jahre abzulesen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeder Streifen ist die Tageshöchsttemperatur an diesem Kalendertag eines Jahres, im Vergleich zum Normalwert (1961–1990). Tippe und ziehe über die Streifen, um einzelne Jahre abzulesen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each stripe is the daily high on this calendar day of a year, compared with the normal (1961–1990). Tap and drag across the stripes to read individual years."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her şerit, bir yılın bu takvim günündeki en yüksek sıcaklığını gösterir; normal değere (1961–1990) göre. Tek tek yılları okumak için şeritlerin üzerinde dokunup sürükleyin."
+          }
+        }
+      }
+    },
+    "Jeder Streifen steht für die mittlere Tageshöchsttemperatur an diesem Kalendertag eines Jahres – blau für kühler, rot für wärmer als der Normalwert (1961–1990). Tippe und ziehe über die Streifen, um einzelne Jahre abzulesen." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each stripe represents the average daily high temperature on this calendar day in one year - blue for cooler, red for warmer than the normal value (1961-1990). Tap and drag over the stripes to inspect individual years."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her şerit, bir yılın bu takvim günündeki ortalama günlük en yüksek sıcaklığını gösterir - mavi normal değerden (1961-1990) daha serin, kırmızı daha sıcak. Tek tek yılları görmek için şeritlerin üzerinde dokunup sürükleyin."
+          }
+        }
+      }
+    },
     "Jetzt" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3216,6 +3619,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Şimdi"
+          }
+        }
+      }
+    },
+    "Kälter als %@ aller %@ seit %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kälter als %@ aller %@ seit %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colder than %@ of all %@ since %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%3$@ yılından bu yana %2$@ günlerinin %1$@’inden daha soğuk."
+          }
+        }
+      }
+    },
+    "Kältester" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kältester"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coldest"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En soğuk"
           }
         }
       }
@@ -3436,6 +3885,50 @@
         }
       }
     },
+    "Klima" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klima"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Climate"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İklim"
+          }
+        }
+      }
+    },
+    "Klima. %@ %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klima. %@ %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Climate. %@ %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İklim. %@ %@"
+          }
+        }
+      }
+    },
     "Klimakatastrophe" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3511,6 +4004,28 @@
         }
       }
     },
+    "kühler als normal" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kühler als normal"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cooler than normal"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "normalden serin"
+          }
+        }
+      }
+    },
     "Kurz: 0 windstill, 3 schwache Brise, 6 starker Wind, 8 stürmisch, 12 Orkan." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3569,6 +4084,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Çok hafif rüzgar"
+          }
+        }
+      }
+    },
+    "Letzter Kälterekord" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letzter Kälterekord"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last cold record"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son soğuk rekoru"
+          }
+        }
+      }
+    },
+    "Letzter Wärmerekord" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letzter Wärmerekord"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last heat record"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son sıcak rekoru"
           }
         }
       }
@@ -4417,6 +4978,51 @@
         }
       }
     },
+    "Normal (1961–1990)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal (1961–1990)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal (1961–1990)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal (1961–1990)"
+          }
+        }
+      }
+    },
+    "Normal %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal %@"
+          }
+        }
+      }
+    },
     "Notifications" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4616,6 +5222,28 @@
     },
     "Öffnet die Wetterwarnungen" : {
 
+    },
+    "Öffnet Klimadetails" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet Klimadetails"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens climate details"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İklim ayrıntılarını açar"
+          }
+        }
+      }
     },
     "Öffnet stündliche Umweltdiagramme" : {
       "extractionState" : "manual",
@@ -5454,6 +6082,28 @@
         }
       }
     },
+    "Rekord %@ (%@)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rekord %@ (%@)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record %@ (%@)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rekor %@ (%@)"
+          }
+        }
+      }
+    },
     "Relative Luftfeuchtigkeit" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5827,6 +6477,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "SO"
+          }
+        }
+      }
+    },
+    "So kühl war ein %@ zuletzt %@ (%@)." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So kühl war ein %@ zuletzt %@ (%@)."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A %@ was last this cool in %@ (%@)."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir %@ en son %@ yılında bu kadar serindi (%@)."
+          }
+        }
+      }
+    },
+    "So kühl wie heute war es seit %@ noch nie." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So kühl wie heute war es seit %@ noch nie."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It has never been this cool since %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ yılından bu yana hiç bu kadar serin olmamıştı."
+          }
+        }
+      }
+    },
+    "So warm war ein %@ zuletzt %@ (%@)." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So warm war ein %@ zuletzt %@ (%@)."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A %@ was last this warm in %@ (%@)."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir %@ en son %@ yılında bu kadar sıcaktı (%@)."
+          }
+        }
+      }
+    },
+    "So warm wie heute war es seit %@ noch nie." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So warm wie heute war es seit %@ noch nie."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It has never been this warm since %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ yılından bu yana hiç bu kadar sıcak olmamıştı."
           }
         }
       }
@@ -6537,6 +7279,29 @@
         }
       }
     },
+    "Trend" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trend"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trend"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eğilim"
+          }
+        }
+      }
+    },
     "Trocken" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6680,6 +7445,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Otomatik seçimi yalnızca ne yaptığınızı biliyorsanız geçersiz kılın. Çoğu model dünya genelinde veri sağlar ancak kendi bölgesi için optimize edilmiştir. Bazıları yalnızca kendi bölgesini kapsar ve otomatik seçime kıyasla daha az veri sağlayabilir."
+          }
+        }
+      }
+    },
+    "Üblich (P10–P90)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üblich (P10–P90)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usual (P10–P90)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Olağan (P10–P90)"
           }
         }
       }
@@ -6898,6 +7686,32 @@
     "UV: %.1f" : {
 
     },
+    "Verlauf der Tageshöchstwerte" : {
+
+    },
+    "Verlauf der Tageshöchstwerte. Tippe und ziehe, um einzelne Jahre zu lesen." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verlauf der Tageshöchstwerte. Tippe und ziehe, um einzelne Jahre zu lesen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily-high history. Tap and drag to read individual years."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlük en yüksek değerlerin geçmişi. Tek tek yılları okumak için dokunup sürükleyin."
+          }
+        }
+      }
+    },
     "Volumetrischer Wassergehalt je Bodentiefe" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -7018,6 +7832,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bu Model Ne Zaman Uygundur"
+          }
+        }
+      }
+    },
+    "Wärmer als %@ aller %@ seit %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wärmer als %@ aller %@ seit %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warmer than %@ of all %@ since %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%3$@ yılından bu yana %2$@ günlerinin %1$@’inden daha sıcak."
+          }
+        }
+      }
+    },
+    "wärmer als normal" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "wärmer als normal"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "warmer than normal"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "normalden sıcak"
+          }
+        }
+      }
+    },
+    "Wärmster" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wärmster"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warmest"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En sıcak"
           }
         }
       }

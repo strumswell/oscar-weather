@@ -27,6 +27,8 @@ servers:
     description: "Public RainViewer endpoint"
   - url: https://ensemble-api.open-meteo.com
     description: "Public Open-Meteo ensemble endpoint"
+  - url: https://archive-api.open-meteo.com
+    description: "Public Open-Meteo historical (archive) endpoint"
 paths:
   /v1/ensemble:
     servers:
@@ -93,6 +95,91 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/EnsembleForecastResponse"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                  reason:
+                    type: string
+  /v1/archive:
+    servers:
+      - url: https://archive-api.open-meteo.com
+    get:
+      operationId: getArchive
+      tags:
+        - Weather Forecast APIs
+      summary: Historical daily weather for coordinates
+      description: Daily historical weather variables (ERA5 reanalysis) for given WGS84 latitude and longitude coordinates, available back to 1940.
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          description: "WGS84 coordinate"
+          schema:
+            type: number
+            format: number
+        - name: longitude
+          in: query
+          required: true
+          description: "WGS84 coordinate"
+          schema:
+            type: number
+            format: number
+        - name: start_date
+          in: query
+          required: true
+          description: "ISO8601 start date (yyyy-MM-dd)"
+          schema:
+            type: string
+        - name: end_date
+          in: query
+          required: true
+          description: "ISO8601 end date (yyyy-MM-dd)"
+          schema:
+            type: string
+        - name: daily
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - temperature_2m_max
+        - name: models
+          in: query
+          description: "Force a single reanalysis model so the multi-decade series stays consistent (Open-Meteo otherwise mixes ERA5 with ECMWF IFS from 2017 onward)."
+          schema:
+            type: string
+            enum:
+              - era5
+              - era5_land
+              - era5_seamless
+        - name: timezone
+          in: query
+          schema:
+            type: string
+        - name: timeformat
+          in: query
+          schema:
+            type: string
+            default: iso8601
+            enum:
+              - iso8601
+              - unixtime
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArchiveResponse"
         400:
           description: Bad Request
           content:
@@ -1219,6 +1306,40 @@ components:
           type: array
           items:
             type: number
+      required:
+        - time
+    ArchiveResponse:
+      type: object
+      properties:
+        latitude:
+          type: number
+        longitude:
+          type: number
+        utc_offset_seconds:
+          type: integer
+        timezone:
+          type: string
+        timezone_abbreviation:
+          type: string
+        elevation:
+          type: number
+        daily_units:
+          type: object
+          additionalProperties:
+            type: string
+        daily:
+          $ref: "#/components/schemas/ArchiveDailyResponse"
+    ArchiveDailyResponse:
+      type: object
+      properties:
+        time:
+          type: array
+          items:
+            type: string
+        temperature_2m_max:
+          type: array
+          items:
+            type: [number, null]
       required:
         - time
     EnsembleForecastResponse:

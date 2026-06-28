@@ -131,6 +131,7 @@ struct NowView: View {
                         }
 
                         AQIView()
+                        ClimateView()
                         LegalTextView()
                         if weather.debug {
                             VStack {

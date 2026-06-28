@@ -28,6 +28,7 @@ final class APIClient: Sendable {
   let openMeteoAqi: Client
   let openMeteoGeo: Client
   let openMeteoEnsemble: Client
+  let openMeteoArchive: Client
   let brightsky: Client
   let canadaWeather: Client
   let rainViewer: Client
@@ -40,12 +41,14 @@ final class APIClient: Sendable {
     openMeteoAqi = APIClient.get(url: Self.serverURL(Servers.server2))
     openMeteoGeo = APIClient.get(url: Self.serverURL(Servers.server3))
     openMeteoEnsemble = APIClient.get(url: Self.ensembleServerURL)
+    openMeteoArchive = APIClient.get(url: Self.archiveServerURL)
     brightsky = APIClient.get(url: Self.serverURL(Servers.server4))
     canadaWeather = APIClient.get(url: Self.serverURL(Servers.server5))
     rainViewer = APIClient.get(url: Self.serverURL(Servers.server6))
   }
 
   private static let ensembleServerURL = URL(string: "https://ensemble-api.open-meteo.com")!
+  private static let archiveServerURL = URL(string: "https://archive-api.open-meteo.com")!
 
   /// The generated `Servers.serverN()` build compile-time-constant base URLs; a failure is a
   /// spec/build error, so fail loudly with a clear message instead of force-trying.
@@ -339,6 +342,41 @@ final class APIClient: Sendable {
     let decoded = try decoder.decode(DailyEnsembleForecastResponse.self, from: data)
     await DailyEnsembleForecastCache.shared.set(data, for: cacheKey)
     return decoded
+  }
+
+  /// Historical daily maximum temperatures (ERA5 reanalysis) for a coordinate over a date range.
+  /// Backs the climate timeline. Coordinates are passed through unrounded because callers feed in
+  /// the already grid-snapped `forecast.latitude/longitude`, which keeps the cache key stable.
+  /// The (cold) full-history request is extremely heavy, so callers cache the result indefinitely
+  /// and only ever fetch the missing recent days; this method itself stays a thin transport.
+  func getArchive(
+    latitude: Double,
+    longitude: Double,
+    startDate: String,
+    endDate: String
+  ) async throws -> Components.Schemas.ArchiveResponse {
+    let response = try await openMeteoArchive.getArchive(
+      .init(
+        query: .init(
+          latitude: latitude,
+          longitude: longitude,
+          start_date: startDate,
+          end_date: endDate,
+          daily: [.temperature_2m_max],
+          models: .era5,
+          timezone: "auto"
+        )
+      ))
+
+    switch response {
+    case let .ok(response):
+      switch response.body {
+      case .json(let result):
+        return result
+      }
+    case .badRequest, .undocumented:
+      throw URLError(.badServerResponse)
+    }
   }
 
   func getAlerts(

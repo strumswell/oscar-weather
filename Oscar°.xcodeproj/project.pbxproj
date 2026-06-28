@@ -224,6 +224,10 @@
 		AA00000D2F9A00000000001A /* EnvironmentMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000C2F9A00000000001A /* EnvironmentMetric.swift */; };
 		AA00000F2F9A00000000001A /* AQIGaugeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000E2F9A00000000001A /* AQIGaugeCard.swift */; };
 		AA0000112F9A00000000001A /* EnvironmentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000102F9A00000000001A /* EnvironmentDetailView.swift */; };
+		C100000B2FF0000000000001 /* ClimateSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C100000A2FF0000000000001 /* ClimateSummary.swift */; };
+		C100000D2FF0000000000001 /* ClimateArchiveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C100000C2FF0000000000001 /* ClimateArchiveService.swift */; };
+		C100000F2FF0000000000001 /* ClimateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C100000E2FF0000000000001 /* ClimateView.swift */; };
+		C10000112FF0000000000001 /* ClimateDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000102FF0000000000001 /* ClimateDetailView.swift */; };
 		AA0000132F9A00000000001A /* AQIChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000122F9A00000000001A /* AQIChart.swift */; };
 		AA0000152F9A00000000001A /* UVChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000142F9A00000000001A /* UVChart.swift */; };
 		AA0000172F9A00000000001A /* PollenChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000162F9A00000000001A /* PollenChart.swift */; };
@@ -486,6 +490,10 @@
 		AA00000C2F9A00000000001A /* EnvironmentMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentMetric.swift; sourceTree = "<group>"; };
 		AA00000E2F9A00000000001A /* AQIGaugeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AQIGaugeCard.swift; sourceTree = "<group>"; };
 		AA0000102F9A00000000001A /* EnvironmentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentDetailView.swift; sourceTree = "<group>"; };
+		C100000A2FF0000000000001 /* ClimateSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimateSummary.swift; sourceTree = "<group>"; };
+		C100000C2FF0000000000001 /* ClimateArchiveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimateArchiveService.swift; sourceTree = "<group>"; };
+		C100000E2FF0000000000001 /* ClimateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimateView.swift; sourceTree = "<group>"; };
+		C10000102FF0000000000001 /* ClimateDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimateDetailView.swift; sourceTree = "<group>"; };
 		AA0000122F9A00000000001A /* AQIChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AQIChart.swift; sourceTree = "<group>"; };
 		AA0000142F9A00000000001A /* UVChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UVChart.swift; sourceTree = "<group>"; };
 		AA0000162F9A00000000001A /* PollenChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PollenChart.swift; sourceTree = "<group>"; };
@@ -706,6 +714,8 @@
 				25CBB63B2B44A13600223B69 /* WeatherSimulationView.swift */,
 				25CB17DD2B46EB61001D973A /* LegalTextView.swift */,
 				25AD38E62BE716E100A8F305 /* MemoryView.swift */,
+				C100000E2FF0000000000001 /* ClimateView.swift */,
+				C10000102FF0000000000001 /* ClimateDetailView.swift */,
 			);
 			path = NowSubViews;
 			sourceTree = "<group>";
@@ -802,6 +812,8 @@
 				2502F6F62D2F3D2600636DC9 /* WeatherObservable.swift */,
 				2589E7CD2F4B55CD005BB633 /* OscarRadarState.swift */,
 				44F71A4B1D6AC81B4BBA20CA /* WindFieldCache.swift */,
+				C100000A2FF0000000000001 /* ClimateSummary.swift */,
+				C100000C2FF0000000000001 /* ClimateArchiveService.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -1313,6 +1325,10 @@
 				AD4000092FE2000000000001 /* MoonView.swift in Sources */,
 				253F84F72C20B8ED00844A9E /* HourlyDetailView.swift in Sources */,
 				AB0001022F9A00000000001A /* EnvironmentDetailSection.swift in Sources */,
+				C100000B2FF0000000000001 /* ClimateSummary.swift in Sources */,
+				C100000D2FF0000000000001 /* ClimateArchiveService.swift in Sources */,
+				C100000F2FF0000000000001 /* ClimateView.swift in Sources */,
+				C10000112FF0000000000001 /* ClimateDetailView.swift in Sources */,
 				AB0001042F9A00000000001A /* AQIComponentSnapshot.swift in Sources */,
 				AB0001062F9A00000000001A /* PollenSnapshot.swift in Sources */,
 				AB0001082F9A00000000001A /* EnvironmentDetailCard.swift in Sources */,

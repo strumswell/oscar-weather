@@ -17,6 +17,8 @@ struct NowSheetView: View {
             DailyDetailView()
         case .environment(let section):
             EnvironmentDetailView(scrollTo: section)
+        case .climate(let summary):
+            ClimateDetailView(summary: summary)
         case .alerts:
             AlertListView()
         case .legal:
