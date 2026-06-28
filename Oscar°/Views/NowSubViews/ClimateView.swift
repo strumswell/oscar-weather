@@ -560,7 +560,7 @@ func climateHeadline(_ summary: ClimateSummary) -> String {
         return String(localized: "Der kälteste \(day) seit \(year).")
     }
     // Clamp to 1…99 so a near-record never rounds to a misleading "0 %"/"100 %".
-    let pct = "\(min(99, max(1, summary.headlinePercent()))) %"
+    let pct = climateHeadlinePercent(min(99, max(1, summary.headlinePercent())))
     if summary.isWarmerThanNormal {
         return String(localized: "Wärmer als \(pct) aller \(day) seit \(year).")
     }
@@ -636,4 +636,68 @@ func climateStatLine(_ summary: ClimateSummary, _ unit: ClimateTemperatureUnit) 
     let record = summary.previousWarmRecordString(unit)
     let year = String(summary.previousWarmRecord.year)
     return String(localized: "Heute \(today) · Normal \(normal) · Rekord \(record) (\(year))")
+}
+
+/// The "X von Y" value next to the heat/frost rows.
+///
+/// Turkish phrases this as a possessive ("30 yılın 5'i" = "5 of the 30 years"), and that suffix
+/// follows the vowel harmony of how the *count* is spoken — so it can't be baked into the string
+/// catalog. We attach it to the count here, before substitution.
+func climateYearCount(_ count: Int, of total: Int) -> String {
+    let countText: String
+    if Locale.current.language.languageCode?.identifier == "tr" {
+        countText = "\(count)\(turkishPossessiveSuffix(for: count))"
+    } else {
+        countText = String(count)
+    }
+    return String(localized: "climate.yearCount",
+                  defaultValue: "\(countText) von \(String(total))")
+}
+
+/// The percentage fragment of the climate headline ("Wärmer als 65 % …"). Turkish writes the percent
+/// in local form and carries an ablative-possessive suffix harmonized to the spoken number
+/// ("%65'inden"), so it's assembled here; other languages get the plain "65 %".
+private func climateHeadlinePercent(_ percent: Int) -> String {
+    if Locale.current.language.languageCode?.identifier == "tr" {
+        return "%\(percent)\(turkishAblativePossessiveSuffix(for: percent))"
+    }
+    return "\(percent) %"
+}
+
+/// Turkish ablative-of-possessive suffix ("…'inden") for a digit number, harmonized to its spoken
+/// form — e.g. 65 → "'inden", 3 → "'ünden", 6 → "'sından", 30 → "'undan", 40 → "'ından".
+private func turkishAblativePossessiveSuffix(for value: Int) -> String {
+    let possessive = turkishPossessiveSuffix(for: value)   // "'i" / "'ü" / "'sı" / "'u" / "'ı"
+    let isFront = possessive.last == "i" || possessive.last == "ü"
+    return "\(possessive)n\(isFront ? "den" : "dan")"
+}
+
+/// Turkish 3rd-person possessive suffix (with its leading apostrophe) for a number written as
+/// digits — e.g. 5 → "'i" (beş'i), 3 → "'ü" (üç'ü), 6 → "'sı" (altı'sı), 20 → "'si" (yirmi'si).
+///
+/// The suffix depends only on the last *spoken* word of the number: its final vowel picks one of
+/// ı/u/i/ü by vowel harmony (a/ı→ı, o/u→u, e/i→i, ö/ü→ü), and a buffer "s" is inserted when that
+/// word ends in a vowel (iki, altı, yedi, yirmi, elli).
+private func turkishPossessiveSuffix(for value: Int) -> String {
+    let units = ["", "i", "si", "ü", "ü", "i", "sı", "si", "i", "u"]   // bir…dokuz
+    let tens  = ["", "u", "si", "u", "ı", "si", "ı", "i", "i", "ı"]    // on…doksan
+
+    let n = abs(value)
+    let body: String
+    if n % 10 != 0 {
+        body = units[n % 10]
+    } else if (n / 10) % 10 != 0 {
+        body = tens[(n / 10) % 10]
+    } else if n == 0 {
+        body = "ı"                       // sıfır
+    } else if n % 1_000 != 0 {
+        body = "ü"                       // …yüz
+    } else if n % 1_000_000 != 0 {
+        body = "i"                       // …bin
+    } else if n % 1_000_000_000 != 0 {
+        body = "u"                       // …milyon
+    } else {
+        body = "ı"                       // …milyar
+    }
+    return "'\(body)"
 }

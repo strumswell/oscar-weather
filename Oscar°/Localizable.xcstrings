@@ -307,7 +307,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%2$@ yılın %1$@’i"
+            "value" : "%1$@ / %2$@"
           }
         }
       }
@@ -416,7 +416,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%d-Günlük Tahmin"
+            "value" : "%d Günlük Tahmin"
           }
         }
       }
@@ -735,7 +735,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geçerli Konum"
+            "value" : "Mevcut Konum"
           }
         }
       }
@@ -907,7 +907,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Domuz Otu"
+            "value" : "Ambrozya"
           }
         }
       }
@@ -947,7 +947,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Orijinal uygulama simgesi dışındaki tüm uygulama simgeleri yapay zeka araçlarının yardımıyla oluşturuldu. Tasarımcıysan ya da özel bir uygulama simgesi hazırlamak isteyen bir meraklıysan bana design@bolte.id adresinden yaz."
+            "value" : "Orijinal uygulama simgesi dışındaki tüm uygulama simgeleri yapay zeka araçlarının yardımıyla oluşturuldu. Tasarımcıysanız ya da özel bir uygulama simgesi hazırlamak isteyen bir meraklıysanız bana design@bolte.id adresinden yazın."
           }
         }
       }
@@ -1086,7 +1086,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "HKI"
+            "value" : "HKİ"
           }
         }
       }
@@ -1718,6 +1718,30 @@
         }
       }
     },
+    "climate.yearCount" : {
+      "comment" : "Heat/frost rows in the climate detail: how many of the recorded years crossed the threshold. TR renders it as a possessive (\"30 yılın 5'i\"); the count already carries its suffix.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ von %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ of %2$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%2$@ yılın %1$@"
+          }
+        }
+      }
+    },
     "Cloud: %.2f / %.2f" : {
       "localizations" : {
         "de" : {
@@ -1854,7 +1878,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Veriler ERA5 yeniden analizinden gelir: hava modelleri istasyon, uydu, uçak ve şamandıra ölçümlerini 1940’a kadar uzanan kesintisiz, dünya çapında bir kayıtta birleştirir."
+            "value" : "Veriler ERA5 yeniden analizinden gelir: hava modelleri istasyon, uydu, uçak ve şamandıra ölçümlerini 1940'a kadar uzanan kesintisiz, dünya çapında bir kayıtta birleştirir."
           }
         }
       }
@@ -2019,7 +2043,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dünya Sağlık Örgütü (WHO), öğle saatlerinde gölgeye geçmeyi önerir. Güneşte gömlek, güneş kremi, güneş gözlüğü ve baş koruması gerekir."
+            "value" : "Dünya Sağlık Örgütü (WHO), öğle saatlerinde gölgeye geçmeyi önerir. Güneşte gömlek, güneş kremi, güneş gözlüğü ve şapka gerekir."
           }
         }
       }
@@ -2277,7 +2301,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Topluluk Detayları"
+            "value" : "Topluluk Ayrıntıları"
           }
         }
       }
@@ -2661,7 +2685,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tatlı esinti"
+            "value" : "Canlı esinti"
           }
         }
       }
@@ -2829,7 +2853,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Algılanan sıcaklık"
+            "value" : "Hissedilen sıcaklık"
           }
         }
       }
@@ -3641,7 +3665,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%3$@ yılından bu yana %2$@ günlerinin %1$@’inden daha soğuk."
+            "value" : "%3$@ yılından bu yana %2$@ günlerinin %1$@ daha soğuk."
           }
         }
       }
@@ -4267,7 +4291,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hava Kalitesi Endeksi"
+            "value" : "Hava Kalitesi İndeksi"
           }
         }
       }
@@ -5338,7 +5362,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ için optimize · dünya geneli veri"
+            "value" : "%@ için optimize edilmiş · dünya geneli veri"
           }
         }
       }
@@ -6310,7 +6334,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fırtına"
+            "value" : "Kuvvetli fırtına"
           }
         }
       }
@@ -6933,7 +6957,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kuvvetli fırtına"
+            "value" : "Fırtına"
           }
         }
       }
@@ -7150,7 +7174,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Günlük Detaylar"
+            "value" : "Günlük Ayrıntılar"
           }
         }
       }
@@ -7791,7 +7815,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gündüz değerlerinin günlük değerlerin yerine geçmesini veya 24 saatlik aralıkta işaretlenmesini seç."
+            "value" : "Gündüz değerlerinin günlük değerlerin yerine geçmesini veya 24 saatlik aralıkta işaretlenmesini seçin."
           }
         }
       }
@@ -7854,7 +7878,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%3$@ yılından bu yana %2$@ günlerinin %1$@’inden daha sıcak."
+            "value" : "%3$@ yılından bu yana %2$@ günlerinin %1$@ daha sıcak."
           }
         }
       }
@@ -8073,7 +8097,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hava Modeli"
+            "value" : "Hava Durumu Modeli"
           }
         }
       }
@@ -8124,7 +8148,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rüzgar Ani Artışları"
+            "value" : "Rüzgar Hamleleri"
           }
         }
       }
@@ -8209,7 +8233,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rüzgar Sakinleri"
+            "value" : "Sakin Rüzgarlar"
           }
         }
       }

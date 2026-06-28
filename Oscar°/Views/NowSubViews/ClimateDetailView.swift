@@ -112,13 +112,13 @@ struct ClimateDetailView: View {
                 Divider()
                 ClimateStatRow(
                     label: "Hitze (\(summary.hotThresholdLabel(unit)))",
-                    value: String(localized: "\(String(summary.hotYears)) von \(String(summary.totalYears))"))
+                    value: climateYearCount(summary.hotYears, of: summary.totalYears))
             }
             if summary.frostYears > 0 {
                 Divider()
                 ClimateStatRow(
                     label: "Frost (\(summary.frostThresholdLabel(unit)))",
-                    value: String(localized: "\(String(summary.frostYears)) von \(String(summary.totalYears))"))
+                    value: climateYearCount(summary.frostYears, of: summary.totalYears))
             }
         }
         .padding(.horizontal, 16)
