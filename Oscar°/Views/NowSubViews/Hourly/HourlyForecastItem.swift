@@ -29,9 +29,13 @@ struct HourlyForecastItem: Identifiable {
   let precipitation: String
   let iconName: String
   let temperature: String
+  /// The leading "Jetzt" card carrying live conditions instead of an hourly slot.
+  var isNow: Bool = false
 
   var id: String {
-    "forecast-\(timestamp)"
+    // A stable id for the now card: its timestamp moves with every refresh, and a
+    // changing id would re-create the card instead of animating value changes.
+    isNow ? "forecast-now" : "forecast-\(timestamp)"
   }
 }
 

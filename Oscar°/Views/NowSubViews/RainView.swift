@@ -12,22 +12,9 @@ struct RainView: View {
     @Environment(Location.self) private var location: Location
     var openRadarMap: () -> Void = {}
 
-    // Debug: tap the radar chart 5× quickly to spawn a second chart fed by
-    // BrightSky `/radar` beneath the primary one, to compare the two services.
-    @State private var showBrightskyComparison = false
-    @State private var brightskyComparison: Components.Schemas.RadarResponse?
-
     private var oscarPoints: [PrecipChartPoint] {
         Self.fromNow((weather.precipSeries?.series ?? []).map {
             PrecipChartPoint(date: $0.timestamp, value: $0.precipitation)
-        })
-    }
-
-    private var brightskyPoints: [PrecipChartPoint] {
-        Self.fromNow((brightskyComparison?.radar ?? []).compactMap { data in
-            guard let timestamp = data.timestamp,
-                  let precipitation = data.precipitation_5?.first?.first else { return nil }
-            return PrecipChartPoint(date: timestamp, value: Double(precipitation) / 10.0)
         })
     }
 
@@ -50,24 +37,6 @@ struct RainView: View {
                     .clipShape(.rect(cornerRadius: 10))
                     .padding([.leading, .trailing, .bottom])
                     .frame(height: 180)
-                    .contentShape(Rectangle())
-                    .simultaneousGesture(
-                        TapGesture(count: 5).onEnded { toggleBrightskyComparison() }
-                    )
-
-                if showBrightskyComparison {
-                    Text("BrightSky (Debug)")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .padding(.leading)
-                    PrecipitationSeriesChart(points: brightskyPoints)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 20)
-                    .background(.thinMaterial)
-                    .clipShape(.rect(cornerRadius: 10))
-                    .padding([.leading, .trailing, .bottom])
-                    .frame(height: 180)
-                }
             }
             .scrollTransition { content, phase in
                 content
@@ -90,17 +59,6 @@ struct RainView: View {
         }
         return sorted
     }
-
-    private func toggleBrightskyComparison() {
-        showBrightskyComparison.toggle()
-        UIApplication.shared.playHapticFeedback()
-        if showBrightskyComparison, brightskyComparison == nil {
-            let coordinates = location.coordinates
-            Task {
-                brightskyComparison = try? await APIClient.shared.getRainRadar(coordinates: coordinates)
-            }
-        }
-    }
 }
 
 // MARK: - Reusable precipitation chart
@@ -111,8 +69,7 @@ struct PrecipChartPoint: Identifiable {
     let value: Double  // mm/h
 }
 
-/// Renders a precipitation time series (mm/h) as an area chart. Used for both the
-/// primary oscar-server series and the BrightSky debug comparison.
+/// Renders the oscar-server precipitation time series (mm/h) as an area chart.
 private struct PrecipitationSeriesChart: View {
     let points: [PrecipChartPoint]
 

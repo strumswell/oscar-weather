@@ -12,7 +12,7 @@ struct BrightSkyAttribution: View {
         NavigationStack {
             List {
                 Section(header: Text("Über")) {
-                    Text("BrightSky ist eine Open-Source-Wetter-API, die offene Wetterdaten vom DWD aufbereiten und für Oscar in Form von Wetterwarnung und Radardaten für Deutschland zur Verfügung stellen. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu BrightSky, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro.")
+                    Text("BrightSky ist eine Open-Source-Wetter-API, die offene Wetterdaten vom DWD aufbereiten und für Oscar in Form von Wetterwarnungen für Deutschland zur Verfügung stellen. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu BrightSky, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro.")
                 }
                 Section(header: Text("Webseite")) {
                     Link(destination: URL(string: "https://brightsky.dev/")!, label: {

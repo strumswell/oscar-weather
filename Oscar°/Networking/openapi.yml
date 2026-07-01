@@ -761,61 +761,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SearchResponse"
-  /radar:
-    servers:
-      - url: https://api.brightsky.dev
-    get:
-      operationId: getRainRadar
-      summary: Get weather radar data
-      parameters:
-        - name: date
-          in: query
-          required: true
-          schema:
-            type: string
-          description: The date and time for the requested radar data.
-        - name: bbox
-          in: query
-          schema:
-            type: array
-            items:
-              type: number
-          description: Bounding box coordinates.
-        - name: lat
-          in: query
-          required: true
-          schema:
-            type: number
-          description: Latitude of the location.
-        - name: lon
-          in: query
-          required: true
-          schema:
-            type: number
-          description: Longitude of the location.
-        - name: distance
-          in: query
-          schema:
-            type: integer
-          description: Distance parameter for radar data.
-        - name: tz
-          in: query
-          schema:
-            type: string
-          description: Time zone of the location.
-        - name: format
-          in: query
-          schema:
-            type: string
-            enum: [plain, otherFormats]
-          description: The format of the output data.
-      responses:
-        "200":
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RadarResponse"
   /alerts:
     servers:
       - url: https://api.brightsky.dev
@@ -1552,27 +1497,6 @@ components:
           items:
             type: string
           nullable: true
-    RadarResponse:
-      type: object
-      properties:
-        radar:
-          type: array
-          items:
-            $ref: "#/components/schemas/RadarData"
-    RadarData:
-      type: object
-      properties:
-        timestamp:
-          type: string
-          format: date-time
-        source:
-          type: string
-        precipitation_5:
-          type: array
-          items:
-            type: array
-            items:
-              type: integer
     HourlyUnits:
       type: object
       properties:

@@ -473,33 +473,6 @@ final class APIClient: Sendable {
     }
   }
 
-  func getRainRadar(coordinates: CLLocationCoordinate2D) async throws
-    -> Components.Schemas.RadarResponse
-  {
-    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
-    let formatter = ISO8601DateFormatter()
-    formatter.timeZone = TimeZone.current
-    let iso8601String = formatter.string(from: Date())
-    let response = try await brightsky.getRainRadar(
-      .init(
-        query: .init(
-          date: iso8601String,
-          lat: outboundCoordinates.latitude,
-          lon: outboundCoordinates.longitude,
-          distance: 0,
-          tz: "Europe/Berlin", format: .plain)
-      ))
-    switch response {
-    case let .ok(response):
-      switch response.body {
-      case .json(let result):
-        return result
-      }
-    case .undocumented:
-      return .init()
-    }
-  }
-
   /// Per-location precipitation timeline (observations + nowcast, mm/h) from
   /// oscar-server's `/radar/series`. Auto-routes DWD inside Germany / OPERA
   /// elsewhere in Europe. Hand-written (oscar-server is not part of the

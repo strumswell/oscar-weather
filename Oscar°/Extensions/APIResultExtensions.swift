@@ -18,53 +18,37 @@ extension Components.Schemas.CurrentWeather {
     }
 }
 
-extension Components.Schemas.RadarResponse {
-    func isRaining() -> Bool {
-        if (radar?.first) == nil {
-            return false
-        }
-        
-        if radar?.first?.precipitation_5?.first?.first ?? 0 > 0 {
-            return true
-        }
-        
-        return false
-    }
-    
-    func isExpectingRain() -> Bool {
-        guard let radarData = radar else {
-            return false
-        }
-        
-        for timeframe in radarData {
-            if let precipitationArray = timeframe.precipitation_5 {
-                for row in precipitationArray {
-                    for precipitation in row {
-                        if precipitation > 0 {
-                            return true
-                        }
-                    }
-                }
-            }
-        }
-        return false
-    }
-}
-
 extension PrecipSeriesResponse {
-    /// The point nearest to "now", preferring observed frames over nowcast.
+    /// How far the sample nearest to "now" may be from the wall clock before the
+    /// series counts as stale (e.g. the app slept in the background) and reads as
+    /// "no data" instead of replaying an outdated value.
+    private static let freshnessWindow: TimeInterval = 20 * 60
+
+    /// The point nearest to "now" across the whole series — observed *or* nowcast.
+    /// Radar observations lag the wall clock by 5–15 min, so shortly after rain
+    /// starts the value that is actually "now" lives in the nowcast half;
+    /// preferring observed frames here used to read a stale dry frame while the
+    /// chart already showed rain.
     private func nearestToNow() -> PrecipPoint? {
         let now = Date()
-        let observed = series.filter { !$0.isForecast }
-        let candidates = observed.isEmpty ? series : observed
-        return candidates.min {
+        guard let nearest = series.min(by: {
             abs($0.timestamp.timeIntervalSince(now)) < abs($1.timestamp.timeIntervalSince(now))
+        }), abs(nearest.timestamp.timeIntervalSince(now)) <= Self.freshnessWindow else {
+            return nil
         }
+        return nearest
     }
 
-    /// Current precipitation rate in mm/h at "now" (nearest observed frame).
+    /// Precipitation rate in mm/h at "now", or nil when the series has no sample
+    /// near the current time (stale data). Lets callers with their own fallback
+    /// (e.g. the forecast value) tell "radar says dry" apart from "no radar".
+    var currentRate: Double? {
+        nearestToNow()?.precipitation
+    }
+
+    /// Current precipitation rate in mm/h at "now" (nearest frame, 0 when stale).
     var currentPrecipitation: Double {
-        nearestToNow()?.precipitation ?? 0
+        currentRate ?? 0
     }
 
     /// Whether it is raining right now at the location.

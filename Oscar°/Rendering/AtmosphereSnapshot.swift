@@ -129,7 +129,9 @@ enum AtmosphereWeatherMapper {
             ?? weather.forecast.current?.precipitation
             ?? 0)
         let snowfall = Float(value(at: hourlyIndex, in: weather.forecast.hourly?.snowfall) ?? 0)
-        let radarIntensity = radarPrecipitationIntensity(weather.precipSeries)
+        // Radar rate (mm/h) at the frame nearest "now"; ~6 mm/h maps to full intensity.
+        let radarRate = Float(weather.precipSeries?.currentRate ?? 0)
+        let radarIntensity = clamp(radarRate / 6, 0, 1)
         let precipitationIntensity = max(
             clamp(precipitation / 8, 0, 1),
             radarIntensity
@@ -137,7 +139,9 @@ enum AtmosphereWeatherMapper {
         // Radar sees rain the forecast doesn't: a blue, sunny sky can't be right while
         // precipitation reaches the ground. Lift a dry forecast to an overcast, rainy
         // scene so the sky/clouds/sun agree with the rain animation that already shows.
-        if radarIntensity > 0.1, condition == .clear || condition == .partlyCloudy {
+        // Any measurable rate counts (0.1 mm/h is the series' smallest nonzero step) —
+        // even drizzle must not fall out of a rendered blue sky.
+        if radarRate >= 0.1, condition == .clear || condition == .partlyCloudy || condition == .overcast {
             condition = .rain
             cloudCoverage = max(cloudCoverage, clamp(0.55 + radarIntensity * 0.45, 0, 1))
         }
@@ -194,7 +198,9 @@ enum AtmosphereWeatherMapper {
             condition: condition,
             cloudCoverage: cloudCoverage,
             cloudDensity: cloudDensity,
-            precipitationAmount: precipitation,
+            // The effective amount driving the scene: radar-measured rain counts even
+            // when the forecast still reads dry (mm and mm/h share the hourly scale).
+            precipitationAmount: max(precipitation, radarRate),
             snowfallAmount: snowfall,
             precipitationIntensity: precipitationIntensity,
             snowfallIntensity: snowfallIntensity,
@@ -263,13 +269,6 @@ enum AtmosphereWeatherMapper {
 
     private static func normalized(_ value: Float, max: Float) -> Float {
         clamp(value / max, 0, 1)
-    }
-
-    private static func radarPrecipitationIntensity(_ series: PrecipSeriesResponse?) -> Float {
-        guard let series else { return 0 }
-        // `currentPrecipitation` is the rate (mm/h) at the frame nearest "now".
-        // ~6 mm/h maps to full intensity (moderate-to-heavy rain).
-        return clamp(Float(series.currentPrecipitation) / 6, 0, 1)
     }
 
     @MainActor private static func airQualityHaze(weather: Weather, timestamp: Double) -> Float {

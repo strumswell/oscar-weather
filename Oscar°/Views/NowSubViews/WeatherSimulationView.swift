@@ -188,7 +188,9 @@ struct WeatherSimulationView: View {
     }
 
     private func shouldShowStorm(_ snapshot: AtmosphereSnapshot) -> Bool {
-        max(snapshot.precipitationIntensity, snapshot.snowfallIntensity) > 0.05
+        // No minimum: any precipitation that exists gets drops on screen (0.001
+        // only filters float dust). Light rates render sparse via stormStrength.
+        max(snapshot.precipitationIntensity, snapshot.snowfallIntensity) > 0.001
     }
 
     /// The moon's pass across the sky (0 = rise, 0.5 = transit, 1 = set),
@@ -248,8 +250,13 @@ struct WeatherSimulationView: View {
     private func stormStrength(for snapshot: AtmosphereSnapshot) -> Int {
         let isSnow = snapshot.condition == .snow
         let intensity = isSnow ? snapshot.snowfallIntensity : snapshot.precipitationIntensity
-        let base = isSnow ? 90 : 45
-        return max(12, min(220, Int(Double(base) + Double(intensity) * 170)))
+        let base = Double(isSnow ? 90 : 45)
+        // Ramp the base in over the first 0.05 of intensity (≈0.3 mm/h, the old
+        // visibility threshold): drizzle gets a sparse handful of drops instead of
+        // jumping straight to the full base count, and rates at or above the old
+        // threshold look exactly as before.
+        let ramp = min(1, Double(intensity) / 0.05)
+        return max(12, min(220, Int(base * ramp + Double(intensity) * 170)))
     }
 }
 

@@ -3,6 +3,7 @@ import Foundation
 enum HourlyForecastBuilder {
   static func makeItems(
     forecast: Operations.getForecast.Output.Ok.Body.jsonPayload,
+    precipSeries: PrecipSeriesResponse? = nil,
     isLoading: Bool
   ) -> [HourlyTimelineItem] {
     guard let hourly = forecast.hourly else {
@@ -22,12 +23,64 @@ enum HourlyForecastBuilder {
     }
 
     let timeZone = TimeZone(secondsFromGMT: forecast.utc_offset_seconds ?? 0) ?? .current
-    let startIndex = min(localizedHourIndex(currentTime: forecast.current?.time, hours: hourly.time), availableCount - 1)
-    let endIndex = min(startIndex + 48, availableCount - 1)
     let precipitationUnit = forecast.hourly_units?.precipitation ?? "mm"
 
+    // "Jetzt" replaces the current hour: a card with the live conditions —
+    // radar-aware precipitation and icon — followed by the whole hours strictly
+    // after now.
+    if let current = forecast.current,
+       let firstFutureIndex = hourly.time.firstIndex(where: { $0 > current.time }),
+       firstFutureIndex < availableCount {
+      var items: [HourlyTimelineItem] = [
+        .forecast(nowItem(current: current, precipSeries: precipSeries, precipitationUnit: precipitationUnit))
+      ]
+
+      // A sunrise/sunset between now and the first whole hour lives in the hour
+      // slot the Jetzt card replaces — carry it over instead of dropping it.
+      if !isLoading, firstFutureIndex > 0,
+         let sunEvent = sunEventItem(
+           for: hourly.time[firstFutureIndex - 1],
+           daily: forecast.daily,
+           timeZone: timeZone
+         ),
+         sunEvent.timestamp > current.time {
+        items.append(.sunEvent(sunEvent))
+      }
+
+      items += hourlyItems(
+        range: firstFutureIndex...min(firstFutureIndex + 47, availableCount - 1),
+        forecast: forecast,
+        hourly: hourly,
+        precipitationUnit: precipitationUnit,
+        timeZone: timeZone,
+        isLoading: isLoading
+      )
+      return items
+    }
+
+    // No usable current conditions (or the forecast is exhausted): the plain
+    // hourly strip starting at the hour nearest to now.
+    let startIndex = min(localizedHourIndex(currentTime: forecast.current?.time, hours: hourly.time), availableCount - 1)
+    return hourlyItems(
+      range: startIndex...min(startIndex + 48, availableCount - 1),
+      forecast: forecast,
+      hourly: hourly,
+      precipitationUnit: precipitationUnit,
+      timeZone: timeZone,
+      isLoading: isLoading
+    )
+  }
+
+  private static func hourlyItems(
+    range: ClosedRange<Int>,
+    forecast: Operations.getForecast.Output.Ok.Body.jsonPayload,
+    hourly: Operations.getForecast.Output.Ok.Body.jsonPayload.hourlyPayload,
+    precipitationUnit: String,
+    timeZone: TimeZone,
+    isLoading: Bool
+  ) -> [HourlyTimelineItem] {
     var items: [HourlyTimelineItem] = []
-    for index in startIndex...endIndex {
+    for index in range {
       let timestamp = hourly.time[index]
       let forecastItem = HourlyForecastItem(
         timestamp: timestamp,
@@ -56,6 +109,49 @@ enum HourlyForecastBuilder {
     }
 
     return items
+  }
+
+  /// The "Jetzt" card: current conditions, with radar overriding the model where
+  /// it has fresh coverage — radar measures what is falling right now, while the
+  /// model's "current" precipitation is an interpolated guess.
+  private static func nowItem(
+    current: Components.Schemas.CurrentWeather,
+    precipSeries: PrecipSeriesResponse?,
+    precipitationUnit: String
+  ) -> HourlyForecastItem {
+    let radarRate = precipSeries?.currentRate
+    let forecastPrecipitation = current.precipitation ?? 0
+    let precipitation = radarRate.map { precipitationValue(fromMillimeters: $0, unit: precipitationUnit) }
+      ?? forecastPrecipitation
+    let isRaining = (radarRate ?? 0) > 0 || forecastPrecipitation > 0
+
+    // Lift a dry-sky code to a precipitation icon when rain is actually reaching
+    // the ground (mirrors the widgets' radar-aware icon). A code that already
+    // shows precipitation keeps its more specific icon (snow, thunderstorm, …).
+    var weatherCode = current.weathercode
+    if isRaining, weatherCode < 51 {
+      weatherCode = (radarRate ?? forecastPrecipitation) >= 2.5 ? 61 : 51
+    }
+
+    return HourlyForecastItem(
+      timestamp: current.time,
+      hour: String(localized: "Jetzt"),
+      precipitation: HourlyFormatting.precipitationString(
+        value: precipitation,
+        unit: precipitationUnit
+      ),
+      iconName: HourlyFormatting.weatherIconName(
+        weatherCode: weatherCode,
+        isDay: current.is_day ?? 1
+      ),
+      temperature: HourlyFormatting.temperatureString(current.temperature),
+      isNow: true
+    )
+  }
+
+  /// Radar rates are always mm/h; the card label follows the user's unit setting.
+  private static func precipitationValue(fromMillimeters value: Double, unit: String) -> Double {
+    unit.lowercased() == "inch" ? value / 25.4 : value
   }
 
   static func hasHourlyDetailData(forecast: Operations.getForecast.Output.Ok.Body.jsonPayload) -> Bool {
