@@ -449,12 +449,16 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
 
     override func draw(in mapView: MLNMapView, with context: MLNStyleLayerDrawingContext) {
         // Snapshot the drawable state — `draw` runs on MapLibre's render thread.
+        // `self.` is load-bearing: the guard below re-declares these names as
+        // locals typed from `snapshot`, and unqualified lookup on the release
+        // Swift compiler binds the closure to those locals → "circular reference"
+        // (the beta compiler resolves to the properties and builds fine).
         let snapshot = stateLock.withLock {
-            (pipeline: pipelineState, depthStencil: depthStencilState,
-             texA: textureA, texB: textureB, palette: paletteTexture,
-             flow: flowTexture ?? zeroFlowTexture, flowScale: flowScale,
-             bounds: overlayBounds, phase: phase, opacity: opacity,
-             soft: softRendering)
+            (pipeline: self.pipelineState, depthStencil: self.depthStencilState,
+             texA: self.textureA, texB: self.textureB, palette: self.paletteTexture,
+             flow: self.flowTexture ?? self.zeroFlowTexture, flowScale: self.flowScale,
+             bounds: self.overlayBounds, phase: self.phase, opacity: self.opacity,
+             soft: self.softRendering)
         }
         if !didLogFirstDraw {
             didLogFirstDraw = true
