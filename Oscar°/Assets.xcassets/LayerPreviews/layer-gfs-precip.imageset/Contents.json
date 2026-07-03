@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "layer-gfs-precip.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

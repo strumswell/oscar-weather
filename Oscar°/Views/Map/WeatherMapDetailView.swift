@@ -1,0 +1,239 @@
+//
+//  WeatherMapDetailView.swift
+//  Oscar°
+//
+//  Fullscreen weather map: timestamp badge, legend, layer picker entry point,
+//  and the shared timeline scrubbers.
+//
+
+import SwiftUI
+import UIKit
+
+// MARK: - Fullscreen detail view
+
+/// Fullscreen weather map: timestamp badge, layer menu, close button, and the shared
+/// timeline scrubbers (radar or model layer, depending on what's active).
+struct WeatherMapDetailView: View {
+    let settingsService: SettingService
+    let onClose: () -> Void
+    @Environment(Location.self) private var location: Location
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var radarState = OscarRadarState(renderMode: .fullscreen)
+    @State private var modelGridState = ModelGridLayerState(renderMode: .fullscreen)
+    @State private var isLayerPickerPresented = false
+
+    var body: some View {
+        ZStack {
+            WeatherMapView(
+                settingsService: settingsService,
+                coordinates: location.coordinates,
+                cities: LocationService.shared.city.cities,
+                overlayOpacity: 0.7,
+                userActionAllowed: true,
+                showWindParticles: true,
+                oscarRadarState: radarState,
+                modelGridState: modelGridState
+            )
+            .ignoresSafeArea()
+
+            // Timestamp badge + legend — top-left (colormap follows the active layer)
+            VStack {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        if settingsService.oscarRadarLayer {
+                            if radarState.hasAnyLoadedFrame,
+                               let timestamp = radarState.currentFrameTimestamp {
+                                RadarTimestampBadge(
+                                    timestamp: timestamp,
+                                    isLive: radarState.isCurrentFrameLive
+                                )
+                                ColormapVerticalLegend(colormap: .radar)
+                            } else if radarState.isLoading {
+                                ProgressView()
+                                    .controlSize(.small)
+                            }
+                        } else if settingsService.activeTileLayer != nil {
+                            if modelGridState.hasCurrentFrame,
+                               let timestamp = modelGridState.currentFrameTimestamp {
+                                RadarTimestampBadge(timestamp: timestamp, isLive: false)
+                                if let colormap = settingsService.activeTileLayer?.colormap {
+                                    ColormapVerticalLegend(colormap: colormap)
+                                }
+                            } else if modelGridState.isLoading {
+                                ProgressView()
+                                    .controlSize(.small)
+                            }
+                        }
+                    }
+                    .padding(12)
+                    Spacer()
+                    VStack(spacing: 4) {
+                        Button(action: dismiss) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 20, weight: .semibold))
+                                .frame(width: 18, height: 18)
+                        }
+                        .buttonStyle(.glass)
+                        .buttonBorderShape(.circle)
+                        .controlSize(.large)
+                        .accessibilityLabel(Text("Karte schließen"))
+
+                        layerPickerButton
+                    }
+                    .padding(.trailing)
+                    .padding(.top)
+                }
+                Spacer()
+            }
+
+            // Timeline controls — bottom (the same shared components as before)
+            VStack {
+                Spacer()
+                if settingsService.oscarRadarLayer {
+                    OscarRadarTimelineControls(radarState: radarState,
+                                               onBadgeTap: presentLayerPicker)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 16)
+                } else if settingsService.activeTileLayer != nil {
+                    WeatherTileTimelineControls(imageState: modelGridState,
+                                                onBadgeTap: presentLayerPicker)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 16)
+                }
+            }
+        }
+        // Declared BEFORE the load task so the source pick lands first (both run
+        // on the main actor and the pick has no suspension points).
+        .task(id: "\(location.coordinates.latitude)|\(location.coordinates.longitude)") {
+            settingsService.autoSelectRadarSource(
+                latitude: location.coordinates.latitude,
+                longitude: location.coordinates.longitude)
+        }
+        .task {
+            if settingsService.oscarRadarLayer {
+                radarState.setRegion(settingsService.oscarRadarRegion)
+                await radarState.loadAllFrames()
+                // Testing hook: `-radarAutoPlay YES` starts playback immediately
+                // (exercises sustained frame swaps without touch input).
+                if UserDefaults.standard.bool(forKey: "radarAutoPlay") {
+                    radarState.play()
+                }
+            } else if let layer = settingsService.activeTileLayer {
+                await modelGridState.loadLayer(layer)
+            }
+        }
+        .task {
+            // Testing hook: `-autoPresentLayerPicker YES` opens the layer sheet
+            // once the map is up (screenshot flows without touch input).
+            guard UserDefaults.standard.bool(forKey: "autoPresentLayerPicker") else { return }
+            try? await Task.sleep(for: .seconds(1.5))
+            isLayerPickerPresented = true
+        }
+        .task {
+            // Map left open across server updates: re-fetch once metadata expires.
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(5 * 60))
+                guard !Task.isCancelled else { break }
+                await refreshActiveLayerIfStale()
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // Coming back from background: the timeline may be minutes to hours
+            // old. refreshIfStale keeps a quick app switch free.
+            guard phase == .active else { return }
+            Task { await refreshActiveLayerIfStale() }
+        }
+        .onChange(of: settingsService.oscarRadarLayer) { _, isEnabled in
+            if isEnabled {
+                modelGridState.pause()
+                radarState.setRegion(settingsService.oscarRadarRegion)
+                if radarState.frames.isEmpty {
+                    Task { await radarState.loadAllFrames() }
+                }
+            } else {
+                radarState.pause()
+            }
+        }
+        .onChange(of: settingsService.oscarRadarRegion) { _, newRegion in
+            guard settingsService.oscarRadarLayer else { return }
+            radarState.setRegion(newRegion)
+            Task { await radarState.reloadForCurrentRegion() }
+        }
+        .onChange(of: settingsService.activeTileLayer) { _, newLayer in
+            if let layer = newLayer {
+                radarState.pause()
+                Task { await modelGridState.loadLayer(layer) }
+            } else {
+                modelGridState.pause()
+            }
+        }
+        .sheet(isPresented: $isLayerPickerPresented) {
+            MapLayerPickerSheet(
+                settingsService: settingsService,
+                onSelectRadar: activateOscarRadar,
+                onSelectTileLayer: activateTileLayer
+            )
+            // No .presentationBackground override: iOS 26 renders the sheet as
+            // Liquid Glass at the medium detent and swaps to an opaque background
+            // when pulled up to .large.
+            .presentationDetents([.medium, .large])
+            .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+            .presentationDragIndicator(.hidden)
+        }
+    }
+
+    // MARK: - Layer picker
+
+    /// Apple-Maps-style entry point ("Kartenmodi"): a glassy circular button that
+    /// opens the half-height layer picker sheet.
+    private var layerPickerButton: some View {
+        Button(action: presentLayerPicker) {
+            Image(systemName: "globe.europe.africa.fill")
+                .font(.system(size: 20, weight: .semibold))
+                .frame(width: 18, height: 18)
+        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .controlSize(.large)
+        .accessibilityLabel(Text("Kartenebenen"))
+    }
+
+    private func presentLayerPicker() {
+        UIApplication.shared.playHapticFeedback()
+        isLayerPickerPresented = true
+    }
+
+    private func refreshActiveLayerIfStale() async {
+        if settingsService.oscarRadarLayer {
+            await radarState.refreshIfStale()
+        } else if settingsService.activeTileLayer != nil {
+            await modelGridState.refreshIfStale()
+        }
+    }
+
+    private func activateOscarRadar(_ region: RadarRegion) {
+        settingsService.radarAutoFallbackActive = false
+        settingsService.activeTileLayer = nil
+        settingsService.settings?.rainviewerLayer = false
+        settingsService.oscarRadarRegion = region
+        settingsService.save()
+        settingsService.oscarRadarLayer = true
+        modelGridState.pause()
+    }
+
+    private func activateTileLayer(_ layer: WeatherTileLayer) {
+        settingsService.radarAutoFallbackActive = false
+        settingsService.oscarRadarLayer = false
+        settingsService.settings?.rainviewerLayer = false
+        settingsService.save()
+        radarState.pause()
+        settingsService.activeTileLayer = layer
+    }
+
+    private func dismiss() {
+        radarState.pause()
+        modelGridState.pause()
+        UIApplication.shared.playHapticFeedback()
+        onClose()
+    }
+}

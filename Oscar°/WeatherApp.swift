@@ -26,8 +26,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
             queue: .main
         ) { _ in
             Task { @MainActor in
-                OscarRadarState.purgeDecodedCaches()
-                GFSImageLayerState.purgeDecodedCaches()
+                ModelGridLayerState.purgeDecodedCaches()
             }
         }
         return true
@@ -112,6 +111,7 @@ struct WeatherApp: App {
                     }
                     await weather.refresh(location: location)
                     await notificationSettingsManager.configureOnLaunch()
+                    await WidgetBasemapRenderer.refreshIfNeeded()
                 }
                 .sentryTrace("NowView")
         }

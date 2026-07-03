@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "layer-icon-wind.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

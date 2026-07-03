@@ -1,5 +1,6 @@
 import UIKit
-import MapKit
+import CoreLocation
+import MapLibre
 
 // MARK: - Display link proxy (breaks retain cycle)
 
@@ -11,13 +12,14 @@ private final class WindParticleDisplayLinkProxy: NSObject {
 // MARK: - Wind particle overlay
 
 /// A transparent UIView that renders animated wind particles above the map.
-/// Placed as a subview of MKMapView so it tracks pan/zoom automatically.
+/// Placed as a sibling above the MLNMapView; the coordinator forwards region
+/// changes so particles re-seed after pan/zoom.
 /// Respects Reduce Motion: hidden when the system preference is enabled.
-final class WindParticleView: UIView {
+final class WindParticleView: UIView { 
 
     // MARK: - Configuration
 
-    weak var mapView: MKMapView?
+    weak var mapView: MLNMapView?
 
     var frameKey: String? {
         didSet {
@@ -64,6 +66,7 @@ final class WindParticleView: UIView {
     nonisolated(unsafe) private var displayLink: CADisplayLink?
     private var lastTimestamp: CFTimeInterval = 0
     nonisolated(unsafe) private var reduceMotionObserver: NSObjectProtocol?
+    nonisolated(unsafe) private var thermalObserver: NSObjectProtocol?
 
     // MARK: - Init
 
@@ -94,12 +97,22 @@ final class WindParticleView: UIView {
             // The observer is registered with `queue: .main`, so this fires on the main actor.
             MainActor.assumeIsolated { self?.applyReduceMotionState() }
         }
+        thermalObserver = NotificationCenter.default.addObserver(
+            forName: ProcessInfo.thermalStateDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.resetParticles() }
+        }
     }
 
     deinit {
         displayLink?.invalidate()
         fetchVisibleTilesTask?.cancel()
         if let obs = reduceMotionObserver {
+            NotificationCenter.default.removeObserver(obs)
+        }
+        if let obs = thermalObserver {
             NotificationCenter.default.removeObserver(obs)
         }
     }
@@ -125,7 +138,10 @@ final class WindParticleView: UIView {
     }
 
     private func rebuildBitmapContext() {
-        let scale = window?.windowScene?.screen.scale ?? traitCollection.displayScale
+        // 2× is indistinguishable for soft trails and nearly halves the pixels the
+        // fade + stroke + makeImage copy touch every tick (thermal, see the device
+        // overheat history around parallel decode).
+        let scale = min(2, window?.windowScene?.screen.scale ?? traitCollection.displayScale)
         let pw = bounds.width
         let ph = bounds.height
         guard pw > 0, ph > 0 else { return }
@@ -153,16 +169,25 @@ final class WindParticleView: UIView {
         guard w > 0, h > 0 else { return }
         let zoomLevel = approximateZoomLevel(for: mapView)
         let zoomDensityScale = particleDensityScale(for: zoomLevel)
-        let count = max(60, Int((w * h / 5200) * CGFloat(zoomDensityScale)))
+        // Thermal backpressure: fewer particles once the device runs warm.
+        let thermalScale: CGFloat
+        switch ProcessInfo.processInfo.thermalState {
+        case .critical: thermalScale = 0.25
+        case .serious:  thermalScale = 0.5
+        default:        thermalScale = 1
+        }
+        let count = min(600, max(95, Int((w * h / 2300) * CGFloat(zoomDensityScale) * thermalScale)))
         particles = (0..<count).map { _ in randomParticle(w: Float(w), h: Float(h)) }
     }
 
     private func randomParticle(w: Float, h: Float) -> Particle {
+        // 1.5–4 s at 30 fps: long enough for coherent streamlines, short enough
+        // that the field re-seeds visibly after pan/zoom.
         return Particle(
             x: Float.random(in: 0..<w),
             y: Float.random(in: 0..<h),
-            age: Int.random(in: 0..<24),
-            ttl: Int.random(in: 12..<30)
+            age: Int.random(in: 0..<40),
+            ttl: Int.random(in: 45..<120)
         )
     }
 
@@ -203,32 +228,38 @@ final class WindParticleView: UIView {
         let zoomLevel = approximateZoomLevel(for: mapView)
         let isGFS = activeLayer == .gfsWind
         let metersScale = particleVelocityScale(for: zoomLevel, isGFS: isGFS)
-        let minPixelStep: Float = isGFS ? 0.22 : 0.18
-        let trailLengthScale = particleTrailScale(for: zoomLevel, isGFS: isGFS)
+        let minPixelStep: Float = 0.2
         let dt = max(0.5, deltaMs / 16.667)
 
         // Fade previous strokes instead of fully clearing, so particles leave trails.
+        // 0.07/tick ≈ a ~half-second tail at 30 fps — the trail comes from
+        // persistence, not from stretching the per-tick step. Far-out zooms get a
+        // slower fade: continent-scale streamlines read better with longer tails.
         let frameRect = CGRect(origin: .zero, size: CGSize(width: w, height: h))
         ctx.setBlendMode(.destinationOut)
-        ctx.setFillColor(UIColor.black.withAlphaComponent(isGFS ? 0.12 : 0.1).cgColor)
+        ctx.setFillColor(UIColor.black.withAlphaComponent(zoomLevel <= 4 ? 0.045 : 0.07).cgColor)
         ctx.fill(frameRect)
 
         // Stroke style tuned for readability over busy radar/map imagery.
         ctx.setBlendMode(.normal)
         if isGFS {
-            ctx.setStrokeColor(red: 232/255, green: 244/255, blue: 1, alpha: 0.92)
+            ctx.setStrokeColor(red: 232/255, green: 244/255, blue: 1, alpha: 0.9)
         } else {
-            ctx.setStrokeColor(red: 250/255, green: 252/255, blue: 1, alpha: 0.96)
+            ctx.setStrokeColor(red: 250/255, green: 252/255, blue: 1, alpha: 0.94)
         }
-        ctx.setLineWidth(isGFS ? 1.9 : 2.1)
+        ctx.setLineWidth(isGFS ? 1.6 : 1.8)
         ctx.beginPath()
 
         let fw = Float(w)
         let fh = Float(h)
-        let visibleRect = mapView.visibleMapRect
-        let isAxisAligned = mapView.camera.heading == 0 && mapView.camera.pitch == 0
-        let mapPointsPerPixelX = visibleRect.width / Double(w)
-        let mapPointsPerPixelY = visibleRect.height / Double(h)
+        // Axis-aligned fast path: per-particle conversions in plain Web-Mercator math
+        // (two MapLibre `convert` calls per particle per tick would be the slow path).
+        let visible = mapView.visibleCoordinateBounds
+        let isAxisAligned = mapView.direction == 0 && mapView.camera.pitch == 0
+        let nw = Self.mercatorUnit(latitude: visible.ne.latitude, longitude: visible.sw.longitude)
+        let se = Self.mercatorUnit(latitude: visible.sw.latitude, longitude: visible.ne.longitude)
+        let mercPerPixelX = (se.x - nw.x) / Double(w)
+        let mercPerPixelY = (se.y - nw.y) / Double(h)
 
         for i in particles.indices {
             if particles[i].age >= particles[i].ttl {
@@ -239,11 +270,11 @@ final class WindParticleView: UIView {
             let sx = particles[i].x
             let sy = particles[i].y
             let coord: CLLocationCoordinate2D
-            if isAxisAligned {
-                coord = MKMapPoint(
-                    x: visibleRect.minX + Double(sx) * mapPointsPerPixelX,
-                    y: visibleRect.minY + Double(sy) * mapPointsPerPixelY
-                ).coordinate
+            if isAxisAligned, mercPerPixelX > 0, mercPerPixelY > 0 {
+                coord = Self.coordinate(
+                    mercX: nw.x + Double(sx) * mercPerPixelX,
+                    mercY: nw.y + Double(sy) * mercPerPixelY
+                )
             } else {
                 coord = mapView.convert(
                     CGPoint(x: CGFloat(sx), y: CGFloat(sy)),
@@ -264,11 +295,11 @@ final class WindParticleView: UIView {
                 longitude: coord.longitude + dLon
             )
             let newPt: CGPoint
-            if isAxisAligned {
-                let mapPoint = MKMapPoint(newCoord)
+            if isAxisAligned, mercPerPixelX > 0, mercPerPixelY > 0 {
+                let merc = Self.mercatorUnit(latitude: newCoord.latitude, longitude: newCoord.longitude)
                 newPt = CGPoint(
-                    x: (mapPoint.x - visibleRect.minX) / mapPointsPerPixelX,
-                    y: (mapPoint.y - visibleRect.minY) / mapPointsPerPixelY
+                    x: (merc.x - nw.x) / mercPerPixelX,
+                    y: (merc.y - nw.y) / mercPerPixelY
                 )
             } else {
                 newPt = mapView.convert(newCoord, toPointTo: self)
@@ -281,9 +312,6 @@ final class WindParticleView: UIView {
                 let s = minPixelStep / spd
                 dx *= s; dy *= s
             }
-
-            dx *= trailLengthScale
-            dy *= trailLengthScale
 
             let nx = sx + dx
             let ny = sy + dy
@@ -392,17 +420,17 @@ final class WindParticleView: UIView {
         }
     }
 
-    private func visibleTilePositions(in mapView: MKMapView) -> (z: Int, positions: [(x: Int, y: Int)]) {
-        let lonSpan = mapView.region.span.longitudeDelta
-        let z = max(0, min(8, Int(log2(360.0 / max(0.001, lonSpan)).rounded()) + 1))
+    private func visibleTilePositions(in mapView: MLNMapView) -> (z: Int, positions: [(x: Int, y: Int)]) {
+        let visible = mapView.visibleCoordinateBounds
+        let z = approximateZoomLevel(for: mapView)
         let tilesPerSide = 1 << z
-        let worldSize = MKMapSize.world.width
-        let rect = mapView.visibleMapRect
 
-        let minX = max(0, Int(rect.minX / worldSize * Double(tilesPerSide)))
-        let maxX = min(tilesPerSide - 1, Int(rect.maxX / worldSize * Double(tilesPerSide)))
-        let minY = max(0, Int(rect.minY / worldSize * Double(tilesPerSide)))
-        let maxY = min(tilesPerSide - 1, Int(rect.maxY / worldSize * Double(tilesPerSide)))
+        let nw = Self.mercatorUnit(latitude: visible.ne.latitude, longitude: visible.sw.longitude)
+        let se = Self.mercatorUnit(latitude: visible.sw.latitude, longitude: visible.ne.longitude)
+        let minX = max(0, Int(nw.x * Double(tilesPerSide)))
+        let maxX = min(tilesPerSide - 1, Int(se.x * Double(tilesPerSide)))
+        let minY = max(0, Int(nw.y * Double(tilesPerSide)))
+        let maxY = min(tilesPerSide - 1, Int(se.y * Double(tilesPerSide)))
 
         guard minX <= maxX, minY <= maxY else { return (z, []) }
 
@@ -415,54 +443,60 @@ final class WindParticleView: UIView {
         return (z, positions)
     }
 
-    private func approximateZoomLevel(for mapView: MKMapView) -> Int {
-        let lonSpan = mapView.region.span.longitudeDelta
+    private func approximateZoomLevel(for mapView: MLNMapView) -> Int {
+        let visible = mapView.visibleCoordinateBounds
+        let lonSpan = visible.ne.longitude - visible.sw.longitude
         return max(0, min(8, Int(log2(360.0 / max(0.001, lonSpan)).rounded()) + 1))
     }
 
-    private func approximateZoomLevel(for mapView: MKMapView?) -> Int {
+    private func approximateZoomLevel(for mapView: MLNMapView?) -> Int {
         guard let mapView else { return 5 }
         return approximateZoomLevel(for: mapView)
+    }
+
+    // MARK: - Web-Mercator helpers (normalized [0,1]², y grows south)
+
+    private static func mercatorUnit(latitude: Double, longitude: Double) -> (x: Double, y: Double) {
+        let lat = min(85.05112878, max(-85.05112878, latitude))
+        let x = (longitude + 180) / 360
+        let yDeg = log(tan((45 + lat / 2) * .pi / 180)) * 180 / .pi
+        return (x, (180 - yDeg) / 360)
+    }
+
+    private static func coordinate(mercX: Double, mercY: Double) -> CLLocationCoordinate2D {
+        CLLocationCoordinate2D(
+            latitude: atan(sinh(.pi * (1 - 2 * mercY))) * 180 / .pi,
+            longitude: mercX * 360 - 180
+        )
     }
 
     private func particleDensityScale(for zoomLevel: Int) -> Float {
         switch zoomLevel {
         case 0...2:
-            return 2.5
+            return 1.6
         case 3...4:
-            return 1.7
+            return 1.25
         case 5...6:
-            return 0.75
+            return 1.0
         default:
-            return 0.4
+            return 0.6
         }
     }
 
-    private func particleTrailScale(for zoomLevel: Int, isGFS: Bool) -> Float {
-        let base: Float = isGFS ? 1.8 : 1.6
-        switch zoomLevel {
-        case 0...2:
-            return base * 9
-        case 3...4:
-            return base * 7
-        case 5...6:
-            return base * 2.95
-        default:
-            return base * 0.65
-        }
-    }
-
+    /// Degrees-per-(m/s) factor chosen so a given wind speed moves a particle the
+    /// SAME number of screen pixels at every zoom (the 2^z term cancels the map
+    /// scale): 10 m/s ≈ 50 px/s. Far-out zooms are damped a touch — continental
+    /// views read better when the field drifts rather than races.
     private func particleVelocityScale(for zoomLevel: Int, isGFS: Bool) -> Double {
-        let base: Double = isGFS ? 160 : 130
+        let scaleInvariant = 65.0 * pow(2, Double(6 - zoomLevel))
+        // Far-out boost: at continent scale the same px/s reads as stubby dashes,
+        // so let the field flow faster (Windy-style long streamlines).
+        let farOutBoost: Double
         switch zoomLevel {
-        case 0...2:
-            return base * 0.01
-        case 3...4:
-            return base * 0.3
-        case 5...6:
-            return base * 0.78
-        default:
-            return base
+        case ...3: farOutBoost = 1.7
+        case 4:    farOutBoost = 1.3
+        default:   farOutBoost = 1.0
         }
+        return scaleInvariant * farOutBoost * (isGFS ? 1.1 : 1.0)
     }
 }

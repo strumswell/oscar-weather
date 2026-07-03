@@ -5,6 +5,8 @@ import UIKit
 
 struct OscarRadarTimelineControls: View {
     @Bindable var radarState: OscarRadarState
+    /// Tapping the source badge (e.g. "DWD Radar") opens the layer picker.
+    var onBadgeTap: (() -> Void)?
 
     var body: some View {
         Group {
@@ -123,8 +125,6 @@ struct OscarRadarTimelineControls: View {
 
     // MARK: - Helpers
 
-    private var firstTimestamp: String { shortTime(from: radarState.frameTimestamps.first) }
-    private var lastTimestamp: String  { shortTime(from: radarState.frameTimestamps.last) }
     private var previousTimestamp: String { timeAt(index: 0) }
     private var midTimestamp1: String { timeAt(index: oneThirdIndex) }
     private var midTimestamp2: String { timeAt(index: twoThirdIndex) }
@@ -133,16 +133,29 @@ struct OscarRadarTimelineControls: View {
     private var selectedDay: String { day(from: radarState.currentFrameTimestamp) }
     private var selectedTime: String { shortTime(from: radarState.currentFrameTimestamp) }
 
+    private var regionBadgeTitle: String {
+        switch radarState.region {
+        case .germany: "DWD Radar"
+        case .europe: "OPERA Radar"
+        case .usa: "NOAA Radar"
+        }
+    }
+
     private var dwdBadge: some View {
-        Text(radarState.region == .europe ? "OPERA Radar" : "DWD Radar")
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(.primary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-            )
+        Button(action: { onBadgeTap?() }) {
+            Text(regionBadgeTitle)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+        .disabled(onBadgeTap == nil)
+        .accessibilityHint(Text("Öffnet die Kartenebenen"))
     }
 
     private func timeAt(index: Int) -> String {
@@ -211,6 +224,7 @@ struct RadarTimestampBadge: View {
 // MARK: - Pulsing dot
 
 private struct PulsingDot: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pulsing = false
 
     var body: some View {
@@ -219,7 +233,7 @@ private struct PulsingDot: View {
             .frame(width: 6, height: 6)
             .scaleEffect(pulsing ? 1.5 : 1.0)
             .opacity(pulsing ? 0.5 : 1.0)
-            .onAppear { pulsing = true }
+            .onAppear { pulsing = !reduceMotion }
             .animation(
                 .easeInOut(duration: 0.9).repeatForever(autoreverses: true),
                 value: pulsing
@@ -263,7 +277,9 @@ extension DateFormatter {
 // MARK: - Tile Layer Timeline Controls (ICON-D2 / GFS)
 
 struct WeatherTileTimelineControls: View {
-    @Bindable var imageState: GFSImageLayerState
+    @Bindable var imageState: ModelGridLayerState
+    /// Tapping the source badge (e.g. "DWD ICON-D2") opens the layer picker.
+    var onBadgeTap: (() -> Void)?
 
     var body: some View {
         Group {
@@ -381,15 +397,20 @@ struct WeatherTileTimelineControls: View {
     // MARK: - Badge
 
     private var sourceBadge: some View {
-        Text(imageState.currentLayer?.sourceLabel ?? "")
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(.primary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-            )
+        Button(action: { onBadgeTap?() }) {
+            Text(imageState.currentLayer?.sourceLabel ?? "")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+        .disabled(onBadgeTap == nil)
+        .accessibilityHint(Text("Öffnet die Kartenebenen"))
     }
 
     // MARK: - Helpers
@@ -600,182 +621,5 @@ private struct TimelineScrubber: View {
         let clampedIndex = max(0, min(frameCount - 1, index))
         let fraction = CGFloat(clampedIndex) / CGFloat(frameCount - 1)
         return fraction * width
-    }
-}
-
-// ===========================================================================
-// MARK: - Colormap
-// ===========================================================================
-
-enum WeatherColormap {
-    case radar, temperature, wind
-
-    // Colors ordered from minimum → maximum value
-    var colors: [Color] {
-        switch self {
-        case .radar:
-            return [
-                Color(hex: 0x99ffff), // drizzle
-                Color(hex: 0x32ffff),
-                Color(hex: 0x00caca),
-                Color(hex: 0x009934),
-                Color(hex: 0x4cbf19),
-                Color(hex: 0x98cb03),
-                Color(hex: 0xcce603),
-                Color(hex: 0xffff00),
-                Color(hex: 0xffc400),
-                Color(hex: 0xff8901),
-                Color(hex: 0xff0000),
-                Color(hex: 0xb40000),
-                Color(hex: 0x4848ff),
-                Color(hex: 0x0000c9),
-                Color(hex: 0x990199),
-                Color(hex: 0xfe33ff), // extreme / hail
-            ]
-        case .temperature:
-            return [
-                Color(hex: 0x3f49b3), // ≤ −40 °C
-                Color(hex: 0x4263d8),
-                Color(hex: 0x3f7df1),
-                Color(hex: 0x3896f9),
-                Color(hex: 0x2bb1ef),
-                Color(hex: 0x1ec9d8),
-                Color(hex: 0x20dbbf),
-                Color(hex: 0x25eca5),
-                Color(hex: 0xd2e92a), // 0 °C
-                Color(hex: 0xe3d630),
-                Color(hex: 0xf0c331),
-                Color(hex: 0xf7ad2b),
-                Color(hex: 0xf89525),
-                Color(hex: 0xf77b1a),
-                Color(hex: 0xed610e),
-                Color(hex: 0xe14906),
-                Color(hex: 0xd13503),
-                Color(hex: 0xbe2400),
-                Color(hex: 0xa91500), // ≥ +50 °C
-            ]
-        case .wind:
-            return [
-                Color(hex: 0xf7fcff), // 0–1 m/s
-                Color(hex: 0xd2ddf2),
-                Color(hex: 0xadbfe5),
-                Color(hex: 0x9a9edc),
-                Color(hex: 0x8a7fcf),
-                Color(hex: 0x795eb5),
-                Color(hex: 0x693e9a),
-                Color(hex: 0x581d77),
-                Color(hex: 0x4a0059), // ≥ 8 m/s
-            ]
-        }
-    }
-
-    // (fraction 0…1 from bottom/min, label text) for the vertical legend
-    var verticalLabels: [(Double, LocalizedStringKey)] {
-        switch self {
-        case .radar:
-            return [
-                (0.00, "Niesel"),
-                (0.25, "Leicht"),
-                (0.50, "Mäßig"),
-                (0.75, "Stark"),
-                (1.00, "Extrem"),
-            ]
-        case .temperature:
-            // 19 colours, 5 °C/step → fraction = index / 18
-            return [
-                (0.000, "−40 °C"),
-                (0.111, "−30 °C"),
-                (0.222, "−20 °C"),
-                (0.333, "−10 °C"),
-                (0.444,   "0 °C"),
-                (0.556, "+10 °C"),
-                (0.667, "+20 °C"),
-                (0.778, "+30 °C"),
-                (0.889, "+40 °C"),
-                (1.000, "+50 °C"),
-            ]
-        case .wind:
-            return [
-                (0.00, "0 m/s"),
-                (0.25, "2 m/s"),
-                (0.50, "4 m/s"),
-                (0.75, "6 m/s"),
-                (1.00, "≥8 m/s"),
-            ]
-        }
-    }
-
-    var unit: String {
-        switch self {
-        case .radar:       return "mm/h"
-        case .temperature: return "°C"
-        case .wind:        return "m/s"
-        }
-    }
-
-    // Evenly-spaced gradient stops (min at 0, max at 1)
-    var gradientStops: [Gradient.Stop] {
-        let n = colors.count
-        guard n > 1 else { return colors.map { .init(color: $0, location: 0) } }
-        return colors.enumerated().map { i, c in
-            .init(color: c, location: Double(i) / Double(n - 1))
-        }
-    }
-}
-
-extension WeatherTileLayer {
-    var colormap: WeatherColormap {
-        switch self {
-        case .iconPrecip, .gfsPrecip: return .radar
-        case .iconTemp,   .gfsTemp:   return .temperature
-        case .iconWind,   .gfsWind:   return .wind
-        }
-    }
-}
-
-// MARK: - Horizontal gradient line (inside slider chip)
-
-struct ColormapGradientLine: View {
-    let colormap: WeatherColormap
-
-    var body: some View {
-        LinearGradient(stops: colormap.gradientStops, startPoint: .leading, endPoint: .trailing)
-            .frame(height: 4)
-            .clipShape(Capsule())
-            .opacity(0.85)
-    }
-}
-
-// MARK: - Vertical legend (beside map badge)
-
-struct ColormapVerticalLegend: View {
-    let colormap: WeatherColormap
-    private let barWidth: CGFloat = 10
-    private var barHeight: CGFloat { CGFloat(colormap.verticalLabels.count) * 20 }
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 5) {
-            // Gradient bar — low at bottom, high at top
-            LinearGradient(stops: colormap.gradientStops, startPoint: .bottom, endPoint: .top)
-                .frame(width: barWidth, height: barHeight)
-                .clipShape(RoundedRectangle(cornerRadius: barWidth / 2))
-
-            // Labels pinned by fraction
-            ZStack(alignment: .topLeading) {
-                Color.clear.frame(width: 52, height: barHeight)
-                ForEach(Array(colormap.verticalLabels.enumerated()), id: \.offset) { _, entry in
-                    let inset = barWidth / 2
-                    Text(entry.1)
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundStyle(.secondary)
-                        // Shrink the label range by the corner-radius inset so top/bottom
-                        // labels align with the actual start/end of the visible gradient.
-                        .offset(y: inset + (barHeight - barWidth) * (1 - entry.0) - 6)
-                }
-            }
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .glassEffect(in: RoundedRectangle(cornerRadius: 12))
     }
 }

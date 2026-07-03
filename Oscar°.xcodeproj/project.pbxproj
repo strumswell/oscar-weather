@@ -52,7 +52,28 @@
 		2516BD562BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
 		2516BD572BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
 		2516BD582BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */; };
-		2519538F2F124B27003D5302 /* RadarImageOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2519538D2F124B27003D5302 /* RadarImageOverlay.swift */; };
+		AD60000A2FE4000000000001 /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = AD6000092FE4000000000001 /* MapLibre */; };
+		AD60000C2FE4000000000004 /* RadarSnapshotRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD60000B2FE4000000000004 /* RadarSnapshotRenderer.swift */; };
+		AD8000022FE6000000000001 /* WeatherMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000012FE6000000000001 /* WeatherMapView.swift */; };
+		AD8000042FE6000000000001 /* RadarCustomStyleLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000032FE6000000000001 /* RadarCustomStyleLayer.swift */; };
+		AD8000062FE6000000000001 /* UserLocationDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000052FE6000000000001 /* UserLocationDot.swift */; };
+		AD8000082FE6000000000001 /* RadarMotionArrows.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000072FE6000000000001 /* RadarMotionArrows.swift */; };
+		AD80000A2FE6000000000001 /* MapValueBubbles.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000092FE6000000000001 /* MapValueBubbles.swift */; };
+		AD80000C2FE6000000000001 /* WeatherMapPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD80000B2FE6000000000001 /* WeatherMapPreview.swift */; };
+		AD80000E2FE6000000000001 /* WeatherMapDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD80000D2FE6000000000001 /* WeatherMapDetailView.swift */; };
+		AD8000102FE6000000000001 /* MapLayerPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD80000F2FE6000000000001 /* MapLayerPickerSheet.swift */; };
+		AD8000122FE6000000000001 /* WeatherModelInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000112FE6000000000001 /* WeatherModelInfoView.swift */; };
+		AD8000142FE6000000000001 /* WeatherColormap.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000132FE6000000000001 /* WeatherColormap.swift */; };
+		AD8000162FE6000000000001 /* RadarRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000152FE6000000000001 /* RadarRegion.swift */; };
+		AD8000172FE6000000000001 /* RadarRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000152FE6000000000001 /* RadarRegion.swift */; };
+		AD8000192FE6000000000001 /* RadarFrameSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000182FE6000000000001 /* RadarFrameSupport.swift */; };
+		AD80001A2FE6000000000001 /* RadarFrameSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000182FE6000000000001 /* RadarFrameSupport.swift */; };
+		AD80001C2FE6000000000001 /* RadarMotionData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD80001B2FE6000000000001 /* RadarMotionData.swift */; };
+		AD80001D2FE6000000000001 /* RadarMotionData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD80001B2FE6000000000001 /* RadarMotionData.swift */; };
+		AD80001F2FE6000000000001 /* WeatherTileLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD80001E2FE6000000000001 /* WeatherTileLayer.swift */; };
+		AD8000202FE6000000000001 /* WeatherTileLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD80001E2FE6000000000001 /* WeatherTileLayer.swift */; };
+		AD8000222FE6000000000001 /* ModelGridLayerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000212FE6000000000001 /* ModelGridLayerState.swift */; };
+		AD8000232FE6000000000001 /* ModelGridLayerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000212FE6000000000001 /* ModelGridLayerState.swift */; };
 		251953902F124B27003D5302 /* RadarTimelineControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2519538E2F124B27003D5302 /* RadarTimelineControls.swift */; };
 		251BFE7E2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */; };
 		251BFEC42E48F34000D35589 /* WeatherAtmosphericAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */; };
@@ -62,8 +83,10 @@
 		AD6000062FE4000000000001 /* AtmosphereDebugPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6000052FE4000000000001 /* AtmosphereDebugPanel.swift */; };
 		AD6000082FE4000000000001 /* AtmosphereDebugOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6000072FE4000000000001 /* AtmosphereDebugOverlay.swift */; };
 		251BFED22FB000000000001 /* AtmosphereSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFED02FB000000000001 /* AtmosphereSnapshot.swift */; };
+		AD6000102FE4000000000006 /* WidgetBasemapStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD60000F2FE4000000000006 /* WidgetBasemapStore.swift */; };
+		AD6000112FE4000000000006 /* WidgetBasemapStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD60000F2FE4000000000006 /* WidgetBasemapStore.swift */; };
+		AD6000132FE4000000000007 /* WidgetBasemapRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6000122FE4000000000007 /* WidgetBasemapRenderer.swift */; };
 		251BFED42FB000000000001 /* AtmosphereShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 251BFED32FB000000000001 /* AtmosphereShaders.metal */; };
-		251FE39127C5674400D26F0F /* WMSTileOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251FE39027C5674400D26F0F /* WMSTileOverlay.swift */; };
 		2523367F27C3EB3900C2111A /* RainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2523367E27C3EB3900C2111A /* RainView.swift */; };
 		252FC3B42ECE830300981FF3 /* RadarColorMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 252FC3B32ECE830200981FF3 /* RadarColorMapping.swift */; };
 		2533940A27C43F810087C220 /* AlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2533940927C43F810087C220 /* AlertView.swift */; };
@@ -152,8 +175,6 @@
 		27CB790C1F0C4B2E8B8D4675 /* ForecastSanitizingMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD4C99740CB4E98913B4BC6 /* ForecastSanitizingMiddleware.swift */; };
 		28830655F3EF4C9D9B1E72FD /* ForecastSanitizingMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD4C99740CB4E98913B4BC6 /* ForecastSanitizingMiddleware.swift */; };
 		3CA2D5A0065D45D394BED588 /* ForecastSanitizingMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD4C99740CB4E98913B4BC6 /* ForecastSanitizingMiddleware.swift */; };
-		259EDA6C29ABC19F00F94996 /* RainRadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259EDA6B29ABC19F00F94996 /* RainRadarView.swift */; };
-		25A0CEDD26C4068300DD4A79 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A0CEDC26C4068300DD4A79 /* RadarView.swift */; };
 		25A1C0022F8D000100000001 /* APIContactIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1C0012F8D000100000001 /* APIContactIdentity.swift */; };
 		25A1C0032F8D000100000001 /* APIContactIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1C0012F8D000100000001 /* APIContactIdentity.swift */; };
 		25A1C0042F8D000100000001 /* APIContactIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A1C0012F8D000100000001 /* APIContactIdentity.swift */; };
@@ -180,8 +201,6 @@
 		25CB17EA2B470461001D973A /* APIResultExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CB17E92B470461001D973A /* APIResultExtensions.swift */; };
 		25CBB63C2B44A13600223B69 /* WeatherSimulationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CBB63B2B44A13600223B69 /* WeatherSimulationView.swift */; };
 		25D72B2727C67016001F43FC /* SettingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D72B2627C67016001F43FC /* SettingService.swift */; };
-		25DA7A1A27A420970062E02B /* MapDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DA7A1927A420970062E02B /* MapDetailView.swift */; };
-		25DEA6152BCDA4CA00D403D5 /* WMSTileOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251FE39027C5674400D26F0F /* WMSTileOverlay.swift */; };
 		25ED4A4727A2F5C60050C4A9 /* HeadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED4A4627A2F5C60050C4A9 /* HeadView.swift */; };
 		25ED799529F1A7C6002E0AAB /* Color-Interpolation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799429F1A7C6002E0AAB /* Color-Interpolation.swift */; };
 		25ED79AB29F1A7DF002E0AAB /* Meteor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ED799629F1A7DD002E0AAB /* Meteor.swift */; };
@@ -362,16 +381,32 @@
 		2512E97B2F70B000004670E4 /* TemperatureRangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureRangeView.swift; sourceTree = "<group>"; };
 		251440882D86E0E400E48037 /* RainViewerAttribution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainViewerAttribution.swift; sourceTree = "<group>"; };
 		2516BD552BD9AD1E00A522D1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		2519538D2F124B27003D5302 /* RadarImageOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarImageOverlay.swift; sourceTree = "<group>"; };
+		AD60000B2FE4000000000004 /* RadarSnapshotRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarSnapshotRenderer.swift; sourceTree = "<group>"; };
+		AD8000012FE6000000000001 /* WeatherMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherMapView.swift; sourceTree = "<group>"; };
+		AD8000032FE6000000000001 /* RadarCustomStyleLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarCustomStyleLayer.swift; sourceTree = "<group>"; };
+		AD8000052FE6000000000001 /* UserLocationDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationDot.swift; sourceTree = "<group>"; };
+		AD8000072FE6000000000001 /* RadarMotionArrows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarMotionArrows.swift; sourceTree = "<group>"; };
+		AD8000092FE6000000000001 /* MapValueBubbles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapValueBubbles.swift; sourceTree = "<group>"; };
+		AD80000B2FE6000000000001 /* WeatherMapPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherMapPreview.swift; sourceTree = "<group>"; };
+		AD80000D2FE6000000000001 /* WeatherMapDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherMapDetailView.swift; sourceTree = "<group>"; };
+		AD80000F2FE6000000000001 /* MapLayerPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapLayerPickerSheet.swift; sourceTree = "<group>"; };
+		AD8000112FE6000000000001 /* WeatherModelInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherModelInfoView.swift; sourceTree = "<group>"; };
+		AD8000132FE6000000000001 /* WeatherColormap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherColormap.swift; sourceTree = "<group>"; };
+		AD8000152FE6000000000001 /* RadarRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarRegion.swift; sourceTree = "<group>"; };
+		AD8000182FE6000000000001 /* RadarFrameSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarFrameSupport.swift; sourceTree = "<group>"; };
+		AD80001B2FE6000000000001 /* RadarMotionData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarMotionData.swift; sourceTree = "<group>"; };
+		AD80001E2FE6000000000001 /* WeatherTileLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherTileLayer.swift; sourceTree = "<group>"; };
+		AD8000212FE6000000000001 /* ModelGridLayerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelGridLayerState.swift; sourceTree = "<group>"; };
 		2519538E2F124B27003D5302 /* RadarTimelineControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarTimelineControls.swift; sourceTree = "<group>"; };
 		251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAtmosphericAdapter.swift; sourceTree = "<group>"; };
 		251BFED02FB000000000001 /* AtmosphereSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereSnapshot.swift; sourceTree = "<group>"; };
+		AD60000F2FE4000000000006 /* WidgetBasemapStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBasemapStore.swift; sourceTree = "<group>"; };
+		AD6000122FE4000000000007 /* WidgetBasemapRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBasemapRenderer.swift; sourceTree = "<group>"; };
 		AD6000012FE4000000000001 /* AtmosphereDebugState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereDebugState.swift; sourceTree = "<group>"; };
 		AD6000032FE4000000000001 /* AtmosphereDebugSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereDebugSnapshot.swift; sourceTree = "<group>"; };
 		AD6000052FE4000000000001 /* AtmosphereDebugPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereDebugPanel.swift; sourceTree = "<group>"; };
 		AD6000072FE4000000000001 /* AtmosphereDebugOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereDebugOverlay.swift; sourceTree = "<group>"; };
 		251BFED32FB000000000001 /* AtmosphereShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = AtmosphereShaders.metal; sourceTree = "<group>"; };
-		251FE39027C5674400D26F0F /* WMSTileOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WMSTileOverlay.swift; sourceTree = "<group>"; };
 		2523367E27C3EB3900C2111A /* RainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainView.swift; sourceTree = "<group>"; };
 		252FC3B32ECE830200981FF3 /* RadarColorMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarColorMapping.swift; sourceTree = "<group>"; };
 		2533940927C43F810087C220 /* AlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertView.swift; sourceTree = "<group>"; };
@@ -416,8 +451,6 @@
 		259704E42757D7E800DFCA53 /* AlertDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertDetailView.swift; sourceTree = "<group>"; };
 		2598E9352C7291D2004A9D5E /* CacheMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheMiddleware.swift; sourceTree = "<group>"; };
 		1DD4C99740CB4E98913B4BC6 /* ForecastSanitizingMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastSanitizingMiddleware.swift; sourceTree = "<group>"; };
-		259EDA6B29ABC19F00F94996 /* RainRadarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainRadarView.swift; sourceTree = "<group>"; };
-		25A0CEDC26C4068300DD4A79 /* RadarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarView.swift; sourceTree = "<group>"; };
 		25A1C0012F8D000100000001 /* APIContactIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIContactIdentity.swift; sourceTree = "<group>"; };
 		25A1C0052F8D000100000001 /* NotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
 		25A1D1002F8E000100000001 /* MemberCardStickerPlacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberCardStickerPlacement.swift; sourceTree = "<group>"; };
@@ -438,7 +471,6 @@
 		25CB17E92B470461001D973A /* APIResultExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIResultExtensions.swift; sourceTree = "<group>"; };
 		25CBB63B2B44A13600223B69 /* WeatherSimulationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherSimulationView.swift; sourceTree = "<group>"; };
 		25D72B2627C67016001F43FC /* SettingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingService.swift; sourceTree = "<group>"; };
-		25DA7A1927A420970062E02B /* MapDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapDetailView.swift; sourceTree = "<group>"; };
 		25E30B2A26CD9B31007F468D /* CityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityService.swift; sourceTree = "<group>"; };
 		25ECE65D2BDA1F250088B302 /* ci_post_xcodebuild.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ci_post_xcodebuild.sh; sourceTree = "<group>"; };
 		25ED4A4627A2F5C60050C4A9 /* HeadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadView.swift; sourceTree = "<group>"; };
@@ -563,6 +595,7 @@
 				25B734172BD9BB86003C6756 /* SentrySwiftUI in Frameworks */,
 				25C4300F2AC36165001DA5FC /* OpenAPIRuntime in Frameworks */,
 				25C430122AC36173001DA5FC /* OpenAPIURLSession in Frameworks */,
+				AD60000A2FE4000000000001 /* MapLibre in Frameworks */,
 				255BDD9E2BD9B2E40061E4EB /* (null) in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -615,6 +648,8 @@
 			children = (
 				251BFE7B2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift */,
 				251BFED02FB000000000001 /* AtmosphereSnapshot.swift */,
+				AD60000F2FE4000000000006 /* WidgetBasemapStore.swift */,
+				AD6000122FE4000000000007 /* WidgetBasemapRenderer.swift */,
 				251BFED32FB000000000001 /* AtmosphereShaders.metal */,
 			);
 			path = Rendering;
@@ -668,6 +703,7 @@
 			children = (
 				3EB8902F251A55950028FED0 /* RadarWidget.swift */,
 				2546516629E492E500D8C13D /* RadarProvider.swift */,
+				AD60000B2FE4000000000004 /* RadarSnapshotRenderer.swift */,
 			);
 			path = Radar;
 			sourceTree = "<group>";
@@ -704,7 +740,6 @@
 				253F84F62C20B8ED00844A9E /* HourlyDetailView.swift */,
 				3E61170B2544B2D300B68120 /* DailyView.swift */,
 				AD1000052FBB000000000001 /* DailyDetailView.swift */,
-				25A0CEDC26C4068300DD4A79 /* RadarView.swift */,
 				2523367E27C3EB3900C2111A /* RainView.swift */,
 				2533940927C43F810087C220 /* AlertView.swift */,
 				253F708A29510B06000BD4C0 /* AQIView.swift */,
@@ -799,6 +834,7 @@
 		25CB17E02B4702D1001D973A /* Networking */ = {
 			isa = PBXGroup;
 			children = (
+				AD8000312FE6000000000001 /* Radar */,
 				257D07DC2AC355EC005EBD16 /* openapi.yml */,
 				257D07DE2AC3561C005EBD16 /* openapi-generator-config.yml */,
 				25A1C0012F8D000100000001 /* APIContactIdentity.swift */,
@@ -810,7 +846,6 @@
 				2598E9352C7291D2004A9D5E /* CacheMiddleware.swift */,
 				1DD4C99740CB4E98913B4BC6 /* ForecastSanitizingMiddleware.swift */,
 				2502F6F62D2F3D2600636DC9 /* WeatherObservable.swift */,
-				2589E7CD2F4B55CD005BB633 /* OscarRadarState.swift */,
 				44F71A4B1D6AC81B4BBA20CA /* WindFieldCache.swift */,
 				C100000A2FF0000000000001 /* ClimateSummary.swift */,
 				C100000C2FF0000000000001 /* ClimateArchiveService.swift */,
@@ -855,6 +890,7 @@
 		3E89BBA6252EFEC5006F7BCC /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				AD8000302FE6000000000001 /* Map */,
 				2512E9392C37C751004670E4 /* Legal */,
 				25ED799329F1A79D002E0AAB /* Backgrounds */,
 				255C23AE258F93900066B2BD /* NowSubViews */,
@@ -865,13 +901,7 @@
 				255950942B45B16000122324 /* SearchCityView.swift */,
 				2536438026DACCB800C8A952 /* LegalView.swift */,
 				259704E42757D7E800DFCA53 /* AlertDetailView.swift */,
-				25DA7A1927A420970062E02B /* MapDetailView.swift */,
-				251FE39027C5674400D26F0F /* WMSTileOverlay.swift */,
-				259EDA6B29ABC19F00F94996 /* RainRadarView.swift */,
 				252FC3B32ECE830200981FF3 /* RadarColorMapping.swift */,
-				2519538D2F124B27003D5302 /* RadarImageOverlay.swift */,
-				2519538E2F124B27003D5302 /* RadarTimelineControls.swift */,
-				C05DF774DD1215A6E465D9AD /* WindParticleView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1048,6 +1078,38 @@
 			path = Hourly;
 			sourceTree = "<group>";
 		};
+		AD8000302FE6000000000001 /* Map */ = {
+			isa = PBXGroup;
+			children = (
+				AD8000012FE6000000000001 /* WeatherMapView.swift */,
+				AD8000032FE6000000000001 /* RadarCustomStyleLayer.swift */,
+				AD8000052FE6000000000001 /* UserLocationDot.swift */,
+				AD8000072FE6000000000001 /* RadarMotionArrows.swift */,
+				AD8000092FE6000000000001 /* MapValueBubbles.swift */,
+				AD80000B2FE6000000000001 /* WeatherMapPreview.swift */,
+				AD80000D2FE6000000000001 /* WeatherMapDetailView.swift */,
+				AD80000F2FE6000000000001 /* MapLayerPickerSheet.swift */,
+				AD8000112FE6000000000001 /* WeatherModelInfoView.swift */,
+				AD8000132FE6000000000001 /* WeatherColormap.swift */,
+				2519538E2F124B27003D5302 /* RadarTimelineControls.swift */,
+				C05DF774DD1215A6E465D9AD /* WindParticleView.swift */,
+			);
+			path = Map;
+			sourceTree = "<group>";
+		};
+		AD8000312FE6000000000001 /* Radar */ = {
+			isa = PBXGroup;
+			children = (
+				AD8000152FE6000000000001 /* RadarRegion.swift */,
+				AD8000182FE6000000000001 /* RadarFrameSupport.swift */,
+				2589E7CD2F4B55CD005BB633 /* OscarRadarState.swift */,
+				AD80001B2FE6000000000001 /* RadarMotionData.swift */,
+				AD80001E2FE6000000000001 /* WeatherTileLayer.swift */,
+				AD8000212FE6000000000001 /* ModelGridLayerState.swift */,
+			);
+			path = Radar;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1118,6 +1180,7 @@
 				25C430112AC36173001DA5FC /* OpenAPIURLSession */,
 				4EBF1FE0D46648989064EF72 /* Sentry */,
 				25B734162BD9BB86003C6756 /* SentrySwiftUI */,
+				AD6000092FE4000000000001 /* MapLibre */,
 			);
 			productName = Weather;
 			productReference = 3EB89011251A55700028FED0 /* Oscar°.app */;
@@ -1186,6 +1249,7 @@
 				25C4300D2AC36165001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */,
 				25C430102AC36173001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */,
 				61BF2619978C4D10BB7D4A9F /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+				AD6000062FE4000000000003 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */,
 			);
 			productRefGroup = 3EB89012251A55700028FED0 /* Products */;
 			projectDirPath = "";
@@ -1317,6 +1381,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AD8000022FE6000000000001 /* WeatherMapView.swift in Sources */,
+				AD8000042FE6000000000001 /* RadarCustomStyleLayer.swift in Sources */,
+				AD8000062FE6000000000001 /* UserLocationDot.swift in Sources */,
+				AD8000082FE6000000000001 /* RadarMotionArrows.swift in Sources */,
+				AD80000A2FE6000000000001 /* MapValueBubbles.swift in Sources */,
+				AD80000C2FE6000000000001 /* WeatherMapPreview.swift in Sources */,
+				AD80000E2FE6000000000001 /* WeatherMapDetailView.swift in Sources */,
+				AD8000102FE6000000000001 /* MapLayerPickerSheet.swift in Sources */,
+				AD8000122FE6000000000001 /* WeatherModelInfoView.swift in Sources */,
+				AD8000142FE6000000000001 /* WeatherColormap.swift in Sources */,
+				AD8000162FE6000000000001 /* RadarRegion.swift in Sources */,
+				AD8000192FE6000000000001 /* RadarFrameSupport.swift in Sources */,
+				AD80001C2FE6000000000001 /* RadarMotionData.swift in Sources */,
+				AD80001F2FE6000000000001 /* WeatherTileLayer.swift in Sources */,
+				AD8000222FE6000000000001 /* ModelGridLayerState.swift in Sources */,
 				AD5000022FE3000000000001 /* NowSheet.swift in Sources */,
 				AD5000042FE3000000000001 /* NowPresentationCoordinator.swift in Sources */,
 				AD5000062FE3000000000001 /* NowSheetView.swift in Sources */,
@@ -1339,7 +1418,6 @@
 				AB0001122F9A00000000001A /* EnvironmentUVSectionView.swift in Sources */,
 				AB0001142F9A00000000001A /* EnvironmentPollenSectionView.swift in Sources */,
 				AA0000112F9A00000000001A /* EnvironmentDetailView.swift in Sources */,
-				251FE39127C5674400D26F0F /* WMSTileOverlay.swift in Sources */,
 				255950952B45B16000122324 /* SearchCityView.swift in Sources */,
 				2502F6F72D2F3D2600636DC9 /* WeatherObservable.swift in Sources */,
 				253F708B29510B06000BD4C0 /* AQIView.swift in Sources */,
@@ -1378,6 +1456,8 @@
 				2533940A27C43F810087C220 /* AlertView.swift in Sources */,
 				251BFE7E2E48DC7600D35589 /* WeatherAtmosphericAdapter.swift in Sources */,
 				251BFED12FB000000000001 /* AtmosphereSnapshot.swift in Sources */,
+				AD6000102FE4000000000006 /* WidgetBasemapStore.swift in Sources */,
+				AD6000132FE4000000000007 /* WidgetBasemapRenderer.swift in Sources */,
 				AD6000022FE4000000000001 /* AtmosphereDebugState.swift in Sources */,
 				AD6000042FE4000000000001 /* AtmosphereDebugSnapshot.swift in Sources */,
 				AD6000062FE4000000000001 /* AtmosphereDebugPanel.swift in Sources */,
@@ -1418,7 +1498,6 @@
 				2512E96A2C399B7D004670E4 /* AppIconSettingsView.swift in Sources */,
 				25ED79B529F1A7DF002E0AAB /* Color-Custom.swift in Sources */,
 				25CB17DE2B46EB61001D973A /* LegalTextView.swift in Sources */,
-				25DA7A1A27A420970062E02B /* MapDetailView.swift in Sources */,
 				25BEDCE426CACF7D00D90D6B /* DataModels.xcdatamodeld in Sources */,
 				25CBB63C2B44A13600223B69 /* WeatherSimulationView.swift in Sources */,
 				2512E9432C37E3EB004670E4 /* MemberCard.swift in Sources */,
@@ -1452,7 +1531,6 @@
 				2598E9362C7291D2004A9D5E /* CacheMiddleware.swift in Sources */,
 				28830655F3EF4C9D9B1E72FD /* ForecastSanitizingMiddleware.swift in Sources */,
 				254CA7BA2F85A4BD0014801D /* NOAAAttribution.swift in Sources */,
-				2519538F2F124B27003D5302 /* RadarImageOverlay.swift in Sources */,
 				251953902F124B27003D5302 /* RadarTimelineControls.swift in Sources */,
 				25AD38E72BE716E100A8F305 /* MemoryView.swift in Sources */,
 				259187CF2C715B7500611B0F /* WindChart.swift in Sources */,
@@ -1460,13 +1538,11 @@
 				25ED79B329F1A7DF002E0AAB /* CloudGroup.swift in Sources */,
 				25ED79BC29F1A7DF002E0AAB /* StormDrop.swift in Sources */,
 				2523367F27C3EB3900C2111A /* RainView.swift in Sources */,
-				25A0CEDD26C4068300DD4A79 /* RadarView.swift in Sources */,
 				259187D72C715C2400611B0F /* ET0EvapotranspirationChart.swift in Sources */,
 				25ED79B229F1A7DF002E0AAB /* StarField.swift in Sources */,
 				25ED799529F1A7C6002E0AAB /* Color-Interpolation.swift in Sources */,
 				25ED79AF29F1A7DF002E0AAB /* StarsView.swift in Sources */,
 				259187D52C715BE000611B0F /* SoilTemperatureChart.swift in Sources */,
-				259EDA6C29ABC19F00F94996 /* RainRadarView.swift in Sources */,
 				7F31D5F3095242D353B38311 /* WindFieldCache.swift in Sources */,
 				D2CE14A38C6521B8E277CF62 /* WindParticleView.swift in Sources */,
 			);
@@ -1476,6 +1552,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AD8000172FE6000000000001 /* RadarRegion.swift in Sources */,
+				AD80001A2FE6000000000001 /* RadarFrameSupport.swift in Sources */,
+				AD80001D2FE6000000000001 /* RadarMotionData.swift in Sources */,
+				AD8000202FE6000000000001 /* WeatherTileLayer.swift in Sources */,
+				AD8000232FE6000000000001 /* ModelGridLayerState.swift in Sources */,
 				AD4000042FE2000000000001 /* NotificationNames.swift in Sources */,
 				AD40000B2FE2000000000001 /* WeatherSnapshotStore.swift in Sources */,
 				25761D5129F1D083006976BE /* StormDrop.swift in Sources */,
@@ -1484,10 +1565,10 @@
 				AD3000042FDD000000000001 /* WindSpeedUnit.swift in Sources */,
 				AD1000042FBB000000000001 /* DailyEnsembleForecast.swift in Sources */,
 				25761D4F29F1CC85006976BE /* Cloud.swift in Sources */,
-				25DEA6152BCDA4CA00D403D5 /* WMSTileOverlay.swift in Sources */,
 				25761D5029F1CF14006976BE /* Storm.swift in Sources */,
 				253F70962B5319DD0075D093 /* CityService.swift in Sources */,
 				251BFED22FB000000000001 /* AtmosphereSnapshot.swift in Sources */,
+				AD6000112FE4000000000006 /* WidgetBasemapStore.swift in Sources */,
 				259623D02A2BD6BF00BA75F6 /* HomeProvider.swift in Sources */,
 				251BFEC42E48F34000D35589 /* WeatherAtmosphericAdapter.swift in Sources */,
 				258EE2F62B5EF58100AE942B /* RetryClientMiddleware.swift in Sources */,
@@ -1510,6 +1591,7 @@
 				DFDA11052FEE000000000003 /* WidgetCityIntent.swift in Sources */,
 				DFDA11042FEE000000000003 /* TemperatureRangeView.swift in Sources */,
 				2546516729E492E500D8C13D /* RadarProvider.swift in Sources */,
+				AD60000C2FE4000000000004 /* RadarSnapshotRenderer.swift in Sources */,
 				259623D62A2BD97C00BA75F6 /* Color-Custom.swift in Sources */,
 				2598E93A2C729273004A9D5E /* CacheMiddleware.swift in Sources */,
 				3CA2D5A0065D45D394BED588 /* ForecastSanitizingMiddleware.swift in Sources */,
@@ -2010,6 +2092,14 @@
 				minimumVersion = 9.0.0;
 			};
 		};
+		AD6000062FE4000000000003 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/maplibre/maplibre-gl-native-distribution";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -2056,6 +2146,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 25C430062AC3608E001DA5FC /* XCRemoteSwiftPackageReference "swift-openapi-generator" */;
 			productName = "plugin:OpenAPIGenerator";
+		};
+		AD6000092FE4000000000001 /* MapLibre */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AD6000062FE4000000000003 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */;
+			productName = MapLibre;
 		};
 /* End XCSwiftPackageProductDependency section */
 

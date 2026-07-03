@@ -39,6 +39,38 @@ struct DWDLabel: View {
     }
 }
 
+// MARK: - EUMETNET OPERA
+
+struct OperaAttribution: View {
+    var body: some View {
+        NavigationStack {
+            List {
+                Section(header: Text("Über")) {
+                    Text("Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar.")
+                }
+                Section(header: Text("Webseite")) {
+                    Link("eumetnet.eu", destination: URL(string: "https://www.eumetnet.eu/")!)
+                    Link("OPERA-Programm", destination: URL(string: "https://www.eumetnet.eu/activities/observations-programme/current-activities/opera/")!)
+                }
+            }
+        }
+        .navigationBarTitle("EUMETNET OPERA", displayMode: .inline)
+    }
+}
+
+struct OperaLabel: View {
+    var body: some View {
+        HStack {
+            Image(systemName: "globe.europe.africa.fill")
+                .frame(width: 30, height: 30)
+                .foregroundStyle(.white)
+                .background(Color.green)
+                .clipShape(.rect(cornerRadius: 5))
+            Text("EUMETNET OPERA")
+        }
+    }
+}
+
 #Preview {
     DWDAttribution()
 }

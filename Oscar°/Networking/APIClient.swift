@@ -13,7 +13,20 @@ import OpenAPIURLSession
 /// Base URL of the companion oscar-server backend (radar, models, precip series,
 /// notifications). Defined here because `APIClient` is a member of every target
 /// (incl. the watch widget extension), unlike the MapKit-dependent radar files.
-let radarBaseURL = "https://server.oscars.love"
+///
+/// Dev override: launch with `-radarBaseURL http://localhost:3000` (the Oscar° scheme
+/// ships this argument disabled — tick it in Edit Scheme → Run → Arguments), or persist
+/// it via `defaults write cloud.bolte.Oscar radarBaseURL ...`. On a physical device use
+/// the Mac's LAN address (e.g. `http://<mac>.local:3000` — oscar-server binds 0.0.0.0).
+/// Only the app process sees the override; widget/watch extensions read their own
+/// defaults and stay on production.
+let radarBaseURL: String = {
+    if let override = UserDefaults.standard.string(forKey: "radarBaseURL"),
+       !override.isEmpty {
+        return override.hasSuffix("/") ? String(override.dropLast()) : override
+    }
+    return "https://server.oscars.love"
+}()
 
 enum AlertResponse {
   case brightsky(Operations.getAlerts.Output.Ok.Body.jsonPayload)

@@ -95,7 +95,7 @@ actor WindFieldCache {
 
     private static func fetch(key: WindTileKey, layer: WeatherTileLayer) async -> WindFieldTile? {
         let urlString =
-            "\(GFSImageLayerState.baseURL)/models/\(layer.windFieldPrefix)/frames"
+            "\(ModelGridLayerState.baseURL)/models/\(layer.windFieldPrefix)/frames"
             + "/\(key.frameId)/wind/field/\(key.z)/\(key.x)/\(key.y).json?samples=\(layer.windFieldSamples)"
         guard let url = URL(string: urlString) else { return nil }
         var req = URLRequest(url: url)

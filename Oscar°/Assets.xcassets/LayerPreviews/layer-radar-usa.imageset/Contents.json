@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "layer-radar-usa.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

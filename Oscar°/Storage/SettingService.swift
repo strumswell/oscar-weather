@@ -67,12 +67,33 @@ public final class SettingService {
             Self.defaults.set(oscarRadarRegionRaw, forKey: "oscarRadarRegion")
         }
     }
-    /// When true, the radar fetches the raw 8-bit value grid and colormaps it on-device
-    /// instead of downloading the server-colormapped image. Read directly from
-    /// UserDefaults in OscarRadarState's background loader via the "radarUsesValueGrid" key.
-    var radarUsesValueGrid: Bool {
+    /// When true (default), radar playback morphs between frames along the server's
+    /// motion fields (RainViewer-style smooth motion). False = exact frames only —
+    /// also forced by the system Reduce Motion setting at render time.
+    var radarSmoothMotion: Bool {
         didSet {
-            UserDefaults.standard.set(radarUsesValueGrid, forKey: "radarUsesValueGrid")
+            UserDefaults.standard.set(radarSmoothMotion, forKey: "radarSmoothMotion")
+        }
+    }
+    /// When true (default), map layers render with RainViewer-style soft edges
+    /// (bicubic data sampling + smooth palette gradients). False = crisp isobands.
+    var radarSoftRendering: Bool {
+        didSet {
+            UserDefaults.standard.set(radarSoftRendering, forKey: "radarSoftRendering")
+        }
+    }
+    /// When true (default), the paused radar view overlays motion arrows showing
+    /// where precipitation is heading.
+    var radarMotionArrows: Bool {
+        didSet {
+            UserDefaults.standard.set(radarMotionArrows, forKey: "radarMotionArrows")
+        }
+    }
+    /// When true (default), model temperature/wind layers show sampled city value
+    /// bubbles on the map.
+    var mapValueBubbles: Bool {
+        didSet {
+            UserDefaults.standard.set(mapValueBubbles, forKey: "mapValueBubbles")
         }
     }
     var timeFormatPreference: TimeFormatPreference {
@@ -156,7 +177,10 @@ public final class SettingService {
             ?? "germany"
         oscarRadarRegionRaw = resolvedRadarRegion
         Self.defaults.set(resolvedRadarRegion, forKey: "oscarRadarRegion")
-        radarUsesValueGrid = UserDefaults.standard.bool(forKey: "radarUsesValueGrid")
+        radarSmoothMotion = (UserDefaults.standard.object(forKey: "radarSmoothMotion") as? Bool) ?? true
+        radarSoftRendering = (UserDefaults.standard.object(forKey: "radarSoftRendering") as? Bool) ?? true
+        radarMotionArrows = (UserDefaults.standard.object(forKey: "radarMotionArrows") as? Bool) ?? true
+        mapValueBubbles = (UserDefaults.standard.object(forKey: "mapValueBubbles") as? Bool) ?? true
         timeFormatPreference = TimeFormatPreference(
             rawValue: Self.defaults.string(forKey: Self.timeFormatPreferenceKey) ?? ""
         ) ?? .system

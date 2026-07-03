@@ -23,8 +23,7 @@ struct NowView: View {
     @State private var tapCount = 0
     @State private var presentation = NowPresentationCoordinator()
     @State private var atmosphereDebug = AtmosphereDebugState()
-    @State private var oscarRadarState = OscarRadarState(renderMode: .preview)
-    @State private var gfsImageState = GFSImageLayerState(renderMode: .preview)
+    @State private var modelGridState = ModelGridLayerState(renderMode: .preview)
     @State private var manualRefreshInFlight = false
     @State private var showRefreshIndicator = false
     @State private var spinnerShownAt: Date?
@@ -78,13 +77,9 @@ struct NowView: View {
                             }
                             .buttonStyle(.plain)
                             .accessibilityHint(Text("Öffnet die Karte"))
-                            RadarView(
+                            WeatherMapPreview(
                                 settingsService: settingsService,
-                                showLayerSettings: false,
-                                userActionAllowed: false,
-                                showWindParticles: false,
-                                oscarRadarState: oscarRadarState,
-                                gfsImageState: gfsImageState
+                                modelGridState: modelGridState
                             )
                                 .frame(height: 350)
                                 .clipShape(.rect(cornerRadius: 10))
@@ -97,35 +92,15 @@ struct NowView: View {
                                 .accessibilityHint(Text("Öffnet die Karte"))
                                 .accessibilityAction { presentMap() }
                                 .task {
-                                    if settingsService.oscarRadarLayer {
-                                        oscarRadarState.setRegion(settingsService.oscarRadarRegion)
-                                        await oscarRadarState.loadCurrentFrame()
-                                    } else if let layer = settingsService.activeTileLayer {
-                                        await gfsImageState.loadLayer(layer)
+                                    if let layer = settingsService.activeTileLayer {
+                                        await modelGridState.loadLayer(layer)
                                     }
-                                }
-                                .onChange(of: settingsService.oscarRadarLayer) { _, isEnabled in
-                                    if isEnabled {
-                                        gfsImageState.pause()
-                                        oscarRadarState.setRegion(settingsService.oscarRadarRegion)
-                                        if oscarRadarState.frames.isEmpty {
-                                            Task { await oscarRadarState.loadCurrentFrame() }
-                                        }
-                                    } else {
-                                        oscarRadarState.pause()
-                                    }
-                                }
-                                .onChange(of: settingsService.oscarRadarRegion) { _, newRegion in
-                                    guard settingsService.oscarRadarLayer else { return }
-                                    oscarRadarState.setRegion(newRegion)
-                                    Task { await oscarRadarState.reloadForCurrentRegion() }
                                 }
                                 .onChange(of: settingsService.activeTileLayer) { _, newLayer in
                                     if let layer = newLayer {
-                                        oscarRadarState.pause()
-                                        Task { await gfsImageState.loadLayer(layer) }
+                                        Task { await modelGridState.loadLayer(layer) }
                                     } else {
-                                        gfsImageState.pause()
+                                        modelGridState.pause()
                                     }
                                 }
                         }
@@ -237,46 +212,52 @@ struct NowView: View {
             )
         }
         .fullScreenCover(isPresented: $presentation.isMapPresented) {
-            MapDetailView(settingsService: settingsService) {
+            WeatherMapDetailView(settingsService: settingsService) {
                 presentation.isMapPresented = false
             }
         }
         .background(.thinMaterial)
         .edgesIgnoringSafeArea(.all)
         .task {
-            // Periodically refresh radar / tile metadata so the map stays current.
+            // Testing hook: `-autoPresentMapLibreAfter <seconds>` opens the map AFTER
+            // the NowView (incl. the preview card's map) exists — reproduces the
+            // tap-to-open flow headless, unlike -autoPresentMap which presents at launch.
+            let mapLibreDelay = UserDefaults.standard.double(forKey: "autoPresentMapLibreAfter")
+            if mapLibreDelay > 0 {
+                Task {
+                    try? await Task.sleep(for: .seconds(mapLibreDelay))
+                    presentation.isMapPresented = true
+                }
+            }
+            // Periodically refresh the tile-layer metadata so the map preview stays
+            // current (the radar preview refreshes itself inside WeatherMapPreview).
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(5 * 60))
                 guard !Task.isCancelled else { break }
-                if settingsService.oscarRadarLayer {
-                    await oscarRadarState.loadCurrentFrame()
-                } else if settingsService.activeTileLayer != nil {
-                    if let layer = settingsService.activeTileLayer { await gfsImageState.loadLayer(layer) }
-                }
+                if settingsService.activeTileLayer != nil { await modelGridState.refreshIfStale() }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             Task {
                 await weather.refresh(location: location)
                 await NotificationSettingsManager.shared.syncLocationUpdate()
+                await WidgetBasemapRenderer.refreshIfNeeded()
                 WidgetCenter.shared.reloadAllTimelines()
-                if settingsService.oscarRadarLayer {
-                    await oscarRadarState.loadCurrentFrame()
-                } else if settingsService.activeTileLayer != nil {
-                    if let layer = settingsService.activeTileLayer { await gfsImageState.loadLayer(layer) }
-                }
+                if settingsService.activeTileLayer != nil { await modelGridState.refreshIfStale() }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .changedLocation, object: nil)) { _ in
             Task {
                 await weather.refresh(location: location)
                 await NotificationSettingsManager.shared.syncLocationUpdate()
+                await WidgetBasemapRenderer.refreshIfNeeded()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .cityToggle, object: nil)) { _ in
             Task {
                 await weather.refresh(location: location)
                 await NotificationSettingsManager.shared.syncLocationUpdate()
+                await WidgetBasemapRenderer.refreshIfNeeded()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .unitChanged, object: nil)) { _ in
@@ -349,7 +330,7 @@ extension NowView {
         settingsService.settings?.dwdLayer = false
         settingsService.save()
         settingsService.oscarRadarLayer = true
-        gfsImageState.pause()
+        modelGridState.pause()
         presentMap()
     }
 }

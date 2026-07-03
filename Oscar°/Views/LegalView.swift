@@ -103,10 +103,36 @@ struct LegalView: View {
             Divider()
 
             settingsNavigationLink {
+              OperaAttribution()
+            } label: {
+              OperaLabel()
+            }
+
+            Divider()
+
+            settingsNavigationLink {
               NOAAAttribution()
             } label: {
               NOAALabel()
             }
+
+            Divider()
+
+            legalLinkRow(
+              systemImage: "map.fill",
+              iconBackground: .teal,
+              title: String(localized: "Kartendaten © OpenStreetMap"),
+              destination: URL(string: "https://www.openstreetmap.org/copyright")!
+            )
+
+            Divider()
+
+            legalLinkRow(
+              systemImage: "square.grid.3x3.fill",
+              iconBackground: .teal,
+              title: "Kartenkacheln: OpenFreeMap",
+              destination: URL(string: "https://openfreemap.org")!
+            )
           }
 
           section("Sonstiges") {
