@@ -111,6 +111,7 @@ struct NowView: View {
                         if weather.debug {
                             VStack {
                                 Text(weather.isLoading.description)
+                                Text("spinner=\(showRefreshIndicator.description) pending=\(spinnerPending.description)")
                                 Text(weather.error)
                                 Text("Air")
                                     .padding(.top, 20)
@@ -168,7 +169,14 @@ struct NowView: View {
                 // Debounce: only show the spinner if loading lingers past 500ms of
                 // on-screen time, so quick (cache-hit) refreshes don't flash it.
                 guard (try? await Task.sleep(for: .milliseconds(500))) != nil else { return }
-                guard spinnerPending else { return }
+                // If loading finishes right at the debounce boundary, the sleep's timer
+                // can win the race against cancellation and resume normally even though
+                // the id already flipped to `false` and the replacement (hide) task has
+                // already run. Showing the spinner then would strand it on screen — the
+                // id won't change again, so nothing would ever hide it. `spinnerPending`
+                // is captured at body time (always `true` here) and can't catch this;
+                // the cancellation flag is set either way, so check it explicitly.
+                guard !Task.isCancelled else { return }
                 spinnerShownAt = .now
                 showRefreshIndicator = true
             }
