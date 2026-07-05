@@ -34,8 +34,8 @@ struct WindTileKey: Hashable, Sendable {
 extension WeatherTileLayer {
     var windFieldPrefix: String {
         switch self {
-        case .gfsPrecip, .gfsTemp, .gfsWind: "gfs"
-        case .iconPrecip, .iconTemp, .iconWind: "icon"
+        case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure: "gfs"
+        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: "icon"
         }
     }
 

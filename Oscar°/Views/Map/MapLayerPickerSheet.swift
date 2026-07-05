@@ -33,6 +33,7 @@ struct MapLayerPickerSheet: View {
                     productSection(title: "Regen", layers: [.iconPrecip, .gfsPrecip])
                     productSection(title: "Temperatur", layers: [.iconTemp, .gfsTemp])
                     productSection(title: "Wind", layers: [.iconWind, .gfsWind])
+                    productSection(title: "Luftdruck", layers: [.iconPressure, .gfsPressure])
                     displaySection
                 }
                 .padding(.horizontal, 20)
@@ -107,6 +108,12 @@ struct MapLayerPickerSheet: View {
         !(settingsService.oscarRadarLayer && settingsService.oscarRadarRegion == .europe)
     }
 
+    /// Isobars ride the hourly model frames, so they need a model layer —
+    /// the 5-minute radar timeline has no matching pressure fields.
+    private var isobarsAvailable: Bool {
+        settingsService.activeTileLayer != nil
+    }
+
     private var displaySection: some View {
         VStack(alignment: .leading, spacing: 10) {
             LayerPickerSectionHeader(title: "Darstellung", detail: nil)
@@ -134,6 +141,14 @@ struct MapLayerPickerSheet: View {
                 LayerToggleRow(title: "Regenzellen",
                                subtitle: "Zugbahnen kräftiger Schauer",
                                isOn: $settingsService.showStormCells)
+                Divider().padding(.leading, 16)
+                LayerToggleRow(title: "Isobaren",
+                               subtitle: isobarsAvailable
+                                   ? "Luftdrucklinien mit Hoch- und Tiefzentren"
+                                   : "Nur auf Modellebenen (Radar hat keinen Luftdruck)",
+                               isOn: $settingsService.showIsobars)
+                    .disabled(!isobarsAvailable)
+                    .opacity(isobarsAvailable ? 1 : 0.45)
                 LayerToggleRow(title: "Niederschlagsart",
                                subtitle: precipTypeAvailable
                                    ? "Schnee, Graupel & Hagel im Radar einfärben"
@@ -340,20 +355,22 @@ private extension WeatherTileLayer {
     /// Tile label in the layer picker (the product lives in the section header).
     var pickerRegion: LocalizedStringKey {
         switch self {
-        case .iconPrecip, .iconTemp, .iconWind: return "Zentraleuropa"
-        case .gfsPrecip, .gfsTemp, .gfsWind:    return "Weltweit"
+        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "Zentraleuropa"
+        case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure:     return "Weltweit"
         }
     }
 
     /// Preview screenshot in Assets.xcassets/LayerPreviews.
     var previewImageName: String {
         switch self {
-        case .iconPrecip: return "layer-icon-precip"
-        case .iconTemp:   return "layer-icon-temp"
-        case .iconWind:   return "layer-icon-wind"
-        case .gfsPrecip:  return "layer-gfs-precip"
-        case .gfsTemp:    return "layer-gfs-temp"
-        case .gfsWind:    return "layer-gfs-wind"
+        case .iconPrecip:   return "layer-icon-precip"
+        case .iconTemp:     return "layer-icon-temp"
+        case .iconWind:     return "layer-icon-wind"
+        case .iconPressure: return "layer-icon-pressure"
+        case .gfsPrecip:    return "layer-gfs-precip"
+        case .gfsTemp:      return "layer-gfs-temp"
+        case .gfsWind:      return "layer-gfs-wind"
+        case .gfsPressure:  return "layer-gfs-pressure"
         }
     }
 }

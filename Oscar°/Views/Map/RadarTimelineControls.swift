@@ -103,8 +103,8 @@ struct WeatherTileTimelineControls: View {
 
     private var shortSourceLabel: String {
         switch imageState.currentLayer {
-        case .iconPrecip, .iconTemp, .iconWind: "ICON-D2"
-        case .gfsPrecip, .gfsTemp, .gfsWind: "GFS"
+        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: "ICON-D2"
+        case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure: "GFS"
         case nil: ""
         }
     }

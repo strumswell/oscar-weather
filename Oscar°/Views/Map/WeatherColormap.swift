@@ -40,6 +40,15 @@ enum ServerColormapStops {
         0x581d77, 0x4a0059,
     ]
 
+    /// (hPa, hex) — MSLP diverging stops (Crameri "vik", neutral ≈ 1013 hPa).
+    /// Unevenly spaced; the value-grid index span is 930…1070 hPa (ends clamp).
+    static let pressure: [(hpa: Double, hex: Int)] = [
+        (950, 0x001261), (960, 0x023175), (970, 0x055189), (980, 0x2575a1),
+        (990, 0x64a0be), (1000, 0xa3c7d9), (1005, 0xc3dae5), (1010, 0xe0e6e9),
+        (1013, 0xece5e0), (1016, 0xeed9cd), (1020, 0xe6c4b0), (1025, 0xdbaa8d),
+        (1030, 0xd0906b), (1040, 0xbb602d), (1050, 0x892606), (1060, 0x590008),
+    ]
+
     /// Typed-radar block layout + ramps (`radar_typed` palette, mirror of
     /// oscar-server's `TypedRadar`): rain keeps the plasma radar ramp at indices
     /// 1…153; only frozen/icy phases are recolored — snow 154…204 (icy white→blue)
@@ -65,7 +74,7 @@ enum ServerColormapStops {
 }
 
 enum WeatherColormap {
-    case radar, temperature, wind, radarTyped
+    case radar, temperature, wind, pressure, radarTyped
 
     // Colors ordered from minimum → maximum value
     var colors: [Color] {
@@ -76,6 +85,8 @@ enum WeatherColormap {
             return ServerColormapStops.temperature.map { Color(hex: $0) }
         case .wind:
             return ServerColormapStops.wind.map { Color(hex: $0) }
+        case .pressure:
+            return ServerColormapStops.pressure.map { Color(hex: $0.hex) }
         case .radarTyped:
             return ServerColormapStops.typedGroups.flatMap { group in
                 group.stops.map { Color(hex: $0.hex) }
@@ -116,6 +127,16 @@ enum WeatherColormap {
                 (0.75, "6 m/s"),
                 (1.00, "≥8 m/s"),
             ]
+        case .pressure:
+            // Legend spans the stop range 950…1060 hPa; fraction = (hPa − 950) / 110.
+            return [
+                (0.000, "950"),
+                (0.182, "970"),
+                (0.364, "990"),
+                (0.545, "1010"),
+                (0.727, "1030"),
+                (1.000, "1060"),
+            ]
         case .radarTyped:
             // 3 bands: rain fills the lower 60% (matching its index share), the
             // frozen bands 20% each — labels centered per band.
@@ -132,14 +153,23 @@ enum WeatherColormap {
         case .radar:       return "mm/h"
         case .temperature: return "°C"
         case .wind:        return "m/s"
+        case .pressure:    return "hPa"
         case .radarTyped:  return ""
         }
     }
 
     // Gradient stops: evenly spaced (min at 0, max at 1). The typed radar stacks the
     // full rain ramp (lower 60%, its share of the index space) and the two frozen
-    // ramps (20% each) with hard edges between bands.
+    // ramps (20% each) with hard edges between bands. Pressure stops are unevenly
+    // spaced in hPa, so their locations come from the value positions.
     var gradientStops: [Gradient.Stop] {
+        if case .pressure = self {
+            let stops = ServerColormapStops.pressure
+            let low = stops.first!.hpa, span = stops.last!.hpa - low
+            return stops.map {
+                .init(color: Color(hex: $0.hex), location: ($0.hpa - low) / span)
+            }
+        }
         if case .radarTyped = self {
             let rain = ServerColormapStops.radar
             var stops: [Gradient.Stop] = rain.enumerated().map { i, stop in
@@ -164,9 +194,10 @@ enum WeatherColormap {
 extension WeatherTileLayer {
     var colormap: WeatherColormap {
         switch self {
-        case .iconPrecip, .gfsPrecip: return .radar
-        case .iconTemp,   .gfsTemp:   return .temperature
-        case .iconWind,   .gfsWind:   return .wind
+        case .iconPrecip,   .gfsPrecip:   return .radar
+        case .iconTemp,     .gfsTemp:     return .temperature
+        case .iconWind,     .gfsWind:     return .wind
+        case .iconPressure, .gfsPressure: return .pressure
         }
     }
 }

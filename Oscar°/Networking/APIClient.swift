@@ -546,6 +546,20 @@ final class APIClient: Sendable {
     return data
   }
 
+  /// Isobar GeoJSON for one model frame (`/{framesEndpoint}/{frameKey}/pressure/isolines`):
+  /// MSLP isolines as MultiLineStrings plus H/T pressure-center points.
+  /// `framesEndpoint` is the layer's frames path ("models/icon/frames") — kept a
+  /// string because WeatherTileLayer isn't compiled into every target this file is.
+  func getPressureIsolines(framesEndpoint: String, frameKey: String) async throws -> Data {
+    guard let url = URL(string: "\(radarBaseURL)/\(framesEndpoint)/\(frameKey)/pressure/isolines")
+    else { throw URLError(.badURL) }
+    var request = URLRequest(url: url)
+    request.addAPIContactIdentity()
+    let (data, http) = try await Self.fetchWithRetry(request)
+    guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
+    return data
+  }
+
   /// Retry/backoff for the hand-written (non-OpenAPI) endpoints, mirroring the
   /// generated clients' RetryingMiddleware policy: 3 attempts on 429/5xx or a
   /// thrown transport error, exponential backoff with jitter. Cancellation and

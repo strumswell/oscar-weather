@@ -152,6 +152,13 @@ public final class SettingService {
             UserDefaults.standard.set(showStormCells, forKey: "showStormCells")
         }
     }
+    /// When true, MSLP isobars (with H/T centers) overlay the active model layer —
+    /// the Großwetterlage view on top of pressure, temperature, or wind.
+    var showIsobars: Bool {
+        didSet {
+            UserDefaults.standard.set(showIsobars, forKey: "showIsobars")
+        }
+    }
     /// Opacity of the radar/model data overlays (0.3…1).
     var mapOverlayOpacity: Double {
         didSet {
@@ -275,6 +282,7 @@ public final class SettingService {
         mapValueBubbles = (UserDefaults.standard.object(forKey: "mapValueBubbles") as? Bool) ?? true
         showAlertPolygons = UserDefaults.standard.bool(forKey: "showAlertPolygons")
         showStormCells = UserDefaults.standard.bool(forKey: "showStormCells")
+        showIsobars = UserDefaults.standard.bool(forKey: "showIsobars")
         let storedOpacity = UserDefaults.standard.object(forKey: "mapOverlayOpacity") as? Double
         mapOverlayOpacity = min(max(storedOpacity ?? 0.7, 0.3), 1)
         mapBasemapStyleRaw = Self.defaults.string(forKey: "mapBasemapStyle") ?? MapBasemapStyle.fiord.rawValue

@@ -70,14 +70,16 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
     case iconPrecip = "icon_precip"
     case iconTemp   = "icon_temp"
     case iconWind   = "icon_wind"
+    case iconPressure = "icon_pressure"
     case gfsPrecip  = "gfs_precip"
     case gfsTemp    = "gfs_temp"
     case gfsWind    = "gfs_wind"
+    case gfsPressure = "gfs_pressure"
 
     var framesEndpoint: String {
         switch self {
-        case .iconPrecip, .iconTemp, .iconWind: return "models/icon/frames"
-        case .gfsPrecip, .gfsTemp, .gfsWind:   return "models/gfs/frames"
+        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "models/icon/frames"
+        case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure:     return "models/gfs/frames"
         }
     }
 
@@ -88,25 +90,27 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
     /// Variable path segment in oscar-server model URLs.
     var variableSegment: String {
         switch self {
-        case .iconPrecip, .gfsPrecip: return "precipitation"
-        case .iconTemp, .gfsTemp:     return "temperature"
-        case .iconWind, .gfsWind:     return "wind"
+        case .iconPrecip, .gfsPrecip:       return "precipitation"
+        case .iconTemp, .gfsTemp:           return "temperature"
+        case .iconWind, .gfsWind:           return "wind"
+        case .iconPressure, .gfsPressure:   return "pressure"
         }
     }
 
     var sourceLabel: String {
         switch self {
-        case .iconPrecip, .iconTemp, .iconWind: return "DWD ICON-D2"
-        case .gfsPrecip, .gfsTemp, .gfsWind:   return "NOAA GFS"
+        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "DWD ICON-D2"
+        case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure:     return "NOAA GFS"
         }
     }
 
     /// Server palette id (`/colormaps/{id}`) the value grids of this layer index into.
     var colormapId: String {
         switch self {
-        case .iconPrecip, .gfsPrecip: return "plasma"
-        case .iconTemp, .gfsTemp:     return "temperature"
-        case .iconWind, .gfsWind:     return "wind_speed"
+        case .iconPrecip, .gfsPrecip:     return "plasma"
+        case .iconTemp, .gfsTemp:         return "temperature"
+        case .iconWind, .gfsWind:         return "wind_speed"
+        case .iconPressure, .gfsPressure: return "pressure"
         }
     }
 }

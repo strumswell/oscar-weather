@@ -566,8 +566,8 @@ extension WeatherTileLayer {
     /// as the frames' image_bounds.
     var motionEndpoint: String {
         switch self {
-        case .iconPrecip, .iconTemp, .iconWind: return "models/icon/motion"
-        case .gfsPrecip, .gfsTemp, .gfsWind:   return "models/gfs/motion"
+        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "models/icon/motion"
+        case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure:     return "models/gfs/motion"
         }
     }
 }

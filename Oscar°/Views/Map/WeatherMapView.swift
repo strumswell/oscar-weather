@@ -56,6 +56,12 @@ struct WeatherMapView: UIViewRepresentable {
     fileprivate static let alertSourceID = "oscar-alert-polygons"
     fileprivate static let alertFillLayerID = "oscar-alert-fill"
     fileprivate static let alertOutlineLayerID = "oscar-alert-outline"
+    fileprivate static let isobarSourceID = "oscar-isobar-source"
+    fileprivate static let isobarCasingLayerID = "oscar-isobar-casing"
+    fileprivate static let isobarLineLayerID = "oscar-isobar-line"
+    fileprivate static let isobarLabelLayerID = "oscar-isobar-label"
+    fileprivate static let isobarCenterLayerID = "oscar-isobar-center"
+    fileprivate static let isobarCenterValueLayerID = "oscar-isobar-center-value"
     fileprivate static let cellPointSourceID = "oscar-cells-points"
     fileprivate static let cellTrackSourceID = "oscar-cells-tracks"
     fileprivate static let cellConeSourceID = "oscar-cells-cones"
@@ -181,6 +187,12 @@ struct WeatherMapView: UIViewRepresentable {
         private var stormCellsRegion: RadarRegion?
         private var isLoadingStormCells = false
 
+        // Per-frame isobar GeoJSON, keyed "framesEndpoint/frameKey" (see syncIsobars).
+        private var isobarShapes: [String: MLNShape] = [:]
+        private var isobarFetchesInFlight: Set<String> = []
+        private var isobarFailures: [String: Date] = [:]
+        private var isobarSyncKey: String?
+
 
         private var selectedCityAnnotation: MLNPointAnnotation?
         private var selectedCityIdentity: String?
@@ -270,6 +282,7 @@ struct WeatherMapView: UIViewRepresentable {
                 bubbleSyncKey = nil
                 lastBubbleSignature = nil
                 registeredBubbleIcons.removeAll()
+                isobarSyncKey = nil
                 syncAll()
             }
         }
@@ -321,6 +334,7 @@ struct WeatherMapView: UIViewRepresentable {
             let activeTileLayer = settings.activeTileLayer
             let alertPolygons = settings.showAlertPolygons
             let stormCells = settings.showStormCells
+            let isobars = settings.showIsobars
             let radarRegion = settings.oscarRadarRegion
             // Registers the observation dependency; the value itself reaches the
             // layers via `parent.overlayOpacity` on the next updateUIView pass.
@@ -375,6 +389,10 @@ struct WeatherMapView: UIViewRepresentable {
                            smoothMotion: smoothMotion, softRendering: softRendering)
             syncValueBubbles(style: style, selection: activeTileLayer, enabled: valueBubbles,
                              payload: gfsFrame, frameKey: gfsFrameKey)
+            // Isobars ride the hourly model frame keys, so they need a model layer —
+            // the 5-minute radar timeline has no matching pressure fields.
+            syncIsobars(style: style, active: isobars && activeTileLayer != nil,
+                        selection: activeTileLayer, frameKey: gfsFrameKey)
             syncAlertPolygons(style: style, active: alertPolygons)
             // Cell tracks are radar-scale nowcasts — they'd be misleading floating
             // over a model forecast layer, so they require the radar to be active.
@@ -790,6 +808,169 @@ struct WeatherMapView: UIViewRepresentable {
             outline.lineWidth = NSExpression(forConstantValue: 1.6)
             outline.lineOpacity = NSExpression(forConstantValue: 0.9)
             insertOverlayLayer(outline, in: style)
+        }
+
+        // MARK: Isobars (Großwetterlage overlay)
+
+        /// MSLP isolines + H/T pressure centers (server `/models/{model}/frames/
+        /// {key}/pressure/isolines`) over the active model layer — the classic
+        /// Großwetterlage look on top of the pressure, temperature, or wind fill.
+        /// The per-frame GeoJSON swaps into one shared source while scrubbing (the
+        /// value-bubble pattern); fetched shapes are cached per frame key, so a
+        /// second playback loop is free.
+        private func syncIsobars(style: MLNStyle, active: Bool,
+                                 selection: WeatherTileLayer?, frameKey: String?) {
+            guard active, let selection, let frameKey else {
+                if isobarSyncKey != nil { removeIsobarLayers(from: style) }
+                return
+            }
+            let cacheKey = "\(selection.framesEndpoint)/\(frameKey)"
+
+            if isobarShapes[cacheKey] == nil,
+               !isobarFetchesInFlight.contains(cacheKey),
+               isobarFailures[cacheKey].map({ Date().timeIntervalSince($0) > 120 }) ?? true {
+                isobarFetchesInFlight.insert(cacheKey)
+                Task { @MainActor [weak self] in
+                    defer { self?.isobarFetchesInFlight.remove(cacheKey) }
+                    do {
+                        let data = try await APIClient.shared.getPressureIsolines(
+                            framesEndpoint: selection.framesEndpoint, frameKey: frameKey)
+                        guard let self, !self.isTornDown else { return }
+                        guard let shape = try? MLNShape(
+                            data: data, encoding: String.Encoding.utf8.rawValue) else {
+                            self.isobarFailures[cacheKey] = Date()
+                            return
+                        }
+                        // Frame keys are valid-time stable, so day over day the cache
+                        // only grows — reset it before it does.
+                        if self.isobarShapes.count > 96 { self.isobarShapes.removeAll() }
+                        self.isobarShapes[cacheKey] = shape
+                        self.isobarFailures[cacheKey] = nil
+                        self.syncAll()
+                    } catch {
+                        mapLibreLogger.error("Isobar fetch failed: \(error.localizedDescription, privacy: .public)")
+                        self?.isobarFailures[cacheKey] = Date()
+                    }
+                }
+            }
+
+            guard let shape = isobarShapes[cacheKey] else {
+                clearIsobarSourceIfNeeded(in: style, nextKey: cacheKey)
+                return
+            }
+            ensureIsobarLayers(in: style)
+            guard isobarSyncKey != cacheKey else { return }
+            (style.source(withIdentifier: WeatherMapView.isobarSourceID) as? MLNShapeSource)?.shape = shape
+            isobarSyncKey = cacheKey
+        }
+
+        private func clearIsobarSourceIfNeeded(in style: MLNStyle, nextKey: String) {
+            guard isobarSyncKey != nil, isobarSyncKey != nextKey else { return }
+            (style.source(withIdentifier: WeatherMapView.isobarSourceID) as? MLNShapeSource)?
+                .shape = MLNShapeCollectionFeature(shapes: [])
+            isobarSyncKey = nil
+        }
+
+        /// One shared source; casing + core line pair (readable over both the dark
+        /// low end and the near-white 1013 center of the pressure fill), inline
+        /// hPa labels, and the H/T center letters with their central pressure.
+        private func ensureIsobarLayers(in style: MLNStyle) {
+            guard style.source(withIdentifier: WeatherMapView.isobarSourceID) == nil else { return }
+            let source = MLNShapeSource(identifier: WeatherMapView.isobarSourceID,
+                                        shape: MLNShapeCollectionFeature(shapes: []))
+            style.addSource(source)
+
+            // Lines carry `level`, the H/T points carry `kind` — the predicates keep
+            // each layer to its half of the shared FeatureCollection.
+            let isIsobar = NSPredicate(format: "level != NIL")
+            let isCenter = NSPredicate(format: "kind != NIL")
+            // Index isobars (multiples of 10/20 hPa) draw bolder.
+            func indexWidth(_ index: Double, _ regular: Double) -> NSExpression {
+                NSExpression(forConditional: NSPredicate(format: "index == YES"),
+                             trueExpression: NSExpression(forConstantValue: index),
+                             falseExpression: NSExpression(forConstantValue: regular))
+            }
+
+            let casing = MLNLineStyleLayer(identifier: WeatherMapView.isobarCasingLayerID, source: source)
+            casing.predicate = isIsobar
+            casing.lineColor = NSExpression(forConstantValue: UIColor.black)
+            casing.lineOpacity = NSExpression(forConstantValue: 0.28)
+            casing.lineWidth = indexWidth(3.2, 2.2)
+            casing.lineCap = NSExpression(forConstantValue: "round")
+            casing.lineJoin = NSExpression(forConstantValue: "round")
+            insertOverlayLayer(casing, in: style)
+
+            let line = MLNLineStyleLayer(identifier: WeatherMapView.isobarLineLayerID, source: source)
+            line.predicate = isIsobar
+            line.lineColor = NSExpression(forConstantValue: UIColor.white)
+            line.lineOpacity = NSExpression(forConstantValue: 0.95)
+            line.lineWidth = indexWidth(1.8, 1.0)
+            line.lineCap = NSExpression(forConstantValue: "round")
+            line.lineJoin = NSExpression(forConstantValue: "round")
+            insertOverlayLayer(line, in: style)
+
+            // Inline hPa labels along the lines, above the basemap labels.
+            let labels = MLNSymbolStyleLayer(identifier: WeatherMapView.isobarLabelLayerID, source: source)
+            labels.predicate = isIsobar
+            labels.symbolPlacement = NSExpression(forConstantValue: "line")
+            labels.symbolSpacing = NSExpression(forConstantValue: 320)
+            labels.maximumTextAngle = NSExpression(forConstantValue: 30)
+            labels.text = NSExpression(forKeyPath: "label")
+            // The ONLY font stack the OpenFreeMap styles serve glyphs for.
+            labels.textFontNames = NSExpression(forConstantValue: ["Noto Sans Regular"])
+            labels.textFontSize = NSExpression(forConstantValue: 10)
+            labels.textColor = NSExpression(forConstantValue: UIColor.white)
+            labels.textHaloColor = NSExpression(forConstantValue: UIColor.black.withAlphaComponent(0.55))
+            labels.textHaloWidth = NSExpression(forConstantValue: 1.1)
+            style.addLayer(labels)
+
+            // DWD-style pressure centers: blue H (Hoch), red T (Tief), central
+            // pressure beneath. Always visible — they carry the synoptic story at
+            // low zoom where line labels get sparse.
+            let centerColor = NSExpression(
+                forMLNMatchingKey: NSExpression(forKeyPath: "kind"),
+                in: [NSExpression(forConstantValue: "T"): NSExpression(
+                    forConstantValue: UIColor(red: 0.78, green: 0.16, blue: 0.16, alpha: 1))],
+                default: NSExpression(
+                    forConstantValue: UIColor(red: 0.08, green: 0.4, blue: 0.75, alpha: 1))
+            )
+            let centers = MLNSymbolStyleLayer(identifier: WeatherMapView.isobarCenterLayerID, source: source)
+            centers.predicate = isCenter
+            centers.text = NSExpression(forKeyPath: "kind")
+            centers.textFontNames = NSExpression(forConstantValue: ["Noto Sans Regular"])
+            centers.textFontSize = NSExpression(forConstantValue: 24)
+            centers.textColor = centerColor
+            centers.textHaloColor = NSExpression(forConstantValue: UIColor.white.withAlphaComponent(0.85))
+            centers.textHaloWidth = NSExpression(forConstantValue: 1.4)
+            centers.textAllowsOverlap = NSExpression(forConstantValue: true)
+            centers.textIgnoresPlacement = NSExpression(forConstantValue: true)
+            style.addLayer(centers)
+
+            let centerValues = MLNSymbolStyleLayer(
+                identifier: WeatherMapView.isobarCenterValueLayerID, source: source)
+            centerValues.predicate = isCenter
+            centerValues.text = NSExpression(forKeyPath: "label")
+            centerValues.textFontNames = NSExpression(forConstantValue: ["Noto Sans Regular"])
+            centerValues.textFontSize = NSExpression(forConstantValue: 10)
+            centerValues.textColor = centerColor
+            centerValues.textHaloColor = NSExpression(forConstantValue: UIColor.white.withAlphaComponent(0.85))
+            centerValues.textHaloWidth = NSExpression(forConstantValue: 1.2)
+            centerValues.textOffset = NSExpression(forConstantValue: NSValue(cgVector: CGVector(dx: 0, dy: 1.5)))
+            centerValues.textAllowsOverlap = NSExpression(forConstantValue: true)
+            centerValues.textIgnoresPlacement = NSExpression(forConstantValue: true)
+            style.addLayer(centerValues)
+        }
+
+        private func removeIsobarLayers(from style: MLNStyle) {
+            for id in [WeatherMapView.isobarCenterValueLayerID, WeatherMapView.isobarCenterLayerID,
+                       WeatherMapView.isobarLabelLayerID, WeatherMapView.isobarLineLayerID,
+                       WeatherMapView.isobarCasingLayerID] {
+                if let layer = style.layer(withIdentifier: id) { style.removeLayer(layer) }
+            }
+            if let source = style.source(withIdentifier: WeatherMapView.isobarSourceID) {
+                style.removeSource(source)
+            }
+            isobarSyncKey = nil
         }
 
         // MARK: Storm cells

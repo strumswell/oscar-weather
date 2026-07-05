@@ -144,64 +144,122 @@ struct RainTimelineLockScreenView: View {
     var entry: RainTimelineProvider.Entry
     @Environment(\.widgetFamily) private var family
 
-    private static let barAreaHeight: CGFloat = 24
+    @ViewBuilder
+    var body: some View {
+        switch family {
+        case .accessoryRectangular:
+            RainTimelineRectangularView(entry: entry)
+                .containerBackground(.clear, for: .widget)
+        default:
+            EmptyView()
+                .containerBackground(.clear, for: .widget)
+        }
+    }
+}
+
+private struct RainTimelineRectangularView: View {
+    let entry: RainTimelineEntry
 
     var body: some View {
-        Group {
-            switch family {
-            case .accessoryRectangular:
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 4) {
-                        Image(systemName: entry.hasRadarCoverage ? "cloud.rain.fill" : "cloud.slash")
-                            .font(.system(size: 11))
-                        Text(entry.headline)
-                            .font(.system(size: 13, weight: .semibold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                    }
-                    .widgetAccentable()
-                    if entry.hasRadarCoverage {
-                        bars
-                        HStack {
-                            Text("Jetzt")
-                            Spacer()
-                            Text("+\(entry.spanMinutes) min")
-                        }
-                        .font(.system(size: 9))
-                        .foregroundStyle(.secondary)
-                    } else {
-                        Text("Radar ist für diesen Ort nicht verfügbar")
-                            .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            default:
-                EmptyView()
-            }
+        VStack(alignment: .leading, spacing: 2) {
+            RainTimelineHeader(entry: entry)
+                .widgetAccentable()
+            RainTimelineContent(entry: entry)
         }
-        .containerBackground(.clear, for: .widget)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct RainTimelineHeader: View {
+    let entry: RainTimelineEntry
+
+    private var iconName: String {
+        entry.hasRadarCoverage ? "cloud.rain.fill" : "cloud.slash"
     }
 
-    private var bars: some View {
-        // Scale against at least "moderate rain" so drizzle doesn't fill the chart.
-        let reference = max(2.0, entry.bars.max() ?? 0)
-        return HStack(alignment: .bottom, spacing: 2) {
-            ForEach(Array(entry.bars.enumerated()), id: \.offset) { _, value in
-                Capsule(style: .continuous)
-                    .fill(value > 0 ? AnyShapeStyle(.primary) : AnyShapeStyle(.tertiary))
-                    .frame(height: barHeight(value, reference: reference))
-                    .frame(maxWidth: .infinity)
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: iconName)
+                .font(.system(size: 11))
+                .accessibilityHidden(true)
+            Text(entry.headline)
+                .font(.system(size: 13, weight: .semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+    }
+}
+
+private struct RainTimelineContent: View {
+    let entry: RainTimelineEntry
+
+    var body: some View {
+        if entry.hasRadarCoverage {
+            RainTimelineBars(bars: entry.bars)
+            RainTimelineAxisLabel(spanMinutes: entry.spanMinutes)
+        } else {
+            Text("Radar ist für diesen Ort nicht verfügbar")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+private struct RainTimelineAxisLabel: View {
+    let spanMinutes: Int
+
+    var body: some View {
+        HStack {
+            Text("Jetzt")
+            Spacer()
+            Text("+\(spanMinutes) min")
+        }
+        .font(.system(size: 9))
+        .foregroundStyle(.secondary)
+    }
+}
+
+private struct RainTimelineBars: View {
+    let bars: [Double]
+
+    private static let barAreaHeight: CGFloat = 24
+
+    private var reference: Double {
+        max(2.0, bars.max() ?? 0)
+    }
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 2) {
+            ForEach(Array(bars.enumerated()), id: \.offset) { _, value in
+                RainTimelineBar(value: value, reference: reference)
             }
         }
         .frame(height: Self.barAreaHeight, alignment: .bottom)
     }
+}
 
-    private func barHeight(_ value: Double, reference: Double) -> CGFloat {
+private struct RainTimelineBar: View {
+    let value: Double
+    let reference: Double
+
+    private static let barAreaHeight: CGFloat = 24
+
+    private var fillColor: Color {
+        value > 0 ? .primary : .secondary.opacity(0.35)
+    }
+
+    private var height: CGFloat {
         guard value > 0 else { return 3 }
         // Square root emphasizes light rain, which is what matters at a glance.
         let fraction = min(1.0, (value / reference).squareRoot())
         return 4 + CGFloat(fraction) * (Self.barAreaHeight - 4)
+    }
+
+    var body: some View {
+        Capsule(style: .continuous)
+            .fill(fillColor)
+            .frame(height: height)
+            .frame(maxWidth: .infinity)
     }
 }
 

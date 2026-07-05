@@ -3841,6 +3841,23 @@
     "inch" : {
       "shouldTranslate" : false
     },
+    "Isobaren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Isobars"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İzobarlar"
+          }
+        }
+      }
+    },
     "Italien" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4568,7 +4585,7 @@
       }
     },
     "Luftdruck" : {
-      "extractionState" : "stale",
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4603,6 +4620,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hava basıncı (hPa)"
+          }
+        }
+      }
+    },
+    "Luftdrucklinien mit Hoch- und Tiefzentren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressure lines with high and low centers"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüksek ve alçak basınç merkezleriyle izobar çizgileri"
           }
         }
       }
@@ -5531,6 +5565,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yalnızca %@ – diğer konumlar veri döndürmez"
+          }
+        }
+      }
+    },
+    "Nur auf Modellebenen (Radar hat keinen Luftdruck)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only on model layers (radar has no pressure data)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yalnızca model katmanlarında (radarda basınç verisi yok)"
           }
         }
       }
