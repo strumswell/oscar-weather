@@ -120,14 +120,19 @@ struct RainTimelineProvider: TimelineProvider {
 
     /// Synthetic series for placeholder/snapshot: dry now, rain starting mid-window.
     static func placeholderSeries(now: Date = Date()) -> PrecipSeriesResponse {
-        let points = (0..<maxBars).map { step in
-            PrecipPoint(
-                timestamp: now.addingTimeInterval(Double(step) * 300),
-                precipitation: step < 7 ? 0 : min(2.4, Double(step - 6) * 0.4),
-                isForecast: step > 2
-            )
+        let points: [PrecipPoint] = (0..<maxBars).map { step -> PrecipPoint in
+            let timestamp = now.addingTimeInterval(Double(step) * 300)
+            let precipitation: Double
+            if step < 7 {
+                precipitation = 0
+            } else {
+                precipitation = min(2.4, Double(step - 6) * 0.4)
+            }
+            let isForecast = step > 2
+
+            return PrecipPoint(timestamp: timestamp, precipitation: precipitation, isForecast: isForecast)
         }
-        return PrecipSeriesResponse(
+        let response = PrecipSeriesResponse(
             source: "placeholder",
             unit: "mm/h",
             latitude: 0,
@@ -137,6 +142,7 @@ struct RainTimelineProvider: TimelineProvider {
             lastObservedAt: nil,
             forecastHorizon: nil
         )
+        return response
     }
 }
 

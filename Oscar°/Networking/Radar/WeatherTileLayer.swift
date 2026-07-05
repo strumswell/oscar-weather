@@ -97,6 +97,15 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
         }
     }
 
+    var isPressureLayer: Bool {
+        switch self {
+        case .iconPressure, .gfsPressure:
+            true
+        default:
+            false
+        }
+    }
+
     var sourceLabel: String {
         switch self {
         case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "DWD ICON-D2"

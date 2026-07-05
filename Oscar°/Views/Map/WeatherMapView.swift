@@ -334,7 +334,7 @@ struct WeatherMapView: UIViewRepresentable {
             let activeTileLayer = settings.activeTileLayer
             let alertPolygons = settings.showAlertPolygons
             let stormCells = settings.showStormCells
-            let isobars = settings.showIsobars
+            let isobars = settings.showIsobars || activeTileLayer?.isPressureLayer == true
             let radarRegion = settings.oscarRadarRegion
             // Registers the observation dependency; the value itself reaches the
             // layers via `parent.overlayOpacity` on the next updateUIView pass.
@@ -924,16 +924,9 @@ struct WeatherMapView: UIViewRepresentable {
             labels.textHaloWidth = NSExpression(forConstantValue: 1.1)
             style.addLayer(labels)
 
-            // DWD-style pressure centers: blue H (Hoch), red T (Tief), central
-            // pressure beneath. Always visible — they carry the synoptic story at
-            // low zoom where line labels get sparse.
-            let centerColor = NSExpression(
-                forMLNMatchingKey: NSExpression(forKeyPath: "kind"),
-                in: [NSExpression(forConstantValue: "T"): NSExpression(
-                    forConstantValue: UIColor(red: 0.78, green: 0.16, blue: 0.16, alpha: 1))],
-                default: NSExpression(
-                    forConstantValue: UIColor(red: 0.08, green: 0.4, blue: 0.75, alpha: 1))
-            )
+            // Neutral pressure-center labels avoid conflicting with the pressure
+            // fill palette, where low pressure is blue and high pressure is red.
+            let centerColor = NSExpression(forConstantValue: UIColor.black)
             let centers = MLNSymbolStyleLayer(identifier: WeatherMapView.isobarCenterLayerID, source: source)
             centers.predicate = isCenter
             centers.text = NSExpression(forKeyPath: "kind")
