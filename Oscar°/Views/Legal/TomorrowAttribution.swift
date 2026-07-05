@@ -21,7 +21,8 @@ struct TomorrowAttribution: View {
                 }
             }
         }
-        .navigationBarTitle("Tomorrow", displayMode: .inline)
+        .navigationTitle("Tomorrow")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

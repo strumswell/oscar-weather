@@ -25,6 +25,7 @@ struct NotificationSettingsView: View {
                 // and async changes instead of going stale until the view is recreated.
                 let rainAlertsEnabled = notificationSettingsManager.rainAlertsEnabled
                 let weatherAlertsEnabled = notificationSettingsManager.weatherAlertsEnabled
+                let liveRainStatusEnabled = notificationSettingsManager.liveRainStatusEnabled
 
                 Toggle(
                     String(localized: "Rain alerts (Beta)"),
@@ -35,6 +36,14 @@ struct NotificationSettingsView: View {
                     String(localized: "Weather alerts (Beta)"),
                     isOn: weatherAlertsBinding(currentValue: weatherAlertsEnabled)
                 )
+
+                Toggle(
+                    String(localized: "Live-Regenstatus (Beta)"),
+                    isOn: liveRainStatusBinding(currentValue: liveRainStatusEnabled)
+                )
+                .disabled(!rainAlertsEnabled)
+            } footer: {
+                Text(String(localized: "Der Live-Regenstatus zeigt aufziehenden Regen als Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island. Er benötigt aktive Regen-Warnungen."))
             }
             .disabled(isUpdating)
 
@@ -102,6 +111,17 @@ struct NotificationSettingsView: View {
                     if newValue && !enabled {
                         showPermissionAlert = true
                     }
+                }
+            }
+        )
+    }
+
+    private func liveRainStatusBinding(currentValue: Bool) -> Binding<Bool> {
+        Binding(
+            get: { currentValue },
+            set: { newValue in
+                runUpdate {
+                    _ = await notificationSettingsManager.setLiveRainStatusEnabled(newValue)
                 }
             }
         )

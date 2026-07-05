@@ -11,65 +11,75 @@ import SwiftUI
 // MARK: - Colormap
 // ===========================================================================
 
+/// Canonical client-side copies of oscar-server's palette stops
+/// (`Sources/App/Imaging/Colormaps.swift`). The map colors value grids with the
+/// palettes fetched from `/colormaps/{id}` — these tables only drive the legends
+/// and the offline plasma fallback, so this is the ONE place to update when the
+/// server stops change.
+enum ServerColormapStops {
+    /// (dBZ bin, hex) — the plasma radar stops. Index 0 (dry) is transparent.
+    static let radar: [(dbz: Double, hex: Int)] = [
+        (1, 0x99ffff),    // drizzle
+        (5.5, 0x32ffff), (10, 0x00caca), (14.5, 0x009934), (19, 0x4cbf19),
+        (23.5, 0x98cb03), (28, 0xcce603), (32.5, 0xffff00), (37, 0xffc400),
+        (41.5, 0xff8901), (46, 0xff0000), (50.5, 0xb40000), (55, 0x4848ff),
+        (60, 0x0000c9), (65, 0x990199),
+        (75, 0xfe33ff),   // extreme / hail
+    ]
+
+    /// −40 °C … +50 °C, 5 °C per stop.
+    static let temperature: [Int] = [
+        0x3f49b3, 0x4263d8, 0x3f7df1, 0x3896f9, 0x2bb1ef, 0x1ec9d8, 0x20dbbf,
+        0x25eca5, 0xd2e92a, 0xe3d630, 0xf0c331, 0xf7ad2b, 0xf89525, 0xf77b1a,
+        0xed610e, 0xe14906, 0xd13503, 0xbe2400, 0xa91500,
+    ]
+
+    /// 0 … ≥8 m/s, 1 m/s per stop.
+    static let wind: [Int] = [
+        0xf7fcff, 0xd2ddf2, 0xadbfe5, 0x9a9edc, 0x8a7fcf, 0x795eb5, 0x693e9a,
+        0x581d77, 0x4a0059,
+    ]
+
+    /// Typed-radar block layout + ramps (`radar_typed` palette, mirror of
+    /// oscar-server's `TypedRadar`): rain keeps the plasma radar ramp at indices
+    /// 1…153; only frozen/icy phases are recolored — snow 154…204 (icy white→blue)
+    /// and every mixed/icy phase 205…255 (pink→violet: sleet, freezing rain,
+    /// graupel, hail). Stops are (intensity fraction, hex, alpha).
+    static let typedRainSpan = 153
+    static let typedGroupSpan = 51
+    static let typedGroups: [(label: String, stops: [(f: Double, hex: Int, a: UInt8)])] = [
+        ("Schnee", [(0.00, 0xE2EFFA, 185), (0.35, 0xBDE0F6, 220),
+                    (0.70, 0x7FB8E8, 242), (1.00, 0x3D7DD8, 252)]),
+        ("Eis/Mix", [(0.00, 0xFFD9F0, 205), (0.45, 0xF267C8, 235), (1.00, 0x9C1FB8, 252)]),
+    ]
+
+    /// Storm-cell marker steps (peak intensity → dot color), mirror of the
+    /// `intensityColor` expression in WeatherMapView's cell layer. Labels reuse the
+    /// radar legend's localization keys.
+    static let stormCellSteps: [(hex: Int, label: String)] = [
+        (0x00CACA, "Leicht"),
+        (0xFFFF00, "Mäßig"),
+        (0xFF0000, "Stark"),
+        (0xFE33FF, "Extrem"),
+    ]
+}
+
 enum WeatherColormap {
-    case radar, temperature, wind
+    case radar, temperature, wind, radarTyped
 
     // Colors ordered from minimum → maximum value
     var colors: [Color] {
         switch self {
         case .radar:
-            return [
-                Color(hex: 0x99ffff), // drizzle
-                Color(hex: 0x32ffff),
-                Color(hex: 0x00caca),
-                Color(hex: 0x009934),
-                Color(hex: 0x4cbf19),
-                Color(hex: 0x98cb03),
-                Color(hex: 0xcce603),
-                Color(hex: 0xffff00),
-                Color(hex: 0xffc400),
-                Color(hex: 0xff8901),
-                Color(hex: 0xff0000),
-                Color(hex: 0xb40000),
-                Color(hex: 0x4848ff),
-                Color(hex: 0x0000c9),
-                Color(hex: 0x990199),
-                Color(hex: 0xfe33ff), // extreme / hail
-            ]
+            return ServerColormapStops.radar.map { Color(hex: $0.hex) }
         case .temperature:
-            return [
-                Color(hex: 0x3f49b3), // ≤ −40 °C
-                Color(hex: 0x4263d8),
-                Color(hex: 0x3f7df1),
-                Color(hex: 0x3896f9),
-                Color(hex: 0x2bb1ef),
-                Color(hex: 0x1ec9d8),
-                Color(hex: 0x20dbbf),
-                Color(hex: 0x25eca5),
-                Color(hex: 0xd2e92a), // 0 °C
-                Color(hex: 0xe3d630),
-                Color(hex: 0xf0c331),
-                Color(hex: 0xf7ad2b),
-                Color(hex: 0xf89525),
-                Color(hex: 0xf77b1a),
-                Color(hex: 0xed610e),
-                Color(hex: 0xe14906),
-                Color(hex: 0xd13503),
-                Color(hex: 0xbe2400),
-                Color(hex: 0xa91500), // ≥ +50 °C
-            ]
+            return ServerColormapStops.temperature.map { Color(hex: $0) }
         case .wind:
-            return [
-                Color(hex: 0xf7fcff), // 0–1 m/s
-                Color(hex: 0xd2ddf2),
-                Color(hex: 0xadbfe5),
-                Color(hex: 0x9a9edc),
-                Color(hex: 0x8a7fcf),
-                Color(hex: 0x795eb5),
-                Color(hex: 0x693e9a),
-                Color(hex: 0x581d77),
-                Color(hex: 0x4a0059), // ≥ 8 m/s
-            ]
+            return ServerColormapStops.wind.map { Color(hex: $0) }
+        case .radarTyped:
+            return ServerColormapStops.typedGroups.flatMap { group in
+                group.stops.map { Color(hex: $0.hex) }
+            }
         }
     }
 
@@ -106,6 +116,14 @@ enum WeatherColormap {
                 (0.75, "6 m/s"),
                 (1.00, "≥8 m/s"),
             ]
+        case .radarTyped:
+            // 3 bands: rain fills the lower 60% (matching its index share), the
+            // frozen bands 20% each — labels centered per band.
+            return [
+                (0.30, "Regen"),
+                (0.70, "Schnee"),
+                (0.90, "Eis/Mix"),
+            ]
         }
     }
 
@@ -114,11 +132,27 @@ enum WeatherColormap {
         case .radar:       return "mm/h"
         case .temperature: return "°C"
         case .wind:        return "m/s"
+        case .radarTyped:  return ""
         }
     }
 
-    // Evenly-spaced gradient stops (min at 0, max at 1)
+    // Gradient stops: evenly spaced (min at 0, max at 1). The typed radar stacks the
+    // full rain ramp (lower 60%, its share of the index space) and the two frozen
+    // ramps (20% each) with hard edges between bands.
     var gradientStops: [Gradient.Stop] {
+        if case .radarTyped = self {
+            let rain = ServerColormapStops.radar
+            var stops: [Gradient.Stop] = rain.enumerated().map { i, stop in
+                .init(color: Color(hex: stop.hex), location: Double(i) / Double(rain.count - 1) * 0.6)
+            }
+            for (band, group) in ServerColormapStops.typedGroups.enumerated() {
+                let base = 0.6 + Double(band) * 0.2
+                stops.append(contentsOf: group.stops.map {
+                    .init(color: Color(hex: $0.hex), location: base + $0.f * 0.2)
+                })
+            }
+            return stops
+        }
         let n = colors.count
         guard n > 1 else { return colors.map { .init(color: $0, location: 0) } }
         return colors.enumerated().map { i, c in
@@ -137,8 +171,38 @@ extension WeatherTileLayer {
     }
 }
 
+// MARK: - Storm-cell legend (shown while the Regenzellen layer is on)
+
+/// Compact key for the cell markers' peak-intensity colors — the dots alone don't
+/// explain themselves. Same visual family as `ColormapVerticalLegend`.
+@available(iOS 26.0, *)
+struct StormCellLegend: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text("Regenzellen")
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundStyle(.secondary)
+            ForEach(Array(ServerColormapStops.stormCellSteps.enumerated()), id: \.offset) { _, step in
+                HStack(spacing: 5) {
+                    Circle()
+                        .fill(Color(hex: step.hex))
+                        .frame(width: 8, height: 8)
+                        .overlay(Circle().stroke(.white.opacity(0.8), lineWidth: 1))
+                    Text(LocalizedStringKey(step.label))
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .glassEffect(in: RoundedRectangle(cornerRadius: 12))
+    }
+}
+
 // MARK: - Vertical legend (beside map badge)
 
+@available(iOS 26.0, *)
 struct ColormapVerticalLegend: View {
     let colormap: WeatherColormap
     private let barWidth: CGFloat = 10

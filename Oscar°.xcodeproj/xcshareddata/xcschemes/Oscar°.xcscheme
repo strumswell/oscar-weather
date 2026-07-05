@@ -52,7 +52,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-radarBaseURL http://localhost:3000"
+            argument = "-radarBaseURL http://192.168.178.136:3000"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument

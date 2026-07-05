@@ -1,139 +1,74 @@
 import SwiftUI
+import Observation
 import UIKit
 
-// MARK: - Oscar Radar Timeline Controls
+// MARK: - Shared player-state surface
+
+/// The slice of OscarRadarState / ModelGridLayerState that the unified timeline
+/// chip drives. Both are @MainActor @Observable classes; property reads through
+/// the existential still register with SwiftUI's observation tracking.
+@MainActor
+protocol TimelinePlayerState: AnyObject, Observable {
+    var frameTimestamps: [String] { get }
+    var currentFrameIndex: Int { get set }
+    var isPlaying: Bool { get }
+    var isLoading: Bool { get }
+    var error: String? { get }
+    var loadedFrameIndices: Set<Int> { get }
+    var loadingFrameIndices: Set<Int> { get }
+    var hasAnyLoadedFrame: Bool { get }
+    func play()
+    func pause()
+    func beginScrubbing()
+    func endScrubbing()
+}
+
+extension OscarRadarState: TimelinePlayerState {}
+extension ModelGridLayerState: TimelinePlayerState {}
+
+// MARK: - Shared timeline helpers
+
+/// Index of the frame closest to the wall clock (the scrubber's "now" marker).
+private func closestIndexToNow(_ timestamps: [String]) -> Int? {
+    guard !timestamps.isEmpty else { return nil }
+    return closestTimestampIndex(in: timestamps.map(parseFrameDate))
+}
+
+private enum TimelineFormatters {
+    /// Compact signed offsets for the status pill / axis end ("+35 Min.", "+2 Std.").
+    nonisolated(unsafe) static let delta: DateComponentsFormatter = {
+        let f = DateComponentsFormatter()
+        f.allowedUnits = [.hour, .minute]
+        f.unitsStyle = .abbreviated
+        f.maximumUnitCount = 1
+        return f
+    }()
+    nonisolated(unsafe) static let weekday: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "EEE"
+        return f
+    }()
+}
+
+// MARK: - Layer-specific wrappers
 
 struct OscarRadarTimelineControls: View {
-    @Bindable var radarState: OscarRadarState
+    let radarState: OscarRadarState
     /// Tapping the source badge (e.g. "DWD Radar") opens the layer picker.
     var onBadgeTap: (() -> Void)?
 
     var body: some View {
-        Group {
-            if radarState.frameTimestamps.isEmpty {
-                // Metadata not yet fetched — show loading chip
-                loadingChip
-            } else {
-                playerChip
-            }
-        }
-
-        if let error = radarState.error {
-            Text(error)
-                .font(.caption2)
-                .foregroundStyle(.red)
-                .padding(.horizontal, 14)
-        }
+        TimelineControlsChip(
+            state: radarState,
+            sourceLabel: sourceLabel,
+            shortSourceLabel: shortSourceLabel,
+            isLive: radarState.isCurrentFrameLive,
+            loadingLabel: "Oscar Radar-Daten werden geladen…",
+            onBadgeTap: onBadgeTap
+        )
     }
 
-    // MARK: - Player chip
-
-    private var playerChip: some View {
-        VStack(spacing: 10) {
-            // Row 1: play button
-            HStack {
-                Button {
-                    if radarState.isPlaying { radarState.pause() } else { radarState.play() }
-                    UIApplication.shared.playHapticFeedback()
-                } label: {
-                    Image(systemName: radarState.isPlaying ? "pause.fill" : "play.fill")
-                        .font(.system(size: 15, weight: .bold))
-                        .frame(width: 44, height: 44)
-                        .glassEffect(in: Circle())
-                }
-                .buttonStyle(.plain)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(selectedDay)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    Text(selectedTime)
-                        .font(.subheadline.weight(.semibold).monospacedDigit())
-                        .foregroundStyle(.primary)
-                }
-                Spacer()
-            }
-
-            // Row 2: frame scrubber
-            let frameCount = radarState.frames.count
-            if frameCount > 1 {
-                TimelineScrubber(
-                    frameCount: frameCount,
-                    selectedIndex: radarState.currentFrameIndex,
-                    loadedIndices: radarState.loadedFrameIndices,
-                    loadingIndices: radarState.loadingFrameIndices,
-                    contiguousReadyRange: radarState.contiguousReadyRange,
-                    onSelectionChanged: { index in
-                        guard index != radarState.currentFrameIndex else { return }
-                        radarState.currentFrameIndex = index
-                        UIApplication.shared.playHapticFeedback()
-                    },
-                    onInteractionChanged: { isInteracting in
-                        if isInteracting {
-                            radarState.beginScrubbing()
-                        } else {
-                            radarState.endScrubbing()
-                        }
-                    }
-                )
-            }
-
-            // Row 3: axis timestamps
-            HStack {
-                Text(previousTimestamp)
-                    .font(.footnote.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Text(midTimestamp1)
-                    .font(.footnote.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Text(midTimestamp2)
-                    .font(.footnote.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Text(nextTimestamp)
-                    .font(.footnote.monospacedDigit())
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .glassEffect(in: RoundedRectangle(cornerRadius: 24))
-        .overlay(alignment: .topTrailing) {
-            dwdBadge
-                .padding(.top, 17)
-                .padding(.trailing, 17)
-        }
-        // Block the underlying map from receiving touches inside the chip
-        .contentShape(RoundedRectangle(cornerRadius: 24))
-        .gesture(DragGesture(minimumDistance: 0).onChanged { _ in })
-    }
-
-    // MARK: - Loading chip
-
-    private var loadingChip: some View {
-        HStack(spacing: 8) {
-            ProgressView().scaleEffect(0.75)
-            Text("Oscar Radar-Daten werden geladen…")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .glassEffect(in: RoundedRectangle(cornerRadius: 24))
-    }
-
-    // MARK: - Helpers
-
-    private var previousTimestamp: String { timeAt(index: 0) }
-    private var midTimestamp1: String { timeAt(index: oneThirdIndex) }
-    private var midTimestamp2: String { timeAt(index: twoThirdIndex) }
-    private var nextTimestamp: String { timeAt(index: radarState.frameTimestamps.count - 1) }
-
-    private var selectedDay: String { day(from: radarState.currentFrameTimestamp) }
-    private var selectedTime: String { shortTime(from: radarState.currentFrameTimestamp) }
-
-    private var regionBadgeTitle: String {
+    private var sourceLabel: String {
         switch radarState.region {
         case .germany: "DWD Radar"
         case .europe: "OPERA Radar"
@@ -141,55 +76,731 @@ struct OscarRadarTimelineControls: View {
         }
     }
 
-    private var dwdBadge: some View {
-        Button(action: { onBadgeTap?() }) {
-            Text(regionBadgeTitle)
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(.primary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                )
+    private var shortSourceLabel: String {
+        switch radarState.region {
+        case .germany: "DWD"
+        case .europe: "OPERA"
+        case .usa: "NOAA"
         }
-        .buttonStyle(.plain)
-        .disabled(onBadgeTap == nil)
-        .accessibilityHint(Text("Öffnet die Kartenebenen"))
-    }
-
-    private func timeAt(index: Int) -> String {
-        guard index >= 0, index < radarState.frameTimestamps.count else { return "--:--" }
-        return shortTime(from: radarState.frameTimestamps[index])
-    }
-
-    private var oneThirdIndex: Int {
-        guard radarState.frameTimestamps.count > 1 else { return 0 }
-        return max(0, min(radarState.frameTimestamps.count - 1, radarState.frameTimestamps.count / 3))
-    }
-
-    private var twoThirdIndex: Int {
-        guard radarState.frameTimestamps.count > 1 else { return 0 }
-        return max(0, min(radarState.frameTimestamps.count - 1, (radarState.frameTimestamps.count * 2) / 3))
-    }
-
-    private func shortTime(from timestamp: String?) -> String {
-        guard let timestamp,
-              let date = ISO8601DateFormatter.parseRadarDate(timestamp)
-        else { return "--:--" }
-        return SettingService.formattedTime(date)
-    }
-
-    private func day(from timestamp: String?) -> String {
-        guard let timestamp,
-              let date = ISO8601DateFormatter.parseRadarDate(timestamp)
-        else { return "--" }
-        return DateFormatter.shortDay.string(from: date)
     }
 }
 
+struct WeatherTileTimelineControls: View {
+    let imageState: ModelGridLayerState
+    /// Tapping the source badge (e.g. "DWD ICON-D2") opens the layer picker.
+    var onBadgeTap: (() -> Void)?
 
-// MARK: - Timestamp badge (A + D)
+    var body: some View {
+        TimelineControlsChip(
+            state: imageState,
+            sourceLabel: imageState.currentLayer?.sourceLabel ?? "",
+            shortSourceLabel: shortSourceLabel,
+            isLive: false,
+            loadingLabel: "Wetterdaten werden geladen…",
+            onBadgeTap: onBadgeTap
+        )
+    }
+
+    private var shortSourceLabel: String {
+        switch imageState.currentLayer {
+        case .iconPrecip, .iconTemp, .iconWind: "ICON-D2"
+        case .gfsPrecip, .gfsTemp, .gfsWind: "GFS"
+        case nil: ""
+        }
+    }
+}
+
+// MARK: - Unified timeline chip
+
+/// One-row header (play + time + status pill + source) over the scrubber.
+/// Loading is communicated as playability, video-player style: a buffered band
+/// grows along the track, the play button carries a progress ring, and the
+/// unbuffered remainder shimmers. Before metadata arrives the chip renders a
+/// same-size skeleton so nothing jumps when data lands.
+struct TimelineControlsChip: View {
+    let state: any TimelinePlayerState
+    let sourceLabel: String
+    let shortSourceLabel: String
+    let isLive: Bool
+    let loadingLabel: LocalizedStringKey
+    var onBadgeTap: (() -> Void)?
+
+    /// Latches once the initial prefetch is over so the progress ring doesn't
+    /// flicker back in when playback or the residency window reloads single
+    /// evicted frames (which briefly re-populates loadingFrameIndices).
+    @State private var prefetchSettled = false
+
+    var body: some View {
+        VStack(spacing: 10) {
+            header
+
+            let frameCount = state.frameTimestamps.count
+            if frameCount > 1 {
+                TimelineScrubber(
+                    timestamps: state.frameTimestamps,
+                    selectedIndex: state.currentFrameIndex,
+                    loadedIndices: state.loadedFrameIndices,
+                    onSelectionChanged: { index in
+                        guard index != state.currentFrameIndex else { return }
+                        state.currentFrameIndex = index
+                        UIApplication.shared.playHapticFeedback()
+                    },
+                    onInteractionChanged: { isInteracting in
+                        if isInteracting {
+                            state.beginScrubbing()
+                        } else {
+                            state.endScrubbing()
+                        }
+                    }
+                )
+            } else if frameCount == 0 {
+                GhostTrack()
+                    .accessibilityLabel(Text(loadingLabel))
+            }
+
+            if let error = state.error {
+                errorFooter(error)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .glassEffect(in: RoundedRectangle(cornerRadius: 24))
+        // Block the underlying map from receiving touches inside the chip
+        .contentShape(RoundedRectangle(cornerRadius: 24))
+        .gesture(DragGesture(minimumDistance: 0).onChanged { _ in })
+        .onChange(of: bufferFraction >= 1) { _, full in
+            if full { prefetchSettled = true }
+        }
+        .onChange(of: state.frameTimestamps) { _, _ in
+            prefetchSettled = false
+        }
+        .task(id: loadingIsIdle) {
+            // Idle without ever reaching 100 % (failed frames, eviction on very
+            // long timelines): settle after a debounce instead of never.
+            guard loadingIsIdle else { return }
+            try? await Task.sleep(for: .milliseconds(800))
+            guard !Task.isCancelled else { return }
+            prefetchSettled = true
+        }
+    }
+
+    private var loadingIsIdle: Bool {
+        !state.isLoading && state.loadingFrameIndices.isEmpty && state.hasAnyLoadedFrame
+    }
+
+    // MARK: Header
+
+    private var header: some View {
+        HStack(spacing: 12) {
+            playButton
+            // Fixed-content variants so ViewThatFits can drop the weekday and
+            // shorten the source label before anything truncates.
+            ViewThatFits(in: .horizontal) {
+                headerContent(showDay: true, source: sourceLabel)
+                headerContent(showDay: false, source: sourceLabel)
+                headerContent(showDay: false, source: shortSourceLabel)
+            }
+        }
+    }
+
+    private func headerContent(showDay: Bool, source: String) -> some View {
+        HStack(spacing: 8) {
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                Text(selectedTime)
+                    .font(.headline.monospacedDigit())
+                if showDay, !selectedDay.isEmpty {
+                    Text(selectedDay)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .fixedSize()
+                }
+            }
+            Spacer(minLength: 6)
+            statusPill
+            sourceBadge(source)
+        }
+    }
+
+    private var playButton: some View {
+        Button {
+            if state.isPlaying { state.pause() } else { state.play() }
+            UIApplication.shared.playHapticFeedback()
+        } label: {
+            ZStack {
+                Image(systemName: state.isPlaying ? "pause.fill" : "play.fill")
+                    .font(.system(size: 15, weight: .bold))
+                    .frame(width: 44, height: 44)
+                    .glassEffect(in: Circle())
+                if showsBufferRing {
+                    Circle()
+                        .stroke(.white.opacity(0.14), lineWidth: 2.5)
+                        .frame(width: 37, height: 37)
+                    Circle()
+                        .trim(from: 0, to: bufferFraction)
+                        .stroke(.white.opacity(0.9),
+                                style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                        .frame(width: 37, height: 37)
+                }
+            }
+            .animation(.smooth(duration: 0.35), value: bufferFraction)
+            .animation(.smooth(duration: 0.35), value: showsBufferRing)
+        }
+        .buttonStyle(.plain)
+        .disabled(state.frameTimestamps.isEmpty)
+        .accessibilityLabel(state.isPlaying ? Text("Pause") : Text("Wiedergabe"))
+    }
+
+    /// Fraction of the timeline that is decoded and ready — the play button's
+    /// determinate progress ring during prefetch.
+    private var bufferFraction: CGFloat {
+        let count = state.frameTimestamps.count
+        guard count > 0 else { return 0 }
+        return CGFloat(state.loadedFrameIndices.count) / CGFloat(count)
+    }
+
+    private var showsBufferRing: Bool {
+        !prefetchSettled && bufferFraction < 1
+    }
+
+    // MARK: Status pill
+
+    /// LIVE on the natural now frame, "Jetzt" when a coarser timeline sits on
+    /// its closest-to-now frame, otherwise a signed offset that jumps back to now.
+    @ViewBuilder
+    private var statusPill: some View {
+        if isLive {
+            HStack(spacing: 5) {
+                PulsingDot()
+                Text("LIVE")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.red)
+            }
+            .padding(.horizontal, 9)
+            .padding(.vertical, 5)
+            .glassEffect(in: Capsule())
+        } else if let date = selectedDate {
+            if state.currentFrameIndex == closestIndexToNow(state.frameTimestamps) {
+                Text("Jetzt")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 5)
+                    .glassEffect(in: Capsule())
+            } else {
+                let delta = date.timeIntervalSinceNow
+                Button(action: jumpToNow) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.uturn.backward")
+                            .font(.caption2.weight(.bold))
+                        Text(deltaLabel(delta))
+                            .font(.caption.weight(.semibold).monospacedDigit())
+                            .lineLimit(1)
+                            .fixedSize()
+                    }
+                    .foregroundStyle(delta > 0 ? AnyShapeStyle(.orange) : AnyShapeStyle(.secondary))
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 5)
+                    .glassEffect(in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("Zur aktuellen Zeit springen"))
+            }
+        }
+    }
+
+    private func deltaLabel(_ delta: TimeInterval) -> String {
+        let formatted = TimelineFormatters.delta.string(from: abs(delta)) ?? ""
+        return (delta > 0 ? "+" : "−") + formatted
+    }
+
+    private func jumpToNow() {
+        guard let index = closestIndexToNow(state.frameTimestamps),
+              index != state.currentFrameIndex else { return }
+        state.currentFrameIndex = index
+        UIApplication.shared.playHapticFeedback()
+    }
+
+    // MARK: Source badge
+
+    @ViewBuilder
+    private func sourceBadge(_ title: String) -> some View {
+        if !title.isEmpty {
+            Button(action: { onBadgeTap?() }) {
+                HStack(spacing: 3) {
+                    Text(title)
+                        .font(.caption.weight(.semibold))
+                        .lineLimit(1)
+                        .fixedSize()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 9)
+                .padding(.vertical, 5)
+                .glassEffect(in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .disabled(onBadgeTap == nil)
+            .accessibilityHint(Text("Öffnet die Kartenebenen"))
+        }
+    }
+
+    // MARK: Error footer
+
+    private func errorFooter(_ message: String) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.caption2)
+                .foregroundStyle(.orange)
+            Text(message)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: Selected frame
+
+    private var selectedTimestamp: String? {
+        let stamps = state.frameTimestamps
+        guard stamps.indices.contains(state.currentFrameIndex) else { return nil }
+        return stamps[state.currentFrameIndex]
+    }
+
+    private var selectedDate: Date? {
+        selectedTimestamp.flatMap(parseFrameDate)
+    }
+
+    private var selectedTime: String {
+        guard let date = selectedDate else { return "--:--" }
+        return SettingService.formattedTime(date)
+    }
+
+    private var selectedDay: String {
+        guard let date = selectedDate else { return "" }
+        return TimelineFormatters.weekday.string(from: date)
+    }
+}
+
+// MARK: - Scrubber
+
+private struct TimelineScrubber: View {
+    let timestamps: [String]
+    let selectedIndex: Int
+    let loadedIndices: Set<Int>
+    let onSelectionChanged: (Int) -> Void
+    let onInteractionChanged: (Bool) -> Void
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isDragging = false
+    /// Raw finger x while dragging — the thumb follows this continuously instead
+    /// of snapping between quantized frame positions, so scrubbing tracks at
+    /// display refresh rate. nil when idle (thumb sits on the selected frame).
+    @State private var dragX: CGFloat?
+    /// timestamps parsed once per timeline — body re-runs per drag pixel and
+    /// must not re-parse 50 ISO strings each time.
+    @State private var cachedDates: [Date?] = []
+
+    private var frameCount: Int { timestamps.count }
+
+    var body: some View {
+        GeometryReader { proxy in
+            let width = proxy.size.width
+            let trackWidth = max(width - thumbDiameter, 1)
+            let dates = cachedDates.count == timestamps.count
+                ? cachedDates
+                : timestamps.map(parseFrameDate)
+            let nowIndex = closestTimestampIndex(in: dates)
+            let runs = loadedRuns()
+            let nowCenter = thumbRadius + xOffset(for: nowIndex, width: trackWidth)
+            let nowLabelX = min(max(nowCenter - nowLabelWidth / 2, 0), width - nowLabelWidth)
+            let showStart = nowLabelX > 52
+            let showEnd = nowLabelX + nowLabelWidth < width - 60
+            let midMarks = midAxisLabels(dates: dates, trackWidth: trackWidth).filter { mark in
+                abs(mark.x - nowCenter) > 42
+                    && mark.x - 24 > (showStart ? 44 : 8)
+                    && mark.x + 24 < width - (showEnd ? 44 : 8)
+            }
+
+            VStack(spacing: 6) {
+                trackZone(width: width, trackWidth: trackWidth, dates: dates,
+                          nowIndex: nowIndex, runs: runs, midMarks: midMarks)
+                axisRow(width: width, dates: dates, midMarks: midMarks,
+                        nowLabelX: nowLabelX, showStart: showStart, showEnd: showEnd)
+            }
+        }
+        .frame(height: trackZoneHeight + 6 + axisHeight)
+        .onChange(of: timestamps, initial: true) { _, stamps in
+            cachedDates = stamps.map(parseFrameDate)
+        }
+    }
+
+    // MARK: Track
+
+    private func trackZone(width: CGFloat, trackWidth: CGFloat, dates: [Date?],
+                           nowIndex: Int, runs: [ClosedRange<Int>],
+                           midMarks: [(x: CGFloat, text: String)]) -> some View {
+        let thumbOffset = dragX.map { min(max($0 - thumbRadius, 0), trackWidth) }
+            ?? xOffset(for: selectedIndex, width: trackWidth)
+        let selectionIsLoaded = loadedIndices.contains(selectedIndex)
+        let fullyBuffered = loadedIndices.count >= frameCount
+
+        return ZStack(alignment: .leading) {
+            Capsule()
+                .fill(.white.opacity(0.08))
+                .frame(height: trackHeight)
+                .padding(.horizontal, thumbRadius)
+
+            // Buffered bands — playability, video-player style. Edges spring as
+            // the contiguous ranges grow; islands from scrub-triggered preloads
+            // render as their own segments.
+            ZStack(alignment: .leading) {
+                ForEach(Array(runs.enumerated()), id: \.offset) { _, run in
+                    Capsule()
+                        .fill(.white.opacity(0.26))
+                        .frame(width: bandWidth(for: run, trackWidth: trackWidth),
+                               height: trackHeight)
+                        .offset(x: xOffset(for: run.lowerBound, width: trackWidth))
+                }
+            }
+            .padding(.leading, thumbRadius)
+            .animation(.smooth(duration: 0.55), value: loadedIndices)
+
+            // Nowcast/forecast zone right of the now marker.
+            if nowIndex < frameCount - 1 {
+                let nowX = xOffset(for: nowIndex, width: trackWidth)
+                UnevenRoundedRectangle(bottomTrailingRadius: trackHeight / 2,
+                                       topTrailingRadius: trackHeight / 2)
+                    .fill(.orange.opacity(0.14))
+                    .frame(width: max(trackWidth - nowX, 0), height: trackHeight)
+                    .offset(x: thumbRadius + nowX)
+            }
+
+            Capsule()
+                .strokeBorder(.white.opacity(0.08), lineWidth: 0.75)
+                .frame(height: trackHeight)
+                .padding(.horizontal, thumbRadius)
+
+            // One tick per axis label, so the labels visibly anchor to the track.
+            ForEach(midMarks, id: \.x) { mark in
+                Capsule()
+                    .fill(.white.opacity(0.32))
+                    .frame(width: 1.5, height: 5)
+                    .offset(x: mark.x - 0.75)
+            }
+
+            if !fullyBuffered && !reduceMotion {
+                ShimmerBand(trackWidth: trackWidth, height: trackHeight)
+                    .mask(SegmentsShape(segments: gapSegments(runs: runs, trackWidth: trackWidth)))
+                    .frame(width: trackWidth, height: trackHeight)
+                    .padding(.leading, thumbRadius)
+            }
+
+            // "Now" marker separating observation from nowcast.
+            RoundedRectangle(cornerRadius: 1)
+                .fill(.white.opacity(0.9))
+                .frame(width: 2, height: trackHeight + 6)
+                .offset(x: thumbRadius + xOffset(for: nowIndex, width: trackWidth) - 1)
+                .shadow(color: .black.opacity(0.3), radius: 1)
+
+            Circle()
+                .fill(.white.opacity(selectionIsLoaded ? 1 : 0.75))
+                .frame(width: thumbDiameter, height: thumbDiameter)
+                .shadow(color: .black.opacity(0.22), radius: 5, y: 2)
+                .overlay {
+                    Circle()
+                        .stroke(Color.black.opacity(0.12), lineWidth: 1)
+                }
+                .overlay {
+                    if !selectionIsLoaded {
+                        ThumbLoadingRing()
+                    }
+                }
+                .offset(x: thumbOffset)
+        }
+        .frame(height: trackZoneHeight)
+        .contentShape(Rectangle())
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { value in
+                    if !isDragging {
+                        isDragging = true
+                        onInteractionChanged(true)
+                    }
+                    dragX = value.location.x
+                    onSelectionChanged(index(for: value.location.x, width: trackWidth))
+                }
+                .onEnded { value in
+                    onSelectionChanged(index(for: value.location.x, width: trackWidth))
+                    if isDragging {
+                        isDragging = false
+                        onInteractionChanged(false)
+                    }
+                    // Settle onto the selected frame's quantized position.
+                    withAnimation(.snappy(duration: 0.2)) {
+                        dragX = nil
+                    }
+                }
+        )
+        .onChange(of: fullyBuffered) { _, ready in
+            // The whole timeline just became scrubbable under the user's finger.
+            if ready && isDragging {
+                UIApplication.shared.playHapticFeedback()
+            }
+        }
+        .accessibilityElement()
+        .accessibilityLabel("Zeitleiste")
+        .accessibilityValue("\(selectedIndex + 1) von \(frameCount)")
+        .accessibilityAdjustableAction { direction in
+            switch direction {
+            case .increment:
+                onSelectionChanged(min(frameCount - 1, selectedIndex + 1))
+            case .decrement:
+                onSelectionChanged(max(0, selectedIndex - 1))
+            @unknown default:
+                break
+            }
+        }
+    }
+
+    // MARK: Axis
+
+    /// First and last frame time at the edges, round in-between times along the
+    /// track, and "Jetzt" anchored under the now marker. Labels yield to their
+    /// neighbors when space gets tight (filtering happens in body, shared with
+    /// the track's tick marks).
+    private func axisRow(width: CGFloat, dates: [Date?],
+                         midMarks: [(x: CGFloat, text: String)],
+                         nowLabelX: CGFloat, showStart: Bool, showEnd: Bool) -> some View {
+        ZStack(alignment: .topLeading) {
+            HStack {
+                if showStart {
+                    Text(edgeLabel(dates.first ?? nil))
+                }
+                Spacer()
+                if showEnd {
+                    Text(edgeLabel(dates.last ?? nil))
+                }
+            }
+            ForEach(midMarks, id: \.x) { label in
+                Text(label.text)
+                    .frame(width: 48)
+                    .offset(x: label.x - 24)
+            }
+            Text("Jetzt")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.primary)
+                .frame(width: nowLabelWidth)
+                .offset(x: nowLabelX)
+        }
+        .font(.caption.monospacedDigit())
+        .foregroundStyle(.secondary)
+        .frame(height: axisHeight)
+    }
+
+    private func edgeLabel(_ date: Date?) -> String {
+        guard let date else { return "--:--" }
+        return SettingService.formattedTime(date)
+    }
+
+    /// Round times between the first and last frame. The step is chosen by the
+    /// space actually available — smallest candidate whose on-track spacing
+    /// clears one label width — so the axis fills wide layouts with more times
+    /// and never crowds narrow ones.
+    private func midAxisLabels(dates: [Date?], trackWidth: CGFloat) -> [(x: CGFloat, text: String)] {
+        guard let first = dates.first ?? nil, let last = dates.last ?? nil,
+              last > first else { return [] }
+        let span = last.timeIntervalSince(first)
+        let minLabelSpacing: CGFloat = 55
+        let steps: [TimeInterval] = [15, 30, 60, 120, 180, 360, 720, 1440].map { $0 * 60 }
+        guard let step = steps.first(where: {
+            CGFloat($0 / span) * trackWidth >= minLabelSpacing
+        }) else { return [] }
+
+        var labels: [(x: CGFloat, text: String)] = []
+        var tick = (first.timeIntervalSince1970 / step).rounded(.up) * step
+        while tick < last.timeIntervalSince1970 - 1 {
+            let fraction = CGFloat((tick - first.timeIntervalSince1970) / span)
+            labels.append((
+                x: thumbRadius + fraction * trackWidth,
+                text: SettingService.formattedTime(Date(timeIntervalSince1970: tick))
+            ))
+            tick += step
+        }
+        return labels
+    }
+
+    // MARK: Geometry & segments
+
+    private var thumbDiameter: CGFloat { 18 }
+    private var thumbRadius: CGFloat { thumbDiameter / 2 }
+    private var trackHeight: CGFloat { 10 }
+    private var trackZoneHeight: CGFloat { 26 }
+    private var axisHeight: CGFloat { 14 }
+    private var nowLabelWidth: CGFloat { 48 }
+
+    /// Contiguous runs of loaded frames, left to right.
+    private func loadedRuns() -> [ClosedRange<Int>] {
+        var runs: [ClosedRange<Int>] = []
+        var index = 0
+        while index < frameCount {
+            if loadedIndices.contains(index) {
+                var end = index
+                while end + 1 < frameCount, loadedIndices.contains(end + 1) {
+                    end += 1
+                }
+                runs.append(index...end)
+                index = end + 1
+            } else {
+                index += 1
+            }
+        }
+        return runs
+    }
+
+    /// X-ranges not covered by any buffered band — the shimmer's mask.
+    private func gapSegments(runs: [ClosedRange<Int>], trackWidth: CGFloat) -> [ClosedRange<CGFloat>] {
+        var gaps: [ClosedRange<CGFloat>] = []
+        var cursor = 0
+        for run in runs {
+            if run.lowerBound > cursor {
+                let from = xOffset(for: max(cursor - 1, 0), width: trackWidth)
+                let to = xOffset(for: run.lowerBound, width: trackWidth)
+                if to > from { gaps.append(from...to) }
+            }
+            cursor = run.upperBound + 1
+        }
+        if cursor < frameCount {
+            let from = xOffset(for: max(cursor - 1, 0), width: trackWidth)
+            if trackWidth > from { gaps.append(from...trackWidth) }
+        }
+        return gaps
+    }
+
+    private func bandWidth(for run: ClosedRange<Int>, trackWidth: CGFloat) -> CGFloat {
+        let lower = xOffset(for: run.lowerBound, width: trackWidth)
+        let upper = xOffset(for: run.upperBound, width: trackWidth)
+        return max(upper - lower, 6)
+    }
+
+    private func index(for locationX: CGFloat, width: CGFloat) -> Int {
+        guard frameCount > 1 else { return 0 }
+        let clampedX = min(max(locationX - thumbRadius, 0), width)
+        let fraction = clampedX / width
+        return Int((fraction * CGFloat(frameCount - 1)).rounded())
+    }
+
+    private func xOffset(for index: Int, width: CGFloat) -> CGFloat {
+        guard frameCount > 1 else { return 0 }
+        let clampedIndex = max(0, min(frameCount - 1, index))
+        let fraction = CGFloat(clampedIndex) / CGFloat(frameCount - 1)
+        return fraction * width
+    }
+}
+
+// MARK: - Loading choreography pieces
+
+/// One slow highlight sweeping the track — "working" without per-frame flicker.
+/// Callers mask it to the unbuffered gaps (or show it bare on the skeleton).
+private struct ShimmerBand: View {
+    let trackWidth: CGFloat
+    let height: CGFloat
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1 / 30)) { context in
+            let period: TimeInterval = 2.8
+            let phase = CGFloat(
+                context.date.timeIntervalSinceReferenceDate
+                    .truncatingRemainder(dividingBy: period) / period)
+            let bandWidth: CGFloat = 72
+            Color.clear
+                .overlay(alignment: .leading) {
+                    LinearGradient(
+                        colors: [.clear, .white.opacity(0.18), .clear],
+                        startPoint: .leading, endPoint: .trailing)
+                        .frame(width: bandWidth)
+                        .offset(x: phase * (trackWidth + bandWidth) - bandWidth)
+                }
+                .clipShape(Capsule())
+        }
+        .frame(width: trackWidth, height: height)
+        .allowsHitTesting(false)
+    }
+}
+
+/// Rounded rects over the given x-ranges — the shimmer's gap mask.
+private struct SegmentsShape: Shape {
+    let segments: [ClosedRange<CGFloat>]
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        for segment in segments {
+            let width = segment.upperBound - segment.lowerBound
+            guard width > 0.5 else { continue }
+            path.addRoundedRect(
+                in: CGRect(x: segment.lowerBound, y: rect.minY,
+                           width: width, height: rect.height),
+                cornerSize: CGSize(width: rect.height / 2, height: rect.height / 2))
+        }
+        return path
+    }
+}
+
+/// Indeterminate ring around the thumb while the frame under it is decoding.
+private struct ThumbLoadingRing: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var rotating = false
+
+    var body: some View {
+        Circle()
+            .trim(from: 0, to: 0.7)
+            .stroke(.white.opacity(0.9), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+            .frame(width: 25, height: 25)
+            .rotationEffect(.degrees(rotating ? 360 : 0))
+            .shadow(color: .black.opacity(0.25), radius: 1)
+            .onAppear {
+                guard !reduceMotion else { return }
+                withAnimation(.linear(duration: 1.0).repeatForever(autoreverses: false)) {
+                    rotating = true
+                }
+            }
+    }
+}
+
+/// Skeleton track shown before frame metadata arrives — same footprint as the
+/// real scrubber so the chip doesn't jump when data lands.
+private struct GhostTrack: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        GeometryReader { proxy in
+            VStack(spacing: 6) {
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(.white.opacity(0.08))
+                        .frame(height: 10)
+                    if !reduceMotion {
+                        ShimmerBand(trackWidth: proxy.size.width, height: 10)
+                    }
+                }
+                .frame(height: 26)
+                HStack {
+                    Text(verbatim: "--:--")
+                    Spacer()
+                    Text(verbatim: "--:--")
+                }
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(.tertiary)
+                .frame(height: 14)
+            }
+        }
+        .frame(height: 46)
+    }
+}
+
+// MARK: - Timestamp badge (map preview)
 // isLive is driven explicitly by OscarRadarState.isCurrentFrameLive so that the
 // pulsing dot only appears on the "natural now" frame, never on scrubbed frames.
 
@@ -216,7 +827,7 @@ struct RadarTimestampBadge: View {
     }
 
     private var formattedTime: String {
-        guard let date = ISO8601DateFormatter.parseRadarDate(timestamp) else { return "--:--" }
+        guard let date = parseFrameDate(timestamp) else { return "--:--" }
         return SettingService.formattedTime(date)
     }
 }
@@ -238,388 +849,5 @@ private struct PulsingDot: View {
                 .easeInOut(duration: 0.9).repeatForever(autoreverses: true),
                 value: pulsing
             )
-    }
-}
-
-// MARK: - Shared formatter singletons
-
-extension ISO8601DateFormatter {
-    // Handles "2024-01-15T12:00:00+00:00" and "2024-01-15T12:00:00Z"
-    nonisolated(unsafe) static let radarFormatter: ISO8601DateFormatter = {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime]
-        return f
-    }()
-
-    // Handles "2024-01-15T12:00:00.000Z" and similar with sub-second precision
-    nonisolated(unsafe) private static let radarFormatterFractional: ISO8601DateFormatter = {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return f
-    }()
-
-    /// Tries fractional-seconds ISO8601, plain ISO8601, and Unix epoch (seconds).
-    static func parseRadarDate(_ string: String) -> Date? {
-        radarFormatterFractional.date(from: string)
-            ?? radarFormatter.date(from: string)
-            ?? Double(string).map { Date(timeIntervalSince1970: $0) }
-    }
-}
-
-extension DateFormatter {
-    static let shortDay: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "EEEE"
-        return f
-    }()
-}
-
-// MARK: - Tile Layer Timeline Controls (ICON-D2 / GFS)
-
-struct WeatherTileTimelineControls: View {
-    @Bindable var imageState: ModelGridLayerState
-    /// Tapping the source badge (e.g. "DWD ICON-D2") opens the layer picker.
-    var onBadgeTap: (() -> Void)?
-
-    var body: some View {
-        Group {
-            if imageState.frameTimestamps.isEmpty || (imageState.isLoading && !imageState.hasAnyLoadedFrame) {
-                loadingChip
-            } else {
-                playerChip
-            }
-        }
-        if let error = imageState.error {
-            Text(error)
-                .font(.caption2)
-                .foregroundStyle(.red)
-                .padding(.horizontal, 14)
-        }
-    }
-
-    // MARK: - Player chip
-
-    private var playerChip: some View {
-        VStack(spacing: 10) {
-            HStack {
-                Button {
-                    if imageState.isPlaying { imageState.pause() } else { imageState.play() }
-                    UIApplication.shared.playHapticFeedback()
-                } label: {
-                    Image(systemName: imageState.isPlaying ? "pause.fill" : "play.fill")
-                        .font(.system(size: 15, weight: .bold))
-                        .frame(width: 44, height: 44)
-                        .glassEffect(in: Circle())
-                }
-                .buttonStyle(.plain)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(selectedDay)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    Text(selectedTime)
-                        .font(.subheadline.weight(.semibold).monospacedDigit())
-                        .foregroundStyle(.primary)
-                }
-                Spacer()
-                if imageState.isLoading && !imageState.hasCurrentFrame && imageState.hasAnyLoadedFrame {
-                    ProgressView()
-                        .scaleEffect(0.75)
-                }
-            }
-
-            let frameCount = imageState.frames.count
-            if frameCount > 1 {
-                TimelineScrubber(
-                    frameCount: frameCount,
-                    selectedIndex: imageState.currentFrameIndex,
-                    loadedIndices: imageState.loadedFrameIndices,
-                    loadingIndices: imageState.loadingFrameIndices,
-                    contiguousReadyRange: imageState.contiguousReadyRange,
-                    onSelectionChanged: { index in
-                        guard index != imageState.currentFrameIndex else { return }
-                        imageState.currentFrameIndex = index
-                        UIApplication.shared.playHapticFeedback()
-                    },
-                    onInteractionChanged: { isInteracting in
-                        if isInteracting {
-                            imageState.beginScrubbing()
-                        } else {
-                            imageState.endScrubbing()
-                        }
-                    }
-                )
-            }
-
-            HStack {
-                Text(timeAt(index: 0))
-                    .font(.footnote.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Text(timeAt(index: oneThirdIndex))
-                    .font(.footnote.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Text(timeAt(index: twoThirdIndex))
-                    .font(.footnote.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Text(timeAt(index: imageState.frameTimestamps.count - 1))
-                    .font(.footnote.monospacedDigit())
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .glassEffect(in: RoundedRectangle(cornerRadius: 24))
-        .overlay(alignment: .topTrailing) {
-            sourceBadge
-                .padding(.top, 17)
-                .padding(.trailing, 17)
-        }
-        .contentShape(RoundedRectangle(cornerRadius: 24))
-        .gesture(DragGesture(minimumDistance: 0).onChanged { _ in })
-    }
-
-    // MARK: - Loading chip
-
-    private var loadingChip: some View {
-        HStack(spacing: 8) {
-            ProgressView().scaleEffect(0.75)
-            Text("Wetterdaten werden geladen…")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .glassEffect(in: RoundedRectangle(cornerRadius: 24))
-    }
-
-    // MARK: - Badge
-
-    private var sourceBadge: some View {
-        Button(action: { onBadgeTap?() }) {
-            Text(imageState.currentLayer?.sourceLabel ?? "")
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(.primary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                )
-        }
-        .buttonStyle(.plain)
-        .disabled(onBadgeTap == nil)
-        .accessibilityHint(Text("Öffnet die Kartenebenen"))
-    }
-
-    // MARK: - Helpers
-
-    private var selectedDay: String  { dayFrom(imageState.currentFrameTimestamp) }
-    private var selectedTime: String { timeFrom(imageState.currentFrameTimestamp) }
-
-    private var oneThirdIndex: Int {
-        guard imageState.frameTimestamps.count > 1 else { return 0 }
-        return max(0, min(imageState.frameTimestamps.count - 1, imageState.frameTimestamps.count / 3))
-    }
-    private var twoThirdIndex: Int {
-        guard imageState.frameTimestamps.count > 1 else { return 0 }
-        return max(0, min(imageState.frameTimestamps.count - 1, (imageState.frameTimestamps.count * 2) / 3))
-    }
-
-    private func timeAt(index: Int) -> String {
-        guard index >= 0, index < imageState.frameTimestamps.count else { return "--:--" }
-        return timeFrom(imageState.frameTimestamps[index])
-    }
-
-    private func timeFrom(_ ts: String?) -> String {
-        guard let ts, let date = ISO8601DateFormatter.parseRadarDate(ts) else { return "--:--" }
-        return SettingService.formattedTime(date)
-    }
-
-    private func dayFrom(_ ts: String?) -> String {
-        guard let ts, let date = ISO8601DateFormatter.parseRadarDate(ts) else { return "--" }
-        return DateFormatter.shortDay.string(from: date)
-    }
-}
-
-private struct TimelineScrubber: View {
-    let frameCount: Int
-    let selectedIndex: Int
-    let loadedIndices: Set<Int>
-    let loadingIndices: Set<Int>
-    let contiguousReadyRange: ClosedRange<Int>?
-    let onSelectionChanged: (Int) -> Void
-    let onInteractionChanged: (Bool) -> Void
-
-    @State private var isDragging = false
-
-    var body: some View {
-        GeometryReader { proxy in
-            let trackWidth = max(proxy.size.width - thumbDiameter, 1)
-            let thumbOffset = xOffset(for: selectedIndex, width: trackWidth)
-            let selectionIsLoaded = loadedIndices.contains(selectedIndex)
-            let selectionIsLoading = loadingIndices.contains(selectedIndex)
-
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(.white.opacity(0.1))
-                    .frame(height: trackHeight)
-                    .padding(.horizontal, thumbRadius)
-
-                readinessHighlight(
-                    contiguousReadyRange: contiguousReadyRange,
-                    width: trackWidth
-                )
-                .padding(.horizontal, thumbRadius)
-
-                stepMarkers
-                    .padding(.horizontal, thumbRadius)
-
-                Capsule()
-                    .strokeBorder(.white.opacity(0.08), lineWidth: 0.75)
-                    .frame(height: trackHeight)
-                    .padding(.horizontal, thumbRadius)
-
-                Circle()
-                    .fill(thumbFill(isLoaded: selectionIsLoaded, isLoading: selectionIsLoading))
-                    .frame(width: thumbDiameter, height: thumbDiameter)
-                    .shadow(color: .black.opacity(0.22), radius: 5, y: 2)
-                    .overlay {
-                        Circle()
-                            .stroke(Color.black.opacity(0.12), lineWidth: 1)
-                    }
-                    .offset(x: thumbOffset)
-            }
-            .frame(height: 26)
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        if !isDragging {
-                            isDragging = true
-                            onInteractionChanged(true)
-                        }
-                        onSelectionChanged(index(for: value.location.x, width: trackWidth))
-                    }
-                    .onEnded { value in
-                        onSelectionChanged(index(for: value.location.x, width: trackWidth))
-                        if isDragging {
-                            isDragging = false
-                            onInteractionChanged(false)
-                        }
-                    }
-            )
-            .accessibilityElement()
-            .accessibilityLabel("Zeitleiste")
-            .accessibilityValue("\(selectedIndex + 1) von \(frameCount)")
-            .accessibilityAdjustableAction { direction in
-                switch direction {
-                case .increment:
-                    onSelectionChanged(min(frameCount - 1, selectedIndex + 1))
-                case .decrement:
-                    onSelectionChanged(max(0, selectedIndex - 1))
-                @unknown default:
-                    break
-                }
-            }
-        }
-        .frame(height: 26)
-    }
-
-    private var thumbDiameter: CGFloat { 18 }
-    private var thumbRadius: CGFloat { thumbDiameter / 2 }
-    private var trackHeight: CGFloat { 10 }
-    private var markerHeight: CGFloat { 5 }
-
-    @ViewBuilder
-    private var stepMarkers: some View {
-        HStack(spacing: 0) {
-            ForEach(0..<frameCount, id: \.self) { index in
-                let isSelected = index == selectedIndex
-                let isLoaded = loadedIndices.contains(index)
-                let isLoading = loadingIndices.contains(index)
-
-                Capsule()
-                    .fill(markerColor(isSelected: isSelected, isLoaded: isLoaded, isLoading: isLoading))
-                    .frame(width: markerWidth(isSelected: isSelected), height: markerHeight)
-                    .frame(maxWidth: .infinity)
-            }
-        }
-        .frame(height: trackHeight)
-    }
-
-    private func markerColor(isSelected: Bool, isLoaded: Bool, isLoading: Bool) -> Color {
-        if isSelected {
-            return isLoaded ? .white.opacity(0.9) : .orange.opacity(0.9)
-        }
-
-        if isLoading {
-            return .orange.opacity(0.6)
-        }
-
-        if isLoaded {
-            return .white.opacity(0.36)
-        }
-
-        return .white.opacity(0.1)
-    }
-
-    private func markerWidth(isSelected: Bool) -> CGFloat {
-        isSelected ? 5 : 2.5
-    }
-
-    @ViewBuilder
-    private func readinessHighlight(
-        contiguousReadyRange: ClosedRange<Int>?,
-        width: CGFloat
-    ) -> some View {
-        if let contiguousReadyRange {
-            let lower = min(max(contiguousReadyRange.lowerBound, 0), frameCount - 1)
-            let upper = min(max(contiguousReadyRange.upperBound, 0), frameCount - 1)
-            let lowerOffset = xOffset(for: lower, width: width)
-            let upperOffset = xOffset(for: upper, width: width)
-            readinessSegment(
-                minX: lowerOffset,
-                maxX: upperOffset
-            )
-            .frame(height: trackHeight)
-        }
-    }
-
-    private func readinessSegment(
-        minX: CGFloat,
-        maxX: CGFloat
-    ) -> some View {
-        Capsule()
-            .fill(.white.opacity(0.22))
-            .frame(width: max(maxX - minX, 10), height: trackHeight)
-            .offset(x: minX)
-    }
-
-    private func thumbFill(isLoaded: Bool, isLoading: Bool) -> some ShapeStyle {
-        if isLoaded {
-            return AnyShapeStyle(Color.white)
-        }
-
-        if isLoading {
-            return AnyShapeStyle(Color.orange.opacity(0.94))
-        }
-
-        return AnyShapeStyle(Color.white.opacity(0.82))
-    }
-
-    private func index(for locationX: CGFloat, width: CGFloat) -> Int {
-        guard frameCount > 1 else { return 0 }
-        let clampedX = min(max(locationX - thumbRadius, 0), width)
-        let fraction = clampedX / width
-        return Int((fraction * CGFloat(frameCount - 1)).rounded())
-    }
-
-    private func xOffset(for index: Int, width: CGFloat) -> CGFloat {
-        guard frameCount > 1 else { return 0 }
-        let clampedIndex = max(0, min(frameCount - 1, index))
-        let fraction = CGFloat(clampedIndex) / CGFloat(frameCount - 1)
-        return fraction * width
     }
 }

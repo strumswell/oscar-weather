@@ -4,8 +4,45 @@
 //
 //  Created by Philipp Bolte on 22.09.20.
 //
+import AppIntents
 import WidgetKit
 import SwiftUI
+
+// MARK: - Configuration intent
+
+/// Raw values must match MapBasemapStyle — they key the app-prerendered
+/// basemaps in the app group (WidgetBasemapStore).
+enum RadarWidgetStyle: String, AppEnum {
+    case fiord
+    case dark
+    case positron
+
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Kartenstil")
+    static let caseDisplayRepresentations: [RadarWidgetStyle: DisplayRepresentation] = [
+        .fiord: "Fiord",
+        .dark: "Dunkel",
+        .positron: "Hell",
+    ]
+}
+
+struct RadarWidgetConfigIntent: WidgetConfigurationIntent {
+    static let title: LocalizedStringResource = "Regenradar"
+    static let description = IntentDescription("Regenradar für aktuellen Standort")
+
+    @Parameter(title: "Kartenstil", default: .fiord)
+    var style: RadarWidgetStyle
+
+    @Parameter(title: "Weichzeichnen", default: true)
+    var smoothing: Bool
+
+    @Parameter(title: "Bewegungspfeile", default: true)
+    var motionArrows: Bool
+
+    @Parameter(title: "Regenzellen", default: false)
+    var stormCells: Bool
+}
+
+// MARK: - Entry view
 
 struct RadarWidgetEntryView: View {
     @Environment(\.widgetRenderingMode) var widgetRenderingMode
@@ -54,7 +91,11 @@ struct RadarWidget: Widget {
     let kind: String = "WeatherWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: RadarProvider()) { entry in
+        AppIntentConfiguration(
+            kind: kind,
+            intent: RadarWidgetConfigIntent.self,
+            provider: RadarProvider()
+        ) { entry in
             RadarWidgetEntryView(entry: entry)
         }
         .contentMarginsDisabled()

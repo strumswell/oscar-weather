@@ -29,7 +29,8 @@ struct ForecastModelSettingsView: View {
         }
       }
     }
-    .navigationBarTitle("Wettermodell", displayMode: .inline)
+    .navigationTitle("Wettermodell")
+    .navigationBarTitleDisplayMode(.inline)
   }
 
   @ViewBuilder

@@ -5,6 +5,12 @@ import OpenAPIRuntime
 import OSLog
 
 actor CacheStore {
+  /// All API clients share one store: every instance points at the same on-disk
+  /// `caches/APICache` directory, so separate stores each enforced their own
+  /// eviction over shared files — one client could delete entries another still
+  /// believed it held, and each reloaded the full directory at launch.
+  static let shared = CacheStore()
+
   private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Cache")
 
   private struct CachedResponseMetadata: Codable {
@@ -244,7 +250,7 @@ nonisolated final class CachingMiddleware: ClientMiddleware {
 
   init(cacheTime: TimeInterval = 10) {
     self.cacheTime = cacheTime
-    self.cacheStore = CacheStore()
+    self.cacheStore = .shared
   }
   
   func clearCache() async {

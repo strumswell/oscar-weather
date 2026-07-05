@@ -3,6 +3,27 @@ import SwiftUI
 import OSLog
 import WidgetKit
 
+enum MapBasemapStyle: String, CaseIterable, Identifiable {
+    case fiord
+    case dark
+    case positron
+
+    var id: String { rawValue }
+
+    /// OpenFreeMap style endpoint (no API key).
+    var styleURL: URL {
+        URL(string: "https://tiles.openfreemap.org/styles/\(rawValue)")!
+    }
+
+    var label: LocalizedStringKey {
+        switch self {
+        case .fiord: return "Fiord"
+        case .dark: return "Dunkel"
+        case .positron: return "Hell"
+        }
+    }
+}
+
 enum TimeFormatPreference: String, CaseIterable, Identifiable {
     case system
     case h24
@@ -51,6 +72,18 @@ public final class SettingService {
         category: "Storage"
     )
     var settings: Settings?
+    /// Units are mirrored out of Core Data into plain stored properties: mutating an
+    /// @NSManaged field fires no @Observable change, so views bound to `settings` went
+    /// stale. Views read/write these; the didSet persists back to Core Data.
+    var temperatureUnit: String {
+        didSet { unitDidChange() }
+    }
+    var windSpeedUnit: String {
+        didSet { unitDidChange() }
+    }
+    var precipitationUnit: String {
+        didSet { unitDidChange() }
+    }
     var oscarRadarLayer: Bool {
         didSet {
             UserDefaults.standard.set(oscarRadarLayer, forKey: "oscarRadarLayer")
@@ -65,6 +98,15 @@ public final class SettingService {
         didSet {
             // Shared app group so the radar widget reads the same region.
             Self.defaults.set(oscarRadarRegionRaw, forKey: "oscarRadarRegion")
+        }
+    }
+    /// When true, the radar layer shows the TYPED product (rain/snow/hail coloring
+    /// baked into the grid) where available — DWD and MRMS, not OPERA. The resolved
+    /// product accessor lives in WeatherTileLayer.swift — `RadarProduct` isn't
+    /// compiled into every target this file is.
+    var radarPrecipTypeOverlay: Bool {
+        didSet {
+            UserDefaults.standard.set(radarPrecipTypeOverlay, forKey: "radarPrecipTypeOverlay")
         }
     }
     /// When true (default), radar playback morphs between frames along the server's
@@ -96,10 +138,40 @@ public final class SettingService {
             UserDefaults.standard.set(mapValueBubbles, forKey: "mapValueBubbles")
         }
     }
+    /// When true, active severe-weather warning areas render as a polygon overlay
+    /// on top of whichever radar/model layer is showing.
+    var showAlertPolygons: Bool {
+        didSet {
+            UserDefaults.standard.set(showAlertPolygons, forKey: "showAlertPolygons")
+        }
+    }
+    /// When true, tracked precipitation cells render as markers with their
+    /// extrapolated tracks, alongside whichever layer is showing.
+    var showStormCells: Bool {
+        didSet {
+            UserDefaults.standard.set(showStormCells, forKey: "showStormCells")
+        }
+    }
+    /// Opacity of the radar/model data overlays (0.3…1).
+    var mapOverlayOpacity: Double {
+        didSet {
+            UserDefaults.standard.set(mapOverlayOpacity, forKey: "mapOverlayOpacity")
+        }
+    }
+    var mapBasemapStyleRaw: String {
+        didSet {
+            // Shared app group so the widget basemap prerender follows the map style.
+            Self.defaults.set(mapBasemapStyleRaw, forKey: "mapBasemapStyle")
+        }
+    }
+    var mapBasemapStyle: MapBasemapStyle {
+        get { MapBasemapStyle(rawValue: mapBasemapStyleRaw) ?? .fiord }
+        set { mapBasemapStyleRaw = newValue.rawValue }
+    }
     var timeFormatPreference: TimeFormatPreference {
         didSet {
             Self.defaults.set(timeFormatPreference.rawValue, forKey: Self.timeFormatPreferenceKey)
-            nc.post(name: .unitChanged, object: nil)
+            nc.post(name: .weatherRefreshNeeded, object: nil)
         }
     }
     var dailyForecastDaytimeTemperaturesEnabled: Bool {
@@ -128,29 +200,42 @@ public final class SettingService {
     }
     var dailyForecastDaytimeCustomStartHour: Int {
         didSet {
-            Self.defaults.set(
-                dailyForecastDaytimeCustomStartHour,
-                forKey: Self.dailyForecastDaytimeCustomStartHourKey
-            )
+            let clamped = Self.clampedHour(dailyForecastDaytimeCustomStartHour)
+            if clamped != dailyForecastDaytimeCustomStartHour {
+                dailyForecastDaytimeCustomStartHour = clamped
+                return
+            }
+            if dailyForecastDaytimeCustomEndHour < clamped {
+                dailyForecastDaytimeCustomEndHour = clamped
+            }
+            Self.defaults.set(clamped, forKey: Self.dailyForecastDaytimeCustomStartHourKey)
         }
     }
     var dailyForecastDaytimeCustomEndHour: Int {
         didSet {
-            Self.defaults.set(
-                dailyForecastDaytimeCustomEndHour,
-                forKey: Self.dailyForecastDaytimeCustomEndHourKey
-            )
+            let clamped = Self.clampedHour(dailyForecastDaytimeCustomEndHour)
+            if clamped != dailyForecastDaytimeCustomEndHour {
+                dailyForecastDaytimeCustomEndHour = clamped
+                return
+            }
+            if dailyForecastDaytimeCustomStartHour > clamped {
+                dailyForecastDaytimeCustomStartHour = clamped
+            }
+            Self.defaults.set(clamped, forKey: Self.dailyForecastDaytimeCustomEndHourKey)
         }
     }
     var forecastModelPreference: ForecastModelPreference {
         didSet {
             Self.defaults.set(forecastModelPreference.rawValue, forKey: Self.forecastModelPreferenceKey)
-            nc.post(name: .unitChanged, object: nil)
+            nc.post(name: .weatherRefreshNeeded, object: nil)
         }
     }
     private let context: NSManagedObjectContext
     private let pc = PersistenceController.shared
     private let nc = NotificationCenter.default
+    /// True while `update()` copies Core Data values into the mirrored properties, so
+    /// their didSet doesn't write straight back and re-post a refresh.
+    private var isHydrating = false
     nonisolated private static let timeFormatPreferenceKey = "timeFormatPreference"
     private static let dailyForecastDaytimeTemperaturesEnabledKey = "dailyForecastDaytimeTemperaturesEnabled"
     private static let dailyForecastDaytimeTemperatureDisplayModeKey = "dailyForecastDaytimeTemperatureDisplayMode"
@@ -168,6 +253,9 @@ public final class SettingService {
     nonisolated(unsafe) private static var formatterCache: [String: DateFormatter] = [:]
 
     private init() {
+        temperatureUnit = "celsius"
+        windSpeedUnit = "kmh"
+        precipitationUnit = "mm"
         oscarRadarLayer = UserDefaults.standard.bool(forKey: "oscarRadarLayer")
         activeTileLayerRaw = UserDefaults.standard.string(forKey: "activeTileLayer")
         // Prefer the shared app group; migrate a value written to standard defaults by older
@@ -177,10 +265,19 @@ public final class SettingService {
             ?? "germany"
         oscarRadarRegionRaw = resolvedRadarRegion
         Self.defaults.set(resolvedRadarRegion, forKey: "oscarRadarRegion")
+        // Migration: the standalone "Niederschlagsart" layer (oscarRadarProduct ==
+        // "precip_type") became a toggle on the radar layer.
+        radarPrecipTypeOverlay = (UserDefaults.standard.object(forKey: "radarPrecipTypeOverlay") as? Bool)
+            ?? (UserDefaults.standard.string(forKey: "oscarRadarProduct") == "precip_type")
         radarSmoothMotion = (UserDefaults.standard.object(forKey: "radarSmoothMotion") as? Bool) ?? true
         radarSoftRendering = (UserDefaults.standard.object(forKey: "radarSoftRendering") as? Bool) ?? true
         radarMotionArrows = (UserDefaults.standard.object(forKey: "radarMotionArrows") as? Bool) ?? true
         mapValueBubbles = (UserDefaults.standard.object(forKey: "mapValueBubbles") as? Bool) ?? true
+        showAlertPolygons = UserDefaults.standard.bool(forKey: "showAlertPolygons")
+        showStormCells = UserDefaults.standard.bool(forKey: "showStormCells")
+        let storedOpacity = UserDefaults.standard.object(forKey: "mapOverlayOpacity") as? Double
+        mapOverlayOpacity = min(max(storedOpacity ?? 0.7, 0.3), 1)
+        mapBasemapStyleRaw = Self.defaults.string(forKey: "mapBasemapStyle") ?? MapBasemapStyle.fiord.rawValue
         timeFormatPreference = TimeFormatPreference(
             rawValue: Self.defaults.string(forKey: Self.timeFormatPreferenceKey) ?? ""
         ) ?? .system
@@ -239,7 +336,6 @@ public final class SettingService {
                 let defaultSettings = Settings(context: self.context)
                 defaultSettings.druckLayer = false
                 defaultSettings.dwdLayer = true
-                defaultSettings.rainviewerLayer = false
                 defaultSettings.infrarotLayer = false
                 defaultSettings.tempLayer = false
                 defaultSettings.humidityLayer = false
@@ -250,6 +346,11 @@ public final class SettingService {
                 self.save()
             } else {
                 self.settings = result.first!
+                isHydrating = true
+                temperatureUnit = settings?.temperatureUnit ?? "celsius"
+                windSpeedUnit = settings?.windSpeedUnit ?? "kmh"
+                precipitationUnit = settings?.precipitationUnit ?? "mm"
+                isHydrating = false
                 mirrorUnitsToSharedDefaults()
             }
         } catch {
@@ -257,24 +358,14 @@ public final class SettingService {
             return
         }
     }
-    func updateTemperatureUnit(_ unit: String) {
-        settings?.temperatureUnit = unit
-        save()
-        nc.post(name: .unitChanged, object: nil)
-        WidgetCenter.shared.reloadAllTimelines()
-    }
 
-    func updateWindSpeedUnit(_ unit: String) {
-        settings?.windSpeedUnit = unit
+    private func unitDidChange() {
+        guard !isHydrating else { return }
+        settings?.temperatureUnit = temperatureUnit
+        settings?.windSpeedUnit = windSpeedUnit
+        settings?.precipitationUnit = precipitationUnit
         save()
-        nc.post(name: .unitChanged, object: nil)
-        WidgetCenter.shared.reloadAllTimelines()
-    }
-
-    func updatePrecipitationUnit(_ unit: String) {
-        settings?.precipitationUnit = unit
-        save()
-        nc.post(name: .unitChanged, object: nil)
+        nc.post(name: .weatherRefreshNeeded, object: nil)
         WidgetCenter.shared.reloadAllTimelines()
     }
 
@@ -285,23 +376,6 @@ public final class SettingService {
         Self.defaults.set(settings?.temperatureUnit ?? "celsius", forKey: Self.temperatureUnitKey)
         Self.defaults.set(settings?.windSpeedUnit ?? "kmh", forKey: Self.windSpeedUnitKey)
         Self.defaults.set(settings?.precipitationUnit ?? "mm", forKey: Self.precipitationUnitKey)
-    }
-
-    func updateDailyForecastDaytimeCustomStartHour(_ hour: Int) {
-        let startHour = Self.clampedHour(hour)
-        let endHour = max(startHour, dailyForecastDaytimeCustomEndHour)
-        updateDailyForecastDaytimeCustomHours(startHour: startHour, endHour: endHour)
-    }
-
-    func updateDailyForecastDaytimeCustomEndHour(_ hour: Int) {
-        let endHour = Self.clampedHour(hour)
-        let startHour = min(dailyForecastDaytimeCustomStartHour, endHour)
-        updateDailyForecastDaytimeCustomHours(startHour: startHour, endHour: endHour)
-    }
-
-    private func updateDailyForecastDaytimeCustomHours(startHour: Int, endHour: Int) {
-        dailyForecastDaytimeCustomStartHour = startHour
-        dailyForecastDaytimeCustomEndHour = endHour
     }
 
     nonisolated static var resolvedTimeFormatAPIValue: String {

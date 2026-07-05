@@ -23,6 +23,14 @@ extension SettingService {
         set { oscarRadarRegionRaw = newValue.rawValue }
     }
 
+    /// The radar product the map shows, resolved from the "Niederschlagsart" toggle
+    /// and the active region's coverage (OPERA has no type product → plain radar).
+    var oscarRadarProduct: RadarProduct {
+        radarPrecipTypeOverlay && RadarProduct.precipitationTyped.isAvailable(in: oscarRadarRegion)
+            ? .precipitationTyped
+            : .precipitation
+    }
+
     /// True while the GFS precip layer is showing as the automatic "no radar here"
     /// fallback of `autoSelectRadarSource` — lets a later location change return
     /// to a real radar without ever overriding an explicit layer choice.
@@ -34,7 +42,7 @@ extension SettingService {
     /// Location-based radar source pick: DWD → OPERA → NOAA MRMS by coverage,
     /// else the GFS precipitation forecast as the general fallback. Runs only
     /// while a radar layer is active (or while the fallback IT chose is still
-    /// showing) — an explicit model/RainViewer selection is never overridden.
+    /// showing) — an explicit model selection is never overridden.
     func autoSelectRadarSource(latitude: Double, longitude: Double) {
         let radarIntent = oscarRadarLayer
             || (activeTileLayer == .gfsPrecip && radarAutoFallbackActive)
@@ -44,6 +52,8 @@ extension SettingService {
             radarAutoFallbackActive = false
             guard !oscarRadarLayer || oscarRadarRegion != region else { return }
             activeTileLayer = nil
+            // The typed product's regional availability is resolved inside
+            // `oscarRadarProduct`, so a region switch needs no product fix-up.
             oscarRadarRegion = region
             oscarRadarLayer = true
         } else if oscarRadarLayer {
@@ -71,19 +81,8 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
         }
     }
 
-    var tilePath: String {
-        switch self {
-        case .iconPrecip: return "icon/precip-tiles"
-        case .iconTemp:   return "icon/temp-tiles"
-        case .iconWind:   return "icon/wind-tiles"
-        case .gfsPrecip:  return "gfs/prate-tiles"
-        case .gfsTemp:    return "gfs/temp-tiles"
-        case .gfsWind:    return "gfs/wind-tiles"
-        }
-    }
-
-    /// Frames-path prefix for full-world image requests. Combined with the frame
-    /// key and variable: `{imagePath}/{frameKey}/{variableSegment}/image`.
+    /// Frames-path prefix for grid requests. Combined with the frame key and
+    /// variable: `{imagePath}/{frameKey}/{variableSegment}/grid`.
     var imagePath: String? { framesEndpoint }
 
     /// Variable path segment in oscar-server model URLs.

@@ -10,26 +10,24 @@ import SwiftUI
 struct AlertView: View {
     @Environment(Weather.self) private var weather: Weather
     @Environment(NowPresentationCoordinator.self) private var presentation
-    
+
     var body: some View {
-        HStack {
-            Image(systemName: "exclamationmark.circle.fill")
-                .resizable()
+        HStack(spacing: 5) {
+            // The icon alone carries the warning color; the glass capsule and
+            // primary text keep the pill in the app's Liquid Glass language —
+            // a solid orange fill read as a massive block over the sky gradient.
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.orange)
-                .frame(width: 15, height: 15)
             if hasAlert() {
                 Text(getFormattedHeadline())
-                    .font(.caption2)
-                    .foregroundStyle(.orange)
-                    .bold()
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.primary)
             }
         }
-        .padding(.horizontal, 5)
-        .padding(.vertical, 5)
-        .overlay(
-            RoundedRectangle(cornerRadius: 25)
-                .stroke(.orange, lineWidth: 2)
-        )
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .glassEffect(.regular.tint(.orange.opacity(0.5)), in: Capsule())
         .onTapGesture {
             UIApplication.shared.playHapticFeedback()
             presentation.present(.alerts)
@@ -42,7 +40,6 @@ struct AlertView: View {
             presentation.present(.alerts)
         }
         .padding(.top, -10)
-        .shadow(radius: 15)
     }
 }
 

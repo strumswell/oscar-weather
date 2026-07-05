@@ -92,6 +92,60 @@
         }
       }
     },
+    "+%@ min" : {
+
+    },
+    "Bewegungspfeile" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motion Arrows"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hareket Okları"
+          }
+        }
+      }
+    },
+    "Dunkel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koyu"
+          }
+        }
+      }
+    },
+    "Fiord" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fiord"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fiord"
+          }
+        }
+      }
+    },
     "H: %@" : {
       "comment" : "Höchste Temperatur",
       "localizations" : {
@@ -109,6 +163,55 @@
         }
       }
     },
+    "Hell" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açık"
+          }
+        }
+      }
+    },
+    "Jetzt" : {
+
+    },
+    "Kartenstil" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kartenstil"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Map style"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Harita stili"
+          }
+        }
+      }
+    },
+    "Radar ist für diesen Ort nicht verfügbar" : {
+
+    },
+    "Regenzellen" : {
+
+    },
     "T: %@" : {
       "comment" : "Niedrigste Temperatur",
       "localizations" : {
@@ -122,6 +225,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "D: %@"
+          }
+        }
+      }
+    },
+    "UV" : {
+
+    },
+    "Weichzeichnen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soften"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yumuşatma"
           }
         }
       }

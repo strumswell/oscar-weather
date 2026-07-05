@@ -4,7 +4,8 @@
 //
 //  Client-side motion arrows for the paused radar, built from the /motion flow
 //  field plus the frame's in-RAM value grid (used by WeatherMapView's
-//  syncArrowLayer; RadarSnapshotRenderer in the widget carries a CPU port).
+//  syncArrowLayer). Placement math and the arrow icon live in RadarArrowGeometry,
+//  shared with the widget's CPU compositor (RadarSnapshotRenderer).
 //
 
 import CoreLocation
@@ -20,49 +21,20 @@ enum RadarMotionArrows {
         motion: RadarMotionData, fieldIndex: Int,
         grid: RadarGridPayload, bounds: OscarRadarBounds
     ) -> [MLNPointFeature] {
-        guard motion.fields.indices.contains(fieldIndex) else { return [] }
-        let field = motion.fields[fieldIndex]
-        let cols = motion.cols, rows = motion.rows
-        guard field.count == cols * rows * 2 else { return [] }
-
-        func mercatorY(_ latitude: Double) -> Double {
-            log(tan(.pi / 4 + latitude * .pi / 360))
-        }
-        let yNorth = mercatorY(bounds.north)
-        let ySouth = mercatorY(bounds.south)
-
-        var features: [MLNPointFeature] = []
-        features.reserveCapacity(cols * rows / 8)
-        for row in 0..<rows {
-            for col in 0..<cols {
-                // Checkerboard: half the cells, evenly spread — the full cell
-                // pitch read as too busy.
-                guard (row + col) % 2 == 0 else { continue }
-                let u = Double(field[row * cols + col])
-                let v = Double(field[cols * rows + row * cols + col])
-                let speed = (u * u + v * v).squareRoot()
-                guard speed >= 0.8 else { continue }
-
-                let uvX = (Double(col) + 0.5) / Double(cols)
-                let uvY = (Double(row) + 0.5) / Double(rows)
-                guard cellHasPrecip(grid: grid, uvX: uvX, uvY: uvY,
-                                    cellW: 1.0 / Double(cols), cellH: 1.0 / Double(rows)) else { continue }
-
+        let cellW = 1.0 / Double(motion.cols)
+        let cellH = 1.0 / Double(motion.rows)
+        return RadarArrowGeometry.arrowCells(motion: motion, fieldIndex: fieldIndex, bounds: bounds)
+            .compactMap { cell in
+                guard cellHasPrecip(grid: grid, uvX: cell.uvX, uvY: cell.uvY,
+                                    cellW: cellW, cellH: cellH) else { return nil }
                 let feature = MLNPointFeature()
-                let y = yNorth + uvY * (ySouth - yNorth)
-                feature.coordinate = CLLocationCoordinate2D(
-                    latitude: (2 * atan(exp(y)) - .pi / 2) * 180 / .pi,
-                    longitude: bounds.west + uvX * (bounds.east - bounds.west))
+                feature.coordinate = cell.coordinate
                 feature.attributes = [
-                    // +u = east, +v = south → clockwise-from-north degrees.
-                    "rotation": atan2(u, -v) * 180 / .pi,
-                    // Slightly larger arrows for faster motion (0.6…1.15).
-                    "scale": 0.6 + min(speed / 4, 1) * 0.55,
+                    "rotation": cell.rotation,
+                    "scale": cell.scale,
                 ]
-                features.append(feature)
+                return feature
             }
-        }
-        return features
     }
 
     /// ≥2 of 25 subsampled points inside the cell footprint carry a nonzero
@@ -86,28 +58,5 @@ enum RadarMotionArrows {
             }
         }
         return false
-    }
-
-    /// Thin north-pointing line arrow, black with a thin white border — the look
-    /// of the old server-rendered vector tiles. Drawn as a stroked path twice:
-    /// wider white underneath, thin black on top.
-    static func arrowImage() -> UIImage {
-        let size = CGSize(width: 13, height: 18)
-        let path = UIBezierPath()
-        path.move(to: CGPoint(x: 6.5, y: 16.5))        // tail
-        path.addLine(to: CGPoint(x: 6.5, y: 2))        // tip
-        path.move(to: CGPoint(x: 3.8, y: 5.6))         // head left
-        path.addLine(to: CGPoint(x: 6.5, y: 2))
-        path.addLine(to: CGPoint(x: 9.2, y: 5.6))      // head right
-        path.lineCapStyle = .round
-        path.lineJoinStyle = .round
-        return UIGraphicsImageRenderer(size: size).image { _ in
-            UIColor.white.setStroke()
-            path.lineWidth = 2.6
-            path.stroke()
-            UIColor.black.setStroke()
-            path.lineWidth = 1.1
-            path.stroke()
-        }
     }
 }

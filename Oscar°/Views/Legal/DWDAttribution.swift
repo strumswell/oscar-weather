@@ -20,7 +20,8 @@ struct DWDAttribution: View {
                 }
             }
         }
-        .navigationBarTitle("DWD", displayMode: .inline)
+        .navigationTitle("DWD")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -54,7 +55,8 @@ struct OperaAttribution: View {
                 }
             }
         }
-        .navigationBarTitle("EUMETNET OPERA", displayMode: .inline)
+        .navigationTitle("EUMETNET OPERA")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

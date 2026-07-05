@@ -27,6 +27,9 @@ struct WidgetBasemapRecord: Codable {
     let height: Double
     let scale: Double
     let renderedAt: Date
+    /// Basemap style raw value (MapBasemapStyle). nil only in records written
+    /// before styles became per-widget-configurable.
+    var style: String?
 }
 
 enum WidgetBasemapStore {
@@ -52,13 +55,40 @@ enum WidgetBasemapStore {
             .appendingPathComponent("WidgetBasemaps", isDirectory: true)
     }
 
-    private static func sizeKey(_ size: CGSize) -> String {
-        "\(Int(size.width.rounded()))x\(Int(size.height.rounded()))"
+    // MARK: - Requested styles handshake
+
+    /// Default basemap style for the radar widget (and the fallback for records
+    /// without one). Must equal MapBasemapStyle.fiord.rawValue.
+    static let defaultStyle = "fiord"
+    /// App-group defaults key: the styles configured across radar widget
+    /// instances. Written by the widget provider on every timeline render, read
+    /// by WidgetBasemapRenderer to know which basemaps to prerender — the app
+    /// process cannot see per-widget intent configurations directly.
+    private static let requestedStylesKey = "radarWidgetRequestedStyles"
+
+    static func requestedStyles() -> [String] {
+        let stored = UserDefaults(suiteName: appGroupID)?
+            .stringArray(forKey: requestedStylesKey) ?? []
+        return stored.isEmpty ? [defaultStyle] : stored
     }
 
-    static func load(size: CGSize) -> (record: WidgetBasemapRecord, image: UIImage)? {
+    static func registerRequestedStyle(_ style: String) {
+        guard let defaults = UserDefaults(suiteName: appGroupID) else { return }
+        var styles = defaults.stringArray(forKey: requestedStylesKey) ?? []
+        guard !styles.contains(style) else { return }
+        styles.append(style)
+        defaults.set(styles, forKey: requestedStylesKey)
+    }
+
+    // MARK: - Records
+
+    private static func key(_ size: CGSize, style: String) -> String {
+        "\(Int(size.width.rounded()))x\(Int(size.height.rounded()))-\(style)"
+    }
+
+    static func load(size: CGSize, style: String) -> (record: WidgetBasemapRecord, image: UIImage)? {
         guard let directory else { return nil }
-        let key = sizeKey(size)
+        let key = key(size, style: style)
         guard let json = try? Data(contentsOf: directory.appendingPathComponent("\(key).json")),
               let record = try? JSONDecoder().decode(WidgetBasemapRecord.self, from: json),
               let png = try? Data(contentsOf: directory.appendingPathComponent("\(key).png")),
@@ -72,7 +102,8 @@ enum WidgetBasemapStore {
               let png = image.pngData(),
               let json = try? JSONEncoder().encode(record)
         else { return }
-        let key = sizeKey(CGSize(width: record.width, height: record.height))
+        let key = key(CGSize(width: record.width, height: record.height),
+                      style: record.style ?? defaultStyle)
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try? png.write(to: directory.appendingPathComponent("\(key).png"), options: .atomic)
         try? json.write(to: directory.appendingPathComponent("\(key).json"), options: .atomic)

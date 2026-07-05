@@ -263,8 +263,14 @@
         }
       }
     },
+    "%@ %%" : {
+
+    },
     "%@ Bft" : {
       "shouldTranslate" : false
+    },
+    "%@ mm/h" : {
+
     },
     "%@ Tage" : {
       "extractionState" : "stale",
@@ -421,6 +427,29 @@
         }
       }
     },
+    "%lld von %lld" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld von %2$lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld of %2$lld"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
     "°C" : {
       "localizations" : {
         "en" : {
@@ -449,6 +478,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "°F"
+          }
+        }
+      }
+    },
+    "≈ 2 km Raster" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 2 km grid"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 2 km çözünürlük"
+          }
+        }
+      }
+    },
+    "≈ 25 km Raster" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 25 km grid"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 25 km çözünürlük"
           }
         }
       }
@@ -645,6 +708,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hava"
+          }
+        }
+      }
+    },
+    "Aktive Warngebiete des DWD" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active DWD warning areas"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DWD'nin aktif uyarı bölgeleri"
           }
         }
       }
@@ -1451,6 +1531,23 @@
       },
       "shouldTranslate" : false
     },
+    "Bewegungspfeile" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motion Arrows"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hareket Okları"
+          }
+        }
+      }
+    },
     "Bft" : {
       "shouldTranslate" : false
     },
@@ -1770,6 +1867,23 @@
       },
       "shouldTranslate" : false
     },
+    "Darstellung" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görünüm"
+          }
+        }
+      }
+    },
     "Das ist der %@. kälteste %@ seit %@." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1929,6 +2043,38 @@
         }
       }
     },
+    "Deckkraft" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opacity"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opaklık"
+          }
+        }
+      }
+    },
+    "Deckkraft der Wetterebenen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather layer opacity"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava katmanlarının opaklığı"
+          }
+        }
+      }
+    },
     "Der kälteste %@ seit %@." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1952,6 +2098,23 @@
         }
       }
     },
+    "Der Live-Regenstatus zeigt aufziehenden Regen als Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island. Er benötigt aktive Regen-Warnungen." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The live rain status shows approaching rain as a Live Activity on the Lock Screen and in the Dynamic Island. It requires rain alerts to be turned on."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canlı yağmur durumu, yaklaşan yağmuru kilit ekranında ve Dynamic Island'da canlı aktivite olarak gösterir. Bunun için yağmur uyarılarının açık olması gerekir."
+          }
+        }
+      }
+    },
     "Der wärmste %@ seit %@." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1971,6 +2134,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%2$@ yılından bu yana en sıcak %1$@."
+          }
+        }
+      }
+    },
+    "Deutscher Wetterdienst" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "German national weather service"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alman meteoroloji servisi"
           }
         }
       }
@@ -2098,6 +2278,23 @@
         }
       }
     },
+    "Dunkel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koyu"
+          }
+        }
+      }
+    },
     "Dünne Zweige bewegen sich, Wimpel strecken sich." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2168,6 +2365,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bir topluluk, birbirine yakın birkaç model çalışmasını karşılaştırır. Bu sayede önümüzdeki günlerde tahminin ne kadar kararlı ya da belirsiz olduğu görünür hale gelir."
+          }
+        }
+      }
+    },
+    "Ein Wettermodell ist eine Computersimulation der Atmosphäre: Aus Millionen Messwerten berechnet es, wie das Wetter in den nächsten Stunden und Tagen wird." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A weather model is a computer simulation of the atmosphere: from millions of measurements it calculates the weather for the coming hours and days."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava modeli, atmosferin bilgisayar simülasyonudur: Milyonlarca ölçümden önümüzdeki saat ve günlerin havasını hesaplar."
           }
         }
       }
@@ -2441,6 +2654,9 @@
         }
       }
     },
+    "EUMETNET OPERA" : {
+
+    },
     "Europa" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2608,6 +2824,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nemli"
+          }
+        }
+      }
+    },
+    "Fiord" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fiord"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fiord"
+          }
+        }
+      }
+    },
+    "Flüssige Bewegungen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smooth Motion"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akıcı Hareket"
           }
         }
       }
@@ -2784,6 +3034,23 @@
     },
     "Für diesen Standort liegen aktuell keine stündlichen Details vor." : {
 
+    },
+    "Gefrierend" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Freezing"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Donan yağış"
+          }
+        }
+      }
     },
     "GEFS zeigt lange Trends, ist aber wegen des groben Gitters weniger lokal." : {
       "extractionState" : "stale",
@@ -3024,6 +3291,57 @@
         }
       }
     },
+    "Graupel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graupel"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graupel"
+          }
+        }
+      }
+    },
+    "Gröberes Raster, dafür weltweit — gut für den großen Überblick. Einzelne Schauer können verschwimmen." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coarser grid, but worldwide — great for the big picture. Individual showers may blur."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha kaba ama dünya çapında ağ — genel bakış için idealdir. Tek tek sağanaklar bulanıklaşabilir."
+          }
+        }
+      }
+    },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Larger branches and small trees move."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
+          }
+        }
+      }
+    },
     "Großbritannien" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3064,23 +3382,6 @@
         }
       }
     },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Larger branches and small trees move."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
-          }
-        }
-      }
-    },
     "Gut" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3100,6 +3401,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "İyi"
+          }
+        }
+      }
+    },
+    "Hagel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hail"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolu"
           }
         }
       }
@@ -3162,6 +3480,23 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Haze: %1$.2f Turbidity: %2$.2f"
+          }
+        }
+      }
+    },
+    "Hell" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açık"
           }
         }
       }
@@ -3693,6 +4028,38 @@
         }
       }
     },
+    "Karte schließen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close Map"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haritayı Kapat"
+          }
+        }
+      }
+    },
+    "Kartenebenen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Map Layers"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Harita Katmanları"
+          }
+        }
+      }
+    },
     "Kawaii" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4128,6 +4495,40 @@
     "LIVE" : {
       "shouldTranslate" : false
     },
+    "Live + Kurzprognose" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live + short-term forecast"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canlı + kısa vadeli tahmin"
+          }
+        }
+      }
+    },
+    "Live-Regenstatus (Beta)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live rain status (Beta)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canlı yağmur durumu (Beta)"
+          }
+        }
+      }
+    },
     "Lizenz" : {
       "localizations" : {
         "en" : {
@@ -4186,6 +4587,12 @@
     "Luftdruck (hPa)" : {
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luftdruck (hPa)"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4196,12 +4603,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hava basıncı (hPa)"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Luftdruck (hPa)"
           }
         }
       }
@@ -4854,6 +5255,12 @@
     "Niederschlag" : {
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niederschlag"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4865,11 +5272,22 @@
             "state" : "translated",
             "value" : "Yağış"
           }
-        },
-        "de" : {
+        }
+      }
+    },
+    "Niederschlagsart" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Niederschlag"
+            "value" : "Precipitation Type"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağış Türü"
           }
         }
       }
@@ -5198,8 +5616,40 @@
         }
       }
     },
+    "Öffnet die Erklärung zu Wettermodellen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the weather models explanation"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava modelleri açıklamasını açar"
+          }
+        }
+      }
+    },
     "Öffnet die Karte" : {
 
+    },
+    "Öffnet die Kartenebenen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the map layers"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Harita katmanlarını açar"
+          }
+        }
+      }
     },
     "Öffnet die rechtlichen Hinweise" : {
 
@@ -5323,6 +5773,23 @@
     },
     "open-meteo.com" : {
       "shouldTranslate" : false
+    },
+    "OPERA-Programm" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OPERA programme"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OPERA programı"
+          }
+        }
+      }
     },
     "Optimiert für %@ · weltweite Daten" : {
       "localizations" : {
@@ -5452,6 +5919,23 @@
         }
       }
     },
+    "Ortswerte" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "City Values"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şehir Değerleri"
+          }
+        }
+      }
+    },
     "Oscar can send beta rain alerts and beta weather alerts for your current location in Central Europe. Turn each alert type on or off below." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5499,6 +5983,7 @@
       }
     },
     "Oscar Radar-Daten werden geladen…" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5510,6 +5995,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oscar radar verileri yükleniyor…"
+          }
+        }
+      }
+    },
+    "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses the European radar composite of EUMETNET's OPERA programme — the network of Europe's national weather services — for the rain radar across Europe outside Central Europe. Use does not imply endorsement by or official affiliation with EUMETNET."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, Orta Avrupa dışındaki Avrupa yağmur radarı için Avrupa ulusal meteoroloji servislerinin birliği olan EUMETNET'in OPERA programının Avrupa radar kompozitini kullanır. Kullanım, EUMETNET ile resmi bir bağlantı veya destek anlamına gelmez."
           }
         }
       }
@@ -5595,6 +6096,28 @@
     },
     "Override" : {
 
+    },
+    "Pause" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duraklat"
+          }
+        }
+      }
     },
     "PM" : {
       "comment" : "Environment PM",
@@ -5722,6 +6245,9 @@
         }
       }
     },
+    "Quelle: Deutscher Wetterdienst" : {
+
+    },
     "Radar" : {
       "localizations" : {
         "de" : {
@@ -5813,10 +6339,8 @@
         }
       }
     },
-    "RainViewer" : {
-      "shouldTranslate" : false
-    },
     "RainViewer stellt diverse Kartenlayer bereit. Darunter fallen unter anderem das globale Regenradar und Satellitenbilder." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5831,9 +6355,6 @@
           }
         }
       }
-    },
-    "rainviewer.com" : {
-      "shouldTranslate" : false
     },
     "Rauch driftet leicht, Windfahnen bleiben ruhig." : {
       "extractionState" : "stale",
@@ -5918,6 +6439,12 @@
     "Referenz-Evapotranspiration" : {
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Referenz-Evapotranspiration"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5928,12 +6455,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Referans Evapotranspirasyon"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Referenz-Evapotranspiration"
           }
         }
       }
@@ -5968,6 +6489,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yağmur"
+          }
+        }
+      }
+    },
+    "Regen · Schnee · Hagel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain · Snow · Hail"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur · Kar · Dolu"
           }
         }
       }
@@ -6051,6 +6589,25 @@
         }
       }
     },
+    "Regenzelle" : {
+
+    },
+    "Regenzellen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain Cells"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur Hücreleri"
+          }
+        }
+      }
+    },
     "Regnerisch" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6099,6 +6656,12 @@
     "Relative Luftfeuchtigkeit" : {
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relative Luftfeuchtigkeit"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6109,12 +6672,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bağıl nem"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Relative Luftfeuchtigkeit"
           }
         }
       }
@@ -6159,6 +6716,23 @@
         }
       }
     },
+    "Sanfte Übergänge zwischen den Bildern" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soft transitions between frames"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kareler arasında yumuşak geçişler"
+          }
+        }
+      }
+    },
     "Schadstoffe jetzt" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6178,6 +6752,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Şu anki kirleticiler"
+          }
+        }
+      }
+    },
+    "Schauer" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Showers"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağanak"
           }
         }
       }
@@ -6205,9 +6796,32 @@
         }
       }
     },
+    "Schließen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kapat"
+          }
+        }
+      }
+    },
     "Schnee" : {
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schnee"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6219,11 +6833,22 @@
             "state" : "translated",
             "value" : "Kar"
           }
-        },
-        "de" : {
+        }
+      }
+    },
+    "Schneeregen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Schnee"
+            "value" : "Sleet"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sulu kar"
           }
         }
       }
@@ -6338,6 +6963,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "GD"
+          }
+        }
+      }
+    },
+    "Sehr feines Raster über Zentraleuropa — erkennt auch kleine Schauer und Gewitter. Ideal für die nächsten 48 Stunden." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Very fine grid over Central Europe — picks up even small showers and thunderstorms. Ideal for the next 48 hours."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta Avrupa üzerinde çok ince ağ — küçük sağanakları ve fırtınaları bile yakalar. Önümüzdeki 48 saat için idealdir."
           }
         }
       }
@@ -6669,6 +7311,16 @@
         }
       }
     },
+    "spinner=%@ pending=%@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "spinner=%1$@ pending=%2$@"
+          }
+        }
+      }
+    },
     "Stabil" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6863,6 +7515,25 @@
           }
         }
       }
+    },
+    "Stil der Hintergrundkarte" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basemap style"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arka plan haritası stili"
+          }
+        }
+      }
+    },
+    "Stufe %@" : {
+
     },
     "stündlich" : {
       "extractionState" : "stale",
@@ -7201,6 +7872,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sıcaklık (°C)"
+          }
+        }
+      }
+    },
+    "Temperatur & Wind an Städten" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature & wind at cities"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şehirlerde sıcaklık ve rüzgar"
           }
         }
       }
@@ -7600,6 +8288,23 @@
         }
       }
     },
+    "US-Wetterbehörde NOAA" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "US weather agency NOAA"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ABD meteoroloji kurumu NOAA"
+          }
+        }
+      }
+    },
     "USA" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -7908,6 +8613,22 @@
         }
       }
     },
+    "Was sind Wettermodelle?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What are weather models?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava modelleri nedir?"
+          }
+        }
+      }
+    },
     "Wasserverlust einer Referenzfläche" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -7987,6 +8708,40 @@
         }
       }
     },
+    "Weiche Kanten statt harter Farbstufen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soft edges instead of hard color steps"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sert renk basamakları yerine yumuşak kenarlar"
+          }
+        }
+      }
+    },
+    "Weichzeichnen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soften"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yumuşatma"
+          }
+        }
+      }
+    },
     "Weltraum" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8006,6 +8761,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uzay"
+          }
+        }
+      }
+    },
+    "Weltweit" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Worldwide"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dünya geneli"
           }
         }
       }
@@ -8034,6 +8806,7 @@
       }
     },
     "Wetterdaten werden geladen…" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -8061,6 +8834,80 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hava Durumu Modeli"
+          }
+        }
+      }
+    },
+    "Wettermodelle" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather Models"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava Modelleri"
+          }
+        }
+      }
+    },
+    "Wettermodelle in Oscar°" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather models in Oscar°"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar°'daki hava modelleri"
+          }
+        }
+      }
+    },
+    "Wetterwarnung" : {
+
+    },
+    "Wetterwarnungen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather Warnings"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava Durumu Uyarıları"
+          }
+        }
+      }
+    },
+    "Wiedergabe" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiedergabe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynat"
           }
         }
       }
@@ -8119,6 +8966,12 @@
     "Windgeschwindigkeit" : {
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Windgeschwindigkeit"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8129,12 +8982,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rüzgar hızı"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Windgeschwindigkeit"
           }
         }
       }
@@ -8224,6 +9071,29 @@
         }
       }
     },
+    "Zeitleiste" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeitleiste"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timeline"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaman çizelgesi"
+          }
+        }
+      }
+    },
     "Zeitpunkt" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8270,6 +9140,79 @@
         }
       }
     },
+    "Zentraleuropa" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Central Europe"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta Avrupa"
+          }
+        }
+      }
+    },
+    "Zugbahnen kräftiger Schauer" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tracks of heavy showers"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuvvetli sağanakların hareket yönü"
+          }
+        }
+      }
+    },
+    "Zugrichtung im Regenradar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movement direction on the rain radar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur radarında hareket yönü"
+          }
+        }
+      }
+    },
+    "Zur aktuellen Zeit springen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zur aktuellen Zeit springen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jump to the current time"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şimdiki zamana dön"
+          }
+        }
+      }
+    },
     "Zurück zum Anfang der stündlichen Vorhersage" : {
 
     },
@@ -8286,470 +9229,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dallar hareket eder, gevşek kağıt yerden kalkar."
-          }
-        }
-      }
-    },
-    "Wettermodelle in Oscar°" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weather models in Oscar°"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar°'daki hava modelleri"
-          }
-        }
-      }
-    },
-    "Flüssige Bewegungen" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Smooth Motion"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Akıcı Hareket"
-          }
-        }
-      }
-    },
-    "Live + Kurzprognose" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Live + short-term forecast"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Canlı + kısa vadeli tahmin"
-          }
-        }
-      }
-    },
-    "Ortswerte" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "City Values"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Şehir Değerleri"
-          }
-        }
-      }
-    },
-    "Deutscher Wetterdienst" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "German national weather service"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alman meteoroloji servisi"
-          }
-        }
-      }
-    },
-    "Bewegungspfeile" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Motion Arrows"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hareket Okları"
-          }
-        }
-      }
-    },
-    "Was sind Wettermodelle?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What are weather models?"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hava modelleri nedir?"
-          }
-        }
-      }
-    },
-    "Weichzeichnen" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Soften"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yumuşatma"
-          }
-        }
-      }
-    },
-    "≈ 25 km Raster" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "≈ 25 km grid"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "≈ 25 km çözünürlük"
-          }
-        }
-      }
-    },
-    "Wettermodelle" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weather Models"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hava Modelleri"
-          }
-        }
-      }
-    },
-    "Karte schließen" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Close Map"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Haritayı Kapat"
-          }
-        }
-      }
-    },
-    "Zugrichtung im Regenradar" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Movement direction on the rain radar"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yağmur radarında hareket yönü"
-          }
-        }
-      }
-    },
-    "Zentraleuropa" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Central Europe"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Orta Avrupa"
-          }
-        }
-      }
-    },
-    "Sehr feines Raster über Zentraleuropa — erkennt auch kleine Schauer und Gewitter. Ideal für die nächsten 48 Stunden." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Very fine grid over Central Europe — picks up even small showers and thunderstorms. Ideal for the next 48 hours."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Orta Avrupa üzerinde çok ince ağ — küçük sağanakları ve fırtınaları bile yakalar. Önümüzdeki 48 saat için idealdir."
-          }
-        }
-      }
-    },
-    "Weiche Kanten statt harter Farbstufen" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Soft edges instead of hard color steps"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sert renk basamakları yerine yumuşak kenarlar"
-          }
-        }
-      }
-    },
-    "Gröberes Raster, dafür weltweit — gut für den großen Überblick. Einzelne Schauer können verschwimmen." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Coarser grid, but worldwide — great for the big picture. Individual showers may blur."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daha kaba ama dünya çapında ağ — genel bakış için idealdir. Tek tek sağanaklar bulanıklaşabilir."
-          }
-        }
-      }
-    },
-    "Kartenebenen" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Map Layers"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Harita Katmanları"
-          }
-        }
-      }
-    },
-    "Ein Wettermodell ist eine Computersimulation der Atmosphäre: Aus Millionen Messwerten berechnet es, wie das Wetter in den nächsten Stunden und Tagen wird." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A weather model is a computer simulation of the atmosphere: from millions of measurements it calculates the weather for the coming hours and days."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hava modeli, atmosferin bilgisayar simülasyonudur: Milyonlarca ölçümden önümüzdeki saat ve günlerin havasını hesaplar."
-          }
-        }
-      }
-    },
-    "Öffnet die Erklärung zu Wettermodellen" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens the weather models explanation"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hava modelleri açıklamasını açar"
-          }
-        }
-      }
-    },
-    "Öffnet die Kartenebenen" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens the map layers"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Harita katmanlarını açar"
-          }
-        }
-      }
-    },
-    "Darstellung" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appearance"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Görünüm"
-          }
-        }
-      }
-    },
-    "Schließen" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Close"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kapat"
-          }
-        }
-      }
-    },
-    "Weltweit" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Worldwide"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dünya geneli"
-          }
-        }
-      }
-    },
-    "Sanfte Übergänge zwischen den Bildern" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Soft transitions between frames"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kareler arasında yumuşak geçişler"
-          }
-        }
-      }
-    },
-    "OPERA-Programm" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OPERA programme"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OPERA programı"
-          }
-        }
-      }
-    },
-    "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar uses the European radar composite of EUMETNET's OPERA programme — the network of Europe's national weather services — for the rain radar across Europe outside Central Europe. Use does not imply endorsement by or official affiliation with EUMETNET."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar, Orta Avrupa dışındaki Avrupa yağmur radarı için Avrupa ulusal meteoroloji servislerinin birliği olan EUMETNET'in OPERA programının Avrupa radar kompozitini kullanır. Kullanım, EUMETNET ile resmi bir bağlantı veya destek anlamına gelmez."
-          }
-        }
-      }
-    },
-    "Temperatur & Wind an Städten" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Temperature & wind at cities"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Şehirlerde sıcaklık ve rüzgar"
-          }
-        }
-      }
-    },
-    "≈ 2 km Raster" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "≈ 2 km grid"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "≈ 2 km çözünürlük"
-          }
-        }
-      }
-    },
-    "US-Wetterbehörde NOAA" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "US weather agency NOAA"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ABD meteoroloji kurumu NOAA"
           }
         }
       }

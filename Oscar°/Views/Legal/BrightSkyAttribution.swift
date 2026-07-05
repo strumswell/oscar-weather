@@ -25,7 +25,8 @@ struct BrightSkyAttribution: View {
                 }
             }
         }
-        .navigationBarTitle("BrightSky", displayMode: .inline)
+        .navigationTitle("BrightSky")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

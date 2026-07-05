@@ -24,7 +24,7 @@ struct WeatherMapPreview: View {
             settingsService: settingsService,
             coordinates: location.coordinates,
             cities: LocationService.shared.city.cities,
-            overlayOpacity: 0.7,
+            overlayOpacity: settingsService.mapOverlayOpacity,
             userActionAllowed: false,
             showWindParticles: false,
             oscarRadarState: radarState,
@@ -44,6 +44,11 @@ struct WeatherMapPreview: View {
                     .padding(10)
             }
         }
+        .overlay(alignment: .bottomLeading) {
+            MapAttributionLabel()
+                .padding(.leading, 10)
+                .padding(.bottom, 6)
+        }
         // Declared BEFORE the load task: re-picks the radar source whenever the
         // selected location changes (DWD → OPERA → NOAA → GFS precip fallback).
         .task(id: "\(location.coordinates.latitude)|\(location.coordinates.longitude)") {
@@ -53,6 +58,7 @@ struct WeatherMapPreview: View {
         }
         .task {
             guard settingsService.oscarRadarLayer else { return }
+            radarState.setProduct(settingsService.oscarRadarProduct)
             radarState.setRegion(settingsService.oscarRadarRegion)
             await radarState.loadCurrentFrame()
         }
@@ -74,6 +80,7 @@ struct WeatherMapPreview: View {
         }
         .onChange(of: settingsService.oscarRadarLayer) { _, isEnabled in
             guard isEnabled else { return radarState.pause() }
+            radarState.setProduct(settingsService.oscarRadarProduct)
             radarState.setRegion(settingsService.oscarRadarRegion)
             if radarState.frames.isEmpty {
                 Task { await radarState.loadCurrentFrame() }
@@ -82,6 +89,11 @@ struct WeatherMapPreview: View {
         .onChange(of: settingsService.oscarRadarRegion) { _, newRegion in
             guard settingsService.oscarRadarLayer else { return }
             radarState.setRegion(newRegion)
+            Task { await radarState.reloadForCurrentRegion() }
+        }
+        .onChange(of: settingsService.oscarRadarProduct) { _, newProduct in
+            guard settingsService.oscarRadarLayer else { return }
+            radarState.setProduct(newProduct)
             Task { await radarState.reloadForCurrentRegion() }
         }
     }

@@ -39,6 +39,10 @@
 	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>NSSupportsLiveActivitiesFrequentUpdates</key>
+	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

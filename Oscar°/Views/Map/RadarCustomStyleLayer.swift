@@ -28,7 +28,7 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     #include <metal_stdlib>
     using namespace metal;
     struct RadarVOut { float4 position [[position]]; float2 uv; };
-    struct RadarParams { float4 p; };   // x: phase, y: opacity, z: flow scale (per-gap), w: soft rendering (0/1)
+    struct RadarParams { float4 p; };   // x: phase, y: opacity, z: flow scale (per-gap), w: sampling mode (0 hard / 1 soft / 2 categorical)
 
     vertex RadarVOut radar_style_vs(uint vid [[vertex_id]],
                                     constant float4* clip [[buffer(0)]],
@@ -71,6 +71,34 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     // Soft mode (p.w): B-spline data sampling + LINEAR palette sampling. The palette
     // rgb is PREMULTIPLIED (setPalette), so filtering through transparent entries
     // interpolates correctly — no dark fringe at the rain edge.
+    // Typed grids are block-coded (rain 1…153, snow 154…204, ice/mix 205…255 —
+    // keep the bounds in sync with the server's TypedRadar). Nearest sampling picks
+    // the block; soft mode additionally bicubic-smooths the intensity INSIDE that
+    // block (Weichzeichnen works without fabricating types at boundaries) and fades
+    // echo edges like the plain soft path. Dry pixels stay transparent — outward
+    // feathering would tint snow rims with low rain indices.
+    static half4 typed_sample(texture2d<float> tex, texture2d<half> palette,
+                              sampler dataLinear, float2 uv, bool soft) {
+        constexpr sampler dataNearest(filter::nearest, address::clamp_to_edge);
+        constexpr sampler lutNearest(filter::nearest, address::clamp_to_edge);
+        constexpr sampler lutLinear(filter::linear, address::clamp_to_edge);
+        float vN = tex.sample(dataNearest, uv).r * 255.0;
+        if (vN < 0.5) return half4(0.0);
+        if (!soft) {
+            return palette.sample(lutNearest, float2((vN + 0.5) / 256.0, 0.5));
+        }
+        float lo = 1.0, hi = 153.0;
+        if (vN > 204.5)      { lo = 205.0; hi = 255.0; }
+        else if (vN > 153.5) { lo = 154.0; hi = 204.0; }
+        float vs = sample_bspline(tex, dataLinear, uv) * 255.0;
+        float v = clamp(vs, lo, hi);
+        // (v+0.5)/256 hits texel centers, so linear LUT sampling never blends
+        // across a block edge (v is clamped to [lo, hi]).
+        half4 c = palette.sample(lutLinear, float2((v + 0.5) / 256.0, 0.5));
+        float fade = clamp(vs / lo, 0.0, 1.0);
+        return c * half(fade * fade);
+    }
+
     fragment half4 radar_style_fs(RadarVOut in [[stage_in]],
                                   texture2d<float> frameA [[texture(0)]],
                                   texture2d<float> frameB [[texture(1)]],
@@ -81,10 +109,20 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         constexpr sampler lutNearest(filter::nearest, address::clamp_to_edge);
         constexpr sampler lutLinear(filter::linear, address::clamp_to_edge);
         float t = p.p.x;
-        bool soft = p.p.w > 0.5;
+        bool categorical = p.p.w > 1.5;
+        bool soft = !categorical && p.p.w > 0.5;
         float2 f = flow.sample(dataSampler, in.uv).rg * p.p.z;
         float2 uvA = in.uv - t * f;
         float2 uvB = in.uv + (1.0 - t) * f;
+        if (categorical) {
+            // Typed grids: index blending would fabricate types, so look each frame
+            // up and blend the premultiplied COLORS — the motion warp still applies
+            // (it only moves sampling positions).
+            bool softTyped = p.p.w > 2.5;
+            half4 ca = typed_sample(frameA, palette, dataSampler, uvA, softTyped);
+            half4 cb = typed_sample(frameB, palette, dataSampler, uvB, softTyped);
+            return mix(ca, cb, half(t)) * half(p.p.y);
+        }
         float a = soft ? sample_bspline(frameA, dataSampler, uvA) : frameA.sample(dataSampler, uvA).r;
         float b = soft ? sample_bspline(frameB, dataSampler, uvB) : frameB.sample(dataSampler, uvB).r;
         float v = mix(a, b, t);                                // blend in data (dBZ) space
@@ -93,6 +131,14 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         return c * half(p.p.y);                                // palette is premultiplied
     }
     """
+
+    /// How the fragment shader samples data and palette (raw value = shader param).
+    enum SamplingMode: Float {
+        case hard = 0             // linear data, nearest palette — crisp isobands
+        case soft = 1             // bicubic data, linear palette — RainViewer look
+        case categorical = 2      // nearest data, color-space blend — typed grids
+        case categoricalSoft = 3  // typed grids with in-block bicubic smoothing
+    }
 
     // Written by the coordinator (main thread), read by `draw` on MapLibre's render
     // thread — every access goes through `stateLock`.
@@ -104,7 +150,7 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     nonisolated(unsafe) private var flowTexture: MTLTexture?
     nonisolated(unsafe) private var flowScale: Float = 0
     nonisolated(unsafe) private var phase: Float = 0
-    nonisolated(unsafe) private var softRendering: Float = 1
+    nonisolated(unsafe) private var samplingMode: Float = SamplingMode.soft.rawValue
     nonisolated(unsafe) private var paletteTexture: MTLTexture?
     nonisolated(unsafe) private var zeroFlowTexture: MTLTexture?
 
@@ -116,11 +162,17 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     // r8 texture cache: whole timeline on roomy devices, scrub window on tight ones.
     // Rebuild on miss is a ~16–29 MB memcpy from the frame's in-RAM grid indices.
     // Main-thread only (the render thread never touches the cache, just the two refs).
+    // The byte budget is GLOBAL: radar + model layer can coexist, and independent
+    // per-instance budgets would double the worst case. Enforcement evicts LRU
+    // entries from whichever live instance holds the most bytes.
     private var textures: [String: MTLTexture] = [:]
     private var textureLRU: [String] = []
     private var textureBytes = 0
-    private let textureBudget = adaptiveCacheBudget(
+    @MainActor private static let sharedTextureBudget = adaptiveCacheBudget(
         fraction: 0.1, floor: 96 * 1024 * 1024, cap: 256 * 1024 * 1024)
+    @MainActor private static var sharedTextureBytes = 0
+    // Layers currently in a style (didMove/willMove); weak so removal can't leak.
+    @MainActor private static let instances = NSHashTable<RadarCustomStyleLayer>.weakObjects()
 
     // Flow-field textures for the active motion payload (a few KB each; keep all).
     private var motionData: RadarMotionData?
@@ -148,13 +200,12 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         }
     }
 
-    /// RainViewer-style soft rendering (bicubic data sampling + smooth palette
-    /// gradients). Off = crisp isoband edges at data resolution.
-    @MainActor func setSoftRendering(_ enabled: Bool) {
-        let value: Float = enabled ? 1 : 0
+    /// Data/palette sampling: `.soft` = RainViewer look, `.hard` = crisp isobands,
+    /// `.categorical` = typed grids (nearest sampling, color-space blend).
+    @MainActor func setSampling(_ mode: SamplingMode) {
         let changed = stateLock.withLock { () -> Bool in
-            guard softRendering != value else { return false }
-            softRendering = value
+            guard samplingMode != mode.rawValue else { return false }
+            samplingMode = mode.rawValue
             return true
         }
         if changed { setNeedsDisplay() }
@@ -227,13 +278,20 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
                 self.depthStencilState = depthStencil
                 self.zeroFlowTexture = zero
             }
+            Self.instances.add(self)
             mapLibreLogger.info(
                 "custom layer: pipeline ready (color=\(mtkView.colorPixelFormat.rawValue) depth=\(depthFormat.rawValue) samples=\(mtkView.sampleCount))")
         }
     }
 
     override func willMove(from mapView: MLNMapView) {
-        MainActor.assumeIsolated { stopPlayback() }
+        MainActor.assumeIsolated {
+            stopPlayback()
+            // Purge here too (not just in the coordinator) so a removed layer can
+            // never keep counting against the shared texture budget.
+            purgeTextures()
+            Self.instances.remove(self)
+        }
         stateLock.withLock {
             pipelineState = nil
             depthStencilState = nil
@@ -310,13 +368,29 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         textures[key] = texture
         textureLRU.append(key)
         textureBytes += payload.width * payload.height
-        while textureBytes > textureBudget, textureLRU.count > 1 {
-            let evicted = textureLRU.removeFirst()
-            if let old = textures.removeValue(forKey: evicted) {
-                textureBytes -= old.width * old.height
-            }
-        }
+        Self.sharedTextureBytes += payload.width * payload.height
+        Self.enforceSharedTextureBudget()
         return texture
+    }
+
+    /// Evict LRU textures from whichever live layer holds the most bytes until the
+    /// GLOBAL budget is met; every instance keeps at least its most recent texture.
+    @MainActor
+    private static func enforceSharedTextureBudget() {
+        while sharedTextureBytes > sharedTextureBudget {
+            let holders = instances.allObjects.filter { $0.textureLRU.count > 1 }
+            guard let biggest = holders.max(by: { $0.textureBytes < $1.textureBytes }) else { return }
+            biggest.evictOldestTexture()
+        }
+    }
+
+    @MainActor
+    private func evictOldestTexture() {
+        let evicted = textureLRU.removeFirst()
+        if let old = textures.removeValue(forKey: evicted) {
+            textureBytes -= old.width * old.height
+            Self.sharedTextureBytes -= old.width * old.height
+        }
     }
 
     /// rg16Float flow texture for a motion field, in UV DISPLACEMENT PER SERVER STEP
@@ -376,6 +450,7 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     func purgeTextures() {
         textures.removeAll()
         textureLRU.removeAll()
+        Self.sharedTextureBytes -= textureBytes
         textureBytes = 0
         flowTextures.removeAll()
         stateLock.withLock {
@@ -384,6 +459,38 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
             flowTexture = nil
             flowScale = 0
         }
+    }
+
+    /// App-level memory-warning hook: every live layer drops its cached textures
+    /// except the pair currently on screen (the visible frame must survive or the
+    /// map blanks; everything else is a ~16–29 MB memcpy away on demand).
+    @MainActor
+    static func purgeCachedTextures() {
+        for layer in instances.allObjects {
+            layer.trimToDisplayedTextures()
+        }
+    }
+
+    @MainActor
+    private func trimToDisplayedTextures() {
+        let displayed = stateLock.withLock { (textureA, textureB) }
+        var kept: [String: MTLTexture] = [:]
+        var keptLRU: [String] = []
+        var keptBytes = 0
+        for key in textureLRU {
+            guard let texture = textures[key],
+                  texture === displayed.0 || texture === displayed.1 else { continue }
+            kept[key] = texture
+            keptLRU.append(key)
+            keptBytes += texture.width * texture.height
+        }
+        Self.sharedTextureBytes += keptBytes - textureBytes
+        textures = kept
+        textureLRU = keptLRU
+        textureBytes = keptBytes
+        // Flow textures are a few KB each and rebuild lazily; the bound current
+        // flowTexture ref survives in the render state.
+        flowTextures.removeAll()
     }
 
     /// Drop the palette texture. Required on a variable switch: `hasPalette` gates the
@@ -458,7 +565,7 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
              texA: self.textureA, texB: self.textureB, palette: self.paletteTexture,
              flow: self.flowTexture ?? self.zeroFlowTexture, flowScale: self.flowScale,
              bounds: self.overlayBounds, phase: self.phase, opacity: self.opacity,
-             soft: self.softRendering)
+             sampling: self.samplingMode)
         }
         if !didLogFirstDraw {
             didLogFirstDraw = true
@@ -483,10 +590,8 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         // reach ~2^zoom·512 and float32 vertices would jitter at deep zoom.
         let worldSize = 512.0 * pow(2.0, context.zoomLevel)
         func mercator(_ latitude: Double, _ longitude: Double) -> (x: Double, y: Double) {
-            let x = (180.0 + longitude) / 360.0
-            let yRad = log(tan((45.0 + latitude / 2.0) * Double.pi / 180.0))
-            let y = (180.0 - yRad * (180.0 / Double.pi)) / 360.0
-            return (x * worldSize, y * worldSize)
+            (WebMercator.unitX(longitude: longitude) * worldSize,
+             WebMercator.unitY(latitude: latitude) * worldSize)
         }
         let m = context.projectionMatrix
         func clip(_ p: (x: Double, y: Double)) -> SIMD4<Float> {
@@ -508,7 +613,7 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         let uvs: [SIMD2<Float>] = [
             SIMD2(0, 0), SIMD2(1, 0), SIMD2(0, 1), SIMD2(1, 1),
         ]
-        var params = SIMD4<Float>(snapshot.phase, snapshot.opacity, snapshot.flowScale, snapshot.soft)
+        var params = SIMD4<Float>(snapshot.phase, snapshot.opacity, snapshot.flowScale, snapshot.sampling)
 
         renderEncoder.setRenderPipelineState(pipelineState)
         renderEncoder.setDepthStencilState(depthStencilState)

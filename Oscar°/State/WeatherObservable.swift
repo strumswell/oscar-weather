@@ -49,7 +49,7 @@ enum WeatherLoadState {
 
 @MainActor
 @Observable
-class Weather {
+final class Weather {
     var isLoading: Bool = false
     var loadState: WeatherLoadState = .idle
     @ObservationIgnored private var isRefreshing = false

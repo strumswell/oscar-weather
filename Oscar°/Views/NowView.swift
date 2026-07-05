@@ -225,7 +225,7 @@ struct NowView: View {
             }
         }
         .background(.thinMaterial)
-        .edgesIgnoringSafeArea(.all)
+        .ignoresSafeArea()
         .task {
             // Testing hook: `-autoPresentMapLibreAfter <seconds>` opens the map AFTER
             // the NowView (incl. the preview card's map) exists — reproduces the
@@ -246,34 +246,10 @@ struct NowView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-            Task {
-                await weather.refresh(location: location)
-                await NotificationSettingsManager.shared.syncLocationUpdate()
-                await WidgetBasemapRenderer.refreshIfNeeded()
-                WidgetCenter.shared.reloadAllTimelines()
-                if settingsService.activeTileLayer != nil { await modelGridState.refreshIfStale() }
-            }
+            refreshWeatherData(isForeground: true)
         }
-        .onReceive(NotificationCenter.default.publisher(for: .changedLocation, object: nil)) { _ in
-            Task {
-                await weather.refresh(location: location)
-                await NotificationSettingsManager.shared.syncLocationUpdate()
-                await WidgetBasemapRenderer.refreshIfNeeded()
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .cityToggle, object: nil)) { _ in
-            Task {
-                await weather.refresh(location: location)
-                await NotificationSettingsManager.shared.syncLocationUpdate()
-                await WidgetBasemapRenderer.refreshIfNeeded()
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .unitChanged, object: nil)) { _ in
-            // Clear any stale fallback notice; the upcoming refresh re-posts one if it still applies.
-            modelFallbackToast = nil
-            Task {
-                await weather.refresh(location: location)
-            }
+        .onReceive(NotificationCenter.default.publisher(for: .weatherRefreshNeeded, object: nil)) { _ in
+            refreshWeatherData()
         }
         .onReceive(NotificationCenter.default.publisher(for: .forecastModelFallback)) { _ in
             withAnimation(.spring(duration: 0.4)) {
@@ -327,6 +303,24 @@ private struct WeatherUnavailableView: View {
 }
 
 extension NowView {
+    /// The single refresh path for every weather-data input change (foreground return,
+    /// GPS move, city switch, unit/format/model change). The individual steps are cheap
+    /// or self-guarded, so running all of them on every trigger beats five near-identical
+    /// handlers that each forget a different step.
+    private func refreshWeatherData(isForeground: Bool = false) {
+        // Clear any stale fallback notice; the refresh re-posts one if it still applies.
+        modelFallbackToast = nil
+        Task {
+            await weather.refresh(location: location)
+            await NotificationSettingsManager.shared.syncLocationUpdate()
+            await WidgetBasemapRenderer.refreshIfNeeded()
+            if isForeground {
+                WidgetCenter.shared.reloadAllTimelines()
+                if settingsService.activeTileLayer != nil { await modelGridState.refreshIfStale() }
+            }
+        }
+    }
+
     private func presentMap() {
         UIApplication.shared.playHapticFeedback()
         presentation.isMapPresented = true
@@ -334,9 +328,6 @@ extension NowView {
 
     private func openRadarMap() {
         settingsService.activeTileLayer = nil
-        settingsService.settings?.rainviewerLayer = false
-        settingsService.settings?.dwdLayer = false
-        settingsService.save()
         settingsService.oscarRadarLayer = true
         modelGridState.pause()
         presentMap()

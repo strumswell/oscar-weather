@@ -61,7 +61,8 @@ struct OpenMeteoAttribution: View {
                 }
             }
         }
-        .navigationBarTitle("Open-Meteo", displayMode: .inline)
+        .navigationTitle("Open-Meteo")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

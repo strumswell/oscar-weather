@@ -35,7 +35,7 @@ struct HourlyDetailView: View {
     }
 
     private var windSpeedUnit: WindSpeedUnit {
-        WindSpeedUnit(settingValue: settingsService.settings?.windSpeedUnit)
+        WindSpeedUnit(settingValue: settingsService.windSpeedUnit)
     }
 
     private var initialChartScrollPosition: Date {

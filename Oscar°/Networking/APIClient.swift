@@ -33,7 +33,6 @@ enum AlertResponse {
   case canadian(Operations.getCanadianWeatherAlerts.Output.Ok.Body.jsonPayload)
 }
 
-// TODO: Caching for API results
 final class APIClient: Sendable {
   static let shared = APIClient()
 
@@ -44,7 +43,6 @@ final class APIClient: Sendable {
   let openMeteoArchive: Client
   let brightsky: Client
   let canadaWeather: Client
-  let rainViewer: Client
 
   init() {
     openMeteo = APIClient.get(
@@ -57,7 +55,6 @@ final class APIClient: Sendable {
     openMeteoArchive = APIClient.get(url: Self.archiveServerURL)
     brightsky = APIClient.get(url: Self.serverURL(Servers.server4))
     canadaWeather = APIClient.get(url: Self.serverURL(Servers.server5))
-    rainViewer = APIClient.get(url: Self.serverURL(Servers.server6))
   }
 
   private static let ensembleServerURL = URL(string: "https://ensemble-api.open-meteo.com")!
@@ -343,10 +340,8 @@ final class APIClient: Sendable {
     request.cachePolicy = .reloadIgnoringLocalCacheData
     request.setValue(APIContactIdentity.userAgent, forHTTPHeaderField: "User-Agent")
 
-    let (data, response) = try await URLSession.shared.data(for: request)
-    guard let httpResponse = response as? HTTPURLResponse,
-      (200...299).contains(httpResponse.statusCode)
-    else {
+    let (data, httpResponse) = try await Self.fetchWithRetry(request)
+    guard (200...299).contains(httpResponse.statusCode) else {
       throw URLError(.badServerResponse)
     }
 
@@ -508,32 +503,78 @@ final class APIClient: Sendable {
 
     var request = URLRequest(url: url)
     request.addAPIContactIdentity()
-    let (data, response) = try await URLSession.shared.data(for: request)
-    guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+    let (data, http) = try await Self.fetchWithRetry(request)
     if http.statusCode == 204 || http.statusCode == 404 { return nil }
     guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
     return try JSONDecoder().decode(PrecipSeriesResponse.self, from: data)
   }
 
-  func getRainViewerMaps() async throws -> Components.Schemas.RainViewerResponse {
-    let fallbackResponse: Components.Schemas.RainViewerResponse = .init(
-      version: "2.0",
-      generated: Int(Date().timeIntervalSince1970),
-      host: "",
-      radar: .init(past: [], nowcast: []),
-      satellite: .init(infrared: [])
-    )
+  /// Active severe-weather warning polygons around a coordinate, as a raw GeoJSON
+  /// FeatureCollection from oscar-server — handed straight to MapLibre's shape
+  /// source. The viewport-sized box stays under the endpoint's 15°×25° cap.
+  func getWeatherAlertPolygons(around coordinates: CLLocationCoordinate2D) async throws -> Data {
+    let language = Locale.current.language.languageCode?.identifier == "de" ? "de" : "en"
+    let minLat = max(-90.0, coordinates.latitude - 5)
+    let maxLat = min(90.0, coordinates.latitude + 5)
+    let minLon = max(-180.0, coordinates.longitude - 7)
+    let maxLon = min(180.0, coordinates.longitude + 7)
+    guard
+      let url = URL(
+        string:
+          "\(radarBaseURL)/weather-alerts/area?minLat=\(minLat)&minLon=\(minLon)&maxLat=\(maxLat)&maxLon=\(maxLon)&lang=\(language)"
+      )
+    else { throw URLError(.badURL) }
 
-    let response = try await rainViewer.getRainViewerMaps(.init())
+    var request = URLRequest(url: url)
+    request.addAPIContactIdentity()
+    let (data, http) = try await Self.fetchWithRetry(request)
+    guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
+    return data
+  }
 
-    switch response {
-    case let .ok(response):
-      switch response.body {
-      case .json(let result):
-        return result
+  /// Tracked precipitation cells for a radar region as raw GeoJSON (Point features
+  /// with velocity/bearing/intensity properties and an extrapolated `path`).
+  /// `region` is the region path component ("germany" | "europe" | "usa") — kept a
+  /// string because RadarRegion isn't compiled into every target this file is.
+  func getStormCells(region: String) async throws -> Data {
+    guard let url = URL(string: "\(radarBaseURL)/radar/\(region)/cells")
+    else { throw URLError(.badURL) }
+    var request = URLRequest(url: url)
+    request.addAPIContactIdentity()
+    let (data, http) = try await Self.fetchWithRetry(request)
+    guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
+    return data
+  }
+
+  /// Retry/backoff for the hand-written (non-OpenAPI) endpoints, mirroring the
+  /// generated clients' RetryingMiddleware policy: 3 attempts on 429/5xx or a
+  /// thrown transport error, exponential backoff with jitter. Cancellation and
+  /// client-error statuses surface immediately.
+  static func fetchWithRetry(
+    _ request: URLRequest, attempts: Int = 3
+  ) async throws -> (Data, HTTPURLResponse) {
+    var lastError: Error = URLError(.unknown)
+    for attempt in 0..<attempts {
+      if attempt > 0 {
+        let base = 0.5 * pow(2, Double(attempt - 1))
+        try await Task.sleep(for: .seconds(min(8, base) * Double.random(in: 0.5...1.5)))
       }
-    case .undocumented:
-      return fallbackResponse
+      do {
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        if http.statusCode == 429 || (500..<600).contains(http.statusCode) {
+          lastError = URLError(.badServerResponse)
+          continue
+        }
+        return (data, http)
+      } catch is CancellationError {
+        throw CancellationError()
+      } catch let error as URLError where error.code == .cancelled {
+        throw error
+      } catch {
+        lastError = error
+      }
     }
+    throw lastError
   }
 }

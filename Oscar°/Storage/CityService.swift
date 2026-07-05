@@ -1,6 +1,6 @@
 //
-//  LocationViewModel.swift
-//  LocationViewModel
+//  CityService.swift
+//  Oscar°
 //
 //  Created by Philipp Bolte on 18.08.21.
 //
@@ -12,7 +12,7 @@ import OSLog
 
 @MainActor
 @Observable
-public class CityService {
+public final class CityService {
     static let shared = CityService()
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier ?? "Oscar",
@@ -35,6 +35,7 @@ public class CityService {
             try self.context.save()
             update()
             nc.post(name: .cityToggle, object: nil)
+            nc.post(name: .weatherRefreshNeeded, object: nil)
             WidgetCenter.shared.reloadAllTimelines()
         } catch {
             Self.logger.error("City save failed: \(error.localizedDescription, privacy: .public)")

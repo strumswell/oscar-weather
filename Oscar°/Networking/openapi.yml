@@ -23,8 +23,6 @@ servers:
     description: "Public BrightSky endpoint"
   - url: https://weather.gc.ca
     description: "Public Weather Service from Canada"
-  - url: https://api.rainviewer.com
-    description: "Public RainViewer endpoint"
   - url: https://ensemble-api.open-meteo.com
     description: "Public Open-Meteo ensemble endpoint"
   - url: https://archive-api.open-meteo.com
@@ -911,23 +909,6 @@ paths:
                           type: array
                           items: {}
                           nullable: true
-  /public/weather-maps.json:
-    servers:
-      - url: https://api.rainviewer.com
-    get:
-      operationId: getRainViewerMaps
-      tags:
-        - Weather Maps
-      summary: Get weather radar and satellite imagery information
-      description: Returns paths to radar and satellite imagery tiles, including past observations and nowcast predictions
-      responses:
-        "200":
-          description: Successful response with radar and satellite data
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RainViewerResponse"
-
 components:
   schemas:
     WeatherAlert:
@@ -1554,42 +1535,3 @@ components:
         precipitation_probability_max:
           type: string
           example: "%"
-    RainViewerResponse:
-      type: object
-      properties:
-        version:
-          type: string
-          example: "2.0"
-        generated:
-          type: integer
-          description: Unix timestamp when the response was generated
-        host:
-          type: string
-          description: Base URL for tile requests
-        radar:
-          type: object
-          properties:
-            past:
-              type: array
-              items:
-                $ref: "#/components/schemas/RainViewerMapFrame"
-            nowcast:
-              type: array
-              items:
-                $ref: "#/components/schemas/RainViewerMapFrame"
-        satellite:
-          type: object
-          properties:
-            infrared:
-              type: array
-              items:
-                $ref: "#/components/schemas/RainViewerMapFrame"
-    RainViewerMapFrame:
-      type: object
-      properties:
-        time:
-          type: integer
-          description: Unix timestamp of the frame
-        path:
-          type: string
-          description: Path to request the tile data

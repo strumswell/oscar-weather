@@ -92,6 +92,9 @@
         }
       }
     },
+    "+%lld min" : {
+
+    },
     "12 Stunden" : {
 
     },
@@ -120,6 +123,12 @@
           }
         }
       }
+    },
+    "Aktuelle Windgeschwindigkeit und Windrichtung" : {
+      "comment" : "LS Widget Wind Beschreibung"
+    },
+    "Aktueller UV-Index mit WHO-Farbskala" : {
+      "comment" : "LS Widget UV-Index Beschreibung"
     },
     "alle %lld Std." : {
 
@@ -151,6 +160,9 @@
     "Dicke Äste bewegen sich, Drähte können pfeifen." : {
 
     },
+    "Dunkel" : {
+
+    },
     "Dünne Zweige bewegen sich, Wimpel strecken sich." : {
 
     },
@@ -161,6 +173,12 @@
 
     },
     "Europa" : {
+
+    },
+    "Extrem" : {
+      "comment" : "UV-Kategorie 11+"
+    },
+    "Fiord" : {
 
     },
     "Frankreich & Europa" : {
@@ -187,6 +205,12 @@
     "Größere Zweige und kleine Bäume bewegen sich." : {
 
     },
+    "Hell" : {
+
+    },
+    "Hoch" : {
+      "comment" : "UV-Kategorie 6-7"
+    },
     "Hochauflösendes Modell für Italien." : {
 
     },
@@ -202,6 +226,15 @@
     "Japan" : {
 
     },
+    "Jetzt" : {
+
+    },
+    "Kein Regen in Sicht" : {
+      "comment" : "LS Widget Regenverlauf: kein Regen im Radarfenster"
+    },
+    "Keine Radardaten" : {
+      "comment" : "LS Widget Regenverlauf ohne Radarabdeckung"
+    },
     "KI-basiertes Wettermodell von ECMWF." : {
 
     },
@@ -214,11 +247,17 @@
     "Leiser Zug" : {
 
     },
+    "Mäßig" : {
+      "comment" : "UV-Kategorie 3-5"
+    },
     "Mäßige Brise" : {
 
     },
     "Mitteleuropa & Alpen" : {
 
+    },
+    "N" : {
+      "comment" : "Kompass Nord"
     },
     "N_compass" : {
       "comment" : "North"
@@ -235,20 +274,38 @@
     "Niederlande & Westeuropa" : {
 
     },
+    "Niedrig" : {
+      "comment" : "UV-Kategorie 0-2"
+    },
+    "NO" : {
+      "comment" : "Kompass Nordost"
+    },
     "Nordamerika" : {
 
     },
     "Nordeuropa" : {
 
     },
+    "NW" : {
+      "comment" : "Kompass Nordwest"
+    },
     "NW_compass" : {
       "comment" : "North-West"
+    },
+    "O" : {
+      "comment" : "Kompass Ost"
     },
     "Orkan" : {
 
     },
     "Orkanartiger Sturm" : {
 
+    },
+    "Radar ist für diesen Ort nicht verfügbar" : {
+
+    },
+    "Radarbasierter Niederschlag der nächsten 90 Minuten" : {
+      "comment" : "LS Widget Regenverlauf Beschreibung"
     },
     "Rauch driftet leicht, Windfahnen bleiben ruhig." : {
 
@@ -279,6 +336,18 @@
         }
       }
     },
+    "Regen · noch >%lld min" : {
+      "comment" : "LS Widget Regenverlauf: Regen hält länger als das Radarfenster an"
+    },
+    "Regen · noch ~%lld min" : {
+      "comment" : "LS Widget Regenverlauf: Regen endet in X Minuten"
+    },
+    "Regen ab %@" : {
+      "comment" : "LS Widget Regenverlauf: Regen beginnt um Uhrzeit"
+    },
+    "Regen bis %@" : {
+      "comment" : "LS Widget Regenverlauf: Regen endet um Uhrzeit"
+    },
     "Regenmenge und -wahrscheinlichkeit für die aktuelle Stunde" : {
       "comment" : "LS Widget Regenmenge und -wahrscheinlichkeit",
       "localizations" : {
@@ -302,6 +371,12 @@
         }
       }
     },
+    "Regenverlauf" : {
+      "comment" : "LS Widget Regenverlauf"
+    },
+    "S" : {
+      "comment" : "Kompass Süd"
+    },
     "S_compass" : {
       "comment" : "South"
     },
@@ -320,6 +395,12 @@
     "SE_compass" : {
       "comment" : "South-East"
     },
+    "Sehr hoch" : {
+      "comment" : "UV-Kategorie 8-10"
+    },
+    "SO" : {
+      "comment" : "Kompass Südost"
+    },
     "Sonnenaufgang bis Sonnenuntergang" : {
 
     },
@@ -337,6 +418,9 @@
     },
     "Stürmischer Wind" : {
 
+    },
+    "SW" : {
+      "comment" : "Kompass Südwest"
     },
     "SW_compass" : {
       "comment" : "South-West"
@@ -370,6 +454,29 @@
     "USA" : {
 
     },
+    "UV" : {
+
+    },
+    "UV %lld · %@" : {
+      "comment" : "LS Widget UV-Index inline: Wert und WHO-Kategorie",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "UV %1$lld · %2$@"
+          }
+        }
+      }
+    },
+    "UV-Index" : {
+      "comment" : "LS Widget UV-Index"
+    },
+    "UV-Index –" : {
+      "comment" : "LS Widget UV-Index ohne Daten"
+    },
+    "W" : {
+      "comment" : "Kompass West"
+    },
     "W_compass" : {
       "comment" : "West"
     },
@@ -378,6 +485,9 @@
     },
     "Werte ersetzen" : {
 
+    },
+    "Wind" : {
+      "comment" : "LS Widget Wind"
     },
     "Windstille" : {
 

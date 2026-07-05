@@ -2,8 +2,8 @@
 //  OscarRadarState.swift
 //  Oscar°
 //
-//  Timeline state for the live radar layer: metadata + frame grid loading,
-//  playback, scrubbing, and the shared plasma palette.
+//  Timeline state for the live radar layer (precipitation or precip-type product):
+//  metadata + frame grid loading, playback, scrubbing, and the shared palettes.
 //
 
 import Foundation
@@ -30,6 +30,9 @@ final class OscarRadarState {
     /// Active radar coverage (DWD Germany / OPERA Europe / MRMS USA). Use `setRegion(_:)`
     /// to change it — it clears loaded frames so the next load re-fetches.
     private(set) var region: RadarRegion = .germany
+    /// Active radar product (precipitation radar / categorical precip-type). Use
+    /// `setProduct(_:)` to change it — same clearing semantics as `setRegion(_:)`.
+    private(set) var product: RadarProduct = .precipitation
     var isLoading: Bool = false
     var currentFrameIndex: Int = 0 {
         didSet {
@@ -40,12 +43,15 @@ final class OscarRadarState {
     var isPlaying: Bool = false
     var error: String?
     private(set) var loadingFrameIndices: Set<Int> = []
+    // Stored (not derived from `frames`) — it's read in the per-frame-load hot path
+    // and rebuilding a Set per read made every load O(frame count).
+    private(set) var loadedFrameIndices: Set<Int> = []
     private(set) var renderFrameIndex: Int?
     private(set) var interactionState: MapInteractionState = .idle
     private(set) var isMapInteracting = false
 
     @ObservationIgnored nonisolated(unsafe) private var playbackTimer: Timer?
-    @ObservationIgnored private var frameInfos: [OscarFrameInfo] = []
+    @ObservationIgnored private var frameInfos: [RadarFrameInfo] = []
     @ObservationIgnored private var frameDates: [Date?] = []
     @ObservationIgnored private var loadSessionID = UUID()
     @ObservationIgnored private var suppressSelectionSideEffects = false
@@ -55,9 +61,13 @@ final class OscarRadarState {
     @ObservationIgnored private let renderMode: MapRenderMode
     private static let baseURL = radarBaseURL
     private static let cacheLock = NSLock()
+    // Live instances (preview + fullscreen come and go with their views) for the
+    // app-level memory-warning purge.
+    private static let instances = NSHashTable<OscarRadarState>.weakObjects()
 
     init(renderMode: MapRenderMode = .fullscreen) {
         self.renderMode = renderMode
+        Self.instances.add(self)
     }
 
     // MARK: - Derived state
@@ -94,10 +104,6 @@ final class OscarRadarState {
         frames.indices.contains(currentFrameIndex) && frames[currentFrameIndex] != nil
     }
 
-    var loadedFrameIndices: Set<Int> {
-        Set(frames.indices.filter { frames[$0] != nil })
-    }
-
     var contiguousReadyRange: ClosedRange<Int>? {
         contiguousLoadedRange(
             in: frames.map { $0 != nil },
@@ -121,21 +127,82 @@ final class OscarRadarState {
         return frameTimestamps[index]
     }
 
+    // MARK: - Grid residency
+
+    // Decoded grids are 1 byte/px (DWD ≈ 1.3 MB, OPERA ≈ 2 MB, MRMS ≈ 6 MB per frame),
+    // so only a window around the selection stays resident; evicted slots go back to
+    // nil and reload on demand via the normal loader (same UX as a not-yet-loaded
+    // frame). The window is sized from the process's real memory headroom — a fixed
+    // ±8 frames capped the radar preload at ±40 min and left the scrubber's far ticks
+    // permanently unloaded; on today's devices the entire timeline usually fits.
+    private static let gridResidencyBudget = adaptiveCacheBudget(
+        fraction: 0.16, floor: 64 * 1024 * 1024, cap: 512 * 1024 * 1024)
+
+    private var residencyRadius: Int {
+        let bytesPerFrame = frames.lazy.compactMap { $0 }.first
+            .map { max(1, $0.gridPayload.width * $0.gridPayload.height) } ?? 4_000_000
+        return max(8, Self.gridResidencyBudget / bytesPerFrame / 2)
+    }
+
+    private func residentFrameIndices(around center: Int) -> Set<Int> {
+        let count = frames.count
+        let radius = residencyRadius
+        guard count > 2 * radius + 1 else { return Set(frames.indices) }
+        // Modulo window so playback wrap-around (last frame → first) stays warm.
+        var resident = Set((center - radius...center + radius)
+            .map { (($0 % count) + count) % count })
+        if !frameDates.isEmpty {
+            resident.insert(closestTimestampIndex(in: frameDates))
+        }
+        if let renderFrameIndex {
+            resident.insert(renderFrameIndex)
+        }
+        return resident
+    }
+
+    private func evictFrames(outside resident: Set<Int>) {
+        for index in frames.indices where frames[index] != nil && !resident.contains(index) {
+            frames[index] = nil
+            loadedFrameIndices.remove(index)
+        }
+    }
+
+    /// App-level memory-warning hook: drop every decoded grid except the displayed
+    /// pair. Evicted frames reload on demand, exactly like not-yet-loaded ones.
+    static func purgeDecodedGrids() {
+        for state in instances.allObjects {
+            state.backgroundPreloadTask?.cancel()
+            let anchor = state.renderFrameIndex ?? state.currentFrameIndex
+            var keep: Set<Int> = [anchor]
+            if let next = nextLoadedIndex(in: state.frames.map { $0 != nil }, after: anchor) {
+                keep.insert(next)
+            }
+            state.evictFrames(outside: keep)
+        }
+    }
+
     // MARK: - Shared Cache
 
-    // Keyed by region: frame keys are bare timestamps that collide across
-    // regions, so caches must be region-qualified.
-    private static var cachedFrameInfos: [RadarRegion: [OscarFrameInfo]] = [:]
-    private static var cachedBounds: [RadarRegion: OscarBoundsInfo] = [:]
-    private static var lastFetchedTime: [RadarRegion: Date] = [:]
+    // Keyed by region + product: frame keys are bare timestamps that collide
+    // across sources, so caches must be source-qualified.
+    private struct SourceKey: Hashable {
+        let region: RadarRegion
+        let product: RadarProduct
+    }
+
+    private var sourceKey: SourceKey { SourceKey(region: region, product: product) }
+
+    private static var cachedFrameInfos: [SourceKey: [RadarFrameInfo]] = [:]
+    private static var cachedBounds: [SourceKey: RadarBoundsDTO] = [:]
+    private static var lastFetchedTime: [SourceKey: Date] = [:]
     private static let cacheDuration: TimeInterval = 10 * 60
 
-    private static func isCacheValid(for region: RadarRegion) -> Bool {
-        guard let last = lastFetchedTime[region] else { return false }
+    private static func isCacheValid(for source: SourceKey) -> Bool {
+        guard let last = lastFetchedTime[source] else { return false }
         return Date().timeIntervalSince(last) < cacheDuration
     }
 
-    // MARK: - Region
+    // MARK: - Region / product
 
     /// Switches radar coverage. Clears the loaded frames + in-flight work so the
     /// next `loadCurrentFrame()`/`loadAllFrames()` fetches the new region. No-op
@@ -143,7 +210,18 @@ final class OscarRadarState {
     func setRegion(_ newRegion: RadarRegion) {
         guard newRegion != region else { return }
         region = newRegion
+        resetForSourceChange()
+    }
 
+    /// Switches between the precipitation radar and the categorical precip-type
+    /// product. Same clearing semantics as `setRegion(_:)`.
+    func setProduct(_ newProduct: RadarProduct) {
+        guard newProduct != product else { return }
+        product = newProduct
+        resetForSourceChange()
+    }
+
+    private func resetForSourceChange() {
         bootstrapTask?.cancel()
         focusedLoadTask?.cancel()
         backgroundPreloadTask?.cancel()
@@ -158,6 +236,7 @@ final class OscarRadarState {
         bounds = nil
         motion = nil
         loadingFrameIndices.removeAll()
+        loadedFrameIndices.removeAll()
         renderFrameIndex = nil
         currentFrameIndex = 0
         suppressSelectionSideEffects = false
@@ -181,7 +260,7 @@ final class OscarRadarState {
     /// frames as "live".
     func refreshIfStale() async {
         guard !isLoading else { return }
-        guard !Self.isCacheValid(for: region) || !hasAnyLoadedFrame else { return }
+        guard !Self.isCacheValid(for: sourceKey) || !hasAnyLoadedFrame else { return }
         await reloadForCurrentRegion()
     }
 
@@ -277,8 +356,15 @@ final class OscarRadarState {
             guard let self else { return }
 
             do {
-                let (fetchedFrameInfos, boundsInfo) = try await Self.fetchFrameInfos(region: self.region)
+                let (allFrameInfos, boundsInfo) = try await Self.fetchFrameInfos(source: self.sourceKey)
                 guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
+                // Deep-past observation frames add little and eat preload/residency
+                // budget — keep ~25 min of past plus the entire nowcast.
+                let pastCutoff = Date().addingTimeInterval(-25 * 60)
+                let fetchedFrameInfos = allFrameInfos.filter { info in
+                    guard let date = parseFrameDate(info.timestamp) else { return true }
+                    return date >= pastCutoff
+                }
                 guard !fetchedFrameInfos.isEmpty else {
                     self.isLoading = false
                     return
@@ -294,11 +380,14 @@ final class OscarRadarState {
                 self.frameTimestamps = timestamps
                 self.frameDates = dates
                 self.frames = Array(repeating: nil, count: fetchedFrameInfos.count)
+                self.loadedFrameIndices = []
                 self.currentFrameIndex = closest
                 self.suppressSelectionSideEffects = false
 
                 // Motion fields load in parallel and are optional — the layer renders a
-                // plain cross-fade until they arrive.
+                // plain cross-fade until they arrive. The typed product morphs too:
+                // the warp moves sampling POSITIONS, and the layer blends typed frames
+                // in color space (categorical indices are never interpolated).
                 let motionRegion = self.region
                 Task { [weak self] in
                     let data = await Self.fetchMotionData(region: motionRegion)
@@ -332,6 +421,8 @@ final class OscarRadarState {
             renderFrameIndex = currentFrameIndex
         }
 
+        evictFrames(outside: residentFrameIndices(around: currentFrameIndex))
+
         focusedLoadTask?.cancel()
         let sessionID = loadSessionID
         let focusIndices = focusedFrameIndices(around: currentFrameIndex)
@@ -352,8 +443,10 @@ final class OscarRadarState {
 
         let sessionID = loadSessionID
         let focused = Set(focusedFrameIndices(around: currentFrameIndex))
+        // Preload only the residency window — anything further would be evicted again.
+        let resident = residentFrameIndices(around: currentFrameIndex)
         let ordered = prioritizedFrameIndices(count: frameInfos.count, around: currentFrameIndex)
-            .filter { !focused.contains($0) }
+            .filter { resident.contains($0) && !focused.contains($0) }
 
         backgroundPreloadTask = Task { [weak self] in
             guard let self else { return }
@@ -415,8 +508,8 @@ final class OscarRadarState {
         defer { loadingFrameIndices.remove(index) }
 
         let info = frameInfos[index]
-        await Self.warmPalette()
-        guard let grid = await Self.loadGridIndices(for: info, region: region) else { return false }
+        await Self.warmPalette(id: product.colormapId)
+        guard let grid = await Self.loadGridIndices(for: info, source: sourceKey) else { return false }
         let loadedFrame = OscarRadarFrame(key: info.key, timestamp: info.timestamp,
                                           gridIndices: grid.indices, width: grid.width, height: grid.height)
 
@@ -426,9 +519,8 @@ final class OscarRadarState {
             return false
         }
 
-        var updated = frames
-        updated[index] = loadedFrame
-        frames = updated
+        frames[index] = loadedFrame
+        loadedFrameIndices.insert(index)
 
         if renderFrameIndex == nil || currentFrameIndex == index {
             renderFrameIndex = index
@@ -448,11 +540,11 @@ final class OscarRadarState {
 
     /// Fetches frame metadata from the server, or returns the cached list if still valid.
     /// Clears the image cache when the metadata expires, since frame keys will have changed.
-    private static func fetchFrameInfos(region: RadarRegion) async throws -> ([OscarFrameInfo], OscarBoundsInfo) {
-        if let cached = cacheLock.withLock({ () -> ([OscarFrameInfo], OscarBoundsInfo)? in
-            if isCacheValid(for: region),
-               let bounds = cachedBounds[region],
-               let infos = cachedFrameInfos[region], !infos.isEmpty {
+    private static func fetchFrameInfos(source: SourceKey) async throws -> ([RadarFrameInfo], RadarBoundsDTO) {
+        if let cached = cacheLock.withLock({ () -> ([RadarFrameInfo], RadarBoundsDTO)? in
+            if isCacheValid(for: source),
+               let bounds = cachedBounds[source],
+               let infos = cachedFrameInfos[source], !infos.isEmpty {
                 return (infos, bounds)
             }
             return nil
@@ -460,22 +552,20 @@ final class OscarRadarState {
             return cached
         }
 
-        guard let url = URL(string: "\(baseURL)/radar/\(region.pathComponent)/frames") else {
+        guard let url = URL(string: "\(baseURL)/\(source.product.framesPath(for: source.region))") else {
             throw URLError(.badURL)
         }
         var request = URLRequest(url: url)
         request.addAPIContactIdentity()
         let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder().decode(OscarFramesResponse.self, from: data)
-        // The image is rendered in Web Mercator; `image_bounds` is the lat/lon of
-        // that Mercator rectangle and is what the overlay must span. `bounds` is
-        // the tighter data footprint and would misproject the image — most visibly
-        // for the large OPERA (Europe) extent.
+        let response = try JSONDecoder().decode(RadarFramesResponse.self, from: data)
+        // image_bounds (the rendered Mercator rectangle) over the tighter data
+        // footprint — see RadarFramesResponse.
         let overlayBounds = response.imageBounds ?? response.bounds
         cacheLock.withLock {
-            cachedFrameInfos[region] = response.frames
-            cachedBounds[region] = overlayBounds
-            lastFetchedTime[region] = Date()
+            cachedFrameInfos[source] = response.frames
+            cachedBounds[source] = overlayBounds
+            lastFetchedTime[source] = Date()
         }
         return (response.frames, overlayBounds)
     }
@@ -490,10 +580,25 @@ final class OscarRadarState {
 
     /// Download the raw 8-bit value grid and decode it (serial lane) to a compact index
     /// buffer. Colormapping happens on the GPU at draw time (palette LUT in the layer).
-    private static func loadGridIndices(for frameInfo: OscarFrameInfo, region: RadarRegion) async -> RadarGridPayload? {
-        guard let url = URL(string: "\(baseURL)/radar/\(region.pathComponent)/frames/\(frameInfo.key)/grid"),
-              let data = await fetchAssetData(url) else { return nil }
-        return await RadarFrameDecodeLane.shared.decodeGrid(data)
+    private static func loadGridIndices(for frameInfo: RadarFrameInfo, source: SourceKey) async -> RadarGridPayload? {
+        guard let url = URL(string: "\(baseURL)/\(source.product.framesPath(for: source.region))/\(frameInfo.key)/grid\(source.product.gridQuery)") else {
+            return nil
+        }
+        var request = URLRequest(url: url)
+        request.addAPIContactIdentity()
+        guard let (data, response) = try? await URLSession.shared.data(for: request),
+              let http = response as? HTTPURLResponse else { return nil }
+        switch http.statusCode {
+        case 200:
+            return await RadarFrameDecodeLane.shared.decodeGrid(data)
+        case 404:
+            // A dry frame has no grid — that's data ("no precipitation"), not an
+            // error. A 1×1 index-0 payload renders fully transparent and marks the
+            // tick loaded instead of leaving it on the orange loading state forever.
+            return RadarGridPayload(indices: [0], width: 1, height: 1)
+        default:
+            return nil
+        }
     }
 
     /// Minutes between two frame timestamps (nil if either fails to parse). The map
@@ -512,33 +617,41 @@ final class OscarRadarState {
 
     // MARK: - Value-grid colormap (client-side rendering path)
 
-    // Resolves once (server-preferred, local fallback); every grid frame colormaps against it.
-    private static var cachedPalette: [PixelRGBA]?
+    // Resolved once per palette id (server-preferred, local fallback); every grid
+    // frame colormaps against its product's entry.
+    private static var cachedPalettes: [String: [PixelRGBA]] = [:]
 
-    /// The resolved 256-entry plasma palette (warming it on first call). Used by the off-main
-    /// GPU materialization path; resolution is cheap (one cached network fetch, then memory).
-    static func resolvedPalette() async -> [PixelRGBA] {
-        await warmPalette()
-        return cachedPalette ?? RadarPlasma.buildPalette()
+    /// The resolved 256-entry palette for a colormap id (warming it on first call). Used by
+    /// the off-main GPU materialization path; resolution is cheap (one cached network fetch,
+    /// then memory).
+    static func resolvedPalette(id: String) async -> [PixelRGBA] {
+        await warmPalette(id: id)
+        return cachedPalettes[id] ?? fallbackPalette(id: id)
     }
 
-    /// Resolves the 256-entry plasma palette: server `/colormaps/plasma` preferred, local
-    /// `RadarPlasma` fallback (kept in sync with the server) if it's unavailable.
-    private static func warmPalette() async {
-        if cachedPalette != nil { return }
-        if let url = URL(string: "\(baseURL)/colormaps/plasma") {
+    /// Resolves a 256-entry palette: server `/colormaps/{id}` preferred, local fallback
+    /// (kept in sync with the server) if it's unavailable.
+    private static func warmPalette(id: String) async {
+        if cachedPalettes[id] != nil { return }
+        if let url = URL(string: "\(baseURL)/colormaps/\(id)") {
             var request = URLRequest(url: url)
             request.addAPIContactIdentity()
             if let (data, response) = try? await URLSession.shared.data(for: request),
                (response as? HTTPURLResponse)?.statusCode == 200, data.count == 256 * 4 {
-                cachedPalette = (0..<256).map {
+                cachedPalettes[id] = (0..<256).map {
                     let o = $0 * 4
                     return PixelRGBA(r: data[o], g: data[o + 1], b: data[o + 2], a: data[o + 3])
                 }
                 return
             }
         }
-        if cachedPalette == nil { cachedPalette = RadarPlasma.buildPalette() }
+        if cachedPalettes[id] == nil { cachedPalettes[id] = fallbackPalette(id: id) }
+    }
+
+    private static func fallbackPalette(id: String) -> [PixelRGBA] {
+        id == RadarProduct.precipitationTyped.colormapId
+            ? TypedRadarPalette.buildPalette()
+            : RadarPlasma.buildPalette()
     }
 
     deinit {
@@ -557,9 +670,8 @@ final class OscarRadarState {
 private enum RadarPlasma {
     private struct Stop { let value: Double; let color: PixelRGBA }
 
-    private static func colorHex(_ hex: String) -> PixelRGBA {
-        let v = UInt32(hex.dropFirst(), radix: 16) ?? 0
-        return PixelRGBA(r: UInt8((v >> 16) & 255), g: UInt8((v >> 8) & 255), b: UInt8(v & 255), a: 255)
+    private static func colorHex(_ hex: Int) -> PixelRGBA {
+        PixelRGBA(r: UInt8((hex >> 16) & 255), g: UInt8((hex >> 8) & 255), b: UInt8(hex & 255), a: 255)
     }
     private static func mmPer5(_ hourly: Double) -> Double { hourly / 12 }
     private static func dbzToMmH(_ dbz: Double) -> Double {
@@ -573,12 +685,10 @@ private enum RadarPlasma {
         return p.0.1 + (p.1.1 - p.0.1) * (dbz - p.0.0) / (p.1.0 - p.0.0)
     }
     private static let stops: [Stop] = {
-        let bins: [(Double, String)] = [(1, "#99ffff"), (5.5, "#32ffff"), (10, "#00caca"),
-            (14.5, "#009934"), (19, "#4cbf19"), (23.5, "#98cb03"), (28, "#cce603"), (32.5, "#ffff00"),
-            (37, "#ffc400"), (41.5, "#ff8901"), (46, "#ff0000"), (50.5, "#b40000"), (55, "#4848ff"),
-            (60, "#0000c9"), (65, "#990199"), (75, "#fe33ff")]
-        return [Stop(value: 0, color: PixelRGBA(r: 0, g: 0, b: 0, a: 0))]
-            + bins.map { Stop(value: mmPer5(dbzToMmH($0.0)), color: colorHex($0.1)) }
+        [Stop(value: 0, color: PixelRGBA(r: 0, g: 0, b: 0, a: 0))]
+            + ServerColormapStops.radar.map {
+                Stop(value: mmPer5(dbzToMmH($0.dbz)), color: colorHex($0.hex))
+            }
     }()
     private static let dbzMax = 85.0
 
@@ -606,32 +716,47 @@ private enum RadarPlasma {
     }
 }
 
-// MARK: - API Models
-
-private struct OscarFramesResponse: Decodable {
-    let frames: [OscarFrameInfo]
-    let bounds: OscarBoundsInfo
-    let imageBounds: OscarBoundsInfo?
-
-    enum CodingKeys: String, CodingKey {
-        case frames
-        case bounds
-        case imageBounds = "image_bounds"
+/// Local fallback for the server `/colormaps/radar_typed` palette — kept in sync with
+/// oscar-server's `TypedRadar`: index 0 dry, rain 1…153 (the plasma radar ramp
+/// resampled — rain looks identical to the plain radar), snow 154…204 and ice/mix
+/// 205…255 from `ServerColormapStops.typedGroups` (shared with the map legend).
+private enum TypedRadarPalette {
+    static func buildPalette() -> [PixelRGBA] {
+        var pal = [PixelRGBA](repeating: PixelRGBA(r: 0, g: 0, b: 0, a: 0), count: 256)
+        let plasma = RadarPlasma.buildPalette()
+        let rainSpan = ServerColormapStops.typedRainSpan
+        let groupSpan = ServerColormapStops.typedGroupSpan
+        for shade in 1...rainSpan {
+            let f = Double(shade - 1) / Double(rainSpan - 1)
+            pal[shade] = plasma[1 + Int((f * 254).rounded())]
+        }
+        for offset in 0..<groupSpan {
+            let f = Double(offset) / Double(groupSpan - 1)
+            for (group, ramp) in ServerColormapStops.typedGroups.enumerated() {
+                pal[rainSpan + 1 + group * groupSpan + offset] = sample(ramp.stops, f)
+            }
+        }
+        return pal
     }
-}
 
-private struct OscarFrameInfo: Decodable {
-    let key: String
-    let timestamp: String
-}
-
-private struct OscarBoundsInfo: Decodable {
-    let north: Double
-    let south: Double
-    let west: Double
-    let east: Double
-
-    var asDomain: OscarRadarBounds {
-        OscarRadarBounds(north: north, south: south, west: west, east: east)
+    private static func sample(_ stops: [(f: Double, hex: Int, a: UInt8)], _ f: Double) -> PixelRGBA {
+        func pixel(_ s: (f: Double, hex: Int, a: UInt8)) -> PixelRGBA {
+            PixelRGBA(r: UInt8((s.hex >> 16) & 255), g: UInt8((s.hex >> 8) & 255),
+                      b: UInt8(s.hex & 255), a: s.a)
+        }
+        guard let first = stops.first, let last = stops.last else {
+            return PixelRGBA(r: 0, g: 0, b: 0, a: 0)
+        }
+        if f <= first.f { return pixel(first) }
+        if f >= last.f { return pixel(last) }
+        for pair in zip(stops, stops.dropFirst()) where f >= pair.0.f && f < pair.1.f {
+            let t = (f - pair.0.f) / (pair.1.f - pair.0.f)
+            let a = pixel(pair.0), b = pixel(pair.1)
+            func mix(_ x: UInt8, _ y: UInt8) -> UInt8 {
+                UInt8(clamping: Int((Double(x) + t * (Double(y) - Double(x))).rounded()))
+            }
+            return PixelRGBA(r: mix(a.r, b.r), g: mix(a.g, b.g), b: mix(a.b, b.b), a: mix(a.a, b.a))
+        }
+        return pixel(last)
     }
 }

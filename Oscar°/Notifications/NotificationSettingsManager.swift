@@ -5,6 +5,7 @@
 //  Created by Philipp Bolte on 18.04.26.
 //
 
+import ActivityKit
 import Foundation
 import OSLog
 import Security
@@ -75,7 +76,12 @@ final class NotificationSettingsManager: NSObject {
             notificationLogger.info("Lifecycle: launch skipped APNs registration; authorization=\(self.authorizationStatus.debugName, privacy: .public) enabled=\(self.enabled, privacy: .public) storedCredentials=\(self.hasStoredSubscriptionCredentials, privacy: .public)")
         }
 
-        setLiveRainStatusEnabledLocally(false)
+        // Live rain status rides on the rain-alert subscription — it can't be on alone.
+        let storedLiveRainStatus = UserDefaults.standard.bool(forKey: liveRainStatusEnabledKey)
+        setLiveRainStatusEnabledLocally(storedLiveRainStatus && rainAlertsEnabled)
+        if liveRainStatusEnabled {
+            RainRadarLiveActivityManager.shared.startMonitoring()
+        }
     }
 
     func setRainAlertsEnabled(_ enabled: Bool) async -> Bool {
@@ -91,7 +97,6 @@ final class NotificationSettingsManager: NSObject {
             }
 
             setRainAlertsEnabledLocally(true)
-            setLiveRainStatusEnabledLocally(false)
             refreshEnabledState()
             notificationLogger.info("Lifecycle: rain alerts enabled locally; registerForRemoteNotifications")
             UIApplication.shared.registerForRemoteNotifications()
@@ -133,33 +138,28 @@ final class NotificationSettingsManager: NSObject {
     }
 
     func setLiveRainStatusEnabled(_ enabled: Bool) async -> Bool {
-        notificationLogger.info("Lifecycle: Live Activities are disabled; ignoring setLiveRainStatusEnabled requested -> \(enabled, privacy: .public)")
-        setLiveRainStatusEnabledLocally(false)
-        await syncSubscriptionForCurrentState(forceRegister: false)
-        return false
-    }
-
-    @available(*, unavailable, message: "Use the individual alert toggles instead.")
-    func enableNotifications() async -> Bool {
-        let granted = hasNotificationAuthorization ? true : await requestNotificationPermission()
-        await refreshAuthorizationStatus()
-        guard granted || hasNotificationAuthorization else {
-            refreshEnabledState()
-            return false
+        notificationLogger.info("Lifecycle: setLiveRainStatusEnabled requested -> \(enabled, privacy: .public)")
+        if enabled {
+            guard rainAlertsEnabled else {
+                notificationLogger.info("Lifecycle: live rain status enable rejected; rain alerts disabled")
+                setLiveRainStatusEnabledLocally(false)
+                return false
+            }
+            guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+                notificationLogger.info("Lifecycle: live rain status enable rejected; Live Activities disabled in system settings")
+                setLiveRainStatusEnabledLocally(false)
+                return false
+            }
+            setLiveRainStatusEnabledLocally(true)
+            RainRadarLiveActivityManager.shared.startMonitoring()
+            await syncSubscriptionForCurrentState(forceRegister: false)
+            await flushPendingLiveActivityTokens()
+            return true
         }
 
-        refreshEnabledState()
-        UIApplication.shared.registerForRemoteNotifications()
-        return true
-    }
-
-    @available(*, unavailable, message: "Use the individual alert toggles instead.")
-    func disableNotifications() async {
-        setRainAlertsEnabledLocally(false)
-        setWeatherAlertsEnabledLocally(false)
         setLiveRainStatusEnabledLocally(false)
-        refreshEnabledState()
         await syncSubscriptionForCurrentState(forceRegister: false)
+        return true
     }
 
     func didRegisterForRemoteNotifications(_ tokenData: Data) {
@@ -227,7 +227,7 @@ final class NotificationSettingsManager: NSObject {
         [
             "rainAlertsEnabled": rainAlertsEnabled,
             "weatherAlertsEnabled": weatherAlertsEnabled,
-            "liveActivityEnabled": false,
+            "liveActivityEnabled": liveRainStatusEnabled,
         ]
     }
 
@@ -274,12 +274,7 @@ final class NotificationSettingsManager: NSObject {
         let outboundCoordinates = LocationService.outboundCoordinate(currentLocation.coordinates)
         let cityName = currentLocation.name.isEmpty ? "Current Location" : currentLocation.name
 
-        let languageCode: String
-        if #available(iOS 16.0, *) {
-            languageCode = Locale.current.language.languageCode?.identifier ?? "en"
-        } else {
-            languageCode = Locale.current.languageCode ?? "en"
-        }
+        let languageCode = Locale.current.language.languageCode?.identifier ?? "en"
         let language = languageCode.lowercased().hasPrefix("de") ? "de" : "en"
 
         var patchBody: [String: Any] = [
@@ -305,7 +300,7 @@ final class NotificationSettingsManager: NSObject {
             timeFormat: SettingService.resolvedTimeFormatAPIValue,
             rainAlertsEnabled: rainAlertsEnabled,
             weatherAlertsEnabled: weatherAlertsEnabled,
-            liveRainStatusEnabled: false,
+            liveRainStatusEnabled: liveRainStatusEnabled,
             apnsEnvironment: apnsEnvironment
         )
 
@@ -380,7 +375,13 @@ final class NotificationSettingsManager: NSObject {
             persistLastSentSubscriptionState(state)
             UserDefaults.standard.set(true, forKey: installationRegistrationCompletedKey)
             notificationLogger.info("Lifecycle: subscription register request succeeded; subscriptionIdLength=\(registerResponse.subscriptionId.count, privacy: .public)")
-            clearPendingLiveActivityTokens()
+            // A register creates a new subscription row: a previously synced
+            // push-to-start token belongs to the old one — re-send it.
+            if let latest = UserDefaults.standard.string(forKey: latestLiveActivityPushToStartTokenKey) {
+                UserDefaults.standard.set(latest, forKey: pendingLiveActivityPushToStartTokenKey)
+                UserDefaults.standard.removeObject(forKey: latestLiveActivityPushToStartTokenKey)
+            }
+            await flushPendingLiveActivityTokens()
         } catch {
             notificationLogger.error("Lifecycle: subscription register request threw error=\(error.localizedDescription, privacy: .public)")
         }
@@ -475,7 +476,7 @@ final class NotificationSettingsManager: NSObject {
                 Keychain.save(key: lastSentDeviceTokenKey, value: token)
                 persistLastSentSubscriptionState(state)
                 notificationLogger.info("Lifecycle: subscription patch request succeeded; status=\(httpResponse.statusCode, privacy: .public)")
-                clearPendingLiveActivityTokens()
+                await flushPendingLiveActivityTokens()
                 return .success
             }
             notificationLogger.error("Lifecycle: subscription patch request failed; status=\(httpResponse.statusCode, privacy: .public)")
@@ -487,17 +488,64 @@ final class NotificationSettingsManager: NSObject {
     }
 
     func syncLiveActivityPushToStartToken(_ token: String) async {
-        notificationLogger.info("Lifecycle: Live Activity push-to-start token ignored; Live Activities disabled")
-        clearPendingLiveActivityTokens()
+        guard liveRainStatusEnabled else {
+            // iOS can hand out the token before the user enables the feature; keep the
+            // freshest one so enabling later syncs it without waiting for a new one.
+            UserDefaults.standard.set(token, forKey: pendingLiveActivityPushToStartTokenKey)
+            return
+        }
+        guard UserDefaults.standard.string(forKey: latestLiveActivityPushToStartTokenKey) != token else {
+            return
+        }
+        if await patchLiveActivityToken(path: "push-to-start-token", body: ["token": token]) {
+            UserDefaults.standard.set(token, forKey: latestLiveActivityPushToStartTokenKey)
+            UserDefaults.standard.removeObject(forKey: pendingLiveActivityPushToStartTokenKey)
+        } else {
+            UserDefaults.standard.set(token, forKey: pendingLiveActivityPushToStartTokenKey)
+        }
     }
 
     func syncLiveActivityUpdateToken(activityId: String, token: String) async {
-        notificationLogger.info("Lifecycle: Live Activity update token ignored; Live Activities disabled")
+        guard liveRainStatusEnabled else { return }
+        _ = await patchLiveActivityToken(
+            path: "update-token",
+            body: ["activityId": activityId, "token": token]
+        )
     }
 
-    private func clearPendingLiveActivityTokens() {
-        UserDefaults.standard.removeObject(forKey: pendingLiveActivityPushToStartTokenKey)
-        UserDefaults.standard.removeObject(forKey: latestLiveActivityPushToStartTokenKey)
+    private func patchLiveActivityToken(path: String, body: [String: Any]) async -> Bool {
+        guard let subscriptionId = Keychain.load(key: subscriptionKey),
+              let apiKey = Keychain.load(key: apiKeyKey),
+              let url = URL(string: "/notifications/\(subscriptionId)/live-activity/\(path)", relativeTo: baseURL),
+              let httpBody = try? JSONSerialization.data(withJSONObject: body)
+        else { return false }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addAPIContactIdentity()
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.httpBody = httpBody
+
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+            let succeeded = (200...299).contains(statusCode)
+            notificationLogger.info("Lifecycle: live-activity \(path, privacy: .public) patch finished; status=\(statusCode, privacy: .public)")
+            return succeeded
+        } catch {
+            notificationLogger.error("Lifecycle: live-activity \(path, privacy: .public) patch threw error=\(error.localizedDescription, privacy: .public)")
+            return false
+        }
+    }
+
+    /// Re-sends a push-to-start token that arrived while the feature was off or a
+    /// prior sync failed. Called after enabling and after successful register/patch.
+    private func flushPendingLiveActivityTokens() async {
+        guard liveRainStatusEnabled,
+              let pending = UserDefaults.standard.string(forKey: pendingLiveActivityPushToStartTokenKey)
+        else { return }
+        await syncLiveActivityPushToStartToken(pending)
     }
 
     private enum PatchResult {

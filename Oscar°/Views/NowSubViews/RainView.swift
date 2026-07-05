@@ -118,7 +118,7 @@ private struct PrecipitationSeriesChart: View {
                         }
                         .padding(6)
                         .background(.ultraThinMaterial.opacity(0.5))
-                        .cornerRadius(7)
+                        .clipShape(.rect(cornerRadius: 7))
                         .shadow(radius: 10)
                     }
             }

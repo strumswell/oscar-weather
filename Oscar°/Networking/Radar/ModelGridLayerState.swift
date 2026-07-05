@@ -24,6 +24,10 @@ final class ModelGridLayerState {
     private(set) var frameTimestamps: [String] = []
     private(set) var frameKeys: [String] = []
     private(set) var bounds: OscarRadarBounds?
+    /// Per-pair motion fields for the precip morph (`/models/{model}/motion`),
+    /// fetched alongside the frame list. Byte-identical wire shape to the radar
+    /// payload, so the radar decoder parses it. nil for temperature/wind layers.
+    private(set) var motion: RadarMotionData?
     /// Selected frame index from the timeline. Rendering may temporarily stay on
     /// the last ready frame if the selected frame is still warming.
     var currentFrameIndex: Int = 0 {
@@ -37,6 +41,9 @@ final class ModelGridLayerState {
     var error: String?
     private(set) var currentLayer: WeatherTileLayer?
     private(set) var loadingFrameIndices: Set<Int> = []
+    // Stored (not derived from `frames`) — it's read in the per-frame-load hot path
+    // and rebuilding a Set per read made every load O(frame count).
+    private(set) var loadedFrameIndices: Set<Int> = []
     private(set) var renderFrameIndex: Int?
     private(set) var interactionState: MapInteractionState = .idle
     private(set) var isMapInteracting = false
@@ -45,7 +52,7 @@ final class ModelGridLayerState {
     @ObservationIgnored private var backgroundPreloadTask: Task<Void, Never>?
     @ObservationIgnored private var focusedLoadTask: Task<Void, Never>?
     @ObservationIgnored nonisolated(unsafe) private var playbackTimer: Timer?
-    @ObservationIgnored private var frameInfos: [TileFrameInfo] = []
+    @ObservationIgnored private var frameInfos: [ModelFrameInfo] = []
     @ObservationIgnored private var frameDates: [Date?] = []
     @ObservationIgnored private var loadSessionID = UUID()
     @ObservationIgnored private var suppressSelectionSideEffects = false
@@ -64,8 +71,28 @@ final class ModelGridLayerState {
         return cache
     }()
 
+    // Live instances (preview + fullscreen come and go with their views) for the
+    // app-level memory-warning purge.
+    private static let instances = NSHashTable<ModelGridLayerState>.weakObjects()
+
+    /// App-level memory-warning hook: clears the shared grid cache and drops every
+    /// instance's decoded grids except the displayed pair. Evicted frames reload on
+    /// demand, exactly like not-yet-loaded ones.
     static func purgeDecodedCaches() {
         gridCache.removeAllObjects()
+        for state in instances.allObjects {
+            state.backgroundPreloadTask?.cancel()
+            let anchor = state.renderFrameIndex ?? state.currentFrameIndex
+            var keep: Set<Int> = [anchor]
+            if let next = nextLoadedIndex(in: state.frames.map { $0 != nil }, after: anchor) {
+                keep.insert(next)
+            }
+            for index in state.frames.indices
+            where state.frames[index] != nil && !keep.contains(index) {
+                state.frames[index] = nil
+                state.loadedFrameIndices.remove(index)
+            }
+        }
     }
 
     /// Per-variable palettes from `/colormaps/{id}` (256 RGBA entries), cached for the
@@ -90,6 +117,7 @@ final class ModelGridLayerState {
 
     init(renderMode: MapRenderMode = .fullscreen) {
         self.renderMode = renderMode
+        Self.instances.add(self)
     }
 
     // MARK: - Derived
@@ -125,6 +153,14 @@ final class ModelGridLayerState {
         return frameKeys[index]
     }
 
+    /// Timestamp for a frame key — the map layer rescales a motion field by the
+    /// actually displayed pair's timestamp gap (progressive loading can skip frames).
+    func timestamp(forKey key: String) -> String? {
+        guard let index = frameKeys.firstIndex(of: key),
+              frameTimestamps.indices.contains(index) else { return nil }
+        return frameTimestamps[index]
+    }
+
     var hasCurrentFrame: Bool {
         currentFrame != nil
     }
@@ -139,10 +175,6 @@ final class ModelGridLayerState {
 
     var isSelectedFrameReady: Bool {
         frames.indices.contains(currentFrameIndex) && frames[currentFrameIndex] != nil
-    }
-
-    var loadedFrameIndices: Set<Int> {
-        Set(frames.indices.filter { frames[$0] != nil })
     }
 
     var contiguousReadyRange: ClosedRange<Int>? {
@@ -248,7 +280,9 @@ final class ModelGridLayerState {
         frameKeys = []
         frameInfos = []
         bounds = OscarRadarBounds(north: 85.051, south: -85.051, west: -180, east: 180)
+        motion = nil
         loadingFrameIndices.removeAll()
+        loadedFrameIndices.removeAll()
         renderFrameIndex = nil
 
         loadTask = Task { [weak self] in
@@ -261,16 +295,12 @@ final class ModelGridLayerState {
                 var req = URLRequest(url: url)
                 req.addAPIContactIdentity()
                 let (data, _) = try await URLSession.shared.data(for: req)
-                let decoded = try JSONDecoder().decode(TileFramesResponse.self, from: data)
+                let decoded = try JSONDecoder().decode(ModelFramesResponse.self, from: data)
                 guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
 
                 let fetchedFrameInfos = decoded.frames
-                let fetchedBounds: OscarRadarBounds
-                if let b = decoded.imageBounds ?? decoded.bounds {
-                    fetchedBounds = OscarRadarBounds(north: b.north, south: b.south, west: b.west, east: b.east)
-                } else {
-                    fetchedBounds = OscarRadarBounds(north: 85.051, south: -85.051, west: -180, east: 180)
-                }
+                let fetchedBounds = (decoded.imageBounds ?? decoded.bounds)?.asDomain
+                    ?? OscarRadarBounds(north: 85.051, south: -85.051, west: -180, east: 180)
 
                 // 2. Pre-size array so the scrubber can render immediately.
                 let timestamps = fetchedFrameInfos.map(\.validTime)
@@ -281,6 +311,7 @@ final class ModelGridLayerState {
                 self.suppressSelectionSideEffects = true
                 self.frameInfos = fetchedFrameInfos
                 self.frames = Array(repeating: nil, count: fetchedFrameInfos.count)
+                self.loadedFrameIndices = []
                 self.frameTimestamps = timestamps
                 self.frameDates = dates
                 self.frameKeys = keys
@@ -288,6 +319,19 @@ final class ModelGridLayerState {
                 self.currentFrameIndex = closest
                 self.suppressSelectionSideEffects = false
                 self.lastMetadataLoad = Date()
+
+                // Motion fields load in parallel and are optional — the layer
+                // renders a plain cross-fade until they arrive (mirrors the radar
+                // path). Precipitation only: temperature/wind never warp along
+                // the precip flow, so they skip the fetch entirely.
+                if layer.morphsAlongMotion {
+                    let motionEndpoint = layer.motionEndpoint
+                    Task { [weak self] in
+                        let data = await Self.fetchMotionData(endpoint: motionEndpoint)
+                        guard let self, self.loadSessionID == sessionID else { return }
+                        self.motion = data
+                    }
+                }
 
                 await self.loadFrameBatch(
                     indices: self.focusedFrameIndices(around: closest),
@@ -323,6 +367,18 @@ final class ModelGridLayerState {
     }
 
     // MARK: - Helpers
+
+    /// Fetch + decode `/models/{model}/motion` (best-effort; nil on any failure).
+    /// Byte-identical wire shape to `/radar/{region}/motion`, so the radar decoder
+    /// parses it as-is. Server sends max-age 600 + ETag — refetches are cheap.
+    private static func fetchMotionData(endpoint: String) async -> RadarMotionData? {
+        guard let url = URL(string: "\(baseURL)/\(endpoint)") else { return nil }
+        var request = URLRequest(url: url)
+        request.addAPIContactIdentity()
+        guard let (data, response) = try? await URLSession.shared.data(for: request),
+              (response as? HTTPURLResponse)?.statusCode == 200 else { return nil }
+        return RadarMotionData(jsonData: data)
+    }
 
     private func handleFrameSelectionChanged() {
         guard !suppressSelectionSideEffects else { return }
@@ -470,9 +526,8 @@ final class ModelGridLayerState {
             return false
         }
 
-        var updated = frames
-        updated[index] = payload
-        frames = updated
+        frames[index] = payload
+        loadedFrameIndices.insert(index)
 
         if renderFrameIndex == nil || currentFrameIndex == index {
             renderFrameIndex = index
@@ -498,32 +553,21 @@ final class ModelGridLayerState {
     }
 }
 
-// MARK: - API Models (tile layers)
+// MARK: - Motion morphing (per model)
 
-private struct TileFramesResponse: Decodable {
-    let frames: [TileFrameInfo]
-    let bounds: TileBounds?
-    let imageBounds: TileBounds?
-
-    enum CodingKeys: String, CodingKey {
-        case frames
-        case bounds
-        case imageBounds = "image_bounds"
+extension WeatherTileLayer {
+    /// Only precipitation morphs along the server flow field — temperature and
+    /// wind cross-fade in data space (warping them along precip motion is wrong).
+    var morphsAlongMotion: Bool {
+        self == .iconPrecip || self == .gfsPrecip
     }
 
-    struct TileBounds: Decodable {
-        let north, south, west, east: Double
+    /// `/models/{model}/motion` — per-pair flow fields sized to the same raster
+    /// as the frames' image_bounds.
+    var motionEndpoint: String {
+        switch self {
+        case .iconPrecip, .iconTemp, .iconWind: return "models/icon/motion"
+        case .gfsPrecip, .gfsTemp, .gfsWind:   return "models/gfs/motion"
+        }
     }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        frames = try container.decode([TileFrameInfo].self, forKey: .frames)
-        bounds = try? container.decode(TileBounds.self, forKey: .bounds)
-        imageBounds = try? container.decode(TileBounds.self, forKey: .imageBounds)
-    }
-}
-
-private struct TileFrameInfo: Decodable {
-    let key: String
-    let validTime: String
 }

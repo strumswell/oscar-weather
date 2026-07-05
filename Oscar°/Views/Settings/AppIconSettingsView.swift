@@ -46,7 +46,8 @@ struct AppIconSettingsView: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .navigationBarTitle("App-Symbol", displayMode: .inline)
+        .navigationTitle("App-Symbol")
+        .navigationBarTitleDisplayMode(.inline)
         .alert("App-Symbol konnte nicht geändert werden", isPresented: errorBinding) {
             Button("OK", role: .cancel) {
                 iconChangeError = nil

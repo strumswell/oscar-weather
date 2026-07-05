@@ -27,7 +27,7 @@ class Location {
 
 @MainActor
 @Observable
-class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate  {
+final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate {
     static let shared = LocationService()
     private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Location")
     nonisolated static let outboundCoordinateDecimalPlaces = 3
@@ -170,7 +170,7 @@ class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate  {
     internal func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         if status == .authorizedWhenInUse || status == .authorizedAlways {
             updateGPSCoordinates()
-            notificationCenter.post(name: .changedLocation, object: nil)
+            notificationCenter.post(name: .weatherRefreshNeeded, object: nil)
         }
     }
     
@@ -178,7 +178,7 @@ class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate  {
         if let location = locations.last {
             if (location.distance(from: CLLocation(latitude: gpsLocation.latitude , longitude: gpsLocation.longitude )) > 2500) { // if distance change > 2.5 km
                 gpsLocation = location.coordinate
-                notificationCenter.post(name: .changedLocation, object: nil) // notify view
+                notificationCenter.post(name: .weatherRefreshNeeded, object: nil) // notify view
             }
         }
     }

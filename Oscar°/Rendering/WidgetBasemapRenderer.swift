@@ -18,10 +18,9 @@ import WidgetKit
 enum WidgetBasemapRenderer {
     /// Shared with RadarProvider.snapshotSize in the widget (same store keys).
     private static let sizes = WidgetBasemapStore.compositeSizes
-    /// Same framing and style as the widget compositor / in-app map.
+    /// Same framing as the widget compositor / in-app map.
     private static let spanMeters = 65_000.0
     private static let scale: CGFloat = 2
-    private static let styleURL = URL(string: "https://tiles.openfreemap.org/styles/fiord")!
     /// Re-render when the location moved past this or the cache got old.
     private static let maxLocationDrift: CLLocationDistance = 500
     private static let maxAge: TimeInterval = 30 * 24 * 3600
@@ -30,6 +29,9 @@ enum WidgetBasemapRenderer {
 
     /// Renders any missing/stale basemaps for the current location and reloads the
     /// radar widget when something new landed. Cheap when the cache is warm.
+    /// One basemap per (size, style) — styles come from the widget instances'
+    /// intent configurations via the app-group handshake (a style newly picked in
+    /// a widget renders over the flat fallback until the app runs this).
     static func refreshIfNeeded() async {
         guard !isRefreshing else { return }
         isRefreshing = true
@@ -40,17 +42,21 @@ enum WidgetBasemapRenderer {
         guard CLLocationCoordinate2DIsValid(center) else { return }
 
         var rendered = false
-        for size in sizes {
-            if let (record, _) = WidgetBasemapStore.load(size: size),
-               Date().timeIntervalSince(record.renderedAt) < maxAge,
-               CLLocation(latitude: record.latitude, longitude: record.longitude).distance(
-                   from: CLLocation(latitude: center.latitude, longitude: center.longitude)
-               ) < maxLocationDrift {
-                continue
+        for styleRaw in WidgetBasemapStore.requestedStyles() {
+            guard let style = MapBasemapStyle(rawValue: styleRaw) else { continue }
+            for size in sizes {
+                if let (record, _) = WidgetBasemapStore.load(size: size, style: styleRaw),
+                   Date().timeIntervalSince(record.renderedAt) < maxAge,
+                   CLLocation(latitude: record.latitude, longitude: record.longitude).distance(
+                       from: CLLocation(latitude: center.latitude, longitude: center.longitude)
+                   ) < maxLocationDrift {
+                    continue
+                }
+                guard let result = try? await snapshot(
+                    center: center, size: size, style: style) else { continue }
+                WidgetBasemapStore.save(result.record, image: result.image)
+                rendered = true
             }
-            guard let result = try? await snapshot(center: center, size: size) else { continue }
-            WidgetBasemapStore.save(result.record, image: result.image)
-            rendered = true
         }
         if rendered {
             WidgetCenter.shared.reloadTimelines(ofKind: "WeatherWidget")
@@ -58,10 +64,10 @@ enum WidgetBasemapRenderer {
     }
 
     private static func snapshot(
-        center: CLLocationCoordinate2D, size: CGSize
+        center: CLLocationCoordinate2D, size: CGSize, style: MapBasemapStyle
     ) async throws -> (record: WidgetBasemapRecord, image: UIImage) {
         let options = MLNMapSnapshotOptions(
-            styleURL: styleURL,
+            styleURL: style.styleURL,
             camera: MLNMapCamera(lookingAtCenter: center, altitude: spanMeters, pitch: 0, heading: 0),
             size: size
         )
@@ -100,7 +106,7 @@ enum WidgetBasemapRenderer {
                     latitude: center.latitude, longitude: center.longitude,
                     north: nw.latitude, south: se.latitude, west: nw.longitude, east: se.longitude,
                     width: size.width, height: size.height, scale: options.scale,
-                    renderedAt: Date()
+                    renderedAt: Date(), style: style.rawValue
                 )
                 continuation.resume(returning: (record, snapshot.image))
             }

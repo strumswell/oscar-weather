@@ -102,6 +102,11 @@ struct MapLayerPickerSheet: View {
         }
     }
 
+    /// The typed radar product exists for DWD and MRMS coverage, not OPERA.
+    private var precipTypeAvailable: Bool {
+        !(settingsService.oscarRadarLayer && settingsService.oscarRadarRegion == .europe)
+    }
+
     private var displaySection: some View {
         VStack(alignment: .leading, spacing: 10) {
             LayerPickerSectionHeader(title: "Darstellung", detail: nil)
@@ -121,15 +126,73 @@ struct MapLayerPickerSheet: View {
                 LayerToggleRow(title: "Ortswerte",
                                subtitle: "Temperatur & Wind an Städten",
                                isOn: $settingsService.mapValueBubbles)
+                Divider().padding(.leading, 16)
+                LayerToggleRow(title: "Wetterwarnungen",
+                               subtitle: "Aktive Warngebiete des DWD",
+                               isOn: $settingsService.showAlertPolygons)
+                Divider().padding(.leading, 16)
+                LayerToggleRow(title: "Regenzellen",
+                               subtitle: "Zugbahnen kräftiger Schauer",
+                               isOn: $settingsService.showStormCells)
+                LayerToggleRow(title: "Niederschlagsart",
+                               subtitle: precipTypeAvailable
+                                   ? "Schnee, Graupel & Hagel im Radar einfärben"
+                                   : "Für das Europa-Radar (OPERA) nicht verfügbar",
+                               isOn: $settingsService.radarPrecipTypeOverlay)
+                    .disabled(true)//!precipTypeAvailable)
+                    .opacity(precipTypeAvailable ? 1 : 0.45)
+                Divider().padding(.leading, 16)
+                opacityRow
+                Divider().padding(.leading, 16)
+                basemapRow
             }
             .background(.fill.tertiary, in: RoundedRectangle(cornerRadius: 16))
         }
     }
 
+    private var opacityRow: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("Deckkraft")
+                Spacer()
+                Text("\(Int((settingsService.mapOverlayOpacity * 100).rounded())) %")
+                    .font(.callout.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+            Slider(value: $settingsService.mapOverlayOpacity, in: 0.3...1.0, step: 0.05)
+                .accessibilityLabel(Text("Deckkraft der Wetterebenen"))
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+
+    private var basemapRow: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Karte")
+                Text("Stil der Hintergrundkarte")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Picker("Karte", selection: $settingsService.mapBasemapStyle) {
+                ForEach(MapBasemapStyle.allCases) { style in
+                    Text(style.label).tag(style)
+                }
+            }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: 190)
+            .labelsHidden()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+
     // MARK: Selection
 
     private func isRadarSelected(_ region: RadarRegion) -> Bool {
-        settingsService.oscarRadarLayer && settingsService.oscarRadarRegion == region
+        settingsService.oscarRadarLayer
+            && settingsService.oscarRadarRegion == region
     }
 
     private func select(_ activate: () -> Void) {

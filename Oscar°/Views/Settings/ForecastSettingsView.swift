@@ -6,7 +6,7 @@
 import SwiftUI
 
 struct ForecastSettingsView: View {
-  private let settingsService = SettingService.shared
+  @Bindable private var settingsService = SettingService.shared
 
   var body: some View {
     NavigationStack {
@@ -27,10 +27,7 @@ struct ForecastSettingsView: View {
         }
 
         Section {
-          Toggle(isOn: Binding(
-            get: { settingsService.dailyForecastDaytimeTemperaturesEnabled },
-            set: { settingsService.dailyForecastDaytimeTemperaturesEnabled = $0 }
-          )) {
+          Toggle(isOn: $settingsService.dailyForecastDaytimeTemperaturesEnabled) {
             Text("Tageswerte begrenzen")
           }
         } footer: {
@@ -55,29 +52,20 @@ struct ForecastSettingsView: View {
           }
 
           Section {
-            Picker(String(localized: "Zeitraum"), selection: Binding(
-              get: { settingsService.dailyForecastDaytimeTemperatureRangeMode },
-              set: { settingsService.dailyForecastDaytimeTemperatureRangeMode = $0 }
-            )) {
+            Picker(String(localized: "Zeitraum"), selection: $settingsService.dailyForecastDaytimeTemperatureRangeMode) {
               ForEach(ForecastDaytimeTemperatureRangeMode.allCases) { mode in
                 Text(mode.label).tag(mode)
               }
             }
 
             if settingsService.dailyForecastDaytimeTemperatureRangeMode == .customHours {
-              Picker(String(localized: "Start"), selection: Binding(
-                get: { settingsService.dailyForecastDaytimeCustomStartHour },
-                set: { settingsService.updateDailyForecastDaytimeCustomStartHour($0) }
-              )) {
+              Picker(String(localized: "Start"), selection: $settingsService.dailyForecastDaytimeCustomStartHour) {
                 ForEach(0...settingsService.dailyForecastDaytimeCustomEndHour, id: \.self) { hour in
                   Text(hourLabel(hour)).tag(hour)
                 }
               }
 
-              Picker(String(localized: "Ende"), selection: Binding(
-                get: { settingsService.dailyForecastDaytimeCustomEndHour },
-                set: { settingsService.updateDailyForecastDaytimeCustomEndHour($0) }
-              )) {
+              Picker(String(localized: "Ende"), selection: $settingsService.dailyForecastDaytimeCustomEndHour) {
                 ForEach(settingsService.dailyForecastDaytimeCustomStartHour...23, id: \.self) { hour in
                   Text(hourLabel(hour)).tag(hour)
                 }
@@ -87,7 +75,8 @@ struct ForecastSettingsView: View {
         }
       }
     }
-    .navigationBarTitle("Vorhersage", displayMode: .inline)
+    .navigationTitle("Vorhersage")
+    .navigationBarTitleDisplayMode(.inline)
   }
 
   private func hourLabel(_ hour: Int) -> String {

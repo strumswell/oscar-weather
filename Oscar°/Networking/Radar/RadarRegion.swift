@@ -15,6 +15,39 @@ struct OscarRadarBounds: Equatable {
     let east: Double
 }
 
+/// Radar product family served by oscar-server: the plain precipitation radar or
+/// the typed variant — the same frames with the "Niederschlagsart" overlay baked in
+/// (intensity+type combined grid, DWD HG / MRMS PrecipFlag; see server `TypedRadar`).
+enum RadarProduct: String, CaseIterable, Equatable, Sendable {
+    case precipitation
+    case precipitationTyped = "precipitation_typed"
+
+    /// Frames endpoint path (`{framesPath}/…` also prefixes the grid URLs).
+    /// Both products share ONE timeline — typed only changes the grid encoding.
+    func framesPath(for region: RadarRegion) -> String {
+        "radar/\(region.pathComponent)/frames"
+    }
+
+    /// Query string appended to grid asset URLs (`grid?style=typed`).
+    var gridQuery: String {
+        self == .precipitationTyped ? "?style=typed" : ""
+    }
+
+    /// Server palette id (`/colormaps/{id}`) the value grids of this product index into.
+    var colormapId: String {
+        switch self {
+        case .precipitation:      return "plasma"
+        case .precipitationTyped: return "radar_typed"
+        }
+    }
+
+    /// The typed product exists only for the DWD and MRMS composites, not OPERA
+    /// (no hydrometeor-classification product there).
+    func isAvailable(in region: RadarRegion) -> Bool {
+        self == .precipitation || region != .europe
+    }
+}
+
 /// Radar coverage the user can choose between in the map's layer menu.
 /// Mirrors oscar-server's radar sources: high-res DWD (Germany), the pan-European
 /// EUMETNET OPERA composite, and the NOAA MRMS CONUS composite (USA).

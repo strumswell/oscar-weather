@@ -21,7 +21,8 @@ struct NOAAAttribution: View {
                 }
             }
         }
-        .navigationBarTitle("NOAA GFS", displayMode: .inline)
+        .navigationTitle("NOAA GFS")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

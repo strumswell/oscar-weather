@@ -12,6 +12,11 @@ struct GlobalRadarProvider: TimelineProvider {
   private static let logger = Logger(
     subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "RadarWidget")
 
+  /// ≈ zoom level 14 (591657550.5 / 2^14) — the framing the widget always used.
+  private static let spanMeters = 591657550.5 / Double(1 << 14)
+  private static let snapshotSize = CGSize(width: 300, height: 300)
+  private static let overlayAlpha: CGFloat = 0.7
+
   func placeholder(in context: Context) -> GlobalRadarEntry {
     GlobalRadarEntry(date: Date(), image: UIImage(systemName: "map") ?? UIImage())
   }
@@ -38,12 +43,14 @@ struct GlobalRadarProvider: TimelineProvider {
         return LocationService.shared.getCoordinates()
       }
 
-      let zoomLevel = 14
-      // https://gis.stackexchange.com/questions/7430/what-ratio-scales-do-google-maps-zoom-levels-correspond-to
-      let meters = 591657550.500000 / pow(2, Double(zoomLevel))
-
       let region = MKCoordinateRegion(
-        center: coordinate, latitudinalMeters: meters, longitudinalMeters: meters)
+        center: coordinate, latitudinalMeters: Self.spanMeters, longitudinalMeters: Self.spanMeters)
+
+      // Precip overlay from oscar-server: regional radar in coverage, GFS elsewhere.
+      // Fetched alongside the basemap; a nil overlay (offline, no frames) degrades
+      // to the plain map instead of an error icon.
+      let overlay = await RadarSnapshotRenderer.overlayImage(
+        center: coordinate, spanMeters: Self.spanMeters, size: Self.snapshotSize)
 
       captureMapSnapshot(at: coordinate, region: region) { snapshotImage in
         guard let snapshot = snapshotImage else {
@@ -53,11 +60,13 @@ struct GlobalRadarProvider: TimelineProvider {
           return
         }
 
-        let tiles = tilesCoveringRegion(region: region, zoomLevel: zoomLevel)
-        overlayTiles(on: snapshot, tiles: tiles, zoomLevel: zoomLevel) { overlaidImage in
-          let entry = GlobalRadarEntry(date: Date(), image: overlaidImage)
-          completion(entry)
+        let composite = UIGraphicsImageRenderer(size: snapshot.size).image { _ in
+          snapshot.draw(at: .zero)
+          overlay?.draw(
+            in: CGRect(origin: .zero, size: snapshot.size),
+            blendMode: .normal, alpha: Self.overlayAlpha)
         }
+        completion(GlobalRadarEntry(date: Date(), image: composite))
       }
     }
   }
@@ -68,7 +77,7 @@ struct GlobalRadarProvider: TimelineProvider {
   ) {
     let mapSnapshotOptions = MKMapSnapshotter.Options()
     mapSnapshotOptions.region = region
-    mapSnapshotOptions.size = CGSize(width: 300, height: 300)
+    mapSnapshotOptions.size = Self.snapshotSize
     mapSnapshotOptions.scale = 3
     mapSnapshotOptions.traitCollection = UITraitCollection(userInterfaceStyle: .dark)
 
@@ -79,126 +88,6 @@ struct GlobalRadarProvider: TimelineProvider {
         return
       }
       completion(snapshot.image)
-    }
-  }
-
-  private func tilesCoveringRegion(region: MKCoordinateRegion, zoomLevel: Int) -> [(x: Int, y: Int)]
-  {
-    func tileCoords(for coordinate: CLLocationCoordinate2D, zoomLevel: Int) -> (x: Int, y: Int) {
-      let x = Int(floor((coordinate.longitude + 180.0) / 360.0 * pow(2.0, Double(zoomLevel))))
-      let y = Int(
-        floor(
-          (1.0 - log(
-            tan(coordinate.latitude * .pi / 180.0) + 1.0 / cos(coordinate.latitude * .pi / 180.0))
-            / .pi) / 2.0 * pow(2.0, Double(zoomLevel))))
-      return (x, y)
-    }
-
-    let topLeft = CLLocationCoordinate2D(
-      latitude: region.center.latitude + region.span.latitudeDelta / 2,
-      longitude: region.center.longitude - region.span.longitudeDelta / 2)
-    let bottomRight = CLLocationCoordinate2D(
-      latitude: region.center.latitude - region.span.latitudeDelta / 2,
-      longitude: region.center.longitude + region.span.longitudeDelta / 2)
-
-    let topLeftTile = tileCoords(for: topLeft, zoomLevel: zoomLevel)
-    let bottomRightTile = tileCoords(for: bottomRight, zoomLevel: zoomLevel)
-
-    var tiles = [(Int, Int)]()
-    for x in topLeftTile.x...bottomRightTile.x {
-      for y in topLeftTile.y...bottomRightTile.y {
-        tiles.append((x, y))
-      }
-    }
-    return tiles
-  }
-
-  private func overlayTiles(
-    on snapshot: UIImage, tiles: [(x: Int, y: Int)], zoomLevel: Int,
-    completion: @escaping @Sendable (UIImage) -> Void
-  ) {
-    let minX = tiles.min(by: { $0.x < $1.x })!.x
-    let maxX = tiles.max(by: { $0.x < $1.x })!.x
-    let minY = tiles.min(by: { $0.y < $1.y })!.y
-    let maxY = tiles.max(by: { $0.y < $1.y })!.y
-
-    let totalXtiles = maxX - minX + 1
-    let totalYtiles = maxY - minY + 1
-
-    let tileWidth = snapshot.size.width / CGFloat(totalXtiles)
-    let tileHeight = snapshot.size.height / CGFloat(totalYtiles)
-
-    Task {
-      // Fetch all tiles concurrently; the `for await` loop accumulates them in this one task,
-      // replacing the old DispatchGroup + captured-var append (no shared mutable state).
-      let tileImages = await withTaskGroup(of: (image: UIImage, x: Int, y: Int)?.self) { taskGroup in
-        for (x, y) in tiles {
-          taskGroup.addTask {
-            await withCheckedContinuation { continuation in
-              self.fetchTileImage(x: x, y: y, z: zoomLevel) { tileImage in
-                continuation.resume(returning: tileImage.map { (image: $0, x: x, y: y) })
-              }
-            }
-          }
-        }
-        var collected: [(image: UIImage, x: Int, y: Int)] = []
-        for await result in taskGroup {
-          if let result { collected.append(result) }
-        }
-        return collected
-      }
-
-      let composite = await MainActor.run { () -> UIImage in
-        let renderer = UIGraphicsImageRenderer(size: snapshot.size)
-        return renderer.image { _ in
-          snapshot.draw(at: .zero)
-          for (tile, x, y) in tileImages {
-            let originX = CGFloat(x - minX) * tileWidth
-            let originY = CGFloat(y - minY) * tileHeight
-            tile.draw(
-              in: CGRect(x: originX, y: originY, width: tileWidth + 0.05, height: tileHeight + 0.05),
-              blendMode: .normal, alpha: 0.7)
-          }
-        }
-      }
-      completion(composite)
-    }
-  }
-
-  private func fetchTileImage(x: Int, y: Int, z: Int, completion: @escaping @Sendable (UIImage?) -> Void) {
-    Task {
-      do {
-        let rainViewerData = try await APIClient.shared.getRainViewerMaps()
-
-        if let mostRecentFrame = rainViewerData.radar?.past?.last {
-          let host = rainViewerData.host ?? "https://tilecache.rainviewer.com"
-          let path = mostRecentFrame.path ?? ""
-
-          let urlString = "\(host)\(path)/256/\(z)/\(x)/\(y)/1/1_1.png"
-
-          guard let url = URL(string: urlString) else {
-            completion(nil)
-            return
-          }
-
-          var request = URLRequest(url: url)
-          request.addAPIContactIdentity()
-
-          let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil, let image = UIImage(data: data) else {
-              completion(nil)
-              return
-            }
-            completion(image)
-          }
-          task.resume()
-        } else {
-          completion(nil)
-        }
-      } catch {
-        Self.logger.error("Error fetching RainViewer data: \(error.localizedDescription, privacy: .public)")
-        completion(nil)
-      }
     }
   }
 }

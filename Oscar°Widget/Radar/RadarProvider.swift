@@ -10,8 +10,10 @@ struct RadarEntry: TimelineEntry {
 
 /// Timeline provider for the radar widget. The map is CPU-composited over the
 /// app-prerendered basemap (see RadarSnapshotRenderer); this type only supplies
-/// the location and the refresh cadence.
-struct RadarProvider: TimelineProvider {
+/// the location, the per-widget configuration, and the refresh cadence.
+struct RadarProvider: AppIntentTimelineProvider {
+    typealias Entry = RadarEntry
+    typealias Intent = RadarWidgetConfigIntent
 
     func placeholder(in context: Context) -> RadarEntry {
         // placeholder() must never fail; a missing/renamed asset would otherwise crash the
@@ -20,29 +22,36 @@ struct RadarProvider: TimelineProvider {
         return RadarEntry(date: Date(), frameDate: Date(), image: image)
     }
 
-    func getSnapshot(in context: Context, completion: @escaping @Sendable (RadarEntry) -> Void) {
-        let displaySize = context.displaySize
-        let family = context.family
-        Task {
-            completion(await buildWidgetEntry(displaySize: displaySize, family: family))
-        }
+    func snapshot(for configuration: RadarWidgetConfigIntent, in context: Context) async -> RadarEntry {
+        await buildWidgetEntry(configuration: configuration, displaySize: context.displaySize,
+                               family: context.family)
     }
 
-    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<RadarEntry>) -> Void) {
-        let displaySize = context.displaySize
-        let family = context.family
-        Task {
-            let entry = await buildWidgetEntry(displaySize: displaySize, family: family)
-            let next = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
-            completion(Timeline(entries: [entry], policy: .after(next)))
-        }
+    func timeline(for configuration: RadarWidgetConfigIntent, in context: Context) async -> Timeline<RadarEntry> {
+        let entry = await buildWidgetEntry(configuration: configuration, displaySize: context.displaySize,
+                                           family: context.family)
+        let next = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+        return Timeline(entries: [entry], policy: .after(next))
     }
 
-    private func buildWidgetEntry(displaySize: CGSize, family: WidgetFamily) async -> RadarEntry {
+    private func buildWidgetEntry(
+        configuration: RadarWidgetConfigIntent, displaySize: CGSize, family: WidgetFamily
+    ) async -> RadarEntry {
+        // Tell the app which basemap styles are in use — it prerenders them on
+        // next foreground (the widget itself may not do GPU work).
+        WidgetBasemapStore.registerRequestedStyle(configuration.style.rawValue)
+
         let location = await MainActor.run { LocationService.shared.update(); return LocationService.shared.getCoordinates() }
         let renderSize = snapshotSize(for: displaySize, family: family)
+        let options = RadarWidgetRenderOptions(
+            style: configuration.style.rawValue,
+            smoothing: configuration.smoothing,
+            motionArrows: configuration.motionArrows,
+            stormCells: configuration.stormCells
+        )
 
-        guard let rendered = await RadarSnapshotRenderer.render(center: location, size: renderSize) else {
+        guard let rendered = await RadarSnapshotRenderer.render(
+            center: location, size: renderSize, options: options) else {
             let fallback = UIImage(systemName: "wifi.exclamationmark") ?? UIImage()
             return RadarEntry(date: Date(), frameDate: Date(), image: fallback)
         }

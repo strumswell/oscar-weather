@@ -2,8 +2,8 @@
 //  WeatherMapDetailView.swift
 //  Oscar°
 //
-//  Fullscreen weather map: timestamp badge, legend, layer picker entry point,
-//  and the shared timeline scrubbers.
+//  Fullscreen weather map: legend, layer picker entry point, and the shared
+//  timeline chip.
 //
 
 import SwiftUI
@@ -11,8 +11,8 @@ import UIKit
 
 // MARK: - Fullscreen detail view
 
-/// Fullscreen weather map: timestamp badge, layer menu, close button, and the shared
-/// timeline scrubbers (radar or model layer, depending on what's active).
+/// Fullscreen weather map: legend, layer menu, close button, and the shared
+/// timeline chip (radar or model layer, depending on what's active).
 struct WeatherMapDetailView: View {
     let settingsService: SettingService
     let onClose: () -> Void
@@ -21,6 +21,16 @@ struct WeatherMapDetailView: View {
     @State private var radarState = OscarRadarState(renderMode: .fullscreen)
     @State private var modelGridState = ModelGridLayerState(renderMode: .fullscreen)
     @State private var isLayerPickerPresented = false
+    // sheet(item:), not sheet(isPresented:) + separate array state: the isPresented
+    // variant renders its content once with the PRE-tap (empty) array on the first
+    // presentation — the classic stale-state sheet bug.
+    @State private var tappedAlerts: TappedAlerts?
+    @State private var tappedCell: StormCellInfo?
+
+    private struct TappedAlerts: Identifiable {
+        let id = UUID()
+        let alerts: [WeatherAlertInfo]
+    }
 
     var body: some View {
         ZStack {
@@ -28,15 +38,23 @@ struct WeatherMapDetailView: View {
                 settingsService: settingsService,
                 coordinates: location.coordinates,
                 cities: LocationService.shared.city.cities,
-                overlayOpacity: 0.7,
+                overlayOpacity: settingsService.mapOverlayOpacity,
                 userActionAllowed: true,
                 showWindParticles: true,
                 oscarRadarState: radarState,
-                modelGridState: modelGridState
+                modelGridState: modelGridState,
+                onAlertsTapped: { alerts in
+                    tappedAlerts = TappedAlerts(alerts: alerts)
+                },
+                onCellTapped: { cell in
+                    tappedCell = cell
+                }
             )
             .ignoresSafeArea()
 
-            // Timestamp badge + legend — top-left (colormap follows the active layer)
+            // Timestamp badge + legend — top-left. The badge doubles as the
+            // scrub readout: eyes travel up from the scrubber to read the time
+            // here, so it stays even though the chip header shows it too.
             VStack {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 6) {
@@ -47,21 +65,20 @@ struct WeatherMapDetailView: View {
                                     timestamp: timestamp,
                                     isLive: radarState.isCurrentFrameLive
                                 )
-                                ColormapVerticalLegend(colormap: .radar)
-                            } else if radarState.isLoading {
-                                ProgressView()
-                                    .controlSize(.small)
+                                ColormapVerticalLegend(
+                                    colormap: settingsService.oscarRadarProduct == .precipitationTyped
+                                        ? .radarTyped : .radar)
                             }
-                        } else if settingsService.activeTileLayer != nil {
-                            if modelGridState.hasCurrentFrame,
-                               let timestamp = modelGridState.currentFrameTimestamp {
+                            if settingsService.showStormCells {
+                                StormCellLegend()
+                            }
+                        } else if settingsService.activeTileLayer != nil,
+                                  modelGridState.hasAnyLoadedFrame {
+                            if let timestamp = modelGridState.currentFrameTimestamp {
                                 RadarTimestampBadge(timestamp: timestamp, isLive: false)
-                                if let colormap = settingsService.activeTileLayer?.colormap {
-                                    ColormapVerticalLegend(colormap: colormap)
-                                }
-                            } else if modelGridState.isLoading {
-                                ProgressView()
-                                    .controlSize(.small)
+                            }
+                            if let colormap = settingsService.activeTileLayer?.colormap {
+                                ColormapVerticalLegend(colormap: colormap)
                             }
                         }
                     }
@@ -86,20 +103,23 @@ struct WeatherMapDetailView: View {
                 Spacer()
             }
 
-            // Timeline controls — bottom (the same shared components as before)
-            VStack {
+            // Timeline chip — bottom, with the basemap credit tucked underneath
+            VStack(spacing: 0) {
                 Spacer()
                 if settingsService.oscarRadarLayer {
                     OscarRadarTimelineControls(radarState: radarState,
                                                onBadgeTap: presentLayerPicker)
                         .padding(.horizontal, 16)
-                        .padding(.bottom, 16)
                 } else if settingsService.activeTileLayer != nil {
                     WeatherTileTimelineControls(imageState: modelGridState,
                                                 onBadgeTap: presentLayerPicker)
                         .padding(.horizontal, 16)
-                        .padding(.bottom, 16)
                 }
+                MapAttributionLabel()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, 18)
+                    .padding(.top, 5)
+                    .padding(.bottom, 2)
             }
         }
         // Declared BEFORE the load task so the source pick lands first (both run
@@ -111,6 +131,7 @@ struct WeatherMapDetailView: View {
         }
         .task {
             if settingsService.oscarRadarLayer {
+                radarState.setProduct(settingsService.oscarRadarProduct)
                 radarState.setRegion(settingsService.oscarRadarRegion)
                 await radarState.loadAllFrames()
                 // Testing hook: `-radarAutoPlay YES` starts playback immediately
@@ -146,6 +167,7 @@ struct WeatherMapDetailView: View {
         .onChange(of: settingsService.oscarRadarLayer) { _, isEnabled in
             if isEnabled {
                 modelGridState.pause()
+                radarState.setProduct(settingsService.oscarRadarProduct)
                 radarState.setRegion(settingsService.oscarRadarRegion)
                 if radarState.frames.isEmpty {
                     Task { await radarState.loadAllFrames() }
@@ -157,6 +179,11 @@ struct WeatherMapDetailView: View {
         .onChange(of: settingsService.oscarRadarRegion) { _, newRegion in
             guard settingsService.oscarRadarLayer else { return }
             radarState.setRegion(newRegion)
+            Task { await radarState.reloadForCurrentRegion() }
+        }
+        .onChange(of: settingsService.oscarRadarProduct) { _, newProduct in
+            guard settingsService.oscarRadarLayer else { return }
+            radarState.setProduct(newProduct)
             Task { await radarState.reloadForCurrentRegion() }
         }
         .onChange(of: settingsService.activeTileLayer) { _, newLayer in
@@ -177,6 +204,22 @@ struct WeatherMapDetailView: View {
             // Liquid Glass at the medium detent and swaps to an opaque background
             // when pulled up to .large.
             .presentationDetents([.medium, .large])
+            .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+            .presentationDragIndicator(.hidden)
+        }
+        .sheet(item: $tappedAlerts) { tapped in
+            AlertInfoSheet(alerts: tapped.alerts)
+                .presentationDetents([.medium, .large])
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                .presentationDragIndicator(.hidden)
+        }
+        .sheet(item: $tappedCell) { cell in
+            StormCellInfoSheet(
+                cell: cell,
+                referenceCoordinate: location.coordinates,
+                referenceName: LocationService.shared.city.cities.first(where: \.selected)?.label
+            )
+            .presentationDetents([.medium])
             .presentationBackgroundInteraction(.enabled(upThrough: .medium))
             .presentationDragIndicator(.hidden)
         }
@@ -214,9 +257,7 @@ struct WeatherMapDetailView: View {
     private func activateOscarRadar(_ region: RadarRegion) {
         settingsService.radarAutoFallbackActive = false
         settingsService.activeTileLayer = nil
-        settingsService.settings?.rainviewerLayer = false
         settingsService.oscarRadarRegion = region
-        settingsService.save()
         settingsService.oscarRadarLayer = true
         modelGridState.pause()
     }
@@ -224,8 +265,6 @@ struct WeatherMapDetailView: View {
     private func activateTileLayer(_ layer: WeatherTileLayer) {
         settingsService.radarAutoFallbackActive = false
         settingsService.oscarRadarLayer = false
-        settingsService.settings?.rainviewerLayer = false
-        settingsService.save()
         radarState.pause()
         settingsService.activeTileLayer = layer
     }

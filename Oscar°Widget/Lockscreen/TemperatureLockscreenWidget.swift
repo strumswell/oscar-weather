@@ -13,39 +13,42 @@ struct TemperatureLockScreenView: View {
     @Environment(\.widgetFamily) private var family
     
     var body: some View {
-        switch family {
-        case .accessoryCircular:
-            Gauge(value: entry.temperatureNow, in: entry.temperatureMin...entry.temperatureMax) {
-            } currentValueLabel: {
-                Text("\(Int(round(entry.temperatureNow)))")
-            } minimumValueLabel: {
-                Text("\(Int(round(entry.temperatureMin)))")
-            } maximumValueLabel: {
-                Text("\(Int(round(entry.temperatureMax)))")
-            }
-            .gaugeStyle(.accessoryCircular)
-        case .accessoryInline:
-            HStack {
-                Image(systemName: entry.icon)
+        Group {
+            switch family {
+            case .accessoryCircular:
+                Gauge(value: entry.temperatureNow, in: entry.temperatureMin...entry.temperatureMax) {
+                } currentValueLabel: {
+                    Text("\(Int(round(entry.temperatureNow)))")
+                } minimumValueLabel: {
+                    Text("\(Int(round(entry.temperatureMin)))")
+                } maximumValueLabel: {
+                    Text("\(Int(round(entry.temperatureMax)))")
+                }
+                .gaugeStyle(.accessoryCircular)
+            case .accessoryInline:
+                HStack {
+                    Image(systemName: entry.icon)
+                    Text("\(Int(round(entry.temperatureNow)))°")
+                }
+            case .accessoryCorner:
                 Text("\(Int(round(entry.temperatureNow)))°")
-            }
-        case .accessoryCorner:
-            Text("\(Int(round(entry.temperatureNow)))°")
-                .font(.system(size: 30))
-                .widgetLabel {
-                   Gauge(value: entry.temperatureNow, in: entry.temperatureMin...entry.temperatureMax) {
-                   } currentValueLabel: {
-                       Text("\(Int(round(entry.temperatureNow)))")
-                   } minimumValueLabel: {
-                       Text("\(Int(round(entry.temperatureMin)))")
-                   } maximumValueLabel: {
-                       Text("\(Int(round(entry.temperatureMax)))")
+                    .font(.system(size: 30))
+                    .widgetLabel {
+                       Gauge(value: entry.temperatureNow, in: entry.temperatureMin...entry.temperatureMax) {
+                       } currentValueLabel: {
+                           Text("\(Int(round(entry.temperatureNow)))")
+                       } minimumValueLabel: {
+                           Text("\(Int(round(entry.temperatureMin)))")
+                       } maximumValueLabel: {
+                           Text("\(Int(round(entry.temperatureMax)))")
+                       }
+                      .gaugeStyle(LinearCapacityGaugeStyle())
                    }
-                  .gaugeStyle(LinearCapacityGaugeStyle())
-               }
-        default:
-            EmptyView()
+            default:
+                EmptyView()
+            }
         }
+        .containerBackground(.clear, for: .widget)
     }
 }
 

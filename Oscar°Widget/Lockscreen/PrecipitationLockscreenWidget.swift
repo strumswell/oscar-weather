@@ -13,21 +13,24 @@ struct PrecipitationLockScreenView: View {
     @Environment(\.widgetFamily) private var family
     
     var body: some View {
-        switch family {
-        case .accessoryInline:
-            HStack {
-                Image(systemName: "umbrella.fill")
-                Text("\(entry.precipitationProbability) % • \(entry.precipitation, specifier: "%.1f") mm")
+        Group {
+            switch family {
+            case .accessoryInline:
+                HStack {
+                    Image(systemName: "umbrella.fill")
+                    Text("\(entry.precipitationProbability) % • \(entry.precipitation, specifier: "%.1f") mm")
+                }
+            case .accessoryCorner:
+                VStack {
+                    Image(systemName: "umbrella.fill")
+                    Text("\(entry.precipitation, specifier: "%.1f")mm")
+                        .font(.system(size: 10))
+                }
+            default:
+                EmptyView()
             }
-        case .accessoryCorner:
-            VStack {
-                Image(systemName: "umbrella.fill")
-                Text("\(entry.precipitation, specifier: "%.1f")mm")
-                    .font(.system(size: 10))
-            }
-        default:
-            EmptyView()
         }
+        .containerBackground(.clear, for: .widget)
     }
 }
 

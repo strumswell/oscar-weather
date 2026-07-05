@@ -87,14 +87,6 @@ struct LegalView: View {
             Divider()
 
             settingsNavigationLink {
-              RainViewerAttribution()
-            } label: {
-              RainViewerLabel()
-            }
-
-            Divider()
-
-            settingsNavigationLink {
               DWDAttribution()
             } label: {
               DWDLabel()
