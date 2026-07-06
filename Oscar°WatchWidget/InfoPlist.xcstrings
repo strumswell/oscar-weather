@@ -1,167 +1,167 @@
 {
-  "sourceLanguage" : "de",
-  "strings" : {
-    "CFBundleDisplayName" : {
-      "comment" : "Bundle display name",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar°WatchWidget"
+  "sourceLanguage": "de",
+  "strings": {
+    "CFBundleDisplayName": {
+      "comment": "Bundle display name",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscar°"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar°WatchWidget"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscar°"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar°WatchWidget"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscar°"
           }
         }
       }
     },
-    "CFBundleName" : {
-      "comment" : "Bundle name",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar°WatchWidgetExtension"
+    "CFBundleName": {
+      "comment": "Bundle name",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscar°WatchWidgetExtension"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar°WatchWidgetExtension"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscar°WatchWidgetExtension"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar°WatchWidgetExtension"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscar°WatchWidgetExtension"
           }
         }
       }
     },
-    "NSHumanReadableCopyright" : {
-      "comment" : "Copyright (human-readable)",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
+    "NSHumanReadableCopyright": {
+      "comment": "Copyright (human-readable)",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ""
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ""
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ""
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ""
           }
         }
       }
     },
-    "NSLocationAlwaysAndWhenInUseUsageDescription" : {
-      "comment" : "Privacy - Location Always and When In Use Usage Description",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen."
+    "NSLocationAlwaysAndWhenInUseUsageDescription": {
+      "comment": "Privacy - Location Always and When In Use Usage Description",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Only required to display weather at the current location."
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only required to display weather at the current location."
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yalnızca geçerli konumdaki hava durumunu görüntülemek için gereklidir."
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yalnızca geçerli konumdaki hava durumunu görüntülemek için gereklidir."
           }
         }
       }
     },
-    "NSLocationAlwaysUsageDescription" : {
-      "comment" : "Privacy - Location Always Usage Description",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen."
+    "NSLocationAlwaysUsageDescription": {
+      "comment": "Privacy - Location Always Usage Description",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Only required to display weather at the current location."
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only required to display weather at the current location."
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yalnızca geçerli konumdaki hava durumunu görüntülemek için gereklidir."
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yalnızca geçerli konumdaki hava durumunu görüntülemek için gereklidir."
           }
         }
       }
     },
-    "NSLocationUsageDescription" : {
-      "comment" : "Privacy - Location Usage Description",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen."
+    "NSLocationUsageDescription": {
+      "comment": "Privacy - Location Usage Description",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Only required to display weather at the current location."
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only required to display weather at the current location."
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yalnızca geçerli konumdaki hava durumunu görüntülemek için gereklidir."
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yalnızca geçerli konumdaki hava durumunu görüntülemek için gereklidir."
           }
         }
       }
     },
-    "NSLocationWhenInUseUsageDescription" : {
-      "comment" : "Privacy - Location When In Use Usage Description",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen."
+    "NSLocationWhenInUseUsageDescription": {
+      "comment": "Privacy - Location When In Use Usage Description",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Only required to display weather at the current location."
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only required to display weather at the current location."
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yalnızca geçerli konumdaki hava durumunu görüntülemek için gereklidir."
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yalnızca geçerli konumdaki hava durumunu görüntülemek için gereklidir."
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

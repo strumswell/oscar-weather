@@ -93,7 +93,8 @@ enum HourlyForecastBuilder {
           weatherCode: hourly.weathercode?[index] ?? 0,
           isDay: hourly.is_day?[index] ?? 0
         ),
-        temperature: HourlyFormatting.temperatureString(hourly.temperature_2m?[index])
+        temperature: HourlyFormatting.temperatureString(hourly.temperature_2m?[index]),
+        precipitationValue: hourly.precipitation?[index] ?? 0
       )
 
       items.append(.forecast(forecastItem))
@@ -145,7 +146,8 @@ enum HourlyForecastBuilder {
         isDay: current.is_day ?? 1
       ),
       temperature: HourlyFormatting.temperatureString(current.temperature),
-      isNow: true
+      isNow: true,
+      precipitationValue: precipitation
     )
   }
 

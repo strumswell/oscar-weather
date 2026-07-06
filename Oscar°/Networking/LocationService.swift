@@ -10,6 +10,9 @@ import CoreLocation
 import Combine
 import SwiftUI
 import OSLog
+#if os(watchOS)
+import MapKit
+#endif
 
 @MainActor
 @Observable
@@ -46,7 +49,12 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         super.init()
         self.manager.delegate = self
         self.manager.desiredAccuracy = kCLLocationAccuracyBest
+        // Always authorization has no UI on watchOS; whenInUse is the supported scope there.
+        #if os(watchOS)
+        self.manager.requestWhenInUseAuthorization()
+        #else
         self.manager.requestAlwaysAuthorization()
+        #endif
         self.manager.startUpdatingLocation()
         self.authStatus = self.manager.authorizationStatus
         updateGPSCoordinates()
@@ -137,11 +145,17 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
             // which would otherwise hang the whole refresh.
             let geocoded = try await withTimeout(seconds: 6) {
                 let location = CLLocation(latitude: latitude, longitude: longitude)
+                #if os(watchOS)
+                // CLGeocoder is deprecated AND non-functional on watchOS 26;
+                // MKReverseGeocodingRequest is its designated replacement.
+                return try await mapKitReverseGeocode(location)
+                #else
                 let placemarks = try await reverseGeocode(location)
                 guard let placemark = placemarks.first else {
                     return (name: "", countryCode: String?.none)
                 }
                 return (name: placemark.locality ?? "", countryCode: placemark.isoCountryCode)
+                #endif
             }
             if !geocoded.name.isEmpty {
                 lastGeocoded = (coordinates, geocoded.name, geocoded.countryCode)
@@ -195,6 +209,33 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         return (value * scale).rounded() / scale
     }
 }
+
+#if os(watchOS)
+/// Same single-use box rationale as `SendableGeocoder` below: `cancel()` is
+/// designed to be called concurrently with the in-flight request.
+private struct SendableGeocodingRequest: @unchecked Sendable {
+    let request: MKReverseGeocodingRequest?
+}
+
+/// Reverse-geocodes via MapKit (the watchOS 26 replacement for CLGeocoder),
+/// cancellation-aware so the enclosing timeout can unblock it.
+private func mapKitReverseGeocode(_ location: CLLocation) async throws -> (name: String, countryCode: String?) {
+    let box = SendableGeocodingRequest(request: MKReverseGeocodingRequest(location: location))
+    guard let request = box.request else {
+        return ("", nil)
+    }
+    return try await withTaskCancellationHandler {
+        let mapItems = try await request.mapItems
+        guard let item = mapItems.first else {
+            return ("", String?.none)
+        }
+        let name = item.addressRepresentations?.cityName ?? item.name ?? ""
+        return (name, item.addressRepresentations?.region?.identifier)
+    } onCancel: {
+        box.request?.cancel()
+    }
+}
+#endif
 
 /// CLGeocoder isn't `Sendable`, but `cancelGeocode()` is explicitly designed to be called
 /// concurrently with an in-flight request — exactly what the cancellation handler does below.

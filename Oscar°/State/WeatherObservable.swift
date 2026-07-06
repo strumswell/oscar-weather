@@ -140,7 +140,12 @@ extension Weather {
         locationService.update()
         let info = await locationService.getPlacemarkInfo()
         location.coordinates = locationService.getCoordinates()
-        location.name = info.name
+        // An empty name means the reverse geocode failed (timeout/offline) — keep
+        // whatever we showed before (snapshot hydration or the last success)
+        // instead of wiping the label until the next attempt.
+        if !info.name.isEmpty || location.name.isEmpty {
+            location.name = info.name
+        }
         location.countryCode = info.countryCode
 
         let coordinates = location.coordinates

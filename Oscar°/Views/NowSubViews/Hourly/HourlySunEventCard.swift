@@ -13,19 +13,11 @@ struct HourlySunEventCard: View {
         .foregroundStyle(.secondary)
         .padding(.top, 3)
       Spacer()
-      Image("halfsun")
+      Image(item.kind.imageName)
         .resizable()
         .scaledToFit()
-        .shadow(
-          color: .orange,
-          radius: 10,
-          x: 0,
-          y: -5
-        )
         .frame(width: 45, height: 45)
-        .padding(.bottom, -3)
-        .accessibilityHidden(true)
-      Image(systemName: item.kind.iconName)
+        .padding(.bottom, 2)
         .accessibilityHidden(true)
     }
     .padding(.horizontal, 12)

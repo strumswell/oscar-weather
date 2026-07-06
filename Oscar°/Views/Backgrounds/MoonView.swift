@@ -213,6 +213,7 @@ struct MoonView: View {
     /// 0 in full daylight … 1 at night. Suppresses the halo by day, where the
     /// real moon shows as a pale disc with no glow.
     var skyDarkness: Double = 1
+    var diameter: CGFloat = Self.diameter
 
     static let diameter: CGFloat = 68
     private static let glowTint = Color(red: 0.93, green: 0.95, blue: 1.0)
@@ -272,7 +273,7 @@ struct MoonView: View {
                     .opacity(0.30)
                     .clipShape(Circle())
             }
-            .frame(width: Self.diameter, height: Self.diameter)
+            .frame(width: diameter, height: diameter)
             // The lit limb leans toward the below-horizon sun.
             .rotationEffect(.degrees(litOnRight ? 24 : -24))
             // Atmospheric extinction: subtly dimmer near rise and set.

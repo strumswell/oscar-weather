@@ -15,5 +15,7 @@
 	<string>Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Lediglich benötigt, um Wetter am aktuellen Standort anzuzeigen.</string>
+	<key>NSWidgetWantsLocation</key>
+	<true/>
 </dict>
 </plist>

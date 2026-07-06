@@ -31,6 +31,9 @@ struct HourlyForecastItem: Identifiable {
   let temperature: String
   /// The leading "Jetzt" card carrying live conditions instead of an hourly slot.
   var isNow: Bool = false
+  /// Raw precipitation behind the formatted string (display units), so compact
+  /// layouts (watch) can hide the label for dry hours.
+  var precipitationValue: Double = 0
 
   var id: String {
     // A stable id for the now card: its timestamp moves with every refresh, and a
@@ -44,12 +47,13 @@ struct HourlySunEventItem: Identifiable {
     case sunrise
     case sunset
 
-    var iconName: String {
+    /// Directional sun graphic (rising/setting sun with the arrow and horizon baked in).
+    var imageName: String {
       switch self {
       case .sunrise:
-        return "arrow.up"
+        return "sunrise"
       case .sunset:
-        return "arrow.down"
+        return "sunset"
       }
     }
   }

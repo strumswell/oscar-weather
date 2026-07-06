@@ -54,8 +54,10 @@ struct LockscreenProvider: TimelineProvider {
                 let weathercode = weather.current?.weathercode ?? 0
                 let isDay = weather.current?.is_day ?? 0
 
-                // TODO: Respect radar data for precipitation + probability
-                let precipitation = weather.current?.precipitation ?? 0.0
+                // Radar measures what is falling right now; the model's "current"
+                // value is an interpolated guess (mirrors the Jetzt card's logic).
+                let radarRate = precipSeries?.currentRate
+                let precipitation = radarRate ?? (weather.current?.precipitation ?? 0.0)
                 // Optional chaining only guards nil, not out-of-bounds: precipitation_probability
                 // can be shorter than the time array, so index defensively.
                 let probabilities = weather.hourly?.precipitation_probability ?? []

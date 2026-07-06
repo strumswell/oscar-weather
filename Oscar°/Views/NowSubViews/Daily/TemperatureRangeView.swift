@@ -107,7 +107,7 @@ struct TemperatureRangeView: View {
         .font(.caption2.weight(.semibold))
         .lineLimit(1)
         .minimumScaleFactor(0.7)
-        .foregroundStyle(Color(UIColor.label))
+        .foregroundStyle(Color.primary)
         .frame(width: Self.focusLabelWidth)
         .offset(x: labelOffset, y: 1)
 

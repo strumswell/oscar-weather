@@ -2,6 +2,7 @@
   "sourceLanguage" : "de",
   "strings" : {
     "%.1fmm" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -44,6 +45,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ""
+          }
+        }
+      }
+    },
+    "%lld %% · %.1f mm" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld %% · %2$.1f mm"
           }
         }
       }
@@ -196,13 +207,13 @@
     "Globales Modell des chinesischen Wetterdienstes." : {
 
     },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+
+    },
     "Großbritannien" : {
 
     },
     "Große Bäume bewegen sich, Zweige können brechen." : {
-
-    },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
 
     },
     "Hell" : {

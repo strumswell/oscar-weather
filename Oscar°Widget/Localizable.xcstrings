@@ -2,6 +2,7 @@
   "sourceLanguage" : "de",
   "strings" : {
     "%.1fmm" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -52,6 +53,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : ""
+          }
+        }
+      }
+    },
+    "%@ %% · %.1f mm" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %% · %2$.1f mm"
           }
         }
       }

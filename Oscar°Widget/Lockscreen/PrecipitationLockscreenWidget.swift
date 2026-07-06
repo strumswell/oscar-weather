@@ -21,11 +21,15 @@ struct PrecipitationLockScreenView: View {
                     Text("\(entry.precipitationProbability) % • \(entry.precipitation, specifier: "%.1f") mm")
                 }
             case .accessoryCorner:
-                VStack {
-                    Image(systemName: "umbrella.fill")
-                    Text("\(entry.precipitation, specifier: "%.1f")mm")
-                        .font(.system(size: 10))
-                }
+                // Corner anatomy: a square-ish glyph as inner content, the values
+                // on the curved label — stacking both inside gets clipped.
+                Image(systemName: "umbrella.fill")
+                    .font(.system(size: 24, weight: .medium))
+                    .symbolRenderingMode(.hierarchical)
+                    .widgetAccentable()
+                    .widgetLabel {
+                        Text("\(entry.precipitationProbability) % · \(entry.precipitation, specifier: "%.1f") mm")
+                    }
             default:
                 EmptyView()
             }

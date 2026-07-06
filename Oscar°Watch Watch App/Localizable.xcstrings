@@ -1,7 +1,654 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "%@ Tage" : {
 
+    },
+    "7 Tage" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 days"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 gün"
+          }
+        }
+      }
+    },
+    "12 Stunden" : {
+
+    },
+    "24 Stunden" : {
+
+    },
+    "alle %lld Std." : {
+
+    },
+    "Äste brechen, kleinere Schäden sind möglich." : {
+
+    },
+    "Australien" : {
+
+    },
+    "Automatisch" : {
+
+    },
+    "Bäume können entwurzeln, Gebäude können Schaden nehmen." : {
+
+    },
+    "Bäume schwanken, Gehen gegen den Wind wird mühsam." : {
+
+    },
+    "Bedeckt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overcast"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kapalı"
+          }
+        }
+      }
+    },
+    "Benutzerdefiniert" : {
+
+    },
+    "Bewölkt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudy"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bulutlu"
+          }
+        }
+      }
+    },
+    "Blätter rascheln, Wind ist im Gesicht spürbar." : {
+
+    },
+    "China" : {
+
+    },
+    "Dicke Äste bewegen sich, Drähte können pfeifen." : {
+
+    },
+    "Dunkel" : {
+
+    },
+    "Dünne Zweige bewegen sich, Wimpel strecken sich." : {
+
+    },
+    "E_compass" : {
+      "comment" : "East"
+    },
+    "ECMWF" : {
+
+    },
+    "Erneut versuchen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekrar dene"
+          }
+        }
+      }
+    },
+    "Europa" : {
+
+    },
+    "Fiord" : {
+
+    },
+    "Frankreich & Europa" : {
+
+    },
+    "Frische Brise" : {
+
+    },
+    "Gefrierender Regen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Freezing rain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dondurucu yağmur"
+          }
+        }
+      }
+    },
+    "Gewitter" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thunderstorm"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gök gürültülü fırtına"
+          }
+        }
+      }
+    },
+    "Globales 0,25°-Modell (Open-Data, ca. 2 Std. Verzögerung)." : {
+
+    },
+    "Globales Modell des australischen Wetterdienstes." : {
+
+    },
+    "Globales Modell des chinesischen Wetterdienstes." : {
+
+    },
+    "Große Bäume bewegen sich, Zweige können brechen." : {
+
+    },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+
+    },
+    "Großbritannien" : {
+
+    },
+    "Hell" : {
+
+    },
+    "Heute" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugün"
+          }
+        }
+      }
+    },
+    "Hochauflösendes Modell für Italien." : {
+
+    },
+    "Hochauflösendes Regionalmodell, weltweit durch ECMWF ergänzt." : {
+
+    },
+    "Im Tagesverlauf markieren" : {
+
+    },
+    "Italien" : {
+
+    },
+    "Japan" : {
+
+    },
+    "Jetzt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Now"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şimdi"
+          }
+        }
+      }
+    },
+    "Kein Regen in Sicht" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No rain in sight"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur görünmüyor"
+          }
+        }
+      }
+    },
+    "Keine Daten" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No data"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veri yok"
+          }
+        }
+      }
+    },
+    "Keine Radardaten" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No radar data"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar verisi yok"
+          }
+        }
+      }
+    },
+    "Keine Wetterdaten" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No weather data"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava durumu verisi yok"
+          }
+        }
+      }
+    },
+    "KI-basiertes Wettermodell von ECMWF." : {
+
+    },
+    "Klar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açık"
+          }
+        }
+      }
+    },
+    "Korea" : {
+
+    },
+    "Leichte Brise" : {
+
+    },
+    "Leiser Zug" : {
+
+    },
+    "Mäßige Brise" : {
+
+    },
+    "Mein Standort" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My Location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konumum"
+          }
+        }
+      }
+    },
+    "Mitteleuropa & Alpen" : {
+
+    },
+    "Morgen" : {
+
+    },
+    "N_compass" : {
+      "comment" : "North"
+    },
+    "Nationale Wetterdienste" : {
+
+    },
+    "Native 9-km-Auflösung direkt von ECMWF, stündlich bis +90 Std." : {
+
+    },
+    "NE_compass" : {
+      "comment" : "North-East"
+    },
+    "Nebel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fog"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sisli"
+          }
+        }
+      }
+    },
+    "Niederlande & Westeuropa" : {
+
+    },
+    "Nieselregen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drizzle"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çisenti"
+          }
+        }
+      }
+    },
+    "Nordamerika" : {
+
+    },
+    "Nordeuropa" : {
+
+    },
+    "NW_compass" : {
+      "comment" : "North-West"
+    },
+    "Orkan" : {
+
+    },
+    "Orkanartiger Sturm" : {
+
+    },
+    "Radar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar"
+          }
+        }
+      }
+    },
+    "Rauch driftet leicht, Windfahnen bleiben ruhig." : {
+
+    },
+    "Rauch steigt fast senkrecht auf." : {
+
+    },
+    "Regen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur"
+          }
+        }
+      }
+    },
+    "Regen · noch >%lld min" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain · >%lld min left"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur · >%lld dk kaldı"
+          }
+        }
+      }
+    },
+    "Regen · noch ~%lld min" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain · ~%lld min left"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur · ~%lld dk kaldı"
+          }
+        }
+      }
+    },
+    "Regen ab %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain from %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur başlangıcı: %@"
+          }
+        }
+      }
+    },
+    "Regen bis %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain until %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur bitişi: %@"
+          }
+        }
+      }
+    },
+    "S_compass" : {
+      "comment" : "South"
+    },
+    "Schauer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Showers"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağanak"
+          }
+        }
+      }
+    },
+    "Schneefall" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snow"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kar yağışı"
+          }
+        }
+      }
+    },
+    "Schwache Brise" : {
+
+    },
+    "Schwere Sturmschäden, im Binnenland selten." : {
+
+    },
+    "Schwere Verwüstungen, sehr selten im Landesinneren." : {
+
+    },
+    "Schwerer Sturm" : {
+
+    },
+    "SE_compass" : {
+      "comment" : "South-East"
+    },
+    "Sonnenaufgang bis Sonnenuntergang" : {
+
+    },
+    "Starker Wind" : {
+
+    },
+    "Steifer Wind" : {
+
+    },
+    "stündlich" : {
+
+    },
+    "Stündlich" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hourly"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saatlik"
+          }
+        }
+      }
+    },
+    "Sturm" : {
+
+    },
+    "Stürmischer Wind" : {
+
+    },
+    "SW_compass" : {
+      "comment" : "South-West"
+    },
+    "System" : {
+
+    },
+    "Teils bewölkt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partly cloudy"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parçalı bulutlu"
+          }
+        }
+      }
+    },
+    "Uhr" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " "
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " "
+          }
+        }
+      }
+    },
+    "USA" : {
+
+    },
+    "W_compass" : {
+      "comment" : "West"
+    },
+    "Wählt für jeden Ort weltweit automatisch das beste Modell und kombiniert mehrere Wetterdienste." : {
+
+    },
+    "Werte ersetzen" : {
+
+    },
+    "Windstille" : {
+
+    },
+    "Zweige bewegen sich, loses Papier hebt ab." : {
+
+    }
   },
   "version" : "1.0"
 }
