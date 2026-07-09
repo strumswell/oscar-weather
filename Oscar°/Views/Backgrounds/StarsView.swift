@@ -13,12 +13,30 @@ struct StarsView: View {
     /// are skipped so they don't shine through the moon's disc.
     var occlusionCenter: CGPoint? = nil
     var occlusionRadius: CGFloat = 0
+    /// Forces the layer's strength (0…1). The live sim derives it from the
+    /// day fraction — stars vanish by day — but the onboarding night diorama
+    /// is always night.
+    var opacityOverride: Double? = nil
     @State private var isShown = false
     @State private var starField = StarField()
-    @State private var meteorShower = MeteorShower()
-    
+    @State private var meteorShower: MeteorShower
+
     @Environment(Weather.self) private var weather: Weather
-    
+
+    init(
+        pacing: SimulationPacing = .active,
+        occlusionCenter: CGPoint? = nil,
+        occlusionRadius: CGFloat = 0,
+        opacityOverride: Double? = nil,
+        meteorDelayRange: ClosedRange<Double> = 5...10
+    ) {
+        self.pacing = pacing
+        self.occlusionCenter = occlusionCenter
+        self.occlusionRadius = occlusionRadius
+        self.opacityOverride = opacityOverride
+        _meteorShower = State(initialValue: MeteorShower(delayRange: meteorDelayRange))
+    }
+
     let starStops: [Gradient.Stop] = [
         .init(color: .white, location: 0),
         .init(color: .white, location: 0.25),
@@ -31,6 +49,9 @@ struct StarsView: View {
     ]
 
     var starOpacity: Double {
+        if let opacityOverride {
+            return opacityOverride
+        }
         let color = starStops.interpolated(amount: weather.time)
         return color.getComponents().alpha
     }

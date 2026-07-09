@@ -15,7 +15,8 @@ struct HourlyPlaceholderCard: View {
     .foregroundStyle(.secondary.opacity(0.28))
     .padding(.horizontal, 12)
     .padding(.vertical, 12)
-    .frame(minWidth: 78, minHeight: 116)
+    .frame(width: HourlyForecastCard.cardWidth)
+    .frame(minHeight: 116)
     .background(.thinMaterial)
     .clipShape(.rect(cornerRadius: 10))
     .overlay {

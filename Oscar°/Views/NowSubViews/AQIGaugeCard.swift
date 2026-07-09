@@ -7,6 +7,7 @@ import SwiftUI
 
 struct AQIGaugeCard: View {
     let metric: EnvironmentMetric
+    @Environment(\.cardBackgroundStyle) private var cardBackground
 
     var body: some View {
         VStack {
@@ -28,17 +29,11 @@ struct AQIGaugeCard: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 10)
-        .background(.thinMaterial)
+        .background(cardBackground)
         .clipShape(.rect(cornerRadius: 10))
         .overlay {
             RoundedRectangle(cornerRadius: 10)
                 .stroke(.secondary.opacity(0.075), lineWidth: 1)
-        }
-        .scrollTransition { content, phase in
-            content
-                .opacity(phase.isIdentity ? 1 : 0.5)
-                .scaleEffect(phase.isIdentity ? 1 : 0.9)
-                .blur(radius: phase.isIdentity ? 0 : 2)
         }
     }
 

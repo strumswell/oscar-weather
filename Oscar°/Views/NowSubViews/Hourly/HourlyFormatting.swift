@@ -18,8 +18,10 @@ enum HourlyFormatting {
     return SettingService.formattedTime(date, timeZone: timeZone)
   }
 
+  /// Short weekday ("Do", "Fri") for the sun-event cards, which share the
+  /// narrow hourly-card width.
   static func weekdayString(timestamp: Double, timeZone: TimeZone) -> String {
-    SettingService.formattedWeekday(
+    SettingService.formattedShortWeekday(
       Date(timeIntervalSince1970: TimeInterval(timestamp)),
       timeZone: timeZone
     )

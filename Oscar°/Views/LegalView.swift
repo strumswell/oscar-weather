@@ -49,6 +49,29 @@ struct LegalView: View {
             } label: {
               AppIconSettingsLabel()
             }
+
+            Divider()
+
+            Button {
+              dismiss()
+              OnboardingCoordinator.shared.replay()
+            } label: {
+              HStack {
+                Image(systemName: "sparkles")
+                  .frame(width: 30, height: 30)
+                  .foregroundStyle(.white)
+                  .background(.indigo)
+                  .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+
+                Text("Einführung erneut ansehen")
+                  .font(.body)
+
+                Spacer()
+              }
+              .contentShape(Rectangle())
+              .padding(.vertical, 12)
+            }
+            .buttonStyle(.plain)
           }
 
           section("Über") {

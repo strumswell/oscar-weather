@@ -280,7 +280,9 @@ private final class AtmosphereSnapshotCache {
     }
 }
 
-private struct AtmosphereSkyShaderView: View {
+// Internal (not private): the onboarding scene dioramas reuse the same sky —
+// including its lightning-flash timeline — with hand-built snapshots.
+struct AtmosphereSkyShaderView: View {
     let snapshot: AtmosphereSnapshot
     let size: CGSize
     var moonGlow: Float = 0

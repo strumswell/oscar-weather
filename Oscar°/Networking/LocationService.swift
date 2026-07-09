@@ -49,18 +49,42 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         super.init()
         self.manager.delegate = self
         self.manager.desiredAccuracy = kCLLocationAccuracyBest
+        self.authStatus = self.manager.authorizationStatus
+
         // Always authorization has no UI on watchOS; whenInUse is the supported scope there.
         #if os(watchOS)
         self.manager.requestWhenInUseAuthorization()
-        #else
-        self.manager.requestAlwaysAuthorization()
-        #endif
         self.manager.startUpdatingLocation()
-        self.authStatus = self.manager.authorizationStatus
+        #else
+        // On iOS the dedicated onboarding location step is the ONLY place that ever
+        // requests authorization — the app must never surface the system prompt at
+        // launch. requestWhenInUse/AlwaysAuthorization() AND startUpdatingLocation()
+        // each raise the prompt while the status is .notDetermined, so at launch we
+        // only resume updates when access already exists (a returning user, or a
+        // grant made earlier during onboarding). A first-time grant arrives through
+        // the authorization delegate, which starts updates from there.
+        if isAuthorized {
+            self.manager.startUpdatingLocation()
+        }
+        #endif
+
         updateGPSCoordinates()
-        
+    }
+
+    private var isAuthorized: Bool {
+        manager.authorizationStatus == .authorizedAlways
+            || manager.authorizationStatus == .authorizedWhenInUse
     }
     
+    /// Explicit permission request, used by the onboarding location step.
+    func requestAuthorization() {
+        #if os(watchOS)
+        manager.requestWhenInUseAuthorization()
+        #else
+        manager.requestAlwaysAuthorization()
+        #endif
+    }
+
     ///  Update class state with all cities from storage and the current GPS coordinates, if available
     func update() {
         city.update()
@@ -182,7 +206,11 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
     }
     
     internal func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        authStatus = status
         if status == .authorizedWhenInUse || status == .authorizedAlways {
+            // Deferred at init on a fresh install (see init): the onboarding
+            // location step's grant lands here and is where updates actually start.
+            manager.startUpdatingLocation()
             updateGPSCoordinates()
             notificationCenter.post(name: .weatherRefreshNeeded, object: nil)
         }

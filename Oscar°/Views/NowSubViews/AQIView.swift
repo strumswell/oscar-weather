@@ -66,6 +66,15 @@ struct AQIView: View {
                             AQIGaugeCard(metric: metric)
                         }
                         .buttonStyle(.plain)
+                        // Lives here rather than on the card: outside a scroll
+                        // view (the onboarding collage) the phase never resolves
+                        // to identity and the card rendered permanently blurred.
+                        .scrollTransition { content, phase in
+                            content
+                                .opacity(phase.isIdentity ? 1 : 0.5)
+                                .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                                .blur(radius: phase.isIdentity ? 0 : 2)
+                        }
                         .accessibilityLabel(accessibilityLabel(for: metric))
                         .accessibilityHint(Text("Öffnet stündliche Umweltdiagramme"))
                     }

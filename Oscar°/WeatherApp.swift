@@ -91,7 +91,10 @@ struct WeatherApp: App {
     
     var body: some Scene {
         WindowGroup {
-            NowView()
+            ZStack {
+                NowView()
+                OnboardingGate()
+            }
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .environment(weather)
                 .environment(location)

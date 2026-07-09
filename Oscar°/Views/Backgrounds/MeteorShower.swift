@@ -11,8 +11,16 @@ class MeteorShower {
     var meteors = Set<Meteor>()
     var lastUpdate = Date.now
 
+    /// Seconds between spawns; the onboarding night diorama shortens it so a
+    /// meteor reliably streaks past while the step is on screen.
+    let delayRange: ClosedRange<Double>
     var lastCreationDate = Date.now
-    var nextCreationDelay = Double.random(in: 5...10)
+    var nextCreationDelay: Double
+
+    init(delayRange: ClosedRange<Double> = 5...10) {
+        self.delayRange = delayRange
+        nextCreationDelay = .random(in: delayRange)
+    }
 
     func update(date: Date, size: CGSize) {
         let delta = date.timeIntervalSince1970 - lastUpdate.timeIntervalSince1970
@@ -55,6 +63,6 @@ class MeteorShower {
 
         meteors.insert(meteor)
         lastCreationDate = .now
-        nextCreationDelay = Double.random(in: 5...10)
+        nextCreationDelay = .random(in: delayRange)
     }
 }

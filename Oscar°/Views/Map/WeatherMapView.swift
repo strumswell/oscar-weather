@@ -87,7 +87,11 @@ struct WeatherMapView: UIViewRepresentable {
         mapView.delegate = context.coordinator
         mapView.setCenter(coordinates, zoomLevel: 7, animated: false)
         mapView.allowsTilting = false
-        mapView.showsUserLocation = true
+        // MapLibre requests location permission itself the moment this is enabled
+        // while the status is undetermined — and the preview lives inside NowView,
+        // which renders at launch (even behind onboarding). So show the user dot
+        // only once access already exists; updateUIView turns it on after a grant.
+        mapView.showsUserLocation = Self.locationAuthorized
         // OpenFreeMap/OSM (ODbL) attribution is an always-visible corner label
         // (MapAttributionLabel, drawn by the SwiftUI host) — the OSMF-preferred
         // form — so MapLibre's ⓘ button and wordmark both stay hidden.
@@ -129,9 +133,26 @@ struct WeatherMapView: UIViewRepresentable {
         return mapView
     }
 
+    /// True only when location access has already been granted — never triggers a
+    /// prompt. Gates the map's user-location dot so the launch-time NowView preview
+    /// can't raise the system permission dialog before the onboarding step does.
+    @MainActor static var locationAuthorized: Bool {
+        switch LocationService.shared.authStatus {
+        case .authorizedWhenInUse, .authorizedAlways: true
+        default: false
+        }
+    }
+
     func updateUIView(_ mapView: MLNMapView, context: Context) {
         context.coordinator.parent = self
         context.coordinator.syncAll()
+
+        // Enable the user-location dot once access is granted (e.g. after the
+        // onboarding location step), without recreating the map.
+        let authorized = Self.locationAuthorized
+        if mapView.showsUserLocation != authorized {
+            mapView.showsUserLocation = authorized
+        }
 
         // Static (non-interactive) previews follow the selected location.
         if !userActionAllowed {
