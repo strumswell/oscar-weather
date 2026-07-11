@@ -1,0 +1,207 @@
+{
+  "canvas": {
+    "width": 1320,
+    "height": 2868
+  },
+  "background": {
+    "top": "#3AA0FF",
+    "bottom": "#0067DF"
+  },
+  "device": {
+    "screenOffsetX": 75,
+    "screenOffsetY": 66,
+    "screenWidth": 1320,
+    "screenCornerRadius": 180
+  },
+  "defaults": {
+    "device": {
+      "frame": "Apple iPhone 17 Pro Max Deep Blue",
+      "width": 1150,
+      "x": 85,
+      "y": 731
+    },
+    "title": {
+      "font": "fonts/SeriouslyNostalgicFn-Regular.otf",
+      "size": 150,
+      "color": "#E8E7FF",
+      "align": "center",
+      "x": 60,
+      "y": 134,
+      "width": 1200,
+      "lineHeight": 1.05,
+      "letterSpacing": 0
+    }
+  },
+  "locales": {
+    "tr": {
+      "title": {
+        "font": "/System/Library/Fonts/Supplemental/Georgia Bold.ttf"
+      }
+    }
+  },
+  "scenes": {
+    "01_now_rain": {
+      "extraTexts": [
+        {
+          "text": {
+            "de-DE": "°",
+            "en-US": "°"
+          },
+          "x": 870,
+          "y": 82,
+          "width": 60,
+          "size": 150,
+          "font": "/System/Library/Fonts/Supplemental/Georgia.ttf",
+          "lineHeight": 1
+        },
+        {
+          "text": {
+            "de-DE": "Genaue Vorhersagen. Offen für alle.",
+            "en-US": "Accurate forecasts. Open to all."
+          },
+          "x": 260,
+          "y": 321,
+          "width": 800,
+          "size": 80,
+          "font": "/System/Library/Fonts/SFNSRounded.ttf",
+          "fontWeight": 500,
+          "color": "#B9DAFF"
+        }
+      ],
+      "images": [
+        {
+          "src": "images/cloud5_3x_1.png",
+          "x": -363,
+          "y": 346,
+          "width": 1891
+        },
+        {
+          "src": "images/oscar_figure.png",
+          "x": 838,
+          "y": 2278,
+          "width": 415,
+          "rotation": 7.5
+        }
+      ],
+      "order": [
+        "image0",
+        "device",
+        "title",
+        "extra0"
+      ],
+      "title": {
+        "x": 60,
+        "y": 68,
+        "size": 220
+      },
+      "device": {
+        "x": 85,
+        "y": 731
+      }
+    },
+    "90_map_wind": {
+      "hidden": true
+    },
+    "91_map_pressure": {
+      "hidden": true
+    },
+    "04_map_temp": {
+      "devices": [
+        {
+          "shot": "90_map_wind",
+          "x": -36,
+          "y": 589,
+          "width": 772,
+          "rotation": -9,
+          "shadowBlur": 60,
+          "shadowOpacity": 0.55,
+          "shadowY": 24
+        },
+        {
+          "shot": "91_map_pressure",
+          "x": 560,
+          "y": 585,
+          "width": 806,
+          "rotation": 11.7,
+          "shadowBlur": 60,
+          "shadowOpacity": 0.55,
+          "shadowY": 24
+        }
+      ],
+      "order": [
+        "device2",
+        "device1",
+        "device"
+      ],
+      "device": {
+        "x": 200,
+        "y": 1109,
+        "width": 921
+      },
+      "title": {
+        "x": 60,
+        "y": 134
+      }
+    },
+    "03_map_radar": {
+      "title": {
+        "x": 60,
+        "y": 134
+      },
+      "device": {
+        "x": 85,
+        "y": 731
+      }
+    },
+    "02_forecast": {
+      "title": {
+        "x": 60,
+        "y": 134
+      },
+      "device": {
+        "x": 85,
+        "y": 731
+      }
+    },
+    "05_ensemble": {
+      "title": {
+        "x": 60,
+        "y": 132
+      },
+      "device": {
+        "x": 85,
+        "y": 731
+      }
+    },
+    "06_air_quality": {
+      "title": {
+        "x": 60,
+        "y": 134
+      },
+      "device": {
+        "x": 85,
+        "y": 731
+      }
+    },
+    "07_klima": {
+      "device": {
+        "x": 85,
+        "y": 731
+      },
+      "title": {
+        "x": 60,
+        "y": 134
+      }
+    },
+    "09_widgets": {
+      "device": {
+        "x": 85,
+        "y": 731
+      },
+      "title": {
+        "x": 60,
+        "y": 134
+      }
+    }
+  }
+}

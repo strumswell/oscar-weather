@@ -31,17 +31,20 @@ struct NotificationSettingsView: View {
                     String(localized: "Rain alerts (Beta)"),
                     isOn: rainAlertsBinding(currentValue: rainAlertsEnabled)
                 )
+                .accessibilityIdentifier("notifications.rainAlerts")
 
                 Toggle(
                     String(localized: "Weather alerts (Beta)"),
                     isOn: weatherAlertsBinding(currentValue: weatherAlertsEnabled)
                 )
+                .accessibilityIdentifier("notifications.weatherAlerts")
 
                 Toggle(
                     String(localized: "Live-Regenstatus (Beta)"),
                     isOn: liveRainStatusBinding(currentValue: liveRainStatusEnabled)
                 )
                 .disabled(!rainAlertsEnabled)
+                .accessibilityIdentifier("notifications.liveRainStatus")
             } footer: {
                 Text(String(localized: "Der Live-Regenstatus zeigt aufziehenden Regen als Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island. Er benötigt aktive Regen-Warnungen."))
             }
@@ -65,7 +68,7 @@ struct NotificationSettingsView: View {
         .alert(String(localized: "Benachrichtigungen deaktiviert"), isPresented: $showPermissionAlert) {
             Button(String(localized: "OK"), role: .cancel) {}
         } message: {
-            Text(String(localized: "Allow notifications in iOS Settings to receive rain alerts and weather alerts in Central Europe."))
+            Text(String(localized: "Allow notifications in iOS Settings to receive rain alerts and weather alerts in Central Europe and the United States."))
         }
         .task {
             await notificationSettingsManager.reloadNotificationStatus()
@@ -76,13 +79,13 @@ struct NotificationSettingsView: View {
         switch notificationSettingsManager.authorizationStatus {
         case .authorized, .provisional, .ephemeral:
             if !notificationSettingsManager.rainAlertsEnabled && !notificationSettingsManager.weatherAlertsEnabled {
-                return String(localized: "Both beta alert types are currently turned off. They are only available for Central Europe.")
+                return String(localized: "Both beta alert types are currently turned off. They are available for Central Europe and the United States.")
             }
-            return String(localized: "Oscar can send beta rain alerts and beta weather alerts for your current location in Central Europe. Turn each alert type on or off below.")
+            return String(localized: "Oscar can send beta rain alerts and beta weather alerts for your current location in Central Europe and the United States. Turn each alert type on or off below.")
         case .denied:
             return String(localized: "Mitteilungen sind auf Systemebene deaktiviert.")
         case .notDetermined:
-            return String(localized: "Turn on rain alerts or weather alerts to receive beta notifications in Central Europe. Your approximate location will be stored on an Oscar server for this.")
+            return String(localized: "Turn on rain alerts or weather alerts to receive beta notifications in Central Europe and the United States. Your approximate location will be stored on an Oscar server for this.")
         @unknown default:
             return String(localized: "Benachrichtigungsstatus unbekannt.")
         }

@@ -122,6 +122,8 @@ extension HeadView {
       return (brightskyAlerts.alerts?.count ?? 0) > 0
     case .canadian(let canadianAlerts):
       return canadianAlerts.contains { $0.alert?.alerts?.isEmpty == false }
+    case .oscar(let oscarAlerts):
+      return !oscarAlerts.alerts.isEmpty
     }
   }
 }

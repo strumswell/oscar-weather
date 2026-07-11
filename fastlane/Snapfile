@@ -1,0 +1,59 @@
+# fastlane snapshot configuration for the App Store screenshot run.
+# Invoke through bin/screenshots.sh (sets DEVELOPER_DIR to Xcode-beta).
+
+project("./Oscar°.xcodeproj")
+scheme("Oscar°Screenshots")
+
+# The build happens exactly once, up front: bin/screenshots.sh runs an
+# incremental `xcodebuild build-for-testing` into this derived-data path, and
+# every language pass reuses those products. snapshot itself never builds —
+# without that (test_without_building off), each language pass re-runs the
+# build phase, paying a "nothing changed" build check per locale. Don't run
+# `fastlane snapshot` directly without a prior build.
+derived_data_path("./fastlane/derived_data")
+test_without_building(true)
+
+# 6.9" is the only required iPhone size; App Store Connect scales the rest.
+# iPad Pro 13-inch is the planned follow-up device.
+devices(["iPhone 17 Pro Max"])
+
+# Pin to the STABLE runtime. snapshot shuts down all simulators before every
+# language run (hardcoded in prepare_simulators_for_launch), and each cold boot
+# of a BETA runtime pays 10-20 min of silent device preparation before the app
+# can install — that was ~50 min of a 3-locale run. Stable boots take ~1 min.
+# Bump this when a new stable iOS runtime is installed.
+ios_version("26.5")
+
+# App Store Connect locale codes, so deliver can consume the folders directly.
+# tr is parked for now — its title.strings and layout font override stay in
+# place; add it back here to re-enable.
+languages(["de-DE", "en-US"])
+
+output_directory("./fastlane/screenshots")
+clear_previous_screenshots(true)
+
+# Clean 9:41 status bar: full white battery (discharging at 100% avoids the
+# green charging bolt), full wifi and cellular.
+override_status_bar(true)
+override_status_bar_arguments("--time '9:41' --dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active --operatorName '' --cellularBars 4 --batteryState discharging --batteryLevel 100")
+
+# Oscar° is a dark-only app; keep the simulator dark so any system-drawn chrome
+# (e.g. the notification permission alert in the notifications scene) matches.
+# NOTE: the fullscreen map's glassy controls are iOS 26 Liquid Glass
+# (.glassEffect), which samples the backdrop and looks the same in light/dark —
+# the simulator just renders it flatter/brighter than a physical device.
+dark_mode(true)
+
+# No uninstall/reinstall between language runs: scenes are stateless fixture
+# data, onboarding is skipped via launch argument, and xcodebuild installs the
+# built app itself when running tests. Flip back to true if the parked
+# notifications scene returns — its permission prompt needs a fresh install.
+reinstall_app(false)
+app_identifier("cloud.bolte.Oscar")
+
+# Map scenes stream live tiles; serial runs keep them stable.
+concurrent_simulators(false)
+
+number_of_retries(1)
+stop_after_first_error(false)
+skip_open_summary(false)

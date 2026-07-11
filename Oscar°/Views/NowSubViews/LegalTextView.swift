@@ -38,6 +38,7 @@ struct LegalTextView: View {
         }
         .accessibilityAddTraits(.isButton)
         .accessibilityHint(Text("Öffnet die rechtlichen Hinweise"))
+        .accessibilityIdentifier("now.legal")
         .accessibilityAction {
             UIApplication.shared.playHapticFeedback()
             presentation.present(.legal)

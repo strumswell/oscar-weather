@@ -70,6 +70,20 @@ struct WeatherApp: App {
             diskCapacity: 500 * 1024 * 1024      // 500 MB
         )
 
+        // Screenshot runs (fastlane snapshot) swap the network layer for a fixture
+        // server and skip crash reporting; a no-op in every normal launch.
+        if ScreenshotMode.bootstrap() {
+            // Pin the GPS-backed location to the fixture city: the simulator
+            // has no fix, so views reading `location` (map camera) would sit
+            // on the Location() default until a refresh lands — or forever.
+            location.coordinates = CLLocationCoordinate2D(
+                latitude: ScreenshotFixtures.latitude,
+                longitude: ScreenshotFixtures.longitude
+            )
+            location.name = "Leipzig"
+            return
+        }
+
         SentrySDK.start { options in
             options.dsn = "https://f6b7fe82cd8cd8bb11dc0dc38db42255@o4507143648772096.ingest.de.sentry.io/4507143650148432"
             options.debug = false
@@ -92,8 +106,12 @@ struct WeatherApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                NowView()
-                OnboardingGate()
+                if ScreenshotMode.scene == .widgets {
+                    ScreenshotWidgetGallery()
+                } else {
+                    NowView()
+                    OnboardingGate()
+                }
             }
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .environment(weather)

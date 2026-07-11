@@ -92,6 +92,7 @@ struct DailyView: View {
     .disabled(!hasDailyDetailData)
     .accessibilityLabel(Text("Tägliche Details"))
     .accessibilityHint(Text("Öffnet die tägliche Ensemble-Vorhersage"))
+    .accessibilityIdentifier("now.daily")
     .scrollTransition { [reduceMotion] content, phase in
       content
         .opacity(phase.isIdentity ? 1 : 0.8)

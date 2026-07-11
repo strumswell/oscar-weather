@@ -1,0 +1,68 @@
+# App Store screenshot pipeline. Run through bin/screenshots.sh so
+# DEVELOPER_DIR points at Xcode-beta (repo build convention).
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Capture localized screenshots and frame them"
+  lane :screenshots do
+    snapshot
+    frame
+  end
+
+  desc "Frame already-captured screenshots (Frame Studio compositor; edit the layout with bin/frame-studio.sh)"
+  lane :frame do
+    sh("cd .. && bin/frame-compose.sh")
+    UI.success("Framed overview: fastlane/screenshots/framed.html")
+  end
+
+  desc "Upload framed screenshots to App Store Connect (needs an ASC API key)"
+  # Setup (one time):
+  #   1. Create a Team API key with App Manager role:
+  #      https://appstoreconnect.apple.com/access/integrations/api
+  #   2. Store the .p8 OUTSIDE the repo, then export:
+  #      ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH
+  # deliver prefers the *_framed variants automatically when present.
+  lane :upload_screenshots do
+    app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: ENV.fetch("ASC_KEY_PATH")
+    )
+
+    # The other English storefronts reuse the en-US set verbatim. Staged in a
+    # temp dir so the working screenshots folder (and the Frame Studio editor,
+    # which lists its locale folders) stays untouched. deliver creates missing
+    # version localizations itself, so the extra locales need no ASC setup.
+    english_storefronts = %w[en-GB en-CA en-AU]
+    require "fileutils"
+    require "tmpdir"
+    # Plain Ruby in a lane runs with CWD at the fastlane directory; only
+    # actions chdir to the repo root. Resolve the folder for either case.
+    screenshots_root =
+      File.expand_path(File.directory?("screenshots") ? "screenshots" : "fastlane/screenshots")
+    staged = Dir.mktmpdir("oscar-screenshots")
+    Dir.glob(File.join(screenshots_root, "*")).each do |entry|
+      name = File.basename(entry)
+      next unless File.directory?(entry) && name.match?(/\A[a-z]{2}(-[A-Z]{2})?\z/i)
+      FileUtils.cp_r(entry, File.join(staged, name))
+    end
+    UI.user_error!("no en-US captures to mirror — run bin/screenshots.sh first") unless
+      File.directory?(File.join(staged, "en-US"))
+    english_storefronts.each do |locale|
+      FileUtils.cp_r(File.join(staged, "en-US"), File.join(staged, locale))
+    end
+
+    deliver(
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_app_version_update: true,
+      overwrite_screenshots: true,
+      screenshots_path: staged,
+      force: true,
+      # Precheck can't run with API-key auth (IAP check needs Apple ID) and is
+      # pointless for a screenshots-only upload anyway.
+      run_precheck_before_submit: false
+    )
+  end
+end

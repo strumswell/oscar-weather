@@ -96,7 +96,7 @@ struct WatchSimulationView: View {
                         diameter: Self.moonDiameter
                     )
                     .opacity(
-                        Double(0.35 + 0.65 * snapshot.nightAmount)
+                        MoonPhase.skyVisibility(phase: moonPhase, nightAmount: Double(snapshot.nightAmount))
                             * Double(1 - snapshot.cloudDensity * 0.4)
                     )
                     .blur(radius: CGFloat(snapshot.cloudDensity) * 2)

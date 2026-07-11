@@ -77,6 +77,7 @@ struct AQIView: View {
                         }
                         .accessibilityLabel(accessibilityLabel(for: metric))
                         .accessibilityHint(Text("Öffnet stündliche Umweltdiagramme"))
+                        .accessibilityIdentifier("now.environment.\(metric.id)")
                     }
                 }
                 .scrollTargetLayout()

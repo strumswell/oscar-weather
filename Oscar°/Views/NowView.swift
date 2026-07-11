@@ -66,6 +66,7 @@ struct NowView: View {
                             }
                         RainView(openRadarMap: openRadarMap)
                         HourlyView()
+                            .accessibilityIdentifier("now.hourly")
                         DailyView()
                         VStack(alignment: .leading) {
                             Button(action: presentMap) {

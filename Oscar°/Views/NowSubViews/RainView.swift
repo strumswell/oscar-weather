@@ -83,6 +83,18 @@ private struct PrecipitationSeriesChart: View {
         [0, maxValue / 2, maxValue]
     }
 
+    /// Explicit ticks every 30 min starting at the first point: the automatic
+    /// axis only labels "nice" round times, which drops the label at the left
+    /// edge because the domain starts at the current (non-round) minute.
+    private var xAxisValues: [Date] {
+        guard let first = points.first?.date, let last = points.last?.date else { return [] }
+        return stride(
+            from: first.timeIntervalSinceReferenceDate,
+            through: last.timeIntervalSinceReferenceDate,
+            by: 30 * 60
+        ).map(Date.init(timeIntervalSinceReferenceDate:))
+    }
+
     var body: some View {
         Chart {
             ForEach(points) { point in
@@ -124,9 +136,11 @@ private struct PrecipitationSeriesChart: View {
             }
         }
         .chartXAxis {
-            AxisMarks(position: .bottom) { value in
+            AxisMarks(position: .bottom, values: xAxisValues) { value in
                 AxisTick()
-                AxisValueLabel() {
+                // Lead-anchor the first label so it renders inside the plot
+                // instead of being clipped at the leading edge.
+                AxisValueLabel(anchor: value.index == 0 ? .topLeading : .top) {
                     if let date = value.as(Date.self) {
                         Text(SettingService.formattedTime(date))
                     }

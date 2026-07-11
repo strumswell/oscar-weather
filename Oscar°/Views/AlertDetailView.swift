@@ -23,6 +23,10 @@ struct AlertListView: View {
                     if let firstAlert = canadianAlerts.first?.alert?.alerts {
                         AlertDetailView(alert: .canadian(firstAlert))
                     }
+                case .oscar(let oscarAlerts):
+                    ForEach(oscarAlerts.alerts, id: \.alertId) { alert in
+                        AlertDetailView(alert: .oscar(alert))
+                    }
                 }
             }
             .navigationTitle("Unwetterwarnungen")
@@ -43,6 +47,7 @@ struct AlertDetailView: View {
     enum AlertType {
         case brightsky(Components.Schemas.WeatherAlert)
         case canadian(Operations.getCanadianWeatherAlerts.Output.Ok.Body.jsonPayloadPayload.alertPayload.alertsPayload)
+        case oscar(OscarPointAlert)
     }
     
     var alert: AlertType
@@ -116,9 +121,11 @@ extension AlertDetailView {
             } else {
                 return formatDate(date: Date())
             }
+        case .oscar(let oscarAlert):
+            return formatDate(date: oscarAlert.onsetAt ?? Date())
         }
     }
-    
+
     func getEndDate() -> String {
         switch alert {
         case .brightsky(let brightskyAlert):
@@ -129,6 +136,8 @@ extension AlertDetailView {
             } else {
                 return formatDate(date: Date())
             }
+        case .oscar(let oscarAlert):
+            return formatDate(date: oscarAlert.expiresAt ?? Date())
         }
     }
     
@@ -148,33 +157,43 @@ extension AlertDetailView {
             return brightskyAlert.event_de ?? brightskyAlert.event_en ?? ""
         case .canadian(let canadianAlert):
             return canadianAlert.first?.alertBannerText ?? ""
+        case .oscar(let oscarAlert):
+            return oscarAlert.event
         }
     }
-    
+
     func getDescription() -> String {
         switch alert {
         case .brightsky(let brightskyAlert):
             return brightskyAlert.description_de ?? brightskyAlert.description_en ?? ""
         case .canadian(let canadianAlert):
             return canadianAlert.first?.text ?? ""
+        case .oscar(let oscarAlert):
+            return oscarAlert.description ?? ""
         }
     }
-    
+
     func getInstruction() -> String? {
         switch alert {
         case .brightsky(let brightskyAlert):
             return brightskyAlert.instruction_de ?? brightskyAlert.instruction_en
         case .canadian:
             return nil
+        case .oscar(let oscarAlert):
+            return oscarAlert.instruction
         }
     }
-    
+
     func getSource() -> String {
         switch alert {
         case .brightsky:
             return "Deutscher Wetterdienst"
         case .canadian:
             return "Environment Canada"
+        case .oscar(let oscarAlert):
+            return oscarAlert.source == "nws"
+                ? "NOAA / National Weather Service"
+                : "Deutscher Wetterdienst"
         }
     }
 }

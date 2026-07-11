@@ -5,6 +5,7 @@
 //  Created by Philipp Bolte on 11.04.23.
 //
 
+import CoreLocation
 import SwiftUI
 import WidgetKit
 
@@ -12,8 +13,25 @@ import WidgetKit
 struct Oscar_Watch_Watch_AppApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @State private var weather = Weather()
-    @State private var location = Location()
+    @State private var location: Location
     @State private var lastRefreshStart: Date?
+
+    init() {
+        // App Store screenshot staging (bin/watch-screenshots.sh): the fixture
+        // server answers all data endpoints, the location pins to the fixture
+        // city so neither GPS nor geocoding runs on the freshly booted sim.
+        let location = Location()
+        MainActor.assumeIsolated {
+            if ScreenshotMode.bootstrap() {
+                location.coordinates = CLLocationCoordinate2D(
+                    latitude: ScreenshotFixtures.latitude,
+                    longitude: ScreenshotFixtures.longitude
+                )
+                location.name = "Leipzig"
+            }
+        }
+        _location = State(initialValue: location)
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -28,8 +46,9 @@ struct Oscar_Watch_Watch_AppApp: App {
     }
 
     private func refresh() {
-        // Cold start: show the cached snapshot immediately, the network refresh follows.
-        if !weather.hasContent, let snapshot = WeatherSnapshotStore.load() {
+        // Cold start: show the cached snapshot immediately, the network refresh
+        // follows. Screenshot runs skip the cache — only fixture data may show.
+        if !ScreenshotMode.active, !weather.hasContent, let snapshot = WeatherSnapshotStore.load() {
             weather.apply(snapshot: snapshot, location: location)
         }
 

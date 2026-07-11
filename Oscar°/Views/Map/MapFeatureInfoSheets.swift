@@ -20,6 +20,9 @@ import simd
 /// (the `/weather-alerts/area` GeoJSON properties).
 struct WeatherAlertInfo: Identifiable {
     let id: String
+    /// Ingesting agency: "dwd" (Germany) or "nws" (US); nil from servers that
+    /// predate the field. Drives attribution and severity terminology.
+    let source: String?
     let event: String
     let severityRank: Int
     let headline: String?
@@ -33,6 +36,7 @@ struct WeatherAlertInfo: Identifiable {
               let event = attributes["event"] as? String else { return nil }
         self.id = id
         self.event = event
+        source = attributes["source"] as? String
         severityRank = attributes["severity_rank"] as? Int ?? 1
         headline = attributes["headline"] as? String
         details = attributes["description"] as? String
@@ -107,13 +111,28 @@ enum AlertSeverityStyle {
         }
     }
 
-    static func label(rank: Int) -> LocalizedStringKey {
-        switch rank {
+    static func label(rank: Int, source: String? = nil) -> LocalizedStringKey {
+        // NWS alerts use the CAP severity terms US users know from official
+        // products; the DWD warning-level names are DWD-specific.
+        if source == "nws" {
+            return switch rank {
+            case 1: "Minor"
+            case 2: "Moderate"
+            case 3: "Severe"
+            case 4: "Extreme"
+            default: "Alert"
+            }
+        }
+        return switch rank {
         case 2: "Markante Wetterwarnung"
         case 3: "Unwetterwarnung"
         case 4: "Extreme Unwetterwarnung"
         default: "Wetterwarnung"
         }
+    }
+
+    static func sourceName(_ source: String?) -> String {
+        source == "nws" ? "NOAA / National Weather Service" : "Deutscher Wetterdienst"
     }
 }
 
@@ -160,7 +179,7 @@ private struct AlertInfoCard: View {
                 HStack(spacing: 5) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 10, weight: .bold))
-                    Text(AlertSeverityStyle.label(rank: alert.severityRank))
+                    Text(AlertSeverityStyle.label(rank: alert.severityRank, source: alert.source))
                         .font(.caption.weight(.semibold))
                 }
                 .foregroundStyle(severityColor)
@@ -197,7 +216,7 @@ private struct AlertInfoCard: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Text("Quelle: Deutscher Wetterdienst")
+            Text("Quelle: \(AlertSeverityStyle.sourceName(alert.source))")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }

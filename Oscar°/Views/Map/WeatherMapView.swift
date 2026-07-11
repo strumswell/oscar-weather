@@ -78,6 +78,14 @@ struct WeatherMapView: UIViewRepresentable {
     fileprivate static let cellHeadLayerID = "oscar-cells-head"
     fileprivate static let cellArrowImageName = "oscar-cell-arrow"
 
+    /// Initial camera zoom, overridable via `-mapInitialZoom <z>` (UserDefaults
+    /// argument domain or persisted default) — a dev/staging knob like
+    /// `-radarBaseURL`, unset in every normal launch.
+    private static var initialZoom: Double {
+        let override = UserDefaults.standard.double(forKey: "mapInitialZoom")
+        return override > 0 ? override : 7
+    }
+
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     func makeUIView(context: Context) -> MLNMapView {
@@ -85,7 +93,7 @@ struct WeatherMapView: UIViewRepresentable {
         let mapView = MLNMapView(frame: .zero, styleURL: settingsService.mapBasemapStyle.styleURL)
         mapLibreLogger.info("map view created role=\(userActionAllowed ? "fullscreen" : "preview", privacy: .public)")
         mapView.delegate = context.coordinator
-        mapView.setCenter(coordinates, zoomLevel: 7, animated: false)
+        mapView.setCenter(coordinates, zoomLevel: Self.initialZoom, animated: false)
         mapView.allowsTilting = false
         // MapLibre requests location permission itself the moment this is enabled
         // while the status is undetermined — and the preview lives inside NowView,
@@ -160,7 +168,7 @@ struct WeatherMapView: UIViewRepresentable {
             let distance = CLLocation(latitude: current.latitude, longitude: current.longitude)
                 .distance(from: CLLocation(latitude: coordinates.latitude, longitude: coordinates.longitude))
             if distance > 1000 {
-                mapView.setCenter(coordinates, zoomLevel: 7, animated: false)
+                mapView.setCenter(coordinates, zoomLevel: Self.initialZoom, animated: false)
                 context.coordinator.recenterIntoRadarBoundsIfNeeded(animated: false)
             }
         }
@@ -785,10 +793,17 @@ struct WeatherMapView: UIViewRepresentable {
                         self.alertOverlayData = data
                         self.alertOverlayFetchedAt = Date()
                         self.alertOverlayCenter = center
-                        if let style = self.mapView?.style {
-                            self.removeAlertPolygonLayers(from: style)
+                        // Swap the shape into the existing source instead of tearing the
+                        // source + layers down: MapLibre re-tiles a fresh GeoJSON source
+                        // asynchronously, so a rebuild blanks the polygons for a beat on
+                        // every refresh (the isobar sources use the same pattern).
+                        if let style = self.mapView?.style,
+                           let source = style.source(withIdentifier: WeatherMapView.alertSourceID) as? MLNShapeSource,
+                           let shape = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue) {
+                            source.shape = shape
+                        } else {
+                            self.syncAll()
                         }
-                        self.syncAll()
                     } catch {
                         mapLibreLogger.error("Alert polygon fetch failed: \(error.localizedDescription, privacy: .public)")
                         // Back off until the staleness window elapses; keep stale data

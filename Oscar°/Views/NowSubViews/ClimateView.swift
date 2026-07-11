@@ -172,6 +172,7 @@ struct ClimateView: View {
             .accessibilityElement(children: .combine)
             .accessibilityLabel(Text("Klima. \(climateHeadline(summary)) \(climateStatLine(summary, unit))"))
             .accessibilityHint(Text("Öffnet Klimadetails"))
+            .accessibilityIdentifier("now.climate")
         } else {
             ClimatePlaceholder(isThrottled: model.phase == .throttled)
         }

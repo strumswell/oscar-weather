@@ -25,6 +25,7 @@ struct LegalView: View {
             } label: {
               NotificationSettingsLabel()
             }
+            .accessibilityIdentifier("legal.notifications")
 
             Divider()
 

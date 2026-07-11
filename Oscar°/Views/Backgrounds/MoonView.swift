@@ -13,6 +13,31 @@ enum MoonPhase {
         (1 - cos(phase * 2 * .pi)) / 2
     }
 
+    /// How strongly the moon reads against the current sky, as an opacity multiplier in 0…1.
+    ///
+    /// At night it returns full strength. By day the real moon is only spottable when it
+    /// clears the sun's glare *and* shows enough lit surface: a thin crescent near the sun
+    /// (small elongation, little illuminated area) is effectively invisible, while a quarter
+    /// or gibbous moon far from the sun holds as a pale disc. `nightAmount` (0 by day … 1 at
+    /// night) blends the two continuously through twilight, so a thin crescent that vanishes
+    /// at noon still shows once the sky darkens.
+    ///
+    /// Sun–moon separation comes straight from `phase` — both bodies hug the ecliptic, so the
+    /// geocentric elongation is within a degree or two of the real sky separation. No ephemeris.
+    static func skyVisibility(phase: Double, nightAmount: Double, daytimeCeiling: Double = 0.5) -> Double {
+        let separation = 180 - abs(180 - 360 * phase)             // degrees from the sun
+        let elongation = smoothstep(28, 65, separation)           // escape the sun's glare
+        let lit = smoothstep(0.08, 0.42, illumination(for: phase)) // enough bright area to catch the eye
+        let daytimeVisibility = elongation * lit
+        // Blend day → night: pale-when-visible by day, full at night.
+        return daytimeCeiling * daytimeVisibility * (1 - nightAmount) + nightAmount
+    }
+
+    private static func smoothstep(_ edge0: Double, _ edge1: Double, _ value: Double) -> Double {
+        let t = min(max((value - edge0) / (edge1 - edge0), 0), 1)
+        return t * t * (3 - 2 * t)
+    }
+
     /// Fraction of the moon's pass across the sky — 0 at moonrise, 0.5 at transit, 1 at
     /// moonset — or nil while the moon is below the horizon.
     ///

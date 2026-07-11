@@ -87,6 +87,13 @@
 		AD6000042FE4000000000001 /* AtmosphereDebugSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6000032FE4000000000001 /* AtmosphereDebugSnapshot.swift */; };
 		AD6000062FE4000000000001 /* AtmosphereDebugPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6000052FE4000000000001 /* AtmosphereDebugPanel.swift */; };
 		AD6000082FE4000000000001 /* AtmosphereDebugOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD6000072FE4000000000001 /* AtmosphereDebugOverlay.swift */; };
+		5C22EE0130A1000000000001 /* ScreenshotMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22EE0030A1000000000001 /* ScreenshotMode.swift */; };
+		5C22EE0330A1000000000001 /* ScreenshotFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22EE0230A1000000000001 /* ScreenshotFixtures.swift */; };
+		5C22EE0530A1000000000001 /* ScreenshotFixtureServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22EE0430A1000000000001 /* ScreenshotFixtureServer.swift */; };
+		5C22EE0730A1000000000001 /* ScreenshotWidgetGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22EE0630A1000000000001 /* ScreenshotWidgetGallery.swift */; };
+		5C22EE0830A1000000000001 /* RadarSnapshotRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD60000B2FE4000000000004 /* RadarSnapshotRenderer.swift */; };
+		5C22EE0A30A1000000000002 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22EE0930A1000000000002 /* SnapshotHelper.swift */; };
+		5C22EE0C30A1000000000002 /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22EE0B30A1000000000002 /* ScreenshotTests.swift */; };
 		251BFED22FB000000000001 /* AtmosphereSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251BFED02FB000000000001 /* AtmosphereSnapshot.swift */; };
 		AD6000102FE4000000000006 /* WidgetBasemapStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD60000F2FE4000000000006 /* WidgetBasemapStore.swift */; };
 		AD6000112FE4000000000006 /* WidgetBasemapStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD60000F2FE4000000000006 /* WidgetBasemapStore.swift */; };
@@ -343,6 +350,9 @@
 		5A7C00272FAB000000000001 /* HourlyFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF4E7D970804126A8E2426E /* HourlyFormatting.swift */; };
 		5A7C00282FAB000000000001 /* TemperatureRangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E97B2F70B000004670E4 /* TemperatureRangeView.swift */; };
 		5A7C002A2FAB000000000001 /* WatchRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7C00292FAB000000000001 /* WatchRootView.swift */; };
+		5A7C00902FAB000000000001 /* ScreenshotMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22EE0030A1000000000001 /* ScreenshotMode.swift */; };
+		5A7C00912FAB000000000001 /* ScreenshotFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22EE0230A1000000000001 /* ScreenshotFixtures.swift */; };
+		5A7C00922FAB000000000001 /* ScreenshotFixtureServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22EE0430A1000000000001 /* ScreenshotFixtureServer.swift */; };
 		5A7C002C2FAB000000000001 /* WatchSimulationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7C002B2FAB000000000001 /* WatchSimulationView.swift */; };
 		5A7C002E2FAB000000000001 /* WatchNowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7C002D2FAB000000000001 /* WatchNowView.swift */; };
 		5A7C00302FAB000000000001 /* WatchRainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7C002F2FAB000000000001 /* WatchRainView.swift */; };
@@ -390,6 +400,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 25429BE529E5F9B000D5979F;
 			remoteInfo = "Oscar°WatchWidgetExtension";
+		};
+		5C22EE1630A1000000000002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3EB89009251A55700028FED0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3EB89010251A55700028FED0;
+			remoteInfo = "Oscar°";
 		};
 		3EB89034251A55980028FED0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -493,6 +510,13 @@
 		AD6000032FE4000000000001 /* AtmosphereDebugSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereDebugSnapshot.swift; sourceTree = "<group>"; };
 		AD6000052FE4000000000001 /* AtmosphereDebugPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereDebugPanel.swift; sourceTree = "<group>"; };
 		AD6000072FE4000000000001 /* AtmosphereDebugOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphereDebugOverlay.swift; sourceTree = "<group>"; };
+		5C22EE0030A1000000000001 /* ScreenshotMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotMode.swift; sourceTree = "<group>"; };
+		5C22EE0230A1000000000001 /* ScreenshotFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotFixtures.swift; sourceTree = "<group>"; };
+		5C22EE0430A1000000000001 /* ScreenshotFixtureServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotFixtureServer.swift; sourceTree = "<group>"; };
+		5C22EE0630A1000000000001 /* ScreenshotWidgetGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotWidgetGallery.swift; sourceTree = "<group>"; };
+		5C22EE0930A1000000000002 /* SnapshotHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
+		5C22EE0B30A1000000000002 /* ScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
+		5C22EE0D30A1000000000002 /* Oscar°UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Oscar°UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		251BFED32FB000000000001 /* AtmosphereShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = AtmosphereShaders.metal; sourceTree = "<group>"; };
 		2523367E27C3EB3900C2111A /* RainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RainView.swift; sourceTree = "<group>"; };
 		2533940927C43F810087C220 /* AlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertView.swift; sourceTree = "<group>"; };
@@ -729,6 +753,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5C22EE1330A1000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -792,8 +823,21 @@
 				AD6000032FE4000000000001 /* AtmosphereDebugSnapshot.swift */,
 				AD6000052FE4000000000001 /* AtmosphereDebugPanel.swift */,
 				AD6000072FE4000000000001 /* AtmosphereDebugOverlay.swift */,
+				5C22EE0030A1000000000001 /* ScreenshotMode.swift */,
+				5C22EE0230A1000000000001 /* ScreenshotFixtures.swift */,
+				5C22EE0430A1000000000001 /* ScreenshotFixtureServer.swift */,
+				5C22EE0630A1000000000001 /* ScreenshotWidgetGallery.swift */,
 			);
 			path = Debug;
+			sourceTree = "<group>";
+		};
+		5C22EE0E30A1000000000002 /* Oscar°UITests */ = {
+			isa = PBXGroup;
+			children = (
+				5C22EE0930A1000000000002 /* SnapshotHelper.swift */,
+				5C22EE0B30A1000000000002 /* ScreenshotTests.swift */,
+			);
+			path = "Oscar°UITests";
 			sourceTree = "<group>";
 		};
 		25429BD129E5F94100D5979F /* Oscar°Watch Watch App */ = {
@@ -1067,6 +1111,7 @@
 				3EB8902E251A55950028FED0 /* Oscar°Widget */,
 				25429BD129E5F94100D5979F /* Oscar°Watch Watch App */,
 				25429BE929E5F9B000D5979F /* Oscar°WatchWidget */,
+				5C22EE0E30A1000000000002 /* Oscar°UITests */,
 				25B4C4592B5744000069B3B0 /* ci_scripts */,
 				3EB89029251A55950028FED0 /* Frameworks */,
 				3EB89012251A55700028FED0 /* Products */,
@@ -1080,6 +1125,7 @@
 				3EB89028251A55950028FED0 /* Oscar°WidgetExtension.appex */,
 				25429BD029E5F94100D5979F /* Oscar°Watch Watch App.app */,
 				25429BE629E5F9B000D5979F /* Oscar°WatchWidgetExtension.appex */,
+				5C22EE0D30A1000000000002 /* Oscar°UITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1398,6 +1444,26 @@
 			productReference = 3EB89028251A55950028FED0 /* Oscar°WidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		5C22EE1030A1000000000002 /* Oscar°UITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5C22EE1130A1000000000002 /* Build configuration list for PBXNativeTarget "Oscar°UITests" */;
+			buildPhases = (
+				5C22EE1230A1000000000002 /* Sources */,
+				5C22EE1330A1000000000002 /* Frameworks */,
+				5C22EE1430A1000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5C22EE1530A1000000000002 /* PBXTargetDependency */,
+			);
+			name = "Oscar°UITests";
+			packageProductDependencies = (
+			);
+			productName = "Oscar°UITests";
+			productReference = 5C22EE0D30A1000000000002 /* Oscar°UITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1419,6 +1485,10 @@
 					};
 					3EB89027251A55950028FED0 = {
 						CreatedOnToolsVersion = 12.0;
+					};
+					5C22EE1030A1000000000002 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = 3EB89010251A55700028FED0;
 					};
 				};
 			};
@@ -1448,6 +1518,7 @@
 				3EB89027251A55950028FED0 /* Oscar°WidgetExtension */,
 				25429BCF29E5F94100D5979F /* Oscar°Watch Watch App */,
 				25429BE529E5F9B000D5979F /* Oscar°WatchWidgetExtension */,
+				5C22EE1030A1000000000002 /* Oscar°UITests */,
 			);
 		};
 /* End PBXProject section */
@@ -1503,6 +1574,13 @@
 				6E1153412B59C98B004D3273 /* Localizable.xcstrings in Resources */,
 				253F70902B5316BC0075D093 /* openapi-generator-config.yml in Resources */,
 				3EB89032251A55980028FED0 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5C22EE1430A1000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1573,6 +1651,9 @@
 				5A7C00272FAB000000000001 /* HourlyFormatting.swift in Sources */,
 				5A7C00282FAB000000000001 /* TemperatureRangeView.swift in Sources */,
 				5A7C002A2FAB000000000001 /* WatchRootView.swift in Sources */,
+				5A7C00902FAB000000000001 /* ScreenshotMode.swift in Sources */,
+				5A7C00912FAB000000000001 /* ScreenshotFixtures.swift in Sources */,
+				5A7C00922FAB000000000001 /* ScreenshotFixtureServer.swift in Sources */,
 				5A7C002C2FAB000000000001 /* WatchSimulationView.swift in Sources */,
 				5A7C002E2FAB000000000001 /* WatchNowView.swift in Sources */,
 				5A7C00302FAB000000000001 /* WatchRainView.swift in Sources */,
@@ -1728,6 +1809,11 @@
 				AD6000042FE4000000000001 /* AtmosphereDebugSnapshot.swift in Sources */,
 				AD6000062FE4000000000001 /* AtmosphereDebugPanel.swift in Sources */,
 				AD6000082FE4000000000001 /* AtmosphereDebugOverlay.swift in Sources */,
+				5C22EE0130A1000000000001 /* ScreenshotMode.swift in Sources */,
+				5C22EE0330A1000000000001 /* ScreenshotFixtures.swift in Sources */,
+				5C22EE0530A1000000000001 /* ScreenshotFixtureServer.swift in Sources */,
+				5C22EE0730A1000000000001 /* ScreenshotWidgetGallery.swift in Sources */,
+				5C22EE0830A1000000000001 /* RadarSnapshotRenderer.swift in Sources */,
 				251BFED42FB000000000001 /* AtmosphereShaders.metal in Sources */,
 				259187CB2C715B2900611B0F /* PrecipitationChart.swift in Sources */,
 				AD0000192FAA100000000001 /* HourlyChartUtilities.swift in Sources */,
@@ -1877,6 +1963,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5C22EE1230A1000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5C22EE0A30A1000000000002 /* SnapshotHelper.swift in Sources */,
+				5C22EE0C30A1000000000002 /* ScreenshotTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -1892,6 +1987,11 @@
 			isa = PBXTargetDependency;
 			target = 25429BE529E5F9B000D5979F /* Oscar°WatchWidgetExtension */;
 			targetProxy = 25429BF229E5F9B300D5979F /* PBXContainerItemProxy */;
+		};
+		5C22EE1530A1000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3EB89010251A55700028FED0 /* Oscar° */;
+			targetProxy = 5C22EE1630A1000000000002 /* PBXContainerItemProxy */;
 		};
 		257EB3572BD8314200E46468 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1931,7 +2031,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "Oscar°Watch Watch App/Oscar°Watch.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°Watch Watch App/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1944,7 +2044,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.3;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -1964,7 +2064,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "Oscar°Watch Watch App/Oscar°Watch.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°Watch Watch App/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1977,7 +2077,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.3;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -1997,7 +2097,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "Oscar°WatchWidget/Oscar°WatchWidgetExtension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Oscar°WatchWidget/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°";
@@ -2008,7 +2108,7 @@
 					"@executable_path/../../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 0.3;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "cloud.bolte.Oscar.watchkitapp.Oscar-WatchWidget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -2028,7 +2128,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "Oscar°WatchWidget/Oscar°WatchWidgetExtension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Oscar°WatchWidget/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°";
@@ -2039,7 +2139,7 @@
 					"@executable_path/../../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 0.3;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "cloud.bolte.Oscar.watchkitapp.Oscar-WatchWidget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -2189,7 +2289,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Oscar°/Oscar°.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
@@ -2201,7 +2301,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.3;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2219,7 +2319,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Oscar°/Oscar°.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"Oscar°/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
@@ -2231,7 +2331,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.3;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2247,7 +2347,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = "Oscar°Widget/Oscar°WidgetExtension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
 				INFOPLIST_FILE = "Oscar°Widget/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°";
@@ -2257,7 +2357,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 0.3;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar.OscarWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -2273,7 +2373,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = "Oscar°Widget/Oscar°WidgetExtension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
 				INFOPLIST_FILE = "Oscar°Widget/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Oscar°";
@@ -2283,12 +2383,46 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 0.3;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar.OscarWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		5C22EE1730A1000000000002 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar.UITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Oscar°";
+			};
+			name = Debug;
+		};
+		5C22EE1830A1000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar.UITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Oscar°";
 			};
 			name = Release;
 		};
@@ -2336,6 +2470,15 @@
 			buildConfigurations = (
 				3EB89038251A55980028FED0 /* Debug */,
 				3EB89039251A55980028FED0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5C22EE1130A1000000000002 /* Build configuration list for PBXNativeTarget "Oscar°UITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5C22EE1730A1000000000002 /* Debug */,
+				5C22EE1830A1000000000002 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

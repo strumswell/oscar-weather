@@ -1,0 +1,1396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Oscar° Frame Studio</title>
+<style>
+  :root {
+    --bg0: #161618;      /* stage backdrop */
+    --bg1: #1d1d20;      /* panels */
+    --bg2: #232327;      /* cards, list hover */
+    --bg3: #2b2b30;      /* inputs, buttons */
+    --line: #313136;
+    --line2: #3c3c42;
+    --text: #e8e8ea;
+    --dim: #9a9aa2;
+    --faint: #6b6b73;
+    --accent: #4c8dff;
+    --danger: #ff5f57;
+    --radius: 7px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg1); color: var(--text);
+         font: 12.5px/1.5 -apple-system, "SF Pro Text", system-ui, sans-serif;
+         height: 100vh; display: grid; grid-template-rows: 46px 1fr;
+         grid-template-columns: 232px 1fr 296px; overflow: hidden;
+         -webkit-font-smoothing: antialiased; }
+
+  /* ---------- header ---------- */
+  header { grid-column: 1 / 4; display: flex; align-items: center; gap: 8px;
+           padding: 0 12px; background: var(--bg1); border-bottom: 1px solid var(--line); }
+  header .logo { width: 10px; height: 10px; border-radius: 3px; margin-right: 2px;
+                 background: linear-gradient(180deg, #3aa0ff, #0067df); }
+  header h1 { font-size: 13px; margin: 0 14px 0 0; font-weight: 600; letter-spacing: .01em; }
+  .tabs { display: flex; gap: 2px; background: var(--bg2); border: 1px solid var(--line);
+          border-radius: var(--radius); padding: 2px; }
+  .tab { padding: 3px 12px; border-radius: 5px; cursor: pointer; color: var(--dim);
+         font-weight: 500; }
+  .tab:hover { color: var(--text); }
+  .tab.active { background: var(--bg3); color: var(--text);
+                box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+  .spacer { flex: 1; }
+  #status { color: var(--faint); font-size: 11.5px; margin-right: 6px; }
+
+  /* ---------- controls ---------- */
+  button { background: var(--bg3); color: var(--text); border: 1px solid var(--line2);
+           border-radius: var(--radius); padding: 5px 12px; cursor: pointer; font: inherit;
+           font-weight: 500; }
+  button:hover { background: #33333a; }
+  button:active { background: #3a3a42; }
+  button:disabled { opacity: .4; cursor: default; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { background: #5c98ff; }
+  button.small { padding: 2.5px 9px; font-size: 11.5px; }
+  button.icon { padding: 2.5px 7px; font-size: 11.5px; line-height: 1.3; }
+  button.danger { color: var(--danger); }
+  input, select, textarea { background: var(--bg3); border: 1px solid var(--line2);
+    color: var(--text); border-radius: 6px; padding: 4px 7px; font: inherit; width: 100%; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  input[type=color] { width: 30px; height: 26px; padding: 2px; flex-shrink: 0; }
+  input[type=checkbox] { width: auto; }
+  textarea { resize: vertical; min-height: 54px; }
+
+  /* ---------- nav ---------- */
+  nav { background: var(--bg1); border-right: 1px solid var(--line); overflow-y: auto;
+        padding: 10px; display: flex; flex-direction: column; }
+  nav .seg { display: flex; gap: 2px; background: var(--bg2); border: 1px solid var(--line);
+             border-radius: var(--radius); padding: 2px; margin-bottom: 10px; flex-shrink: 0; }
+  nav .seg button { flex: 1; border: 0; background: none; padding: 3.5px 0; color: var(--dim);
+                    font-size: 11.5px; border-radius: 5px; }
+  nav .seg button:hover { color: var(--text); background: none; }
+  nav .seg button.on { background: var(--bg3); color: var(--text);
+                       box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+  nav h3 { font-size: 10px; text-transform: uppercase; letter-spacing: .07em;
+           color: var(--faint); margin: 12px 4px 5px; font-weight: 600; }
+  .scene { padding: 5px 7px; border-radius: var(--radius); cursor: pointer; color: var(--dim);
+           display: flex; align-items: center; gap: 8px; }
+  .scene:hover { background: var(--bg2); }
+  .scene.active { background: var(--bg2); color: var(--text); }
+  .scene.active .grow { font-weight: 500; }
+  .scene img.thumb { width: 20px; height: 42px; object-fit: cover; object-position: top;
+                     border-radius: 4px; background: var(--bg3); flex-shrink: 0;
+                     border: 1px solid var(--line); }
+  .scene img.thumb.sq { width: 26px; height: 30px; }
+  .scene .grow { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .scene .dot { width: 5px; height: 5px; border-radius: 3px; background: var(--accent);
+                flex-shrink: 0; }
+  .scene .src { font-size: 9.5px; color: var(--faint); border: 1px solid var(--line2);
+                border-radius: 4px; padding: 0 4px; flex-shrink: 0; letter-spacing: .04em; }
+  .scene button { flex-shrink: 0; }
+
+  /* ---------- stage ---------- */
+  main { position: relative; overflow: hidden; background: var(--bg0); }
+  #stage { position: absolute; left: 0; top: 0; transform-origin: top left;
+           box-shadow: 0 12px 70px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.05); }
+  #stage .layer { position: absolute; }
+  .textblock { white-space: pre-wrap; cursor: move; user-select: none; outline: none; }
+  .textblock.editing { cursor: text; user-select: text; -webkit-user-select: text;
+                       outline: 2px dashed rgba(76,141,255,.9) !important; outline-offset: 2px; }
+  .devicewrap, .imagewrap { cursor: move; user-select: none; }
+  .devicewrap .rotor, .imagewrap .rotor { position: absolute; inset: 0;
+    transform-origin: center; pointer-events: none; }
+  .devicewrap img, .imagewrap img { position: absolute; pointer-events: none; }
+  .selected { outline: 2px solid rgba(76,141,255,.9) !important; outline-offset: 2px; }
+  #centerGuide { position: absolute; top: 0; bottom: 0; width: 1px; left: 50%;
+                 background: #ff2d78; display: none; z-index: 999; }
+  #watchPane { display: none; position: absolute; inset: 0; overflow: auto;
+               text-align: center; padding: 34px; }
+  #watchPane img { width: 416px; max-width: 78%; border-radius: 24px;
+                   box-shadow: 0 12px 70px rgba(0,0,0,.55); }
+  #watchPane p { max-width: 380px; margin: 14px auto 0; }
+
+  /* ---------- inspector ---------- */
+  aside { background: var(--bg1); border-left: 1px solid var(--line); overflow-y: auto;
+          padding: 12px; }
+  aside section { border: 1px solid var(--line); border-radius: 9px; background: var(--bg2);
+                  padding: 10px 10px 4px; margin-bottom: 10px; }
+  aside h2 { font-size: 10px; text-transform: uppercase; letter-spacing: .07em;
+             color: var(--faint); margin: 0 0 8px; font-weight: 600; }
+  aside h2 .ctx { color: var(--dim); text-transform: none; letter-spacing: 0; }
+  .row { display: flex; gap: 7px; align-items: center; margin-bottom: 7px; }
+  .row label { width: 74px; color: var(--dim); flex-shrink: 0; font-size: 11.5px; }
+  .row .pair { display: flex; gap: 5px; width: 100%; }
+  .seg { display: flex; gap: 2px; width: 100%; background: var(--bg3);
+         border: 1px solid var(--line2); border-radius: 6px; padding: 2px; }
+  .seg button { flex: 1; padding: 2.5px 0; border: 0; background: none; color: var(--dim);
+                font-size: 11.5px; border-radius: 4px; }
+  .seg button:hover { background: none; color: var(--text); }
+  .seg button.on { background: #3d3d45; color: var(--text); }
+  .hint { color: var(--faint); font-size: 11px; margin: 2px 0 8px; word-break: break-word;
+          line-height: 1.45; }
+  .stack { display: flex; flex-direction: column; gap: 6px; margin-bottom: 7px; }
+  .check { display: flex; gap: 6px; align-items: center; color: var(--dim);
+           font-size: 11.5px; margin-bottom: 7px; }
+
+  /* ---------- modal ---------- */
+  #modal { position: fixed; inset: 0; background: rgba(10,10,12,.9); display: none;
+           align-items: center; justify-content: center; z-index: 1000; cursor: zoom-out; }
+  #modal img { max-height: 93vh; max-width: 60vw; border-radius: 12px;
+               box-shadow: 0 20px 90px rgba(0,0,0,.7); }
+  #modal figcaption { text-align: center; color: var(--dim); margin-top: 10px;
+                      font-size: 11.5px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"></div>
+  <h1>Frame Studio</h1>
+  <div class="tabs" id="localeTabs"></div>
+  <div class="spacer"></div>
+  <span id="status"></span>
+  <button id="btnRender" title="Save, then render this shot with the real compositor">Preview</button>
+  <button id="btnRenderAll" title="Save, then render every scene × locale">Render all</button>
+  <button id="btnSave" class="primary" title="⌘S">Save</button>
+</header>
+
+<nav>
+  <div class="seg" id="navTabs">
+    <button data-tab="ios" class="on">iOS</button><button data-tab="watch">watchOS</button><button data-tab="library">Library</button>
+  </div>
+  <div id="navList"></div>
+</nav>
+
+<main id="viewport">
+  <div id="watchPane"><img alt=""><p class="hint">Watch screenshots ship raw —
+    App&nbsp;Store Connect wants the bare watch UI, no frames or decoration.</p></div>
+  <div id="stage">
+    <div class="layer" id="bg" style="inset:0"></div>
+    <div class="layer devicewrap" id="deviceGroup">
+      <div class="rotor"><img id="shot" alt=""><img id="frameImg" alt=""></div>
+    </div>
+    <div class="layer textblock" id="titleBlock"></div>
+    <div id="deviceBlocks"></div>
+    <div id="extraBlocks"></div>
+    <div id="imageBlocks"></div>
+    <div id="centerGuide"></div>
+  </div>
+</main>
+
+<aside id="inspector"></aside>
+
+<input type="file" id="imgFile" accept="image/png,image/jpeg,image/webp" style="display:none">
+<div id="modal"><figure><img id="modalRender"><figcaption>compositor output</figcaption></figure></div>
+
+<script>
+"use strict";
+
+const $ = (id) => document.getElementById(id);
+const api = {
+  get: (p) => fetch(p).then(r => r.json()),
+  put: (p, body) => fetch(p, { method: "PUT", body: JSON.stringify(body) }).then(r => r.json()),
+  post: (p, body) => fetch(p, { method: "POST", body: JSON.stringify(body) }).then(r => r.json()),
+};
+
+let state;                 // /api/state payload; state.layout is the live model
+let titles = {};           // locale -> {scene: caption}
+let dirtyTitles = new Set();
+let dirtyLayout = false;
+// sel: 'device' | 'device1'.. | 'title' | 'extra0'.. | 'image0'.. | null
+// tab: 'ios' (layout editing) | 'watch' (raw capture review) | 'library'
+let cur = { scene: null, locale: null, sel: null, tab: "ios", watchShot: 0 };
+let stageScale = 0.28;
+const fontFamilies = {};   // font path -> loaded css family name
+const geoCache = {};       // sel key -> {x, y, w, h, rotation} for handles
+
+function setStatus(text, transient = true) {
+  $("status").textContent = text;
+  if (transient) setTimeout(() => { if ($("status").textContent === text) $("status").textContent = dirtyLabel(); }, 2500);
+}
+function dirtyLabel() { return (dirtyLayout || dirtyTitles.size) ? "unsaved changes" : ""; }
+function markDirty() { dirtyLayout = true; $("status").textContent = dirtyLabel(); }
+
+// ---------------------------------------------------------------- model
+
+function canvasSize() { return [state.layout.canvas?.width ?? 1320, state.layout.canvas?.height ?? 2868]; }
+function currentScene() { return state.layout.scenes?.[cur.scene]; }
+function currentExtras() { return currentScene()?.extraTexts ?? []; }
+function currentImages() { return currentScene()?.images ?? []; }
+function currentDevices() { return currentScene()?.devices ?? []; }
+
+function blockFor(key) {
+  const dev = key?.match?.(/^device(\d+)$/);
+  if (dev) return currentDevices()[+dev[1] - 1];
+  if (key?.startsWith?.("extra")) return currentExtras()[+key.slice(5)];
+  if (key?.startsWith?.("image")) return currentImages()[+key.slice(5)];
+  return null;
+}
+function sectionFor(key) {
+  if (key === "device" || /^device\d+$/.test(key ?? "")) return "device";
+  if (key?.startsWith?.("image")) return "image";
+  return "title";
+}
+function isDeviceKey(key) { return key === "device" || /^device\d+$/.test(key ?? ""); }
+
+// Style cascade per key: block > locales[loc] > scenes[scene] > defaults —
+// the same order as compose.swift.
+function resolve(section, key, fallback, block = null) {
+  const L = state.layout;
+  for (const level of [
+    block,
+    L.locales?.[cur.locale]?.[section],
+    L.scenes?.[cur.scene]?.[section],
+    L.defaults?.[section],
+  ]) {
+    if (level && level[key] !== undefined) return level[key];
+  }
+  return fallback;
+}
+function resolveFor(selKey, prop, fallback) {
+  return resolve(sectionFor(selKey), prop, fallback, blockFor(selKey));
+}
+
+function write(section, key, value, block = null) {
+  let target = block;
+  if (!target) {
+    state.layout.scenes[cur.scene] ??= {};
+    state.layout.scenes[cur.scene][section] ??= {};
+    target = state.layout.scenes[cur.scene][section];
+  }
+  target[key] = value;
+  markDirty();
+}
+function writeLocale(section, key, value) {
+  const L = state.layout;
+  L.locales ??= {};
+  L.locales[cur.locale] ??= {};
+  L.locales[cur.locale][section] ??= {};
+  L.locales[cur.locale][section][key] = value;
+  markDirty();
+}
+function writeFor(selKey, prop, value) {
+  const block = blockFor(selKey);
+  if (block) { block[prop] = value; markDirty(); }
+  else write(sectionFor(selKey), prop, value);
+}
+
+// Positions: shared per scene by default; per-locale when the element's
+// "position for this locale only" box is ticked (locale override holds x/y).
+function posIsPerLocale(section) {
+  const sec = state.layout.locales?.[cur.locale]?.[section];
+  return sec?.x !== undefined || sec?.y !== undefined;
+}
+function writePos(selKey, axis, value) {
+  const block = blockFor(selKey);
+  if (block) { block[axis] = value; markDirty(); return; }
+  const section = sectionFor(selKey);
+  if (posIsPerLocale(section)) writeLocale(section, axis, value);
+  else write(section, axis, value);
+}
+
+function defaultPos(section) {
+  const [w] = canvasSize();
+  return section === "device"
+    ? { x: (w - resolve("device", "width", 1200)) / 2, y: 420 }
+    : { x: 60, y: 90 };
+}
+
+// ---------------------------------------------------------------- layers
+
+function layerKeys() {
+  return ["device", ...currentDevices().map((_, i) => "device" + (i + 1)),
+          ...currentImages().map((_, i) => "image" + i),
+          "title", ...currentExtras().map((_, i) => "extra" + i)];
+}
+function effectiveOrder() {
+  const keys = layerKeys();
+  const order = (currentScene()?.order ?? []).filter(k => keys.includes(k));
+  for (const k of keys) if (!order.includes(k)) order.push(k);
+  return order;
+}
+function moveLayer(direction) {
+  const order = effectiveOrder();
+  const i = order.indexOf(cur.sel);
+  const j = i + direction;
+  if (i < 0 || j < 0 || j >= order.length) return;
+  [order[i], order[j]] = [order[j], order[i]];
+  (state.layout.scenes[cur.scene] ??= {}).order = order;
+  markDirty();
+  renderStage();
+}
+function removeFromOrder(prefix, index) {
+  const sc = currentScene();
+  if (!sc?.order) return;
+  const re = new RegExp(`^${prefix}(\\d+)$`);
+  sc.order = sc.order.filter(k => k !== prefix + index).map(k => {
+    const m = k.match(re);
+    return m && +m[1] > index ? prefix + (+m[1] - 1) : k;
+  });
+}
+
+// ---------------------------------------------------------------- fonts
+
+async function fontFamily(path) {
+  if (fontFamilies[path]) return fontFamilies[path];
+  const family = "f_" + path.replace(/[^a-z0-9]/gi, "_");
+  try {
+    const buffer = await fetch(`/api/font?path=${encodeURIComponent(path)}`).then(r => {
+      if (!r.ok) throw new Error("font fetch failed");
+      return r.arrayBuffer();
+    });
+    const face = new FontFace(family, buffer);
+    await face.load();
+    document.fonts.add(face);
+    fontFamilies[path] = family;
+    return family;
+  } catch {
+    fontFamilies[path] = "serif";
+    return "serif";
+  }
+}
+
+// ---------------------------------------------------------------- stage
+
+function hexToRgba(hex, alpha) {
+  const v = parseInt(hex.replace("#", ""), 16);
+  return `rgba(${(v >> 16) & 255}, ${(v >> 8) & 255}, ${v & 255}, ${alpha})`;
+}
+function shadowCss(selKey) {
+  const blur = resolveFor(selKey, "shadowBlur", 0);
+  const x = resolveFor(selKey, "shadowX", 0);
+  const y = resolveFor(selKey, "shadowY", 0);
+  if (!blur && !x && !y) return "";
+  const color = hexToRgba(resolveFor(selKey, "shadowColor", "#000000"),
+                          resolveFor(selKey, "shadowOpacity", 0.5));
+  return `${x}px ${y}px ${blur}px ${color}`;
+}
+
+function shotPath(locale, scene) {
+  return `/fastlane/screenshots/${locale}/${state.device}-${scene}.png`;
+}
+
+async function styleTextBlock(el, selKey, caption) {
+  const px = (v) => v + "px";
+  el.textContent = caption;
+  el.style.left = px(resolveFor(selKey, "x", 60));
+  el.style.top = px(resolveFor(selKey, "y", 90));
+  el.style.width = px(resolveFor(selKey, "width", 1200));
+  el.style.fontSize = px(resolveFor(selKey, "size", 110));
+  el.style.color = resolveFor(selKey, "color", "#FFFFFF");
+  el.style.textAlign = resolveFor(selKey, "align", "center");
+  el.style.lineHeight = resolveFor(selKey, "lineHeight", 1.05);
+  el.style.letterSpacing = px(resolveFor(selKey, "letterSpacing", 0));
+  el.style.textShadow = shadowCss(selKey);
+  // Weight rides the 'wght' variation axis only (no CSS font-weight): static
+  // single-style fonts stay unsynthesized, exactly like CoreText in compose.
+  const weight = resolveFor(selKey, "fontWeight", 0);
+  el.style.fontVariationSettings = weight ? `"wght" ${weight}` : "";
+  el.style.fontFamily = await fontFamily(resolveFor(selKey, "font", "fonts/SeriouslyNostalgicFn-Regular.otf"));
+}
+
+/// Lays out one device instance (wrapper + rotor with shot/frame imgs).
+async function styleDeviceGroup(wrapper, selKey, shotScene) {
+  const [w] = canvasSize();
+  const rotor = wrapper.querySelector(".rotor");
+  const shotImg = rotor.children[0];
+  const frameImg = rotor.children[1];
+  const frameW = resolveFor(selKey, "width", 1200);
+  const dx = resolveFor(selKey, "x", (w - frameW) / 2);
+  const dy = resolveFor(selKey, "y", 420);
+  const frameName = resolveFor(selKey, "frame", "Apple iPhone 17 Pro Max Deep Blue");
+  frameImg.src = `/fastlane/frame-studio/frames/${encodeURIComponent(frameName)}.png`;
+  await frameImg.decode().catch(() => {});
+  const aspect = frameImg.naturalHeight / frameImg.naturalWidth || 2.04;
+  const s = frameW / (frameImg.naturalWidth || 1470);
+  const rotation = resolveFor(selKey, "rotation", 0);
+  wrapper.style.left = dx + "px";
+  wrapper.style.top = dy + "px";
+  wrapper.style.width = frameW + "px";
+  wrapper.style.height = frameW * aspect + "px";
+  const shadow = shadowCss(selKey);
+  wrapper.style.filter = shadow ? `drop-shadow(${shadow})` : "";
+  rotor.style.transform = rotation ? `rotate(${rotation}deg)` : "";
+  frameImg.style.inset = "0";
+  frameImg.style.width = "100%";
+  shotImg.src = shotPath(cur.locale, shotScene);
+  const dev = state.layout.device ?? {};
+  shotImg.style.left = (dev.screenOffsetX ?? 75) * s + "px";
+  shotImg.style.top = (dev.screenOffsetY ?? 66) * s + "px";
+  shotImg.style.width = (dev.screenWidth ?? 1320) * s + "px";
+  shotImg.style.borderRadius = (dev.screenCornerRadius ?? 0) * s + "px";
+  geoCache[selKey] = { x: dx, y: dy, w: frameW, h: frameW * aspect, rotation };
+}
+
+// Re-renders overlap when edits arrive per keystroke (the font/image loads are
+// async) — stale passes bail out instead of appending duplicate layers.
+let renderGen = 0;
+
+// rebuildInspector=false keeps the sidebar DOM intact so the focused input
+// survives — pass it from every oninput handler that lives in the inspector.
+async function renderStage(rebuildInspector = true) {
+  const gen = ++renderGen;
+  const stale = () => gen !== renderGen;
+  const [w, h] = canvasSize();
+  const stage = $("stage");
+  stage.style.width = w + "px";
+  stage.style.height = h + "px";
+  fitStage();
+
+  const order = effectiveOrder();
+  const zOf = (k) => order.indexOf(k) + 1;
+
+  $("bg").style.background =
+    `linear-gradient(180deg, ${state.layout.background?.top ?? "#3AA0FF"}, ${state.layout.background?.bottom ?? "#0067DF"})`;
+
+  // Main device
+  await styleDeviceGroup($("deviceGroup"), "device", cur.scene);
+  if (stale()) return;
+  $("deviceGroup").style.zIndex = zOf("device");
+
+  // Extra device instances (other captures composed into this shot)
+  const deviceHolder = $("deviceBlocks");
+  deviceHolder.innerHTML = "";
+  for (let i = 0; i < currentDevices().length; i++) {
+    const key = "device" + (i + 1);
+    const wrapper = document.createElement("div");
+    wrapper.className = "layer devicewrap";
+    wrapper.dataset.key = key;
+    wrapper.innerHTML = `<div class="rotor"><img alt=""><img alt=""></div>`;
+    deviceHolder.appendChild(wrapper);
+    await styleDeviceGroup(wrapper, key, currentDevices()[i].shot);
+    if (stale()) return;
+    wrapper.style.zIndex = zOf(key);
+    makeDraggable(wrapper, key);
+  }
+
+  // Title
+  const caption = titles[cur.locale]?.[cur.scene] ?? "";
+  const title = $("titleBlock");
+  await styleTextBlock(title, "title", caption);
+  if (stale()) return;
+  title.style.zIndex = zOf("title");
+
+  // Extra text blocks
+  const extraHolder = $("extraBlocks");
+  extraHolder.innerHTML = "";
+  for (let i = 0; i < currentExtras().length; i++) {
+    const key = "extra" + i;
+    const block = currentExtras()[i];
+    const el = document.createElement("div");
+    el.className = "layer textblock";
+    el.dataset.key = key;
+    await styleTextBlock(el, key, block.text?.[cur.locale] ?? block.text?.["en-US"] ?? "text");
+    if (stale()) return;
+    el.style.zIndex = zOf(key);
+    extraHolder.appendChild(el);
+    makeDraggable(el, key);
+    makeTextEditable(el, key);
+  }
+
+  // Image layers
+  const imageHolder = $("imageBlocks");
+  imageHolder.innerHTML = "";
+  for (let i = 0; i < currentImages().length; i++) {
+    const key = "image" + i;
+    const block = currentImages()[i];
+    const wrapper = document.createElement("div");
+    wrapper.className = "layer imagewrap";
+    wrapper.dataset.key = key;
+    const img = document.createElement("img");
+    img.className = "rotor";
+    img.draggable = false;
+    img.src = "/fastlane/frame-studio/" + block.src;
+    wrapper.appendChild(img);
+    await img.decode().catch(() => {});
+    if (stale()) return;
+    const width = block.width ?? 600;
+    const height = width * (img.naturalHeight / img.naturalWidth || 1);
+    const rotation = block.rotation ?? 0;
+    wrapper.style.left = (block.x ?? 100) + "px";
+    wrapper.style.top = (block.y ?? 100) + "px";
+    wrapper.style.width = width + "px";
+    wrapper.style.height = height + "px";
+    wrapper.style.opacity = block.opacity ?? 1;
+    const sh = shadowCss(key);
+    wrapper.style.filter = sh ? `drop-shadow(${sh})` : "";
+    wrapper.style.zIndex = zOf(key);
+    img.style.width = "100%";
+    img.style.transform = rotation ? `rotate(${rotation}deg)` : "";
+    geoCache[key] = { x: block.x ?? 100, y: block.y ?? 100, w: width, h: height, rotation };
+    imageHolder.appendChild(wrapper);
+    makeDraggable(wrapper, key);
+  }
+
+  applySelection();
+  renderHandles();
+  if (rebuildInspector) renderInspector();
+}
+
+function fitStage() {
+  const [w, h] = canvasSize();
+  const box = $("viewport").getBoundingClientRect();
+  stageScale = Math.min((box.width - 56) / w, (box.height - 56) / h);
+  // The stage is scaled from its top-left corner, so center it with an
+  // explicit translate — its layout box stays at the unscaled canvas size and
+  // flex/margin centering would place the visible content off-screen.
+  const ox = Math.max(28, (box.width - w * stageScale) / 2);
+  const oy = Math.max(28, (box.height - h * stageScale) / 2);
+  $("stage").style.transform = `translate(${ox}px, ${oy}px) scale(${stageScale})`;
+}
+window.addEventListener("resize", () => { fitStage(); renderHandles(); });
+
+// ---------------------------------------------------------------- handles
+
+function stagePoint(ev) {
+  const r = $("stage").getBoundingClientRect();
+  return [(ev.clientX - r.left) / stageScale, (ev.clientY - r.top) / stageScale];
+}
+
+function elFor(key) {
+  if (key === "device") return $("deviceGroup");
+  if (key === "title") return $("titleBlock");
+  return document.querySelector(`[data-key="${key}"]`);
+}
+
+/// Apply geometry during handle drags without a full re-render.
+function applyGeom(key, g) {
+  geoCache[key] = g;
+  const el = elFor(key);
+  if (!el) return;
+  el.style.left = g.x + "px";
+  el.style.top = g.y + "px";
+  el.style.width = g.w + "px";
+  el.style.height = g.h + "px";
+  const rotor = el.querySelector(".rotor");
+  if (rotor) rotor.style.transform = g.rotation ? `rotate(${g.rotation}deg)` : "";
+  positionHandles(g);
+}
+
+function positionHandles(g) {
+  const holder = $("handles");
+  if (!holder || !g) return;
+  holder.style.left = g.x + "px";
+  holder.style.top = g.y + "px";
+  holder.style.width = g.w + "px";
+  holder.style.height = g.h + "px";
+  holder.style.transform = g.rotation ? `rotate(${g.rotation}deg)` : "";
+}
+
+function renderHandles() {
+  $("handles")?.remove();
+  const key = cur.sel;
+  if (!key || !(isDeviceKey(key) || key.startsWith("image"))) return;
+  const g = geoCache[key];
+  if (!g) return;
+  const holder = document.createElement("div");
+  holder.id = "handles";
+  holder.style.cssText = "position:absolute;pointer-events:none;z-index:1001;transform-origin:center;";
+  const size = 16 / stageScale;
+  const border = 2.5 / stageScale;
+  for (const [cx, cy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
+    const dot = document.createElement("div");
+    dot.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;
+      background:#fff;border:${border}px solid #4c8dff;pointer-events:auto;cursor:nwse-resize;
+      left:${cx * 100}%;top:${cy * 100}%;transform:translate(-50%,-50%);`;
+    dot.onpointerdown = startResize;
+    holder.appendChild(dot);
+  }
+  const knob = document.createElement("div");
+  knob.title = "drag to rotate";
+  knob.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;
+    background:#4c8dff;border:${border}px solid #fff;pointer-events:auto;cursor:grab;
+    left:50%;top:${-44 / stageScale}px;transform:translate(-50%,-50%);`;
+  knob.onpointerdown = startRotate;
+  holder.appendChild(knob);
+  $("stage").appendChild(holder);
+  positionHandles(geoCache[key]);
+}
+
+/// Corner drag: proportional resize anchored at the element center — robust
+/// for rotated elements too.
+function startResize(e) {
+  e.stopPropagation();
+  e.preventDefault();
+  const key = cur.sel;
+  const g0 = { ...geoCache[key] };
+  const cx = g0.x + g0.w / 2, cy = g0.y + g0.h / 2;
+  const [sx, sy] = stagePoint(e);
+  const d0 = Math.max(1, Math.hypot(sx - cx, sy - cy));
+  const dot = e.target;
+  dot.setPointerCapture(e.pointerId);
+  dot.onpointermove = (ev) => {
+    const [mx, my] = stagePoint(ev);
+    const f = Math.max(0.05, Math.hypot(mx - cx, my - cy) / d0);
+    const w = Math.round(g0.w * f);
+    const h = w * g0.h / g0.w;
+    const x = Math.round(cx - w / 2), y = Math.round(cy - h / 2);
+    writePos(key, "x", x);
+    writePos(key, "y", y);
+    writeFor(key, "width", w);
+    applyGeom(key, { x, y, w, h, rotation: g0.rotation });
+  };
+  dot.onpointerup = dot.onpointercancel = () => { dot.onpointermove = null; renderStage(); };
+}
+
+function startRotate(e) {
+  e.stopPropagation();
+  e.preventDefault();
+  const key = cur.sel;
+  const g = geoCache[key];
+  const cx = g.x + g.w / 2, cy = g.y + g.h / 2;
+  const knob = e.target;
+  knob.setPointerCapture(e.pointerId);
+  knob.onpointermove = (ev) => {
+    const [mx, my] = stagePoint(ev);
+    let deg = Math.atan2(my - cy, mx - cx) * 180 / Math.PI + 90;
+    if (deg > 180) deg -= 360;
+    for (const snap of [-180, -90, 0, 90, 180]) {
+      if (Math.abs(deg - snap) < 4) { deg = snap; break; }
+    }
+    deg = Math.round(deg * 10) / 10;
+    writeFor(key, "rotation", deg);
+    applyGeom(key, { ...geoCache[key], rotation: deg });
+  };
+  knob.onpointerup = knob.onpointercancel = () => { knob.onpointermove = null; renderStage(); };
+}
+
+// ---------------------------------------------------------------- drag
+
+function makeDraggable(el, key) {
+  el.onpointerdown = (e) => {
+    if (el.isContentEditable) return;  // inline editing: let the browser place the caret
+    e.preventDefault();
+    select(key);
+    const [w] = canvasSize();
+    const def = defaultPos(sectionFor(key));
+    const startX = resolveFor(key, "x", def.x);
+    const startY = resolveFor(key, "y", def.y);
+    const width = resolveFor(key, "width", isDeviceKey(key) ? 1200 : 600);
+    const px = e.clientX, py = e.clientY;
+    el.setPointerCapture(e.pointerId);
+    el.onpointermove = (ev) => {
+      let nx = Math.round(startX + (ev.clientX - px) / stageScale);
+      const ny = Math.round(startY + (ev.clientY - py) / stageScale);
+      const centered = Math.abs(nx + width / 2 - w / 2) < 8;
+      $("centerGuide").style.display = centered ? "block" : "none";
+      if (centered) nx = Math.round((w - width) / 2);
+      writePos(key, "x", nx);
+      writePos(key, "y", ny);
+      el.style.left = nx + "px";
+      el.style.top = ny + "px";
+      if (geoCache[key]) {
+        geoCache[key].x = nx;
+        geoCache[key].y = ny;
+        positionHandles(geoCache[key]);
+      }
+      renderInspector();
+    };
+    el.onpointerup = el.onpointercancel = () => {
+      el.onpointermove = null;
+      $("centerGuide").style.display = "none";
+    };
+  };
+}
+
+// Inline caption editing: double-click a text block to type directly on the
+// stage. The model updates per keystroke (mirrored into the inspector's
+// textarea); blur or Escape ends editing and re-renders.
+function makeTextEditable(el, key) {
+  el.ondblclick = () => {
+    if (el.isContentEditable) return;
+    select(key);
+    el.classList.add("editing");
+    try { el.contentEditable = "plaintext-only"; } catch { el.contentEditable = "true"; }
+    el.focus();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    el.oninput = () => {
+      const text = el.innerText.replace(/\n$/, "");
+      if (key === "title") {
+        titles[cur.locale] ??= {};
+        titles[cur.locale][cur.scene] = text;
+        dirtyTitles.add(cur.locale);
+        $("status").textContent = dirtyLabel();
+      } else {
+        const block = blockFor(key);
+        block.text ??= {};
+        block.text[cur.locale] = text;
+        markDirty();
+      }
+      const ta = $("i_text");
+      if (ta) ta.value = text;
+    };
+    el.onkeydown = (ev) => { if (ev.key === "Escape") { ev.preventDefault(); el.blur(); } };
+    el.onblur = () => {
+      el.classList.remove("editing");
+      el.contentEditable = "false";
+      el.oninput = el.onkeydown = el.onblur = null;
+      renderStage();
+    };
+  };
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.metaKey && e.key === "s") { e.preventDefault(); save(); return; }
+  if (cur.sel === null || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)
+      || document.activeElement.isContentEditable) return;
+  const step = e.shiftKey ? 10 : 1;
+  const delta = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+  if (!delta) return;
+  e.preventDefault();
+  const def = defaultPos(sectionFor(cur.sel));
+  writePos(cur.sel, "x", resolveFor(cur.sel, "x", def.x) + delta[0]);
+  writePos(cur.sel, "y", resolveFor(cur.sel, "y", def.y) + delta[1]);
+  renderStage();
+});
+
+function select(key) {
+  // Clicks on other elements preventDefault, so an active inline editor never
+  // loses focus on its own — end its session explicitly.
+  const active = document.activeElement;
+  if (active?.isContentEditable && active !== elFor(key)) active.blur();
+  cur.sel = key;
+  applySelection();
+  renderHandles();
+  renderInspector();
+}
+function applySelection() {
+  $("deviceGroup").classList.toggle("selected", cur.sel === "device");
+  $("titleBlock").classList.toggle("selected", cur.sel === "title");
+  document.querySelectorAll("[data-key]").forEach((el) =>
+    el.classList.toggle("selected", el.dataset.key === cur.sel));
+}
+
+// ---------------------------------------------------------------- nav
+
+function renderSceneList() { renderNav(); }
+
+function firstVisibleScene() {
+  return state.scenes.find(s => !state.layout.scenes?.[s]?.hidden) ?? state.scenes[0];
+}
+
+function selectTab(tab) {
+  cur.tab = tab;
+  document.querySelectorAll("#navTabs button").forEach(b =>
+    b.classList.toggle("on", b.dataset.tab === tab));
+  $("watchPane").style.display = tab === "watch" ? "block" : "none";
+  $("stage").style.display = tab === "watch" ? "none" : "block";
+  if (tab === "ios" && state.layout.scenes?.[cur.scene]?.hidden) {
+    cur.scene = firstVisibleScene();
+    cur.sel = null;
+    renderStage();
+  }
+  renderNav();
+  if (tab === "watch") renderWatchPane();
+  renderInspector();
+}
+
+function renderNav() {
+  const nav = $("navList");
+  nav.innerHTML = "";
+  if (cur.tab === "ios") renderLayoutRows(nav);
+  else if (cur.tab === "watch") renderWatchRows(nav);
+  else renderLibrary(nav);
+}
+
+function sceneRow(scene, { active = false, badges = "", buttons = [] } = {}) {
+  const el = document.createElement("div");
+  el.className = "scene" + (active ? " active" : "");
+  el.innerHTML = `<img class="thumb" loading="lazy" src="${shotPath(cur.locale, scene)}">
+    <span class="grow">${scene}</span>${badges}`;
+  for (const [label, title, fn] of buttons) {
+    const b = document.createElement("button");
+    b.className = "icon";
+    b.textContent = label;
+    b.title = title;
+    b.onclick = (e) => { e.stopPropagation(); fn(); };
+    el.appendChild(b);
+  }
+  return el;
+}
+
+// Each row is one App Store screenshot (deliverable layout); composition
+// sources live in the Library tab.
+function renderLayoutRows(nav) {
+  const h = document.createElement("h3");
+  h.textContent = "App Store screenshots";
+  nav.appendChild(h);
+  for (const scene of state.scenes) {
+    if (state.layout.scenes?.[scene]?.hidden) continue;
+    const hasOverrides = !!state.layout.scenes?.[scene];
+    const el = sceneRow(scene, {
+      active: scene === cur.scene,
+      badges: hasOverrides ? '<span class="dot" title="has scene overrides"></span>' : "",
+    });
+    el.onclick = () => { cur.scene = scene; cur.sel = null; renderNav(); renderStage(); };
+    nav.appendChild(el);
+  }
+}
+
+function renderWatchRows(nav) {
+  const shots = state.watchShots?.[cur.locale] ?? [];
+  if (!shots.length) {
+    nav.innerHTML = `<div class="hint" style="margin:8px 6px">No watch captures for
+      ${cur.locale} yet — run bin/watch-screenshots.sh.</div>`;
+    return;
+  }
+  const h = document.createElement("h3");
+  h.textContent = "Raw captures";
+  nav.appendChild(h);
+  shots.forEach((file, i) => {
+    const el = document.createElement("div");
+    el.className = "scene" + (i === cur.watchShot ? " active" : "");
+    el.innerHTML = `<img class="thumb sq" loading="lazy"
+      src="/fastlane/screenshots/${cur.locale}/${encodeURIComponent(file)}">
+      <span class="grow">${file.split("-").pop().replace(".png", "")}</span>`;
+    el.onclick = () => { cur.watchShot = i; renderNav(); renderWatchPane(); };
+    nav.appendChild(el);
+  });
+}
+
+function renderWatchPane() {
+  const shots = state.watchShots?.[cur.locale] ?? [];
+  const file = shots[Math.min(cur.watchShot, shots.length - 1)];
+  $("watchPane").querySelector("img").src =
+    file ? `/fastlane/screenshots/${cur.locale}/${encodeURIComponent(file)}` : "";
+}
+
+// Everything addable to the current layout: every capture (sources included)
+// as an extra device, every uploaded image as a media layer.
+function renderLibrary(nav) {
+  const captures = document.createElement("h3");
+  captures.textContent = "Captures";
+  nav.appendChild(captures);
+  for (const scene of state.scenes) {
+    const hidden = state.layout.scenes?.[scene]?.hidden === true;
+    const el = sceneRow(scene, {
+      badges: hidden ? '<span class="src" title="source only — not exported">src</span>' : "",
+      buttons: [
+        ["+", `add to ${cur.scene} as a device`, () => addCaptureToLayout(scene)],
+        [hidden ? "☆" : "★", hidden ? "make deliverable" : "make source-only (no export)",
+         () => toggleHidden(scene)],
+      ],
+    });
+    nav.appendChild(el);
+  }
+
+  const media = document.createElement("h3");
+  media.textContent = "Media";
+  nav.appendChild(media);
+  for (const file of state.images) {
+    const el = document.createElement("div");
+    el.className = "scene";
+    el.innerHTML = `<img class="thumb sq" loading="lazy"
+      src="/fastlane/frame-studio/images/${encodeURIComponent(file)}"><span class="grow">${file}</span>`;
+    const add = document.createElement("button");
+    add.className = "icon";
+    add.textContent = "+";
+    add.title = `add to ${cur.scene}`;
+    add.onclick = (e) => { e.stopPropagation(); addMediaToLayout(file); };
+    el.appendChild(add);
+    nav.appendChild(el);
+  }
+  const upload = document.createElement("button");
+  upload.className = "small";
+  upload.style.margin = "10px 4px";
+  upload.textContent = "Upload image…";
+  upload.onclick = () => $("imgFile").click();
+  nav.appendChild(upload);
+}
+
+function addCaptureToLayout(scene) {
+  state.layout.scenes[cur.scene] ??= {};
+  const devices = (state.layout.scenes[cur.scene].devices ??= []);
+  devices.push({ shot: scene, x: 160, y: 900, width: 700, rotation: -8 });
+  cur.sel = "device" + devices.length;
+  markDirty();
+  selectTab("ios");
+  renderStage();
+}
+
+function addMediaToLayout(file) {
+  placeImage("images/" + file);
+  selectTab("ios");
+  renderStage();
+}
+
+function toggleHidden(scene) {
+  state.layout.scenes[scene] ??= {};
+  if (state.layout.scenes[scene].hidden) {
+    delete state.layout.scenes[scene].hidden;
+    if (!Object.keys(state.layout.scenes[scene]).length) delete state.layout.scenes[scene];
+  } else {
+    state.layout.scenes[scene].hidden = true;
+  }
+  markDirty();
+  renderNav();
+}
+
+// ---------------------------------------------------------------- inspector
+
+function group(title, inner, ctx = "") {
+  return `<section><h2>${title}${ctx ? ` <span class="ctx">· ${ctx}</span>` : ""}</h2>${inner}</section>`;
+}
+function field(label, inner) { return `<div class="row"><label>${label}</label>${inner}</div>`; }
+function num(id, value, step = 1) { return `<input type="number" id="${id}" value="${value}" step="${step}">`; }
+function pair(...inputs) { return `<div class="pair">${inputs.join("")}</div>`; }
+function layerButtons() {
+  return field("Layer", `<div class="seg">
+    <button id="i_layerBack" title="send backward">▼</button>
+    <button id="i_layerFwd" title="bring forward">▲</button></div>`);
+}
+function shadowFields(key) {
+  return group("Shadow",
+    field("Color", pair(`<input type="color" id="i_shColor" value="${resolveFor(key, "shadowColor", "#000000")}">`,
+                        num("i_shOpacity", resolveFor(key, "shadowOpacity", 0.5), 0.05))) +
+    field("Blur", num("i_shBlur", resolveFor(key, "shadowBlur", 0))) +
+    field("Offset", pair(num("i_shX", resolveFor(key, "shadowX", 0)),
+                         num("i_shY", resolveFor(key, "shadowY", 0)))) +
+    `<div class="hint">Shows once blur or offset is non-zero. Color row: color · opacity.</div>`);
+}
+function posLocaleRow(section) {
+  return `<div class="check"><input type="checkbox" id="i_posLocale"
+    ${posIsPerLocale(section) ? "checked" : ""}>
+    <span>position for ${cur.locale} only</span></div>`;
+}
+
+function renderInspector() {
+  const box = $("inspector");
+  if (cur.tab === "watch") {
+    box.innerHTML = group("Watch capture", `<div class="hint">Watch screenshots are delivered
+      exactly as captured — App Store Connect requires the bare watch UI without frames,
+      backgrounds, or captions. Recapture with bin/watch-screenshots.sh.</div>`);
+    return;
+  }
+  const key = cur.sel;
+  const block = blockFor(key);
+  const isExtra = key?.startsWith?.("extra");
+  const isImage = key?.startsWith?.("image");
+  const isExtraDevice = /^device\d+$/.test(key ?? "");
+  const sceneHasOverride = !!currentScene() && Object.keys(currentScene()).length;
+
+  let html = "";
+  if (key === null) {
+    html = group("Selection", `<div class="hint">Click the device, a text, or an image to
+      edit it. Drag to move, arrows to nudge (⇧ = 10 px). Devices and images get corner
+      handles to resize and a top knob to rotate.</div>`);
+  } else if (key === "device" || isExtraDevice) {
+    let inner = "";
+    if (isExtraDevice) {
+      inner += field("Shows", `<select id="i_shot">${state.scenes.map(s =>
+        `<option ${s === block.shot ? "selected" : ""}>${s}</option>`).join("")}</select>`);
+    }
+    inner += field("Frame", `<select id="i_frame">${state.frames.map(f =>
+      `<option ${f === resolveFor(key, "frame", "Apple iPhone 17 Pro Max Deep Blue") ? "selected" : ""}>${f}</option>`).join("")}</select>`);
+    inner += field("Position", pair(num("i_x", resolveFor(key, "x", defaultPos("device").x)),
+                                    num("i_y", resolveFor(key, "y", 420))));
+    inner += field("Width", pair(num("i_dwidth", resolveFor(key, "width", 1200)),
+                                 num("i_rotation", resolveFor(key, "rotation", 0), 0.5)));
+    inner += `<div class="hint">Width row: width · rotation°.</div>`;
+    if (!isExtraDevice) {
+      inner += field("Screen radius", num("i_screenRadius", state.layout.device?.screenCornerRadius ?? 0));
+      inner += `<div class="hint">Rounds the screenshot's corners under the bezel
+        (device-wide, frame px; 180 fits the Pro Max).</div>`;
+      inner += posLocaleRow("device");
+    }
+    inner += `<div class="stack">
+      <button class="small" id="i_dcenter">Center horizontally</button>`;
+    if (!isExtraDevice) inner += `<button class="small" id="i_useDefault">Use as default for all scenes</button>`;
+    if (isExtraDevice) inner += `<button class="small danger" id="i_delete">Delete this device</button>`;
+    inner += `</div>` + layerButtons();
+    html += group(isExtraDevice ? "Extra device" : "Device", inner);
+    html += shadowFields(key);
+  } else if (isImage) {
+    let inner = `<div class="hint">${block.src}</div>`;
+    inner += field("Position", pair(num("i_x", block.x ?? 100), num("i_y", block.y ?? 100)));
+    inner += field("Width", pair(num("i_iwidth", block.width ?? 600),
+                                 num("i_rotation", block.rotation ?? 0, 0.5)));
+    inner += `<div class="hint">Width row: width · rotation°.</div>`;
+    inner += field("Opacity", num("i_iopacity", block.opacity ?? 1, 0.05));
+    inner += layerButtons();
+    inner += `<div class="stack"><button class="small danger" id="i_delete">Delete image</button></div>`;
+    html += group("Image", inner);
+    html += shadowFields(key);
+  } else {
+    const captionValue = isExtra
+      ? (block.text?.[cur.locale] ?? "")
+      : (titles[cur.locale]?.[cur.scene] ?? "");
+    let inner = `<textarea id="i_text" rows="3">${captionValue.replace(/</g, "&lt;")}</textarea>`;
+    const localeFont = state.layout.locales?.[cur.locale]?.title?.font;
+    inner += field("Font", `<select id="i_font">${fontOptions(resolveFor(key, "font", ""))}</select>`);
+    inner += `<div class="check"><input type="checkbox" id="i_fontLocale"
+      ${localeFont && !isExtra ? "checked" : ""} ${isExtra ? "disabled" : ""}>
+      <span>font for ${cur.locale} only</span></div>`;
+    if (localeFont && !isExtra) inner += `<div class="hint">${cur.locale} currently overrides the font (${localeFont.split("/").pop()}).</div>`;
+    const curWeight = resolveFor(key, "fontWeight", 0) || "";
+    inner += field("Weight", `<select id="i_weight">${fontWeights.map(([v, label]) =>
+      `<option value="${v}" ${String(v) === String(curWeight) ? "selected" : ""}>${label}</option>`).join("")}</select>`);
+    inner += field("Size", pair(num("i_size", resolveFor(key, "size", 110)),
+                                `<input type="color" id="i_color" value="${resolveFor(key, "color", "#FFFFFF")}">`));
+    inner += field("Align", `<div class="seg">${["left", "center", "right"].map(a =>
+      `<button data-align="${a}" class="${a === resolveFor(key, "align", "center") ? "on" : ""}">${a}</button>`).join("")}</div>`);
+    inner += field("Position", pair(num("i_x", resolveFor(key, "x", 60)),
+                                    num("i_y", resolveFor(key, "y", 90))));
+    inner += field("Width", num("i_twidth", resolveFor(key, "width", 1200)));
+    inner += field("Line height", pair(num("i_lineHeight", resolveFor(key, "lineHeight", 1.05), 0.05),
+                                       num("i_letterSpacing", resolveFor(key, "letterSpacing", 0), 0.5)));
+    inner += `<div class="hint">Line-height row: multiple · letter spacing.</div>`;
+    if (!isExtra) inner += posLocaleRow("title");
+    inner += `<div class="stack">`;
+    if (!isExtra) inner += `<button class="small" id="i_useDefault">Use as default for all scenes</button>`;
+    if (isExtra) inner += `<button class="small danger" id="i_delete">Delete this text</button>`;
+    inner += `</div>` + layerButtons();
+    html += group(isExtra ? "Extra text" : "Caption", inner, cur.locale);
+    html += shadowFields(key);
+  }
+
+  html += group("Scene", `<div class="stack">
+    <button class="small" id="i_addText">Add extra text</button>
+    <button class="small" id="i_syncLocales" title="Make this scene's device and caption positions identical in every language">Sync positions across languages</button>
+    <button class="small" id="i_resetScene" ${sceneHasOverride ? "" : "disabled"}>Reset scene to defaults</button>
+  </div>
+  <div class="hint">Captures and media are added from the Library tab.</div>`);
+
+  html += group("Background",
+    field("Top", `<input type="color" id="i_bgTop" value="${state.layout.background?.top ?? "#3AA0FF"}">`) +
+    field("Bottom", `<input type="color" id="i_bgBottom" value="${state.layout.background?.bottom ?? "#0067DF"}">`));
+
+  box.innerHTML = html;
+  wireInspector(key, block, isExtra, isImage, isExtraDevice);
+}
+
+function fontOptions(current) {
+  const options = [];
+  const seen = new Set();
+  const add = (value, label) => {
+    if (seen.has(value)) return;
+    seen.add(value);
+    options.push(`<option value="${value}" ${value === current ? "selected" : ""}>${label}</option>`);
+  };
+  for (const f of state.fonts) add("fonts/" + f, f);
+  for (const f of state.systemFonts) add(f.path, f.name);
+  add("/System/Library/Fonts/Supplemental/Georgia Bold.ttf", "Georgia Bold.ttf");
+  add("/System/Library/Fonts/Supplemental/Georgia.ttf", "Georgia.ttf");
+  if (current) add(current, current.split("/").pop());
+  return options.join("");
+}
+
+// SwiftUI's .fontWeight scale on the CSS 100…900 axis. The SF and New York
+// families are variable fonts, so one file serves every weight.
+const fontWeights = [
+  ["", "font default"], [100, "Ultralight"], [200, "Thin"], [300, "Light"],
+  [400, "Regular"], [500, "Medium"], [600, "Semibold"], [700, "Bold"],
+  [800, "Heavy"], [900, "Black"],
+];
+
+function wireInspector(key, block, isExtra, isImage, isExtraDevice) {
+  const on = (id, event, fn) => { const el = $(id); if (el) el[event] = fn; };
+  // oninput handlers pass rebuildInspector=false — a sidebar rebuild would
+  // replace the very input being typed in and drop its focus per keystroke.
+  const bind = (id, prop, numeric = true) => on(id, "oninput", (e) => {
+    writeFor(key, prop, numeric ? Number(e.target.value) : e.target.value);
+    renderStage(false);
+  });
+  const bindPos = (id, axis) => on(id, "oninput", (e) => {
+    writePos(key, axis, Number(e.target.value));
+    renderStage(false);
+  });
+
+  bindPos("i_x", "x");
+  bindPos("i_y", "y");
+  bind("i_rotation", "rotation");
+
+  // Device
+  on("i_shot", "onchange", (e) => { block.shot = e.target.value; markDirty(); renderStage(); });
+  on("i_frame", "onchange", (e) => { writeFor(key, "frame", e.target.value); renderStage(); });
+  bind("i_dwidth", "width");
+  on("i_screenRadius", "oninput", (e) => {
+    (state.layout.device ??= {}).screenCornerRadius = Number(e.target.value);
+    markDirty();
+    renderStage(false);
+  });
+  on("i_dcenter", "onclick", () => {
+    const [w] = canvasSize();
+    writePos(key, "x", Math.round((w - resolveFor(key, "width", 1200)) / 2));
+    renderStage();
+  });
+
+  // Image
+  bind("i_iwidth", "width");
+  bind("i_iopacity", "opacity");
+
+  // Text: update the stage block's text node directly — no re-render needed
+  // for a caption change, and the textarea keeps focus.
+  on("i_text", "oninput", (e) => {
+    if (isExtra) {
+      block.text ??= {};
+      block.text[cur.locale] = e.target.value;
+      markDirty();
+    } else {
+      titles[cur.locale] ??= {};
+      titles[cur.locale][cur.scene] = e.target.value;
+      dirtyTitles.add(cur.locale);
+      $("status").textContent = dirtyLabel();
+    }
+    const target = elFor(isExtra ? key : "title");
+    if (target && !target.isContentEditable) target.textContent = e.target.value;
+  });
+  on("i_font", "onchange", (e) => {
+    if (!isExtra && $("i_fontLocale")?.checked) writeLocale("title", "font", e.target.value);
+    else writeFor(key, "font", e.target.value);
+    renderStage();
+  });
+  on("i_weight", "onchange", (e) => {
+    writeFor(key, "fontWeight", Number(e.target.value) || 0);
+    renderStage();
+  });
+  on("i_fontLocale", "onchange", (e) => {
+    if (e.target.checked) writeLocale("title", "font", resolveFor("title", "font", "fonts/SeriouslyNostalgicFn-Regular.otf"));
+    else if (state.layout.locales?.[cur.locale]?.title) {
+      delete state.layout.locales[cur.locale].title.font;
+      markDirty();
+    }
+    renderStage();
+  });
+  bind("i_size", "size");
+  on("i_color", "oninput", (e) => { writeFor(key, "color", e.target.value.toUpperCase()); renderStage(false); });
+  document.querySelectorAll("[data-align]").forEach((b) =>
+    b.onclick = () => { writeFor(key, "align", b.dataset.align); renderStage(); });
+  bind("i_twidth", "width");
+  bind("i_lineHeight", "lineHeight");
+  bind("i_letterSpacing", "letterSpacing");
+
+  // Shadow (any element)
+  on("i_shColor", "oninput", (e) => { writeFor(key, "shadowColor", e.target.value.toUpperCase()); renderStage(false); });
+  bind("i_shOpacity", "shadowOpacity");
+  bind("i_shBlur", "shadowBlur");
+  bind("i_shX", "shadowX");
+  bind("i_shY", "shadowY");
+
+  // Layering
+  on("i_layerBack", "onclick", () => moveLayer(-1));
+  on("i_layerFwd", "onclick", () => moveLayer(1));
+
+  // Per-locale positions
+  on("i_posLocale", "onchange", (e) => {
+    const section = sectionFor(key);
+    const def = defaultPos(section);
+    if (e.target.checked) {
+      writeLocale(section, "x", Math.round(resolve(section, "x", def.x)));
+      writeLocale(section, "y", Math.round(resolve(section, "y", def.y)));
+    } else {
+      const sec = state.layout.locales?.[cur.locale]?.[section];
+      if (sec) {
+        delete sec.x;
+        delete sec.y;
+        markDirty();
+      }
+    }
+    renderStage();
+  });
+
+  // Defaults promotion / deletion
+  on("i_useDefault", "onclick", () => useAsDefault(sectionFor(key)));
+  on("i_delete", "onclick", () => {
+    if (isImage) {
+      const i = +key.slice(5);
+      currentImages().splice(i, 1);
+      removeFromOrder("image", i);
+      if (!currentImages().length) delete currentScene().images;
+    } else if (isExtra) {
+      const i = +key.slice(5);
+      currentExtras().splice(i, 1);
+      removeFromOrder("extra", i);
+      if (!currentExtras().length) delete currentScene().extraTexts;
+    } else if (isExtraDevice) {
+      const i = +key.slice(6);
+      currentDevices().splice(i - 1, 1);
+      removeFromOrder("device", i);
+      if (!currentDevices().length) delete currentScene().devices;
+    }
+    cur.sel = null;
+    markDirty();
+    renderStage();
+  });
+
+  // Scene actions
+  on("i_addText", "onclick", () => {
+    state.layout.scenes[cur.scene] ??= {};
+    const extras = (state.layout.scenes[cur.scene].extraTexts ??= []);
+    extras.push({ text: { [cur.locale]: "New text" }, x: 160, y: 2500, width: 1000, size: 64 });
+    cur.sel = "extra" + (extras.length - 1);
+    markDirty();
+    renderStage();
+  });
+  on("i_syncLocales", "onclick", syncAcrossLocales);
+  on("i_resetScene", "onclick", () => {
+    delete state.layout.scenes[cur.scene];
+    cur.sel = null;
+    markDirty();
+    renderStage();
+    renderNav();
+  });
+  on("i_bgTop", "oninput", (e) => { (state.layout.background ??= {}).top = e.target.value.toUpperCase(); markDirty(); renderStage(false); });
+  on("i_bgBottom", "oninput", (e) => { (state.layout.background ??= {}).bottom = e.target.value.toUpperCase(); markDirty(); renderStage(false); });
+}
+
+function placeImage(src) {
+  state.layout.scenes[cur.scene] ??= {};
+  const images = (state.layout.scenes[cur.scene].images ??= []);
+  images.push({ src, x: 260, y: 1980, width: 800 });
+  cur.sel = "image" + (images.length - 1);
+  markDirty();
+  renderStage();
+}
+
+$("imgFile").onchange = async (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  const data = await new Promise((resolveP, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolveP(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+  const result = await api.post("/api/upload", { name: file.name, data });
+  if (!result.ok) { alert(result.error ?? "upload failed"); return; }
+  const name = result.src.split("/").pop();
+  if (!state.images.includes(name)) state.images.push(name);
+  placeImage(result.src);
+  if (cur.tab !== "ios") selectTab("ios");
+  setStatus("image uploaded");
+};
+
+// Bake the current locale's effective device/caption positions into the scene
+// and drop every locale's position overrides, so all languages match.
+function syncAcrossLocales() {
+  for (const section of ["device", "title"]) {
+    const def = defaultPos(section);
+    const x = Math.round(resolve(section, "x", def.x));
+    const y = Math.round(resolve(section, "y", def.y));
+    write(section, "x", x);
+    write(section, "y", y);
+    for (const locale of Object.keys(state.layout.locales ?? {})) {
+      const sec = state.layout.locales[locale]?.[section];
+      if (sec) {
+        delete sec.x;
+        delete sec.y;
+        if (!Object.keys(sec).length) delete state.layout.locales[locale][section];
+        if (!Object.keys(state.layout.locales[locale]).length) delete state.layout.locales[locale];
+      }
+    }
+  }
+  markDirty();
+  renderStage();
+  setStatus("positions synced across languages");
+}
+
+// Promote the current scene's effective style to the default and clear the
+// per-scene overrides everywhere, so all scenes follow it.
+function useAsDefault(section) {
+  const keys = section === "device"
+    ? ["frame", "width", "x", "y", "rotation", "shadowColor", "shadowOpacity", "shadowBlur", "shadowX", "shadowY"]
+    : ["font", "fontWeight", "size", "color", "align", "width", "x", "y", "lineHeight", "letterSpacing",
+       "shadowColor", "shadowOpacity", "shadowBlur", "shadowX", "shadowY"];
+  state.layout.defaults[section] ??= {};
+  for (const key of keys) {
+    const value = resolve(section, key, state.layout.defaults[section][key]);
+    if (value !== undefined) state.layout.defaults[section][key] = value;
+  }
+  for (const scene of Object.keys(state.layout.scenes)) {
+    delete state.layout.scenes[scene][section];
+    if (!Object.keys(state.layout.scenes[scene]).length) delete state.layout.scenes[scene];
+  }
+  markDirty();
+  renderStage();
+  renderNav();
+  setStatus(`${section} style is now the default`);
+}
+
+// ---------------------------------------------------------------- chrome
+
+function renderLocaleTabs() {
+  const tabs = $("localeTabs");
+  tabs.innerHTML = "";
+  for (const locale of state.locales) {
+    const el = document.createElement("div");
+    el.className = "tab" + (locale === cur.locale ? " active" : "");
+    el.textContent = locale;
+    el.onclick = async () => {
+      cur.locale = locale;
+      await loadTitles(locale);
+      renderLocaleTabs();
+      renderNav();
+      if (cur.tab === "watch") renderWatchPane();
+      renderStage();
+    };
+    tabs.appendChild(el);
+  }
+}
+
+async function loadTitles(locale) {
+  if (!titles[locale]) titles[locale] = await api.get(`/api/titles/${locale}`);
+}
+
+async function save() {
+  const jobs = [api.put("/api/layout", state.layout)];
+  for (const locale of dirtyTitles) jobs.push(api.put(`/api/titles/${locale}`, titles[locale]));
+  await Promise.all(jobs);
+  dirtyTitles.clear();
+  dirtyLayout = false;
+  setStatus("saved ✓");
+}
+
+async function renderPreview() {
+  await save();
+  setStatus("rendering…", false);
+  const result = await api.post("/api/compose", { scene: cur.scene, locale: cur.locale });
+  if (!result.ok) { setStatus("render failed"); alert(result.stderr || result.stdout); return; }
+  setStatus("rendered ✓");
+  $("modalRender").src = `/fastlane/screenshots/${cur.locale}/${state.device}-${cur.scene}_framed.png?t=${Date.now()}`;
+  $("modal").style.display = "flex";
+}
+
+async function renderAll() {
+  await save();
+  setStatus("rendering all…", false);
+  const result = await api.post("/api/compose", {});
+  setStatus(result.ok ? "all rendered ✓" : "render failed");
+  if (!result.ok) alert(result.stderr || result.stdout);
+  else window.open("/fastlane/screenshots/framed.html", "_blank");
+}
+
+$("modal").onclick = () => { $("modal").style.display = "none"; };
+$("btnSave").onclick = save;
+$("btnRender").onclick = renderPreview;
+$("btnRenderAll").onclick = renderAll;
+$("bg").onpointerdown = () => select(null);
+window.addEventListener("beforeunload", (e) => { if (dirtyLayout || dirtyTitles.size) e.preventDefault(); });
+
+// ---------------------------------------------------------------- boot
+
+(async function boot() {
+  state = await api.get("/api/state");
+  state.layout.scenes ??= {};
+  state.layout.defaults ??= {};
+  state.images ??= [];
+  state.systemFonts ??= [];
+  state.watchShots ??= {};
+  cur.locale = state.locales[0];
+  cur.scene = firstVisibleScene();
+  await loadTitles(cur.locale);
+  renderLocaleTabs();
+  document.querySelectorAll("#navTabs button").forEach(b =>
+    b.onclick = () => selectTab(b.dataset.tab));
+  renderNav();
+  makeDraggable($("deviceGroup"), "device");
+  makeDraggable($("titleBlock"), "title");
+  makeTextEditable($("titleBlock"), "title");
+  await renderStage();
+})();
+</script>
+</body>
+</html>

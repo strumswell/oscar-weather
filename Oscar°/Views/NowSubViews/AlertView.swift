@@ -50,18 +50,22 @@ extension AlertView {
             return (brightskyAlerts.alerts?.count ?? 0) > 0
         case .canadian(let canadianAlerts):
             return !canadianAlerts.isEmpty && canadianAlerts.first?.alert != nil
+        case .oscar(let oscarAlerts):
+            return !oscarAlerts.alerts.isEmpty
         }
     }
-    
+
     func getAlertCount() -> Int {
         switch weather.alerts {
         case .brightsky(let brightskyAlerts):
             return brightskyAlerts.alerts?.count ?? 0
         case .canadian(let canadianAlerts):
             return canadianAlerts.reduce(0) { $0 + ($1.alert?.alerts?.count ?? 0) }
+        case .oscar(let oscarAlerts):
+            return oscarAlerts.alerts.count
         }
     }
-    
+
     func getFormattedHeadline() -> String {
         switch weather.alerts {
         case .brightsky(let brightskyAlerts):
@@ -87,6 +91,16 @@ extension AlertView {
                 }
             }
             return ""
+        case .oscar(let oscarAlerts):
+            // NWS headlines are long provenance sentences; the event name is the
+            // badge-sized label ("SEVERE THUNDERSTORM WARNING").
+            let alertCount = getAlertCount()
+            let event = (oscarAlerts.alerts.first?.event ?? "").uppercased()
+            if alertCount > 1 {
+                return "\(event) (+\(alertCount-1))"
+            } else {
+                return event
+            }
         }
     }
 }

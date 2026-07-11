@@ -31,6 +31,31 @@ let radarBaseURL: String = {
 enum AlertResponse {
   case brightsky(Operations.getAlerts.Output.Ok.Body.jsonPayload)
   case canadian(Operations.getCanadianWeatherAlerts.Output.Ok.Body.jsonPayload)
+  case oscar(OscarPointAlertsResponse)
+}
+
+/// oscar-server `/weather-alerts/point` response — hand-written like the other
+/// oscar-server calls (the server is not part of the generated OpenAPI client).
+/// Used for US locations, where the server ingests NWS alerts; `source` drives
+/// the attribution line ("nws" → NOAA / National Weather Service).
+struct OscarPointAlertsResponse: Decodable {
+  let alertCount: Int
+  let alerts: [OscarPointAlert]
+}
+
+struct OscarPointAlert: Decodable {
+  let alertId: String
+  let source: String
+  let event: String
+  let severity: String
+  let urgency: String
+  let certainty: String
+  let responseType: String?
+  let onsetAt: Date?
+  let expiresAt: Date?
+  let headline: String?
+  let description: String?
+  let instruction: String?
 }
 
 final class APIClient: Sendable {
@@ -70,11 +95,19 @@ final class APIClient: Sendable {
     }
   }
 
+  /// Staging seams, set once at launch by `ScreenshotMode.bootstrap()` before
+  /// any client exists. They exist because watchOS runs URLSession loading
+  /// out of process, where a registered `URLProtocol` never fires: the
+  /// middleware intercepts the generated clients, `stagedFetch` the raw
+  /// `fetchWithRetry` path. Empty/nil outside screenshot runs.
+  nonisolated(unsafe) static var stagingMiddlewares: [any ClientMiddleware] = []
+  nonisolated(unsafe) static var stagedFetch: (@Sendable (URLRequest) -> (Data, HTTPURLResponse)?)?
+
   class func get(url: URL, prepending middlewares: [any ClientMiddleware] = []) -> Client {
     return Client(
       serverURL: url,
       transport: URLSessionTransport(),
-      middlewares: middlewares + [
+      middlewares: Self.stagingMiddlewares + middlewares + [
         CachingMiddleware(cacheTime: 60),
         ContactIdentityMiddleware(),
         RetryingMiddleware(
@@ -392,14 +425,19 @@ final class APIClient: Sendable {
     countryCode: String? = nil
   ) async throws -> AlertResponse {
     let useCanadian: Bool
+    let useUnitedStates: Bool
     if let countryCode {
       useCanadian = countryCode == "CA"
+      useUnitedStates = countryCode == "US"
     } else {
       useCanadian = isCanadianLocation(coordinates)
+      useUnitedStates = !useCanadian && isUnitedStatesLocation(coordinates)
     }
 
     if useCanadian {
       return try await getCanadianWeatherAlerts(coordinates: coordinates)
+    } else if useUnitedStates {
+      return try await getOscarWeatherAlerts(coordinates: coordinates)
     } else {
       return try await getBrightskyAlerts(coordinates: coordinates)
     }
@@ -416,6 +454,63 @@ final class APIClient: Sendable {
     let minimumLatitude = coordinates.longitude < -95.0 ? 49.0 : 45.0
     return coordinates.latitude >= minimumLatitude
   }
+
+  /// NWS alert coverage boxes: CONUS, Alaska, Hawaii, Puerto Rico/USVI, and
+  /// Guam/Northern Marianas. Only consulted after the Canada check, so the
+  /// shared-border strip keeps resolving to Environment Canada as before.
+  private func isUnitedStatesLocation(_ coordinates: CLLocationCoordinate2D) -> Bool {
+    let lat = coordinates.latitude
+    let lon = coordinates.longitude
+    let conus = lat >= 24.3 && lat <= 49.5 && lon >= -125.0 && lon <= -66.5
+    let alaska = lat >= 51.0 && lat <= 72.0 && lon >= -170.0 && lon <= -129.5
+    let hawaii = lat >= 18.5 && lat <= 22.5 && lon >= -160.6 && lon <= -154.5
+    let caribbean = lat >= 17.4 && lat <= 18.6 && lon >= -68.0 && lon <= -64.3
+    let pacific = lat >= 12.9 && lat <= 20.6 && lon >= 144.5 && lon <= 146.1
+    return conus || alaska || hawaii || caribbean || pacific
+  }
+
+  /// Active severe-weather alerts at a point from oscar-server
+  /// (`/weather-alerts/point`, NWS-sourced for US locations). Geometry is
+  /// skipped — the badge and detail list never render it, and US multi-zone
+  /// alerts can carry hundreds of KB of polygon rings.
+  private func getOscarWeatherAlerts(coordinates: CLLocationCoordinate2D) async throws
+    -> AlertResponse
+  {
+    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
+    let language = Locale.current.language.languageCode?.identifier == "de" ? "de" : "en"
+    guard
+      let url = URL(
+        string:
+          "\(radarBaseURL)/weather-alerts/point?lat=\(outboundCoordinates.latitude)&lon=\(outboundCoordinates.longitude)&lang=\(language)&includeGeometry=false"
+      )
+    else { throw URLError(.badURL) }
+
+    var request = URLRequest(url: url)
+    request.addAPIContactIdentity()
+    let (data, http) = try await Self.fetchWithRetry(request)
+    guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
+    return .oscar(try Self.oscarAlertDecoder.decode(OscarPointAlertsResponse.self, from: data))
+  }
+
+  /// oscar-server dates are ISO-8601 with fractional seconds; accept the plain
+  /// variant too.
+  private static let oscarAlertDecoder: JSONDecoder = {
+    let fractional = ISO8601DateFormatter()
+    fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    let plain = ISO8601DateFormatter()
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .custom { decoder in
+      let container = try decoder.singleValueContainer()
+      let value = try container.decode(String.self)
+      guard let date = fractional.date(from: value) ?? plain.date(from: value) else {
+        throw DecodingError.dataCorruptedError(
+          in: container, debugDescription: "Unparseable date: \(value)"
+        )
+      }
+      return date
+    }
+    return decoder
+  }()
 
   private func getBrightskyAlerts(coordinates: CLLocationCoordinate2D) async throws -> AlertResponse
   {
@@ -567,6 +662,7 @@ final class APIClient: Sendable {
   static func fetchWithRetry(
     _ request: URLRequest, attempts: Int = 3
   ) async throws -> (Data, HTTPURLResponse) {
+    if let staged = Self.stagedFetch?(request) { return staged }
     var lastError: Error = URLError(.unknown)
     for attempt in 0..<attempts {
       if attempt > 0 {

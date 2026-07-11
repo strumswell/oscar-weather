@@ -85,11 +85,12 @@ struct WeatherSimulationView: View {
                             isSouthernHemisphere: location.coordinates.latitude < 0,
                             skyDarkness: Double(snapshot.nightAmount)
                         )
-                        // Visible whenever it's above the horizon: pale in daylight, brightening
-                        // as the sky darkens. Clouds dim and blur it (below) but never hide it —
-                        // even full overcast keeps it at ~60% of its clear-sky opacity.
+                        // Realistic daytime visibility: a moon far enough from the sun with
+                        // enough lit surface shows as a pale disc; a thin crescent near the sun
+                        // fades to nothing, matching what's actually out the window. Full strength
+                        // at night. Clouds dim and blur it (below) but never hide it outright.
                         .opacity(
-                            Double(0.35 + 0.65 * snapshot.nightAmount)
+                            MoonPhase.skyVisibility(phase: moonPhase, nightAmount: Double(snapshot.nightAmount))
                                 * Double(1 - snapshot.cloudDensity * 0.4)
                         )
                         .blur(radius: CGFloat(snapshot.cloudDensity) * 2.5)

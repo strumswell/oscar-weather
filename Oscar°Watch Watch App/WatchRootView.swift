@@ -11,12 +11,17 @@ import SwiftUI
 struct WatchRootView: View {
     @Environment(Weather.self) private var weather: Weather
 
+    // Screenshot runs preselect a page via `-watchPage <0-3>` (argument
+    // domain); interactive launches start at 0 as before.
+    @State private var selection = min(3, max(0, UserDefaults.standard.integer(forKey: "watchPage")))
+
     var body: some View {
-        TabView {
+        TabView(selection: $selection) {
             WatchNowView()
                 .containerBackground(for: .tabView) {
                     WatchSimulationView()
                 }
+                .tag(0)
 
             // nil means the server confirmed there is no radar coverage here —
             // the page would have nothing to say.
@@ -25,17 +30,20 @@ struct WatchRootView: View {
                     .containerBackground(for: .tabView) {
                         WatchSimulationView(style: .gradientOnly)
                     }
+                    .tag(1)
             }
 
             WatchHourlyView()
                 .containerBackground(for: .tabView) {
                     WatchSimulationView(style: .gradientOnly)
                 }
+                .tag(2)
 
             WatchDailyView()
                 .containerBackground(for: .tabView) {
                     WatchSimulationView(style: .gradientOnly)
                 }
+                .tag(3)
         }
         .tabViewStyle(.verticalPage)
         .preferredColorScheme(.dark)

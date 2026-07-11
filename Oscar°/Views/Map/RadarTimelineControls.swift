@@ -416,12 +416,18 @@ private struct TimelineScrubber: View {
             let runs = loadedRuns()
             let nowCenter = thumbRadius + xOffset(for: nowIndex, width: trackWidth)
             let nowLabelX = min(max(nowCenter - nowLabelWidth / 2, 0), width - nowLabelWidth)
-            let showStart = nowLabelX > 52
-            let showEnd = nowLabelX + nowLabelWidth < width - 60
+            // All collision tests use measured label widths (see labelWidth):
+            // the edge labels can be wide ("12:55 PM"), mid marks are usually
+            // short ("2 PM", "14:00") — hardcoded slot constants either waste
+            // marks or overlap, depending on locale.
+            let startWidth = labelWidth(edgeLabel(dates.first ?? nil))
+            let endWidth = labelWidth(edgeLabel(dates.last ?? nil))
+            let showStart = nowLabelX > startWidth + 8
+            let showEnd = nowLabelX + nowLabelWidth < width - endWidth - 8
             let midMarks = midAxisLabels(dates: dates, trackWidth: trackWidth).filter { mark in
-                abs(mark.x - nowCenter) > 42
-                    && mark.x - 24 > (showStart ? 44 : 8)
-                    && mark.x + 24 < width - (showEnd ? 44 : 8)
+                abs(mark.x - nowCenter) > (nowLabelWidth + mark.width) / 2 + 4
+                    && mark.x - mark.width / 2 > (showStart ? startWidth + 6 : 8)
+                    && mark.x + mark.width / 2 < width - (showEnd ? endWidth + 6 : 8)
             }
 
             VStack(spacing: 6) {
@@ -441,7 +447,7 @@ private struct TimelineScrubber: View {
 
     private func trackZone(width: CGFloat, trackWidth: CGFloat, dates: [Date?],
                            nowIndex: Int, runs: [ClosedRange<Int>],
-                           midMarks: [(x: CGFloat, text: String)]) -> some View {
+                           midMarks: [(x: CGFloat, text: String, width: CGFloat)]) -> some View {
         let thumbOffset = dragX.map { min(max($0 - thumbRadius, 0), trackWidth) }
             ?? xOffset(for: selectedIndex, width: trackWidth)
         let selectionIsLoaded = loadedIndices.contains(selectedIndex)
@@ -572,7 +578,7 @@ private struct TimelineScrubber: View {
     /// neighbors when space gets tight (filtering happens in body, shared with
     /// the track's tick marks).
     private func axisRow(width: CGFloat, dates: [Date?],
-                         midMarks: [(x: CGFloat, text: String)],
+                         midMarks: [(x: CGFloat, text: String, width: CGFloat)],
                          nowLabelX: CGFloat, showStart: Bool, showEnd: Bool) -> some View {
         ZStack(alignment: .topLeading) {
             HStack {
@@ -586,8 +592,9 @@ private struct TimelineScrubber: View {
             }
             ForEach(midMarks, id: \.x) { label in
                 Text(label.text)
-                    .frame(width: 48)
-                    .offset(x: label.x - 24)
+                    .fixedSize()
+                    .frame(width: label.width + 2)
+                    .offset(x: label.x - (label.width + 2) / 2)
             }
             Text("Jetzt")
                 .font(.caption2.weight(.semibold))
@@ -602,34 +609,63 @@ private struct TimelineScrubber: View {
 
     private func edgeLabel(_ date: Date?) -> String {
         guard let date else { return "--:--" }
+        return axisTime(date)
+    }
+
+    /// Axis time label. 12-hour locales get ":00" dropped on full hours
+    /// ("2 PM" instead of "2:00 PM") — the AM/PM suffix already eats the
+    /// width budget, and round track marks are full hours almost always.
+    private func axisTime(_ date: Date) -> String {
+        if uses12HourClock, Calendar.current.component(.minute, from: date) == 0 {
+            return SettingService.formattedTime(date, showsMinutes: false)
+        }
         return SettingService.formattedTime(date)
     }
 
-    /// Round times between the first and last frame. The step is chosen by the
-    /// space actually available — smallest candidate whose on-track spacing
-    /// clears one label width — so the axis fills wide layouts with more times
-    /// and never crowds narrow ones.
-    private func midAxisLabels(dates: [Date?], trackWidth: CGFloat) -> [(x: CGFloat, text: String)] {
+    /// AM/PM designators are letters; 24-hour strings are digits and ":".
+    private var uses12HourClock: Bool {
+        SettingService.formattedTime(.now).contains(where: \.isLetter)
+    }
+
+    /// The axis row renders in .caption.monospacedDigit() — measure candidate
+    /// labels with the matching UIFont so spacing decisions use real widths.
+    private static let axisUIFont = UIFont.monospacedDigitSystemFont(
+        ofSize: UIFont.preferredFont(forTextStyle: .caption1).pointSize, weight: .regular)
+
+    private func labelWidth(_ text: String) -> CGFloat {
+        ceil((text as NSString).size(withAttributes: [.font: Self.axisUIFont]).width)
+    }
+
+    /// Round times between the first and last frame. Candidate steps go from
+    /// dense to sparse; for each one the labels are generated and MEASURED,
+    /// and the first step whose widest label (plus a 12 pt gap) fits the
+    /// on-track spacing wins. Hour-only strings ("2 PM") therefore pack
+    /// tighter than minute strings ("2:30 PM") automatically, in every
+    /// locale, on every layer span — radar's 3 h and the models' 36 h alike.
+    private func midAxisLabels(
+        dates: [Date?], trackWidth: CGFloat
+    ) -> [(x: CGFloat, text: String, width: CGFloat)] {
         guard let first = dates.first ?? nil, let last = dates.last ?? nil,
               last > first else { return [] }
         let span = last.timeIntervalSince(first)
-        let minLabelSpacing: CGFloat = 55
         let steps: [TimeInterval] = [15, 30, 60, 120, 180, 360, 720, 1440].map { $0 * 60 }
-        guard let step = steps.first(where: {
-            CGFloat($0 / span) * trackWidth >= minLabelSpacing
-        }) else { return [] }
-
-        var labels: [(x: CGFloat, text: String)] = []
-        var tick = (first.timeIntervalSince1970 / step).rounded(.up) * step
-        while tick < last.timeIntervalSince1970 - 1 {
-            let fraction = CGFloat((tick - first.timeIntervalSince1970) / span)
-            labels.append((
-                x: thumbRadius + fraction * trackWidth,
-                text: SettingService.formattedTime(Date(timeIntervalSince1970: tick))
-            ))
-            tick += step
+        for step in steps {
+            let spacing = CGFloat(step / span) * trackWidth
+            var marks: [(x: CGFloat, text: String, width: CGFloat)] = []
+            var widest: CGFloat = 0
+            var tick = (first.timeIntervalSince1970 / step).rounded(.up) * step
+            while tick < last.timeIntervalSince1970 - 1 {
+                let text = axisTime(Date(timeIntervalSince1970: tick))
+                widest = max(widest, labelWidth(text))
+                let fraction = CGFloat((tick - first.timeIntervalSince1970) / span)
+                marks.append((x: thumbRadius + fraction * trackWidth, text: text, width: 0))
+                tick += step
+            }
+            if spacing >= widest + 12 {
+                return marks.map { (x: $0.x, text: $0.text, width: widest) }
+            }
         }
-        return labels
+        return []
     }
 
     // MARK: Geometry & segments

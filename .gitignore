@@ -13,3 +13,16 @@ build/
 # Stray dir from a misfired -I include flag being treated as a path
 /Oscar°.xcodeproj/-I/
 /Oscar°.xcodeproj/-Xcc/
+
+# fastlane screenshot output (config, fonts and captions stay in git);
+# fastlane/README.md is auto-generated boilerplate — docs live in SCREENSHOTS.md
+fastlane/screenshots/**/*.png
+fastlane/screenshots/**/*.html
+fastlane/report.xml
+fastlane/test_output/
+fastlane/README.md
+fastlane/derived_data/
+fastlane/frame-studio/.build/
+fastlane/frame-studio/__pycache__/
+fastlane/metadata/
+fastlane/Preview.html
