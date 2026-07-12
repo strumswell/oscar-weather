@@ -352,7 +352,8 @@ struct StormCellInfoSheet: View {
     /// 8-way compass word for the movement direction ("toward").
     private var compassDirection: String {
         let names = ["N", "NO", "O", "SO", "S", "SW", "W", "NW"]
-        let index = Int(((cell.bearingDeg + 22.5) / 45).rounded(.down)) % 8
+        let normalizedBearing = cell.bearingDeg.truncatingRemainder(dividingBy: 360) + 360
+        let index = Int(((normalizedBearing.truncatingRemainder(dividingBy: 360) + 22.5) / 45).rounded(.down)) % 8
         return names[index]
     }
 
@@ -372,6 +373,8 @@ struct StormCellInfoSheet: View {
     }
 
     private func formatted(_ value: Double) -> String {
-        value >= 10 ? String(Int(value.rounded())) : String(format: "%.1f", value)
+        value >= 10
+            ? String(Int(value.rounded()))
+            : value.formatted(.number.precision(.fractionLength(1)))
     }
 }

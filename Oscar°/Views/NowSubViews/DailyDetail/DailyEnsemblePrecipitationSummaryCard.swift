@@ -60,7 +60,7 @@ struct DailyEnsemblePrecipitationSummaryCard: View {
       statRow(
         label: "Unsicherster Tag",
         subtitle: nil,
-        value: highestUncertaintyDay.map { "±\(String(format: "%.1f", $0.span / 2)) \(unit)" } ?? "--",
+        value: highestUncertaintyDay.map { "±\(($0.span / 2).formatted(.number.precision(.fractionLength(1)))) \(unit)" } ?? "--",
         valueColor: .orange,
         date: highestUncertaintyDay.map { shortDate($0.point.date) }
       )
@@ -68,7 +68,7 @@ struct DailyEnsemblePrecipitationSummaryCard: View {
       statRow(
         label: "Ø Ensemble-Unsicherheit",
         subtitle: nil,
-        value: avgUncertainty.map { "\(String(format: "%.1f", $0)) \(unit)" } ?? "--",
+        value: avgUncertainty.map { "\($0.formatted(.number.precision(.fractionLength(1)))) \(unit)" } ?? "--",
         valueColor: .secondary,
         date: nil
       )
@@ -76,7 +76,7 @@ struct DailyEnsemblePrecipitationSummaryCard: View {
       statRow(
         label: "Gesamtniederschlag",
         subtitle: nil,
-        value: totalPrecipitation.map { "\(String(format: "%.1f", $0)) \(unit)" } ?? "--",
+        value: totalPrecipitation.map { "\($0.formatted(.number.precision(.fractionLength(1)))) \(unit)" } ?? "--",
         valueColor: .blue,
         date: nil
       )
@@ -85,7 +85,7 @@ struct DailyEnsemblePrecipitationSummaryCard: View {
 
   private func formatted(_ value: Double?) -> String {
     guard let value else { return "--" }
-    return "\(String(format: "%.1f", value)) \(unit)"
+    return "\(value.formatted(.number.precision(.fractionLength(1)))) \(unit)"
   }
 
   private func shortDate(_ date: Date) -> String {

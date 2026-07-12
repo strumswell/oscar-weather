@@ -189,7 +189,6 @@ struct LegalView: View {
 
           settingsNavigationLink {
             MemoryView()
-              .navigationBarBackButtonHidden()
           } label: {
             HStack {
               Spacer()

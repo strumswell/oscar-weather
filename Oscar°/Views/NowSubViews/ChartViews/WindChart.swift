@@ -12,7 +12,7 @@ struct WindChart: View {
   var windspeed10m: [Double]
   var windspeed80m: [Double]
   var windspeed120m: [Double]
-  var windspeed180m: [Double]
+  var windspeed180m: [Double?]
   var winddirection10m: [Double]
   var time: [Double]
   var unit: String
@@ -48,20 +48,23 @@ struct WindChart: View {
 
   var windData180m: [(time: Date, speed: Double)] {
     let count = min(time.count, windspeed180m.count)
-    return (0..<count).map { index in
-      (time: Date(timeIntervalSince1970: time[index]), speed: windspeed180m[index])
+    return (0..<count).compactMap { index in
+      windspeed180m[index].map { speed in
+        (time: Date(timeIntervalSince1970: time[index]), speed: speed)
+      }
     }
   }
 
   var allWindData: [(time: Date, speed10m: Double, direction10m: Double, speed80m: Double, speed120m: Double, speed180m: Double)] {
     let count = min(time.count, min(windspeed10m.count, min(windspeed80m.count, min(windspeed120m.count, min(windspeed180m.count, winddirection10m.count)))))
-    return (0..<count).map { index in
-      (time: Date(timeIntervalSince1970: time[index]),
+    return (0..<count).compactMap { index in
+      guard let speed180m = windspeed180m[index] else { return nil }
+      return (time: Date(timeIntervalSince1970: time[index]),
        speed10m: windspeed10m[index],
        direction10m: winddirection10m[index], 
        speed80m: windspeed80m[index],
        speed120m: windspeed120m[index],
-       speed180m: windspeed180m[index])
+       speed180m: speed180m)
     }
   }
 

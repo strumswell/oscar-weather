@@ -20,8 +20,9 @@ struct AlertListView: View {
                         AlertDetailView(alert: .brightsky(alert))
                     }
                 case .canadian(let canadianAlerts):
-                    if let firstAlert = canadianAlerts.first?.alert?.alerts {
-                        AlertDetailView(alert: .canadian(firstAlert))
+                    let alerts = canadianAlerts.flatMap { $0.alert?.alerts ?? [] }
+                    ForEach(Array(alerts.enumerated()), id: \.offset) { _, alert in
+                        AlertDetailView(alert: .canadian([alert]))
                     }
                 case .oscar(let oscarAlerts):
                     ForEach(oscarAlerts.alerts, id: \.alertId) { alert in
@@ -67,14 +68,14 @@ struct AlertDetailView: View {
             .padding(.bottom, 1)
             
             HStack {
-                Text("Start: " + getStartDate())
+                Text("Start: \(getStartDate())")
                     .font(.subheadline)
                     .lineLimit(5)
                     .minimumScaleFactor(0.5)
                 Spacer()
             }
             HStack {
-                Text("Ende: " + getEndDate())
+                Text("Ende: \(getEndDate())")
                     .font(.subheadline)
                     .lineLimit(5)
                     .minimumScaleFactor(0.5)
@@ -101,7 +102,7 @@ struct AlertDetailView: View {
             }
 
             HStack {
-                Text("Quelle: " + getSource())
+                Text("Quelle: \(getSource())")
                     .font(.subheadline)
                 Spacer()
             }
@@ -114,30 +115,30 @@ extension AlertDetailView {
     func getStartDate() -> String {
         switch alert {
         case .brightsky(let brightskyAlert):
-            return formatDate(date: brightskyAlert.onset ?? Date())
+            return brightskyAlert.onset.map(formatDate) ?? String(localized: "Unbekannt")
         case .canadian(let canadianAlert):
             if let dateString = canadianAlert.first?.eventOnsetTime {
-                return formatDate(date: parseISO8601Date(dateString) ?? Date())
+                return parseISO8601Date(dateString).map(formatDate) ?? String(localized: "Unbekannt")
             } else {
-                return formatDate(date: Date())
+                return String(localized: "Unbekannt")
             }
         case .oscar(let oscarAlert):
-            return formatDate(date: oscarAlert.onsetAt ?? Date())
+            return oscarAlert.onsetAt.map(formatDate) ?? String(localized: "Unbekannt")
         }
     }
 
     func getEndDate() -> String {
         switch alert {
         case .brightsky(let brightskyAlert):
-            return formatDate(date: brightskyAlert.expires ?? Date())
+            return brightskyAlert.expires.map(formatDate) ?? String(localized: "Unbekannt")
         case .canadian(let canadianAlert):
             if let dateString = canadianAlert.first?.eventEndTime {
-                return formatDate(date: parseISO8601Date(dateString) ?? Date())
+                return parseISO8601Date(dateString).map(formatDate) ?? String(localized: "Unbekannt")
             } else {
-                return formatDate(date: Date())
+                return String(localized: "Unbekannt")
             }
         case .oscar(let oscarAlert):
-            return formatDate(date: oscarAlert.expiresAt ?? Date())
+            return oscarAlert.expiresAt.map(formatDate) ?? String(localized: "Unbekannt")
         }
     }
     
@@ -148,6 +149,10 @@ extension AlertDetailView {
     func parseISO8601Date(_ dateString: String) -> Date? {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = formatter.date(from: dateString) {
+            return date
+        }
+        formatter.formatOptions = [.withInternetDateTime]
         return formatter.date(from: dateString)
     }
     

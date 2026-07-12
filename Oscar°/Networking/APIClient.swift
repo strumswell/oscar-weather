@@ -300,9 +300,6 @@ final class APIClient: Sendable {
     -> Operations.getAirQuality.Output.Ok.Body.jsonPayload
   {
     let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
-    let fallbackForecast: Operations.getAirQuality.Output.Ok.Body.jsonPayload = .init(
-      latitude: 0, longitude: 0)
-
     let response = try await openMeteoAqi.getAirQuality(
       .init(
         query: .init(
@@ -324,7 +321,7 @@ final class APIClient: Sendable {
         return result
       }
     case .undocumented(statusCode: _, _):
-      return fallbackForecast
+      throw URLError(.badServerResponse)
     }
   }
 

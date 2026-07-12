@@ -48,7 +48,8 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
     private override init() {
         super.init()
         self.manager.delegate = self
-        self.manager.desiredAccuracy = kCLLocationAccuracyBest
+        self.manager.desiredAccuracy = kCLLocationAccuracyKilometer
+        self.manager.distanceFilter = 2_500
         self.authStatus = self.manager.authorizationStatus
 
         // Always authorization has no UI on watchOS; whenInUse is the supported scope there.
@@ -205,7 +206,8 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         return location
     }
     
-    internal func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+    internal func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = manager.authorizationStatus
         authStatus = status
         if status == .authorizedWhenInUse || status == .authorizedAlways {
             // Deferred at init on a fresh install (see init): the onboarding

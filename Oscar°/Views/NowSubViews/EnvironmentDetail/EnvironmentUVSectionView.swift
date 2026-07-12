@@ -19,7 +19,7 @@ struct EnvironmentUVSectionView: View {
             EnvironmentDetailCard {
                 EnvironmentDetailHeaderView(
                     title: "UV-Index",
-                    value: currentUV.map { String(format: "%.1f", $0) } ?? "--",
+                    value: currentUV.map { $0.formatted(.number.precision(.fractionLength(1))) } ?? "--",
                     badge: currentUVBadge,
                     color: currentUVColor,
                     subtitle: nil

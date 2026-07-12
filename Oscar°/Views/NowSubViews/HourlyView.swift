@@ -64,7 +64,7 @@ struct HourlyView: View {
       .animation(.snappy, value: dayLabel)
       .animation(.snappy, value: showDayBadge)
 
-      Button(action: presentDetails) {
+      Group {
         ScrollView(.horizontal) {
           LazyHStack(spacing: 12) {
             if shouldShowPlaceholders {
@@ -101,10 +101,10 @@ struct HourlyView: View {
         .contentMargins(.trailing, 16, for: .scrollContent)
         .frame(maxWidth: .infinity)
       }
-      .buttonStyle(.plain)
+      .contentShape(.rect)
+      .onTapGesture(perform: presentDetails)
       .disabled(!hasHourlyDetailData)
-      .accessibilityLabel(Text("Stündliche Details"))
-      .accessibilityHint(Text("Öffnet die stündliche Wettervorhersage"))
+      .accessibilityAction(named: Text("Stündliche Details"), presentDetails)
     }
     .scrollTransition { content, phase in
       content

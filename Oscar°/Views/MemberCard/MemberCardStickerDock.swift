@@ -9,6 +9,7 @@ struct MemberCardStickerDock: View {
     let onPickupStarted: (String, CGPoint) -> Void
     let onPickupMoved: (CGPoint) -> Void
     let onPickupEnded: (CGPoint) -> Void
+    let onAccessibleAdd: (String) -> Void
     let onRemoveSelection: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -36,6 +37,13 @@ struct MemberCardStickerDock: View {
         }
         .shadow(color: .black.opacity(0.16), radius: 22, y: 12)
         .accessibilityElement(children: .contain)
+        .accessibilityActions {
+            ForEach(assetNames, id: \.self) { assetName in
+                Button(MemberCard.stickerTitle(for: assetName)) {
+                    onAccessibleAdd(assetName)
+                }
+            }
+        }
     }
 
     private var stickerRail: some View {
@@ -79,6 +87,7 @@ struct MemberCardStickerDock: View {
         .buttonStyle(.plain)
         .disabled(!canRemoveSelection)
         .opacity(canRemoveSelection ? 1 : 0.46)
+        .accessibilityLabel("Sticker entfernen")
         .accessibilityHint("Removes the currently selected sticker from the member card.")
     }
 

@@ -42,6 +42,7 @@ final class NotificationSettingsManager: NSObject {
     private let pendingLiveActivityPushToStartTokenKey = "notificationPendingLiveActivityPushToStartToken"
     private let latestLiveActivityPushToStartTokenKey = "notificationLatestLiveActivityPushToStartToken"
     private let legacyDeregistrationCompletedKey = "notificationDidDeregisterLegacyRadarSubscription"
+    @ObservationIgnored private var subscriptionSyncTask: Task<Void, Never>?
 
     /// Old notification backend the app used before migrating to ``radarBaseURL`` (server.oscars.love).
     /// Kept only so the client can best-effort de-register its legacy subscription once during migration.
@@ -260,6 +261,23 @@ final class NotificationSettingsManager: NSObject {
     }
 
     private func syncSubscriptionForCurrentState(forceRegister: Bool) async {
+        if let subscriptionSyncTask {
+            await subscriptionSyncTask.value
+            if forceRegister {
+                await syncSubscriptionForCurrentState(forceRegister: true)
+            }
+            return
+        }
+
+        let task = Task { @MainActor [self] in
+            await performSubscriptionSync(forceRegister: forceRegister)
+            subscriptionSyncTask = nil
+        }
+        subscriptionSyncTask = task
+        await task.value
+    }
+
+    private func performSubscriptionSync(forceRegister: Bool) async {
         guard let token = Keychain.load(key: cachedDeviceTokenKey), !token.isEmpty else {
             notificationLogger.info("Lifecycle: subscription sync skipped; missing cached device token")
             return

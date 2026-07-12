@@ -46,7 +46,9 @@ struct ScreenshotWidgetGallery: View {
                     .clipShape(.rect(cornerRadius: 28, style: .continuous))
                     .shadow(color: .black.opacity(0.35), radius: 22, y: 12)
             }
-            .accessibilityIdentifier("screenshot.widgetGallery")
+            .accessibilityIdentifier(
+                radar == nil ? "screenshot.widgetGallery.loading" : "screenshot.widgetGallery.ready"
+            )
         }
         .task {
             WidgetBasemapStore.registerRequestedStyle(MapBasemapStyle.fiord.rawValue)

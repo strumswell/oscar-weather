@@ -616,15 +616,16 @@ enum SyntheticRadar {
 
     private static func grayPNG(pixels: [UInt8], width: Int, height: Int) -> Data {
         var pixels = pixels
-        let context = pixels.withUnsafeMutableBytes { raw in
-            CGContext(
+        let image = pixels.withUnsafeMutableBytes { raw -> CGImage? in
+            let context = CGContext(
                 data: raw.baseAddress, width: width, height: height,
                 bitsPerComponent: 8, bytesPerRow: width,
                 space: CGColorSpaceCreateDeviceGray(),
                 bitmapInfo: CGImageAlphaInfo.none.rawValue
             )
+            return context?.makeImage()
         }
-        guard let image = context?.makeImage() else { return Data() }
+        guard let image else { return Data() }
         return UIImage(cgImage: image).pngData() ?? Data()
     }
 

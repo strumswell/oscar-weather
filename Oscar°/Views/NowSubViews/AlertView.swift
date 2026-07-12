@@ -28,6 +28,8 @@ struct AlertView: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .glassEffect(.regular.tint(.orange.opacity(0.5)), in: Capsule())
+        .frame(minWidth: 44, minHeight: 44)
+        .contentShape(.rect)
         .onTapGesture {
             UIApplication.shared.playHapticFeedback()
             presentation.present(.alerts)

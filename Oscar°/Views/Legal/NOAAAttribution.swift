@@ -9,8 +9,7 @@ import SwiftUI
 
 struct NOAAAttribution: View {
     var body: some View {
-        NavigationStack {
-            List {
+        List {
                 Section(header: Text("Über")) {
                     Text("Oscar verwendet Prognosedaten des Global Forecast System (GFS), einem Wettervorhersagemodell der National Centers for Environmental Prediction (NCEP), bereitgestellt durch NOAA. NOAA/NWS-Daten sind in der Regel gemeinfrei, sofern nicht anders gekennzeichnet. Die Nutzung stellt keine Unterstützung, Empfehlung oder offizielle Verbindung zu NOAA, NWS oder NCEP dar.")
                 }
@@ -19,7 +18,6 @@ struct NOAAAttribution: View {
                     Link("GFS bei NOAA/NCEI", destination: URL(string: "https://www.ncei.noaa.gov/products/weather-climate-models/global-forecast")!)
                     Link("NWS Disclaimer", destination: URL(string: "https://www.weather.gov/disclaimer/")!)
                 }
-            }
         }
         .navigationTitle("NOAA GFS")
         .navigationBarTitleDisplayMode(.inline)

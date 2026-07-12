@@ -139,8 +139,9 @@ final class OscarRadarState {
         fraction: 0.16, floor: 64 * 1024 * 1024, cap: 512 * 1024 * 1024)
 
     private var residencyRadius: Int {
-        let bytesPerFrame = frames.lazy.compactMap { $0 }.first
-            .map { max(1, $0.gridPayload.width * $0.gridPayload.height) } ?? 4_000_000
+        let bytesPerFrame = frames.lazy.compactMap { $0 }
+            .map { max(1, $0.gridPayload.width * $0.gridPayload.height) }
+            .max() ?? 4_000_000
         return max(8, Self.gridResidencyBudget / bytesPerFrame / 2)
     }
 
@@ -282,6 +283,7 @@ final class OscarRadarState {
 
     func play() {
         guard hasAnyLoadedFrame else { return }
+        playbackTimer?.invalidate()
         isPlaying = true
         interactionState = .playing
         restartBackgroundPreloadIfNeeded()

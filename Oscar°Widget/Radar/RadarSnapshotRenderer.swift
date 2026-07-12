@@ -123,7 +123,7 @@ enum RadarSnapshotRenderer {
     /// (GlobalRadarWidget's MKMapSnapshotter) instead of the app-group prerender.
     static func overlayImage(
         center: CLLocationCoordinate2D, spanMeters: Double, size: CGSize
-    ) async -> UIImage? {
+    ) async -> Rendered? {
         let plan: RadarOverlayPlan
         if let region = RadarRegion.bestSource(latitude: center.latitude, longitude: center.longitude) {
             plan = await radarPlan(region: region, around: center, includeArrows: false)
@@ -138,11 +138,12 @@ enum RadarSnapshotRenderer {
         let format = UIGraphicsImageRendererFormat()
         format.scale = compositeScale
         format.opaque = false
-        return UIGraphicsImageRenderer(size: size, format: format).image { _ in
+        let image = UIGraphicsImageRenderer(size: size, format: format).image { _ in
             for tile in tiles {
                 tile.image.draw(in: tile.rect)
             }
         }
+        return Rendered(image: image, frameDate: plan.frameDate)
     }
 
     // MARK: - Basemap
@@ -249,26 +250,40 @@ enum RadarSnapshotRenderer {
         let y0 = Int(floor(frame.y0 * n)), y1 = Int(floor(frame.y1 * n))
         guard x0 >= 0, y0 >= 0, (x1 - x0 + 1) * (y1 - y0 + 1) <= 16 else { return [] }
 
-        var tiles: [OverlayTile] = []
+        var requests: [(url: URL, tx: Int, ty: Int)] = []
         for tx in x0...x1 {
             for ty in y0...y1 {
                 let urlString = template
                     .replacingOccurrences(of: "{z}", with: "\(zoom)")
                     .replacingOccurrences(of: "{x}", with: "\(tx)")
                     .replacingOccurrences(of: "{y}", with: "\(ty)")
-                guard let url = URL(string: urlString),
-                      let data = await fetchData(url),
-                      let image = UIImage(data: data) else { continue }
+                guard let url = URL(string: urlString) else { continue }
+                requests.append((url, tx, ty))
+            }
+        }
+
+        return await withTaskGroup(of: OverlayTile?.self) { group in
+            for request in requests {
+                group.addTask {
+                    guard let data = await fetchData(request.url),
+                          let image = UIImage(data: data) else { return nil }
+                    let tx = request.tx
+                    let ty = request.ty
                 let origin = frame.point(forWorldX: Double(tx) / n, worldY: Double(ty) / n)
                 let corner = frame.point(forWorldX: Double(tx + 1) / n, worldY: Double(ty + 1) / n)
-                tiles.append(OverlayTile(
+                    return OverlayTile(
                     rect: CGRect(x: origin.x, y: origin.y, width: corner.x - origin.x, height: corner.y - origin.y),
                     image: image,
                     zoom: zoom, tx: tx, ty: ty
-                ))
+                    )
+                }
             }
+            var tiles: [OverlayTile] = []
+            for await tile in group {
+                if let tile { tiles.append(tile) }
+            }
+            return tiles
         }
-        return tiles
     }
 
     // MARK: - Drawing
@@ -405,7 +420,6 @@ enum RadarSnapshotRenderer {
                     guard my > -1, my < Double(mosaicH) else { continue }
                     let iy = Int(my.rounded(.down))
                     let (wy0, wy1, wy2, wy3) = bsplineWeights(my - Double(iy))
-                    let rowWeights = [wy0, wy1, wy2, wy3]
 
                     for px in 0..<outW {
                         let wx = frame.x0 + (Double(px) + 0.5) / Double(outW) * (frame.x1 - frame.x0)
@@ -413,19 +427,21 @@ enum RadarSnapshotRenderer {
                         guard mx > -1, mx < Double(mosaicW) else { continue }
                         let ix = Int(mx.rounded(.down))
                         let (wx0, wx1, wx2, wx3) = bsplineWeights(mx - Double(ix))
-                        let columnWeights = [wx0, wx1, wx2, wx3]
 
-                        var value = 0.0
-                        for row in 0..<4 {
+                        @inline(__always) func sampledRow(_ row: Int) -> Double {
                             let sy = min(max(iy - 1 + row, 0), mosaicH - 1)
                             let rowBase = sy * mosaicW
-                            var rowValue = 0.0
-                            for column in 0..<4 {
-                                let sx = min(max(ix - 1 + column, 0), mosaicW - 1)
-                                rowValue += columnWeights[column] * Double(indices[rowBase + sx])
-                            }
-                            value += rowWeights[row] * rowValue
+                            let x0 = min(max(ix - 1, 0), mosaicW - 1)
+                            let x1 = min(max(ix, 0), mosaicW - 1)
+                            let x2 = min(max(ix + 1, 0), mosaicW - 1)
+                            let x3 = min(max(ix + 2, 0), mosaicW - 1)
+                            return wx0 * Double(indices[rowBase + x0])
+                                + wx1 * Double(indices[rowBase + x1])
+                                + wx2 * Double(indices[rowBase + x2])
+                                + wx3 * Double(indices[rowBase + x3])
                         }
+                        let value = wy0 * sampledRow(0) + wy1 * sampledRow(1)
+                            + wy2 * sampledRow(2) + wy3 * sampledRow(3)
                         guard value > 0.01 else { continue }
 
                         let clamped = min(max(value, 0), 255)

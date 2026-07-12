@@ -63,7 +63,7 @@ struct WatchNowView: View {
                 )
                 if rainRate > 0 {
                     Label(
-                        String(format: "%.1f mm/h", rainRate),
+                        "\(rainRate.formatted(.number.precision(.fractionLength(1)))) mm/h",
                         systemImage: "cloud.rain.fill"
                     )
                 }

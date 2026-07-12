@@ -53,7 +53,7 @@ enum HourlyFormatting {
   }
 
   static func precipitationString(value: Double, unit: String) -> String {
-    String(format: "%.1f %@", value, unit)
+    "\(value.formatted(.number.precision(.fractionLength(1)))) \(unit)"
   }
 
   static func weatherIconName(weatherCode: Double, isDay: Double) -> String {

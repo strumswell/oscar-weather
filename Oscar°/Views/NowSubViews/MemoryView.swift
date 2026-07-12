@@ -65,11 +65,12 @@ struct ImageCircleView: View {
 }
 
 struct MemoryStars: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var starField = StarField()
     @State private var meteorShower = MeteorShower()
 
     var body: some View {
-        TimelineView(.animation) { timeline in
+        TimelineView(.animation(paused: reduceMotion)) { timeline in
             Canvas { context, size in
                 let timeInterval = timeline.date.timeIntervalSince1970
                 starField.update(date: timeline.date)

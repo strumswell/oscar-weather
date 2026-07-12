@@ -64,7 +64,7 @@ struct RainView: View {
 // MARK: - Reusable precipitation chart
 
 struct PrecipChartPoint: Identifiable {
-    let id = UUID()
+    var id: Date { date }
     let date: Date
     let value: Double  // mm/h
 }
@@ -166,6 +166,6 @@ private struct PrecipitationSeriesChart: View {
         }) else {
             return "No Data"
         }
-        return String(format: "%.1f", nearest.value)
+        return nearest.value.formatted(.number.precision(.fractionLength(1)))
     }
 }

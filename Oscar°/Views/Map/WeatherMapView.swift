@@ -655,7 +655,11 @@ struct WeatherMapView: UIViewRepresentable {
                 lastModelFrameKey = nil
                 let colormapId = selection.colormapId
                 Task { @MainActor [weak self] in
-                    guard let palette = await ModelGridLayerState.palette(for: colormapId) else { return }
+                    guard let palette = await ModelGridLayerState.palette(for: colormapId) else {
+                        guard let self, self.modelPaletteId == colormapId else { return }
+                        self.modelPaletteId = nil
+                        return
+                    }
                     guard let self, self.modelPaletteId == colormapId else { return }
                     self.modelPalette = palette
                     self.syncAll()

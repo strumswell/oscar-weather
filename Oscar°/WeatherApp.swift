@@ -118,18 +118,15 @@ struct WeatherApp: App {
                 .environment(location)
                 .preferredColorScheme(.dark)
                 .task {
-                    if weather.lastUpdated == nil,
-                       let snapshot = WeatherSnapshotStore.load() {
+                    let snapshot = await Task.detached {
+                        WeatherSnapshotStore.load()
+                    }.value
+                    if weather.lastUpdated == nil, let snapshot {
                         locationService.update()
-                        let current = CLLocation(
-                            latitude: locationService.getCoordinates().latitude,
-                            longitude: locationService.getCoordinates().longitude
-                        )
-                        let cached = CLLocation(
-                            latitude: snapshot.coordinates.latitude,
-                            longitude: snapshot.coordinates.longitude
-                        )
-                        if current.distance(from: cached) < 50_000 {
+                        if WeatherSnapshotStore.coordinatesMatch(
+                            snapshot: snapshot.coordinates,
+                            current: locationService.getCoordinates()
+                        ) {
                             weather.apply(snapshot: snapshot, location: location)
                         }
                     }

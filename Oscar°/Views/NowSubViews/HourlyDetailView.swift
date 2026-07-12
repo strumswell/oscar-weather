@@ -218,7 +218,7 @@ struct HourlyDetailView: View {
         let rawWindspeed10m = weather.forecast.hourly?.windspeed_10m ?? []
         let rawWindspeed80m = weather.forecast.hourly?.windspeed_80m ?? []
         let rawWindspeed120m = weather.forecast.hourly?.windspeed_120m ?? []
-        let rawWindspeed180m = (weather.forecast.hourly?.windspeed_180m ?? []).map { $0 ?? 0 }
+        let rawWindspeed180m = weather.forecast.hourly?.windspeed_180m ?? []
         let windspeed10m = displayedWindSpeeds(rawWindspeed10m)
         let windspeed80m = displayedWindSpeeds(rawWindspeed80m)
         let windspeed120m = displayedWindSpeeds(rawWindspeed120m)
@@ -396,16 +396,21 @@ struct HourlyDetailView: View {
 
     private func formatted(_ value: Double?, decimals: Int, unit: String) -> String {
         guard let value else { return "--" }
-        return String(format: "%.\(decimals)f %@", value, unit)
+        return "\(value.formatted(.number.precision(.fractionLength(decimals)))) \(unit)"
     }
 
     private func formatted(_ value: Double, decimals: Int, unit: String) -> String {
-        String(format: "%.\(decimals)f %@", value, unit)
+        "\(value.formatted(.number.precision(.fractionLength(decimals)))) \(unit)"
     }
 
     private func displayedWindSpeeds(_ values: [Double]) -> [Double] {
         guard windSpeedUnit.usesBeaufortDisplay else { return values }
         return BeaufortScale.convertedValues(fromKilometersPerHour: values)
+    }
+
+    private func displayedWindSpeeds(_ values: [Double?]) -> [Double?] {
+        guard windSpeedUnit.usesBeaufortDisplay else { return values }
+        return values.map { $0.flatMap(BeaufortScale.value(forKilometersPerHour:)) }
     }
 
     private func apparentTemperatureBadge(for apparentTemperature: Double?, unit: String) -> LocalizedStringKey {
@@ -469,7 +474,7 @@ struct HourlyDetailView: View {
     private func evapotranspirationExplanation(for et0: [Double], unit: String) -> LocalizedStringKey {
         let total = evapotranspirationTotalForReferenceDay(from: et0)
         let formattedTotal = formatted(total, decimals: 1, unit: unit)
-        let liters = String(format: "%.1f", total)
+        let liters = total.formatted(.number.precision(.fractionLength(1)))
 
         if unit == "mm" {
             return "ET₀ beschreibt, wie viel Wasser eine gut versorgte Referenzfläche an die Luft abgibt. Für heute summieren sich die stündlichen Werte auf \(formattedTotal). Das entspricht ungefähr \(liters) Litern Wasser pro Quadratmeter."

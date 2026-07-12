@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5C22EF0130A2000000000001 /* WindSpeedUnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22EF0530A2000000000001 /* WindSpeedUnitTests.swift */; };
+		5C22EF0230A2000000000001 /* WeatherLoadingQueryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22EF0630A2000000000001 /* WeatherLoadingQueryTests.swift */; };
+		5C22EF0330A2000000000001 /* PollenSeverityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22EF0730A2000000000001 /* PollenSeverityTests.swift */; };
+		5C22EF1430A2000000000001 /* OfflineCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22EF1530A2000000000001 /* OfflineCacheTests.swift */; };
 		AD5000022FE3000000000001 /* NowSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD5000012FE3000000000001 /* NowSheet.swift */; };
 		AD5000042FE3000000000001 /* NowPresentationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD5000032FE3000000000001 /* NowPresentationCoordinator.swift */; };
 		AD5000062FE3000000000001 /* NowSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD5000052FE3000000000001 /* NowSheetView.swift */; };
@@ -387,6 +391,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		5C22EF0F30A2000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3EB89009251A55700028FED0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3EB89010251A55700028FED0;
+			remoteInfo = "Oscar°";
+		};
 		25429BDB29E5F94300D5979F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 3EB89009251A55700028FED0 /* Project object */;
@@ -454,6 +465,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5C22EF0430A2000000000001 /* Oscar°Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Oscar°Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5C22EF0530A2000000000001 /* WindSpeedUnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindSpeedUnitTests.swift; sourceTree = "<group>"; };
+		5C22EF0630A2000000000001 /* WeatherLoadingQueryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherLoadingQueryTests.swift; sourceTree = "<group>"; };
+		5C22EF0730A2000000000001 /* PollenSeverityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PollenSeverityTests.swift; sourceTree = "<group>"; };
+		5C22EF1530A2000000000001 /* OfflineCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCacheTests.swift; sourceTree = "<group>"; };
 		AD5000012FE3000000000001 /* NowSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowSheet.swift; sourceTree = "<group>"; };
 		AD5000032FE3000000000001 /* NowPresentationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPresentationCoordinator.swift; sourceTree = "<group>"; };
 		AD5000052FE3000000000001 /* NowSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowSheetView.swift; sourceTree = "<group>"; };
@@ -708,6 +724,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		5C22EF0930A2000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		25429BCD29E5F94100D5979F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -763,6 +786,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5C22EF0830A2000000000001 /* Oscar°Tests */ = {
+			isa = PBXGroup;
+			children = (
+				5C22EF0530A2000000000001 /* WindSpeedUnitTests.swift */,
+				5C22EF0630A2000000000001 /* WeatherLoadingQueryTests.swift */,
+				5C22EF0730A2000000000001 /* PollenSeverityTests.swift */,
+				5C22EF1530A2000000000001 /* OfflineCacheTests.swift */,
+			);
+			path = "Oscar°Tests";
+			sourceTree = "<group>";
+		};
 		2512E9392C37C751004670E4 /* Legal */ = {
 			isa = PBXGroup;
 			children = (
@@ -1112,6 +1146,7 @@
 				25429BD129E5F94100D5979F /* Oscar°Watch Watch App */,
 				25429BE929E5F9B000D5979F /* Oscar°WatchWidget */,
 				5C22EE0E30A1000000000002 /* Oscar°UITests */,
+				5C22EF0830A2000000000001 /* Oscar°Tests */,
 				25B4C4592B5744000069B3B0 /* ci_scripts */,
 				3EB89029251A55950028FED0 /* Frameworks */,
 				3EB89012251A55700028FED0 /* Products */,
@@ -1126,6 +1161,7 @@
 				25429BD029E5F94100D5979F /* Oscar°Watch Watch App.app */,
 				25429BE629E5F9B000D5979F /* Oscar°WatchWidgetExtension.appex */,
 				5C22EE0D30A1000000000002 /* Oscar°UITests.xctest */,
+				5C22EF0430A2000000000001 /* Oscar°Tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1343,6 +1379,26 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		5C22EF0C30A2000000000001 /* Oscar°Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5C22EF1230A2000000000001 /* Build configuration list for PBXNativeTarget "Oscar°Tests" */;
+			buildPhases = (
+				5C22EF0A30A2000000000001 /* Sources */,
+				5C22EF0930A2000000000001 /* Frameworks */,
+				5C22EF0B30A2000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5C22EF1030A2000000000001 /* PBXTargetDependency */,
+			);
+			name = "Oscar°Tests";
+			packageProductDependencies = (
+			);
+			productName = "Oscar°Tests";
+			productReference = 5C22EF0430A2000000000001 /* Oscar°Tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		25429BCF29E5F94100D5979F /* Oscar°Watch Watch App */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 25429BE129E5F94300D5979F /* Build configuration list for PBXNativeTarget "Oscar°Watch Watch App" */;
@@ -1474,6 +1530,10 @@
 				LastSwiftUpdateCheck = 1430;
 				LastUpgradeCheck = 2650;
 				TargetAttributes = {
+					5C22EF0C30A2000000000001 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = 3EB89010251A55700028FED0;
+					};
 					25429BCF29E5F94100D5979F = {
 						CreatedOnToolsVersion = 14.3;
 					};
@@ -1513,17 +1573,25 @@
 			productRefGroup = 3EB89012251A55700028FED0 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-			targets = (
+				targets = (
 				3EB89010251A55700028FED0 /* Oscar° */,
 				3EB89027251A55950028FED0 /* Oscar°WidgetExtension */,
 				25429BCF29E5F94100D5979F /* Oscar°Watch Watch App */,
 				25429BE529E5F9B000D5979F /* Oscar°WatchWidgetExtension */,
-				5C22EE1030A1000000000002 /* Oscar°UITests */,
+					5C22EE1030A1000000000002 /* Oscar°UITests */,
+					5C22EF0C30A2000000000001 /* Oscar°Tests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		5C22EF0B30A2000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		25429BCE29E5F94100D5979F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1605,6 +1673,17 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5C22EF0A30A2000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5C22EF0130A2000000000001 /* WindSpeedUnitTests.swift in Sources */,
+				5C22EF0230A2000000000001 /* WeatherLoadingQueryTests.swift in Sources */,
+				5C22EF0330A2000000000001 /* PollenSeverityTests.swift in Sources */,
+				5C22EF1430A2000000000001 /* OfflineCacheTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		25429BCC29E5F94100D5979F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1975,6 +2054,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		5C22EF1030A2000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3EB89010251A55700028FED0 /* Oscar° */;
+			targetProxy = 5C22EF0F30A2000000000001 /* PBXContainerItemProxy */;
+		};
 		253F708A2B53167D0075D093 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 		};
@@ -2023,6 +2107,42 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		5C22EF1130A2000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar.Tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Oscar°.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Oscar°";
+			};
+			name = Debug;
+		};
+		5C22EF1330A2000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cloud.bolte.Oscar.Tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Oscar°.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Oscar°";
+			};
+			name = Release;
+		};
 		25429BDF29E5F94300D5979F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2429,6 +2549,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		5C22EF1230A2000000000001 /* Build configuration list for PBXNativeTarget "Oscar°Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5C22EF1130A2000000000001 /* Debug */,
+				5C22EF1330A2000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		25429BE129E5F94300D5979F /* Build configuration list for PBXNativeTarget "Oscar°Watch Watch App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

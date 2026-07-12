@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SunView: View {
     let progress: Double
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var isShown = false
     @State private var haloScale = 1.0
@@ -47,6 +48,7 @@ struct SunView: View {
                 .position(x: (proxy.frame(in: .global).width - 75) * sunX, y: 60)
                 .rotationEffect(.degrees((progress - 0.5) * 180))
                 .onAppear {
+                    guard !reduceMotion else { return }
                     withAnimation(.easeInOut(duration: 7).repeatForever(autoreverses: true)) {
                         haloScale = 1.3
                     }

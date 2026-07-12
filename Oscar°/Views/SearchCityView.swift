@@ -5,7 +5,8 @@ struct SearchCityView: View {
     @State private var searchText = ""
     @State private var searchIsActive = false
     @State private var searchResult: Components.Schemas.SearchResponse = .init()
-    @State private var refreshID = UUID()
+    @State private var searchError: String?
+    @State private var selectedCityURI: URL?
     private let client = APIClient.shared
     private var locationService = LocationService.shared
 
@@ -14,13 +15,20 @@ struct SearchCityView: View {
         NavigationStack {
             VStack {
                 if searchIsActive {
-                    if (searchText.count > 0 && (searchResult.results?.isEmpty) == nil) {
+                    if let searchError {
+                        ContentUnavailableView(
+                            "Suche fehlgeschlagen",
+                            systemImage: "wifi.exclamationmark",
+                            description: Text(searchError)
+                        )
+                    } else if (searchText.count > 0 && (searchResult.results?.isEmpty) == nil) {
                         ContentUnavailableView.search
                     } else {
                         List {
                             ForEach(searchResult.results ?? [], id: \.self) { result in
                                 Button {
                                     locationService.city.addCity(searchResult: result)
+                                    selectedCityURI = locationService.city.getSelectedCity()?.objectID.uriRepresentation()
                                     searchIsActive = false
                                     searchText = ""
                                     UIApplication.shared.hideKeyboard()
@@ -81,7 +89,7 @@ struct SearchCityView: View {
                                     locationService.city.toggleActiveCity(city: city)
                                 } label: {
                                     HStack {
-                                        if (city.selected) {
+                                        if city.objectID.uriRepresentation() == selectedCityURI {
                                             Text("\(city.label ?? "")")
                                             Spacer()
                                             Image(systemName: "checkmark")
@@ -95,27 +103,38 @@ struct SearchCityView: View {
                                     .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
-                                .accessibilityValue(city.selected ? Text("Ausgewählt") : Text(""))
-                                .id("\(city.objectID.uriRepresentation())-\(city.selected)")
+                                .accessibilityValue(city.objectID.uriRepresentation() == selectedCityURI ? Text("Ausgewählt") : Text(""))
                             }
                             .onDelete(perform: locationService.city.deleteCity)
                             .onMove(perform: locationService.city.moveCity)
                         }
-                        .id(refreshID)
                     }
                 }
             }
         }
         .searchable(text: $searchText, isPresented: $searchIsActive, placement: .navigationBarDrawer(displayMode: .always), prompt: Text("Suchen..."))
         .onReceive(NotificationCenter.default.publisher(for: .cityToggle)) { _ in
-            refreshID = UUID()
+            selectedCityURI = locationService.city.getSelectedCity()?.objectID.uriRepresentation()
         }
-        .onChange(of: searchText, {
-            Task {
-                if searchText.count < 1 { return }
-                searchResult = try await client.getGeocodeSearchResult(name: searchText)
+        .task {
+            selectedCityURI = locationService.city.getSelectedCity()?.objectID.uriRepresentation()
+        }
+        .task(id: searchText) {
+            searchError = nil
+            guard !searchText.isEmpty else {
+                searchResult = .init()
+                return
             }
-        })
+            do {
+                try await Task.sleep(for: .milliseconds(300))
+                searchResult = try await client.getGeocodeSearchResult(name: searchText)
+            } catch is CancellationError {
+                return
+            } catch {
+                searchResult = .init()
+                searchError = error.localizedDescription
+            }
+        }
     }
 }
 

@@ -101,7 +101,8 @@ struct WatchDailyView: View {
             [
                 daily.time.count,
                 daily.temperature_2m_min?.count ?? 0,
-                daily.temperature_2m_max?.count ?? 0
+                daily.temperature_2m_max?.count ?? 0,
+                daily.weathercode?.count ?? 0
             ].min() ?? 0
         )
     }

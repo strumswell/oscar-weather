@@ -5,6 +5,7 @@ import WidgetKit
 
 struct GlobalRadarEntry: TimelineEntry {
   let date: Date
+  let frameDate: Date?
   let image: UIImage
 }
 
@@ -18,7 +19,7 @@ struct GlobalRadarProvider: TimelineProvider {
   private static let overlayAlpha: CGFloat = 0.7
 
   func placeholder(in context: Context) -> GlobalRadarEntry {
-    GlobalRadarEntry(date: Date(), image: UIImage(systemName: "map") ?? UIImage())
+    GlobalRadarEntry(date: .now, frameDate: nil, image: UIImage(systemName: "map") ?? UIImage())
   }
 
   func getSnapshot(in context: Context, completion: @escaping @Sendable (GlobalRadarEntry) -> Void) {
@@ -55,18 +56,19 @@ struct GlobalRadarProvider: TimelineProvider {
       captureMapSnapshot(at: coordinate, region: region) { snapshotImage in
         guard let snapshot = snapshotImage else {
           let errorEntry = GlobalRadarEntry(
-            date: Date(), image: UIImage(systemName: "exclamationmark.triangle") ?? UIImage())
+            date: .now, frameDate: nil,
+            image: UIImage(systemName: "exclamationmark.triangle") ?? UIImage())
           completion(errorEntry)
           return
         }
 
         let composite = UIGraphicsImageRenderer(size: snapshot.size).image { _ in
           snapshot.draw(at: .zero)
-          overlay?.draw(
+          overlay?.image.draw(
             in: CGRect(origin: .zero, size: snapshot.size),
             blendMode: .normal, alpha: Self.overlayAlpha)
         }
-        completion(GlobalRadarEntry(date: Date(), image: composite))
+        completion(GlobalRadarEntry(date: .now, frameDate: overlay?.frameDate, image: composite))
       }
     }
   }

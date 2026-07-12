@@ -16,6 +16,7 @@ struct OnboardingManualLocationStep: View {
 
     @State private var searchText = ""
     @State private var results: [Components.Schemas.Location] = []
+    @State private var searchError: String?
     @State private var appeared = false
     @FocusState private var searchFocused: Bool
 
@@ -107,7 +108,13 @@ struct OnboardingManualLocationStep: View {
     }
 
     @ViewBuilder private var resultsList: some View {
-        if !results.isEmpty {
+        if let searchError {
+            ContentUnavailableView(
+                "Suche fehlgeschlagen",
+                systemImage: "wifi.exclamationmark",
+                description: Text(searchError)
+            )
+        } else if !results.isEmpty {
             VStack(spacing: 0) {
                 ForEach(Array(results.prefix(5).enumerated()), id: \.offset) { index, result in
                     // Row and its divider cascade in together, so no divider
@@ -146,6 +153,7 @@ struct OnboardingManualLocationStep: View {
         let query = searchText.trimmingCharacters(in: .whitespaces)
         guard query.count >= 2 else {
             results = []
+            searchError = nil
             return
         }
 
@@ -153,9 +161,18 @@ struct OnboardingManualLocationStep: View {
         try? await Task.sleep(for: .milliseconds(250))
         guard !Task.isCancelled else { return }
 
-        let response = try? await client.getGeocodeSearchResult(name: query)
-        guard !Task.isCancelled else { return }
-        results = response?.results ?? []
+        do {
+            let response = try await client.getGeocodeSearchResult(name: query)
+            guard !Task.isCancelled else { return }
+            searchError = nil
+            results = response.results ?? []
+        } catch is CancellationError {
+            return
+        } catch {
+            guard !Task.isCancelled else { return }
+            results = []
+            searchError = error.localizedDescription
+        }
     }
 
     private func select(_ result: Components.Schemas.Location) {

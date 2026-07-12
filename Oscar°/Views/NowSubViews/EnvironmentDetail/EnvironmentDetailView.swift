@@ -57,44 +57,44 @@ struct EnvironmentDetailView: View {
             aqiComponentSnapshot(
                 id: "pm25",
                 label: "PM2.5",
-                value: currentValue(from: weather.air.hourly?.european_aqi_pm2_5) ?? 0,
+                value: currentValue(from: weather.air.hourly?.european_aqi_pm2_5),
                 accentColor: .blue,
                 explanationBodyKey: "PM2.5 entsteht vor allem durch Verkehr, Holzfeuer und Industrie. Die feinen Partikel dringen tief in die Lunge ein und belasten Atemwege und Herz-Kreislauf-System."
             ),
             aqiComponentSnapshot(
                 id: "pm10",
                 label: "PM10",
-                value: currentValue(from: weather.air.hourly?.european_aqi_pm10) ?? 0,
+                value: currentValue(from: weather.air.hourly?.european_aqi_pm10),
                 accentColor: .cyan,
                 explanationBodyKey: "PM10 stammt oft aus Straßenstaub, Baustellen und Landwirtschaft. Die Partikel reizen Augen und Atemwege und können Beschwerden bei empfindlichen Personen verstärken."
             ),
             aqiComponentSnapshot(
                 id: "no2",
                 label: "NO₂",
-                value: currentValue(from: weather.air.hourly?.european_aqi_no2) ?? 0,
+                value: currentValue(from: weather.air.hourly?.european_aqi_no2),
                 accentColor: .orange,
                 explanationBodyKey: "Stickstoffdioxid entsteht vor allem bei Verbrennungsprozessen im Straßenverkehr und in Heizungen. Es reizt die Atemwege und kann Asthma sowie andere Lungenerkrankungen verschlimmern."
             ),
             aqiComponentSnapshot(
                 id: "o3",
                 label: "O₃",
-                value: currentValue(from: weather.air.hourly?.european_aqi_o3) ?? 0,
+                value: currentValue(from: weather.air.hourly?.european_aqi_o3),
                 accentColor: .green,
                 explanationBodyKey: "Bodennahes Ozon bildet sich bei starker Sonneneinstrahlung aus Abgasen. Es kann Husten, Reizungen und eine verringerte Lungenfunktion auslösen."
             ),
             aqiComponentSnapshot(
                 id: "so2",
                 label: "SO₂",
-                value: currentValue(from: weather.air.hourly?.european_aqi_so2) ?? 0,
+                value: currentValue(from: weather.air.hourly?.european_aqi_so2),
                 accentColor: .yellow,
                 explanationBodyKey: "Schwefeldioxid entsteht vor allem bei der Verbrennung schwefelhaltiger Brennstoffe in Industrie und Energieerzeugung. Es reizt die Atemwege und belastet besonders Menschen mit Asthma."
             ),
         ]
-        .sorted { $0.value > $1.value }
+        .sorted { ($0.value ?? -.infinity) > ($1.value ?? -.infinity) }
     }
 
     private var mainPollutant: AQIComponentSnapshot? {
-        aqiComponents.first(where: { $0.value > 0 })
+        aqiComponents.first(where: { ($0.value ?? 0) > 0 })
     }
 
     private var currentUV: Double? {
@@ -241,7 +241,7 @@ struct EnvironmentDetailView: View {
     private func aqiComponentSnapshot(
         id: String,
         label: String,
-        value: Double,
+        value: Double?,
         accentColor: Color,
         explanationBodyKey: String
     ) -> AQIComponentSnapshot {
@@ -250,8 +250,8 @@ struct EnvironmentDetailView: View {
             label: label,
             value: value,
             accentColor: accentColor,
-            status: aqiStatusKey(for: value),
-            statusColor: EnvironmentMetric.forAQI(id: id, label: label, value: value).color,
+            status: value.map(aqiStatusKey),
+            statusColor: value.map { EnvironmentMetric.forAQI(id: id, label: label, value: $0).color },
             explanationBodyKey: explanationBodyKey
         )
     }

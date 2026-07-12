@@ -64,9 +64,9 @@ struct RainTimelineProvider: TimelineProvider {
             return RainTimelineEntry(
                 date: now,
                 bars: [],
-                headline: String(localized: "Keine Radardaten", comment: "LS Widget Regenverlauf ohne Radarabdeckung"),
+                headline: String(localized: "Radardaten sind veraltet", comment: "LS Widget Regenverlauf mit veralteten Radardaten"),
                 spanMinutes: 0,
-                hasRadarCoverage: false
+                hasRadarCoverage: true
             )
         }
 

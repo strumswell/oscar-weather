@@ -23,7 +23,8 @@ class MeteorShower {
     }
 
     func update(date: Date, size: CGSize) {
-        let delta = date.timeIntervalSince1970 - lastUpdate.timeIntervalSince1970
+        let elapsed = date.timeIntervalSince1970 - lastUpdate.timeIntervalSince1970
+        let delta = elapsed > 10 ? 0 : elapsed
 
         if lastCreationDate + nextCreationDelay < .now {
             createMeteor(in: size)

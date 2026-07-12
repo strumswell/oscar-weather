@@ -1,13 +1,14 @@
 import CoreGraphics
 import UIKit
 
+@MainActor
 enum MemberCardStickerAlphaBounds {
     private struct Metrics {
         let bounds: CGRect
         let bottomTrailingAnchor: CGPoint
     }
 
-    nonisolated(unsafe) private static var cache: [String: Metrics] = [:]
+    private static var cache: [String: Metrics] = [:]
 
     static func rect(for assetName: String, in size: CGFloat) -> CGRect {
         let normalized = metrics(for: assetName).bounds
@@ -30,10 +31,7 @@ enum MemberCardStickerAlphaBounds {
         }
 
         guard let image = UIImage(named: MemberCard.imageName(for: assetName)),
-              let cgImage = image.cgImage,
-              let dataProvider = cgImage.dataProvider,
-              let data = dataProvider.data,
-              let bytes = CFDataGetBytePtr(data) else {
+              let sourceImage = image.cgImage else {
             let fallback = Metrics(
                 bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
                 bottomTrailingAnchor: CGPoint(x: 1, y: 1)
@@ -42,11 +40,24 @@ enum MemberCardStickerAlphaBounds {
             return fallback
         }
 
-        let width = cgImage.width
-        let height = cgImage.height
-        let bytesPerRow = cgImage.bytesPerRow
-        let bytesPerPixel = max(cgImage.bitsPerPixel / 8, 4)
-        let alphaOffset = alphaByteOffset(for: cgImage.alphaInfo, bytesPerPixel: bytesPerPixel)
+        let width = sourceImage.width
+        let height = sourceImage.height
+        let bytesPerPixel = 4
+        let bytesPerRow = width * bytesPerPixel
+        guard let context = CGContext(
+            data: nil,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ), let rawData = context.data else {
+            return fallbackMetrics(for: assetName)
+        }
+        context.draw(sourceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+        let bytes = rawData.assumingMemoryBound(to: UInt8.self)
+        let alphaOffset = 3
 
         var minX = width
         var minY = height
@@ -100,14 +111,12 @@ enum MemberCardStickerAlphaBounds {
         return metrics
     }
 
-    private static func alphaByteOffset(for alphaInfo: CGImageAlphaInfo, bytesPerPixel: Int) -> Int {
-        switch alphaInfo {
-        case .first, .premultipliedFirst, .noneSkipFirst:
-            return 0
-        case .last, .premultipliedLast, .noneSkipLast:
-            return max(bytesPerPixel - 1, 0)
-        default:
-            return max(bytesPerPixel - 1, 0)
-        }
+    private static func fallbackMetrics(for assetName: String) -> Metrics {
+        let fallback = Metrics(
+            bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
+            bottomTrailingAnchor: CGPoint(x: 1, y: 1)
+        )
+        cache[assetName] = fallback
+        return fallback
     }
 }

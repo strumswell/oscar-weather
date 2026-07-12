@@ -128,6 +128,6 @@ enum WindSpeedFormatter {
     if unit == WindSpeedUnit.bft.displayUnit {
       return "\(Int(value.rounded())) \(unit)"
     }
-    return "\(String(format: "%.1f", value)) \(unit)"
+    return "\(value.formatted(.number.precision(.fractionLength(1)))) \(unit)"
   }
 }

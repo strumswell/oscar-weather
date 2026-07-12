@@ -204,6 +204,7 @@ final class ModelGridLayerState {
 
     func play() {
         guard !frames.isEmpty else { return }
+        playbackTimer?.invalidate()
         isPlaying = true
         interactionState = .playing
         restartBackgroundPreloadIfNeeded()

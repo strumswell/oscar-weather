@@ -37,6 +37,7 @@ struct OnboardingButtonStack: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .frame(minHeight: 44)
             }
         }
         .padding(.horizontal, 24)

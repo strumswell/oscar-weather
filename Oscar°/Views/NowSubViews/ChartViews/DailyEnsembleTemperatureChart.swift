@@ -240,7 +240,7 @@ struct DailyEnsembleTemperatureChart: View {
 
   private func formatted(_ value: Double?) -> String {
     guard let value else { return "--" }
-    return "\(String(format: "%.1f", value)) \(unit)"
+    return "\(value.formatted(.number.precision(.fractionLength(1)))) \(unit)"
   }
 }
 

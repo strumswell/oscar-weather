@@ -85,9 +85,14 @@ struct EnvironmentAirQualitySectionView: View {
 
                     LabeledContent {
                         HStack(spacing: 8) {
-                            Text(LocalizedStringKey(component.status))
-                                .fontWeight(.semibold)
-                                .foregroundStyle(component.statusColor)
+                            if let status = component.status, let statusColor = component.statusColor {
+                                Text(LocalizedStringKey(status))
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(statusColor)
+                            } else {
+                                Text("–")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     } label: {
                         Text(verbatim: component.label)

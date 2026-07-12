@@ -9,8 +9,7 @@ struct ForecastSettingsView: View {
   @Bindable private var settingsService = SettingService.shared
 
   var body: some View {
-    NavigationStack {
-      List {
+    List {
         Section {
           NavigationLink {
             ForecastModelSettingsView()
@@ -73,7 +72,6 @@ struct ForecastSettingsView: View {
             }
           }
         }
-      }
     }
     .navigationTitle("Vorhersage")
     .navigationBarTitleDisplayMode(.inline)

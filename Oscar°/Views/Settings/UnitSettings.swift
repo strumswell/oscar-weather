@@ -13,8 +13,7 @@ struct UnitSettings: View {
     @Bindable private var settingsService = SettingService.shared
 
     var body: some View {
-        NavigationStack {
-            List {
+        List {
                 Picker(String(localized: "Temperatur"), selection: $settingsService.temperatureUnit) {
                     Text("°C").tag("celsius")
                     Text("°F").tag("fahrenheit")
@@ -38,12 +37,11 @@ struct UnitSettings: View {
                         Text(preference.label).tag(preference)
                     }
                 }
-            }
-            .onChange(of: settingsService.timeFormatPreference) {
+        }
+        .onChange(of: settingsService.timeFormatPreference) {
                 Task {
                     await NotificationSettingsManager.shared.syncTimeFormatPreferenceUpdate()
                 }
-            }
         }
         .navigationTitle("Einheiten")
         .navigationBarTitleDisplayMode(.inline)

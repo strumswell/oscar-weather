@@ -98,6 +98,10 @@ struct HeadView: View {
         Text(weather.forecast.current?.getWindDirection() ?? "")
         Spacer()
       }
+      .accessibilityElement(children: .ignore)
+      .accessibilityLabel(
+        "Bewölkung \(Int((weather.forecast.current?.cloudcover ?? 0).rounded())) Prozent, Wind \(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h")), Richtung \(weather.forecast.current?.getWindDirection() ?? "unbekannt")"
+      )
       .padding(.bottom)
 
       if hasWeatherAlerts() {

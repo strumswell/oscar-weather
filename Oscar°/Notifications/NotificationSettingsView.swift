@@ -10,6 +10,7 @@ import UIKit
 
 @MainActor
 struct NotificationSettingsView: View {
+    @Environment(\.scenePhase) private var scenePhase
     private let notificationSettingsManager: NotificationSettingsManager
     @State private var isUpdating = false
     @State private var showPermissionAlert = false
@@ -73,6 +74,10 @@ struct NotificationSettingsView: View {
         .task {
             await notificationSettingsManager.reloadNotificationStatus()
         }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            Task { await notificationSettingsManager.reloadNotificationStatus() }
+        }
     }
 
     private var statusText: String {
@@ -124,7 +129,10 @@ struct NotificationSettingsView: View {
             get: { currentValue },
             set: { newValue in
                 runUpdate {
-                    _ = await notificationSettingsManager.setLiveRainStatusEnabled(newValue)
+                    let enabled = await notificationSettingsManager.setLiveRainStatusEnabled(newValue)
+                    if newValue && !enabled {
+                        showPermissionAlert = true
+                    }
                 }
             }
         )

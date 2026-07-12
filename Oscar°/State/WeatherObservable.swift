@@ -213,7 +213,7 @@ extension Weather {
                 forecast: forecastResponse,
                 air: airQualityResponse,
                 precipSeries: precipSeries,
-                coordinates: CodableCoordinate(coordinates),
+                coordinates: CodableCoordinate(LocationService.outboundCoordinate(coordinates)),
                 locationName: location.name,
                 savedAt: lastUpdated ?? .now
             )
@@ -222,10 +222,18 @@ extension Weather {
             }
 
             markLoading(.alerts)
-            alerts = try await client.getAlerts(
-                coordinates: coordinates,
-                countryCode: location.countryCode
-            )
+            do {
+                alerts = try await client.getAlerts(
+                    coordinates: coordinates,
+                    countryCode: location.countryCode
+                )
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                // Alerts are supplementary. Never retain warnings for the previous
+                // city or turn an otherwise successful forecast refresh into failure.
+                alerts = .brightsky(.init())
+            }
             markFinished(.alerts)
         } catch {
             self.error = error.localizedDescription

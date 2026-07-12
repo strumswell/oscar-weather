@@ -19,7 +19,7 @@ struct PrecipitationChart: View {
   @State private var selectedDate: Date?
 
   private var hasNoPrecipitation: Bool {
-    precipitation.max() == 0 && snowfall.max() == 0
+    precipitation.allSatisfy { $0 <= 0 } && snowfall.allSatisfy { $0 <= 0 }
   }
 
   private var precipitationData: [(time: Date, precipitation: Double, snowfall: Double)] {
@@ -34,7 +34,7 @@ struct PrecipitationChart: View {
   var body: some View {
     if hasNoPrecipitation {
       ContentUnavailableView(
-        "Kein Niederschlag", image: "icloud.slash",
+        "Kein Niederschlag", systemImage: "icloud.slash",
         description: Text("Für die nächsten Tage wird kein Niederschlag vorhergesagt.")
       )
       .frame(height: 175)
@@ -48,12 +48,13 @@ struct PrecipitationChart: View {
     VStack(alignment: .leading) {
       Chart {
         ForEach(precipitationData, id: \.time) { data in
-          let rainOnly = max(0, data.precipitation - data.snowfall)
+          let snowfallWaterEquivalent = snowfallWaterEquivalent(data.snowfall)
+          let rainOnly = max(0, data.precipitation - snowfallWaterEquivalent)
           
           if data.snowfall > 0 {
             BarMark(
               x: .value("Hour", data.time),
-              y: .value("Schnee (\(unit))", data.snowfall)
+              y: .value("Schnee (\(unit))", snowfallWaterEquivalent)
             )
             .foregroundStyle(
               .linearGradient(
@@ -103,13 +104,14 @@ struct PrecipitationChart: View {
                     if selectedData.snowfall > 0 {
                       HStack(spacing: 4) {
                         Circle().fill(.cyan).frame(width: 6, height: 6)
-                        Text("\(selectedData.snowfall, specifier: "%.1f") \(unit)")
+                        Text("\(selectedData.snowfall, format: .number.precision(.fractionLength(1))) cm")
                           .font(.caption2)
                           .foregroundStyle(.white)
                       }
                     }
                     
-                    let rainOnly = max(0, selectedData.precipitation - selectedData.snowfall)
+                    let snowfallWaterEquivalent = snowfallWaterEquivalent(selectedData.snowfall)
+                    let rainOnly = max(0, selectedData.precipitation - snowfallWaterEquivalent)
                     if rainOnly > 0 {
                       HStack(spacing: 4) {
                         Circle().fill(.blue).frame(width: 6, height: 6)
@@ -194,5 +196,12 @@ struct PrecipitationChart: View {
   /// Gets the nearest precipitation data for a selected date
   private func getSelectedPrecipitationData(for selectedDate: Date) -> (time: Date, precipitation: Double, snowfall: Double)? {
     return precipitationData.min(by: { abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate)) })
+  }
+
+  /// Open-Meteo reports snow depth in cm while precipitation uses the selected
+  /// liquid unit. Convert with its 7:1 snow-depth-to-water ratio before stacking.
+  private func snowfallWaterEquivalent(_ centimeters: Double) -> Double {
+    let millimeters = centimeters * 10 / 7
+    return unit.lowercased() == "inch" ? millimeters / 25.4 : millimeters
   }
 }

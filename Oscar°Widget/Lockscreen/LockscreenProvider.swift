@@ -48,9 +48,13 @@ struct LockscreenProvider: TimelineProvider {
                 async let radarRequest = client.getRadarSeries(coordinates: coordinates)
                 let (weather, precipSeries) = try await (weatherRequest, radarRequest)
 
-                let temperatureMin = weather.daily?.temperature_2m_min?.first ?? 0
-                let temperatureMax = weather.daily?.temperature_2m_max?.first ?? 0
+                let reportedMin = weather.daily?.temperature_2m_min?.first
+                let reportedMax = weather.daily?.temperature_2m_max?.first
                 let temperatureNow = weather.current?.temperature ?? 0
+                let lowerTemperature = min(reportedMin ?? temperatureNow, reportedMax ?? temperatureNow)
+                let upperTemperature = max(reportedMin ?? temperatureNow, reportedMax ?? temperatureNow)
+                let temperatureMin = lowerTemperature < upperTemperature ? lowerTemperature : lowerTemperature - 0.5
+                let temperatureMax = lowerTemperature < upperTemperature ? upperTemperature : upperTemperature + 0.5
                 let weathercode = weather.current?.weathercode ?? 0
                 let isDay = weather.current?.is_day ?? 0
 

@@ -169,6 +169,9 @@ struct MemberCard: View {
                 onPickupEnded: { globalCenter in
                     finishPaletteStickerDrag(globalCenter: globalCenter, in: cardSize, layoutFrame: layoutFrame)
                 },
+                onAccessibleAdd: { assetName in
+                    addSticker(assetName: assetName, in: cardSize)
+                },
                 onRemoveSelection: removeSelectedSticker
             )
             .frame(height: Self.dockHeight)
@@ -296,6 +299,24 @@ struct MemberCard: View {
         updatedPlacements.append(sticker)
         persist(updatedPlacements)
         selectedStickerID = nil
+        UIApplication.shared.playHapticFeedback()
+    }
+
+    private func addSticker(assetName: String, in cardSize: CGSize) {
+        let center = CGPoint(x: cardSize.width / 2, y: cardSize.height / 2)
+        var updatedPlacements = placements
+        let nextZIndex = (updatedPlacements.map(\.zIndex).max() ?? 0) + 1
+        let sticker = MemberCardStickerPlacement(
+            assetName: assetName,
+            xRatio: center.x / cardSize.width,
+            yRatio: center.y / cardSize.height,
+            scale: 1,
+            rotation: 0,
+            zIndex: nextZIndex
+        )
+        updatedPlacements.append(sticker)
+        persist(updatedPlacements)
+        selectedStickerID = sticker.id
         UIApplication.shared.playHapticFeedback()
     }
 
@@ -507,19 +528,25 @@ struct MemberCard: View {
     static func stickerTitle(for assetName: String) -> String {
         switch assetName {
         case "sticker_sun":
-            "Sun sticker"
+            String(localized: "Sun sticker")
         case "sticker_grumpy_cloud":
-            "Grumpy cloud sticker"
+            String(localized: "Grumpy cloud sticker")
         case "sticker_lightning_bolt":
-            "Lightning bolt sticker"
+            String(localized: "Lightning bolt sticker")
         case "sticker_umbrella":
-            "Umbrella sticker"
+            String(localized: "Umbrella sticker")
         case "sticker_oscar":
-            "Oscar sticker"
+            String(localized: "Oscar sticker")
         case "sticker_pest":
-            "Pest sticker"
+            String(localized: "Pest sticker")
+        case "sticker_solar_panel":
+            String(localized: "Solar panel sticker")
+        case "sticker_qourses":
+            String(localized: "Qourses sticker")
+        case "sticker_oscar_sleeping":
+            String(localized: "Sleeping Oscar sticker")
         default:
-            "Sticker"
+            String(localized: "Sticker")
         }
     }
 

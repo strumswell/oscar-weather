@@ -28,33 +28,125 @@ actor CacheStore {
   private var cache: [String: (Date, HTTPResponse, Data)] = [:]
   private let fileManager = FileManager.default
   private let cacheDirectory: URL
-  private let maxEntryCount = 100
-  private let persistentEntryLifetime: TimeInterval = 604800  // 1 week
+  private let maxEntryCount: Int
+  private let persistentEntryLifetime: TimeInterval
+  private var maintenanceScheduled = false
+  private var hasPerformedPersistentMaintenance = false
   
-  init() {
+  init(
+    cacheDirectory: URL? = nil,
+    persistentEntryLifetime: TimeInterval = 7 * 24 * 3_600,
+    maxEntryCount: Int = 100
+  ) {
     let cachesDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
       ?? FileManager.default.temporaryDirectory
-    self.cacheDirectory = cachesDirectory.appendingPathComponent("APICache", isDirectory: true)
-    self.cache = Self.loadFromPersistentStorage(
-      cacheDirectory: cacheDirectory,
-      fileManager: fileManager,
-      persistentEntryLifetime: persistentEntryLifetime,
-      maxEntryCount: maxEntryCount
-    )
+    self.cacheDirectory = cacheDirectory
+      ?? cachesDirectory.appendingPathComponent("APICache", isDirectory: true)
+    self.persistentEntryLifetime = persistentEntryLifetime
+    self.maxEntryCount = maxEntryCount
+    // Disk entries are loaded lazily by key. This keeps launch cheap while
+    // preserving week-old last-known-good responses for offline fallback.
+    self.cache = [:]
   }
 
   func get(_ key: String) -> (Date, HTTPResponse, Data)? {
-    return cache[key]
+    if let cached = cache[key] {
+      return cached
+    }
+    guard let persisted = loadPersistedResponse(for: key) else { return nil }
+    cache[key] = persisted
+    return persisted
   }
 
   func set(_ key: String, value: (Date, HTTPResponse, Data)) {
     cache[key] = value
     saveToPersistentStorage(key: key, value: value)
+    schedulePersistentMaintenanceIfNeeded()
     
     // Limit cache size to prevent unbounded growth
     if cache.count > maxEntryCount {
       cleanOldEntries()
     }
+  }
+
+  private func schedulePersistentMaintenanceIfNeeded() {
+    guard !maintenanceScheduled, !hasPerformedPersistentMaintenance else { return }
+    maintenanceScheduled = true
+    Task(priority: .background) { [weak self] in
+      await Task.yield()
+      await self?.performPersistentMaintenance()
+    }
+  }
+
+  func performPersistentMaintenance(now: Date = .now) {
+    defer {
+      maintenanceScheduled = false
+      hasPerformedPersistentMaintenance = true
+    }
+    guard let files = try? fileManager.contentsOfDirectory(
+      at: cacheDirectory,
+      includingPropertiesForKeys: nil
+    ) else { return }
+
+    let metadataFiles = files.filter { $0.pathExtension == "json" }
+    let bodyStems = Set(
+      files.filter { $0.pathExtension == "body" }
+        .map { $0.deletingPathExtension().lastPathComponent }
+    )
+    var validEntries: [(timestamp: Date, fileStem: String)] = []
+    var metadataStems = Set<String>()
+
+    for metadataURL in metadataFiles {
+      let fileStem = metadataURL.deletingPathExtension().lastPathComponent
+      metadataStems.insert(fileStem)
+      guard let data = try? Data(contentsOf: metadataURL),
+            let metadata = try? JSONDecoder().decode(CachedResponseMetadata.self, from: data),
+            now.timeIntervalSince(metadata.timestamp) < persistentEntryLifetime,
+            bodyStems.contains(fileStem)
+      else {
+        removePersistedFiles(fileStem: fileStem)
+        continue
+      }
+      validEntries.append((metadata.timestamp, fileStem))
+    }
+
+    for orphanedBodyStem in bodyStems.subtracting(metadataStems) {
+      removePersistedFiles(fileStem: orphanedBodyStem)
+    }
+
+    let overflowCount = validEntries.count - maxEntryCount
+    if overflowCount > 0 {
+      for entry in validEntries.sorted(by: { $0.timestamp < $1.timestamp }).prefix(overflowCount) {
+        cache = cache.filter { fileStem(for: $0.key) != entry.fileStem }
+        removePersistedFiles(fileStem: entry.fileStem)
+      }
+    }
+  }
+
+  private func loadPersistedResponse(for key: String) -> (Date, HTTPResponse, Data)? {
+    let fileStem = fileStem(for: key)
+    let metadataURL = metadataFileURL(forFileStem: fileStem)
+    guard fileManager.fileExists(atPath: metadataURL.path) else { return nil }
+    guard let metadataData = try? Data(contentsOf: metadataURL),
+          let metadata = try? JSONDecoder().decode(CachedResponseMetadata.self, from: metadataData),
+          Date.now.timeIntervalSince(metadata.timestamp) < persistentEntryLifetime,
+          let data = try? Data(contentsOf: bodyFileURL(forFileStem: fileStem))
+    else {
+      removePersistedFiles(fileStem: fileStem)
+      return nil
+    }
+
+    var headers = HTTPFields()
+    for header in metadata.headers {
+      if let name = HTTPField.Name(header.name) {
+        headers[name] = header.value
+      }
+    }
+    let response = HTTPResponse(
+      status: HTTPResponse.Status(code: metadata.statusCode),
+      headerFields: headers
+    )
+    return (metadata.timestamp, response, data)
   }
   
   func clearCache() {
@@ -248,9 +340,9 @@ nonisolated final class CachingMiddleware: ClientMiddleware {
   private let cacheTime: TimeInterval
   private let cacheStore: CacheStore
 
-  init(cacheTime: TimeInterval = 10) {
+  init(cacheTime: TimeInterval = 10, cacheStore: CacheStore = .shared) {
     self.cacheTime = cacheTime
-    self.cacheStore = .shared
+    self.cacheStore = cacheStore
   }
   
   func clearCache() async {
@@ -310,9 +402,12 @@ nonisolated final class CachingMiddleware: ClientMiddleware {
 
     let key = cacheKey(for: request, baseURL: baseURL)
 
-    // Check if we have a valid cached response
-    if let (timestamp, cachedResponse, cachedData) = await cacheStore.get(key),
-      Date().timeIntervalSince(timestamp) < cacheTime
+    let cached = await cacheStore.get(key)
+
+    // Fresh entries avoid the request entirely. Older persisted entries stay
+    // available below as last-known-good data if the network/server fails.
+    if let (timestamp, cachedResponse, cachedData) = cached,
+      Date.now.timeIntervalSince(timestamp) < cacheTime
     {
       Self.logger.debug(" ---> Return cache for \(baseURL, privacy: .public)")
       return (cachedResponse, HTTPBody(cachedData))
@@ -337,8 +432,16 @@ nonisolated final class CachingMiddleware: ClientMiddleware {
         }
       }
 
+      if let (_, cachedResponse, cachedData) = cached {
+        Self.logger.info(" ---> Return stale cache after HTTP \(response.status.code, privacy: .public) for \(baseURL, privacy: .public)")
+        return (cachedResponse, HTTPBody(cachedData))
+      }
       return (response, responseBody)
     } catch {
+      if let (_, cachedResponse, cachedData) = cached {
+        Self.logger.info(" ---> Return stale cache after network failure for \(baseURL, privacy: .public)")
+        return (cachedResponse, HTTPBody(cachedData))
+      }
       Self.logger.error("Error in CachingMiddleware: \(error.localizedDescription, privacy: .public)")
       throw error
     }

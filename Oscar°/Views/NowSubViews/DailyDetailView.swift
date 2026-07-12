@@ -90,7 +90,7 @@ struct DailyDetailView: View {
       }
       .sensoryFeedback(.success, trigger: dismissalFeedback)
       .task(id: detailModel.selectedModel) {
-        await detailModel.load(coordinates: currentCoordinate, force: true)
+        await detailModel.load(coordinates: currentCoordinate)
       }
     }
   }
@@ -287,6 +287,8 @@ extension DailyDetailView {
           model: selectedModel
         )
         loadedKeys.insert(key)
+      } catch is CancellationError {
+        return
       } catch {
         errorMessage = error.localizedDescription
       }

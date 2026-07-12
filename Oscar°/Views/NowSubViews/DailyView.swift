@@ -24,7 +24,7 @@ struct DailyView: View {
     let temperatureUnit = weather.forecast.daily_units?.temperature_2m_min ?? "°C"
     let precipitationUnit = weather.forecast.daily_units?.precipitation_sum ?? "mm"
 
-    Button(action: presentDetails) {
+    Group {
       VStack(alignment: .leading) {
         Text(heading)
           .font(.title3)
@@ -88,10 +88,10 @@ struct DailyView: View {
 
       }
     }
-    .buttonStyle(.plain)
+    .contentShape(.rect)
+    .onTapGesture(perform: presentDetails)
     .disabled(!hasDailyDetailData)
-    .accessibilityLabel(Text("Tägliche Details"))
-    .accessibilityHint(Text("Öffnet die tägliche Ensemble-Vorhersage"))
+    .accessibilityAction(named: Text("Tägliche Details"), presentDetails)
     .accessibilityIdentifier("now.daily")
     .scrollTransition { [reduceMotion] content, phase in
       content

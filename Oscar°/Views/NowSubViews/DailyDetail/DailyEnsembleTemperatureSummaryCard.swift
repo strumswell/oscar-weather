@@ -71,7 +71,7 @@ struct DailyEnsembleTemperatureSummaryCard: View {
       statRow(
         label: "Unsicherster Tag",
         subtitle: "Tageshöchstwerte",
-        value: fuzziestMaxDay.map { "±\(String(format: "%.1f", $0.span / 2)) \(unit)" } ?? "--",
+        value: fuzziestMaxDay.map { "±\(($0.span / 2).formatted(.number.precision(.fractionLength(1)))) \(unit)" } ?? "--",
         valueColor: .orange,
         date: fuzziestMaxDay.map { shortDate($0.point.date) }
       )
@@ -79,7 +79,7 @@ struct DailyEnsembleTemperatureSummaryCard: View {
       statRow(
         label: "Unsicherster Tag",
         subtitle: "Tagestiefwerte",
-        value: fuzziestMinDay.map { "±\(String(format: "%.1f", $0.span / 2)) \(unit)" } ?? "--",
+        value: fuzziestMinDay.map { "±\(($0.span / 2).formatted(.number.precision(.fractionLength(1)))) \(unit)" } ?? "--",
         valueColor: .cyan,
         date: fuzziestMinDay.map { shortDate($0.point.date) }
       )
@@ -87,7 +87,7 @@ struct DailyEnsembleTemperatureSummaryCard: View {
       statRow(
         label: "Ø Bandbreite",
         subtitle: "Tageshöchstwerte",
-        value: avgMaxSpan.map { "\(String(format: "%.1f", $0)) \(unit)" } ?? "--",
+        value: avgMaxSpan.map { "\($0.formatted(.number.precision(.fractionLength(1)))) \(unit)" } ?? "--",
         valueColor: .secondary,
         date: nil
       )
@@ -95,7 +95,7 @@ struct DailyEnsembleTemperatureSummaryCard: View {
       statRow(
         label: "Ø Bandbreite",
         subtitle: "Tagestiefwerte",
-        value: avgMinSpan.map { "\(String(format: "%.1f", $0)) \(unit)" } ?? "--",
+        value: avgMinSpan.map { "\($0.formatted(.number.precision(.fractionLength(1)))) \(unit)" } ?? "--",
         valueColor: .secondary,
         date: nil
       )
@@ -104,7 +104,7 @@ struct DailyEnsembleTemperatureSummaryCard: View {
 
   private func formatted(_ value: Double?) -> String {
     guard let value else { return "--" }
-    return "\(String(format: "%.1f", value)) \(unit)"
+    return "\(value.formatted(.number.precision(.fractionLength(1)))) \(unit)"
   }
 
   private func shortDate(_ date: Date) -> String {

@@ -129,7 +129,7 @@ enum WeatherSnapshotStore {
         try? data.write(to: url, options: .atomic)
     }
 
-    static func load(maxAge: TimeInterval = 6 * 3_600) -> WeatherSnapshot? {
+    static func load(maxAge: TimeInterval = 7 * 24 * 3_600) -> WeatherSnapshot? {
         guard let url,
               let data = try? Data(contentsOf: url),
               let snapshot = try? JSONDecoder().decode(WeatherSnapshot.self, from: data),
@@ -137,5 +137,15 @@ enum WeatherSnapshotStore {
             return nil
         }
         return snapshot
+    }
+
+    static func coordinatesMatch(
+        snapshot: CodableCoordinate,
+        current: CLLocationCoordinate2D
+    ) -> Bool {
+        let canonicalSnapshot = LocationService.outboundCoordinate(snapshot.coordinate)
+        let canonicalCurrent = LocationService.outboundCoordinate(current)
+        return canonicalSnapshot.latitude == canonicalCurrent.latitude
+            && canonicalSnapshot.longitude == canonicalCurrent.longitude
     }
 }

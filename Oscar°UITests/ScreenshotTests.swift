@@ -237,10 +237,8 @@ final class ScreenshotTests: XCTestCase {
     func test09Widgets() {
         let app = launch(scene: "widgets")
         XCTAssertTrue(
-            app.descendants(matching: .any)["screenshot.widgetGallery"].waitForExistence(timeout: 30)
+            app.descendants(matching: .any)["screenshot.widgetGallery.ready"].waitForExistence(timeout: 30)
         )
-        // Basemap prerender + live radar tiles for the widget composite.
-        sleep(7)
         snapshot("09_widgets", timeWaitingForIdle: 0)
     }
 

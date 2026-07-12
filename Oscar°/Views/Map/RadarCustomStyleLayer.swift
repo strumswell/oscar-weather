@@ -442,7 +442,7 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         }
         playbackStart = CACurrentMediaTime()
         awaitingAdvance = false
-        didLogFirstDraw = false
+        stateLock.withLock { didLogFirstDraw = false }
         setNeedsDisplay()
     }
 
@@ -552,7 +552,7 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     // MARK: Draw (called by MapLibre every rendered frame)
 
     // One-shot diagnostic: which guard blocks the first draw of this layer instance.
-    nonisolated(unsafe) private var didLogFirstDraw = false
+    private var didLogFirstDraw = false
 
     override func draw(in mapView: MLNMapView, with context: MLNStyleLayerDrawingContext) {
         // Snapshot the drawable state — `draw` runs on MapLibre's render thread.
@@ -567,8 +567,12 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
              bounds: self.overlayBounds, phase: self.phase, opacity: self.opacity,
              sampling: self.samplingMode)
         }
-        if !didLogFirstDraw {
+        let shouldLogFirstDraw = stateLock.withLock {
+            guard !didLogFirstDraw else { return false }
             didLogFirstDraw = true
+            return true
+        }
+        if shouldLogFirstDraw {
             // One-shot per display(): only worth a log line when a guard would block.
             if snapshot.pipeline == nil || snapshot.texA == nil || snapshot.palette == nil
                 || snapshot.bounds == nil {

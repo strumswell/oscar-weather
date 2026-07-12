@@ -28,7 +28,7 @@ struct GlobalRadarEntryWidget: View {
             
             VStack {
                 HStack {
-                    Text(SettingService.formattedTime(entry.date))
+                    Text(SettingService.formattedTime(entry.frameDate ?? entry.date))
                         .font(.footnote)
                         .foregroundStyle(.white)
                         .padding(.horizontal, 5)

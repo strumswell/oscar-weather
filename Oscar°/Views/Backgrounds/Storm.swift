@@ -60,6 +60,8 @@ class Storm {
 
             if drop.x < -0.2 {
                 drop.x += 1.4
+            } else if drop.x > 1.2 {
+                drop.x -= 1.4
             }
 
             if drop.y > 1.2 {

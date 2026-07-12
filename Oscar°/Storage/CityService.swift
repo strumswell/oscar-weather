@@ -75,10 +75,14 @@ public final class CityService {
     }
     
     func deleteCity(offsets: IndexSet) {
-        let indicesToDelete = offsets.map { cities[$0].orderIndex }
         offsets.map { cities[$0] }.forEach(context.delete)
+        let remainingCities = cities.enumerated()
+            .filter { !offsets.contains($0.offset) }
+            .map(\.element)
+        for (index, city) in remainingCities.enumerated() {
+            city.orderIndex = Int64(index)
+        }
         save()
-        updateOrderIndexesAfterDeletion(deletedIndices: indicesToDelete)
     }
     
     func disableAllCities() {
@@ -171,21 +175,6 @@ public final class CityService {
         }
     }
     
-    private func updateOrderIndexesAfterDeletion(deletedIndices: [Int64]) {
-        let fetchRequest: NSFetchRequest<City> = City.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "orderIndex > %@", argumentArray: deletedIndices)
-
-        do {
-            let results = try context.fetch(fetchRequest)
-            for city in results {
-                city.orderIndex -= Int64(deletedIndices.count)
-            }
-            try context.save()
-        } catch {
-            Self.logger.error("Error updating order indexes after deletion: \(error.localizedDescription, privacy: .public)")
-        }
-    }
-
     private func getExistingCity(latitude: Double, longitude: Double) -> City? {
         return self.cities.first { $0.lat == latitude && $0.lon == longitude }
     }
