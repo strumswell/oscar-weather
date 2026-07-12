@@ -81,6 +81,10 @@ struct MapLayerPickerSheet: View {
                           imageName: "layer-radar-usa",
                           isSelected: isRadarSelected(.usa),
                           action: { select { onSelectRadar(.usa) } })
+                LayerTile(title: "Taiwan", subtitle: "CWA",
+                          imageName: "layer-radar-taiwan",
+                          isSelected: isRadarSelected(.taiwan),
+                          action: { select { onSelectRadar(.taiwan) } })
             }
         }
     }
@@ -103,9 +107,10 @@ struct MapLayerPickerSheet: View {
         }
     }
 
-    /// The typed radar product exists for DWD and MRMS coverage, not OPERA.
+    /// The typed radar product exists for DWD and MRMS coverage, not OPERA or CWA.
     private var precipTypeAvailable: Bool {
-        !(settingsService.oscarRadarLayer && settingsService.oscarRadarRegion == .europe)
+        !settingsService.oscarRadarLayer
+            || RadarProduct.precipitationTyped.isAvailable(in: settingsService.oscarRadarRegion)
     }
 
     /// Isobars ride the hourly model frames, so they need a model layer —

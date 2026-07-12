@@ -426,17 +426,22 @@ final class APIClient: Sendable {
   ) async throws -> AlertResponse {
     let useCanadian: Bool
     let useUnitedStates: Bool
+    let useTaiwan: Bool
     if let countryCode {
       useCanadian = countryCode == "CA"
       useUnitedStates = countryCode == "US"
+      useTaiwan = countryCode == "TW"
     } else {
       useCanadian = isCanadianLocation(coordinates)
       useUnitedStates = !useCanadian && isUnitedStatesLocation(coordinates)
+      useTaiwan = !useCanadian && !useUnitedStates && isTaiwanLocation(coordinates)
     }
 
     if useCanadian {
       return try await getCanadianWeatherAlerts(coordinates: coordinates)
-    } else if useUnitedStates {
+    } else if useUnitedStates || useTaiwan {
+      // Both NWS (US) and CWA (Taiwan) warnings are served by oscar-server on the
+      // same source-tagged endpoint; the response's `source` drives attribution.
       return try await getOscarWeatherAlerts(coordinates: coordinates)
     } else {
       return try await getBrightskyAlerts(coordinates: coordinates)
@@ -467,6 +472,15 @@ final class APIClient: Sendable {
     let caribbean = lat >= 17.4 && lat <= 18.6 && lon >= -68.0 && lon <= -64.3
     let pacific = lat >= 12.9 && lat <= 20.6 && lon >= 144.5 && lon <= 146.1
     return conus || alaska || hawaii || caribbean || pacific
+  }
+
+  /// CWA (Taiwan) alert coverage: the main island plus its outlying county groups
+  /// (Penghu, Kinmen, Matsu). Mirrors `RadarRegion.taiwan`'s coverage box and is only
+  /// consulted after the Canada/US checks.
+  private func isTaiwanLocation(_ coordinates: CLLocationCoordinate2D) -> Bool {
+    let lat = coordinates.latitude
+    let lon = coordinates.longitude
+    return lat >= 20.5 && lat <= 26.5 && lon >= 118.0 && lon <= 124.0
   }
 
   /// Active severe-weather alerts at a point from oscar-server

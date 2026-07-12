@@ -73,6 +73,7 @@ struct OscarRadarTimelineControls: View {
         case .germany: "DWD Radar"
         case .europe: "OPERA Radar"
         case .usa: "NOAA Radar"
+        case .taiwan: "CWA Radar"
         }
     }
 
@@ -81,6 +82,7 @@ struct OscarRadarTimelineControls: View {
         case .germany: "DWD"
         case .europe: "OPERA"
         case .usa: "NOAA"
+        case .taiwan: "CWA"
         }
     }
 }

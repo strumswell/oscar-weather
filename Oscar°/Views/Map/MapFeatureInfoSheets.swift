@@ -112,9 +112,9 @@ enum AlertSeverityStyle {
     }
 
     static func label(rank: Int, source: String? = nil) -> LocalizedStringKey {
-        // NWS alerts use the CAP severity terms US users know from official
-        // products; the DWD warning-level names are DWD-specific.
-        if source == "nws" {
+        // NWS and CWA alerts both use the CAP severity terms (Minor/Moderate/Severe/
+        // Extreme); the DWD warning-level names are DWD-specific.
+        if source == "nws" || source == "cwa" {
             return switch rank {
             case 1: "Minor"
             case 2: "Moderate"
@@ -132,7 +132,11 @@ enum AlertSeverityStyle {
     }
 
     static func sourceName(_ source: String?) -> String {
-        source == "nws" ? "NOAA / National Weather Service" : "Deutscher Wetterdienst"
+        switch source {
+        case "nws": "NOAA / National Weather Service"
+        case "cwa": "CWA / Central Weather Administration"
+        default: "Deutscher Wetterdienst"
+        }
     }
 }
 

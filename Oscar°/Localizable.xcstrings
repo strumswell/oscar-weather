@@ -1069,19 +1069,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Erlaube Mitteilungen in den iOS Einstellungen, um Regenwarnungen und Wetterwarnungen in Mitteleuropa und den USA zu erhalten."
+            "value" : "Erlaube Mitteilungen in den iOS Einstellungen, um Regenwarnungen und Wetterwarnungen in Mitteleuropa, den USA und Taiwan zu erhalten."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Allow notifications in iOS Settings to receive rain alerts and weather alerts in Central Europe and the United States."
+            "value" : "Allow notifications in iOS Settings to receive rain alerts and weather alerts in Central Europe, the United States, and Taiwan."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Orta Avrupa ve ABD'de yağmur uyarıları ve hava durumu uyarıları almak için iOS Ayarları'nda bildirimlere izin verin."
+            "value" : "Orta Avrupa, ABD ve Tayvan'da yağmur uyarıları ve hava durumu uyarıları almak için iOS Ayarları'nda bildirimlere izin verin."
           }
         }
       }
@@ -1875,19 +1875,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Beide Beta-Warnungstypen sind derzeit ausgeschaltet. Sie sind für Mitteleuropa und die USA verfügbar."
+            "value" : "Beide Beta-Warnungstypen sind derzeit ausgeschaltet. Sie sind für Mitteleuropa, die USA und Taiwan verfügbar."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Both beta alert types are currently turned off. They are available for Central Europe and the United States."
+            "value" : "Both beta alert types are currently turned off. They are available for Central Europe, the United States, and Taiwan."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Her iki beta uyarı türü de şu anda kapalı. Bunlar Orta Avrupa ve ABD için kullanılabilir."
+            "value" : "Her iki beta uyarı türü de şu anda kapalı. Bunlar Orta Avrupa, ABD ve Tayvan için kullanılabilir."
           }
         }
       }
@@ -6668,19 +6668,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oscar kann Beta-Regenwarnungen und Beta-Wetterwarnungen für deinen aktuellen Ort in Mitteleuropa und den USA senden. Schalte die einzelnen Warnungstypen unten ein oder aus."
+            "value" : "Oscar kann Beta-Regenwarnungen und Beta-Wetterwarnungen für deinen aktuellen Ort in Mitteleuropa, den USA und Taiwan senden. Schalte die einzelnen Warnungstypen unten ein oder aus."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oscar can send beta rain alerts and beta weather alerts for your current location in Central Europe and the United States. Turn each alert type on or off below."
+            "value" : "Oscar can send beta rain alerts and beta weather alerts for your current location in Central Europe, the United States, and Taiwan. Turn each alert type on or off below."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oscar, Orta Avrupa ve ABD'deki mevcut konumunuz için beta yağmur uyarıları ve beta hava durumu uyarıları gönderebilir. Her uyarı türünü aşağıdan açıp kapatın."
+            "value" : "Oscar, Orta Avrupa, ABD ve Tayvan'daki mevcut konumunuz için beta yağmur uyarıları ve beta hava durumu uyarıları gönderebilir. Her uyarı türünü aşağıdan açıp kapatın."
           }
         }
       }
@@ -8996,19 +8996,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aktiviere Regenwarnungen oder Wetterwarnungen, um Beta-Mitteilungen in Mitteleuropa und den USA zu erhalten. Dein ungefährer Standort wird dazu auf einem Oscar-Server gespeichert."
+            "value" : "Aktiviere Regenwarnungen oder Wetterwarnungen, um Beta-Mitteilungen in Mitteleuropa, den USA und Taiwan zu erhalten. Dein ungefährer Standort wird dazu auf einem Oscar-Server gespeichert."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Turn on rain alerts or weather alerts to receive beta notifications in Central Europe and the United States. Your approximate location will be stored on an Oscar server for this."
+            "value" : "Turn on rain alerts or weather alerts to receive beta notifications in Central Europe, the United States, and Taiwan. Your approximate location will be stored on an Oscar server for this."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Orta Avrupa ve ABD'de beta bildirimleri almak için yağmur uyarılarını veya hava durumu uyarılarını açın. Bunun için yaklaşık konumunuz bir Oscar sunucusunda saklanacaktır."
+            "value" : "Orta Avrupa, ABD ve Tayvan'da beta bildirimleri almak için yağmur uyarılarını veya hava durumu uyarılarını açın. Bunun için yaklaşık konumunuz bir Oscar sunucusunda saklanacaktır."
           }
         }
       }

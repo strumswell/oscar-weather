@@ -191,9 +191,11 @@ extension AlertDetailView {
         case .canadian:
             return "Environment Canada"
         case .oscar(let oscarAlert):
-            return oscarAlert.source == "nws"
-                ? "NOAA / National Weather Service"
-                : "Deutscher Wetterdienst"
+            switch oscarAlert.source {
+            case "nws": return "NOAA / National Weather Service"
+            case "cwa": return "CWA / Central Weather Administration"
+            default: return "Deutscher Wetterdienst"
+            }
         }
     }
 }
