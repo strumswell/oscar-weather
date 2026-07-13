@@ -1395,7 +1395,7 @@ struct WeatherMapView: UIViewRepresentable {
         private func syncWindParticles(selection: WeatherTileLayer?, state: ModelGridLayerState?) {
             guard let particleView = windParticleView else { return }
             let isWindLayer = parent.showWindParticles
-                && (selection == .iconWind || selection == .gfsWind)
+                && (selection == .iconWind || selection == .gfsWind || selection == .ecmwfWind)
 
             guard isWindLayer, let state, let frameKey = state.currentFrameKey, let selection else {
                 particleView.isHidden = true
@@ -1425,7 +1425,10 @@ struct WeatherMapView: UIViewRepresentable {
                 let hi = min(keys.count - 1, index + 2)
                 if lo <= hi {
                     let keepIds = Set(keys[lo...hi])
-                    Task { await WindFieldCache.shared.evict(retaining: keepIds) }
+                    Task {
+                        await WindFieldCache.shared.evict(
+                            retaining: keepIds, model: selection.windFieldPrefix)
+                    }
                 }
             }
 
@@ -1453,7 +1456,8 @@ struct WeatherMapView: UIViewRepresentable {
                                       payload: RadarGridPayload?, frameKey: String?) {
             let isBubbleLayer: Bool
             switch selection {
-            case .iconTemp, .gfsTemp, .iconWind, .gfsWind: isBubbleLayer = true
+            case .iconTemp, .gfsTemp, .ecmwfTemp,
+                 .iconWind, .gfsWind, .ecmwfWind: isBubbleLayer = true
             default: isBubbleLayer = false
             }
             guard isBubbleLayer, enabled, let selection, let payload, let frameKey,
@@ -1465,7 +1469,7 @@ struct WeatherMapView: UIViewRepresentable {
                 return
             }
 
-            let isWind = selection == .iconWind || selection == .gfsWind
+            let isWind = selection == .iconWind || selection == .gfsWind || selection == .ecmwfWind
             let unit = isWind
                 ? parent.settingsService.windSpeedUnit
                 : parent.settingsService.temperatureUnit

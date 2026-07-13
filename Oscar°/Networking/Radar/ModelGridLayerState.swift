@@ -2,7 +2,7 @@
 //  ModelGridLayerState.swift
 //  Oscar°
 //
-//  Timeline state for the ICON-D2 / GFS value-grid layers (world images,
+//  Timeline state for the ICON-D2 / GFS / ECMWF value-grid layers (world images,
 //  palettes, progressive frame loading).
 //
 
@@ -560,7 +560,7 @@ extension WeatherTileLayer {
     /// Only precipitation morphs along the server flow field — temperature and
     /// wind cross-fade in data space (warping them along precip motion is wrong).
     var morphsAlongMotion: Bool {
-        self == .iconPrecip || self == .gfsPrecip
+        self == .iconPrecip || self == .gfsPrecip || self == .ecmwfPrecip
     }
 
     /// `/models/{model}/motion` — per-pair flow fields sized to the same raster
@@ -569,6 +569,7 @@ extension WeatherTileLayer {
         switch self {
         case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "models/icon/motion"
         case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure:     return "models/gfs/motion"
+        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: return "models/ecmwf/motion"
         }
     }
 }

@@ -34,6 +34,12 @@ struct WeatherModelInfoView: View {
                     grid: "≈ 25 km Raster",
                     imageName: "layer-gfs-precip",
                     summary: "Gröberes Raster, dafür weltweit — gut für den großen Überblick. Einzelne Schauer können verschwimmen.")
+                WeatherModelCard(
+                    name: "ECMWF IFS",
+                    provider: "Europäisches Zentrum für mittelfristige Wettervorhersagen",
+                    grid: "≈ 25 km Raster",
+                    imageName: "layer-gfs-precip",
+                    summary: "Globales Modell für den mittelfristigen Überblick mit Temperatur, Regen, Wind und Luftdruck in Drei-Stunden-Schritten.")
             }
             .padding(.horizontal, 20)
             .padding(.top, 4)

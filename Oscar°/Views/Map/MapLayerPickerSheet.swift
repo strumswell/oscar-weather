@@ -30,10 +30,10 @@ struct MapLayerPickerSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     radarSection
-                    productSection(title: "Regen", layers: [.iconPrecip, .gfsPrecip])
-                    productSection(title: "Temperatur", layers: [.iconTemp, .gfsTemp])
-                    productSection(title: "Wind", layers: [.iconWind, .gfsWind])
-                    productSection(title: "Luftdruck", layers: [.iconPressure, .gfsPressure])
+                    productSection(title: "Regen", layers: [.iconPrecip, .gfsPrecip, .ecmwfPrecip])
+                    productSection(title: "Temperatur", layers: [.iconTemp, .gfsTemp, .ecmwfTemp])
+                    productSection(title: "Wind", layers: [.iconWind, .gfsWind, .ecmwfWind])
+                    productSection(title: "Luftdruck", layers: [.iconPressure, .gfsPressure, .ecmwfPressure])
                     displaySection
                 }
                 .padding(.horizontal, 20)
@@ -361,7 +361,8 @@ private extension WeatherTileLayer {
     var pickerRegion: LocalizedStringKey {
         switch self {
         case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "Zentraleuropa"
-        case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure:     return "Weltweit"
+        case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure,
+             .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: return "Weltweit"
         }
     }
 
@@ -376,6 +377,12 @@ private extension WeatherTileLayer {
         case .gfsTemp:      return "layer-gfs-temp"
         case .gfsWind:      return "layer-gfs-wind"
         case .gfsPressure:  return "layer-gfs-pressure"
+        // ECMWF and GFS are both global 0.25° products. Reuse the global
+        // product artwork until model-specific screenshots are available.
+        case .ecmwfPrecip:  return "layer-gfs-precip"
+        case .ecmwfTemp:    return "layer-gfs-temp"
+        case .ecmwfWind:    return "layer-gfs-wind"
+        case .ecmwfPressure: return "layer-gfs-pressure"
         }
     }
 }

@@ -226,9 +226,9 @@ final class WindParticleView: UIView {
         guard w > 0, h > 0 else { return }
 
         let zoomLevel = approximateZoomLevel(for: mapView)
-        let isGFS = activeLayer == .gfsWind
+        let usesGlobalModelStyle = activeLayer?.isGlobalModel == true
         let metersScale = particleVelocityScale(
-            forContinuousZoom: continuousZoomLevel(for: mapView), isGFS: isGFS)
+            forContinuousZoom: continuousZoomLevel(for: mapView), usesGlobalModelStyle: usesGlobalModelStyle)
         let minPixelStep: Float = 0.2
         // Hard ceiling on the per-tick step — degenerate samples (tile seams,
         // spike values) must never paint screen-length streaks.
@@ -246,12 +246,12 @@ final class WindParticleView: UIView {
 
         // Stroke style tuned for readability over busy radar/map imagery.
         ctx.setBlendMode(.normal)
-        if isGFS {
+        if usesGlobalModelStyle {
             ctx.setStrokeColor(red: 232/255, green: 244/255, blue: 1, alpha: 0.9)
         } else {
             ctx.setStrokeColor(red: 250/255, green: 252/255, blue: 1, alpha: 0.94)
         }
-        ctx.setLineWidth(isGFS ? 1.6 : 1.8)
+        ctx.setLineWidth(usesGlobalModelStyle ? 1.6 : 1.8)
         ctx.beginPath()
 
         let fw = Float(w)
@@ -410,7 +410,8 @@ final class WindParticleView: UIView {
             var nextTileData: [String: WindFieldTile] = [:]
             await withTaskGroup(of: (String, WindFieldTile?).self) { group in
                 for (x, y) in positions {
-                    let cacheKey = WindTileKey(frameId: frameId, z: z, x: x, y: y)
+                    let cacheKey = WindTileKey(
+                        model: layer.windFieldPrefix, frameId: frameId, z: z, x: x, y: y)
                     let tileKey = "\(z)/\(x)/\(y)"
                     group.addTask {
                         let tile = await WindFieldCache.shared.tile(key: cacheKey, layer: layer)
@@ -503,7 +504,9 @@ final class WindParticleView: UIView {
     /// SAME number of screen pixels at every zoom (the 2^z term cancels the map
     /// scale): 10 m/s ≈ 50 px/s. Far-out zooms are damped a touch — continental
     /// views read better when the field drifts rather than races.
-    private func particleVelocityScale(forContinuousZoom zoom: Double, isGFS: Bool) -> Double {
+    private func particleVelocityScale(
+        forContinuousZoom zoom: Double, usesGlobalModelStyle: Bool
+    ) -> Double {
         let scaleInvariant = 65.0 * pow(2, 6 - zoom)
         // Far-out boost: at continent scale the same px/s reads as stubby dashes,
         // so let the field flow faster (Windy-style long streamlines).
@@ -513,6 +516,6 @@ final class WindParticleView: UIView {
         case ...4.5: farOutBoost = 1.3
         default:     farOutBoost = 1.0
         }
-        return scaleInvariant * farOutBoost * (isGFS ? 1.1 : 1.0)
+        return scaleInvariant * farOutBoost * (usesGlobalModelStyle ? 1.1 : 1.0)
     }
 }

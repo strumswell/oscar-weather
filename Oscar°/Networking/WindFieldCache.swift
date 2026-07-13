@@ -23,6 +23,7 @@ struct WindFieldTile: Decodable, Sendable {
 }
 
 struct WindTileKey: Hashable, Sendable {
+    let model: String
     let frameId: String
     let z: Int
     let x: Int
@@ -36,10 +37,11 @@ extension WeatherTileLayer {
         switch self {
         case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure: "gfs"
         case .iconPrecip, .iconTemp, .iconWind, .iconPressure: "icon"
+        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: "ecmwf"
         }
     }
 
-    var windFieldSamples: Int { self == .gfsWind ? 24 : 32 }
+    var windFieldSamples: Int { isGlobalModel ? 24 : 32 }
 }
 
 // MARK: - Cache
@@ -64,16 +66,20 @@ actor WindFieldCache {
     /// Fire-and-forget prefetch for a set of tile positions.
     func prefetch(frameId: String, z: Int, positions: [(x: Int, y: Int)], layer: WeatherTileLayer) {
         for (x, y) in positions {
-            let key = WindTileKey(frameId: frameId, z: z, x: x, y: y)
+            let key = WindTileKey(
+                model: layer.windFieldPrefix, frameId: frameId, z: z, x: x, y: y)
             guard tiles[key] == nil, fetching[key] == nil else { continue }
             fetching[key] = makeTask(key: key, layer: layer)
         }
     }
 
     /// Drop tiles for frame IDs outside the retention set.
-    func evict(retaining keepIds: Set<String>) {
-        tiles = tiles.filter { keepIds.contains($0.key.frameId) }
-        for key in Array(fetching.keys) where !keepIds.contains(key.frameId) {
+    func evict(retaining keepIds: Set<String>, model: String? = nil) {
+        tiles = tiles.filter { key, _ in
+            (model == nil || key.model == model) && keepIds.contains(key.frameId)
+        }
+        for key in Array(fetching.keys)
+        where (model != nil && key.model != model) || !keepIds.contains(key.frameId) {
             fetching[key]?.cancel()
             fetching.removeValue(forKey: key)
         }
@@ -95,7 +101,7 @@ actor WindFieldCache {
 
     private static func fetch(key: WindTileKey, layer: WeatherTileLayer) async -> WindFieldTile? {
         let urlString =
-            "\(ModelGridLayerState.baseURL)/models/\(layer.windFieldPrefix)/frames"
+            "\(ModelGridLayerState.baseURL)/models/\(key.model)/frames"
             + "/\(key.frameId)/wind/field/\(key.z)/\(key.x)/\(key.y).json?samples=\(layer.windFieldSamples)"
         guard let url = URL(string: urlString) else { return nil }
         var req = URLRequest(url: url)

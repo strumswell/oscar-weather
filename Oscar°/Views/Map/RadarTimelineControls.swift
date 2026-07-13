@@ -107,6 +107,7 @@ struct WeatherTileTimelineControls: View {
         switch imageState.currentLayer {
         case .iconPrecip, .iconTemp, .iconWind, .iconPressure: "ICON-D2"
         case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure: "GFS"
+        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: "ECMWF"
         case nil: ""
         }
     }

@@ -3093,6 +3093,29 @@
     "EUMETNET OPERA" : {
 
     },
+    "Europäisches Zentrum für mittelfristige Wettervorhersagen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Europäisches Zentrum für mittelfristige Wettervorhersagen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "European Centre for Medium-Range Weather Forecasts"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avrupa Orta Vadeli Hava Tahminleri Merkezi"
+          }
+        }
+      }
+    },
     "Europa" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3739,6 +3762,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Çin hava durumu servisinin küresel modeli."
+          }
+        }
+      }
+    },
+    "Globales Modell für den mittelfristigen Überblick mit Temperatur, Regen, Wind und Luftdruck in Drei-Stunden-Schritten." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Globales Modell für den mittelfristigen Überblick mit Temperatur, Regen, Wind und Luftdruck in Drei-Stunden-Schritten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Global model for medium-range outlooks with temperature, rain, wind, and pressure in three-hour steps."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta vadeli genel görünüm için sıcaklık, yağış, rüzgâr ve basıncı üç saatlik adımlarla sunan küresel model."
           }
         }
       }
