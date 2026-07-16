@@ -8,12 +8,13 @@ import CoreLocation
 import SwiftUI
 
 struct HeadView: View {
-  let locationTransition: Namespace.ID
   @Environment(Weather.self) private var weather: Weather
   @Environment(Location.self) private var location: Location
   @Environment(NowPresentationCoordinator.self) private var presentation
   @ScaledMetric(relativeTo: .largeTitle) private var temperatureFontSize: CGFloat = 120
+  @ScaledMetric(relativeTo: .title2) private var cityNameFontSize: CGFloat = 22
   private let settingsService = SettingService.shared
+  private let cityService = CityService.shared
 
   private var windSpeedUnit: WindSpeedUnit {
     WindSpeedUnit(settingValue: settingsService.windSpeedUnit)
@@ -25,45 +26,65 @@ struct HeadView: View {
     return BeaufortScale.value(forKilometersPerHour: speed)
   }
 
+  /// "🏠 Zuhause" above the place name: the selected city's personalization,
+  /// or the current location's (UserDefaults-backed) when GPS is active.
+  private var personalization: String? {
+    let emoji: String?
+    let label: String?
+    if let city = cityService.cities.first(where: { $0.selected }) {
+      emoji = city.emoji
+      label = city.customLabel
+    } else {
+      emoji = cityService.currentLocationEmoji
+      label = cityService.currentLocationCustomLabel
+    }
+    let text = [emoji, label]
+      .compactMap { $0 }
+      .filter { !$0.isEmpty }
+      .joined(separator: " ")
+    return text.isEmpty ? nil : text
+  }
+
+  private var locationHeader: some View {
+    VStack(spacing: 4) {
+      if let personalization {
+        // An "eyebrow" over the place name: small caps, letterspaced,
+        // deliberately quiet next to the city name.
+        Text(personalization)
+          .font(.caption.weight(.semibold))
+          .textCase(.uppercase)
+          .tracking(1.2)
+          .foregroundStyle(Color(UIColor.label).opacity(0.6))
+          .lineLimit(1)
+      }
+      Text(location.name)
+        .font(.system(size: cityNameFontSize, weight: .bold))
+        .lineSpacing(10)
+        .foregroundStyle(Color(UIColor.label))
+    }
+  }
+
   var body: some View {
     HStack {
       Spacer()
-        if #available(iOS 18.0, *) {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                  .foregroundStyle(Color(UIColor.label))
-                Text(location.name)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .lineSpacing(10)
-                    .foregroundStyle(Color(UIColor.label))
-            }
-            .matchedTransitionSource(id: NowSheet.locationTransitionID, in: locationTransition)
-        } else {
-            Image(systemName: "magnifyingglass")
-              .foregroundStyle(Color(UIColor.label))
-            Text(location.name)
-                .font(.title2)
-                .fontWeight(.bold)
-                .lineSpacing(10)
-                .foregroundStyle(Color(UIColor.label))
-        }
+      locationHeader
       Spacer()
     }
     .shadow(radius: 5)
     .onTapGesture {
       UIApplication.shared.playHapticFeedback()
-      presentation.present(.location)
+      presentation.selectedTab = .search
     }
     .accessibilityElement(children: .combine)
     .accessibilityAddTraits(.isButton)
-    .accessibilityLabel(Text("Ort ändern, aktuell \(location.name)"))
+    .accessibilityLabel(
+      Text("Ort ändern, aktuell \([personalization, location.name].compactMap { $0 }.joined(separator: ", "))")
+    )
     .accessibilityAction {
       UIApplication.shared.playHapticFeedback()
-      presentation.present(.location)
+      presentation.selectedTab = .search
     }
-    .padding(.bottom, 35)
-    .padding(.leading, -20)
+    .padding(.bottom, 10)
     .padding(.top)
 
     VStack {
@@ -78,7 +99,7 @@ struct HeadView: View {
           .contentTransition(.numericText())
           .animation(.default, value: weather.forecast.current?.temperature)
       }
-      .padding(.bottom, 170)
+      .padding(.bottom, 155)
 
       HStack {
         Spacer()

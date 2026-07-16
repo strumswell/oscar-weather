@@ -109,7 +109,7 @@ struct WeatherApp: App {
                 if ScreenshotMode.scene == .widgets {
                     ScreenshotWidgetGallery()
                 } else {
-                    NowView()
+                    RootTabView()
                     OnboardingGate()
                 }
             }
@@ -118,6 +118,10 @@ struct WeatherApp: App {
                 .environment(location)
                 .preferredColorScheme(.dark)
                 .task {
+                    // Honor the user's launch default (a saved city or "current
+                    // location") before hydration compares coordinates and before
+                    // the first refresh resolves a location.
+                    locationService.city.applyDefaultSelectionOnLaunch()
                     let snapshot = await Task.detached {
                         WeatherSnapshotStore.load()
                     }.value
@@ -134,7 +138,7 @@ struct WeatherApp: App {
                     await notificationSettingsManager.configureOnLaunch()
                     await WidgetBasemapRenderer.refreshIfNeeded()
                 }
-                .sentryTrace("NowView")
+                .sentryTrace("RootTabView")
         }
     }
 }

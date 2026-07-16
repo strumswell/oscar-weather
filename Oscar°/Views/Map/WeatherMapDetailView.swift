@@ -11,11 +11,12 @@ import UIKit
 
 // MARK: - Fullscreen detail view
 
-/// Fullscreen weather map: legend, layer menu, close button, and the shared
-/// timeline chip (radar or model layer, depending on what's active).
+/// Fullscreen weather map: legend, layer menu, and the shared timeline chip
+/// (radar or model layer, depending on what's active). Hosted as the Karten tab,
+/// so it stays alive across tab switches: loads are guarded against re-runs and
+/// playback pauses when the tab disappears.
 struct WeatherMapDetailView: View {
     let settingsService: SettingService
-    let onClose: () -> Void
     @Environment(Location.self) private var location: Location
     @Environment(\.scenePhase) private var scenePhase
     @State private var radarState = OscarRadarState(renderMode: .fullscreen)
@@ -84,21 +85,9 @@ struct WeatherMapDetailView: View {
                     }
                     .padding(12)
                     Spacer()
-                    VStack(spacing: 4) {
-                        Button(action: dismiss) {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 20, weight: .semibold))
-                                .frame(width: 18, height: 18)
-                        }
-                        .buttonStyle(.glass)
-                        .buttonBorderShape(.circle)
-                        .controlSize(.large)
-                        .accessibilityLabel(Text("Karte schließen"))
-
-                        layerPickerButton
-                    }
-                    .padding(.trailing)
-                    .padding(.top)
+                    layerPickerButton
+                        .padding(.trailing)
+                        .padding(.top)
                 }
                 Spacer()
             }
@@ -130,17 +119,27 @@ struct WeatherMapDetailView: View {
                 longitude: location.coordinates.longitude)
         }
         .task {
+            // Re-runs on every return to the tab: full loads only the first time,
+            // cheap staleness checks after that.
             if settingsService.oscarRadarLayer {
                 radarState.setProduct(settingsService.oscarRadarProduct)
                 radarState.setRegion(settingsService.oscarRadarRegion)
-                await radarState.loadAllFrames()
+                if radarState.frames.isEmpty {
+                    await radarState.loadAllFrames()
+                } else {
+                    await radarState.refreshIfStale()
+                }
                 // Testing hook: `-radarAutoPlay YES` starts playback immediately
                 // (exercises sustained frame swaps without touch input).
                 if UserDefaults.standard.bool(forKey: "radarAutoPlay") {
                     radarState.play()
                 }
             } else if let layer = settingsService.activeTileLayer {
-                await modelGridState.loadLayer(layer)
+                if modelGridState.currentLayer == layer, modelGridState.hasAnyLoadedFrame {
+                    await modelGridState.refreshIfStale()
+                } else {
+                    await modelGridState.loadLayer(layer)
+                }
             }
         }
         .task {
@@ -193,6 +192,11 @@ struct WeatherMapDetailView: View {
             } else {
                 modelGridState.pause()
             }
+        }
+        .onDisappear {
+            // Leaving the tab: stop playback; frames stay cached for the next visit.
+            radarState.pause()
+            modelGridState.pause()
         }
         .sheet(isPresented: $isLayerPickerPresented) {
             MapLayerPickerSheet(
@@ -267,12 +271,5 @@ struct WeatherMapDetailView: View {
         settingsService.oscarRadarLayer = false
         radarState.pause()
         settingsService.activeTileLayer = layer
-    }
-
-    private func dismiss() {
-        radarState.pause()
-        modelGridState.pause()
-        UIApplication.shared.playHapticFeedback()
-        onClose()
     }
 }

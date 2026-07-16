@@ -44,10 +44,13 @@ class Storm {
         }
     }
 
-    func update(date: Date, size: CGSize) {
+    /// `speedMultiplier` compensates small containers: drop speed is a fraction
+    /// of the view height per second, so the same drop that streaks across the
+    /// fullscreen sim crawls inside a ~100pt card without a boost.
+    func update(date: Date, size: CGSize, speedMultiplier: Double = 1) {
         var delta = date.timeIntervalSince1970 - lastUpdate.timeIntervalSince1970
         let divisor = size.height / size.width
-        
+
         if delta > 10 {
             delta = 0
         }
@@ -55,8 +58,8 @@ class Storm {
         for drop in drops {
             let radians = drop.direction.radians
 
-            drop.x += cos(radians) * drop.speed * delta * divisor
-            drop.y += sin(radians) * drop.speed * delta
+            drop.x += cos(radians) * drop.speed * delta * divisor * speedMultiplier
+            drop.y += sin(radians) * drop.speed * delta * speedMultiplier
 
             if drop.x < -0.2 {
                 drop.x += 1.4

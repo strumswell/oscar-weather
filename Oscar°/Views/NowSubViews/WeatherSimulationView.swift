@@ -98,7 +98,7 @@ struct WeatherSimulationView: View {
 
                     if shouldShowSun(snapshot) {
                         SunView(progress: Double(snapshot.timeOfDay))
-                            .opacity(Double((1 - snapshot.cloudDensity * 0.45) * snapshot.phase))
+                            .opacity(Double((1 - snapshot.cloudDensity * 0.45) * snapshot.phase * snapshot.sunDiscVisibility))
                     }
 
                     ZStack {
@@ -171,7 +171,7 @@ struct WeatherSimulationView: View {
     }
 
     private func shouldShowSun(_ snapshot: AtmosphereSnapshot) -> Bool {
-        snapshot.phase > 0.08 && snapshot.cloudDensity < 0.82 && snapshot.precipitationIntensity < 0.55
+        snapshot.sunDiscVisibility > 0.01 && snapshot.cloudDensity < 0.82 && snapshot.precipitationIntensity < 0.55
     }
 
     private func shouldShowStorm(_ snapshot: AtmosphereSnapshot) -> Bool {

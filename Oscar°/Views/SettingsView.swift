@@ -1,6 +1,6 @@
 //
-//  LegalView.swift
-//  LegalView
+//  SettingsView.swift
+//  Oscar°
 //
 //  Created by Philipp Bolte on 28.08.21.
 //
@@ -8,9 +8,8 @@
 import SwiftUI
 import UIKit
 
-struct LegalView: View {
+struct SettingsView: View {
   @Environment(\.colorScheme) var colorScheme
-  @Environment(\.dismiss) private var dismiss
 
   var body: some View {
     NavigationStack {
@@ -19,7 +18,7 @@ struct LegalView: View {
           MemberCard()
             .padding(.horizontal, 16)
 
-          section("Einstellungen") {
+          section("Allgemein") {
             settingsNavigationLink {
               NotificationSettingsView()
             } label: {
@@ -54,7 +53,6 @@ struct LegalView: View {
             Divider()
 
             Button {
-              dismiss()
               OnboardingCoordinator.shared.replay()
             } label: {
               HStack {
@@ -212,18 +210,7 @@ struct LegalView: View {
         .padding(.vertical, 16)
       }
       .background(Color(UIColor.systemGroupedBackground))
-      .navigationTitle("Rechtliches")
-      .navigationBarTitleDisplayMode(.inline)
-      .toolbar(content: {
-        ToolbarItem(
-          placement: .topBarTrailing,
-          content: {
-            Button(role: .close) {
-                dismiss()
-                UIApplication.shared.playHapticFeedback()
-              }
-          })
-      })
+      .navigationTitle("Einstellungen")
     }
   }
 
@@ -297,5 +284,5 @@ struct LegalView: View {
 }
 
 #Preview {
-  LegalView()
+  SettingsView()
 }

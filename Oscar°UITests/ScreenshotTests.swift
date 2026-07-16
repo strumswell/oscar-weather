@@ -229,7 +229,7 @@ final class ScreenshotTests: XCTestCase {
     func skipped_test08Customization() {
         let app = launch(scene: "customization")
         waitForNowContent(app)
-        openLegalSheet(app)
+        openSettingsTab(app)
         sleep(3)
         snapshot("08_customization", timeWaitingForIdle: 0)
     }
@@ -245,7 +245,7 @@ final class ScreenshotTests: XCTestCase {
     func skipped_test10Notifications() {
         let app = launch(scene: "notifications")
         waitForNowContent(app)
-        openLegalSheet(app)
+        openSettingsTab(app)
 
         let notificationsRow = app.descendants(matching: .any)["legal.notifications"].firstMatch
         XCTAssertTrue(notificationsRow.waitForExistence(timeout: 10))
@@ -260,13 +260,15 @@ final class ScreenshotTests: XCTestCase {
 
     // MARK: - Helpers
 
-    private func openLegalSheet(_ app: XCUIApplication) {
-        let legal = app.descendants(matching: .any)["now.legal"].firstMatch
-        scrollTo(legal, in: app, maxSwipes: 12)
-        tapVisible(legal, in: app)
+    /// Selects the settings tab (index-based: tab labels are localized and the
+    /// snapshot run covers several languages).
+    private func openSettingsTab(_ app: XCUIApplication) {
+        let settingsTab = app.tabBars.buttons.element(boundBy: 2)
+        XCTAssertTrue(settingsTab.waitForExistence(timeout: 10), "Tab bar not found")
+        settingsTab.tap()
         XCTAssertTrue(
             app.descendants(matching: .any)["legal.notifications"].waitForExistence(timeout: 10),
-            "Legal sheet did not open"
+            "Settings tab did not open"
         )
     }
 

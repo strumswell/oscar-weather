@@ -1649,17 +1649,8 @@ struct WeatherMapView: UIViewRepresentable {
             }
         }
 
-        /// The selected-city marker (`SelectedCityMarker` asset, 534×652 with the
-        /// balloon tip at 97.4% height). The canvas is twice the tip's y so the
-        /// CENTER-anchored MLNAnnotationImage pins the tip on the coordinate.
         private static func markerImage() -> UIImage {
-            let displaySize = CGSize(width: 34, height: 34 * 652 / 534)
-            let tipY = displaySize.height * (635.0 / 652.0)
-            let canvas = CGSize(width: displaySize.width, height: tipY * 2)
-            let asset = UIImage(named: "SelectedCityMarker")
-            return UIGraphicsImageRenderer(size: canvas).image { _ in
-                asset?.draw(in: CGRect(origin: .zero, size: displaySize))
-            }
+            CityMarkerImage.make()
         }
 
         private func syncSelectedCityAnnotation() {
@@ -1723,12 +1714,32 @@ struct WeatherMapView: UIViewRepresentable {
     }
 }
 
+// MARK: - City marker image
+
+/// iOS-style marker replica (`SelectedCityMarker` asset, 534×652 with the
+/// balloon tip at 97.4% height), shared by the weather map's selected-city
+/// annotation and the locations map picker's dropped pin. The canvas is twice
+/// the tip's y so the CENTER-anchored MLNAnnotationImage pins the tip on the
+/// coordinate.
+@MainActor
+enum CityMarkerImage {
+    static func make() -> UIImage {
+        let displaySize = CGSize(width: 34, height: 34 * 652 / 534)
+        let tipY = displaySize.height * (635.0 / 652.0)
+        let canvas = CGSize(width: displaySize.width, height: tipY * 2)
+        let asset = UIImage(named: "SelectedCityMarker")
+        return UIGraphicsImageRenderer(size: canvas).image { _ in
+            asset?.draw(in: CGRect(origin: .zero, size: displaySize))
+        }
+    }
+}
+
 // MARK: - Basemap attribution
 
 /// ODbL/OpenMapTiles credit for the OpenFreeMap basemap. Initially visible in
 /// the map corner, then auto-fades after 5 s — one of the collapse mechanisms
 /// the OSMF attribution guidelines explicitly sanction, provided the credit
-/// stays findable afterwards (LegalView's OpenStreetMap/OpenFreeMap entries).
+/// stays findable afterwards (SettingsView's OpenStreetMap/OpenFreeMap entries).
 /// MapLibre's ⓘ button stays hidden; this label replaces it.
 struct MapAttributionLabel: View {
     @State private var visible = true

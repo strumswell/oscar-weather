@@ -12,6 +12,7 @@ struct StormView: View {
     let direction: Angle
     let strength: Int
     let pacing: SimulationPacing
+    let speedMultiplier: Double
     // State-owned so body re-evaluations don't reset every falling drop;
     // the call site's .id() swaps it out when the contents change.
     @State private var storm: Storm
@@ -22,7 +23,7 @@ struct StormView: View {
         TimelineView(.animation(minimumInterval: pacing.minimumInterval(base: nil), paused: pacing.isPaused)) { timeline in
             Canvas { context, size in
                 storm.sync(strength: strength, direction: direction)
-                storm.update(date: timeline.date, size: size)
+                storm.update(date: timeline.date, size: size, speedMultiplier: speedMultiplier)
 
                 // Resolve the particle image once per frame, not once per drop: at full display
                 // refresh with hundreds of drops that was thousands of redundant resolves/second.
@@ -44,11 +45,18 @@ struct StormView: View {
         .ignoresSafeArea()
     }
 
-    init(type: Storm.Contents, direction: Angle, strength: Int, pacing: SimulationPacing = .active) {
+    init(
+        type: Storm.Contents,
+        direction: Angle,
+        strength: Int,
+        pacing: SimulationPacing = .active,
+        speedMultiplier: Double = 1
+    ) {
         self.type = type
         self.direction = direction
         self.strength = strength
         self.pacing = pacing
+        self.speedMultiplier = speedMultiplier
         _storm = State(initialValue: Storm(type: type, direction: direction, strength: strength))
     }
 }

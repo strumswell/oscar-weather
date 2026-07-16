@@ -27,6 +27,13 @@ public final class CityService {
     private init() {
         self.cities = []
         self.context = pc.container.viewContext
+        self.currentLocationEmoji = UserDefaults.standard.string(forKey: Self.currentLocationEmojiKey)
+        self.currentLocationCustomLabel = UserDefaults.standard.string(forKey: Self.currentLocationLabelKey)
+        // Current location IS the default until the user explicitly chooses
+        // otherwise (registered defaults are per-launch and never persisted, so
+        // any explicit choice — city default or "no default" — wins forever).
+        UserDefaults.standard.register(defaults: [Self.defaultIsCurrentLocationKey: true])
+        self.defaultIsCurrentLocation = UserDefaults.standard.bool(forKey: Self.defaultIsCurrentLocationKey)
         self.update()
     }
     
@@ -59,19 +66,30 @@ public final class CityService {
         guard let lat = searchResult.latitude, let lon = searchResult.longitude else {
             return
         }
-        if let existingCity = self.getExistingCity(latitude: Double(lat), longitude: Double(lon)) {
+        addCity(name: searchResult.name ?? "", latitude: Double(lat), longitude: Double(lon))
+    }
+
+    func addCity(name: String, latitude: Double, longitude: Double) {
+        if let existingCity = self.getExistingCity(latitude: latitude, longitude: longitude) {
             self.toggleActiveCity(city: existingCity)
         } else {
             let newCity = City(context: self.context)
-            newCity.label = searchResult.name
-            newCity.lat = Double(lat)
-            newCity.lon = Double(lon)
+            newCity.label = name
+            newCity.lat = latitude
+            newCity.lon = longitude
             newCity.selected = false
             newCity.orderIndex = self.getMaxOrderIndex() + 1
-            
+
             save()
             self.toggleActiveCity(city: newCity)
         }
+    }
+
+    func updateCity(_ city: City, emoji: String?, customLabel: String?) {
+        let trimmedLabel = customLabel?.trimmingCharacters(in: .whitespacesAndNewlines)
+        city.emoji = (emoji?.isEmpty == false) ? emoji : nil
+        city.customLabel = (trimmedLabel?.isEmpty == false) ? trimmedLabel : nil
+        save()
     }
     
     func deleteCity(offsets: IndexSet) {
@@ -115,7 +133,82 @@ public final class CityService {
         save()
     }
 
-    
+
+    /// The GPS "current location" entry can be personalized like a saved city,
+    /// but it is no City entity — emoji and label live in UserDefaults, mirrored
+    /// into observable storage so views react to edits.
+    static let currentLocationEmojiKey = "currentLocationEmoji"
+    static let currentLocationLabelKey = "currentLocationCustomLabel"
+
+    private(set) var currentLocationEmoji: String?
+    private(set) var currentLocationCustomLabel: String?
+
+    /// The current-location card title: a custom label wins over the generic name.
+    var currentLocationDisplayName: String {
+        if let currentLocationCustomLabel, !currentLocationCustomLabel.isEmpty {
+            return currentLocationCustomLabel
+        }
+        return String(localized: "Aktueller Standort")
+    }
+
+    func updateCurrentLocation(emoji: String?, customLabel: String?) {
+        let trimmedLabel = customLabel?.trimmingCharacters(in: .whitespacesAndNewlines)
+        currentLocationEmoji = (emoji?.isEmpty == false) ? emoji : nil
+        currentLocationCustomLabel = (trimmedLabel?.isEmpty == false) ? trimmedLabel : nil
+        UserDefaults.standard.set(currentLocationEmoji, forKey: Self.currentLocationEmojiKey)
+        UserDefaults.standard.set(currentLocationCustomLabel, forKey: Self.currentLocationLabelKey)
+    }
+
+    /// Which location the app opens with. Stored across two places by necessity:
+    /// a saved city carries `isDefault`; "current location" is no city at all, so
+    /// that choice lives in UserDefaults.
+    static let defaultIsCurrentLocationKey = "defaultLocationIsCurrentLocation"
+
+    var defaultCity: City? {
+        cities.first { $0.isDefault }
+    }
+
+    /// Stored (not computed off UserDefaults) so it is observable: the list
+    /// card and swipe/context buttons re-render the moment the default flips.
+    private(set) var defaultIsCurrentLocation: Bool
+
+    /// Marks a saved city as the launch default, or (nil + asCurrentLocation) the
+    /// GPS location. Passing nil without asCurrentLocation clears any default.
+    func setDefault(city: City?, asCurrentLocation: Bool = false) {
+        defaultIsCurrentLocation = (city == nil && asCurrentLocation)
+        UserDefaults.standard.set(defaultIsCurrentLocation, forKey: Self.defaultIsCurrentLocationKey)
+        var changed = false
+        for existing in cities where existing.isDefault != (existing === city) {
+            existing.isDefault = (existing === city)
+            changed = true
+        }
+        if changed {
+            save()
+        } else {
+            // Only the current-location flag flipped (observable by itself);
+            // the notification keeps non-observing listeners in sync.
+            nc.post(name: .cityToggle, object: nil)
+        }
+    }
+
+    /// Applies the launch default once at app start: a default city gets selected,
+    /// a "current location" default clears any city selection. Without a default,
+    /// the last selection persists (pre-default behavior).
+    func applyDefaultSelectionOnLaunch() {
+        if defaultIsCurrentLocation {
+            // Only meaningful with GPS access — without it, clearing the city
+            // selection would strand the app on the coordinate fallback (this
+            // matters since current location is the default by default).
+            let status = LocationService.shared.authStatus
+            let gpsAvailable = status == .authorizedWhenInUse || status == .authorizedAlways
+            if gpsAvailable, getSelectedCity() != nil {
+                disableAllCities()
+            }
+        } else if let defaultCity, defaultCity.selected == false {
+            toggleActiveCity(city: defaultCity)
+        }
+    }
+
     func getSelectedCity() -> Optional<City> {
         let selectedCities = self.cities.filter{$0.selected}
         if (selectedCities.isEmpty) {
@@ -177,5 +270,21 @@ public final class CityService {
     
     private func getExistingCity(latitude: Double, longitude: Double) -> City? {
         return self.cities.first { $0.lat == latitude && $0.lon == longitude }
+    }
+}
+
+extension City {
+    /// The user-facing name: a custom label ("Zuhause") wins over the place name.
+    var displayName: String {
+        if let customLabel, !customLabel.isEmpty {
+            return customLabel
+        }
+        return label ?? ""
+    }
+
+    /// The place name as secondary line when a custom label is shown as title.
+    var displayDetail: String? {
+        guard let customLabel, !customLabel.isEmpty else { return nil }
+        return label
     }
 }

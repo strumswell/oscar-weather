@@ -89,6 +89,16 @@ struct AtmosphereSnapshot: Equatable {
     )
 }
 
+extension AtmosphereSnapshot {
+    /// Visibility of the drawn sun DISC: 1 in daylight, fading out as the sun
+    /// approaches the horizon, 0 once it dips below. Distinct from `phase`,
+    /// which deliberately keeps ambient light through twilight — gating the
+    /// disc on `phase` used to float a faint sun in a twilight sky.
+    var sunDiscVisibility: Float {
+        AtmosphereWeatherMapper.smoothstep(0, 4, sunElevation * 180 / .pi)
+    }
+}
+
 enum AtmosphereWeatherMapper {
     @MainActor static func snapshot(from weather: Weather, at location: CLLocationCoordinate2D) -> AtmosphereSnapshot {
         guard location.latitude != 0 || location.longitude != 0 else {

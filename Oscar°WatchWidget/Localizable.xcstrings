@@ -138,6 +138,9 @@
     "Aktuelle Windgeschwindigkeit und Windrichtung" : {
       "comment" : "LS Widget Wind Beschreibung"
     },
+    "Aktueller Standort" : {
+
+    },
     "Aktueller UV-Index mit WHO-Farbskala" : {
       "comment" : "LS Widget UV-Index Beschreibung"
     },
@@ -207,13 +210,13 @@
     "Globales Modell des chinesischen Wetterdienstes." : {
 
     },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
-
-    },
     "Großbritannien" : {
 
     },
     "Große Bäume bewegen sich, Zweige können brechen." : {
+
+    },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
 
     },
     "Hell" : {
@@ -317,6 +320,9 @@
     },
     "Radarbasierter Niederschlag der nächsten 90 Minuten" : {
       "comment" : "LS Widget Regenverlauf Beschreibung"
+    },
+    "Radardaten sind veraltet" : {
+      "comment" : "LS Widget Regenverlauf mit veralteten Radardaten"
     },
     "Rauch driftet leicht, Windfahnen bleiben ruhig." : {
 

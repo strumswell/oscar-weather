@@ -11,23 +11,24 @@ import MapKit
 import WidgetKit
 
 #Preview {
-    NowView().preferredColorScheme(.dark)
+    NowView()
+        .environment(Weather())
+        .environment(Location())
+        .environment(NowPresentationCoordinator())
+        .preferredColorScheme(.dark)
 }
 
 struct NowView: View {
     private let settingsService = SettingService.shared
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
+    @Environment(NowPresentationCoordinator.self) private var presentation
     @Environment(\.scenePhase) private var scenePhase
-    @Namespace private var sheetTransition
     @State private var tapCount = 0
-    @State private var presentation = NowPresentationCoordinator()
     @State private var atmosphereDebug = AtmosphereDebugState()
-    @State private var modelGridState = ModelGridLayerState(renderMode: .preview)
     @State private var manualRefreshInFlight = false
     @State private var showRefreshIndicator = false
     @State private var spinnerShownAt: Date?
-    @State private var modelFallbackToast: String?
 
     var body: some View {
         // Drive the pull-down spinner only while the scene is actually active. Coming
@@ -41,7 +42,8 @@ struct NowView: View {
         let spinnerPending = weather.isLoading && weather.hasContent && !manualRefreshInFlight && scenePhase == .active
 
         ZStack {
-            WeatherSimulationView(isCoveredBySheet: presentation.sheet != nil || presentation.isMapPresented)
+            WeatherSimulationView(isCoveredBySheet: presentation.sheet != nil || presentation.selectedTab != .forecast)
+                .ignoresSafeArea()
             if weather.hasContent {
             ScrollView(.vertical) {
                 ZStack {
@@ -54,8 +56,8 @@ struct NowView: View {
                                 .padding(.vertical, 20)
                                 .transition(.move(edge: .top).combined(with: .opacity))
                         }
-                        HeadView(locationTransition: sheetTransition)
-                            .padding(.top, 50)
+                        HeadView()
+                            .padding(.top, 35)
                             .onTapGesture {
                                 self.tapCount += 1
                                 if self.tapCount == 10 {
@@ -68,47 +70,9 @@ struct NowView: View {
                         HourlyView()
                             .accessibilityIdentifier("now.hourly")
                         DailyView()
-                        VStack(alignment: .leading) {
-                            Button(action: presentMap) {
-                                Text("Karte")
-                                    .font(.title3)
-                                    .bold()
-                                    .foregroundStyle(Color(UIColor.label))
-                                    .padding([.leading, .top])
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityHint(Text("Öffnet die Karte"))
-                            WeatherMapPreview(
-                                settingsService: settingsService,
-                                modelGridState: modelGridState
-                            )
-                                .frame(height: 350)
-                                .clipShape(.rect(cornerRadius: 10))
-                                .padding()
-                                .onTapGesture {
-                                    presentMap()
-                                }
-                                .accessibilityAddTraits(.isButton)
-                                .accessibilityLabel(Text("Regenradar"))
-                                .accessibilityHint(Text("Öffnet die Karte"))
-                                .accessibilityAction { presentMap() }
-                                .task {
-                                    if let layer = settingsService.activeTileLayer {
-                                        await modelGridState.loadLayer(layer)
-                                    }
-                                }
-                                .onChange(of: settingsService.activeTileLayer) { _, newLayer in
-                                    if let layer = newLayer {
-                                        Task { await modelGridState.loadLayer(layer) }
-                                    } else {
-                                        modelGridState.pause()
-                                    }
-                                }
-                        }
-
                         AQIView()
                         ClimateView()
-                        LegalTextView()
+                            .padding(.bottom, 20)
                         if weather.debug {
                             VStack {
                                 Text(weather.isLoading.description)
@@ -194,87 +158,21 @@ struct NowView: View {
                 AtmosphereDebugPanel(state: atmosphereDebug)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                     .padding(.horizontal, 12)
-                    .padding(.bottom, 40)
-            }
-
-            if let message = modelFallbackToast, presentation.sheet == nil, !presentation.isMapPresented {
-                ToastBanner(message: message)
-                    .padding(.top, 60)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    .zIndex(2)
-                    .task {
-                        // Start the dismiss timer only once the toast is actually on screen
-                        // (e.g. after the settings sheet that triggered the change is closed).
-                        try? await Task.sleep(for: .seconds(5))
-                        withAnimation(.easeInOut(duration: 0.3)) { modelFallbackToast = nil }
-                    }
+                    .padding(.bottom, 12)
             }
         }
-        .environment(presentation)
         .environment(atmosphereDebug)
-        .sheet(item: $presentation.sheet) { sheet in
-            NowSheetView(
-                sheet: sheet,
-                settingsService: settingsService,
-                locationTransition: sheetTransition
-            )
-        }
-        .fullScreenCover(isPresented: $presentation.isMapPresented) {
-            WeatherMapDetailView(settingsService: settingsService) {
-                presentation.isMapPresented = false
-            }
-        }
         .background(.thinMaterial)
-        .ignoresSafeArea()
+        .ignoresSafeArea(edges: .top)
         .task {
-            // Testing hook: `-autoPresentMapLibreAfter <seconds>` opens the map AFTER
-            // the NowView (incl. the preview card's map) exists — reproduces the
-            // tap-to-open flow headless, unlike -autoPresentMap which presents at launch.
+            // Testing hook: `-autoPresentMapLibreAfter <seconds>` switches to the map
+            // tab AFTER the NowView exists — reproduces the tap-to-open flow headless,
+            // unlike -autoPresentMap which starts on the map tab at launch.
             let mapLibreDelay = UserDefaults.standard.double(forKey: "autoPresentMapLibreAfter")
-            if mapLibreDelay > 0 {
-                Task {
-                    try? await Task.sleep(for: .seconds(mapLibreDelay))
-                    presentation.isMapPresented = true
-                }
-            }
-            // Periodically refresh the tile-layer metadata so the map preview stays
-            // current (the radar preview refreshes itself inside WeatherMapPreview).
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(5 * 60))
-                guard !Task.isCancelled else { break }
-                if settingsService.activeTileLayer != nil { await modelGridState.refreshIfStale() }
-            }
+            guard mapLibreDelay > 0 else { return }
+            try? await Task.sleep(for: .seconds(mapLibreDelay))
+            presentation.selectedTab = .maps
         }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-            refreshWeatherData(isForeground: true)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .weatherRefreshNeeded, object: nil)) { _ in
-            refreshWeatherData()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .forecastModelFallback)) { _ in
-            withAnimation(.spring(duration: 0.4)) {
-                modelFallbackToast = String(localized: "Außerhalb des Modells – Automatik aktiv.")
-            }
-        }
-    }
-}
-
-struct ToastBanner: View {
-    let message: String
-
-    var body: some View {
-        Text(message)
-            .font(.footnote.weight(.medium))
-            .foregroundStyle(Color(UIColor.label))
-            .lineLimit(1)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 9)
-            .background(.regularMaterial, in: Capsule())
-            .overlay { Capsule().stroke(Color.primary.opacity(0.08), lineWidth: 1) }
-            .shadow(color: .black.opacity(0.15), radius: 10, y: 3)
-            .accessibilityElement()
-            .accessibilityLabel(Text(message))
     }
 }
 
@@ -304,33 +202,10 @@ private struct WeatherUnavailableView: View {
 }
 
 extension NowView {
-    /// The single refresh path for every weather-data input change (foreground return,
-    /// GPS move, city switch, unit/format/model change). The individual steps are cheap
-    /// or self-guarded, so running all of them on every trigger beats five near-identical
-    /// handlers that each forget a different step.
-    private func refreshWeatherData(isForeground: Bool = false) {
-        // Clear any stale fallback notice; the refresh re-posts one if it still applies.
-        modelFallbackToast = nil
-        Task {
-            await weather.refresh(location: location)
-            await NotificationSettingsManager.shared.syncLocationUpdate()
-            await WidgetBasemapRenderer.refreshIfNeeded()
-            if isForeground {
-                WidgetCenter.shared.reloadAllTimelines()
-                if settingsService.activeTileLayer != nil { await modelGridState.refreshIfStale() }
-            }
-        }
-    }
-
-    private func presentMap() {
-        UIApplication.shared.playHapticFeedback()
-        presentation.isMapPresented = true
-    }
-
     private func openRadarMap() {
         settingsService.activeTileLayer = nil
         settingsService.oscarRadarLayer = true
-        modelGridState.pause()
-        presentMap()
+        UIApplication.shared.playHapticFeedback()
+        presentation.selectedTab = .maps
     }
 }

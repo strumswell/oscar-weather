@@ -1,20 +1,14 @@
 import Foundation
 
 enum NowSheet: Identifiable {
-    case location
     case hourly
     case daily
     case environment(EnvironmentDetailSection)
     case climate(ClimateSummary)
     case alerts
-    case legal
-
-    static let locationTransitionID = "locationName"
 
     var id: String {
         switch self {
-        case .location:
-            "location"
         case .hourly:
             "hourly"
         case .daily:
@@ -25,8 +19,6 @@ enum NowSheet: Identifiable {
             "climate"  // single instance; the summary payload doesn't affect identity
         case .alerts:
             "alerts"
-        case .legal:
-            "legal"
         }
     }
 }

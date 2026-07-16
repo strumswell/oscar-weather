@@ -4,6 +4,9 @@
     "" : {
 
     },
+    "–" : {
+
+    },
     ": %@" : {
 
     },
@@ -35,6 +38,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "... artık aramızda olmayanların sevgi dolu anısına geliştirilmiştir. Ancak onlar kalplerimizde ve zihinlerimizde sonsuza dek canlı kalacaklar."
+          }
+        }
+      }
+    },
+    "„Aktueller Standort“ bleibt als Untertitel sichtbar." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Current Location” stays visible as a subtitle."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Mevcut Konum” alt başlık olarak görünür kalır."
           }
         }
       }
@@ -268,6 +287,9 @@
     },
     "%@ Bft" : {
       "shouldTranslate" : false
+    },
+    "%@ cm" : {
+
     },
     "%@ mm/h" : {
 
@@ -763,6 +785,22 @@
         }
       }
     },
+    "Abbrechen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İptal"
+          }
+        }
+      }
+    },
     "ACCESS-G - Australian Bureau of Meteorology (BOM)" : {
       "localizations" : {
         "en" : {
@@ -917,6 +955,7 @@
       }
     },
     "Aktueller Standort" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1109,6 +1148,23 @@
         }
       }
     },
+    "Als Standard festlegen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set as default"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varsayılan olarak ayarla"
+          }
+        }
+      }
+    },
     "Ambrosia" : {
       "comment" : "Pollen type name",
       "extractionState" : "stale",
@@ -1157,6 +1213,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rahat"
+          }
+        }
+      }
+    },
+    "Ansicht" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görünüm"
           }
         }
       }
@@ -1323,6 +1396,23 @@
         }
       }
     },
+    "Arbeit" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İş"
+          }
+        }
+      }
+    },
     "ARPEGE & AROME - Météo-France" : {
       "localizations" : {
         "en" : {
@@ -1424,6 +1514,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avustralya"
+          }
+        }
+      }
+    },
+    "Auswahl aufheben" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear selection"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçimi kaldır"
           }
         }
       }
@@ -1541,6 +1647,23 @@
         }
       }
     },
+    "Bearbeiten" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düzenle"
+          }
+        }
+      }
+    },
     "Beaufort-Skala" : {
       "localizations" : {
         "en" : {
@@ -1553,6 +1676,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Beaufort ölçeği"
+          }
+        }
+      }
+    },
+    "Bedeckt" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overcast"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kapalı"
           }
         }
       }
@@ -1730,6 +1870,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hareket Okları"
+          }
+        }
+      }
+    },
+    "Bewölkt" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudy"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bulutlu"
           }
         }
       }
@@ -2400,6 +2557,22 @@
         }
       }
     },
+    "Der Ortsname bleibt als Untertitel sichtbar." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The place name stays visible as a subtitle."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konum adı alt başlık olarak görünür kalır."
+          }
+        }
+      }
+    },
     "Der wärmste %@ seit %@." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2670,6 +2843,38 @@
         }
       }
     },
+    "Eigener Name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom name"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel ad"
+          }
+        }
+      }
+    },
+    "Eigenes Emoji" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom emoji"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel emoji"
+          }
+        }
+      }
+    },
     "Ein Ensemble vergleicht mehrere leicht unterschiedliche Modellläufe. Dadurch wird sichtbar, wie stabil oder unsicher die Vorhersage in den nächsten Tagen ist." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2827,6 +3032,7 @@
       }
     },
     "Einstellungen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2838,6 +3044,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ayarlar"
+          }
+        }
+      }
+    },
+    "Emoji" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emoji"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emoji"
           }
         }
       }
@@ -2887,6 +3110,9 @@
           }
         }
       }
+    },
+    "Ende: %@" : {
+
     },
     "Ensemble-Details" : {
       "extractionState" : "stale",
@@ -3093,29 +3319,6 @@
     "EUMETNET OPERA" : {
 
     },
-    "Europäisches Zentrum für mittelfristige Wettervorhersagen" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Europäisches Zentrum für mittelfristige Wettervorhersagen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "European Centre for Medium-Range Weather Forecasts"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avrupa Orta Vadeli Hava Tahminleri Merkezi"
-          }
-        }
-      }
-    },
     "Europa" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3135,6 +3338,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avrupa"
+          }
+        }
+      }
+    },
+    "Europäisches Zentrum für mittelfristige Wettervorhersagen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Europäisches Zentrum für mittelfristige Wettervorhersagen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "European Centre for Medium-Range Weather Forecasts"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avrupa Orta Vadeli Hava Tahminleri Merkezi"
           }
         }
       }
@@ -3221,6 +3447,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Düşüyor"
+          }
+        }
+      }
+    },
+    "Familie" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Family"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aile"
           }
         }
       }
@@ -3528,6 +3771,23 @@
         }
       }
     },
+    "Gefrierender Regen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Freezing rain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dondurucu yağmur"
+          }
+        }
+      }
+    },
     "GEFS zeigt lange Trends, ist aber wegen des groben Gitters weniger lokal." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3691,6 +3951,40 @@
         }
       }
     },
+    "Gewählter Punkt" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected point"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçilen nokta"
+          }
+        }
+      }
+    },
+    "Gewitter" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thunderstorm"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gök gürültülü fırtına"
+          }
+        }
+      }
+    },
     "GFS & HRRR - NOAA" : {
       "shouldTranslate" : false
     },
@@ -3841,23 +4135,6 @@
         }
       }
     },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Larger branches and small trees move."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
-          }
-        }
-      }
-    },
     "Großbritannien" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3894,6 +4171,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
+          }
+        }
+      }
+    },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Larger branches and small trees move."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
           }
         }
       }
@@ -4149,6 +4443,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gökyüzü"
+          }
+        }
+      }
+    },
+    "Hinzufügen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekle"
           }
         }
       }
@@ -4594,6 +4905,23 @@
         }
       }
     },
+    "Karten" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maps"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haritalar"
+          }
+        }
+      }
+    },
     "Kartenebenen" : {
       "localizations" : {
         "en" : {
@@ -4629,6 +4957,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kawaii"
+          }
+        }
+      }
+    },
+    "Kein Emoji" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No emoji"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emoji yok"
           }
         }
       }
@@ -4736,6 +5080,23 @@
         }
       }
     },
+    "Keine Ergebnisse" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Results"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonuç Yok"
+          }
+        }
+      }
+    },
     "Keine Pollendaten verfügbar" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4806,6 +5167,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ECMWF'nin yapay zeka tabanlı hava durumu modeli."
+          }
+        }
+      }
+    },
+    "Klar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açık"
           }
         }
       }
@@ -5062,6 +5440,23 @@
         }
       }
     },
+    "Liste" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liste"
+          }
+        }
+      }
+    },
     "LIVE" : {
       "shouldTranslate" : false
     },
@@ -5167,6 +5562,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Başlayalım!"
+          }
+        }
+      }
+    },
+    "Löschen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sil"
           }
         }
       }
@@ -5516,6 +5928,7 @@
       }
     },
     "Meine Orte" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5916,6 +6329,23 @@
         }
       }
     },
+    "Nebel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fog"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sis"
+          }
+        }
+      }
+    },
     "Neuer Ort, neue Vorhersage – ganz ohne Suchen." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6030,6 +6460,23 @@
         }
       }
     },
+    "Nieselregen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drizzle"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çisenti"
+          }
+        }
+      }
+    },
     "NO" : {
       "comment" : "Environment NO",
       "extractionState" : "stale",
@@ -6056,6 +6503,22 @@
     },
     "NOAA Global Forecast System (GFS)" : {
       "shouldTranslate" : false
+    },
+    "Noch keine Orte gespeichert." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No saved places yet."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Henüz kayıtlı konum yok."
+          }
+        }
+      }
     },
     "Nordamerika" : {
       "extractionState" : "stale",
@@ -6406,13 +6869,8 @@
         }
       }
     },
-    "Öffnet die rechtlichen Hinweise" : {
-
-    },
-    "Öffnet die stündliche Wettervorhersage" : {
-
-    },
     "Öffnet die tägliche Ensemble-Vorhersage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6889,6 +7347,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oscar°, hava sizi şaşırtmadan önce haber verir – yalnızca gerçekten önemliyse."
+          }
+        }
+      }
+    },
+    "Oscar° startet mit diesem Ort." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar° opens with this place."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar° bu konumla açılır."
           }
         }
       }
@@ -7485,6 +7959,7 @@
       }
     },
     "Regenradar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7810,6 +8285,23 @@
         }
       }
     },
+    "Schneefall" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snow"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kar yağışı"
+          }
+        }
+      }
+    },
     "Schneeregen" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -7823,6 +8315,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sulu kar"
+          }
+        }
+      }
+    },
+    "Schule" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "School"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Okul"
           }
         }
       }
@@ -8329,6 +8838,23 @@
         }
       }
     },
+    "Standard entfernen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove default"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varsayılanı kaldır"
+          }
+        }
+      }
+    },
     "Standardmäßig wählt Oscar automatisch das beste Wettermodell. Fortgeschrittene Nutzer können ein bestimmtes Modell erzwingen." : {
       "localizations" : {
         "de" : {
@@ -8369,6 +8895,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oscar varsayılan olarak her konum için en iyi modeli otomatik seçer ve birden fazla hava durumu servisini birleştirir. Çoğu kullanıcı için önerilir."
+          }
+        }
+      }
+    },
+    "Standardort" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varsayılan konum"
           }
         }
       }
@@ -8446,6 +8989,9 @@
           }
         }
       }
+    },
+    "Start: %@" : {
+
     },
     "Steifer Wind" : {
       "extractionState" : "stale",
@@ -8638,7 +9184,41 @@
         }
       }
     },
+    "Suche fehlgeschlagen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search Failed"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arama Başarısız Oldu"
+          }
+        }
+      }
+    },
+    "Suche nach einem Ort oder wähle einen Punkt auf der Karte." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search for a place or pick a point on the map."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir konum arayın veya haritada bir nokta seçin."
+          }
+        }
+      }
+    },
     "Suchen..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -8838,6 +9418,23 @@
         }
       }
     },
+    "Teils bewölkt" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partly cloudy"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parçalı bulutlu"
+          }
+        }
+      }
+    },
     "Temperatur" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8953,6 +9550,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saat"
+          }
+        }
+      }
+    },
+    "Tippe auf die Karte, um einen Ort hinzuzufügen." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the map to add a place."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir konum eklemek için haritaya dokunun."
           }
         }
       }
@@ -9240,6 +9854,23 @@
         }
       }
     },
+    "Unbekannter Ort" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown place"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilinmeyen konum"
+          }
+        }
+      }
+    },
     "Unsicherheit & Modell" : {
       "localizations" : {
         "en" : {
@@ -9326,6 +9957,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Resmi meteoroloji servislerinin konumunuz için şiddetli hava uyarıları."
+          }
+        }
+      }
+    },
+    "Urlaub" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vacation"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tatil"
           }
         }
       }
@@ -9481,6 +10129,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tahmin"
+          }
+        }
+      }
+    },
+    "Vorhersage nicht verfügbar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forecast unavailable"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tahmin kullanılamıyor"
+          }
+        }
+      }
+    },
+    "Vorschau" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önizleme"
           }
         }
       }
@@ -10295,6 +10976,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yağmur radarında hareket yönü"
+          }
+        }
+      }
+    },
+    "Zuhause" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ev"
           }
         }
       }

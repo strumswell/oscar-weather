@@ -79,7 +79,7 @@ enum WidgetBasemapRenderer {
         )
         options.scale = scale
         options.showsLogo = false
-        // OpenFreeMap/OSM attribution is covered by the map ⓘ + LegalView.
+        // OpenFreeMap/OSM attribution is covered by the map ⓘ + SettingsView.
         options.showsAttribution = false
 
         let run = SnapshotRun(snapshotter: MLNMapSnapshotter(options: options))

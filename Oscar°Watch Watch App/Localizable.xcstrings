@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "%@ mm/h" : {
+
+    },
     "%@ Tage" : {
 
     },
@@ -24,6 +27,9 @@
 
     },
     "24 Stunden" : {
+
+    },
+    "Aktueller Standort" : {
 
     },
     "alle %lld Std." : {
@@ -169,13 +175,13 @@
     "Globales Modell des chinesischen Wetterdienstes." : {
 
     },
+    "Großbritannien" : {
+
+    },
     "Große Bäume bewegen sich, Zweige können brechen." : {
 
     },
     "Größere Zweige und kleine Bäume bewegen sich." : {
-
-    },
-    "Großbritannien" : {
 
     },
     "Hell" : {
