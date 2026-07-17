@@ -7,7 +7,6 @@ import SwiftUI
 
 struct AQIGaugeCard: View {
     let metric: EnvironmentMetric
-    @Environment(\.cardBackgroundStyle) private var cardBackground
 
     var body: some View {
         VStack {
@@ -29,12 +28,9 @@ struct AQIGaugeCard: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 10)
-        .background(cardBackground)
+        .cardBackground()
         .clipShape(.rect(cornerRadius: 10))
-        .overlay {
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(.secondary.opacity(0.075), lineWidth: 1)
-        }
+        .cardBorder()
     }
 
     @ViewBuilder private var titleText: some View {

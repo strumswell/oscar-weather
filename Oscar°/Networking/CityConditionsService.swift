@@ -134,22 +134,23 @@ final class CityConditionsStore {
 
     private(set) var conditions: [String: CityConditions] = [:]
     private(set) var isLoading = false
-    private var lastFetch: (key: String, at: Date)?
+    private var lastFetch: (keys: Set<String>, at: Date)?
 
     func conditions(for coordinate: CLLocationCoordinate2D) -> CityConditions? {
         conditions[Self.key(for: coordinate)]
     }
 
-    /// One request for all coordinates. Throttled: an unchanged coordinate set
-    /// within 5 minutes is a no-op unless forced.
+    /// One request for all coordinates. Throttled: a coordinate set already
+    /// covered by a fetch within 5 minutes is a no-op unless forced — reorders
+    /// keep the same key set and deletions shrink it, so neither refetches.
     func refresh(coordinates: [CLLocationCoordinate2D], force: Bool = false) async {
         let outbound = coordinates.map(LocationService.outboundCoordinate)
         guard !outbound.isEmpty else { return }
 
-        let fetchKey = outbound.map(Self.key(for:)).joined(separator: ";")
+        let fetchKeys = Set(outbound.map(Self.key(for:)))
         if !force,
            let lastFetch,
-           lastFetch.key == fetchKey,
+           fetchKeys.isSubset(of: lastFetch.keys),
            Date.now.timeIntervalSince(lastFetch.at) < 5 * 60 {
             return
         }
@@ -164,7 +165,9 @@ final class CityConditionsStore {
             async let radarTask = Self.fetchRadar(coordinates: outbound)
             let entries = try await Self.fetchBatch(coordinates: outbound)
             let radarByKey = await radarTask
-            var updated = conditions
+            // Rebuild from the requested set only, so entries for deleted
+            // cities don't accumulate over the session.
+            var updated = conditions.filter { fetchKeys.contains($0.key) }
             // Open-Meteo answers in request order; zip against what was asked
             // so grid-snapped response coordinates can't break the mapping.
             for (requested, entry) in zip(outbound, entries) {
@@ -176,7 +179,7 @@ final class CityConditionsStore {
                 )
             }
             conditions = updated
-            lastFetch = (fetchKey, .now)
+            lastFetch = (fetchKeys, .now)
         } catch is CancellationError {
             return
         } catch {

@@ -112,10 +112,9 @@ struct LocationPreviewSheet: View {
                     .font(.body.weight(.medium))
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.glass)
             .buttonBorderShape(.capsule)
             .controlSize(.large)
-            .tint(.white)
 
             Button {
                 onAdd()

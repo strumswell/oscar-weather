@@ -33,8 +33,9 @@ struct RainView: View {
                 PrecipitationSeriesChart(points: oscarPoints)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 20)
-                    .background(.thinMaterial)
+                    .cardBackground()
                     .clipShape(.rect(cornerRadius: 10))
+                    .cardBorder()
                     .padding([.leading, .trailing, .bottom])
                     .frame(height: 180)
             }
@@ -42,7 +43,6 @@ struct RainView: View {
                 content
                     .opacity(phase.isIdentity ? 1 : 0.8)
                     .scaleEffect(phase.isIdentity ? 1 : 0.99)
-                    .blur(radius: phase.isIdentity ? 0 : 0.5)
             }
         }
     }
@@ -105,7 +105,7 @@ private struct PrecipitationSeriesChart: View {
                 .interpolationMethod(.catmullRom)
                 .foregroundStyle(
                     LinearGradient(
-                        gradient: Gradient(colors: [Color.blue, Color.blue.opacity(0.7)]),
+                        gradient: Gradient(colors: [Color.white, Color.white.opacity(0.3)]),
                         startPoint: .top, endPoint: .bottom
                     )
                 )

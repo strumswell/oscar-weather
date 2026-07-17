@@ -4,7 +4,6 @@ import Observation
 enum AppTab: Hashable {
     case forecast
     case maps
-    case settings
     case search
 }
 

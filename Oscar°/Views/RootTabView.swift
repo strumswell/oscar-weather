@@ -2,10 +2,10 @@
 //  RootTabView.swift
 //  Oscar°
 //
-//  App root: Vorhersage / Karten / Einstellungen tabs plus the system search
-//  tab hosting the locations list (the pill morphs into its search field).
-//  Also owns the app-wide refresh triggers and the sheet presentation shared
-//  by all tabs.
+//  App root: Vorhersage / Karten tabs plus the system search tab hosting the
+//  locations list (the pill morphs into its search field). Einstellungen is no
+//  tab — it opens as a sheet from the bottom of the forecast scroll. Also owns
+//  the app-wide refresh triggers and the sheet presentation shared by all tabs.
 //
 
 import SwiftUI
@@ -27,15 +27,19 @@ struct RootTabView: View {
                 }
                 Tab("Karten", systemImage: "globe.europe.africa", value: AppTab.maps) {
                     WeatherMapDetailView(settingsService: settingsService)
-                }
-                Tab("Einstellungen", systemImage: "gearshape", value: AppTab.settings) {
-                    SettingsView()
+                        .tint(.accentColor)
                 }
                 Tab(value: AppTab.search, role: .search) {
                     LocationsView()
+                        .tint(.accentColor)
                 }
             }
             .tabBarMinimizeBehavior(.onScrollDown)
+            // Monochrome bar like Apple Weather's bottom controls — the accent
+            // tint on the selected item is unreadable on glass over a bright
+            // sky. Tint cascades into tab content, so the tabs above restore
+            // the accent for their own controls (NowView stays monochrome).
+            .tint(.white)
 
             if let message = modelFallbackToast, presentation.sheet == nil {
                 ToastBanner(message: message)

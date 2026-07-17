@@ -15,6 +15,8 @@ struct NowSheetView: View {
             ClimateDetailView(summary: summary)
         case .alerts:
             AlertListView()
+        case .settings:
+            SettingsView()
         }
     }
 }

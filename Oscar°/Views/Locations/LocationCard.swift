@@ -17,6 +17,9 @@ struct LocationCard: View {
     var isSelected = false
     var isDefault = false
     var isCurrentLocation = false
+    /// True while the list is on another tab or under a sheet: the backdrop's
+    /// precipitation layer would otherwise keep animating unseen.
+    var backdropPaused = false
 
     // The card grows with Dynamic Type so title/detail keep fitting.
     @ScaledMetric(relativeTo: .headline) private var cardHeight: CGFloat = 102
@@ -41,6 +44,7 @@ struct LocationCard: View {
                             .font(.headline)
                             .foregroundStyle(.white)
                             .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                         if isDefault {
                             Image(systemName: "star.fill")
                                 .font(.caption2)
@@ -74,14 +78,14 @@ struct LocationCard: View {
         // the card instead, the shader/canvas layers snap to the target width
         // while the container is still animating.
         .background(alignment: .leading) {
-            LocationSimBackdrop(snapshot: snapshot)
+            LocationSimBackdrop(snapshot: snapshot, paused: backdropPaused)
                 .overlay(
                     // Bottom-weighted scrim so white text stays readable on bright skies.
                     LinearGradient(
                         stops: [
-                            .init(color: .black.opacity(0.10), location: 0),
-                            .init(color: .black.opacity(0.16), location: 0.55),
-                            .init(color: .black.opacity(0.42), location: 1),
+                            .init(color: .black.opacity(0.12), location: 0),
+                            .init(color: .black.opacity(0.26), location: 0.45),
+                            .init(color: .black.opacity(0.45), location: 1),
                         ],
                         startPoint: .top,
                         endPoint: .bottom
@@ -125,7 +129,9 @@ struct LocationCard: View {
             Text(emoji).font(.system(size: 24))
         } else if isCurrentLocation {
             Image(systemName: "location.fill")
-                .font(.body)
+                // Fixed size: .body grows past the 44pt badge circle at
+                // accessibility text sizes.
+                .font(.system(size: 17))
                 .foregroundStyle(.white)
         }
     }
@@ -147,6 +153,7 @@ struct LocationCard: View {
 /// data arrives.
 struct LocationSimBackdrop: View {
     var snapshot: AtmosphereSnapshot?
+    var paused = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -180,7 +187,7 @@ struct LocationSimBackdrop: View {
                         type: snap.condition == .snow ? .snow : .rain,
                         direction: .degrees(0),
                         strength: stormStrength(for: snap),
-                        pacing: reduceMotion ? .still : .active,
+                        pacing: reduceMotion || paused ? .still : .active,
                         // Drop speed is per view height; at card height the
                         // unscaled fall reads as slow motion.
                         speedMultiplier: 3

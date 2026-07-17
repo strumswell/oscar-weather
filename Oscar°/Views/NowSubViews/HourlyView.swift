@@ -74,7 +74,6 @@ struct HourlyView: View {
                     content
                       .opacity(phase.isIdentity ? 1 : 0.5)
                       .scaleEffect(shouldReduceMotion || phase.isIdentity ? 1 : 0.9)
-                      .blur(radius: shouldReduceMotion || phase.isIdentity ? 0 : 2)
                   }
                   .padding(.vertical, 20)
               }
@@ -85,7 +84,6 @@ struct HourlyView: View {
                     content
                       .opacity(phase.isIdentity ? 1 : 0.5)
                       .scaleEffect(shouldReduceMotion || phase.isIdentity ? 1 : 0.9)
-                      .blur(radius: shouldReduceMotion || phase.isIdentity ? 0 : 2)
                   }
                   .padding(.vertical, 20)
               }
@@ -96,7 +94,9 @@ struct HourlyView: View {
           .padding(.leading)
         }
         .scrollIndicators(.hidden)
-        .scrollTargetBehavior(.viewAligned)
+        // .never lets a flick travel several cards; the default limit stops
+        // momentum after one page, which reads as a stiff scroll.
+        .scrollTargetBehavior(.viewAligned(limitBehavior: .never))
         .scrollPosition(id: $leadingItemID)
         .contentMargins(.trailing, 16, for: .scrollContent)
         .frame(maxWidth: .infinity)
@@ -110,7 +110,6 @@ struct HourlyView: View {
       content
         .opacity(phase.isIdentity ? 1 : 0.8)
         .scaleEffect(shouldReduceMotion || phase.isIdentity ? 1 : 0.99)
-        .blur(radius: shouldReduceMotion || phase.isIdentity ? 0 : 0.5)
     }
     .sensoryFeedback(.impact, trigger: detailPresentationCount)
   }

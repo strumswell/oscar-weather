@@ -260,15 +260,16 @@ final class ScreenshotTests: XCTestCase {
 
     // MARK: - Helpers
 
-    /// Selects the settings tab (index-based: tab labels are localized and the
-    /// snapshot run covers several languages).
+    /// Opens Einstellungen via the button at the end of the forecast scroll
+    /// (there is no settings tab; found by identifier since labels are localized).
     private func openSettingsTab(_ app: XCUIApplication) {
-        let settingsTab = app.tabBars.buttons.element(boundBy: 2)
-        XCTAssertTrue(settingsTab.waitForExistence(timeout: 10), "Tab bar not found")
-        settingsTab.tap()
+        let settingsButton = app.descendants(matching: .any)["now.settings"].firstMatch
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 10), "Settings button not found")
+        scrollTo(settingsButton, in: app, maxSwipes: 15)
+        tapVisible(settingsButton, in: app)
         XCTAssertTrue(
             app.descendants(matching: .any)["legal.notifications"].waitForExistence(timeout: 10),
-            "Settings tab did not open"
+            "Settings sheet did not open"
         )
     }
 

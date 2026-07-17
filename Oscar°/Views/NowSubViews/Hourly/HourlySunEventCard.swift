@@ -2,7 +2,6 @@ import SwiftUI
 
 struct HourlySunEventCard: View {
   let item: HourlySunEventItem
-  @Environment(\.cardBackgroundStyle) private var cardBackground
 
   var body: some View {
     VStack {
@@ -33,8 +32,9 @@ struct HourlySunEventCard: View {
     .padding(.horizontal, 12)
     .padding(.vertical, 12)
     .frame(width: HourlyForecastCard.cardWidth)
-    .background(cardBackground)
+    .cardBackground()
     .clipShape(.rect(cornerRadius: 10))
+    .cardBorder()
     .accessibilityElement(children: .combine)
   }
 }

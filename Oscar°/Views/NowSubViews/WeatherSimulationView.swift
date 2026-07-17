@@ -250,9 +250,10 @@ struct WeatherSimulationView: View {
 /// Memoizes `AtmosphereWeatherMapper.snapshot` so the same derived snapshot is reused across body
 /// re-evaluations, recomputing only when the weather data (`lastUpdated`), location, or a coarse
 /// 60-second time bucket changes. Held via `@State` (the @State-as-cache pattern) and only ever
-/// touched on the main actor.
+/// touched on the main actor. Shared with NowView, which derives the card fill
+/// from the same snapshot the sim renders.
 @MainActor
-private final class AtmosphereSnapshotCache {
+final class AtmosphereSnapshotCache {
     private struct Key: Equatable {
         let lastUpdated: Date?
         let latitude: Double

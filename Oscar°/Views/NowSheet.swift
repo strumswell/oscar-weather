@@ -6,6 +6,7 @@ enum NowSheet: Identifiable {
     case environment(EnvironmentDetailSection)
     case climate(ClimateSummary)
     case alerts
+    case settings
 
     var id: String {
         switch self {
@@ -19,6 +20,8 @@ enum NowSheet: Identifiable {
             "climate"  // single instance; the summary payload doesn't affect identity
         case .alerts:
             "alerts"
+        case .settings:
+            "settings"
         }
     }
 }

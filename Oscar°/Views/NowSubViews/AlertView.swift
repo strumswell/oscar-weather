@@ -13,9 +13,10 @@ struct AlertView: View {
 
     var body: some View {
         HStack(spacing: 5) {
-            // The icon alone carries the warning color; the glass capsule and
-            // primary text keep the pill in the app's Liquid Glass language —
-            // a solid orange fill read as a massive block over the sky gradient.
+            // The icon alone carries the warning color; the capsule wears the
+            // same material + sky wash + hairline as the cards so it belongs
+            // to the scene (tinted or plain glass both read as a dark, muddy
+            // blob over the sim).
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.orange)
@@ -27,7 +28,11 @@ struct AlertView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .glassEffect(.regular.tint(.orange.opacity(0.5)), in: Capsule())
+        // Orange wash to match the icon — kept translucent so the card base
+        // shows through and white text stays legible on bright days.
+        .background(.orange.opacity(0.32), in: Capsule())
+        .cardBackground(in: Capsule())
+        .cardBorder(Capsule())
         .frame(minWidth: 44, minHeight: 44)
         .contentShape(.rect)
         .onTapGesture {
@@ -41,7 +46,6 @@ struct AlertView: View {
             UIApplication.shared.playHapticFeedback()
             presentation.present(.alerts)
         }
-        .padding(.top, -10)
     }
 }
 

@@ -140,7 +140,6 @@ struct ClimateView: View {
                     content
                         .opacity(phase.isIdentity ? 1 : 0.8)
                         .scaleEffect(phase.isIdentity ? 1 : 0.99)
-                        .blur(radius: phase.isIdentity ? 0 : 0.5)
                 }
             }
         }
@@ -225,12 +224,9 @@ struct ClimateSummaryCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(.thinMaterial)
+        .cardBackground()
         .clipShape(.rect(cornerRadius: 12))
-        .overlay {
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(.secondary.opacity(0.08), lineWidth: 1)
-        }
+        .cardBorder(RoundedRectangle(cornerRadius: 12))
     }
 }
 
@@ -437,7 +433,7 @@ struct InteractiveClimateRibbon: View {
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(.thinMaterial, in: Capsule())
+            .cardBackground(in: Capsule())
             .overlay(Capsule().stroke(.secondary.opacity(0.15), lineWidth: 0.5))
             .position(
                 x: min(max(centerX(for: index, width: width), half), max(width - half, half)),
@@ -475,11 +471,8 @@ struct ClimatePlaceholder: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(.thinMaterial)
+        .cardBackground()
         .clipShape(.rect(cornerRadius: 12))
-        .overlay {
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(.secondary.opacity(0.08), lineWidth: 1)
-        }
+        .cardBorder(RoundedRectangle(cornerRadius: 12))
     }
 }

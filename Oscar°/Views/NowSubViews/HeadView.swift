@@ -56,10 +56,14 @@ struct HeadView: View {
           .tracking(1.2)
           .foregroundStyle(Color(UIColor.label).opacity(0.6))
           .lineLimit(1)
+          // Mutes the emoji too — foregroundStyle can't touch its colors, and
+          // at full saturation it outweighs the city name above it.
+          .opacity(0.8)
       }
       Text(location.name)
         .font(.system(size: cityNameFontSize, weight: .bold))
         .lineSpacing(10)
+        .multilineTextAlignment(.center)
         .foregroundStyle(Color(UIColor.label))
     }
   }
@@ -71,6 +75,7 @@ struct HeadView: View {
       Spacer()
     }
     .shadow(radius: 5)
+    .contentShape(Rectangle())
     .onTapGesture {
       UIApplication.shared.playHapticFeedback()
       presentation.selectedTab = .search
@@ -87,54 +92,50 @@ struct HeadView: View {
     .padding(.bottom, 10)
     .padding(.top)
 
-    VStack {
-      VStack {
-        Spacer()
-        Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
-          .foregroundStyle(Color(UIColor.label))
-          .font(.system(size: temperatureFontSize))
-          .minimumScaleFactor(0.5)
-          .lineLimit(1)
-          .shadow(radius: 15)
-          .contentTransition(.numericText())
-          .animation(.default, value: weather.forecast.current?.temperature)
-      }
-      .padding(.bottom, 155)
+    VStack(spacing: 0) {
+      Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
+        .foregroundStyle(Color(UIColor.label))
+        .font(.system(size: temperatureFontSize))
+        .minimumScaleFactor(0.5)
+        .lineLimit(1)
+        .shadow(radius: 15)
+        .contentTransition(.numericText())
+        .animation(.default, value: weather.forecast.current?.temperature)
+        .padding(.top, 70)
 
-      HStack {
+      HStack(spacing: 6) {
         Spacer()
         Image(systemName: "cloud")
-          .frame(width: 30, height: 30)
-          .foregroundStyle(Color(UIColor.label))
         Text("\(weather.forecast.current?.cloudcover ?? 0, specifier: "%.0f") %")
-          .foregroundStyle(Color(UIColor.label))
         Image(systemName: "wind")
-          .frame(width: 30, height: 30)
-          .foregroundStyle(Color(UIColor.label))
+          .padding(.leading, 12)
         Text(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h"))
-        .foregroundStyle(Color(UIColor.label))
         Image(systemName: "location")
-          .frame(width: 30, height: 30)
-          .foregroundStyle(Color(UIColor.label))
+          .padding(.leading, 12)
         Text(weather.forecast.current?.getWindDirection() ?? "")
         Spacer()
       }
+      .font(.subheadline.weight(.medium))
+      .foregroundStyle(Color(UIColor.label).opacity(0.85))
+      .shadow(radius: 3)
       .accessibilityElement(children: .ignore)
       .accessibilityLabel(
         "Bewölkung \(Int((weather.forecast.current?.cloudcover ?? 0).rounded())) Prozent, Wind \(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h")), Richtung \(weather.forecast.current?.getWindDirection() ?? "unbekannt")"
       )
-      .padding(.bottom)
+      .padding(.top, 150)
 
       if hasWeatherAlerts() {
         AlertView()
-          .padding(.bottom, 20)
+          .padding(.top, 14)
       }
     }
+    // Classic Oscar composition: the temperature floats alone in the sky, and
+    // the metrics anchor the bottom of the gap just above the first card.
+    .padding(.bottom, 40)
     .scrollTransition { content, phase in
       content
         .opacity(phase.isIdentity ? 1 : 0.8)
         .scaleEffect(phase.isIdentity ? 1 : 0.99)
-        .blur(radius: phase.isIdentity ? 0 : 0.5)
     }
   }
 

@@ -26,6 +26,7 @@ struct NowView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var tapCount = 0
     @State private var atmosphereDebug = AtmosphereDebugState()
+    @State private var snapshotCache = AtmosphereSnapshotCache()
     @State private var manualRefreshInFlight = false
     @State private var showRefreshIndicator = false
     @State private var spinnerShownAt: Date?
@@ -40,6 +41,13 @@ struct NowView: View {
         // time the app appears shows no spinner, and a genuinely slow one shows a full,
         // on-screen cycle.
         let spinnerPending = weather.isLoading && weather.hasContent && !manualRefreshInFlight && scenePhase == .active
+        // Cards share the sky's hue instead of a fixed dark material (same
+        // snapshot the sim renders; twilight before any data).
+        let cardFill = AtmosphereSampler.cardFill(
+            snapshot: weather.forecast.hourly != nil
+                ? snapshotCache.snapshot(from: weather, at: location.coordinates)
+                : .twilight
+        )
 
         ZStack {
             WeatherSimulationView(isCoveredBySheet: presentation.sheet != nil || presentation.selectedTab != .forecast)
@@ -73,6 +81,18 @@ struct NowView: View {
                         AQIView()
                         ClimateView()
                             .padding(.bottom, 20)
+                        Button {
+                            UIApplication.shared.playHapticFeedback()
+                            presentation.present(.settings)
+                        } label: {
+                            Label("Einstellungen", systemImage: "gearshape")
+                                .font(.subheadline.weight(.medium))
+                        }
+                        .buttonStyle(.glass)
+                        .buttonBorderShape(.capsule)
+                        .accessibilityIdentifier("now.settings")
+                        .frame(maxWidth: .infinity)
+                        .padding(.bottom, 16)
                         if weather.debug {
                             VStack {
                                 Text(weather.isLoading.description)
@@ -162,7 +182,10 @@ struct NowView: View {
             }
         }
         .environment(atmosphereDebug)
-        .background(.thinMaterial)
+        .environment(\.cardTint, cardFill)
+        // Lighter frost than the default: thinMaterial's dark base swallowed
+        // the sky; ultraThin lets the sim's color reach the cards.
+        .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial))
         .ignoresSafeArea(edges: .top)
         .task {
             // Testing hook: `-autoPresentMapLibreAfter <seconds>` switches to the map

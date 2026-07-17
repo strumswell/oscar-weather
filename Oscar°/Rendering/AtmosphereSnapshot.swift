@@ -397,6 +397,32 @@ enum AtmosphereSampler {
         ]
     }
 
+    /// Card wash for the Now stack: a milky, darkened sample of the lower sky,
+    /// laid over the cards' frosted material so they share the scene's hue
+    /// instead of the material's fixed gray.
+    static func cardFill(snapshot: AtmosphereSnapshot) -> Color {
+        // Blended by hand: Color.mix needs iOS 18, and this file also builds
+        // in targets with older deployment floors.
+        var base = colorVector(for: color(for: snapshot, horizonFactor: 1))
+        // The frost underneath grays the wash out; push the sample away from
+        // its gray axis first so the hue survives the material.
+        let gray = simd_float3(repeating: luminance(base))
+        base = gray + (base - gray) * 1.7
+        // Always darker than the sky it samples: the card sits under the
+        // scene instead of glowing over it, in every condition.
+        base *= 0.7
+        // Except near black: lift dark scenes slightly so night cards still
+        // separate from the sky. The squared falloff keeps days untouched.
+        let lift = 0.12 * (1 - luminance(base)) * (1 - luminance(base))
+        base += simd_float3(repeating: lift)
+        base = simd_clamp(base, simd_float3(repeating: 0), simd_float3(repeating: 1))
+        return Color(
+            red: Double(base.x),
+            green: Double(base.y),
+            blue: Double(base.z)
+        ).opacity(0.65)
+    }
+
     static func cloudTopTint(snapshot: AtmosphereSnapshot, moonGlow: Float = 0) -> Color {
         cloudColor(snapshot: snapshot, top: true, moonGlow: moonGlow)
     }

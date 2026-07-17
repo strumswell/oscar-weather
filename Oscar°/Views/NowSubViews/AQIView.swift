@@ -73,7 +73,6 @@ struct AQIView: View {
                             content
                                 .opacity(phase.isIdentity ? 1 : 0.5)
                                 .scaleEffect(phase.isIdentity ? 1 : 0.9)
-                                .blur(radius: phase.isIdentity ? 0 : 2)
                         }
                         .accessibilityLabel(accessibilityLabel(for: metric))
                         .accessibilityHint(Text("Öffnet stündliche Umweltdiagramme"))
@@ -85,7 +84,7 @@ struct AQIView: View {
                 .padding([.leading, .trailing])
             }
             .scrollIndicators(.hidden)
-            .scrollTargetBehavior(.viewAligned)
+            .scrollTargetBehavior(.viewAligned(limitBehavior: .never))
             .frame(maxWidth: .infinity)
             .padding(.bottom, 20)
         }
@@ -93,7 +92,6 @@ struct AQIView: View {
             content
                 .opacity(phase.isIdentity ? 1 : 0.8)
                 .scaleEffect(phase.isIdentity ? 1 : 0.99)
-                .blur(radius: phase.isIdentity ? 0 : 0.5)
         }
     }
 

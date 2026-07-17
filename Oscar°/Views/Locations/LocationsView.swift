@@ -50,10 +50,21 @@ struct LocationsView: View {
         !searchText.isEmpty
     }
 
+    /// Card backdrops animate only while the list is actually in front; on
+    /// another tab or under a sheet the storm layers would render unseen.
+    private var cardBackdropsPaused: Bool {
+        presentation.selectedTab != .search
+            || presentation.sheet != nil
+            || candidate != nil
+            || editTarget != nil
+            || isMapPresented
+    }
+
     var body: some View {
         NavigationStack {
             locationList
                 .navigationTitle("Orte")
+                .toolbarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Karte", systemImage: "map", action: presentMapPicker)
@@ -155,7 +166,8 @@ struct LocationsView: View {
         } label: {
             CurrentLocationCard(
                 conditions: currentLocationConditions,
-                isSelected: selectedCityURI == nil
+                isSelected: selectedCityURI == nil,
+                backdropPaused: cardBackdropsPaused
             )
         }
         .buttonStyle(LocationCardButtonStyle())
@@ -193,7 +205,8 @@ struct LocationsView: View {
                 conditions: conditionsStore.conditions(
                     for: CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
                 ),
-                isSelected: city.objectID.uriRepresentation() == selectedCityURI
+                isSelected: city.objectID.uriRepresentation() == selectedCityURI,
+                backdropPaused: cardBackdropsPaused
             )
         }
         .buttonStyle(LocationCardButtonStyle())
@@ -302,8 +315,10 @@ struct LocationsView: View {
                     Image(systemName: "chevron.right")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.tertiary)
+                        .accessibilityHidden(true)
                 }
                 .contentShape(.rect)
+                .accessibilityElement(children: .combine)
             }
             .buttonStyle(.plain)
         }
@@ -436,6 +451,7 @@ private struct CityCard: View {
     @ObservedObject var city: City
     let conditions: CityConditions?
     let isSelected: Bool
+    let backdropPaused: Bool
 
     var body: some View {
         let detail = [conditions?.conditionText, city.displayDetail]
@@ -449,7 +465,8 @@ private struct CityCard: View {
             temperature: conditions?.temperature,
             snapshot: conditions?.snapshot,
             isSelected: isSelected,
-            isDefault: city.isDefault
+            isDefault: city.isDefault,
+            backdropPaused: backdropPaused
         )
     }
 }
@@ -461,11 +478,13 @@ private struct CityCard: View {
 private struct CurrentLocationCard: View {
     let conditions: CityConditions?
     let isSelected: Bool
+    let backdropPaused: Bool
     private var cityService = CityService.shared
 
-    init(conditions: CityConditions?, isSelected: Bool) {
+    init(conditions: CityConditions?, isSelected: Bool, backdropPaused: Bool) {
         self.conditions = conditions
         self.isSelected = isSelected
+        self.backdropPaused = backdropPaused
     }
 
     var body: some View {
@@ -485,7 +504,8 @@ private struct CurrentLocationCard: View {
             snapshot: conditions?.snapshot,
             isSelected: isSelected,
             isDefault: cityService.defaultIsCurrentLocation,
-            isCurrentLocation: true
+            isCurrentLocation: true,
+            backdropPaused: backdropPaused
         )
     }
 }

@@ -87,8 +87,13 @@ public final class CityService {
 
     func updateCity(_ city: City, emoji: String?, customLabel: String?) {
         let trimmedLabel = customLabel?.trimmingCharacters(in: .whitespacesAndNewlines)
-        city.emoji = (emoji?.isEmpty == false) ? emoji : nil
-        city.customLabel = (trimmedLabel?.isEmpty == false) ? trimmedLabel : nil
+        let newEmoji = (emoji?.isEmpty == false) ? emoji : nil
+        let newLabel = (trimmedLabel?.isEmpty == false) ? trimmedLabel : nil
+        // Closing the edit sheet without changes must not ripple: save() posts
+        // a full weather refresh and reloads every widget timeline.
+        guard newEmoji != city.emoji || newLabel != city.customLabel else { return }
+        city.emoji = newEmoji
+        city.customLabel = newLabel
         save()
     }
     

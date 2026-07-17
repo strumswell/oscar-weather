@@ -77,12 +77,9 @@ struct DailyView: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 10)
-        .background(.thinMaterial)
+        .cardBackground()
         .clipShape(.rect(cornerRadius: 10))
-        .overlay(
-          RoundedRectangle(cornerRadius: 10)
-            .stroke(Color(UIColor(.secondary.opacity(0.075))), lineWidth: 1)
-        )
+        .cardBorder()
         .font(.body)
         .padding([.leading, .trailing])
 
@@ -97,7 +94,6 @@ struct DailyView: View {
       content
         .opacity(phase.isIdentity ? 1 : 0.8)
         .scaleEffect(reduceMotion || phase.isIdentity ? 1 : 0.99)
-        .blur(radius: reduceMotion || phase.isIdentity ? 0 : 0.5)
     }
     .sensoryFeedback(.impact, trigger: detailPresentationCount)
   }
