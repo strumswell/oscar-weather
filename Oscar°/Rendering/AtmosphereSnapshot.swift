@@ -401,19 +401,27 @@ enum AtmosphereSampler {
     /// laid over the cards' frosted material so they share the scene's hue
     /// instead of the material's fixed gray.
     static func cardFill(snapshot: AtmosphereSnapshot) -> Color {
+        // High sun samples the lower third of the sky — the horizon itself
+        // washed the cards out, while the zenith overshot into navy. Toward
+        // sunset/sunrise the sample slides down to the horizon so the warm
+        // band reaches the cards, and it stays there through the night.
+        let elevationDegrees = snapshot.sunElevation * 180 / .pi
+        let daylight = smoothstep(3, 14, elevationDegrees)
+        let sampleHeight = 1 - daylight / 3
         // Blended by hand: Color.mix needs iOS 18, and this file also builds
         // in targets with older deployment floors.
-        var base = colorVector(for: color(for: snapshot, horizonFactor: 1))
+        var base = colorVector(for: color(for: snapshot, horizonFactor: sampleHeight))
         // The frost underneath grays the wash out; push the sample away from
         // its gray axis first so the hue survives the material.
         let gray = simd_float3(repeating: luminance(base))
         base = gray + (base - gray) * 1.7
         // Always darker than the sky it samples: the card sits under the
-        // scene instead of glowing over it, in every condition.
-        base *= 0.7
+        // scene instead of glowing over it, in every condition. Daytime keeps
+        // a bit more of the sample's lightness.
+        base *= 0.7 + 0.18 * daylight
         // Except near black: lift dark scenes slightly so night cards still
         // separate from the sky. The squared falloff keeps days untouched.
-        let lift = 0.20 * (1 - luminance(base)) * (1 - luminance(base))
+        let lift = 0.14 * (1 - luminance(base)) * (1 - luminance(base))
         base += simd_float3(repeating: lift)
         base = simd_clamp(base, simd_float3(repeating: 0), simd_float3(repeating: 1))
         return Color(
@@ -421,6 +429,12 @@ enum AtmosphereSampler {
             green: Double(base.y),
             blue: Double(base.z)
         ).opacity(0.65)
+    }
+
+    /// Strength of the white card hairline: the daytime 0.15 reads too hot
+    /// against a dark night sky, so it eases down as night falls.
+    static func cardBorderOpacity(snapshot: AtmosphereSnapshot) -> Double {
+        0.15 - 0.07 * Double(snapshot.nightAmount)
     }
 
     static func cloudTopTint(snapshot: AtmosphereSnapshot, moonGlow: Float = 0) -> Color {

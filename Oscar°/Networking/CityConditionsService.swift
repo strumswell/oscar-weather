@@ -29,9 +29,14 @@ struct CityConditions {
         WeatherConditionLabel.text(for: snapshot.condition)
     }
 
-    /// SF Symbol for the map chip, radar-aware like the widget's icon.
-    var symbolName: String {
-        WeatherConditionLabel.symbol(for: weathercode, isDay: isDay, isRaining: isRadarRaining)
+    /// The app's own weather icon asset (01d…50n) for the map chip, radar-aware
+    /// like the widget's icon: measured rain over a dry forecast code shows the
+    /// rain icon.
+    var iconAssetName: String {
+        if isRadarRaining, ![51...57, 61...67, 71...77, 80...86, 95...99].contains(where: { $0.contains(weathercode) }) {
+            return isDay ? "10d" : "10n"
+        }
+        return HourlyFormatting.weatherIconName(weatherCode: Double(weathercode), isDay: isDay ? 1 : 0)
     }
 }
 
@@ -92,37 +97,6 @@ enum WeatherConditionLabel {
         }
     }
 
-    /// SF Symbol for a weathercode — the app-side sibling of the widget's
-    /// `getWeatherIcon`. Radar rain overrides a dry code's symbol.
-    static func symbol(for code: Int, isDay: Bool, isRaining: Bool) -> String {
-        if isRaining, ![51...57, 61...67, 71...77, 80...86, 95...99].contains(where: { $0.contains(code) }) {
-            return "cloud.drizzle.fill"
-        }
-        switch code {
-        case 0, 1:
-            return isDay ? "sun.max.fill" : "moon.stars.fill"
-        case 2:
-            return isDay ? "cloud.sun.fill" : "cloud.moon.fill"
-        case 3:
-            return "cloud.fill"
-        case 45, 48:
-            return "cloud.fog.fill"
-        case 51...55:
-            return "cloud.drizzle.fill"
-        case 56, 57, 66, 67:
-            return "cloud.sleet.fill"
-        case 61...65:
-            return "cloud.rain.fill"
-        case 71...77, 85, 86:
-            return "cloud.snow.fill"
-        case 80...82:
-            return "cloud.heavyrain.fill"
-        case 95...99:
-            return "cloud.bolt.rain.fill"
-        default:
-            return "cloud.fill"
-        }
-    }
 }
 
 @MainActor
@@ -234,6 +208,15 @@ final class CityConditionsStore {
             latitude: entry.latitude,
             longitude: entry.longitude,
             utc_offset_seconds: entry.utc_offset_seconds,
+            // The mapper reads humidity and pressure only from hourly arrays;
+            // a one-element hour carries the batched current values so the card
+            // sky gets the same haze/turbidity inputs as the full simulation
+            // (which otherwise default to 50% humidity and standard pressure).
+            hourly: .init(
+                time: [current.time],
+                relativehumidity_2m: current.relativehumidity_2m.map { [$0] },
+                pressure_msl: current.pressure_msl.map { [$0] }
+            ),
             current: .init(
                 cloudcover: current.cloudcover ?? 0,
                 time: current.time,
@@ -266,7 +249,8 @@ final class CityConditionsStore {
             URLQueryItem(name: "longitude", value: coordinates.map { String($0.longitude) }.joined(separator: ",")),
             URLQueryItem(
                 name: "current",
-                value: "temperature,weathercode,cloudcover,windspeed,wind_direction_10m,precipitation,is_day"
+                value: "temperature,weathercode,cloudcover,windspeed,wind_direction_10m,precipitation,is_day,"
+                    + "relativehumidity_2m,pressure_msl"
             ),
             URLQueryItem(name: "temperature_unit", value: SettingService.resolvedTemperatureUnit),
             URLQueryItem(
@@ -305,6 +289,8 @@ private struct BatchCurrentEntry: Decodable {
         let wind_direction_10m: Double?
         let precipitation: Double?
         let is_day: Double?
+        let relativehumidity_2m: Double?
+        let pressure_msl: Double?
     }
 
     let latitude: Double

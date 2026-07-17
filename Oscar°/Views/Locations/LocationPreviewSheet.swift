@@ -36,11 +36,10 @@ struct LocationPreviewSheet: View {
     var body: some View {
         // Same sky-adaptive card treatment as the Now stack, from this sheet's
         // own weather instance.
-        let cardFill = AtmosphereSampler.cardFill(
-            snapshot: weather.forecast.hourly != nil
-                ? snapshotCache.snapshot(from: weather, at: candidate.coordinate)
-                : .twilight
-        )
+        let atmosphere = weather.forecast.hourly != nil
+            ? snapshotCache.snapshot(from: weather, at: candidate.coordinate)
+            : .twilight
+        let cardFill = AtmosphereSampler.cardFill(snapshot: atmosphere)
 
         ZStack {
             WeatherSimulationView()
@@ -86,6 +85,7 @@ struct LocationPreviewSheet: View {
         .environment(previewLocation)
         .environment(presentation)
         .environment(\.cardTint, cardFill)
+        .environment(\.cardBorderOpacity, AtmosphereSampler.cardBorderOpacity(snapshot: atmosphere))
         .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial))
         .task {
             await load()

@@ -30,7 +30,7 @@ struct AlertView: View {
         .padding(.vertical, 6)
         // Orange wash to match the icon — kept translucent so the card base
         // shows through and white text stays legible on bright days.
-        .background(.orange.opacity(0.32), in: Capsule())
+        .background(.orange.opacity(0.52), in: Capsule())
         .cardBackground(in: Capsule())
         .cardBorder(Capsule())
         .frame(minWidth: 44, minHeight: 44)

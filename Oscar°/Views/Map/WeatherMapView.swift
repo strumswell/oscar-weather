@@ -226,6 +226,9 @@ struct WeatherMapView: UIViewRepresentable {
         private var selectedCityAnnotation: MLNPointAnnotation?
         private var selectedCityIdentity: String?
 
+        private var cityChipSignature: String?
+        private var registeredCityChipImages: Set<String> = []
+
         private var lastWindFrameKey: String?
 
         private var isObservationLoopAlive = false
@@ -312,6 +315,8 @@ struct WeatherMapView: UIViewRepresentable {
                 lastBubbleSignature = nil
                 registeredBubbleIcons.removeAll()
                 isobarSyncKey = nil
+                cityChipSignature = nil
+                registeredCityChipImages.removeAll()
                 syncAll()
             }
         }
@@ -429,6 +434,9 @@ struct WeatherMapView: UIViewRepresentable {
             syncWindParticles(selection: activeTileLayer, state: gfsState)
             syncSelectedCityAnnotation()
             syncUserLocationDot(style: style)
+            // Last: the chips re-assert themselves as the topmost layer, so they
+            // must run after every sync that may have added layers above them.
+            syncCityChips(style: style)
         }
 
         // MARK: Radar (custom layer + motion morph + arrows)
@@ -1588,6 +1596,101 @@ struct WeatherMapView: UIViewRepresentable {
             bubbleSyncKey = nil
             lastBubbleSignature = nil
             registeredBubbleIcons.removeAll()
+        }
+
+        // MARK: Saved-city chips (like the locations picker map)
+
+        private static let cityChipSourceID = "oscar-city-chips"
+        private static let cityChipLayerID = "oscar-city-chips-layer"
+
+        /// The picker map's city chips on the weather map: every saved city as
+        /// a conditions capsule (condition symbol + temperature, custom emoji
+        /// leading when set) with the custom label underneath. Fullscreen only;
+        /// the selected city keeps its red marker instead of a chip.
+        private func syncCityChips(style: MLNStyle) {
+            guard parent.userActionAllowed else { return }
+            // Read through the store so the observation loop re-fires this sync
+            // the moment the batch conditions land.
+            let store = CityConditionsStore.shared
+            var features: [MLNPointFeature] = []
+            var signature = ""
+            for city in parent.cities where !city.selected {
+                let coordinate = CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
+                let iconName: String
+                if let conditions = store.conditions(for: coordinate) {
+                    let temperatureText = "\(Int(conditions.temperature.rounded()))°"
+                    iconName = "oscar-city-chip-\(city.emoji ?? "")-\(conditions.iconAssetName)-\(temperatureText)"
+                    if !registeredCityChipImages.contains(iconName) {
+                        style.setImage(
+                            CityChipImage.chip(
+                                iconAsset: conditions.iconAssetName,
+                                temperatureText: temperatureText,
+                                emoji: city.emoji
+                            ),
+                            forName: iconName
+                        )
+                        registeredCityChipImages.insert(iconName)
+                    }
+                } else {
+                    // Conditions not in yet: the emoji/pin disc as fallback.
+                    iconName = "oscar-city-pin-\(city.emoji ?? "plain")"
+                    if !registeredCityChipImages.contains(iconName) {
+                        style.setImage(CityChipImage.pin(emoji: city.emoji), forName: iconName)
+                        registeredCityChipImages.insert(iconName)
+                    }
+                }
+
+                let feature = MLNPointFeature()
+                feature.coordinate = coordinate
+                feature.attributes = [
+                    "icon": iconName,
+                    "label": city.customLabel ?? "",
+                ]
+                features.append(feature)
+                signature += "\(iconName)|\(city.customLabel ?? "")|\(city.lat)|\(city.lon);"
+            }
+
+            ensureCityChipLayer(in: style)
+            // Other syncs add their layers topmost as data arrives (motion
+            // arrows, value bubbles, cell heads, isobar labels) — re-hoist the
+            // chips whenever anything has landed above them.
+            if style.layers.last?.identifier != Self.cityChipLayerID,
+               let layer = style.layer(withIdentifier: Self.cityChipLayerID) {
+                style.removeLayer(layer)
+                style.addLayer(layer)
+            }
+
+            guard signature != cityChipSignature else { return }
+            cityChipSignature = signature
+            (style.source(withIdentifier: Self.cityChipSourceID) as? MLNShapeSource)?
+                .shape = MLNShapeCollectionFeature(shapes: features)
+        }
+
+        private func ensureCityChipLayer(in style: MLNStyle) {
+            guard style.source(withIdentifier: Self.cityChipSourceID) == nil else { return }
+            let source = MLNShapeSource(
+                identifier: Self.cityChipSourceID,
+                shape: MLNShapeCollectionFeature(shapes: [])
+            )
+            style.addSource(source)
+            let layer = MLNSymbolStyleLayer(identifier: Self.cityChipLayerID, source: source)
+            layer.iconImageName = NSExpression(forKeyPath: "icon")
+            layer.iconAllowsOverlap = NSExpression(forConstantValue: true)
+            layer.iconIgnoresPlacement = NSExpression(forConstantValue: true)
+            layer.text = NSExpression(forKeyPath: "label")
+            // The ONLY font stack the OpenFreeMap styles serve glyphs for.
+            layer.textFontNames = NSExpression(forConstantValue: ["Noto Sans Regular"])
+            layer.textFontSize = NSExpression(forConstantValue: 11)
+            layer.textColor = NSExpression(forConstantValue: UIColor.white)
+            layer.textHaloColor = NSExpression(forConstantValue: UIColor.black.withAlphaComponent(0.45))
+            layer.textHaloWidth = NSExpression(forConstantValue: 1)
+            layer.textAllowsOverlap = NSExpression(forConstantValue: true)
+            layer.textIgnoresPlacement = NSExpression(forConstantValue: true)
+            // The custom label hangs under the capsule; cities without one carry
+            // an empty string, which renders nothing.
+            layer.textAnchor = NSExpression(forConstantValue: "top")
+            layer.textOffset = NSExpression(forConstantValue: NSValue(cgVector: CGVector(dx: 0, dy: 1.6)))
+            style.addLayer(layer)   // topmost — chips read above every overlay
         }
 
         // MARK: Annotations

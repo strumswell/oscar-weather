@@ -43,11 +43,10 @@ struct NowView: View {
         let spinnerPending = weather.isLoading && weather.hasContent && !manualRefreshInFlight && scenePhase == .active
         // Cards share the sky's hue instead of a fixed dark material (same
         // snapshot the sim renders; twilight before any data).
-        let cardFill = AtmosphereSampler.cardFill(
-            snapshot: weather.forecast.hourly != nil
-                ? snapshotCache.snapshot(from: weather, at: location.coordinates)
-                : .twilight
-        )
+        let atmosphere = weather.forecast.hourly != nil
+            ? snapshotCache.snapshot(from: weather, at: location.coordinates)
+            : .twilight
+        let cardFill = AtmosphereSampler.cardFill(snapshot: atmosphere)
 
         ZStack {
             WeatherSimulationView(isCoveredBySheet: presentation.sheet != nil || presentation.selectedTab != .forecast)
@@ -183,6 +182,7 @@ struct NowView: View {
         }
         .environment(atmosphereDebug)
         .environment(\.cardTint, cardFill)
+        .environment(\.cardBorderOpacity, AtmosphereSampler.cardBorderOpacity(snapshot: atmosphere))
         // Lighter frost than the default: thinMaterial's dark base swallowed
         // the sky; ultraThin lets the sim's color reach the cards.
         .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial))

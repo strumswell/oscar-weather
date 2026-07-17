@@ -15,6 +15,11 @@ extension EnvironmentValues {
     /// Injected by the Now stack so cards share the scene's hue while keeping
     /// the material's frosted look; nil elsewhere (sheets, onboarding).
     @Entry var cardTint: Color? = nil
+
+    /// Strength of the white card hairline. The Now stack injects a dimmed
+    /// value at night (AtmosphereSampler.cardBorderOpacity); elsewhere the
+    /// daytime default applies.
+    @Entry var cardBorderOpacity: Double = 0.15
 }
 
 private struct CardBackgroundModifier: ViewModifier {
@@ -44,6 +49,15 @@ private struct CardShapeBackgroundModifier<S: Shape>: ViewModifier {
     }
 }
 
+private struct CardBorderModifier<S: InsettableShape>: ViewModifier {
+    @Environment(\.cardBorderOpacity) private var opacity
+    let shape: S
+
+    func body(content: Content) -> some View {
+        content.overlay(shape.strokeBorder(.white.opacity(opacity), lineWidth: 1))
+    }
+}
+
 extension View {
     /// The environment card fill as background (pair with clipShape).
     func cardBackground() -> some View {
@@ -56,9 +70,9 @@ extension View {
     }
 
     /// The hairline that lifts a card off the sim: semi-transparent white,
-    /// shared by every card.
+    /// shared by every card, dimmed via cardBorderOpacity at night.
     func cardBorder(_ shape: some InsettableShape) -> some View {
-        overlay(shape.strokeBorder(.white.opacity(0.15), lineWidth: 1))
+        modifier(CardBorderModifier(shape: shape))
     }
 
     func cardBorder() -> some View {

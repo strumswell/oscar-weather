@@ -6,6 +6,7 @@
 //  timeline chip.
 //
 
+import CoreLocation
 import SwiftUI
 import UIKit
 
@@ -141,6 +142,17 @@ struct WeatherMapDetailView: View {
                     await modelGridState.loadLayer(layer)
                 }
             }
+        }
+        .task {
+            // The saved-city chips need the batch conditions even when the tab
+            // opens before the locations list ever fetched them. Re-runs on
+            // every return to the tab; the store throttles to one fetch per
+            // 5 minutes.
+            await CityConditionsStore.shared.refresh(
+                coordinates: LocationService.shared.city.cities.map {
+                    CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
+                }
+            )
         }
         .task {
             // Testing hook: `-autoPresentLayerPicker YES` opens the layer sheet
