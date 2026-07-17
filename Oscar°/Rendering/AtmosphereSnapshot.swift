@@ -413,7 +413,7 @@ enum AtmosphereSampler {
         base *= 0.7
         // Except near black: lift dark scenes slightly so night cards still
         // separate from the sky. The squared falloff keeps days untouched.
-        let lift = 0.12 * (1 - luminance(base)) * (1 - luminance(base))
+        let lift = 0.20 * (1 - luminance(base)) * (1 - luminance(base))
         base += simd_float3(repeating: lift)
         base = simd_clamp(base, simd_float3(repeating: 0), simd_float3(repeating: 1))
         return Color(

@@ -19,6 +19,7 @@ struct LocationPreviewSheet: View {
     @State private var weather = Weather()
     @State private var previewLocation: Location
     @State private var presentation = NowPresentationCoordinator()
+    @State private var snapshotCache = AtmosphereSnapshotCache()
     @State private var loadFailed = false
     @ScaledMetric(relativeTo: .largeTitle) private var temperatureFontSize: CGFloat = 96
     private let client = APIClient.shared
@@ -33,6 +34,14 @@ struct LocationPreviewSheet: View {
     }
 
     var body: some View {
+        // Same sky-adaptive card treatment as the Now stack, from this sheet's
+        // own weather instance.
+        let cardFill = AtmosphereSampler.cardFill(
+            snapshot: weather.forecast.hourly != nil
+                ? snapshotCache.snapshot(from: weather, at: candidate.coordinate)
+                : .twilight
+        )
+
         ZStack {
             WeatherSimulationView()
 
@@ -40,7 +49,7 @@ struct LocationPreviewSheet: View {
                 ScrollView(.vertical) {
                     VStack(alignment: .leading) {
                         header
-                            .padding(.top, 36)
+                            .padding(.top, 52)
                             .padding(.bottom, 28)
                         RainView()
                         HourlyView()
@@ -76,6 +85,8 @@ struct LocationPreviewSheet: View {
         .environment(weather)
         .environment(previewLocation)
         .environment(presentation)
+        .environment(\.cardTint, cardFill)
+        .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial))
         .task {
             await load()
         }
