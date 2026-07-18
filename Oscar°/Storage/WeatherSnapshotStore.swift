@@ -139,13 +139,23 @@ enum WeatherSnapshotStore {
         return snapshot
     }
 
+    /// How far the cached snapshot may sit from the current location and still
+    /// stand in until the first refresh lands. Generous on purpose: forecasts
+    /// are area data, and the alternative to hydrating is the twilight
+    /// fallback, which is wrong everywhere.
+    private static let maxSnapshotDistance: CLLocationDistance = 50_000
+
+    /// Whether the cached snapshot may bridge the launch gap for `current`.
+    /// A distance check, NOT coordinate equality: consecutive GPS fixes drift
+    /// (the location manager runs at kilometer accuracy), so comparing rounded
+    /// coordinates threw the cache away on nearly every cold start in
+    /// current-location mode.
     static func coordinatesMatch(
         snapshot: CodableCoordinate,
         current: CLLocationCoordinate2D
     ) -> Bool {
-        let canonicalSnapshot = LocationService.outboundCoordinate(snapshot.coordinate)
-        let canonicalCurrent = LocationService.outboundCoordinate(current)
-        return canonicalSnapshot.latitude == canonicalCurrent.latitude
-            && canonicalSnapshot.longitude == canonicalCurrent.longitude
+        CLLocation(latitude: snapshot.latitude, longitude: snapshot.longitude)
+            .distance(from: CLLocation(latitude: current.latitude, longitude: current.longitude))
+            < maxSnapshotDistance
     }
 }

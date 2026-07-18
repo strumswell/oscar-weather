@@ -12,7 +12,9 @@ struct HourlySunEventCard: View {
         .minimumScaleFactor(0.75)
       Text(item.weekday)
         .font(.footnote)
-        .foregroundStyle(.secondary)
+        // Matches the forecast cards' precipitation line — .secondary's
+        // vibrancy vanishes over a bright sky.
+        .foregroundStyle(.white.opacity(0.72))
         .padding(.top, 3)
       // Same level as the forecast cards' weather icons — not pinned to the
       // card's bottom edge. Drawn a tad larger than its 35pt layout slot so

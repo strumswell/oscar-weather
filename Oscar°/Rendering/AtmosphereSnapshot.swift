@@ -397,38 +397,43 @@ enum AtmosphereSampler {
         ]
     }
 
-    /// Card wash for the Now stack: a milky, darkened sample of the lower sky,
-    /// laid over the cards' frosted material so they share the scene's hue
-    /// instead of the material's fixed gray.
+    /// Card wash for the Now stack, laid over the faded frosted material.
+    /// In high sun it carries a darkened, saturation-pushed sample of the sky
+    /// — the material's frost desaturates whatever shows through it, so a
+    /// neutral layer always reads gray over a blue day; the wash has to put
+    /// the hue back. Toward sunset the wash fades out entirely (bare glass
+    /// reads well in every dim scene), which is also what retires the old
+    /// scroll mismatch: cards never wear the horizon's warm band. At night it
+    /// flips to a faint white lift so cards separate from a near-black sky.
     static func cardFill(snapshot: AtmosphereSnapshot) -> Color {
-        // High sun samples the lower third of the sky — the horizon itself
-        // washed the cards out, while the zenith overshot into navy. Toward
-        // sunset/sunrise the sample slides down to the horizon so the warm
-        // band reaches the cards, and it stays there through the night.
         let elevationDegrees = snapshot.sunElevation * 180 / .pi
         let daylight = smoothstep(3, 14, elevationDegrees)
-        let sampleHeight = 1 - daylight / 3
-        // Blended by hand: Color.mix needs iOS 18, and this file also builds
-        // in targets with older deployment floors.
+        // High sun samples the lower third of the sky (the zenith overshot
+        // into navy); as the sun drops the sample slides UP toward the
+        // zenith, away from the warming horizon, so the residual hue stays
+        // cool while the wash fades.
+        let sampleHeight = 0.3 + 0.37 * daylight
         var base = colorVector(for: color(for: snapshot, horizonFactor: sampleHeight))
-        // The frost underneath grays the wash out; push the sample away from
-        // its gray axis first so the hue survives the material.
-        let gray = simd_float3(repeating: luminance(base))
-        base = gray + (base - gray) * 1.7
-        // Always darker than the sky it samples: the card sits under the
-        // scene instead of glowing over it, in every condition. Daytime keeps
-        // a bit more of the sample's lightness.
-        base *= 0.7 + 0.18 * daylight
-        // Except near black: lift dark scenes slightly so night cards still
-        // separate from the sky. The squared falloff keeps days untouched.
-        let lift = 0.14 * (1 - luminance(base)) * (1 - luminance(base))
-        base += simd_float3(repeating: lift)
+        let level = luminance(base)
+        // Push the sample off its gray axis so the hue survives the frost —
+        // hard, because the material desaturates everything behind it and the
+        // wash has to make up the difference — then darken so the white text
+        // keeps its contrast under bright sky.
+        let gray = simd_float3(repeating: level)
+        base = gray + (base - gray) * 2.1
+        base *= 0.62
         base = simd_clamp(base, simd_float3(repeating: 0), simd_float3(repeating: 1))
-        return Color(
-            red: Double(base.x),
-            green: Double(base.y),
-            blue: Double(base.z)
-        ).opacity(0.65)
+        // Both ramps meet near zero in twilight, so the flip from the fading
+        // day wash to the night lift is invisible.
+        let dayOpacity = 0.55 * daylight
+        let lift = 0.12 * (1 - smoothstep(0.02, 0.16, level))
+        return dayOpacity >= lift
+            ? Color(
+                red: Double(base.x),
+                green: Double(base.y),
+                blue: Double(base.z)
+            ).opacity(Double(dayOpacity))
+            : Color.white.opacity(Double(lift))
     }
 
     /// Strength of the white card hairline: the daytime 0.15 reads too hot

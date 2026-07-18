@@ -120,11 +120,11 @@ private struct PrecipitationSeriesChart: View {
                     ) {
                         VStack(alignment: .center) {
                             Text(SettingService.formattedTime(rawSelectedDate))
-                                .font(.system(size: 11)).foregroundStyle(.gray)
+                                .font(.system(size: 11)).foregroundStyle(.white.opacity(0.72))
                             VStack {
                                 Text(nearestPrecipitation(for: rawSelectedDate))
                                     .bold().foregroundStyle(.blue)
-                                Text("mm/h").font(.system(size: 11)).foregroundStyle(.gray)
+                                Text("mm/h").font(.system(size: 11)).foregroundStyle(.white.opacity(0.72))
                                     .padding(.top, -12)
                             }
                         }
@@ -143,6 +143,9 @@ private struct PrecipitationSeriesChart: View {
                 AxisValueLabel(anchor: value.index == 0 ? .topLeading : .top) {
                     if let date = value.as(Date.self) {
                         Text(SettingService.formattedTime(date))
+                            // Charts' default axis gray vanishes over a bright
+                            // sky behind the translucent card.
+                            .foregroundStyle(.white.opacity(0.72))
                     }
                 }
             }
@@ -153,6 +156,7 @@ private struct PrecipitationSeriesChart: View {
                 AxisValueLabel() {
                     if let value = value.as(Double.self) {
                         Text("\(value, specifier: "%.1f") mm/h")
+                            .foregroundStyle(.white.opacity(0.72))
                     }
                 }
             }

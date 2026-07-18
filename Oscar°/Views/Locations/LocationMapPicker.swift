@@ -373,7 +373,7 @@ private struct MapLibreLocationPicker: UIViewRepresentable {
                         let reuseID = "city-chip-\(iconAsset)-\(temperatureText)"
                         result = mapView.dequeueReusableAnnotationImage(withIdentifier: reuseID)
                             ?? MLNAnnotationImage(
-                                image: CityChipImage.chip(iconAsset: iconAsset, temperatureText: temperatureText),
+                                image: MapChip.conditions(iconAsset: iconAsset, temperatureText: temperatureText),
                                 reuseIdentifier: reuseID
                             )
                     } else {
@@ -381,7 +381,7 @@ private struct MapLibreLocationPicker: UIViewRepresentable {
                         let reuseID = "city-pin-\(chip.emoji ?? "plain")"
                         result = mapView.dequeueReusableAnnotationImage(withIdentifier: reuseID)
                             ?? MLNAnnotationImage(
-                                image: CityChipImage.pin(emoji: chip.emoji),
+                                image: MapChip.pin(emoji: chip.emoji),
                                 reuseIdentifier: reuseID
                             )
                     }
@@ -423,120 +423,6 @@ private struct MapLibreLocationPicker: UIViewRepresentable {
             }
         }
 
-    }
-}
-
-// MARK: - City chip images
-
-/// Shared renderer for saved-city map markers: the conditions capsule and the
-/// emoji/pin disc fallback. Drawn identically on the picker map (annotation
-/// images) and the weather map (style images for the chips symbol layer).
-@MainActor
-enum CityChipImage {
-    /// A saved city's conditions as a capsule chip: the app's own weather icon
-    /// (01d…50n assets, same set as the forecast lists) + current temperature,
-    /// like a mini weather-map station label. A custom emoji, when set, leads
-    /// the capsule.
-    static func chip(iconAsset: String, temperatureText: String, emoji: String? = nil) -> UIImage {
-        let height: CGFloat = 28
-        let padding: CGFloat = 8
-        let spacing: CGFloat = 4
-
-        let icon = UIImage(named: iconAsset)
-        let iconSize = CGSize(width: 21, height: 21)
-
-        let emojiText: NSAttributedString? = (emoji?.isEmpty == false)
-            ? NSAttributedString(string: emoji ?? "", attributes: [.font: UIFont.systemFont(ofSize: 13)])
-            : nil
-
-        let text = NSAttributedString(
-            string: temperatureText,
-            attributes: [
-                .font: UIFont.systemFont(ofSize: 14, weight: .semibold),
-                .foregroundColor: UIColor.white,
-            ]
-        )
-        let textSize = text.size()
-        let emojiSize = emojiText?.size() ?? .zero
-        let emojiAdvance = emojiText == nil ? 0 : emojiSize.width + spacing
-        let width = padding + emojiAdvance + iconSize.width + spacing + textSize.width + padding
-
-        return UIGraphicsImageRenderer(size: CGSize(width: width, height: height)).image { context in
-            let capsule = UIBezierPath(
-                roundedRect: CGRect(x: 0.5, y: 0.5, width: width - 1, height: height - 1),
-                cornerRadius: (height - 1) / 2
-            )
-            context.cgContext.setShadow(
-                offset: CGSize(width: 0, height: 1),
-                blur: 3,
-                color: UIColor.black.withAlphaComponent(0.35).cgColor
-            )
-            UIColor(white: 0.13, alpha: 0.92).setFill()
-            capsule.fill()
-            context.cgContext.setShadow(offset: .zero, blur: 0, color: nil)
-            UIColor(white: 1, alpha: 0.35).setStroke()
-            capsule.lineWidth = 1
-            capsule.stroke()
-
-            emojiText?.draw(at: CGPoint(
-                x: padding,
-                y: (height - emojiSize.height) / 2
-            ))
-            icon?.draw(in: CGRect(
-                x: padding + emojiAdvance,
-                y: (height - iconSize.height) / 2,
-                width: iconSize.width,
-                height: iconSize.height
-            ))
-            text.draw(at: CGPoint(
-                x: padding + emojiAdvance + iconSize.width + spacing,
-                y: (height - textSize.height) / 2
-            ))
-        }
-    }
-
-    /// A saved city as a small dark disc with its emoji (or a red pin glyph
-    /// when none is set) — the fallback while conditions are still loading.
-    static func pin(emoji: String?) -> UIImage {
-        let size = CGSize(width: 32, height: 32)
-        return UIGraphicsImageRenderer(size: size).image { context in
-            let rect = CGRect(origin: .zero, size: size).insetBy(dx: 1.5, dy: 1.5)
-            let circle = UIBezierPath(ovalIn: rect)
-            context.cgContext.setShadow(
-                offset: CGSize(width: 0, height: 1),
-                blur: 3,
-                color: UIColor.black.withAlphaComponent(0.35).cgColor
-            )
-            UIColor(white: 0.13, alpha: 0.92).setFill()
-            circle.fill()
-            context.cgContext.setShadow(offset: .zero, blur: 0, color: nil)
-            UIColor(white: 1, alpha: 0.35).setStroke()
-            circle.lineWidth = 1
-            circle.stroke()
-
-            if let emoji, !emoji.isEmpty {
-                let text = NSAttributedString(
-                    string: emoji,
-                    attributes: [.font: UIFont.systemFont(ofSize: 15)]
-                )
-                let textSize = text.size()
-                text.draw(at: CGPoint(
-                    x: (size.width - textSize.width) / 2,
-                    y: (size.height - textSize.height) / 2
-                ))
-            } else {
-                let config = UIImage.SymbolConfiguration(pointSize: 12, weight: .bold)
-                if let glyph = UIImage(systemName: "mappin", withConfiguration: config)?
-                    .withTintColor(.systemRed, renderingMode: .alwaysOriginal) {
-                    glyph.draw(in: CGRect(
-                        x: (size.width - glyph.size.width) / 2,
-                        y: (size.height - glyph.size.height) / 2,
-                        width: glyph.size.width,
-                        height: glyph.size.height
-                    ))
-                }
-            }
-        }
     }
 }
 

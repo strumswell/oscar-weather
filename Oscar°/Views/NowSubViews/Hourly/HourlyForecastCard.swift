@@ -14,7 +14,9 @@ struct HourlyForecastCard: View {
         .minimumScaleFactor(0.75)
       Text(item.precipitation)
         .font(.footnote)
-        .foregroundStyle(.secondary)
+        // Not .secondary: its vibrant rendering blends into a bright sky
+        // behind the translucent card and can disappear entirely.
+        .foregroundStyle(.white.opacity(0.72))
         .padding(.top, 3)
       Image(item.iconName)
         .resizable()

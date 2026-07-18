@@ -143,8 +143,9 @@ extension RetryingMiddleware: ClientMiddleware {
           logRequest(attempt: attempt, maxAttemptCount: maxAttemptCount)
           (response, responseBody) = try await next(request, body, baseURL)
         } catch {
-          // Don't retry if the error is a cancellation
-          if error is CancellationError {
+          // Don't retry cancellations — including URLSession's form, which is
+          // how a cancelled Swift task surfaces from the transport.
+          if error is CancellationError || (error as? URLError)?.code == .cancelled {
             throw error
           }
 

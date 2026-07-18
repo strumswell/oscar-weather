@@ -122,23 +122,30 @@ struct WeatherApp: App {
                     // location") before hydration compares coordinates and before
                     // the first refresh resolves a location.
                     locationService.city.applyDefaultSelectionOnLaunch()
-                    let snapshot = await Task.detached {
-                        WeatherSnapshotStore.load()
-                    }.value
-                    if weather.lastUpdated == nil, let snapshot {
-                        locationService.update()
-                        if WeatherSnapshotStore.coordinatesMatch(
-                            snapshot: snapshot.coordinates,
-                            current: locationService.getCoordinates()
-                        ) {
-                            weather.apply(snapshot: snapshot, location: location)
-                        }
-                    }
+                    await hydrateFromCache()
                     await weather.refresh(location: location)
                     await notificationSettingsManager.configureOnLaunch()
                     await WidgetBasemapRenderer.refreshIfNeeded()
                 }
                 .sentryTrace("RootTabView")
         }
+    }
+
+    /// Bridges the launch gap with the last session's weather so the sim opens
+    /// on a real scene instead of the twilight fallback. The snapshot is applied
+    /// when it plausibly belongs to the location the first refresh is about to
+    /// query: near the saved city / last GPS fix, or — with no fix yet this
+    /// early in the process — unconditionally, since the refresh that follows
+    /// corrects any actual move and twilight is wrong everywhere.
+    private func hydrateFromCache() async {
+        guard weather.lastUpdated == nil else { return }
+        let loaded = await Task.detached { WeatherSnapshotStore.load() }.value
+        guard let snapshot = loaded else { return }
+        locationService.update()
+        if let current = locationService.knownCoordinates(),
+           !WeatherSnapshotStore.coordinatesMatch(snapshot: snapshot.coordinates, current: current) {
+            return
+        }
+        weather.apply(snapshot: snapshot, location: location)
     }
 }

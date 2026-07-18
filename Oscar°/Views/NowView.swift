@@ -184,8 +184,12 @@ struct NowView: View {
         .environment(\.cardTint, cardFill)
         .environment(\.cardBorderOpacity, AtmosphereSampler.cardBorderOpacity(snapshot: atmosphere))
         // Lighter frost than the default: thinMaterial's dark base swallowed
-        // the sky; ultraThin lets the sim's color reach the cards.
-        .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial))
+        // the sky, and even ultraThin's built-in gray muted it — fading the
+        // material layer lets the sim's color reach the cards through the frost.
+        // 0.6 keeps the blur (frost) alive — fading the material fades its
+        // blur too, so this trades a bit more desaturation (compensated in
+        // cardFill's saturation push) for a visibly frosted card.
+        .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial.opacity(0.6)))
         .ignoresSafeArea(edges: .top)
         .task {
             // Testing hook: `-autoPresentMapLibreAfter <seconds>` switches to the map

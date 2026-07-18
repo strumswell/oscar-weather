@@ -86,7 +86,7 @@ struct LocationPreviewSheet: View {
         .environment(presentation)
         .environment(\.cardTint, cardFill)
         .environment(\.cardBorderOpacity, AtmosphereSampler.cardBorderOpacity(snapshot: atmosphere))
-        .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial))
+        .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial.opacity(0.6)))
         .task {
             await load()
         }

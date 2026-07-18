@@ -211,8 +211,6 @@ struct TimelineControlsChip: View {
             HStack(alignment: .firstTextBaseline, spacing: 5) {
                 Text(selectedTime)
                     .font(.headline.monospacedDigit())
-                    .contentTransition(.numericText())
-                    .animation(.snappy(duration: 0.2), value: selectedTime)
                 if showDay, !selectedDay.isEmpty {
                     Text(selectedDay)
                         .font(.subheadline)
@@ -304,8 +302,6 @@ struct TimelineControlsChip: View {
                             .font(.caption.weight(.semibold).monospacedDigit())
                             .lineLimit(1)
                             .fixedSize()
-                            .contentTransition(.numericText())
-                            .animation(.snappy(duration: 0.2), value: label)
                     }
                     .foregroundStyle(delta > 0 ? AnyShapeStyle(.orange) : AnyShapeStyle(.secondary))
                     .padding(.horizontal, 9)
@@ -863,8 +859,6 @@ struct RadarTimestampBadge: View {
                 Text(formattedTime)
                     .font(.subheadline.weight(.semibold).monospacedDigit())
                     .foregroundStyle(.primary)
-                    .contentTransition(.numericText())
-                    .animation(.snappy(duration: 0.2), value: formattedTime)
             }
         }
         .padding(.horizontal, 10)

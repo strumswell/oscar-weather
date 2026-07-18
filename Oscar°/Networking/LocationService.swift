@@ -116,6 +116,13 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         }
         return gpsLocation
     }
+
+    /// The coordinates a refresh would query right now, or nil while they are
+    /// genuinely unknown — current-location mode before this process' first
+    /// GPS fix, when `getCoordinates()` would return the placeholder default.
+    func knownCoordinates() -> CLLocationCoordinate2D? {
+        city.getSelectedCityCoordinates() ?? getGPSCoordinates()
+    }
     
     /// Ortsteil-level overrides for small villages that CLGeocoder collapses into their Gemeinde.
     /// Each entry: (name, minLat, maxLat, minLon, maxLon) from OSM relation bounding boxes.

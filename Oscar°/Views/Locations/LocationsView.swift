@@ -28,6 +28,7 @@ struct LocationsView: View {
     @State private var searchText = ""
     @State private var searchResult: Components.Schemas.SearchResponse = .init()
     @State private var searchError: String?
+    @State private var isSearchInFlight = false
     @State private var isMapPresented = false
     @State private var candidate: LocationCandidate?
     @State private var editTarget: LocationEditTarget?
@@ -103,17 +104,23 @@ struct LocationsView: View {
             searchError = nil
             guard !searchText.isEmpty else {
                 searchResult = .init()
+                isSearchInFlight = false
                 return
             }
+            isSearchInFlight = true
             do {
                 try await Task.sleep(for: .milliseconds(300))
                 searchResult = try await client.getGeocodeSearchResult(name: searchText)
-            } catch is CancellationError {
-                return
             } catch {
+                // Cancellation arrives in wrapped shapes too (middleware
+                // ClientError around CancellationError / URLError -999), so the
+                // task flag is the reliable signal. A cancelled task must not
+                // touch state — the newer search owns it already.
+                guard !Task.isCancelled else { return }
                 searchResult = .init()
                 searchError = error.localizedDescription
             }
+            isSearchInFlight = false
         }
     }
 
@@ -229,6 +236,9 @@ struct LocationsView: View {
             } label: {
                 Label("Löschen", systemImage: "trash")
             }
+            // Explicit red: the role's default is lost to the tab bar's
+            // cascading white tint, same reason the neighbors set theirs.
+            .tint(.red)
             Button {
                 editTarget = .city(city)
             } label: {
@@ -324,7 +334,9 @@ struct LocationsView: View {
         }
     }
 
-    /// Error/empty state over the (then row-less) list.
+    /// Error/loading/empty state over the (then row-less) list. "No results"
+    /// only after a search actually completed — while one is in flight the
+    /// overlay is a spinner, and earlier results stay in the rows below it.
     @ViewBuilder
     private var searchStatusOverlay: some View {
         if isSearching {
@@ -335,7 +347,11 @@ struct LocationsView: View {
                     description: Text(searchError)
                 )
             } else if searchResult.results?.isEmpty ?? true {
-                ContentUnavailableView.search
+                if isSearchInFlight {
+                    ProgressView()
+                } else {
+                    ContentUnavailableView.search
+                }
             }
         }
     }

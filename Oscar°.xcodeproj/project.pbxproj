@@ -62,6 +62,7 @@
 		AD8000062FE6000000000001 /* UserLocationDot.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000052FE6000000000001 /* UserLocationDot.swift */; };
 		AD8000082FE6000000000001 /* RadarMotionArrows.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000072FE6000000000001 /* RadarMotionArrows.swift */; };
 		AD80000A2FE6000000000001 /* MapValueBubbles.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000092FE6000000000001 /* MapValueBubbles.swift */; };
+		AD8000412FE6000000000001 /* MapChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000402FE6000000000001 /* MapChip.swift */; };
 		AD80000E2FE6000000000001 /* WeatherMapDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD80000D2FE6000000000001 /* WeatherMapDetailView.swift */; };
 		AD8000102FE6000000000001 /* MapLayerPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD80000F2FE6000000000001 /* MapLayerPickerSheet.swift */; };
 		ADC0FFEE2FE6000000000002 /* MapFeatureInfoSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADC0FFEE2FE6000000000001 /* MapFeatureInfoSheets.swift */; };
@@ -509,6 +510,7 @@
 		AD8000052FE6000000000001 /* UserLocationDot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLocationDot.swift; sourceTree = "<group>"; };
 		AD8000072FE6000000000001 /* RadarMotionArrows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarMotionArrows.swift; sourceTree = "<group>"; };
 		AD8000092FE6000000000001 /* MapValueBubbles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapValueBubbles.swift; sourceTree = "<group>"; };
+		AD8000402FE6000000000001 /* MapChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapChip.swift; sourceTree = "<group>"; };
 		AD80000D2FE6000000000001 /* WeatherMapDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherMapDetailView.swift; sourceTree = "<group>"; };
 		AD80000F2FE6000000000001 /* MapLayerPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapLayerPickerSheet.swift; sourceTree = "<group>"; };
 		ADC0FFEE2FE6000000000001 /* MapFeatureInfoSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapFeatureInfoSheets.swift; sourceTree = "<group>"; };
@@ -1347,6 +1349,7 @@
 				AD8000052FE6000000000001 /* UserLocationDot.swift */,
 				AD8000072FE6000000000001 /* RadarMotionArrows.swift */,
 				AD8000092FE6000000000001 /* MapValueBubbles.swift */,
+				AD8000402FE6000000000001 /* MapChip.swift */,
 				AD80000D2FE6000000000001 /* WeatherMapDetailView.swift */,
 				AD80000F2FE6000000000001 /* MapLayerPickerSheet.swift */,
 				ADC0FFEE2FE6000000000001 /* MapFeatureInfoSheets.swift */,
@@ -1829,6 +1832,7 @@
 				AD8000062FE6000000000001 /* UserLocationDot.swift in Sources */,
 				AD8000082FE6000000000001 /* RadarMotionArrows.swift in Sources */,
 				AD80000A2FE6000000000001 /* MapValueBubbles.swift in Sources */,
+				AD8000412FE6000000000001 /* MapChip.swift in Sources */,
 				AD80000E2FE6000000000001 /* WeatherMapDetailView.swift in Sources */,
 				AD8000102FE6000000000001 /* MapLayerPickerSheet.swift in Sources */,
 				ADC0FFEE2FE6000000000002 /* MapFeatureInfoSheets.swift in Sources */,
