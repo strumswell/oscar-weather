@@ -4,6 +4,52 @@
     "" : {
 
     },
+    "Die weißen Bänder zeigen die Bewölkung in drei Höhenlagen, je dicker das Band, desto bedeckter der Himmel. Gelbe Flächen stehen für sonnige Abschnitte, Balken für Niederschlag, gestrichelte Verläufe für die Vergangenheit. Halte und ziehe für die Werte einer Stunde, mit zwei Fingern änderst du den Zeitraum." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die weißen Bänder zeigen die Bewölkung in drei Höhenlagen, je dicker das Band, desto bedeckter der Himmel. Gelbe Flächen stehen für sonnige Abschnitte, Balken für Niederschlag, gestrichelte Verläufe für die Vergangenheit. Halte und ziehe für die Werte einer Stunde, mit zwei Fingern änderst du den Zeitraum."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The white bands show cloud cover at three altitude ranges; the thicker the band, the more overcast the sky. Yellow areas mark sunny periods, bars precipitation, dashed lines the past. Touch and hold for a single hour's values, and pinch to change the time range."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beyaz bantlar bulutluluğu üç yükseklik katmanında gösterir; bant ne kadar kalınsa gökyüzü o kadar kapalıdır. Sarı alanlar güneşli saatleri, çubuklar yağışı, kesikli çizgiler geçmişi gösterir. Bir saatin değerlerini görmek için basılı tutup sürükleyin, zaman aralığını iki parmakla değiştirebilirsiniz."
+          }
+        }
+      }
+    },
+    "Sonne" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonne"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sun"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güneş"
+          }
+        }
+      }
+    },
     "–" : {
 
     },
@@ -1891,6 +1937,29 @@
         }
       }
     },
+    "Bewölkung" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewölkung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloud cover"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bulutluluk"
+          }
+        }
+      }
+    },
     "Bft" : {
       "shouldTranslate" : false
     },
@@ -1999,6 +2068,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toprak su içeriği"
+          }
+        }
+      }
+    },
+    "Böen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Böen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gusts"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rüzgar hamlesi"
           }
         }
       }
@@ -5964,6 +6056,29 @@
     "MET Nordic - MET Norway" : {
       "shouldTranslate" : false
     },
+    "Meteogramm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meteogramm"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meteogram"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meteogram"
+          }
+        }
+      }
+    },
     "Min" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -9805,6 +9920,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Otomatik seçimi yalnızca ne yaptığınızı biliyorsanız geçersiz kılın. Çoğu model dünya genelinde veri sağlar ancak kendi bölgesi için optimize edilmiştir. Bazıları yalnızca kendi bölgesini kapsar ve otomatik seçime kıyasla daha az veri sağlayabilir."
+          }
+        }
+      }
+    },
+    "Übersicht" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übersicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overview"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genel bakış"
           }
         }
       }

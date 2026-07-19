@@ -95,6 +95,12 @@ struct WeatherApp: App {
             options.enableTimeToFullDisplayTracing = true
             options.swiftAsyncStacktraces = true
         }
+
+        // Honor the user's launch default (a saved city or "current location")
+        // before hydration compares coordinates and before the first refresh
+        // resolves a location.
+        locationService.city.applyDefaultSelectionOnLaunch()
+        hydrateFromCache()
     }
     
     @State private var weather = Weather()
@@ -118,11 +124,12 @@ struct WeatherApp: App {
                 .environment(location)
                 .preferredColorScheme(.dark)
                 .task {
-                    // Honor the user's launch default (a saved city or "current
-                    // location") before hydration compares coordinates and before
-                    // the first refresh resolves a location.
-                    locationService.city.applyDefaultSelectionOnLaunch()
-                    await hydrateFromCache()
+                    // Second chance for the init-time hydration: a prewarmed
+                    // launch can run `init` before first unlock, while the
+                    // app-group snapshot is still data-protected and unreadable.
+                    // The UI appearing means the device is unlocked, so retry;
+                    // a guarded no-op whenever init already hydrated.
+                    hydrateFromCache()
                     await weather.refresh(location: location)
                     await notificationSettingsManager.configureOnLaunch()
                     await WidgetBasemapRenderer.refreshIfNeeded()
@@ -132,15 +139,19 @@ struct WeatherApp: App {
     }
 
     /// Bridges the launch gap with the last session's weather so the sim opens
-    /// on a real scene instead of the twilight fallback. The snapshot is applied
-    /// when it plausibly belongs to the location the first refresh is about to
-    /// query: near the saved city / last GPS fix, or — with no fix yet this
-    /// early in the process — unconditionally, since the refresh that follows
-    /// corrects any actual move and twilight is wrong everywhere.
-    private func hydrateFromCache() async {
-        guard weather.lastUpdated == nil else { return }
-        let loaded = await Task.detached { WeatherSnapshotStore.load() }.value
-        guard let snapshot = loaded else { return }
+    /// on a real scene instead of the twilight fallback. Called from `init` and
+    /// deliberately synchronous: `.task` fires only after SwiftUI commits the
+    /// first frame, so the previous async hydrate let twilight flash on every
+    /// cold start until its load landed — the snapshot has to be in place
+    /// before the first body evaluation. The snapshot is applied when it
+    /// plausibly belongs to the location the first refresh is about to query:
+    /// near the saved city / last GPS fix, or — with no fix yet this early in
+    /// the process — unconditionally, since the refresh that follows corrects
+    /// any actual move and twilight is wrong everywhere.
+    private func hydrateFromCache() {
+        // Screenshot runs stay on fixture data only.
+        guard !ScreenshotMode.active, weather.lastUpdated == nil else { return }
+        guard let snapshot = WeatherSnapshotStore.load() else { return }
         locationService.update()
         if let current = locationService.knownCoordinates(),
            !WeatherSnapshotStore.coordinatesMatch(snapshot: snapshot.coordinates, current: current) {

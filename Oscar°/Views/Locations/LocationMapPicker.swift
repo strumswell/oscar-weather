@@ -173,6 +173,7 @@ struct LocationMapSheet: View {
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
+            .tint(.blue)
             .disabled(point.isResolving && point.name == nil)
             Button {
                 withAnimation(.spring(duration: 0.3)) { picked = nil }

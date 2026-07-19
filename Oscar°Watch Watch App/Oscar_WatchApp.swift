@@ -12,7 +12,7 @@ import WidgetKit
 @main
 struct Oscar_Watch_Watch_AppApp: App {
     @Environment(\.scenePhase) private var scenePhase
-    @State private var weather = Weather()
+    @State private var weather: Weather
     @State private var location: Location
     @State private var lastRefreshStart: Date?
 
@@ -21,16 +21,26 @@ struct Oscar_Watch_Watch_AppApp: App {
         // server answers all data endpoints, the location pins to the fixture
         // city so neither GPS nor geocoding runs on the freshly booted sim.
         let location = Location()
-        MainActor.assumeIsolated {
+        let weather = MainActor.assumeIsolated {
+            let weather = Weather()
             if ScreenshotMode.bootstrap() {
                 location.coordinates = CLLocationCoordinate2D(
                     latitude: ScreenshotFixtures.latitude,
                     longitude: ScreenshotFixtures.longitude
                 )
                 location.name = "Leipzig"
+            } else if let snapshot = WeatherSnapshotStore.load() {
+                // Hydrate before the first frame so a cold start opens on the
+                // last session's scene instead of flashing the twilight
+                // fallback until scenePhase turns active (same pattern as the
+                // iOS app). The refresh() hydrate below stays as the second
+                // chance for launches where this read fails.
+                weather.apply(snapshot: snapshot, location: location)
             }
+            return weather
         }
         _location = State(initialValue: location)
+        _weather = State(initialValue: weather)
     }
 
     var body: some Scene {
@@ -46,8 +56,10 @@ struct Oscar_Watch_Watch_AppApp: App {
     }
 
     private func refresh() {
-        // Cold start: show the cached snapshot immediately, the network refresh
-        // follows. Screenshot runs skip the cache — only fixture data may show.
+        // Second chance for the init-time hydration (e.g. a prewarmed launch
+        // where the protected snapshot file wasn't readable yet); the network
+        // refresh follows. Screenshot runs skip the cache — only fixture data
+        // may show.
         if !ScreenshotMode.active, !weather.hasContent, let snapshot = WeatherSnapshotStore.load() {
             weather.apply(snapshot: snapshot, location: location)
         }

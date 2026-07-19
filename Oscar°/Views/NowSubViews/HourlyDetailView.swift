@@ -8,7 +8,7 @@ struct HourlyDetailView: View {
     @State private var chartScrollSynchronizer = ChartScrollSynchronizer()
     @State private var chartTimelineVersion = 0
     @State private var dismissalFeedback = false
-    @State private var selectedSection: HourlyDetailSection = .atmosphere
+    @State private var selectedSection: HourlyDetailSection = .meteogram
 
     private var time: [Double] {
         weather.forecast.hourly?.time ?? []
@@ -110,6 +110,8 @@ struct HourlyDetailView: View {
     @ViewBuilder
     private func sectionContent(for section: HourlyDetailSection) -> some View {
         switch section {
+        case .meteogram:
+            meteogramSection
         case .atmosphere:
             temperatureSection
             precipitationSection
@@ -125,6 +127,45 @@ struct HourlyDetailView: View {
             soilMoistureSection
             evapotranspirationSection
         }
+    }
+
+    private var meteogramSection: some View {
+        // Single chart with its own scroll/zoom state — deliberately not part of
+        // the cross-chart scroll synchronizer.
+        MeteogramPage(
+            input: meteogramInput,
+            initialScrollPosition: initialChartScrollPosition
+        )
+        .id(chartTimelineVersion)
+    }
+
+    private var meteogramInput: MeteogramModel.Input {
+        let hourly = weather.forecast.hourly
+        let units = weather.forecast.hourly_units
+        let probability: [Double] = (hourly?.precipitation_probability ?? []).map { $0 ?? 0 }
+
+        return MeteogramModel.Input(
+            time: time,
+            temperature: hourly?.temperature_2m ?? [],
+            precipitation: hourly?.precipitation ?? [],
+            snowfall: hourly?.snowfall ?? [],
+            precipitationProbability: probability,
+            cloudcoverTotal: hourly?.cloudcover ?? [],
+            cloudcoverLow: hourly?.cloudcover_low ?? [],
+            cloudcoverMid: hourly?.cloudcover_mid ?? [],
+            cloudcoverHigh: hourly?.cloudcover_high ?? [],
+            windspeed: displayedWindSpeeds(hourly?.windspeed_10m ?? []),
+            winddirection: hourly?.winddirection_10m ?? [],
+            windgusts: displayedWindSpeeds(hourly?.windgusts_10m ?? []),
+            pressure: hourly?.pressure_msl ?? [],
+            weathercode: hourly?.weathercode ?? [],
+            isDay: hourly?.is_day ?? [],
+            temperatureUnit: units?.temperature_2m ?? "°C",
+            precipitationUnit: units?.precipitation ?? "mm",
+            pressureUnit: "hPa",
+            windSpeedUnit: windSpeedUnit,
+            referenceDate: referenceDate
+        )
     }
 
     private var temperatureSection: some View {

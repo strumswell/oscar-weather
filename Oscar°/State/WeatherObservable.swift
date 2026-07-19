@@ -209,16 +209,24 @@ extension Weather {
             loadState = .loaded
             isLoading = false
 
-            let snapshot = WeatherSnapshot(
-                forecast: forecastResponse,
-                air: airQualityResponse,
-                precipSeries: precipSeries,
-                coordinates: CodableCoordinate(LocationService.outboundCoordinate(coordinates)),
-                locationName: location.name,
-                savedAt: lastUpdated ?? .now
-            )
-            Task.detached {
-                WeatherSnapshotStore.save(snapshot)
+            // Persist only when the queried coordinates are genuinely known (a
+            // selected city or a GPS fix). Without either, this refresh ran
+            // against the hardcoded coordinate placeholder — real data for the
+            // wrong place — and saving it would overwrite the last real
+            // location's snapshot, which the next launch's hydration then
+            // rejects on distance and falls back to twilight.
+            if locationService.knownCoordinates() != nil {
+                let snapshot = WeatherSnapshot(
+                    forecast: forecastResponse,
+                    air: airQualityResponse,
+                    precipSeries: precipSeries,
+                    coordinates: CodableCoordinate(LocationService.outboundCoordinate(coordinates)),
+                    locationName: location.name,
+                    savedAt: lastUpdated ?? .now
+                )
+                Task.detached {
+                    WeatherSnapshotStore.save(snapshot)
+                }
             }
 
             markLoading(.alerts)
@@ -235,6 +243,12 @@ extension Weather {
                 alerts = .brightsky(.init())
             }
             markFinished(.alerts)
+        } catch is CancellationError {
+            // A cancelled refresh is not a failure: nothing was actually
+            // attempted and rejected, so leave content, `error`, and
+            // `loadState` untouched for the refresh that superseded this one.
+        } catch let error as URLError where error.code == .cancelled {
+            // URLSession surfaces task cancellation as URLError.cancelled.
         } catch {
             self.error = error.localizedDescription
             // Latch the failure: `error` is wiped at the start of every refresh, so a UI that

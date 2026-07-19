@@ -140,6 +140,7 @@ final class APIClient: Sendable {
       .soil_temperature_0cm, .soil_temperature_6cm, .soil_temperature_18cm,
       .soil_temperature_54cm, .soil_moisture_0_1cm, .soil_moisture_1_3cm, .soil_moisture_3_9cm,
       .soil_moisture_9_27cm, .soil_moisture_27_81cm, .et0_fao_evapotranspiration,
+      .windgusts_10m, .cloudcover_low, .cloudcover_mid, .cloudcover_high,
     ]
 
     var query: Operations.getForecast.Input.Query = .init(

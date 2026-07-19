@@ -137,6 +137,10 @@ struct LocationPreviewSheet: View {
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
             .controlSize(.large)
+            // The locations tab runs a white control tint (readable on glass),
+            // which turns this prominent capsule white-on-white; the primary
+            // action wants real contrast, so it opts back into blue.
+            .tint(.blue)
         }
         .padding(.horizontal, 16)
         .padding(.top, 10)

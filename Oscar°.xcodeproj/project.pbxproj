@@ -293,6 +293,11 @@
 		AC1000052FAA200000000001 /* RainRadarLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1000022FAA200000000001 /* RainRadarLiveActivityManager.swift */; };
 		AC1000062FAA200000000001 /* RainRadarLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1000072FAA200000000001 /* RainRadarLiveActivityWidget.swift */; };
 		AD0000112FAA100000000001 /* HourlyDetailChartCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000102FAA100000000001 /* HourlyDetailChartCard.swift */; };
+		AD7000022FEE000000000001 /* MeteogramModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD7000012FEE000000000001 /* MeteogramModel.swift */; };
+		AD7000042FEE000000000001 /* MeteogramChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD7000032FEE000000000001 /* MeteogramChart.swift */; };
+		AD7000062FEE000000000001 /* MeteogramReadoutHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD7000052FEE000000000001 /* MeteogramReadoutHeader.swift */; };
+		AD7000082FEE000000000001 /* MeteogramPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD7000072FEE000000000001 /* MeteogramPage.swift */; };
+		AD70000A2FEE000000000001 /* MeteogramMinimap.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD7000092FEE000000000001 /* MeteogramMinimap.swift */; };
 		AD0000132FAA100000000001 /* HourlyDetailInfoCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000122FAA100000000001 /* HourlyDetailInfoCard.swift */; };
 		AD0000192FAA100000000001 /* HourlyChartUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000182FAA100000000001 /* HourlyChartUtilities.swift */; };
 		AD00001B2FAA100000000001 /* HourlyDetailSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD00001A2FAA100000000001 /* HourlyDetailSection.swift */; };
@@ -686,6 +691,11 @@
 		AD0000102FAA100000000001 /* HourlyDetailChartCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyDetailChartCard.swift; sourceTree = "<group>"; };
 		AD0000122FAA100000000001 /* HourlyDetailInfoCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyDetailInfoCard.swift; sourceTree = "<group>"; };
 		AD0000182FAA100000000001 /* HourlyChartUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyChartUtilities.swift; sourceTree = "<group>"; };
+		AD7000012FEE000000000001 /* MeteogramModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeteogramModel.swift; sourceTree = "<group>"; };
+		AD7000032FEE000000000001 /* MeteogramChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeteogramChart.swift; sourceTree = "<group>"; };
+		AD7000052FEE000000000001 /* MeteogramReadoutHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeteogramReadoutHeader.swift; sourceTree = "<group>"; };
+		AD7000072FEE000000000001 /* MeteogramPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeteogramPage.swift; sourceTree = "<group>"; };
+		AD7000092FEE000000000001 /* MeteogramMinimap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeteogramMinimap.swift; sourceTree = "<group>"; };
 		AD00001A2FAA100000000001 /* HourlyDetailSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyDetailSection.swift; sourceTree = "<group>"; };
 		AD00001C2FAA100000000001 /* HourlyDetailSegmentedControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyDetailSegmentedControl.swift; sourceTree = "<group>"; };
 		AD00001E2FAA100000000001 /* SynchronizedChartScroll.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynchronizedChartScroll.swift; sourceTree = "<group>"; };
@@ -1006,9 +1016,22 @@
 			path = GlobalRadarWidget;
 			sourceTree = "<group>";
 		};
+		AD70000B2FEE000000000001 /* Meteogram */ = {
+			isa = PBXGroup;
+			children = (
+				AD7000012FEE000000000001 /* MeteogramModel.swift */,
+				AD7000032FEE000000000001 /* MeteogramChart.swift */,
+				AD7000052FEE000000000001 /* MeteogramReadoutHeader.swift */,
+				AD7000072FEE000000000001 /* MeteogramPage.swift */,
+				AD7000092FEE000000000001 /* MeteogramMinimap.swift */,
+			);
+			path = Meteogram;
+			sourceTree = "<group>";
+		};
 		259187C42C715A7C00611B0F /* ChartViews */ = {
 			isa = PBXGroup;
 			children = (
+				AD70000B2FEE000000000001 /* Meteogram */,
 				AD0000242FAA100000000001 /* ChartScrollSynchronization */,
 				259187C82C715AEA00611B0F /* TemperatureChart.swift */,
 				259187CA2C715B2900611B0F /* PrecipitationChart.swift */,
@@ -1975,6 +1998,11 @@
 				25ED79AB29F1A7DF002E0AAB /* Meteor.swift in Sources */,
 				259187C92C715AEA00611B0F /* TemperatureChart.swift in Sources */,
 				AD0000112FAA100000000001 /* HourlyDetailChartCard.swift in Sources */,
+				AD7000022FEE000000000001 /* MeteogramModel.swift in Sources */,
+				AD7000042FEE000000000001 /* MeteogramChart.swift in Sources */,
+				AD7000062FEE000000000001 /* MeteogramReadoutHeader.swift in Sources */,
+				AD7000082FEE000000000001 /* MeteogramPage.swift in Sources */,
+				AD70000A2FEE000000000001 /* MeteogramMinimap.swift in Sources */,
 				AD0000132FAA100000000001 /* HourlyDetailInfoCard.swift in Sources */,
 				AD00001B2FAA100000000001 /* HourlyDetailSection.swift in Sources */,
 				AD00001D2FAA100000000001 /* HourlyDetailSegmentedControl.swift in Sources */,

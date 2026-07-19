@@ -1,6 +1,7 @@
 import SwiftUI
 
 enum HourlyDetailSection: String, CaseIterable, Identifiable {
+    case meteogram
     case atmosphere
     case wind
     case ground
@@ -9,6 +10,8 @@ enum HourlyDetailSection: String, CaseIterable, Identifiable {
 
     var title: LocalizedStringKey {
         switch self {
+        case .meteogram:
+            "Meteogramm"
         case .atmosphere:
             "Allgemein"
         case .wind:

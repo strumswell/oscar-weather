@@ -53,7 +53,28 @@ final class ChartScrollSynchronizer {
     private weak var activeScrollView: UIScrollView?
     nonisolated(unsafe) private var displayLink: CADisplayLink?
     private var lastNormalizedOffset: CGFloat?
+    private var lastNotifiedOffset: CGFloat?
     private var idleFrameCount = 0
+
+    /// Invoked (throttled) with the current normalized offset whenever the
+    /// synchronized group scrolls — lets an overview control track the
+    /// viewport without observing UIKit itself.
+    var onNormalizedOffsetChange: ((CGFloat) -> Void)?
+
+    /// Programmatically scrolls every registered chart to the given
+    /// normalized offset (0 = domain start, 1 = domain end minus viewport).
+    func scroll(toNormalizedOffset offset: CGFloat) {
+        let clamped = min(max(offset, 0), 1)
+        lastNormalizedOffset = clamped
+        for entry in entries.values {
+            guard let scrollView = entry.scrollView else { continue }
+            setNormalizedOffset(clamped, on: scrollView)
+        }
+        if lastNotifiedOffset != clamped {
+            lastNotifiedOffset = clamped
+            onNormalizedOffsetChange?(clamped)
+        }
+    }
 
     func register(_ scrollView: UIScrollView) {
         removeDeallocatedEntries()
@@ -92,6 +113,7 @@ final class ChartScrollSynchronizer {
         detachAllEntries()
         activeScrollView = nil
         lastNormalizedOffset = nil
+        lastNotifiedOffset = nil
         idleFrameCount = 0
         stopDisplayLink()
     }
@@ -175,6 +197,12 @@ final class ChartScrollSynchronizer {
         for entry in entries.values {
             guard let target = entry.scrollView, target !== source else { continue }
             setNormalizedOffset(normalizedOffset, on: target)
+        }
+
+        // Threshold keeps SwiftUI invalidations far below display rate.
+        if abs((lastNotifiedOffset ?? -1) - normalizedOffset) > 0.002 {
+            lastNotifiedOffset = normalizedOffset
+            onNormalizedOffsetChange?(normalizedOffset)
         }
     }
 
