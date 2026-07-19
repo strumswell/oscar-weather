@@ -27,18 +27,20 @@ struct RootTabView: View {
                 }
                 Tab("Karten", systemImage: "globe.europe.africa", value: AppTab.maps) {
                     WeatherMapDetailView(settingsService: settingsService)
-                        .tint(.accentColor)
+                        .tint(.primary)
                 }
                 Tab(value: AppTab.search, role: .search) {
                     LocationsView()
-                        .tint(.accentColor)
+                        .tint(.primary)
                 }
             }
             .tabBarMinimizeBehavior(.onScrollDown)
             // Monochrome bar like Apple Weather's bottom controls — the accent
             // tint on the selected item is unreadable on glass over a bright
-            // sky. Tint cascades into tab content, so the tabs above restore
-            // the accent for their own controls (NowView stays monochrome).
+            // sky. Tint cascades into tab content, so the tabs above swap in a
+            // label tint for their own controls — the app has no color accent
+            // (the AccentColor asset is empty, so .accentColor would mean
+            // system blue). NowView stays monochrome.
             .tint(.white)
 
             if let message = modelFallbackToast, presentation.sheet == nil {

@@ -30,6 +30,7 @@ struct LocationsView: View {
     @State private var searchError: String?
     @State private var isSearchInFlight = false
     @State private var isMapPresented = false
+    @State private var isSearchPresented = false
     @State private var candidate: LocationCandidate?
     @State private var editTarget: LocationEditTarget?
     @State private var selectedCityURI: URL?
@@ -71,8 +72,24 @@ struct LocationsView: View {
                         Button("Karte", systemImage: "map", action: presentMapPicker)
                             .accessibilityHint(Text("Öffnet die Karte"))
                     }
+                    ToolbarSpacer(.fixed, placement: .topBarTrailing)
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Einstellungen", systemImage: "gearshape") {
+                            presentation.present(.settings)
+                        }
+                        .accessibilityHint(Text("Öffnet die Einstellungen"))
+                    }
                 }
-                .searchable(text: $searchText)
+        }
+        // On the NavigationStack, not the list content — the canonical shape
+        // for the search tab's pill morph. Attached inside the stack, the
+        // system's round dismiss button survived a swipe-down dismissal and
+        // kept covering the nav bar header.
+        .searchable(text: $searchText, isPresented: $isSearchPresented)
+        .onChange(of: isSearchPresented) { _, presented in
+            // A swipe-down dismissal keeps the typed text otherwise, leaving
+            // the list in results mode with no visible search field.
+            if !presented { searchText = "" }
         }
         .sheet(item: $candidate) { candidate in
             LocationPreviewSheet(candidate: candidate) {

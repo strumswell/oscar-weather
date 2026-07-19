@@ -351,6 +351,9 @@ struct LayerToggleRow: View {
                     .foregroundStyle(.secondary)
             }
         }
+        // Stock switch green; the tab's cascading label tint would paint the
+        // track white/black.
+        .tint(.green)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
     }

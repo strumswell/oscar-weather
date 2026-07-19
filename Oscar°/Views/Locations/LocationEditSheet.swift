@@ -134,7 +134,10 @@ struct LocationEditSheet: View {
                 }
 
                 Section {
+                    // Stock switch green; the tab's cascading label tint would
+                    // paint the track white/black.
                     Toggle("Standardort", isOn: $isDefault)
+                        .tint(.green)
                 } footer: {
                     Text("Oscar° startet mit diesem Ort.")
                 }

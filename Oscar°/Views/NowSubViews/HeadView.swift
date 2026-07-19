@@ -45,6 +45,57 @@ struct HeadView: View {
     return text.isEmpty ? nil : text
   }
 
+  private var gpsAuthorized: Bool {
+    let status = LocationService.shared.authStatus
+    return status == .authorizedWhenInUse || status == .authorizedAlways
+  }
+
+  /// Exclusive selection over the saved places, tagged by objectID URI;
+  /// `nil` is the GPS pseudo-entry. Transient menu content, so the manual
+  /// binding can't go stale.
+  private var locationSwitchPicker: some View {
+    Picker("Ort", selection: Binding(
+      get: { cityService.getSelectedCity()?.objectID.uriRepresentation() },
+      set: { (uri: URL?) in
+        if let uri, let city = cityService.cities.first(where: { $0.objectID.uriRepresentation() == uri }) {
+          switchTo(city)
+        } else {
+          switchToCurrentLocation()
+        }
+      }
+    )) {
+      if gpsAuthorized {
+        Label(cityService.currentLocationDisplayName, systemImage: "location")
+          .tag(URL?.none)
+      }
+      ForEach(cityService.cities, id: \.objectID) { city in
+        Text(menuTitle(for: city))
+          .tag(Optional(city.objectID.uriRepresentation()))
+      }
+    }
+    .pickerStyle(.inline)
+  }
+
+  private func menuTitle(for city: City) -> String {
+    let title = [city.emoji, city.displayName]
+      .compactMap { $0 }
+      .filter { !$0.isEmpty }
+      .joined(separator: " ")
+    return title.isEmpty ? String(localized: "Unbekannter Ort") : title
+  }
+
+  private func switchTo(_ city: City) {
+    guard !city.selected else { return }
+    UIApplication.shared.playHapticFeedback()
+    cityService.toggleActiveCity(city: city)
+  }
+
+  private func switchToCurrentLocation() {
+    guard cityService.getSelectedCity() != nil else { return }
+    UIApplication.shared.playHapticFeedback()
+    cityService.disableAllCities()
+  }
+
   private var locationHeader: some View {
     VStack(spacing: 4) {
       if let personalization {
@@ -79,6 +130,19 @@ struct HeadView: View {
     .onTapGesture {
       UIApplication.shared.playHapticFeedback()
       presentation.selectedTab = .search
+    }
+    // Long-press shortcut for switching places without leaving the forecast.
+    // Lives here because the tab bar's search pill is system-owned — Tab
+    // accepts no gestures or menus.
+    .contextMenu {
+      locationSwitchPicker
+      Divider()
+      Button {
+        UIApplication.shared.playHapticFeedback()
+        presentation.selectedTab = .search
+      } label: {
+        Label("Orte verwalten", systemImage: "list.bullet")
+      }
     }
     .accessibilityElement(children: .combine)
     .accessibilityAddTraits(.isButton)

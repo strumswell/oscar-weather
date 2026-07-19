@@ -112,7 +112,6 @@ struct LocationCard: View {
                     .accessibilityHidden(true)
             }
         }
-        .shadow(color: .black.opacity(0.22), radius: 10, y: 4)
         .animation(.spring(duration: 0.35), value: isSelected)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
