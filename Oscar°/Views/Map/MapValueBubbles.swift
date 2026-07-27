@@ -41,7 +41,7 @@ enum MapValueBubbles {
 
     /// Curated city set: rank tiers gate visibility by zoom (0 = metropolis,
     /// shown first; 2 = only zoomed in). European density favors the ICON-D2
-    /// wedge; the world set is for GFS.
+    /// wedge; the world set is for the global ECMWF layers.
     static let bubbleCities: [(lat: Double, lon: Double, rank: Int, name: String)] = [
         // DACH + central Europe (ICON-D2 wedge)
         (52.52, 13.41, 0, "Berlin"), (53.55, 10.00, 1, "Hamburg"),
@@ -103,7 +103,7 @@ enum MapValueBubbles {
         (59.44, 24.75, 2, "Tallinn"), (53.90, 27.56, 1, "Minsk"),
         (49.84, 24.03, 2, "Lviv"), (46.48, 30.73, 2, "Odesa"),
         (42.70, 23.32, 1, "Sofia"), (40.64, 22.94, 2, "Thessaloniki"),
-        // World (GFS)
+        // World (global model layers)
         (40.71, -74.01, 0, "New York"), (34.05, -118.24, 0, "Los Angeles"),
         (41.88, -87.63, 1, "Chicago"), (29.76, -95.37, 1, "Houston"),
         (25.76, -80.19, 1, "Miami"), (39.74, -104.99, 2, "Denver"),

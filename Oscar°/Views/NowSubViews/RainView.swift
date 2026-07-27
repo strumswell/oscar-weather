@@ -38,6 +38,12 @@ struct RainView: View {
                     .cardBorder()
                     .padding([.leading, .trailing, .bottom])
                     .frame(height: 180)
+                    .contentShape(.rect)
+                    // Simultaneous, not .onTapGesture: the chart's selection
+                    // gesture would swallow a plain tap. A scrub (press +
+                    // drag) never completes a tap, so scrubbing can't
+                    // accidentally open the map.
+                    .simultaneousGesture(TapGesture().onEnded { openRadarMap() })
             }
             .scrollTransition { content, phase in
                 content
@@ -123,7 +129,7 @@ private struct PrecipitationSeriesChart: View {
                                 .font(.system(size: 11)).foregroundStyle(.white.opacity(0.72))
                             VStack {
                                 Text(nearestPrecipitation(for: rawSelectedDate))
-                                    .bold().foregroundStyle(.blue)
+                                    .bold().foregroundStyle(.white)
                                 Text("mm/h").font(.system(size: 11)).foregroundStyle(.white.opacity(0.72))
                                     .padding(.top, -12)
                             }

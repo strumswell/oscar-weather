@@ -240,7 +240,7 @@ struct LocationCardButtonStyle: ButtonStyle {
             isDefault: true
         )
         LocationCard(
-            title: "Aktueller Standort",
+            title: "Mein Standort",
             detail: "Gewitter",
             temperature: 17.2,
             snapshot: .onboardingStorm,

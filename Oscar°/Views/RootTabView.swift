@@ -2,10 +2,13 @@
 //  RootTabView.swift
 //  Oscar°
 //
-//  App root: Vorhersage / Karten tabs plus the system search tab hosting the
-//  locations list (the pill morphs into its search field). Einstellungen is no
-//  tab — it opens as a sheet from the bottom of the forecast scroll. Also owns
-//  the app-wide refresh triggers and the sheet presentation shared by all tabs.
+//  App root: Vorhersage / Karten / Orte tabs. Orte is a plain tab, not the
+//  system search role — the separated search pill is a button affordance
+//  (instant keyboard + round trip), wrong for a dwell space like the
+//  locations list; its search field lives inside the list instead.
+//  Einstellungen is no tab — it opens as a sheet from the bottom of the
+//  forecast scroll. Also owns the app-wide refresh triggers and the sheet
+//  presentation shared by all tabs.
 //
 
 import SwiftUI
@@ -29,7 +32,7 @@ struct RootTabView: View {
                     WeatherMapDetailView(settingsService: settingsService)
                         .tint(.primary)
                 }
-                Tab(value: AppTab.search, role: .search) {
+                Tab("Orte", systemImage: "location.fill", value: AppTab.places) {
                     LocationsView()
                         .tint(.primary)
                 }
@@ -55,8 +58,11 @@ struct RootTabView: View {
                     }
             }
         }
-        .environment(presentation)
         .sheet(item: $presentation.sheet, content: NowSheetView.init)
+        // Outermost so the presented sheet content inherits it too — an
+        // environment set inside a .sheet modifier does not reach its
+        // presented content.
+        .environment(presentation)
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             refreshWeatherData(isForeground: true)
         }

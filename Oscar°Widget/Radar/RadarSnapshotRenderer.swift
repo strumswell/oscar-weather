@@ -14,7 +14,7 @@
 //      + location marker
 //
 //  Layer pick per location: DWD → EUMETNET OPERA → NOAA MRMS radar by coverage,
-//  else the global GFS precip forecast. Everything is fetched before compositing,
+//  else the global ECMWF precip forecast. Everything is fetched before compositing,
 //  so the widget image is never half-loaded. Memory stays tiny (a handful of
 //  256 px tiles; the big value grids never enter this process — ImageIO peaks
 //  >100 MB on the OPERA lossless WebP, measured, vs the ~30 MB widget budget).
@@ -70,7 +70,7 @@ enum RadarSnapshotRenderer {
         if let region {
             plan = await radarPlan(region: region, around: center, includeArrows: options.motionArrows)
         } else {
-            plan = await gfsPlan()
+            plan = await ecmwfPlan()
         }
 
         var cells: [WidgetStormCell] = []
@@ -118,7 +118,7 @@ enum RadarSnapshotRenderer {
     }
 
     /// Precip overlay alone (tiles of the frame closest to now; regional radar in
-    /// coverage, GFS precip elsewhere), projected into a `size`-pt viewport spanning
+    /// coverage, ECMWF precip elsewhere), projected into a `size`-pt viewport spanning
     /// `spanMeters` around `center`. For widgets that draw their own basemap
     /// (GlobalRadarWidget's MKMapSnapshotter) instead of the app-group prerender.
     static func overlayImage(
@@ -128,7 +128,7 @@ enum RadarSnapshotRenderer {
         if let region = RadarRegion.bestSource(latitude: center.latitude, longitude: center.longitude) {
             plan = await radarPlan(region: region, around: center, includeArrows: false)
         } else {
-            plan = await gfsPlan()
+            plan = await ecmwfPlan()
         }
         guard plan.tileURLTemplate != nil else { return nil }
         let bounds = fittedBounds(around: center, spanMeters: spanMeters, size: size)
@@ -199,20 +199,20 @@ enum RadarSnapshotRenderer {
         return plan
     }
 
-    /// Global fallback outside all radar coverages: GFS precipitation forecast,
+    /// Global fallback outside all radar coverages: ECMWF precipitation forecast,
     /// frame closest to now. No motion fields — no arrows.
-    private static func gfsPlan() async -> RadarOverlayPlan {
-        guard let url = URL(string: "\(radarBaseURL)/models/gfs/frames"),
+    private static func ecmwfPlan() async -> RadarOverlayPlan {
+        guard let url = URL(string: "\(radarBaseURL)/models/ecmwf/frames"),
               let data = await fetchData(url, freshest: true),
               let response = try? JSONDecoder().decode(ModelFramesResponse.self, from: data),
               let frame = closestFrame(in: response.frames.map { ($0.key, $0.validTime) })
         else { return RadarOverlayPlan() }
 
         return RadarOverlayPlan(
-            tileURLTemplate: "\(radarBaseURL)/models/gfs/frames/\(frame.key)/precipitation/tiles/{z}/{x}/{y}",
+            tileURLTemplate: "\(radarBaseURL)/models/ecmwf/frames/\(frame.key)/precipitation/tiles/{z}/{x}/{y}",
             maximumTileZoom: 7,
             frameDate: frame.date,
-            colormapId: RadarProduct.precipitation.colormapId  // GFS precip shares plasma
+            colormapId: RadarProduct.precipitation.colormapId  // ECMWF precip shares plasma
         )
     }
 

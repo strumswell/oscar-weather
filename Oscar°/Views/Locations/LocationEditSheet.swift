@@ -72,7 +72,7 @@ struct LocationEditSheet: View {
         case .city(let city):
             city.label ?? ""
         case .currentLocation:
-            String(localized: "Aktueller Standort")
+            String(localized: "Mein Standort")
         }
     }
 
@@ -81,7 +81,7 @@ struct LocationEditSheet: View {
         case .city:
             Text("Der Ortsname bleibt als Untertitel sichtbar.")
         case .currentLocation:
-            Text("„Aktueller Standort“ bleibt als Untertitel sichtbar.")
+            Text("„Mein Standort“ bleibt als Untertitel sichtbar.")
         }
     }
 

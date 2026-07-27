@@ -264,7 +264,7 @@ extension DailyDetailView {
   @MainActor
   @Observable
   final class DetailModel {
-    var selectedModel: DailyEnsembleModel = .iconGlobalEPS
+    var selectedModel: DailyEnsembleModel = .ecmwfIFS025Ensemble
     var response: DailyEnsembleForecastResponse?
     var isLoading = false
     var errorMessage: String?

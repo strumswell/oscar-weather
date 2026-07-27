@@ -247,7 +247,7 @@ struct WeatherMapDetailView: View {
     /// opens the half-height layer picker sheet.
     private var layerPickerButton: some View {
         Button(action: presentLayerPicker) {
-            Image(systemName: "globe.europe.africa.fill")
+            Image(systemName: "map.fill")
                 .font(.system(size: 20, weight: .semibold))
                 .frame(width: 18, height: 18)
         }

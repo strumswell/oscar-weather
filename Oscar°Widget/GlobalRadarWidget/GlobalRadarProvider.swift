@@ -47,7 +47,7 @@ struct GlobalRadarProvider: TimelineProvider {
       let region = MKCoordinateRegion(
         center: coordinate, latitudinalMeters: Self.spanMeters, longitudinalMeters: Self.spanMeters)
 
-      // Precip overlay from oscar-server: regional radar in coverage, GFS elsewhere.
+      // Precip overlay from oscar-server: regional radar in coverage, ECMWF elsewhere.
       // Fetched alongside the basemap; a nil overlay (offline, no frames) degrades
       // to the plain map instead of an error icon.
       let overlay = await RadarSnapshotRenderer.overlayImage(

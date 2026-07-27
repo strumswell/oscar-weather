@@ -194,10 +194,10 @@ enum WeatherColormap {
 extension WeatherTileLayer {
     var colormap: WeatherColormap {
         switch self {
-        case .iconPrecip,   .gfsPrecip,   .ecmwfPrecip:   return .radar
-        case .iconTemp,     .gfsTemp,     .ecmwfTemp:     return .temperature
-        case .iconWind,     .gfsWind,     .ecmwfWind:     return .wind
-        case .iconPressure, .gfsPressure, .ecmwfPressure: return .pressure
+        case .iconPrecip,   .ecmwfPrecip:   return .radar
+        case .iconTemp,     .ecmwfTemp:     return .temperature
+        case .iconWind,     .ecmwfWind:     return .wind
+        case .iconPressure, .ecmwfPressure: return .pressure
         }
     }
 }

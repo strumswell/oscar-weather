@@ -8,6 +8,23 @@ struct DailyEnsembleTemperatureChart: View {
   @State private var selectedDate: Date?
   @State private var chartScrollPosition = Date.now
 
+  /// One inline number on the chart: a day's mean max/min (bold, full color)
+  /// or a band edge (smaller, dimmed).
+  private struct DayValueLabel: Identifiable {
+    enum Tier {
+      case mean
+      case band
+    }
+
+    let id: String
+    let date: Date
+    let anchorValue: Double
+    let text: String
+    let color: Color
+    let tier: Tier
+    let position: AnnotationPosition
+  }
+
   private var domain: ClosedRange<Date> {
     guard let start = points.first?.date, let end = points.last?.date else {
       return Date.now...Date.now.addingTimeInterval(86_400)
@@ -146,6 +163,24 @@ struct DailyEnsembleTemperatureChart: View {
         }
       }
 
+      ForEach(dayValueLabels) { label in
+        PointMark(
+          x: .value("Tag", label.date),
+          y: .value("Wert", label.anchorValue)
+        )
+        .opacity(0)
+        .annotation(
+          position: label.position, spacing: 2,
+          overflowResolution: .init(x: .fit(to: .chart), y: .disabled)
+        ) {
+          Text(label.text)
+            .font(label.tier == .mean ? .footnote.weight(.bold) : .caption2.weight(.semibold))
+            .monospacedDigit()
+            .foregroundStyle(label.color)
+            .shadow(color: .black.opacity(0.35), radius: 2)
+        }
+      }
+
       if let selectedDate, let selectedPoint = selectedPoint(for: selectedDate) {
         RuleMark(x: .value("Auswahl", selectedDate))
           .foregroundStyle(.gray.opacity(0.3))
@@ -180,6 +215,67 @@ struct DailyEnsembleTemperatureChart: View {
           }
       }
     }
+  }
+
+  /// The per-day inline numbers: mean max/min always, band edges only where
+  /// they have room. "Room" is measured in data units equivalent to ~14pt of
+  /// label height (approximating the auto y-domain against the plot height),
+  /// so labels never stack: a band edge must clear its own mean label, the
+  /// two facing edges between the bands must clear each other, and an edge
+  /// facing the OTHER series' mean (possible when bands overlap) is dropped.
+  private var dayValueLabels: [DayValueLabel] {
+    let tops = points.compactMap { $0.temperatureMaxMemberHigh ?? $0.temperatureMax }
+    let bottoms = points.compactMap { $0.temperatureMinMemberLow ?? $0.temperatureMin }
+    guard let top = tops.max(), let bottom = bottoms.min() else { return [] }
+    let gap = max(top - bottom, 1) * 14 / 185
+
+    var labels: [DayValueLabel] = []
+    for point in points {
+      let day = "\(point.date.timeIntervalSince1970)"
+      let max = point.temperatureMax
+      let min = point.temperatureMin
+      let maxHigh = point.temperatureMaxMemberHigh
+      let maxLow = point.temperatureMaxMemberLow
+      let minHigh = point.temperatureMinMemberHigh
+      let minLow = point.temperatureMinMemberLow
+
+      func add(_ suffix: String, _ value: Double, _ color: Color, _ tier: DayValueLabel.Tier, _ position: AnnotationPosition) {
+        labels.append(DayValueLabel(
+          id: "\(day)-\(suffix)",
+          date: point.date,
+          anchorValue: value,
+          text: "\(Int(value.rounded()))°",
+          color: color,
+          tier: tier,
+          position: position
+        ))
+      }
+
+      if let max { add("max", max, .red, .mean, .top) }
+      if let min { add("min", min, .blue, .mean, .bottom) }
+
+      // The two band edges facing each other in the middle: both or neither.
+      let middleClear: Bool = {
+        guard let maxLow, let minHigh else { return true }
+        return maxLow - minHigh >= 2.4 * gap
+      }()
+
+      if let max, let maxHigh, maxHigh - max >= gap {
+        add("maxHigh", maxHigh, .red.opacity(0.7), .band, .top)
+      }
+      if let max, let maxLow, max - maxLow >= gap, middleClear,
+         min.map({ maxLow - $0 >= 1.2 * gap }) ?? true {
+        add("maxLow", maxLow, .red.opacity(0.7), .band, .bottom)
+      }
+      if let min, let minHigh, minHigh - min >= gap, middleClear,
+         max.map({ $0 - minHigh >= 1.2 * gap }) ?? true {
+        add("minHigh", minHigh, .blue.opacity(0.7), .band, .top)
+      }
+      if let min, let minLow, min - minLow >= gap {
+        add("minLow", minLow, .blue.opacity(0.7), .band, .bottom)
+      }
+    }
+    return labels
   }
 
   private func selectedPoint(for date: Date) -> DailyEnsembleDayPoint? {

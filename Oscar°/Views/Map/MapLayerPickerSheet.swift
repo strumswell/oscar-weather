@@ -30,10 +30,10 @@ struct MapLayerPickerSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     radarSection
-                    productSection(title: "Regen", layers: [.iconPrecip, .gfsPrecip, .ecmwfPrecip])
-                    productSection(title: "Temperatur", layers: [.iconTemp, .gfsTemp, .ecmwfTemp])
-                    productSection(title: "Wind", layers: [.iconWind, .gfsWind, .ecmwfWind])
-                    productSection(title: "Luftdruck", layers: [.iconPressure, .gfsPressure, .ecmwfPressure])
+                    productSection(title: "Regen", layers: [.iconPrecip, .ecmwfPrecip])
+                    productSection(title: "Temperatur", layers: [.iconTemp, .ecmwfTemp])
+                    productSection(title: "Wind", layers: [.iconWind, .ecmwfWind])
+                    productSection(title: "Luftdruck", layers: [.iconPressure, .ecmwfPressure])
                     displaySection
                 }
                 .padding(.horizontal, 20)
@@ -364,24 +364,19 @@ private extension WeatherTileLayer {
     var pickerRegion: LocalizedStringKey {
         switch self {
         case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "Zentraleuropa"
-        case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure,
-             .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: return "Weltweit"
+        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: return "Weltweit"
         }
     }
 
-    /// Preview screenshot in Assets.xcassets/LayerPreviews.
+    /// Preview screenshot in Assets.xcassets/LayerPreviews. The "gfs" names
+    /// are historic — the artwork was captured from the retired GFS layers,
+    /// which looked the same as ECMWF's global products.
     var previewImageName: String {
         switch self {
         case .iconPrecip:   return "layer-icon-precip"
         case .iconTemp:     return "layer-icon-temp"
         case .iconWind:     return "layer-icon-wind"
         case .iconPressure: return "layer-icon-pressure"
-        case .gfsPrecip:    return "layer-gfs-precip"
-        case .gfsTemp:      return "layer-gfs-temp"
-        case .gfsWind:      return "layer-gfs-wind"
-        case .gfsPressure:  return "layer-gfs-pressure"
-        // ECMWF and GFS are both global 0.25° products. Reuse the global
-        // product artwork until model-specific screenshots are available.
         case .ecmwfPrecip:  return "layer-gfs-precip"
         case .ecmwfTemp:    return "layer-gfs-temp"
         case .ecmwfWind:    return "layer-gfs-wind"

@@ -138,9 +138,6 @@
     "Aktuelle Windgeschwindigkeit und Windrichtung" : {
       "comment" : "LS Widget Wind Beschreibung"
     },
-    "Aktueller Standort" : {
-
-    },
     "Aktueller UV-Index mit WHO-Farbskala" : {
       "comment" : "LS Widget UV-Index Beschreibung"
     },
@@ -213,10 +210,10 @@
     "Großbritannien" : {
 
     },
-    "Große Bäume bewegen sich, Zweige können brechen." : {
+    "Größere Zweige und kleine Bäume bewegen sich." : {
 
     },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
+    "Große Bäume bewegen sich, Zweige können brechen." : {
 
     },
     "Hell" : {
@@ -265,6 +262,9 @@
       "comment" : "UV-Kategorie 3-5"
     },
     "Mäßige Brise" : {
+
+    },
+    "Mein Standort" : {
 
     },
     "Mitteleuropa & Alpen" : {

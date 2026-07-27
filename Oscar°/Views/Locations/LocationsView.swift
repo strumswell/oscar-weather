@@ -55,7 +55,7 @@ struct LocationsView: View {
     /// Card backdrops animate only while the list is actually in front; on
     /// another tab or under a sheet the storm layers would render unseen.
     private var cardBackdropsPaused: Bool {
-        presentation.selectedTab != .search
+        presentation.selectedTab != .places
             || presentation.sheet != nil
             || candidate != nil
             || editTarget != nil
@@ -69,22 +69,45 @@ struct LocationsView: View {
                 .toolbarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button("Karte", systemImage: "map", action: presentMapPicker)
-                            .accessibilityHint(Text("Öffnet die Karte"))
-                    }
-                    ToolbarSpacer(.fixed, placement: .topBarTrailing)
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("Einstellungen", systemImage: "gearshape") {
-                            presentation.present(.settings)
+                        // No map.badge.plus exists in SF Symbols, so the
+                        // badge.plus treatment is composed from system
+                        // glyphs. (The MapBadgePlus.symbolset compiles into
+                        // the catalog but the iOS 26 runtime refuses to load
+                        // it — SwiftUI faults "No image named … found in
+                        // asset catalog".)
+                        // A ZStack, not a Label: the toolbar extracts a
+                        // Label's icon down to the bare symbol and strips
+                        // composed overlays.
+                        Button(action: presentMapPicker) {
+                            Image(systemName: "map")
+                                .overlay(alignment: .bottomTrailing) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .symbolRenderingMode(.palette)
+                                        // Plus knocked out in the (dynamic)
+                                        // background color, disc in the label
+                                        // color; the scaled backing circle
+                                        // fakes the SF badge knockout against
+                                        // the map. Explicit color — the
+                                        // .background STYLE renders as a hazy
+                                        // material on the glass toolbar.
+                                        .foregroundStyle(Color(.systemBackground), .primary)
+                                        .background {
+                                            Circle()
+                                                .fill(Color(.systemBackground))
+                                                .scaleEffect(1.3)
+                                        }
+                                        .offset(x: 4, y: 4)
+                                }
                         }
-                        .accessibilityHint(Text("Öffnet die Einstellungen"))
+                        .accessibilityLabel(Text("Karte"))
+                        .accessibilityHint(Text("Öffnet die Karte"))
                     }
                 }
         }
-        // On the NavigationStack, not the list content — the canonical shape
-        // for the search tab's pill morph. Attached inside the stack, the
-        // system's round dismiss button survived a swipe-down dismissal and
-        // kept covering the nav bar header.
+        // On the NavigationStack, not the list content. Attached inside the
+        // stack, the system's round dismiss button survived a swipe-down
+        // dismissal and kept covering the nav bar header.
         .searchable(text: $searchText, isPresented: $isSearchPresented)
         .onChange(of: isSearchPresented) { _, presented in
             // A swipe-down dismissal keeps the typed text otherwise, leaving
@@ -246,6 +269,9 @@ struct LocationsView: View {
             } label: {
                 Label("Löschen", systemImage: "trash")
             }
+            // The destructive role only reds the text — the icon follows the
+            // cascading label tint and stayed white without this.
+            .tint(.red)
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(role: .destructive) {
@@ -524,7 +550,7 @@ private struct CurrentLocationCard: View {
         let hasCustomLabel = cityService.currentLocationCustomLabel?.isEmpty == false
         let detail = [
             conditions?.conditionText,
-            hasCustomLabel ? String(localized: "Aktueller Standort") : nil,
+            hasCustomLabel ? String(localized: "Mein Standort") : nil,
         ]
         .compactMap { $0 }
         .joined(separator: " · ")

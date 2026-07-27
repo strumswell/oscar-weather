@@ -16,7 +16,7 @@
 //  "Flüssige Bewegungen" toggle and the system Reduce Motion setting fall back to
 //  exact frames.
 //
-//  Other layers: radar motion arrows (server raster tiles), ICON-D2/GFS model
+//  Other layers: radar motion arrows (server raster tiles), ICON-D2/ECMWF model
 //  images (MLNImageSource), wind particles (sibling Metal-free
 //  overlay view), selected-city marker, user location.
 //
@@ -392,20 +392,20 @@ struct WeatherMapView: UIViewRepresentable {
             let radarIsPlaying = radarState?.isPlaying ?? false
             let radarMotion = radarState?.motion
 
-            let gfsState = parent.modelGridState
-            let gfsBounds = gfsState?.bounds
-            let gfsFrame = gfsState?.currentFrame
-            let gfsFrameKey = gfsState?.currentFrameKey
-            let gfsNext = gfsState?.nextFrameKeyed
-            let gfsIsPlaying = gfsState?.isPlaying ?? false
-            let gfsMotion = gfsState?.motion
+            let modelState = parent.modelGridState
+            let modelBounds = modelState?.bounds
+            let modelFrame = modelState?.currentFrame
+            let modelFrameKey = modelState?.currentFrameKey
+            let modelNext = modelState?.nextFrameKeyed
+            let modelIsPlaying = modelState?.isPlaying ?? false
+            let modelMotion = modelState?.motion
             // Observation re-arm reads (not passed anywhere): currentLayer and the
             // frame indices must be read HERE so withObservationTracking re-fires
             // syncAll when they change — currentFrame/currentFrameKey read them
             // behind guards that can hide them from the tracker on some paths.
-            _ = gfsState?.currentLayer
-            _ = gfsState?.renderFrameIndex
-            _ = gfsState?.currentFrameIndex
+            _ = modelState?.currentLayer
+            _ = modelState?.renderFrameIndex
+            _ = modelState?.currentFrameIndex
 
             // Style switch: setting styleURL reloads the style; didFinishLoading
             // drops every cached layer handle and this sync path rebuilds them.
@@ -423,21 +423,21 @@ struct WeatherMapView: UIViewRepresentable {
                       loadedCount: radarLoadedCount, frameCount: radarFrameCount,
                       isPlaying: radarIsPlaying, motion: radarMotion, smoothMotion: smoothMotion,
                       softRendering: softRendering, arrowsEnabled: motionArrows)
-            syncModelLayer(style: style, selection: activeTileLayer, state: gfsState,
-                           bounds: gfsBounds, payload: gfsFrame, frameKey: gfsFrameKey,
-                           next: gfsNext, isPlaying: gfsIsPlaying, motion: gfsMotion,
+            syncModelLayer(style: style, selection: activeTileLayer, state: modelState,
+                           bounds: modelBounds, payload: modelFrame, frameKey: modelFrameKey,
+                           next: modelNext, isPlaying: modelIsPlaying, motion: modelMotion,
                            smoothMotion: smoothMotion, softRendering: softRendering)
             syncValueBubbles(style: style, selection: activeTileLayer, enabled: valueBubbles,
-                             payload: gfsFrame, frameKey: gfsFrameKey)
+                             payload: modelFrame, frameKey: modelFrameKey)
             // Isobars ride the hourly model frame keys, so they need a model layer —
             // the 5-minute radar timeline has no matching pressure fields.
             syncIsobars(style: style, active: isobars && activeTileLayer != nil,
-                        selection: activeTileLayer, frameKey: gfsFrameKey)
+                        selection: activeTileLayer, frameKey: modelFrameKey)
             syncAlertPolygons(style: style, active: alertPolygons)
             // Cell tracks are radar-scale nowcasts — they'd be misleading floating
             // over a model forecast layer, so they require the radar to be active.
             syncStormCells(style: style, active: stormCells && radarActive, region: radarRegion)
-            syncWindParticles(selection: activeTileLayer, state: gfsState)
+            syncWindParticles(selection: activeTileLayer, state: modelState)
             syncSelectedCityAnnotation()
             syncUserLocationDot(style: style)
             // Last: the chips re-assert themselves as the topmost layer, so they
@@ -633,7 +633,7 @@ struct WeatherMapView: UIViewRepresentable {
             arrowSourceID = nil
         }
 
-        // MARK: ICON-D2 / GFS model layer (value grids + palette, like the radar)
+        // MARK: ICON-D2 / ECMWF model layer (value grids + palette, like the radar)
 
         private func syncModelLayer(
             style: MLNStyle, selection: WeatherTileLayer?, state: ModelGridLayerState?,
@@ -1479,7 +1479,7 @@ struct WeatherMapView: UIViewRepresentable {
         private func syncWindParticles(selection: WeatherTileLayer?, state: ModelGridLayerState?) {
             guard let particleView = windParticleView else { return }
             let isWindLayer = parent.showWindParticles
-                && (selection == .iconWind || selection == .gfsWind || selection == .ecmwfWind)
+                && (selection == .iconWind || selection == .ecmwfWind)
 
             guard isWindLayer, let state, let frameKey = state.currentFrameKey, let selection else {
                 particleView.isHidden = true
@@ -1541,8 +1541,8 @@ struct WeatherMapView: UIViewRepresentable {
                                       payload: RadarGridPayload?, frameKey: String?) {
             let isBubbleLayer: Bool
             switch selection {
-            case .iconTemp, .gfsTemp, .ecmwfTemp,
-                 .iconWind, .gfsWind, .ecmwfWind: isBubbleLayer = true
+            case .iconTemp, .ecmwfTemp,
+                 .iconWind, .ecmwfWind: isBubbleLayer = true
             default: isBubbleLayer = false
             }
             guard isBubbleLayer, enabled, let selection, let payload, let frameKey,
@@ -1554,7 +1554,7 @@ struct WeatherMapView: UIViewRepresentable {
                 return
             }
 
-            let isWind = selection == .iconWind || selection == .gfsWind || selection == .ecmwfWind
+            let isWind = selection == .iconWind || selection == .ecmwfWind
             let unit = isWind
                 ? parent.settingsService.windSpeedUnit
                 : parent.settingsService.temperatureUnit

@@ -211,6 +211,7 @@ struct SettingsView: View {
       }
       .background(Color(UIColor.systemGroupedBackground))
       .navigationTitle("Einstellungen")
+      .toolbarTitleDisplayMode(.inline)
     }
   }
 

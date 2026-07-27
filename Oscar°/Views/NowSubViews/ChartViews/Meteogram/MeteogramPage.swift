@@ -14,8 +14,6 @@ struct MeteogramPage: View {
   @State private var zoom: MeteogramZoom
   @State private var scrollAnchor: Date
   @State private var normalizedOffset: CGFloat
-  @State private var rawSelection: Date?
-  @State private var selectedIndex: Int?
 
   init(input: MeteogramModel.Input, initialScrollPosition: Date) {
     let model = MeteogramModel(input: input)
@@ -48,13 +46,12 @@ struct MeteogramPage: View {
           MeteogramChart(
             model: model,
             zoom: zoom,
-            selectedIndex: selectedIndex,
             synchronizer: synchronizer,
-            initialScrollDate: scrollAnchor,
-            rawSelection: $rawSelection
+            initialScrollDate: scrollAnchor
           )
           // Zoom changes rebuild the panels so the new visible domain and
-          // initial position apply atomically to the whole synced group.
+          // initial position apply atomically to the whole synced group
+          // (and reset the chart-local scrub selection).
           .id(zoom)
 
           MeteogramLegend()
@@ -76,17 +73,6 @@ struct MeteogramPage: View {
       .onAppear {
         synchronizer.onNormalizedOffsetChange = { offset in
           normalizedOffset = offset
-        }
-      }
-      .onChange(of: rawSelection) { _, selection in
-        guard let selection else {
-          selectedIndex = nil
-          return
-        }
-        let snapped = model.snappedIndex(for: selection)
-        if snapped != selectedIndex {
-          selectedIndex = snapped
-          UIApplication.shared.playHapticFeedback()
         }
       }
       .sensoryFeedback(.selection, trigger: zoom)
@@ -145,8 +131,6 @@ struct MeteogramPage: View {
     scrollAnchor = newAnchor
     normalizedOffset = Self.normalizedOffset(forAnchor: newAnchor, model: model, zoom: newZoom)
     zoom = newZoom
-    rawSelection = nil
-    selectedIndex = nil
   }
 
   private var magnifyGesture: some Gesture {

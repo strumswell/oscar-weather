@@ -153,7 +153,7 @@ public final class CityService {
         if let currentLocationCustomLabel, !currentLocationCustomLabel.isEmpty {
             return currentLocationCustomLabel
         }
-        return String(localized: "Aktueller Standort")
+        return String(localized: "Mein Standort")
     }
 
     func updateCurrentLocation(emoji: String?, customLabel: String?) {

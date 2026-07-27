@@ -12,10 +12,36 @@ import SwiftUI
 struct MeteogramChart: View {
   let model: MeteogramModel
   let zoom: MeteogramZoom
-  let selectedIndex: Int?
   let synchronizer: ChartScrollSynchronizer
   let initialScrollDate: Date
-  @Binding var rawSelection: Date?
+
+  /// Selection lives HERE, not on the page, and stores the snapped hour
+  /// index: the binding below dedupes the continuous drag samples down to
+  /// hour crossings, so a scrub re-renders only these two (already heavy)
+  /// panels a few times per second instead of the whole page per sample —
+  /// that per-sample invalidation was the tooltip lag. A zoom change
+  /// recreates this view via `.id(zoom)`, which also resets the selection.
+  @State private var selectedIndex: Int?
+
+  private var selection: Binding<Date?> {
+    Binding(
+      get: {
+        guard let selectedIndex, model.dates.indices.contains(selectedIndex) else { return nil }
+        return model.dates[selectedIndex]
+      },
+      set: { newValue in
+        guard let newValue else {
+          selectedIndex = nil
+          return
+        }
+        let snapped = model.snappedIndex(for: newValue)
+        if snapped != selectedIndex {
+          selectedIndex = snapped
+          UIApplication.shared.playHapticFeedback()
+        }
+      }
+    )
+  }
 
   private var context: MeteogramPanelContext {
     MeteogramPanelContext(
@@ -29,8 +55,8 @@ struct MeteogramChart: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 6) {
-      MeteogramCanvas(context: context, rawSelection: $rawSelection)
-      MeteogramWindStrip(context: context, rawSelection: $rawSelection)
+      MeteogramCanvas(context: context, selection: selection)
+      MeteogramWindStrip(context: context, selection: selection)
     }
   }
 }
@@ -53,13 +79,13 @@ private struct MeteogramPanelContext {
 extension View {
   /// Scroll/zoom/selection configuration shared by both charts.
   fileprivate func meteogramPanelBase(
-    _ context: MeteogramPanelContext, rawSelection: Binding<Date?>
+    _ context: MeteogramPanelContext, selection: Binding<Date?>
   ) -> some View {
     chartXScale(domain: context.model.fullRange)
       .chartYAxis(.hidden)
       .chartScrollableAxes(.horizontal)
       .chartXVisibleDomain(length: context.zoom.seconds)
-      .chartXSelection(value: rawSelection)
+      .chartXSelection(value: selection)
       .synchronizedChartScroll(
         initialX: context.initialScrollDate, using: context.synchronizer)
   }
@@ -160,7 +186,7 @@ private func canvasY(_ unitY: Double) -> CGFloat {
 
 private struct MeteogramCanvas: View {
   let context: MeteogramPanelContext
-  @Binding var rawSelection: Date?
+  let selection: Binding<Date?>
 
   var body: some View {
     Chart {
@@ -172,7 +198,7 @@ private struct MeteogramCanvas: View {
     }
     .chartYScale(domain: 0...1)
     .meteogramGridAxis(context)
-    .meteogramPanelBase(context, rawSelection: $rawSelection)
+    .meteogramPanelBase(context, selection: selection)
     .frame(height: meteogramCanvasHeight)
     .overlay(alignment: .topLeading) { leadingInsetLabels }
   }
@@ -420,7 +446,7 @@ private struct MeteogramCanvas: View {
 
 private struct MeteogramWindStrip: View {
   let context: MeteogramPanelContext
-  @Binding var rawSelection: Date?
+  let selection: Binding<Date?>
 
   var body: some View {
     let model = context.model
@@ -498,7 +524,7 @@ private struct MeteogramWindStrip: View {
     }
     .chartYScale(domain: model.windDomain)
     .meteogramLabeledAxis(context)
-    .meteogramPanelBase(context, rawSelection: $rawSelection)
+    .meteogramPanelBase(context, selection: selection)
     .frame(height: 96)
   }
 }

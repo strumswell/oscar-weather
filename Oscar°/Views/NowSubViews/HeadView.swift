@@ -16,6 +16,16 @@ struct HeadView: View {
   private let settingsService = SettingService.shared
   private let cityService = CityService.shared
 
+  // Classic Oscar composition: the temperature floats alone in the sky and
+  // the metrics anchor the bottom of the gap just above the first card — but
+  // the two sky gaps are flexible, not fixed. NowView stretches the head so
+  // the hourly strip below it ends right at the tab bar; the gaps soak up
+  // whatever the screen size and the optional content (alert, radar card,
+  // eyebrow) leave over, and compress down to these floors before the page
+  // starts to overflow and scroll.
+  private static let temperatureGapMinHeight: CGFloat = 70
+  private static let metricsGapMinHeight: CGFloat = 110
+
   private var windSpeedUnit: WindSpeedUnit {
     WindSpeedUnit(settingValue: settingsService.windSpeedUnit)
   }
@@ -27,7 +37,9 @@ struct HeadView: View {
   }
 
   /// "🏠 Zuhause" above the place name: the selected city's personalization,
-  /// or the current location's (UserDefaults-backed) when GPS is active.
+  /// or the current location's (UserDefaults-backed) when GPS is active —
+  /// its label only appears here when it is custom, never the generic
+  /// "Mein Standort".
   private var personalization: String? {
     let emoji: String?
     let label: String?
@@ -120,86 +132,87 @@ struct HeadView: View {
   }
 
   var body: some View {
-    HStack {
-      Spacer()
-      locationHeader
-      Spacer()
-    }
-    .shadow(radius: 5)
-    .contentShape(Rectangle())
-    .onTapGesture {
-      UIApplication.shared.playHapticFeedback()
-      presentation.selectedTab = .search
-    }
-    // Long-press shortcut for switching places without leaving the forecast.
-    // Lives here because the tab bar's search pill is system-owned — Tab
-    // accepts no gestures or menus.
-    .contextMenu {
-      locationSwitchPicker
-      Divider()
-      Button {
-        UIApplication.shared.playHapticFeedback()
-        presentation.selectedTab = .search
-      } label: {
-        Label("Orte verwalten", systemImage: "list.bullet")
-      }
-    }
-    .accessibilityElement(children: .combine)
-    .accessibilityAddTraits(.isButton)
-    .accessibilityLabel(
-      Text("Ort ändern, aktuell \([personalization, location.name].compactMap { $0 }.joined(separator: ", "))")
-    )
-    .accessibilityAction {
-      UIApplication.shared.playHapticFeedback()
-      presentation.selectedTab = .search
-    }
-    .padding(.bottom, 10)
-    .padding(.top)
-
     VStack(spacing: 0) {
-      Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
-        .foregroundStyle(Color(UIColor.label))
-        .font(.system(size: temperatureFontSize))
-        .minimumScaleFactor(0.5)
-        .lineLimit(1)
-        .shadow(radius: 15)
-        .contentTransition(.numericText())
-        .animation(.default, value: weather.forecast.current?.temperature)
-        .padding(.top, 70)
-
-      HStack(spacing: 6) {
+      HStack {
         Spacer()
-        Image(systemName: "cloud")
-        Text("\(weather.forecast.current?.cloudcover ?? 0, specifier: "%.0f") %")
-        Image(systemName: "wind")
-          .padding(.leading, 12)
-        Text(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h"))
-        Image(systemName: "location")
-          .padding(.leading, 12)
-        Text(weather.forecast.current?.getWindDirection() ?? "")
+        locationHeader
         Spacer()
       }
-      .font(.subheadline.weight(.medium))
-      .foregroundStyle(Color(UIColor.label).opacity(0.85))
-      .shadow(radius: 3)
-      .accessibilityElement(children: .ignore)
+      .shadow(radius: 5)
+      .contentShape(Rectangle())
+      .onTapGesture {
+        UIApplication.shared.playHapticFeedback()
+        presentation.selectedTab = .places
+      }
+      // Long-press shortcut for switching places without leaving the
+      // forecast — Tab accepts no gestures or menus, so it lives here.
+      .contextMenu {
+        locationSwitchPicker
+        Divider()
+        Button {
+          UIApplication.shared.playHapticFeedback()
+          presentation.selectedTab = .places
+        } label: {
+          Label("Orte verwalten", systemImage: "list.bullet")
+        }
+      }
+      .accessibilityElement(children: .combine)
+      .accessibilityAddTraits(.isButton)
       .accessibilityLabel(
-        "Bewölkung \(Int((weather.forecast.current?.cloudcover ?? 0).rounded())) Prozent, Wind \(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h")), Richtung \(weather.forecast.current?.getWindDirection() ?? "unbekannt")"
+        Text("Ort ändern, aktuell \([personalization, location.name].compactMap { $0 }.joined(separator: ", "))")
       )
-      .padding(.top, 150)
-
-      if hasWeatherAlerts() {
-        AlertView()
-          .padding(.top, 14)
+      .accessibilityAction {
+        UIApplication.shared.playHapticFeedback()
+        presentation.selectedTab = .places
       }
-    }
-    // Classic Oscar composition: the temperature floats alone in the sky, and
-    // the metrics anchor the bottom of the gap just above the first card.
-    .padding(.bottom, 40)
-    .scrollTransition { content, phase in
-      content
-        .opacity(phase.isIdentity ? 1 : 0.8)
-        .scaleEffect(phase.isIdentity ? 1 : 0.99)
+      .padding(.bottom, 10)
+      .padding(.top)
+
+      VStack(spacing: 0) {
+        Spacer(minLength: Self.temperatureGapMinHeight)
+
+        Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
+          .foregroundStyle(Color(UIColor.label))
+          .font(.system(size: temperatureFontSize))
+          .minimumScaleFactor(0.5)
+          .lineLimit(1)
+          .shadow(radius: 15)
+          .contentTransition(.numericText())
+          .animation(.default, value: weather.forecast.current?.temperature)
+
+        Spacer(minLength: Self.metricsGapMinHeight)
+
+        HStack(spacing: 6) {
+          Spacer()
+          Image(systemName: "cloud")
+          Text("\(weather.forecast.current?.cloudcover ?? 0, specifier: "%.0f") %")
+          Image(systemName: "wind")
+            .padding(.leading, 12)
+          Text(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h"))
+          Image(systemName: "location")
+            .padding(.leading, 12)
+          Text(weather.forecast.current?.getWindDirection() ?? "")
+          Spacer()
+        }
+        .font(.subheadline.weight(.medium))
+        .foregroundStyle(Color(UIColor.label).opacity(0.85))
+        .shadow(radius: 3)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+          "Bewölkung \(Int((weather.forecast.current?.cloudcover ?? 0).rounded())) Prozent, Wind \(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h")), Richtung \(weather.forecast.current?.getWindDirection() ?? "unbekannt")"
+        )
+
+        if hasWeatherAlerts() {
+          AlertView()
+            .padding(.top, 14)
+        }
+      }
+      .padding(.bottom, 40)
+      .scrollTransition { content, phase in
+        content
+          .opacity(phase.isIdentity ? 1 : 0.8)
+          .scaleEffect(phase.isIdentity ? 1 : 0.99)
+      }
     }
   }
 

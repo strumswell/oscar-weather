@@ -8,7 +8,7 @@ struct HourlyDetailView: View {
     @State private var chartScrollSynchronizer = ChartScrollSynchronizer()
     @State private var chartTimelineVersion = 0
     @State private var dismissalFeedback = false
-    @State private var selectedSection: HourlyDetailSection = .meteogram
+    @State private var selectedSection: HourlyDetailSection = .atmosphere
 
     private var time: [Double] {
         weather.forecast.hourly?.time ?? []

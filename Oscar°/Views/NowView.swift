@@ -30,6 +30,18 @@ struct NowView: View {
     @State private var manualRefreshInFlight = false
     @State private var showRefreshIndicator = false
     @State private var spinnerShownAt: Date?
+    /// Screen size above the tab bar, latched at launch and re-measured only
+    /// when the width changes (rotation): the bottom safe area shrinks when
+    /// the bar minimizes on scroll-down, and tracking that live would
+    /// re-stretch the first page mid-scroll.
+    @State private var stageSize: CGSize?
+
+    private static let scrollTopPadding: CGFloat = 40
+    /// The bottom safe area tops out well above the floating bar's glass.
+    /// Extending the first page this far past it tucks the daily section
+    /// title under the bar instead of into that gap, while the hourly strip
+    /// (whose cards end 20pt higher) still clears the glass.
+    private static let firstPageOvershoot: CGFloat = 48
 
     var body: some View {
         // Drive the pull-down spinner only while the scene is actually active. Coming
@@ -53,7 +65,16 @@ struct NowView: View {
                 .ignoresSafeArea()
             if weather.hasContent {
             ScrollView(.vertical) {
-                ZStack {
+                VStack(alignment: .leading) {
+                    // The launch "page": head, radar teaser, and the hourly
+                    // strip, stretched so the bar never floats over the
+                    // hourly cards — it overlays the daily section title
+                    // right behind it instead. HeadView's
+                    // flexible sky gaps absorb the stretch (and whatever
+                    // extra content shows: alert, radar card, eyebrow), so
+                    // this holds across display sizes; when the content
+                    // genuinely doesn't fit, the page overflows past the
+                    // minimum and scrolls like before.
                     VStack(alignment: .leading) {
                         if showRefreshIndicator {
                             ProgressView()
@@ -76,54 +97,60 @@ struct NowView: View {
                         RainView(openRadarMap: openRadarMap)
                         HourlyView()
                             .accessibilityIdentifier("now.hourly")
-                        DailyView()
-                        AQIView()
-                        ClimateView()
-                            .padding(.bottom, 20)
-                        Button {
-                            UIApplication.shared.playHapticFeedback()
-                            presentation.present(.settings)
-                        } label: {
-                            Label("Einstellungen", systemImage: "gearshape")
-                                .font(.subheadline.weight(.medium))
-                        }
-                        .buttonStyle(.glass)
-                        .buttonBorderShape(.capsule)
-                        .accessibilityIdentifier("now.settings")
-                        .frame(maxWidth: .infinity)
-                        .padding(.bottom, 16)
-                        if weather.debug {
-                            VStack {
-                                Text(weather.isLoading.description)
-                                Text("spinner=\(showRefreshIndicator.description) pending=\(spinnerPending.description)")
-                                Text(weather.error)
-                                Text("Air")
-                                    .padding(.top, 20)
-                                Text(String(reflecting: weather.air))
-                                Text("Radar")
-                                    .padding(.top, 20)
-                                Text(String(reflecting: weather.precipSeries))
-                                Text("Alerts")
-                                    .padding(.top, 20)
-                                Text(String(reflecting: weather.alerts))
-                                Text("Time")
-                                    .padding(.top, 20)
-                                Text(String(reflecting: weather.time))
-                                Text("Location")
-                                    .padding(.top, 20)
-                                Text(String(reflecting: location.coordinates))
-                                Text(String(reflecting: location.name))
-                                Text("Forecast")
-                                    .padding(.top, 20)
-                                Text(String(reflecting: weather.forecast))
-                            }
+                            // The strip's horizontal ScrollView is greedy in
+                            // height and would swallow part of the stretch —
+                            // pin it to its content so all surplus lands in
+                            // HeadView's sky gaps.
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(minHeight: firstPageMinHeight, alignment: .topLeading)
+                    DailyView()
+                    AQIView()
+                    ClimateView()
+                        .padding(.bottom, 20)
+                    Button {
+                        UIApplication.shared.playHapticFeedback()
+                        presentation.present(.settings)
+                    } label: {
+                        Label("Einstellungen", systemImage: "gearshape")
+                            .font(.subheadline.weight(.medium))
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
+                    .accessibilityIdentifier("now.settings")
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 16)
+                    if weather.debug {
+                        VStack {
+                            Text(weather.isLoading.description)
+                            Text("spinner=\(showRefreshIndicator.description) pending=\(spinnerPending.description)")
+                            Text(weather.error)
+                            Text("Air")
+                                .padding(.top, 20)
+                            Text(String(reflecting: weather.air))
+                            Text("Radar")
+                                .padding(.top, 20)
+                            Text(String(reflecting: weather.precipSeries))
+                            Text("Alerts")
+                                .padding(.top, 20)
+                            Text(String(reflecting: weather.alerts))
+                            Text("Time")
+                                .padding(.top, 20)
+                            Text(String(reflecting: weather.time))
+                            Text("Location")
+                                .padding(.top, 20)
+                            Text(String(reflecting: location.coordinates))
+                            Text(String(reflecting: location.name))
+                            Text("Forecast")
+                                .padding(.top, 20)
+                            Text(String(reflecting: weather.forecast))
                         }
                     }
-                    .animation(.easeInOut(duration: 0.3), value: showRefreshIndicator)
                 }
+                .animation(.easeInOut(duration: 0.3), value: showRefreshIndicator)
             }
             .scrollIndicators(.hidden)
-            .padding(.top, 40)
+            .padding(.top, Self.scrollTopPadding)
             .refreshable {
                 // Run the refresh in an unstructured task so it doesn't inherit the
                 // pull-to-refresh gesture's cancellation. SwiftUI cancels the
@@ -191,6 +218,11 @@ struct NowView: View {
         // cardFill's saturation push) for a visibly frosted card.
         .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial.opacity(0.6)))
         .ignoresSafeArea(edges: .top)
+        .onGeometryChange(for: CGSize.self, of: { $0.size }) { size in
+            if stageSize?.width != size.width {
+                stageSize = size
+            }
+        }
         .task {
             // Testing hook: `-autoPresentMapLibreAfter <seconds>` switches to the map
             // tab AFTER the NowView exists — reproduces the tap-to-open flow headless,
@@ -200,6 +232,14 @@ struct NowView: View {
             try? await Task.sleep(for: .seconds(mapLibreDelay))
             presentation.selectedTab = .maps
         }
+    }
+
+    /// From the top of the scroll content down past the bottom safe area
+    /// into the bar's glass: the ZStack above spans screen top (top safe
+    /// area ignored) to the bottom safe area. `nil` until measured — the
+    /// frame then simply has no minimum for that first layout pass.
+    private var firstPageMinHeight: CGFloat? {
+        (stageSize?.height).map { $0 - Self.scrollTopPadding + Self.firstPageOvershoot }
     }
 }
 

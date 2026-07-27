@@ -2,7 +2,7 @@
 //  WeatherTileLayer.swift
 //  Oscar°
 //
-//  Model layer catalog (ICON-D2 / GFS / ECMWF × precip/temp/wind/pressure) and the
+//  Model layer catalog (ICON-D2 / ECMWF × precip/temp/wind/pressure) and the
 //  SettingService accessors for the active map layer selection.
 //
 
@@ -12,7 +12,16 @@ import Foundation
 // in targets that include both SettingService and WeatherTileLayer.
 extension SettingService {
     var activeTileLayer: WeatherTileLayer? {
-        get { activeTileLayerRaw.flatMap { WeatherTileLayer(rawValue: $0) } }
+        get {
+            guard let raw = activeTileLayerRaw else { return nil }
+            if let layer = WeatherTileLayer(rawValue: raw) { return layer }
+            // The GFS layers were removed (July 2026); a persisted pick
+            // migrates to its ECMWF twin instead of silently clearing.
+            if raw.hasPrefix("gfs_") {
+                return WeatherTileLayer(rawValue: raw.replacingOccurrences(of: "gfs_", with: "ecmwf_"))
+            }
+            return nil
+        }
         set { activeTileLayerRaw = newValue?.rawValue }
     }
 
@@ -31,21 +40,21 @@ extension SettingService {
             : .precipitation
     }
 
-    /// True while the GFS precip layer is showing as the automatic "no radar here"
-    /// fallback of `autoSelectRadarSource` — lets a later location change return
-    /// to a real radar without ever overriding an explicit layer choice.
+    /// True while the ECMWF precip layer is showing as the automatic "no radar
+    /// here" fallback of `autoSelectRadarSource` — lets a later location change
+    /// return to a real radar without ever overriding an explicit layer choice.
     var radarAutoFallbackActive: Bool {
         get { UserDefaults.standard.bool(forKey: "radarAutoFallbackActive") }
         set { UserDefaults.standard.set(newValue, forKey: "radarAutoFallbackActive") }
     }
 
     /// Location-based radar source pick: DWD → OPERA → NOAA MRMS by coverage,
-    /// else the GFS precipitation forecast as the general fallback. Runs only
+    /// else the ECMWF precipitation forecast as the general fallback. Runs only
     /// while a radar layer is active (or while the fallback IT chose is still
     /// showing) — an explicit model selection is never overridden.
     func autoSelectRadarSource(latitude: Double, longitude: Double) {
         let radarIntent = oscarRadarLayer
-            || (activeTileLayer == .gfsPrecip && radarAutoFallbackActive)
+            || (activeTileLayer == .ecmwfPrecip && radarAutoFallbackActive)
         guard radarIntent else { return }
 
         if let region = RadarRegion.bestSource(latitude: latitude, longitude: longitude) {
@@ -58,7 +67,7 @@ extension SettingService {
             oscarRadarLayer = true
         } else if oscarRadarLayer {
             oscarRadarLayer = false
-            activeTileLayer = .gfsPrecip
+            activeTileLayer = .ecmwfPrecip
             radarAutoFallbackActive = true
         }
     }
@@ -71,10 +80,6 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
     case iconTemp   = "icon_temp"
     case iconWind   = "icon_wind"
     case iconPressure = "icon_pressure"
-    case gfsPrecip  = "gfs_precip"
-    case gfsTemp    = "gfs_temp"
-    case gfsWind    = "gfs_wind"
-    case gfsPressure = "gfs_pressure"
     case ecmwfPrecip = "ecmwf_precip"
     case ecmwfTemp = "ecmwf_temp"
     case ecmwfWind = "ecmwf_wind"
@@ -83,7 +88,6 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
     var framesEndpoint: String {
         switch self {
         case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "models/icon/frames"
-        case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure:     return "models/gfs/frames"
         case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: return "models/ecmwf/frames"
         }
     }
@@ -95,16 +99,16 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
     /// Variable path segment in oscar-server model URLs.
     var variableSegment: String {
         switch self {
-        case .iconPrecip, .gfsPrecip, .ecmwfPrecip:       return "precipitation"
-        case .iconTemp, .gfsTemp, .ecmwfTemp:              return "temperature"
-        case .iconWind, .gfsWind, .ecmwfWind:              return "wind"
-        case .iconPressure, .gfsPressure, .ecmwfPressure:  return "pressure"
+        case .iconPrecip, .ecmwfPrecip:       return "precipitation"
+        case .iconTemp, .ecmwfTemp:            return "temperature"
+        case .iconWind, .ecmwfWind:            return "wind"
+        case .iconPressure, .ecmwfPressure:    return "pressure"
         }
     }
 
     var isPressureLayer: Bool {
         switch self {
-        case .iconPressure, .gfsPressure, .ecmwfPressure:
+        case .iconPressure, .ecmwfPressure:
             true
         default:
             false
@@ -114,7 +118,6 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
     var sourceLabel: String {
         switch self {
         case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "DWD ICON-D2"
-        case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure:     return "NOAA GFS"
         case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: return "ECMWF IFS"
         }
     }
@@ -122,17 +125,16 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
     /// Server palette id (`/colormaps/{id}`) the value grids of this layer index into.
     var colormapId: String {
         switch self {
-        case .iconPrecip, .gfsPrecip, .ecmwfPrecip:     return "plasma"
-        case .iconTemp, .gfsTemp, .ecmwfTemp:            return "temperature"
-        case .iconWind, .gfsWind, .ecmwfWind:            return "wind_speed"
-        case .iconPressure, .gfsPressure, .ecmwfPressure: return "pressure"
+        case .iconPrecip, .ecmwfPrecip:     return "plasma"
+        case .iconTemp, .ecmwfTemp:          return "temperature"
+        case .iconWind, .ecmwfWind:          return "wind_speed"
+        case .iconPressure, .ecmwfPressure:  return "pressure"
         }
     }
 
     var isGlobalModel: Bool {
         switch self {
-        case .gfsPrecip, .gfsTemp, .gfsWind, .gfsPressure,
-             .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure:
+        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure:
             true
         default:
             false

@@ -29,15 +29,9 @@ struct WeatherModelInfoView: View {
                     imageName: "layer-icon-precip",
                     summary: "Sehr feines Raster über Zentraleuropa — erkennt auch kleine Schauer und Gewitter. Ideal für die nächsten 48 Stunden.")
                 WeatherModelCard(
-                    name: "NOAA GFS",
-                    provider: "US-Wetterbehörde NOAA",
-                    grid: "≈ 25 km Raster",
-                    imageName: "layer-gfs-precip",
-                    summary: "Gröberes Raster, dafür weltweit — gut für den großen Überblick. Einzelne Schauer können verschwimmen.")
-                WeatherModelCard(
                     name: "ECMWF IFS",
                     provider: "Europäisches Zentrum für mittelfristige Wettervorhersagen",
-                    grid: "≈ 25 km Raster",
+                    grid: "≈ 9 km Raster",
                     imageName: "layer-gfs-precip",
                     summary: "Globales Modell für den mittelfristigen Überblick mit Temperatur, Regen, Wind und Luftdruck in Drei-Stunden-Schritten.")
             }

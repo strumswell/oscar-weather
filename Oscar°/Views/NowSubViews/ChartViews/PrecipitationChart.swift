@@ -188,7 +188,7 @@ struct PrecipitationChart: View {
       .chartXScale(domain: maxTimeRange)
       .chartScrollableAxes(.horizontal)
       .chartXVisibleDomain(length: 129600)
-      .chartXSelection(value: $selectedDate)
+      .chartXSelection(value: .snapped(to: 3600, $selectedDate))
       .frame(height: 175)
     }
   }

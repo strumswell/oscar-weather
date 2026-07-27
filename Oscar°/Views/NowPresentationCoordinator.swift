@@ -4,20 +4,27 @@ import Observation
 enum AppTab: Hashable {
     case forecast
     case maps
-    case search
+    case places
 }
 
 @MainActor
 @Observable
 final class NowPresentationCoordinator {
     var sheet: NowSheet?
-    /// Testing hook: launch with `-autoPresentMap YES` (simulator/UI verification) to
-    /// start on the fullscreen map tab instead of tapping through the UI.
-    /// `-autoPresentMapLibre YES` is kept as an alias (older test harness invocations).
-    var selectedTab: AppTab =
-        UserDefaults.standard.bool(forKey: "autoPresentMap")
-            || UserDefaults.standard.bool(forKey: "autoPresentMapLibre")
-        ? .maps : .forecast
+    /// Testing hooks (simulator/UI verification without tapping through the
+    /// UI): `-autoPresentMap YES` starts on the map tab (`-autoPresentMapLibre
+    /// YES` kept as an alias for older test harness invocations),
+    /// `-autoPresentPlaces YES` on the Orte tab.
+    var selectedTab: AppTab = {
+        let defaults = UserDefaults.standard
+        if defaults.bool(forKey: "autoPresentMap") || defaults.bool(forKey: "autoPresentMapLibre") {
+            return .maps
+        }
+        if defaults.bool(forKey: "autoPresentPlaces") {
+            return .places
+        }
+        return .forecast
+    }()
 
     func present(_ sheet: NowSheet) {
         self.sheet = sheet

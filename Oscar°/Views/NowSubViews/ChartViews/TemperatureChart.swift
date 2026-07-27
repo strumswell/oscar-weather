@@ -40,7 +40,8 @@ struct TemperatureChart: View {
 
   var body: some View {
     // Build the series once per body evaluation. `.chartXSelection` mutates `selectedDate`
-    // on every drag sample, so body re-runs continuously while scrubbing — recomputing the
+    // whenever a scrub reaches the next hour (the binding snaps and dedupes the
+    // continuous drag samples), so body still re-runs while scrubbing — recomputing the
     // mapped array and its filters here (instead of in each ForEach/helper) keeps that cheap.
     let data = temperatureData
     let past = data.filter { $0.time <= referenceDate }
@@ -176,7 +177,7 @@ struct TemperatureChart: View {
       .chartXScale(domain: maxTimeRange)
       .chartScrollableAxes(.horizontal)
       .chartXVisibleDomain(length: 129600)
-      .chartXSelection(value: $selectedDate)
+      .chartXSelection(value: .snapped(to: 3600, $selectedDate))
       .frame(height: 175)
     }
   }
