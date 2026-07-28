@@ -26,6 +26,10 @@ final class NowPresentationCoordinator {
         return .forecast
     }()
 
+    /// Bumped when the Orte tab is tapped while already selected —
+    /// LocationsView observes it and presents the search field.
+    var placesSearchRequests = 0
+
     func present(_ sheet: NowSheet) {
         self.sheet = sheet
     }

@@ -180,7 +180,11 @@ struct LocationSimBackdrop: View {
                         pacing: .still
                     )
                 }
-
+            }
+            // Flatten the still layers into one texture per card; the animated
+            // storm stays outside so its ticks don't re-rasterize the stack.
+            .drawingGroup()
+            .overlay {
                 if max(snap.precipitationIntensity, snap.snowfallIntensity) > 0.001 {
                     StormView(
                         type: snap.condition == .snow ? .snow : .rain,

@@ -135,25 +135,29 @@ enum AtmosphereWeatherMapper {
             0.86,
             1.14
         )
-        let precipitation = Float(value(at: hourlyIndex, in: weather.forecast.hourly?.precipitation)
-            ?? weather.forecast.current?.precipitation
+        // Precipitation "now": fresh radar wins in both directions — a measured 0
+        // is an answer, only nil (no coverage / stale) falls through to the model's
+        // current value, then the hourly slot (which smears mid-hour rain onset).
+        let radarRate = weather.precipSeries?.currentRate.map { Float($0) }
+        let modelPrecipitation = Float(weather.forecast.current?.precipitation
+            ?? value(at: hourlyIndex, in: weather.forecast.hourly?.precipitation)
             ?? 0)
-        let snowfall = Float(value(at: hourlyIndex, in: weather.forecast.hourly?.snowfall) ?? 0)
-        // Radar rate (mm/h) at the frame nearest "now"; ~6 mm/h maps to full intensity.
-        let radarRate = Float(weather.precipSeries?.currentRate ?? 0)
-        let radarIntensity = clamp(radarRate / 6, 0, 1)
-        let precipitationIntensity = max(
-            clamp(precipitation / 8, 0, 1),
-            radarIntensity
-        )
+        let precipitation = radarRate ?? modelPrecipitation
+        // Radar includes snow as liquid equivalent; the 7:1 snow-to-liquid ratio
+        // converts its mm/h to the hourly array's cm.
+        let snowfall = radarRate.map { $0 * 0.7 }
+            ?? Float(value(at: hourlyIndex, in: weather.forecast.hourly?.snowfall) ?? 0)
+        // Radar mm/h saturates at ~6; the model's hourly mm at ~8.
+        let precipitationIntensity = radarRate.map { clamp($0 / 6, 0, 1) }
+            ?? clamp(modelPrecipitation / 8, 0, 1)
         // Radar sees rain the forecast doesn't: a blue, sunny sky can't be right while
         // precipitation reaches the ground. Lift a dry forecast to an overcast, rainy
         // scene so the sky/clouds/sun agree with the rain animation that already shows.
         // Any measurable rate counts (0.1 mm/h is the series' smallest nonzero step) —
         // even drizzle must not fall out of a rendered blue sky.
-        if radarRate >= 0.1, condition == .clear || condition == .partlyCloudy || condition == .overcast {
+        if let radarRate, radarRate >= 0.1, condition == .clear || condition == .partlyCloudy || condition == .overcast {
             condition = .rain
-            cloudCoverage = max(cloudCoverage, clamp(0.55 + radarIntensity * 0.45, 0, 1))
+            cloudCoverage = max(cloudCoverage, clamp(0.55 + precipitationIntensity * 0.45, 0, 1))
         }
         let snowfallIntensity = condition == .snow ? max(clamp(snowfall / 6, 0, 1), precipitationIntensity * 0.6) : 0
         let thunderIntensity = condition == .thunderstorm ? max(0.55, precipitationIntensity) : 0
@@ -208,9 +212,7 @@ enum AtmosphereWeatherMapper {
             condition: condition,
             cloudCoverage: cloudCoverage,
             cloudDensity: cloudDensity,
-            // The effective amount driving the scene: radar-measured rain counts even
-            // when the forecast still reads dry (mm and mm/h share the hourly scale).
-            precipitationAmount: max(precipitation, radarRate),
+            precipitationAmount: precipitation,
             snowfallAmount: snowfall,
             precipitationIntensity: precipitationIntensity,
             snowfallIntensity: snowfallIntensity,

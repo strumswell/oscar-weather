@@ -124,7 +124,7 @@ enum HourlyForecastBuilder {
     let forecastPrecipitation = current.precipitation ?? 0
     let precipitation = radarRate.map { precipitationValue(fromMillimeters: $0, unit: precipitationUnit) }
       ?? forecastPrecipitation
-    let isRaining = (radarRate ?? 0) > 0 || forecastPrecipitation > 0
+    let isRaining = (radarRate ?? forecastPrecipitation) > 0
 
     // Lift a dry-sky code to a precipitation icon when rain is actually reaching
     // the ground (mirrors the widgets' radar-aware icon). A code that already

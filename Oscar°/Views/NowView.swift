@@ -112,11 +112,15 @@ struct NowView: View {
                         UIApplication.shared.playHapticFeedback()
                         presentation.present(.settings)
                     } label: {
+                        // Not .glass: the page forces dark mode, so system glass
+                        // rendered as a dark slab between the sky-tinted cards.
                         Label("Einstellungen", systemImage: "gearshape")
                             .font(.subheadline.weight(.medium))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 9)
+                            .cardBackground(in: Capsule())
+                            .cardBorder(Capsule())
                     }
-                    .buttonStyle(.glass)
-                    .buttonBorderShape(.capsule)
                     .accessibilityIdentifier("now.settings")
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 16)

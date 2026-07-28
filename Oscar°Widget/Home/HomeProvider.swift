@@ -63,7 +63,9 @@ final class HomeProvider: TimelineProvider, Sendable {
                 let temperatureNow = weather.current?.temperature ?? 0
                 let weathercode = weather.current?.weathercode ?? 0
                 let isDay = weather.current?.is_day ?? 0
-                let precipitation = weather.current?.precipitation ?? 0
+                // Radar measures what is falling right now; the model's "current"
+                // value is an interpolated guess (mirrors the lockscreen provider).
+                let precipitation = precipSeries?.currentRate ?? (weather.current?.precipitation ?? 0)
 
                 // Build the atmospheric gradient on the main actor (Weather + adapter are
                 // @MainActor); only the resulting Sendable gradient crosses back.

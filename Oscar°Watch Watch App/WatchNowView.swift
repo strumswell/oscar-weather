@@ -29,7 +29,7 @@ struct WatchNowView: View {
         // where it has fresh coverage, the model's current value fills the gap.
         let radarRate = weather.precipSeries?.currentRate
         let forecastPrecipitation = current?.precipitation ?? 0
-        let isRaining = (radarRate ?? 0) > 0 || forecastPrecipitation > 0
+        let isRaining = (radarRate ?? forecastPrecipitation) > 0
         let rainRate = radarRate ?? forecastPrecipitation
 
         return VStack(spacing: 0) {

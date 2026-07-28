@@ -37,13 +37,18 @@ struct CloudsView: View {
                 let scaleSpan = (scales.max() ?? 1) - minScale
 
                 for cloud in cloudGroup.clouds {
+                    guard let image = resolvedImages[cloud.imageNumber] else { continue }
+                    // The deck is laid out for the full-screen sim — skip sprites
+                    // fully outside a smaller canvas (location cards).
+                    guard cloud.position.x < size.width,
+                          cloud.position.y < size.height,
+                          cloud.position.x + image.size.width * cloud.scale > 0,
+                          cloud.position.y + image.size.height * cloud.scale > 0 else { continue }
                     let depth = scaleSpan < 0.01 ? 1.0 : (cloud.scale - minScale) / scaleSpan
                     context.opacity = cloudGroup.opacity * (0.55 + 0.45 * depth)
                     context.translateBy(x: cloud.position.x, y: cloud.position.y)
                     context.scaleBy(x: cloud.scale, y: cloud.scale)
-                    if let image = resolvedImages[cloud.imageNumber] {
-                        context.draw(image, at: .zero, anchor: .topLeading)
-                    }
+                    context.draw(image, at: .zero, anchor: .topLeading)
                     context.transform = .identity
                 }
             }

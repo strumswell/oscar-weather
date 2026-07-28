@@ -23,9 +23,20 @@ struct RootTabView: View {
 
     var body: some View {
         @Bindable var presentation = presentation
+        // The setter fires on re-taps of the current tab too — a second Orte
+        // tap opens its search.
+        let selection = Binding(
+            get: { presentation.selectedTab },
+            set: { tab in
+                if tab == .places, presentation.selectedTab == .places {
+                    presentation.placesSearchRequests += 1
+                }
+                presentation.selectedTab = tab
+            }
+        )
         ZStack(alignment: .top) {
-            TabView(selection: $presentation.selectedTab) {
-                Tab("Vorhersage", systemImage: "cloud.sun", value: AppTab.forecast) {
+            TabView(selection: selection) {
+                Tab("Wetter", systemImage: "cloud.sun", value: AppTab.forecast) {
                     NowView()
                 }
                 Tab("Karten", systemImage: "globe.europe.africa", value: AppTab.maps) {

@@ -1,22 +1,6 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
-    "≈ 9 km Raster" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "≈ 9 km grid"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "≈ 9 km çözünürlük"
-          }
-        }
-      }
-    },
     "" : {
 
     },
@@ -550,6 +534,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "≈ 2 km çözünürlük"
+          }
+        }
+      }
+    },
+    "≈ 9 km Raster" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 9 km grid"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 9 km çözünürlük"
           }
         }
       }
@@ -4209,23 +4210,6 @@
         }
       }
     },
-    "Große Bäume bewegen sich, Zweige können brechen." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Large trees move and branches can break."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
-          }
-        }
-      }
-    },
     "Größere Zweige und kleine Bäume bewegen sich." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4239,6 +4223,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
+          }
+        }
+      }
+    },
+    "Große Bäume bewegen sich, Zweige können brechen." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Large trees move and branches can break."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
           }
         }
       }
@@ -6990,6 +6991,22 @@
         }
       }
     },
+    "Öffnet die Suche" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the search"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aramayı açar"
+          }
+        }
+      }
+    },
     "Öffnet die tägliche Ensemble-Vorhersage" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -7229,6 +7246,22 @@
     },
     "Ort ändern, aktuell %@" : {
 
+    },
+    "Ort hinzufügen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konum ekle"
+          }
+        }
+      }
     },
     "Ort suchen …" : {
       "extractionState" : "stale",
@@ -10725,6 +10758,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Değerleri değiştir"
+          }
+        }
+      }
+    },
+    "Wetter" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava Durumu"
           }
         }
       }

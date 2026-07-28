@@ -88,6 +88,11 @@ struct StarsView: View {
                     context.addFilter(.blur(radius: 0.3))
                     
                     for (index, star) in starField.stars.enumerated() {
+                        // The field spans 600×550pt regardless of canvas size —
+                        // skip stars outside it (4pt margin covers the bloom blur).
+                        if star.y > size.height + 4 || star.x > size.width + 4 || star.x + star.size < -4 {
+                            continue
+                        }
                         // Fade stars over a soft band around the moon instead
                         // of popping them out at the disc edge.
                         var occlusionFade = 1.0

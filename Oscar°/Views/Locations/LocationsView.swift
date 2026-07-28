@@ -68,7 +68,7 @@ struct LocationsView: View {
                 .navigationTitle("Orte")
                 .toolbarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItem(placement: .topBarLeading) {
                         // No map.badge.plus exists in SF Symbols, so the
                         // badge.plus treatment is composed from system
                         // glyphs. (The MapBadgePlus.symbolset compiles into
@@ -103,6 +103,16 @@ struct LocationsView: View {
                         .accessibilityLabel(Text("Karte"))
                         .accessibilityHint(Text("Öffnet die Karte"))
                     }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            UIApplication.shared.playHapticFeedback()
+                            isSearchPresented = true
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                        .accessibilityLabel(Text("Ort hinzufügen"))
+                        .accessibilityHint(Text("Öffnet die Suche"))
+                    }
                 }
         }
         // On the NavigationStack, not the list content. Attached inside the
@@ -113,6 +123,10 @@ struct LocationsView: View {
             // A swipe-down dismissal keeps the typed text otherwise, leaving
             // the list in results mode with no visible search field.
             if !presented { searchText = "" }
+        }
+        // A re-tap on the active Orte tab jumps straight into the search.
+        .onChange(of: presentation.placesSearchRequests) {
+            isSearchPresented = true
         }
         .sheet(item: $candidate) { candidate in
             LocationPreviewSheet(candidate: candidate) {
