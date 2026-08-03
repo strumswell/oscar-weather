@@ -108,38 +108,46 @@ struct NowView: View {
                     AQIView()
                     ClimateView()
                         .padding(.bottom, 20)
-                    Button {
-                        UIApplication.shared.playHapticFeedback()
-                        presentation.present(.settings)
-                    } label: {
-                        // Not .glass: the page forces dark mode, so system glass
-                        // rendered as a dark slab between the sky-tinted cards.
-                        Label("Einstellungen", systemImage: "gearshape")
-                            .font(.subheadline.weight(.medium))
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 9)
-                            .cardBackground(in: Capsule())
-                            .cardBorder(Capsule())
-                    }
-                    .accessibilityIdentifier("now.settings")
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, 16)
                     // Low-opacity white like the map's basemap credit, but the
                     // large lockups need more than its hairline shadow: a crisp
                     // edge plus a soft ambient plate to lift them off bright sky.
-                    VStack(spacing: 16) {
-                        HStack(spacing: 24) {
-                            ProviderLogo(asset: "logo-open-meteo", height: 44)
-                            ProviderLogo(asset: "logo-dwd", height: 48)
-                        }
-                        PoweredByOscarServer(lockupHeight: 28)
+                    HStack(spacing: 24) {
+                        ProviderLogo(asset: "logo-dwd", height: 36)
+                        ProviderLogo(asset: "logo-open-meteo", height: 32)
+                        ProviderLogo(asset: "logo-oscar-server", height: 28)
                     }
                     .foregroundStyle(.white)
                     .opacity(0.7)
                     .shadow(color: .black.opacity(0.35), radius: 1)
                     .shadow(color: .black.opacity(0.45), radius: 8, y: 2)
+                    // The stacked shadows hit every logo separately — six blur
+                    // passes over the animated sim. Rasterize the static row
+                    // once; the padding keeps the 8pt blur inside the offscreen
+                    // bounds, the negative pad gives the layout size back.
+                    .padding(12)
+                    .drawingGroup()
+                    .padding(-12)
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(Text(verbatim: "Powered by Open-Meteo, DWD & Oscar Server"))
+                    .accessibilityLabel(Text(verbatim: "DWD, Open-Meteo & Oscar Server"))
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 16)
+                    Button {
+                        UIApplication.shared.playHapticFeedback()
+                        presentation.present(.settings)
+                    } label: {
+                        // Bare text over the sim: same white + shadow plate as
+                        // the attribution row above so it reads on bright sky.
+                        Label("Einstellungen", systemImage: "gearshape")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.white)
+                            .opacity(0.7)
+                            .shadow(color: .black.opacity(0.35), radius: 1)
+                            .shadow(color: .black.opacity(0.45), radius: 8, y: 2)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 9)
+                            .contentShape(Rectangle())
+                    }
+                    .accessibilityIdentifier("now.settings")
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 24)
                     if weather.debug {

@@ -36,7 +36,12 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
     nonisolated static let outboundCoordinateDecimalPlaces = 3
     var city = CityService.shared
     var authStatus: CLAuthorizationStatus?
-    var gpsLocation: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 52.52, longitude: 13.4)
+    // Seeded from the app-group cache: short-lived processes (widgets) usually
+    // finish their timeline before a live fix arrives, and without the seed
+    // they would query the Berlin placeholder below and render that city.
+    var gpsLocation: CLLocationCoordinate2D = LocationService.cachedGPSLocation() ?? CLLocationCoordinate2D(latitude: 52.52, longitude: 13.4) {
+        didSet { Self.cacheGPSLocation(gpsLocation) }
+    }
     private let manager = CLLocationManager()
     private let notificationCenter = NotificationCenter.default
     private var lastGeocoded: (
@@ -75,6 +80,25 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
     private var isAuthorized: Bool {
         manager.authorizationStatus == .authorizedAlways
             || manager.authorizationStatus == .authorizedWhenInUse
+    }
+
+    /// Last known GPS fix, shared across app, widget, and watch processes.
+    /// UserDefaults is thread-safe, hence the unsafe opt-out is sound here.
+    nonisolated(unsafe) private static let sharedDefaults = UserDefaults(suiteName: "group.cloud.bolte.Oscar") ?? .standard
+    nonisolated private static let cachedGPSLatitudeKey = "lastKnownGPSLatitude"
+    nonisolated private static let cachedGPSLongitudeKey = "lastKnownGPSLongitude"
+
+    nonisolated private static func cachedGPSLocation() -> CLLocationCoordinate2D? {
+        guard let latitude = sharedDefaults.object(forKey: cachedGPSLatitudeKey) as? Double,
+              let longitude = sharedDefaults.object(forKey: cachedGPSLongitudeKey) as? Double else {
+            return nil
+        }
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+
+    nonisolated private static func cacheGPSLocation(_ coordinate: CLLocationCoordinate2D) {
+        sharedDefaults.set(coordinate.latitude, forKey: cachedGPSLatitudeKey)
+        sharedDefaults.set(coordinate.longitude, forKey: cachedGPSLongitudeKey)
     }
     
     /// Explicit permission request, used by the onboarding location step.

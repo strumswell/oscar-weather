@@ -36,23 +36,45 @@ struct HeadView: View {
     return BeaufortScale.value(forKilometersPerHour: speed)
   }
 
-  /// "🏠 Zuhause" above the place name: the selected city's personalization,
-  /// or the current location's (UserDefaults-backed) when GPS is active —
-  /// its label only appears here when it is custom, never the generic
-  /// "Mein Standort".
-  private var personalization: String? {
-    let emoji: String?
-    let label: String?
-    if let city = cityService.cities.first(where: { $0.selected }) {
-      emoji = city.emoji
-      label = city.customLabel
-    } else {
-      emoji = cityService.currentLocationEmoji
-      label = cityService.currentLocationCustomLabel
+  /// The active place's personalization: the selected city's, or the current
+  /// location's (UserDefaults-backed) when GPS is active.
+  private var activePersonalization: PlacePersonalization {
+    cityService.cities.first(where: { $0.selected })?.personalization
+      ?? cityService.currentLocationPersonalization
+  }
+
+  /// "🏠 Zuhause" above the place name: an emoji mark, then the custom label —
+  /// never the generic base name, the city name below already covers that.
+  /// The GPS entry's standard location glyph sits inline with the name instead.
+  private var eyebrow: Text? {
+    let personalization = activePersonalization
+    var parts: [Text] = []
+    if let emoji = personalization.mark.emoji {
+      parts.append(Text(emoji))
     }
-    let text = [emoji, label]
+    if let label = personalization.customLabel {
+      parts.append(Text(label))
+    }
+    guard let first = parts.first else { return nil }
+    return parts.dropFirst().reduce(first) { $0 + Text(verbatim: " ") + $1 }
+  }
+
+  /// The GPS entry keeps its standard glyph directly before the resolved
+  /// place name; an emoji choice moves to the eyebrow, "no icon" leaves the
+  /// name bare.
+  private var showsLocationGlyph: Bool {
+    cityService.cities.first(where: { $0.selected }) == nil
+      && gpsAuthorized
+      && cityService.currentLocationPersonalization.mark == .locationGlyph
+  }
+
+
+  /// Spoken form of the eyebrow — the location glyph is decoration, so only
+  /// emoji and label count here.
+  private var eyebrowDescription: String? {
+    let personalization = activePersonalization
+    let text = [personalization.mark.emoji, personalization.customLabel]
       .compactMap { $0 }
-      .filter { !$0.isEmpty }
       .joined(separator: " ")
     return text.isEmpty ? nil : text
   }
@@ -89,7 +111,8 @@ struct HeadView: View {
   }
 
   private func menuTitle(for city: City) -> String {
-    let title = [city.emoji, city.displayName]
+    let personalization = city.personalization
+    let title = [personalization.mark.emoji, personalization.title]
       .compactMap { $0 }
       .filter { !$0.isEmpty }
       .joined(separator: " ")
@@ -110,10 +133,10 @@ struct HeadView: View {
 
   private var locationHeader: some View {
     VStack(spacing: 4) {
-      if let personalization {
+      if let eyebrow {
         // An "eyebrow" over the place name: small caps, letterspaced,
         // deliberately quiet next to the city name.
-        Text(personalization)
+        eyebrow
           .font(.caption.weight(.semibold))
           .textCase(.uppercase)
           .tracking(1.2)
@@ -123,11 +146,21 @@ struct HeadView: View {
           // at full saturation it outweighs the city name above it.
           .opacity(0.8)
       }
-      Text(location.name)
-        .font(.system(size: cityNameFontSize, weight: .bold))
-        .lineSpacing(10)
-        .multilineTextAlignment(.center)
-        .foregroundStyle(Color(UIColor.label))
+      HStack(spacing: 6) {
+        if showsLocationGlyph {
+          // Concatenated Text put the small glyph on the name's baseline,
+          // hanging low — the stack centers it on the optical middle. Muted
+          // to the eyebrow's level so the name keeps the weight.
+          Image(systemName: "location.fill")
+            .font(.system(size: cityNameFontSize * 0.55, weight: .bold))
+            .foregroundStyle(Color(UIColor.label).opacity(0.75))
+        }
+        Text(location.name)
+          .font(.system(size: cityNameFontSize, weight: .bold))
+          .lineSpacing(10)
+          .multilineTextAlignment(.center)
+          .foregroundStyle(Color(UIColor.label))
+      }
     }
   }
 
@@ -159,7 +192,7 @@ struct HeadView: View {
       .accessibilityElement(children: .combine)
       .accessibilityAddTraits(.isButton)
       .accessibilityLabel(
-        Text("Ort ändern, aktuell \([personalization, location.name].compactMap { $0 }.joined(separator: ", "))")
+        Text("Ort ändern, aktuell \([eyebrowDescription, location.name].compactMap { $0 }.joined(separator: ", "))")
       )
       .accessibilityAction {
         UIApplication.shared.playHapticFeedback()

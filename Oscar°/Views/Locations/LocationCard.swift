@@ -11,12 +11,11 @@ import SwiftUI
 struct LocationCard: View {
     let title: String
     var detail: String?
-    var emoji: String?
+    var mark: PlacePersonalization.Mark = .plain
     var temperature: Double?
     var snapshot: AtmosphereSnapshot?
     var isSelected = false
     var isDefault = false
-    var isCurrentLocation = false
     /// True while the list is on another tab or under a sheet: the backdrop's
     /// precipitation layer would otherwise keep animating unseen.
     var backdropPaused = false
@@ -119,19 +118,22 @@ struct LocationCard: View {
     }
 
     private var hasBadge: Bool {
-        (emoji?.isEmpty == false) || isCurrentLocation
+        mark != .plain
     }
 
     @ViewBuilder
     private var badgeContent: some View {
-        if let emoji, !emoji.isEmpty {
+        switch mark {
+        case .emoji(let emoji):
             Text(emoji).font(.system(size: 24))
-        } else if isCurrentLocation {
+        case .locationGlyph:
             Image(systemName: "location.fill")
                 // Fixed size: .body grows past the 44pt badge circle at
                 // accessibility text sizes.
                 .font(.system(size: 17))
                 .foregroundStyle(.white)
+        case .plain:
+            EmptyView()
         }
     }
 
@@ -237,7 +239,7 @@ struct LocationCardButtonStyle: ButtonStyle {
         LocationCard(
             title: "Zuhause",
             detail: "Leipzig · Klar",
-            emoji: "🏠",
+            mark: .emoji("🏠"),
             temperature: 21.4,
             snapshot: .fallback,
             isSelected: true,
@@ -246,14 +248,14 @@ struct LocationCardButtonStyle: ButtonStyle {
         LocationCard(
             title: "Mein Standort",
             detail: "Gewitter",
+            mark: .locationGlyph,
             temperature: 17.2,
-            snapshot: .onboardingStorm,
-            isCurrentLocation: true
+            snapshot: .onboardingStorm
         )
         LocationCard(
             title: "Oma",
             detail: "Hessen",
-            emoji: "👵",
+            mark: .emoji("👵"),
             temperature: nil,
             snapshot: .onboardingNight
         )

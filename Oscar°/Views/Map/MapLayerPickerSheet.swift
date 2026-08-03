@@ -148,7 +148,7 @@ struct MapLayerPickerSheet: View {
                 ProviderLogo(asset: "logo-eumetnet", height: 28)
                 ProviderLogo(asset: "logo-noaa", height: 28)
             }
-            PoweredByOscarServer()
+            PoweredByOscarServer(lockupHeight: 32)
         }
         .foregroundStyle(.secondary)
         .frame(maxWidth: .infinity)

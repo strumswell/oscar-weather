@@ -527,14 +527,11 @@ private struct CityCard: View {
     let backdropPaused: Bool
 
     var body: some View {
-        let detail = [conditions?.conditionText, city.displayDetail]
-            .compactMap { $0 }
-            .joined(separator: " · ")
-
+        let personalization = city.personalization
         LocationCard(
-            title: city.displayName,
-            detail: detail.isEmpty ? nil : detail,
-            emoji: city.emoji,
+            title: personalization.title,
+            detail: personalization.detailLine(condition: conditions?.conditionText),
+            mark: personalization.mark,
             temperature: conditions?.temperature,
             snapshot: conditions?.snapshot,
             isSelected: isSelected,
@@ -561,23 +558,15 @@ private struct CurrentLocationCard: View {
     }
 
     var body: some View {
-        let hasCustomLabel = cityService.currentLocationCustomLabel?.isEmpty == false
-        let detail = [
-            conditions?.conditionText,
-            hasCustomLabel ? String(localized: "Mein Standort") : nil,
-        ]
-        .compactMap { $0 }
-        .joined(separator: " · ")
-
+        let personalization = cityService.currentLocationPersonalization
         LocationCard(
-            title: cityService.currentLocationDisplayName,
-            detail: detail.isEmpty ? nil : detail,
-            emoji: cityService.currentLocationEmoji,
+            title: personalization.title,
+            detail: personalization.detailLine(condition: conditions?.conditionText),
+            mark: personalization.mark,
             temperature: conditions?.temperature,
             snapshot: conditions?.snapshot,
             isSelected: isSelected,
             isDefault: cityService.defaultIsCurrentLocation,
-            isCurrentLocation: true,
             backdropPaused: backdropPaused
         )
     }

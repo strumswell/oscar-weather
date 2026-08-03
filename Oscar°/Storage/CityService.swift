@@ -29,12 +29,26 @@ public final class CityService {
         self.context = pc.container.viewContext
         self.currentLocationEmoji = UserDefaults.standard.string(forKey: Self.currentLocationEmojiKey)
         self.currentLocationCustomLabel = UserDefaults.standard.string(forKey: Self.currentLocationLabelKey)
+        self.currentLocationIconHidden = UserDefaults.standard.bool(forKey: Self.currentLocationIconHiddenKey)
         // Current location IS the default until the user explicitly chooses
         // otherwise (registered defaults are per-launch and never persisted, so
         // any explicit choice — city default or "no default" — wins forever).
+        let hasExplicitDefaultChoice = UserDefaults.standard.object(forKey: Self.defaultIsCurrentLocationKey) != nil
         UserDefaults.standard.register(defaults: [Self.defaultIsCurrentLocationKey: true])
         self.defaultIsCurrentLocation = UserDefaults.standard.bool(forKey: Self.defaultIsCurrentLocationKey)
         self.update()
+        // One-time upgrade path: a city selected before the default-location
+        // feature existed is itself an explicit choice. Persist it as "no
+        // default" once, or the registered current-location default clears the
+        // selection on every launch and widgets fall back to the placeholder
+        // coordinates (users saw Berlin instead of their city).
+        if !UserDefaults.standard.bool(forKey: Self.defaultSelectionMigratedKey) {
+            UserDefaults.standard.set(true, forKey: Self.defaultSelectionMigratedKey)
+            if !hasExplicitDefaultChoice, getSelectedCity() != nil {
+                defaultIsCurrentLocation = false
+                UserDefaults.standard.set(false, forKey: Self.defaultIsCurrentLocationKey)
+            }
+        }
     }
     
     private func save() {
@@ -144,30 +158,53 @@ public final class CityService {
     /// into observable storage so views react to edits.
     static let currentLocationEmojiKey = "currentLocationEmoji"
     static let currentLocationLabelKey = "currentLocationCustomLabel"
+    static let currentLocationIconHiddenKey = "currentLocationIconHidden"
 
     private(set) var currentLocationEmoji: String?
     private(set) var currentLocationCustomLabel: String?
+    /// True when the user explicitly chose "no icon": without it, no emoji
+    /// means the standard location symbol, not a bare entry.
+    private(set) var currentLocationIconHidden: Bool
 
     /// The current-location card title: a custom label wins over the generic name.
     var currentLocationDisplayName: String {
-        if let currentLocationCustomLabel, !currentLocationCustomLabel.isEmpty {
-            return currentLocationCustomLabel
-        }
-        return String(localized: "Mein Standort")
+        currentLocationPersonalization.title
     }
 
-    func updateCurrentLocation(emoji: String?, customLabel: String?) {
+    /// The GPS entry's personalization, resolved from the UserDefaults mirror.
+    var currentLocationPersonalization: PlacePersonalization {
+        let mark: PlacePersonalization.Mark
+        if let currentLocationEmoji, !currentLocationEmoji.isEmpty {
+            mark = .emoji(currentLocationEmoji)
+        } else if currentLocationIconHidden {
+            mark = .plain
+        } else {
+            mark = .locationGlyph
+        }
+        return PlacePersonalization(
+            mark: mark,
+            customLabel: (currentLocationCustomLabel?.isEmpty == false) ? currentLocationCustomLabel : nil,
+            baseName: String(localized: "Mein Standort")
+        )
+    }
+
+    func updateCurrentLocation(mark: PlacePersonalization.Mark, customLabel: String?) {
         let trimmedLabel = customLabel?.trimmingCharacters(in: .whitespacesAndNewlines)
-        currentLocationEmoji = (emoji?.isEmpty == false) ? emoji : nil
+        currentLocationEmoji = mark.emoji
         currentLocationCustomLabel = (trimmedLabel?.isEmpty == false) ? trimmedLabel : nil
+        currentLocationIconHidden = (mark == .plain)
         UserDefaults.standard.set(currentLocationEmoji, forKey: Self.currentLocationEmojiKey)
         UserDefaults.standard.set(currentLocationCustomLabel, forKey: Self.currentLocationLabelKey)
+        UserDefaults.standard.set(currentLocationIconHidden, forKey: Self.currentLocationIconHiddenKey)
     }
 
     /// Which location the app opens with. Stored across two places by necessity:
     /// a saved city carries `isDefault`; "current location" is no city at all, so
     /// that choice lives in UserDefaults.
     static let defaultIsCurrentLocationKey = "defaultLocationIsCurrentLocation"
+    /// Marks the one-time upgrade check in init as done, so a city selected
+    /// merely for browsing is never promoted to an implicit default later.
+    static let defaultSelectionMigratedKey = "defaultLocationSelectionMigrated"
 
     var defaultCity: City? {
         cities.first { $0.isDefault }
@@ -278,18 +315,54 @@ public final class CityService {
     }
 }
 
-extension City {
-    /// The user-facing name: a custom label ("Zuhause") wins over the place name.
-    var displayName: String {
-        if let customLabel, !customLabel.isEmpty {
-            return customLabel
+/// A place's user personalization, resolved for display: the mark that
+/// represents it (card badge, hero eyebrow, edit-sheet grid) and what it is
+/// called. Built from a City entity or the GPS entry's UserDefaults mirror,
+/// so every surface renders the same rules.
+struct PlacePersonalization: Equatable {
+    enum Mark: Equatable {
+        /// No mark at all — a saved city without an emoji, or the GPS entry
+        /// after an explicit "no icon" choice.
+        case plain
+        case emoji(String)
+        /// The GPS entry's standard mark; views draw it as the SF location symbol.
+        case locationGlyph
+
+        var emoji: String? {
+            if case .emoji(let value) = self { return value }
+            return nil
         }
-        return label ?? ""
     }
 
-    /// The place name as secondary line when a custom label is shown as title.
-    var displayDetail: String? {
-        guard let customLabel, !customLabel.isEmpty else { return nil }
-        return label
+    let mark: Mark
+    /// The user's own name ("Zuhause"); nil when the place keeps its base name.
+    let customLabel: String?
+    /// The place name, or the localized "Mein Standort" for the GPS entry.
+    let baseName: String
+
+    var title: String { customLabel ?? baseName }
+
+    /// The base name whenever a custom title replaced it — the edit sheet
+    /// promises it stays visible.
+    var subtitle: String? { customLabel == nil ? nil : baseName }
+
+    /// Card detail line: subtitle before the condition, because the line
+    /// truncates from the right and the name must survive.
+    func detailLine(condition: String?) -> String? {
+        let joined = [subtitle, condition].compactMap { $0 }.joined(separator: " · ")
+        return joined.isEmpty ? nil : joined
+    }
+}
+
+extension City {
+    /// The user-facing name: a custom label ("Zuhause") wins over the place name.
+    var displayName: String { personalization.title }
+
+    var personalization: PlacePersonalization {
+        PlacePersonalization(
+            mark: emoji.flatMap { $0.isEmpty ? nil : PlacePersonalization.Mark.emoji($0) } ?? .plain,
+            customLabel: (customLabel?.isEmpty == false) ? customLabel : nil,
+            baseName: label ?? ""
+        )
     }
 }

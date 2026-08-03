@@ -222,7 +222,7 @@ struct AlertInfoSheet: View {
                     }
                     // Canadian alerts come straight from EC, not oscar-server.
                     if alerts.contains(where: { $0.source != "ec" }) {
-                        PoweredByOscarServer(lockupHeight: 18)
+                        PoweredByOscarServer(lockupHeight: 30)
                             .foregroundStyle(.tertiary)
                             .padding(.top, 2)
                     }
