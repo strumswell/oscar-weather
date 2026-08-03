@@ -75,6 +75,7 @@ struct OscarRadarTimelineControls: View {
         case .usa: "NOAA Radar"
         case .taiwan: "CWA Radar"
         case .brasil: "REDEMET Radar"
+        case .canarias: "AEMET Radar"
         }
     }
 
@@ -85,6 +86,7 @@ struct OscarRadarTimelineControls: View {
         case .usa: "NOAA"
         case .taiwan: "CWA"
         case .brasil: "REDEMET"
+        case .canarias: "AEMET"
         }
     }
 }

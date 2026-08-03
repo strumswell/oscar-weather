@@ -545,6 +545,29 @@
         }
       }
     },
+    "≈ 1 km · 10 Min." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1 km · 10 Min."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1 km · 10 min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1 km · 10 dk"
+          }
+        }
+      }
+    },
     "≈ 1 km · 2 Min." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6111,6 +6134,29 @@
         }
       }
     },
+    "Kanaren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanaren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canary Islands"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanarya Adaları"
+          }
+        }
+      }
+    },
     "Karte" : {
       "localizations" : {
         "de" : {
@@ -6586,6 +6632,29 @@
     },
     "kn" : {
       "shouldTranslate" : false
+    },
+    "Komposit der beiden AEMET-Radare auf Gran Canaria und Teneriffa über den Kanarischen Inseln. In Tallagen kann der Teide einzelne Sektoren abschatten." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Komposit der beiden AEMET-Radare auf Gran Canaria und Teneriffa über den Kanarischen Inseln. In Tallagen kann der Teide einzelne Sektoren abschatten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Composite of the two AEMET radars on Gran Canaria and Tenerife, covering the Canary Islands. At low levels Mount Teide can block individual sectors."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gran Canaria ve Tenerife'deki iki AEMET radarının Kanarya Adaları'nı kapsayan kompoziti. Alçak seviyelerde Teide bazı sektörleri gölgeleyebilir."
+          }
+        }
+      }
     },
     "Korea" : {
       "extractionState" : "stale",
@@ -11223,6 +11292,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uzay"
+          }
+        }
+      }
+    },
+    "Spanischer Wetterdienst (AEMET)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spanischer Wetterdienst (AEMET)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spain's national weather service (AEMET)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İspanya meteoroloji servisi (AEMET)"
           }
         }
       }

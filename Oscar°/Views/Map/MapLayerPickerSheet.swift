@@ -25,7 +25,7 @@ struct MapLayerPickerSheet: View {
 
     private static let tileColumns = Array(
         repeating: GridItem(.flexible(), spacing: 12), count: 4)
-    /// Radar tiles scroll horizontally (five coverages don't fit a row), so they
+    /// Radar tiles scroll horizontally (six coverages don't fit a row), so they
     /// need a fixed width — sized to the 4-column grid below on a compact phone,
     /// which leaves a peek of the next tile as the scroll affordance.
     private static let radarTileWidth: CGFloat = 76
@@ -97,6 +97,8 @@ struct MapLayerPickerSheet: View {
                                   imageName: "layer-radar-taiwan")
                         radarTile(.brasil, title: "Brasilien", subtitle: "REDEMET",
                                   imageName: "layer-radar-brasil")
+                        radarTile(.canarias, title: "Kanaren", subtitle: "AEMET",
+                                  imageName: "layer-radar-canarias")
                     }
                 }
                 .scrollClipDisabled()

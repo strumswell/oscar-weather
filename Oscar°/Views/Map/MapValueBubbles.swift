@@ -99,6 +99,7 @@ enum MapValueBubbles {
         (51.45, -2.59, 2, "Bristol"), (54.98, -1.61, 2, "Newcastle"),
         (60.39, 5.32, 2, "Bergen"), (63.43, 10.40, 2, "Trondheim"),
         (69.65, 18.96, 2, "Tromsø"), (28.12, -15.43, 2, "Las Palmas"),
+        (28.47, -16.25, 2, "Santa Cruz de Tenerife"),
         (54.69, 25.28, 2, "Vilnius"), (56.95, 24.11, 1, "Riga"),
         (59.44, 24.75, 2, "Tallinn"), (53.90, 27.56, 1, "Minsk"),
         (49.84, 24.03, 2, "Lviv"), (46.48, 30.73, 2, "Odesa"),

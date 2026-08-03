@@ -52,6 +52,12 @@ struct RadarInfoView: View {
                     grid: "≈ 2 km · 20 Min.",
                     imageName: "layer-radar-brasil",
                     summary: "Mosaik aus rund 29 Radarstandorten des brasilianischen Flugwetterdienstes. Einzelne Standorte melden unregelmäßig, Lücken sind möglich.")
+                WeatherModelCard(
+                    name: "AEMET",
+                    provider: "Spanischer Wetterdienst (AEMET)",
+                    grid: "≈ 1 km · 10 Min.",
+                    imageName: "layer-radar-canarias",
+                    summary: "Komposit der beiden AEMET-Radare auf Gran Canaria und Teneriffa über den Kanarischen Inseln. In Tallagen kann der Teide einzelne Sektoren abschatten.")
             }
             .padding(.horizontal, 20)
             .padding(.top, 4)

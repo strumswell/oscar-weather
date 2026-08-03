@@ -3,7 +3,7 @@
 //  Oscar°
 //
 //  Radar coverages the user can choose between (DWD / EUMETNET OPERA / NOAA MRMS /
-//  CWA / REDEMET) and the geographic bounds an overlay spans.
+//  CWA / REDEMET / AEMET) and the geographic bounds an overlay spans.
 //
 
 import Foundation
@@ -42,7 +42,7 @@ enum RadarProduct: String, CaseIterable, Equatable, Sendable {
     }
 
     /// The typed product exists only for the DWD and MRMS composites — neither
-    /// OPERA, CWA nor REDEMET publishes a hydrometeor-classification product.
+    /// OPERA, CWA, REDEMET nor AEMET publishes a hydrometeor-classification product.
     func isAvailable(in region: RadarRegion) -> Bool {
         self == .precipitation || region == .germany || region == .usa
     }
@@ -51,13 +51,15 @@ enum RadarProduct: String, CaseIterable, Equatable, Sendable {
 /// Radar coverage the user can choose between in the map's layer menu.
 /// Mirrors oscar-server's radar sources: high-res DWD (Germany), the pan-European
 /// EUMETNET OPERA composite, the NOAA MRMS CONUS composite (USA), the CWA
-/// QPESUMS composite (Taiwan), and the REDEMET mosaic (Brazil).
+/// QPESUMS composite (Taiwan), the REDEMET mosaic (Brazil), and the AEMET
+/// two-radar composite (Canary Islands — outside the OPERA domain).
 enum RadarRegion: String, CaseIterable, Equatable, Sendable {
     case germany
     case europe
     case usa
     case taiwan
     case brasil
+    case canarias
 
     /// Path component used in oscar-server radar URLs (`/radar/{pathComponent}/…`).
     var pathComponent: String { rawValue }
@@ -68,14 +70,17 @@ enum RadarRegion: String, CaseIterable, Equatable, Sendable {
     /// that actually has radars (the raw box reaches Greenland and central Asia);
     /// taiwan is the 7-radar footprint, not the published rectangle (which reaches
     /// mainland China and Luzon where every pixel is a no-coverage sentinel);
-    /// brasil mirrors the server's REDEMET working grid (union of the site boxes).
+    /// brasil mirrors the server's REDEMET working grid (union of the site boxes);
+    /// canarias mirrors the server's grid (union of the two AEMET radars' 250 km
+    /// range circles — the europe box stops at 34.5°N, so no overlap).
     private var coverage: (north: Double, south: Double, west: Double, east: Double) {
         switch self {
-        case .germany: return (north: 55.86, south: 45.68, west: 1.46, east: 18.73)
-        case .europe:  return (north: 71.0, south: 34.5, west: -25.0, east: 45.0)
-        case .usa:     return (north: 54.99, south: 20.01, west: -129.99, east: -60.01)
-        case .taiwan:  return (north: 26.5, south: 20.5, west: 118.0, east: 124.0)
-        case .brasil:  return (north: 6.44, south: -35.0, west: -76.4, east: -31.6)
+        case .germany:  return (north: 55.86, south: 45.68, west: 1.46, east: 18.73)
+        case .europe:   return (north: 71.0, south: 34.5, west: -25.0, east: 45.0)
+        case .usa:      return (north: 54.99, south: 20.01, west: -129.99, east: -60.01)
+        case .taiwan:   return (north: 26.5, south: 20.5, west: 118.0, east: 124.0)
+        case .brasil:   return (north: 6.44, south: -35.0, west: -76.4, east: -31.6)
+        case .canarias: return (north: 30.6, south: 25.7, west: -19.4, east: -13.0)
         }
     }
 
@@ -86,9 +91,9 @@ enum RadarRegion: String, CaseIterable, Equatable, Sendable {
     }
 
     /// Best radar source for a location, in fixed priority order:
-    /// DWD (highest cadence/quality) → OPERA → NOAA MRMS → CWA → REDEMET.
+    /// DWD (highest cadence/quality) → OPERA → NOAA MRMS → CWA → REDEMET → AEMET.
     static func bestSource(latitude: Double, longitude: Double) -> RadarRegion? {
-        [RadarRegion.germany, .europe, .usa, .taiwan, .brasil].first {
+        [RadarRegion.germany, .europe, .usa, .taiwan, .brasil, .canarias].first {
             $0.covers(latitude: latitude, longitude: longitude)
         }
     }
