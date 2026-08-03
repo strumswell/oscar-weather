@@ -124,6 +124,24 @@ struct NowView: View {
                     .accessibilityIdentifier("now.settings")
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 16)
+                    // Low-opacity white like the map's basemap credit, but the
+                    // large lockups need more than its hairline shadow: a crisp
+                    // edge plus a soft ambient plate to lift them off bright sky.
+                    VStack(spacing: 16) {
+                        HStack(spacing: 24) {
+                            ProviderLogo(asset: "logo-open-meteo", height: 44)
+                            ProviderLogo(asset: "logo-dwd", height: 48)
+                        }
+                        PoweredByOscarServer(lockupHeight: 28)
+                    }
+                    .foregroundStyle(.white)
+                    .opacity(0.7)
+                    .shadow(color: .black.opacity(0.35), radius: 1)
+                    .shadow(color: .black.opacity(0.45), radius: 8, y: 2)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(Text(verbatim: "Powered by Open-Meteo, DWD & Oscar Server"))
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 24)
                     if weather.debug {
                         VStack {
                             Text(weather.isLoading.description)

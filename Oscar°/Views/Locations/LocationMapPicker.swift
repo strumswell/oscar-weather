@@ -268,7 +268,11 @@ private struct MapLibreLocationPicker: UIViewRepresentable {
         // MapLibre's ⓘ button and wordmark stay hidden (see WeatherMapView).
         mapView.logoView.isHidden = true
         mapView.attributionButton.isHidden = true
-        mapView.compassView.isHidden = true
+        // Adaptive compass (visible only while rotated), below the glass
+        // close button in the top-right corner.
+        mapView.compassView.compassVisibility = .adaptive
+        mapView.compassViewPosition = .topRight
+        mapView.compassViewMargins = CGPoint(x: 21, y: 80)
 
         // The map's own tap recognizers (annotation selection, double-tap zoom)
         // must fail before a tap counts as "drop a pin here".
@@ -331,7 +335,10 @@ private struct MapLibreLocationPicker: UIViewRepresentable {
             cityAnnotations = parent.chips.map { chip in
                 let pin = CityPinAnnotation()
                 pin.coordinate = chip.coordinate
-                pin.title = chip.title
+                // The callout repeats the identity line baked under the chip.
+                pin.title = [chip.emoji ?? "", chip.title]
+                    .filter { !$0.isEmpty }
+                    .joined(separator: " ")
                 pin.chip = chip
                 return pin
             }
@@ -369,21 +376,34 @@ private struct MapLibreLocationPicker: UIViewRepresentable {
             nonisolated(unsafe) let annotation = annotation
             MainActor.assumeIsolated {
                 if let cityPin = annotation as? CityPinAnnotation, let chip = cityPin.chip {
+                    // Same identity line as the weather map's chips: the emoji
+                    // leads the name under the capsule.
+                    let identity = [chip.emoji ?? "", chip.title]
+                        .filter { !$0.isEmpty }
+                        .joined(separator: " ")
                     if let temperature = chip.temperature, let iconAsset = chip.iconAsset {
                         let temperatureText = "\(Int(temperature.rounded()))°"
-                        let reuseID = "city-chip-\(chip.emoji ?? "")-\(iconAsset)-\(temperatureText)"
+                        let reuseID = "city-chip-\(iconAsset)-\(temperatureText)-\(identity)"
                         result = mapView.dequeueReusableAnnotationImage(withIdentifier: reuseID)
                             ?? MLNAnnotationImage(
-                                image: MapChip.conditions(iconAsset: iconAsset, temperatureText: temperatureText,
-                                                          emoji: chip.emoji),
+                                image: MapChip.labeled(
+                                    MapChip.conditions(iconAsset: iconAsset, temperatureText: temperatureText),
+                                    label: identity,
+                                    balancedAnchor: true
+                                ),
                                 reuseIdentifier: reuseID
                             )
                     } else {
-                        // Conditions not in yet: the emoji/pin disc as fallback.
-                        let reuseID = "city-pin-\(chip.emoji ?? "plain")"
+                        // Conditions not in yet: the emoji/pin disc as fallback
+                        // (emoji on the disc, only the name underneath).
+                        let reuseID = "city-pin-\(chip.emoji ?? "plain")-\(chip.title)"
                         result = mapView.dequeueReusableAnnotationImage(withIdentifier: reuseID)
                             ?? MLNAnnotationImage(
-                                image: MapChip.pin(emoji: chip.emoji),
+                                image: MapChip.labeled(
+                                    MapChip.pin(emoji: chip.emoji),
+                                    label: chip.title,
+                                    balancedAnchor: true
+                                ),
                                 reuseIdentifier: reuseID
                             )
                     }

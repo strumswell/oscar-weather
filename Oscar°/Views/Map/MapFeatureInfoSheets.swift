@@ -81,6 +81,17 @@ struct WeatherAlertInfo: Identifiable {
     }
 }
 
+extension [WeatherAlertInfo] {
+    /// Active warnings first (severity breaks ties), then upcoming by start.
+    func sortedForDisplay(now: Date = Date()) -> [WeatherAlertInfo] {
+        sorted {
+            let l = Swift.max(0, $0.onset?.timeIntervalSince(now) ?? 0)
+            let r = Swift.max(0, $1.onset?.timeIntervalSince(now) ?? 0)
+            return l != r ? l < r : $0.severityRank > $1.severityRank
+        }
+    }
+}
+
 /// One tracked cell from `/radar/{region}/cells` — everything the overlay and the
 /// tap sheet need, including the projected track and the footprint hull.
 struct StormCellInfo: Identifiable {
@@ -131,8 +142,18 @@ struct StormCellInfo: Identifiable {
 enum AlertSeverityStyle {
     /// DWD ranks: 1 Minor, 2 Moderate, 3 Severe, 4 Extreme — same colors as the
     /// map polygons (`syncAlertPolygons`).
-    static func color(rank: Int) -> Color {
-        switch rank {
+    static func color(rank: Int, source: String? = nil) -> Color {
+        // Meteoalarm's ladder has no Minor: yellow IS Moderate ("vigilance jaune",
+        // "allerta gialla"), so the generic scale would overstate every level by
+        // one color against what national services show for the same warning.
+        if source == "meteoalarm" {
+            return switch rank {
+            case 3: .orange
+            case 4: .red
+            default: .yellow
+            }
+        }
+        return switch rank {
         case 2: .orange
         case 3: .red
         case 4: .purple
@@ -141,9 +162,9 @@ enum AlertSeverityStyle {
     }
 
     static func label(rank: Int, source: String? = nil) -> LocalizedStringKey {
-        // NWS, CWA and Meteoalarm alerts all use the CAP severity terms (Minor/
-        // Moderate/Severe/Extreme); the DWD warning-level names are DWD-specific.
-        if source == "nws" || source == "cwa" || source == "meteoalarm" {
+        // Only DWD (or nil, from old DWD-only servers) uses the German
+        // warning-level names; every other agency gets the CAP terms.
+        if let source, source != "dwd" {
             return switch rank {
             case 1: "Minor"
             case 2: "Moderate"
@@ -166,16 +187,27 @@ enum AlertSeverityStyle {
         switch source {
         case "nws": "NOAA / National Weather Service"
         case "cwa": "CWA / Central Weather Administration"
+        case "ec": "Environment Canada"
         case "meteoalarm":
             senderName.map { "\($0) · EUMETNET Meteoalarm" } ?? "EUMETNET Meteoalarm"
         default: "Deutscher Wetterdienst"
+        }
+    }
+
+    /// Provider mark next to the source line; CWA and EC have no bundled logo.
+    static func sourceLogo(_ source: String?) -> String? {
+        switch source {
+        case "nws": "logo-noaa"
+        case "cwa", "ec": nil
+        case "meteoalarm": "logo-eumetnet"
+        default: "logo-dwd"
         }
     }
 }
 
 // MARK: - Warning sheet
 
-/// All warnings under the tapped point, most severe first — presented small like
+/// All warnings under the tapped point, active-first — presented small like
 /// the Kartenebenen sheet, pullable to .large for long official texts.
 struct AlertInfoSheet: View {
     let alerts: [WeatherAlertInfo]
@@ -187,6 +219,12 @@ struct AlertInfoSheet: View {
                 VStack(spacing: 14) {
                     ForEach(alerts) { alert in
                         AlertInfoCard(alert: alert)
+                    }
+                    // Canadian alerts come straight from EC, not oscar-server.
+                    if alerts.contains(where: { $0.source != "ec" }) {
+                        PoweredByOscarServer(lockupHeight: 18)
+                            .foregroundStyle(.tertiary)
+                            .padding(.top, 2)
                     }
                 }
                 .padding(.horizontal, 20)
@@ -208,7 +246,9 @@ struct AlertInfoSheet: View {
 private struct AlertInfoCard: View {
     let alert: WeatherAlertInfo
 
-    private var severityColor: Color { AlertSeverityStyle.color(rank: alert.severityRank) }
+    private var severityColor: Color {
+        AlertSeverityStyle.color(rank: alert.severityRank, source: alert.source)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -253,9 +293,14 @@ private struct AlertInfoCard: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Text("Quelle: \(AlertSeverityStyle.sourceName(alert.source, senderName: alert.senderName))")
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
+            HStack(spacing: 6) {
+                if let logo = AlertSeverityStyle.sourceLogo(alert.source) {
+                    ProviderLogo(asset: logo, height: 18)
+                }
+                Text("Quelle: \(AlertSeverityStyle.sourceName(alert.source, senderName: alert.senderName))")
+                    .font(.caption2)
+            }
+            .foregroundStyle(.tertiary)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -19,19 +19,13 @@ enum MapChip {
     static let fill = UIColor(white: 0.13, alpha: 0.92)
     static let stroke = UIColor(white: 1, alpha: 0.35)
 
-    /// A saved city's conditions as a capsule chip: leading symbol + current
-    /// temperature, like a mini weather-map station label. The custom city
-    /// emoji, when set, IS the leading symbol; only cities without one fall
-    /// back to the app's weather icon (01d…50n assets, same set as the
-    /// forecast lists).
-    static func conditions(iconAsset: String, temperatureText: String, emoji: String? = nil) -> UIImage {
-        let emojiText: NSAttributedString? = (emoji?.isEmpty == false)
-            ? NSAttributedString(string: emoji ?? "", attributes: [.font: UIFont.systemFont(ofSize: 13)])
-            : nil
-
+    /// A saved city's conditions as a capsule chip: the app's weather icon
+    /// (01d…50n assets, same set as the forecast lists) + current temperature,
+    /// like a mini weather-map station label.
+    static func conditions(iconAsset: String, temperatureText: String) -> UIImage {
+        let icon = UIImage(named: iconAsset)
         // Aspect-fit into the nominal box: the icon assets are not square
         // (clouds are up to ~1.4× wider than tall), a fixed square squishes them.
-        let icon: UIImage? = emojiText == nil ? UIImage(named: iconAsset) : nil
         let iconBox: CGFloat = 21
         let iconSize: CGSize = {
             guard let native = icon?.size, native.width > 0, native.height > 0 else {
@@ -46,28 +40,52 @@ enum MapChip {
             attributes: [.font: textFont, .foregroundColor: UIColor.white]
         )
         let textSize = text.size()
-        let emojiSize = emojiText?.size() ?? .zero
-        let leadingWidth = emojiText == nil ? iconSize.width : emojiSize.width
-        let width = padding + leadingWidth + spacing + textSize.width + padding
+        let width = padding + iconSize.width + spacing + textSize.width + padding
 
         return capsule(width: width) { _ in
-            if let emojiText {
-                emojiText.draw(at: CGPoint(
-                    x: padding,
-                    y: (height - emojiSize.height) / 2
-                ))
-            } else {
-                icon?.draw(in: CGRect(
-                    x: padding,
-                    y: (height - iconSize.height) / 2,
-                    width: iconSize.width,
-                    height: iconSize.height
-                ))
-            }
+            icon?.draw(in: CGRect(
+                x: padding,
+                y: (height - iconSize.height) / 2,
+                width: iconSize.width,
+                height: iconSize.height
+            ))
             text.draw(at: CGPoint(
-                x: padding + leadingWidth + spacing,
+                x: padding + iconSize.width + spacing,
                 y: (height - textSize.height) / 2
             ))
+        }
+    }
+
+    /// The city's identity line ("emoji label") composited under a chip or pin.
+    /// Baked into the image because the basemap glyph server has no emoji
+    /// coverage; the shadow pass stands in for the symbol layers' text halo.
+    /// `balancedAnchor` pads the top with the label block's height so a
+    /// center-anchored annotation image keeps the base on the coordinate.
+    static func labeled(_ base: UIImage, label: String, balancedAnchor: Bool = false) -> UIImage {
+        guard !label.isEmpty else { return base }
+        let text = NSAttributedString(
+            string: label,
+            attributes: [.font: UIFont.systemFont(ofSize: 11), .foregroundColor: UIColor.white]
+        )
+        let textSize = text.size()
+        let gap: CGFloat = 3
+        let labelBlock = gap + ceil(textSize.height)
+        let size = CGSize(
+            width: max(base.size.width, ceil(textSize.width)),
+            height: base.size.height + labelBlock * (balancedAnchor ? 2 : 1)
+        )
+        let baseY: CGFloat = balancedAnchor ? labelBlock : 0
+        return UIGraphicsImageRenderer(size: size).image { context in
+            base.draw(at: CGPoint(x: (size.width - base.size.width) / 2, y: baseY))
+            let origin = CGPoint(x: (size.width - textSize.width) / 2, y: baseY + base.size.height + gap)
+            context.cgContext.setShadow(
+                offset: .zero,
+                blur: 2,
+                color: UIColor.black.withAlphaComponent(0.8).cgColor
+            )
+            text.draw(at: origin)
+            context.cgContext.setShadow(offset: .zero, blur: 0, color: nil)
+            text.draw(at: origin)
         }
     }
 

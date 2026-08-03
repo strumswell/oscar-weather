@@ -44,6 +44,12 @@
     },
     "„Mein Standort“ bleibt als Untertitel sichtbar." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Mein Standort“ bleibt als Untertitel sichtbar."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -353,6 +359,12 @@
     "%@, klingt gut!" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, klingt gut!"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -491,6 +503,12 @@
     },
     "°C" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "°C"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -507,6 +525,12 @@
     },
     "°F" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "°F"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -524,6 +548,12 @@
     "≈ 1 km · 2 Min." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1 km · 2 Min."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -541,6 +571,12 @@
     "≈ 1 km · 5 Min." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1 km · 5 Min."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -558,6 +594,12 @@
     "≈ 1,4 km · 10 Min." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1,4 km · 10 Min."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -575,6 +617,12 @@
     "≈ 2 km · 15 Min." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 2 km · 15 Min."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -592,6 +640,12 @@
     "≈ 2 km · 20 Min." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 2 km · 20 Min."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -609,6 +663,12 @@
     "≈ 2 km Raster" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 2 km Raster"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -626,6 +686,12 @@
     "≈ 9 km Raster" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 9 km Raster"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -714,6 +780,12 @@
     },
     "7-Tage-Ensemble" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7-Tage-Ensemble"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -754,6 +826,12 @@
     "12 Stunden" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 Stunden"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -771,6 +849,12 @@
     "15 Uhr" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 Uhr"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -788,6 +872,12 @@
     "16 Uhr" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "16 Uhr"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -805,6 +895,12 @@
     "17 Uhr" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "17 Uhr"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -822,6 +918,12 @@
     "18 Uhr" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "18 Uhr"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -839,6 +941,12 @@
     "22 Uhr" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "22 Uhr"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -856,6 +964,12 @@
     "24 Stunden" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 Stunden"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -870,8 +984,37 @@
         }
       }
     },
+    "Ab %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ab %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ tarihinden itibaren"
+          }
+        }
+      }
+    },
     "Abbrechen" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abbrechen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -888,6 +1031,12 @@
     },
     "ACCESS-G - Australian Bureau of Meteorology (BOM)" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ACCESS-G - Australian Bureau of Meteorology (BOM)"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -900,6 +1049,12 @@
     "AI GEFS ist ein guter Kompromiss für die nächsten ein bis zwei Wochen." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI GEFS ist ein guter Kompromiss für die nächsten ein bis zwei Wochen."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -917,6 +1072,12 @@
     "AIFS eignet sich gut für mittelfristige Unsicherheit, lokale Details können geglättet wirken." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AIFS eignet sich gut für mittelfristige Unsicherheit, lokale Details können geglättet wirken."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -956,6 +1117,12 @@
     "Aktive Warngebiete des DWD" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktive Warngebiete des DWD"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1085,6 +1252,29 @@
         }
       }
     },
+    "Alert" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warnung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alert"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uyarı"
+          }
+        }
+      }
+    },
     "Alert types" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1156,6 +1346,12 @@
     "Alles auf einen Blick" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles auf einen Blick"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1173,6 +1369,12 @@
     "Allgemein" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allgemein"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1236,6 +1438,12 @@
     "Als Standard festlegen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als Standard festlegen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1254,6 +1462,12 @@
       "comment" : "Pollen type name",
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ambrosia"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1271,6 +1485,12 @@
     "Amtliche Warnungen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amtliche Warnungen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1288,6 +1508,12 @@
     "Angenehm" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Angenehm"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1305,6 +1531,12 @@
     "Ansicht" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ansicht"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1484,6 +1716,12 @@
     "Arbeit" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arbeit"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1500,6 +1738,12 @@
     },
     "ARPEGE & AROME - Météo-France" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ARPEGE & AROME - Météo-France"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1512,6 +1756,12 @@
     "Äste brechen, kleinere Schäden sind möglich." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Äste brechen, kleinere Schäden sind möglich."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1531,6 +1781,12 @@
     },
     "Attribution 4.0 International (CC BY 4.0)" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attribution 4.0 International (CC BY 4.0)"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1543,6 +1799,12 @@
     "Auch gut – such dir einen Ort aus." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auch gut – such dir einen Ort aus."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1559,6 +1821,12 @@
     },
     "Auf meinen Standort zentrieren" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf meinen Standort zentrieren"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1621,6 +1889,12 @@
     },
     "Auswahl aufheben" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auswahl aufheben"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1637,6 +1911,12 @@
     },
     "Außerhalb der Modellabdeckung" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Außerhalb der Modellabdeckung"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1700,6 +1980,12 @@
     "Band" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Band"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1717,6 +2003,12 @@
     "Bäume können entwurzeln, Gebäude können Schaden nehmen." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bäume können entwurzeln, Gebäude können Schaden nehmen."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1734,6 +2026,12 @@
     "Bäume schwanken, Gehen gegen den Wind wird mühsam." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bäume schwanken, Gehen gegen den Wind wird mühsam."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1751,6 +2049,12 @@
     "Bearbeiten" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bearbeiten"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1767,6 +2071,12 @@
     },
     "Beaufort-Skala" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beaufort-Skala"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1784,6 +2094,12 @@
     "Bedeckt" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedeckt"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1794,6 +2110,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kapalı"
+          }
+        }
+      }
+    },
+    "Befindet sich etwa über %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Befindet sich etwa über %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Currently right over %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu anda yaklaşık %@ üzerinde."
           }
         }
       }
@@ -1847,6 +2186,12 @@
       "comment" : "Pollen type name",
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beifuß"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1864,6 +2209,12 @@
     "Benachrichtige mich" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benachrichtige mich"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1949,6 +2300,12 @@
     },
     "Beta User" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beta User"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1961,6 +2318,12 @@
     "Bewegungspfeile" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewegungspfeile"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1978,6 +2341,12 @@
     "Bewölkt" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewölkt"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2022,6 +2391,12 @@
       "comment" : "Pollen type name",
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birke"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2036,9 +2411,38 @@
         }
       }
     },
+    "Bis %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bis %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Until %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ tarihine kadar"
+          }
+        }
+      }
+    },
     "Blätter rascheln, Wind ist im Gesicht spürbar." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blätter rascheln, Wind ist im Gesicht spürbar."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2056,6 +2460,12 @@
     "Boden" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boden"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2096,6 +2506,12 @@
     "Bodentemperatur" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bodentemperatur"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2113,6 +2529,12 @@
     "Bodenwassergehalt" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bodenwassergehalt"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2199,6 +2621,12 @@
     "Brasilien" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brasilien"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2216,6 +2644,12 @@
     "BrightSky" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrightSky"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2228,6 +2662,12 @@
     "BrightSky ist eine Open-Source-Wetter-API, die offene Wetterdaten vom DWD aufbereiten und für Oscar in Form von Wetterwarnung und Radardaten für Deutschland zur Verfügung stellen. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu BrightSky, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrightSky ist eine Open-Source-Wetter-API, die offene Wetterdaten vom DWD aufbereiten und für Oscar in Form von Wetterwarnung und Radardaten für Deutschland zur Verfügung stellen. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu BrightSky, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2245,6 +2685,12 @@
     "brightsky.dev" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brightsky.dev"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2364,6 +2810,12 @@
     },
     "COSMO 2I & 5M - AM ARPAE ARPAP" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "COSMO 2I & 5M - AM ARPAE ARPAP"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2375,6 +2827,12 @@
     },
     "Danke, dass Du Oscar ausprobierst. Viele Jahre und viel Herzblut sind hier reingeflossen. Ich hoffe, es gefällt Dir mindestens so viel wie mir! - Philipp. Für Oscar, Daniela, Ursel, Werner, Reinhard & Sammy" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Danke, dass Du Oscar ausprobierst. Viele Jahre und viel Herzblut sind hier reingeflossen. Ich hoffe, es gefällt Dir mindestens so viel wie mir! - Philipp. Für Oscar, Daniela, Ursel, Werner, Reinhard & Sammy"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2392,6 +2850,12 @@
     "Darstellung" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Darstellung"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2409,6 +2873,12 @@
     "Darunter DWD, NOAA, ECMWF, MeteoSwiss u. v. m." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Darunter DWD, NOAA, ECMWF, MeteoSwiss u. v. m."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2584,6 +3054,12 @@
     },
     "Deckkraft" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deckkraft"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2600,6 +3076,12 @@
     },
     "Deckkraft der Wetterebenen" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deckkraft der Wetterebenen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2617,6 +3099,12 @@
     "Dein Standort verlässt dein Gerät nur auf ca. 100 m gerundet – ohne Konto, ohne Tracking." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Standort verlässt dein Gerät nur auf ca. 100 m gerundet – ohne Konto, ohne Tracking."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2634,6 +3122,12 @@
     "Dein Standort verlässt dein Gerät nur auf ca. 100 m gerundet und wird nur für eine Sache verwendet: dein Wetter." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Standort verlässt dein Gerät nur auf ca. 100 m gerundet und wird nur für eine Sache verwendet: dein Wetter."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2650,6 +3144,12 @@
     },
     "Dein Wetter. Genau hier." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Wetter. Genau hier."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2666,6 +3166,12 @@
     },
     "Deine Vorhersage ist bereit." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Vorhersage ist bereit."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2676,6 +3182,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tahmininiz hazır."
+          }
+        }
+      }
+    },
+    "deinen Standort" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "deinen Standort"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "your location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bulunduğun yer"
           }
         }
       }
@@ -2706,6 +3235,12 @@
     "Der Live-Regenstatus zeigt aufziehenden Regen als Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island. Er benötigt aktive Regen-Warnungen." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Live-Regenstatus zeigt aufziehenden Regen als Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island. Er benötigt aktive Regen-Warnungen."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2722,6 +3257,12 @@
     },
     "Der Ortsname bleibt als Untertitel sichtbar." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Ortsname bleibt als Untertitel sichtbar."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2762,6 +3303,12 @@
     "Deutscher Wetterdienst" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deutscher Wetterdienst"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2778,6 +3325,12 @@
     },
     "Deutscher Wetterdienst (DWD)" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deutscher Wetterdienst (DWD)"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2790,6 +3343,12 @@
     "Dicke Äste bewegen sich, Drähte können pfeifen." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dicke Äste bewegen sich, Drähte können pfeifen."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2901,6 +3460,12 @@
     },
     "Dieser Tag seit 1940" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Tag seit 1940"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2941,6 +3506,12 @@
     "Du kannst den Ort jederzeit wechseln oder weitere hinzufügen." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du kannst den Ort jederzeit wechseln oder weitere hinzufügen."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2958,6 +3529,12 @@
     "Dunkel" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dunkel"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2975,6 +3552,12 @@
     "Dünne Zweige bewegen sich, Wimpel strecken sich." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dünne Zweige bewegen sich, Wimpel strecken sich."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2992,6 +3575,12 @@
     "Durchschnittlicher Wassergehalt des Bodens als volumetrisches Mischungsverhältnis in verschiedenen Tiefen." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durchschnittlicher Wassergehalt des Bodens als volumetrisches Mischungsverhältnis in verschiedenen Tiefen."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3031,6 +3620,12 @@
     },
     "Eigener Name" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eigener Name"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3047,6 +3642,12 @@
     },
     "Eigenes Emoji" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eigenes Emoji"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3064,6 +3665,12 @@
     "Ein Ensemble vergleicht mehrere leicht unterschiedliche Modellläufe. Dadurch wird sichtbar, wie stabil oder unsicher die Vorhersage in den nächsten Tagen ist." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Ensemble vergleicht mehrere leicht unterschiedliche Modellläufe. Dadurch wird sichtbar, wie stabil oder unsicher die Vorhersage in den nächsten Tagen ist."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3081,6 +3688,12 @@
     "Ein klarer Wetterbericht mit allem, was für deinen Tag zählt." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein klarer Wetterbericht mit allem, was für deinen Tag zählt."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3098,6 +3711,12 @@
     "Ein Wetterbericht mit allem, was Du wissen musst." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Wetterbericht mit allem, was Du wissen musst."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3114,6 +3733,12 @@
     },
     "Ein Wettermodell ist eine Computersimulation der Atmosphäre: Aus Millionen Messwerten berechnet es, wie das Wetter in den nächsten Stunden und Tagen wird." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Wettermodell ist eine Computersimulation der Atmosphäre: Aus Millionen Messwerten berechnet es, wie das Wetter in den nächsten Stunden und Tagen wird."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3131,6 +3756,12 @@
     "Eine kurze Warnung, bevor es an deinem Ort losregnet." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine kurze Warnung, bevor es an deinem Ort losregnet."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3170,6 +3801,12 @@
     },
     "Einführung erneut ansehen" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einführung erneut ansehen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3186,6 +3823,12 @@
     },
     "Einheiten" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einheiten"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3203,6 +3846,12 @@
     "Einordnung" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einordnung"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3220,6 +3869,12 @@
     "Einstellungen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3237,6 +3892,12 @@
     "Emoji" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emoji"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3297,12 +3958,15 @@
         }
       }
     },
-    "Ende: %@" : {
-
-    },
     "Ensemble-Details" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ensemble-Details"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3319,6 +3983,12 @@
     },
     "Ensemble-Vorhersage" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ensemble-Vorhersage"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3336,6 +4006,12 @@
     "Ensembles, detaillierte Charts und auf Wunsch dein bevorzugtes Wettermodell." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ensembles, detaillierte Charts und auf Wunsch dein bevorzugtes Wettermodell."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3377,6 +4053,12 @@
       "comment" : "Pollen type name",
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erle"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3394,6 +4076,12 @@
     "Ermöglicht durch DWD, NOAA, ECMWF, MeteoSwiss und viele mehr." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ermöglicht durch DWD, NOAA, ECMWF, MeteoSwiss und viele mehr."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3411,6 +4099,12 @@
     "Ermöglicht durch Open-Data-Projekte weltweiter Wetterdienste. Komplett kostenlos. Für immer." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ermöglicht durch Open-Data-Projekte weltweiter Wetterdienste. Komplett kostenlos. Für immer."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3428,9 +4122,38 @@
     "Erneut versuchen" : {
 
     },
+    "Erreicht %@ gegen %@." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreicht %1$@ gegen %2$@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reaches %1$@ around %2$@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ noktasına %2$@ civarında ulaşacak."
+          }
+        }
+      }
+    },
     "ET₀ beschreibt, wie viel Wasser eine gut versorgte Referenzfläche an die Luft abgibt. Für heute summieren sich die stündlichen Werte auf %@. Bei Millimeter-Angaben entspricht 1 mm ungefähr 1 Liter Wasser pro Quadratmeter." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ET₀ beschreibt, wie viel Wasser eine gut versorgte Referenzfläche an die Luft abgibt. Für heute summieren sich die stündlichen Werte auf %@. Bei Millimeter-Angaben entspricht 1 mm ungefähr 1 Liter Wasser pro Quadratmeter."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3448,6 +4171,12 @@
     "ET₀ beschreibt, wie viel Wasser eine gut versorgte Referenzfläche an die Luft abgibt. Für heute summieren sich die stündlichen Werte auf %@. Das entspricht ungefähr %@ Litern Wasser pro Quadratmeter." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ET₀ beschreibt, wie viel Wasser eine gut versorgte Referenzfläche an die Luft abgibt. Für heute summieren sich die stündlichen Werte auf %@. Das entspricht ungefähr %@ Litern Wasser pro Quadratmeter."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3465,6 +4194,12 @@
     "ET₀ ist die Referenz-Evapotranspiration eines gut bewässerten Grasfeldes und dient zur Schätzung des Bewässerungsbedarfs von Pflanzen." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ET₀ ist die Referenz-Evapotranspiration eines gut bewässerten Grasfeldes und dient zur Schätzung des Bewässerungsbedarfs von Pflanzen."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3554,6 +4289,12 @@
     "Europaweites Komposit (OPERA-Programm) aus den Radaren von über 30 Ländern. Neue Messung alle 15 Minuten; die Zwischenschritte berechnet Oscar aus der Zugbewegung." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Europaweites Komposit (OPERA-Programm) aus den Radaren von über 30 Ländern. Neue Messung alle 15 Minuten; die Zwischenschritte berechnet Oscar aus der Zugbewegung."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3614,6 +4355,29 @@
         }
       }
     },
+    "Extreme" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extrem"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extreme"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aşırı"
+          }
+        }
+      }
+    },
     "Extreme gesundheitliche Gefährdung, Besondere Schutzmaßnahmen sind ein Muss." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3637,9 +4401,61 @@
         }
       }
     },
+    "Extreme Unwetterwarnung" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extreme Unwetterwarnung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extreme Weather Warning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aşırı Şiddetli Hava Uyarısı"
+          }
+        }
+      }
+    },
+    "Extremer Schauer" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extremer Schauer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extreme Shower"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aşırı Sağanak"
+          }
+        }
+      }
+    },
     "Fallend" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fallend"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3657,6 +4473,12 @@
     "Familie" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Familie"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3719,6 +4541,12 @@
     "Feucht" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feucht"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3736,6 +4564,12 @@
     "Fiord" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fiord"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3750,9 +4584,38 @@
         }
       }
     },
+    "Fläche" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fläche"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Area"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alan"
+          }
+        }
+      }
+    },
     "Flugwetterdienst Brasiliens (DECEA)" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flugwetterdienst Brasiliens (DECEA)"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3770,6 +4633,12 @@
     "Flüssige Bewegungen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flüssige Bewegungen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3832,6 +4701,12 @@
     "Frische Brise" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frische Brise"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3940,6 +4815,12 @@
     },
     "Für die nächsten Tage wird kein Niederschlag vorhergesagt." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für die nächsten Tage wird kein Niederschlag vorhergesagt."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3960,6 +4841,12 @@
     "Für dieses Radar nicht verfügbar" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für dieses Radar nicht verfügbar"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3977,6 +4864,12 @@
     "Ganz ohne Standortfreigabe. Du kannst später jederzeit wechseln oder weitere Orte hinzufügen." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ganz ohne Standortfreigabe. Du kannst später jederzeit wechseln oder weitere Orte hinzufügen."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3994,6 +4887,12 @@
     "Gefrierend" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gefrierend"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4011,6 +4910,12 @@
     "Gefrierender Regen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gefrierender Regen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4028,6 +4933,12 @@
     "GEFS zeigt lange Trends, ist aber wegen des groben Gitters weniger lokal." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GEFS zeigt lange Trends, ist aber wegen des groben Gitters weniger lokal."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4045,6 +4956,12 @@
     "Gefühlt %@" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gefühlt %@"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4134,6 +5051,12 @@
     "Gesamtniederschlag" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesamtniederschlag"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4151,6 +5074,12 @@
     "Geschafft!" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geschafft!"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4191,6 +5120,12 @@
     "Gewählter Punkt" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gewählter Punkt"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4208,6 +5143,12 @@
     "Gewitter" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gewitter"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4324,6 +5265,12 @@
       "comment" : "Pollen type name",
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gräser"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4341,6 +5288,12 @@
     "Graupel" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graupel"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4351,23 +5304,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Graupel"
-          }
-        }
-      }
-    },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Larger branches and small trees move."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
           }
         }
       }
@@ -4398,6 +5334,12 @@
     "Große Bäume bewegen sich, Zweige können brechen." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Große Bäume bewegen sich, Zweige können brechen."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4408,6 +5350,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
+          }
+        }
+      }
+    },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Größere Zweige und kleine Bäume bewegen sich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Larger branches and small trees move."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
           }
         }
       }
@@ -4438,6 +5403,12 @@
     "Hagel" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hagel"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4517,6 +5488,12 @@
     "Hell" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hell"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4670,6 +5647,12 @@
     "Hinzufügen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hinzufügen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4805,6 +5788,12 @@
     "ICON EU EPS ist für Europa feiner aufgelöst, reicht aber nur wenige Tage." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ICON EU EPS ist für Europa feiner aufgelöst, reicht aber nur wenige Tage."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4822,6 +5811,12 @@
     "ICON Global EPS passt für kurze bis mittlere Trends weltweit." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ICON Global EPS passt für kurze bis mittlere Trends weltweit."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4891,6 +5886,12 @@
     "Isobaren" : {
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Isobaren"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4976,6 +5977,12 @@
     "Jeder Streifen steht für die mittlere Tageshöchsttemperatur an diesem Kalendertag eines Jahres – blau für kühler, rot für wärmer als der Normalwert (1961–1990). Tippe und ziehe über die Streifen, um einzelne Jahre abzulesen." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeder Streifen steht für die mittlere Tageshöchsttemperatur an diesem Kalendertag eines Jahres – blau für kühler, rot für wärmer als der Normalwert (1961–1990). Tippe und ziehe über die Streifen, um einzelne Jahre abzulesen."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5016,6 +6023,12 @@
     "Jetzt nicht" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt nicht"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5079,6 +6092,12 @@
     "Kältester Tag" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kältester Tag"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5095,6 +6114,12 @@
     },
     "Karte" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5111,6 +6136,12 @@
     },
     "Karte schließen" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte schließen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5128,6 +6159,12 @@
     "Karten" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karten"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5144,6 +6181,12 @@
     },
     "Kartenebenen" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kartenebenen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5183,6 +6226,12 @@
     },
     "Kein Emoji" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Emoji"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5223,6 +6272,12 @@
     "Kein Spam, versprochen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Spam, versprochen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5286,6 +6341,12 @@
     "Keine Ensemble-Daten" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Ensemble-Daten"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5303,6 +6364,12 @@
     "Keine Ergebnisse" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Ergebnisse"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5343,6 +6410,12 @@
     "Keine stündlichen Daten" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine stündlichen Daten"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5360,6 +6433,12 @@
     "Keine Winddaten" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Winddaten"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5394,6 +6473,12 @@
     "Klar" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klar"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5552,6 +6637,12 @@
     "Kurz: 0 windstill, 3 schwache Brise, 6 starker Wind, 8 stürmisch, 12 Orkan." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurz: 0 windstill, 3 schwache Brise, 6 starker Wind, 8 stürmisch, 12 Orkan."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5563,6 +6654,12 @@
     "Leicht" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leicht"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5580,6 +6677,12 @@
     "Leichte Brise" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leichte Brise"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5594,12 +6697,41 @@
         }
       }
     },
+    "Leichter Schauer" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leichter Schauer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light Shower"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hafif Sağanak"
+          }
+        }
+      }
+    },
     "Leipzig" : {
 
     },
     "Leiser Zug" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leiser Zug"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5663,6 +6795,12 @@
     "Liste" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liste"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5683,6 +6821,12 @@
     "Live + Kurzprognose" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live + Kurzprognose"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5700,6 +6844,12 @@
     "Live-Regenstatus (Beta)" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live-Regenstatus (Beta)"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5716,6 +6866,12 @@
     },
     "Lizenz" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lizenz"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5755,6 +6911,12 @@
     "Los geht's" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los geht's"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5772,6 +6934,12 @@
     "Los geht's!" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los geht's!"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5789,6 +6957,12 @@
     "Löschen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löschen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5806,6 +6980,12 @@
     "Luftdruck" : {
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luftdruck"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5846,6 +7026,12 @@
     "Luftdrucklinien mit Hoch- und Tiefzentren" : {
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luftdrucklinien mit Hoch- und Tiefzentren"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5863,6 +7049,12 @@
     "Luftfeuchtigkeit" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luftfeuchtigkeit"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5926,6 +7118,12 @@
     "Lufttemperatur und gefühlte Temperatur" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lufttemperatur und gefühlte Temperatur"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5942,6 +7140,29 @@
     },
     "m/s" : {
       "shouldTranslate" : false
+    },
+    "Markante Wetterwarnung" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markante Wetterwarnung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Significant Weather Warning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belirgin Hava Uyarısı"
+          }
+        }
+      }
     },
     "Mäßig" : {
       "extractionState" : "manual",
@@ -5969,6 +7190,12 @@
     "Mäßige Brise" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mäßige Brise"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5983,9 +7210,38 @@
         }
       }
     },
+    "Mäßiger Schauer" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mäßiger Schauer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moderate Shower"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta Şiddetli Sağanak"
+          }
+        }
+      }
+    },
     "Max" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Max"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6003,6 +7259,12 @@
     "Max-Band" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Max-Band"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6020,6 +7282,12 @@
     "Maximum" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maximum"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6083,6 +7351,12 @@
     "Meeresspiegel-Luftdruck" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meeresspiegel-Luftdruck"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6099,6 +7373,12 @@
     },
     "Mehr als eine Vorhersage" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehr als eine Vorhersage"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6116,6 +7396,12 @@
     "Mehrere Modellläufe zeigen, wie stabil die Vorhersage ist. %@" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehrere Modellläufe zeigen, wie stabil die Vorhersage ist. %@"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6133,6 +7419,12 @@
     "Mein Standort" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mein Standort"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6150,6 +7442,12 @@
     "Mein Wetter anzeigen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mein Wetter anzeigen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6189,6 +7487,12 @@
     },
     "Member" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Member"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6227,6 +7531,12 @@
     "Min" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Min"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6244,6 +7554,12 @@
     "Min-Band" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Min-Band"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6261,6 +7577,12 @@
     "Minimum" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minimum"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6275,9 +7597,38 @@
         }
       }
     },
+    "Minor" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gering"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minor"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hafif"
+          }
+        }
+      }
+    },
     "Minutengenau für deinen Ort" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minutengenau für deinen Ort"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6294,6 +7645,12 @@
     },
     "Mit deinem Standort zeigt Oscar° die Vorhersage für den Ort, an dem du gerade bist – zu Hause wie unterwegs." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit deinem Standort zeigt Oscar° die Vorhersage für den Ort, an dem du gerade bist – zu Hause wie unterwegs."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6400,11 +7757,57 @@
         }
       }
     },
+    "Mittlere Intensität" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mittlere Intensität"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Average Intensity"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ortalama Yoğunluk"
+          }
+        }
+      }
+    },
     "mm" : {
       "shouldTranslate" : false
     },
     "mm/h" : {
       "shouldTranslate" : false
+    },
+    "Moderate" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mäßig"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moderate"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta"
+          }
+        }
+      }
     },
     "Mono" : {
       "extractionState" : "manual",
@@ -6455,6 +7858,12 @@
     "Mosaik aus rund 29 Radarstandorten des brasilianischen Flugwetterdienstes. Einzelne Standorte melden unregelmäßig, Lücken sind möglich." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mosaik aus rund 29 Radarstandorten des brasilianischen Flugwetterdienstes. Einzelne Standorte melden unregelmäßig, Lücken sind möglich."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6478,6 +7887,12 @@
     "Multi-Radar-Komposit über den zusammenhängenden USA mit sehr dichter Aktualisierung aus rund 180 Radaren." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Multi-Radar-Komposit über den zusammenhängenden USA mit sehr dichter Aktualisierung aus rund 180 Radaren."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6517,6 +7932,12 @@
     },
     "Nächsten Tage" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nächsten Tage"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6550,6 +7971,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gece"
+          }
+        }
+      }
+    },
+    "nahezu stationär" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nahezu stationär"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nearly stationary"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "neredeyse durağan"
           }
         }
       }
@@ -6626,6 +8070,12 @@
     "Nebel" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nebel"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6643,6 +8093,12 @@
     "Neuer Ort, neue Vorhersage – ganz ohne Suchen." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neuer Ort, neue Vorhersage – ganz ohne Suchen."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6706,6 +8162,12 @@
     "Niederschlagsart" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niederschlagsart"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6723,6 +8185,12 @@
     "Niederschlagssumme" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niederschlagssumme"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6740,6 +8208,12 @@
     "Niesel" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niesel"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6757,6 +8231,12 @@
     "Nieselregen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nieselregen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6800,6 +8280,12 @@
     },
     "Noch keine Orte gespeichert." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch keine Orte gespeichert."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6999,6 +8485,12 @@
     "Nur auf Modellebenen (Radar hat keinen Luftdruck)" : {
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur auf Modellebenen (Radar hat keinen Luftdruck)"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7016,6 +8508,12 @@
     "Nur relevante Hinweise – jederzeit in den Einstellungen abschaltbar." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur relevante Hinweise – jederzeit in den Einstellungen abschaltbar."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7080,6 +8578,12 @@
     "Ø Bandbreite" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ø Bandbreite"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7097,6 +8601,12 @@
     "Ø Ensemble-Unsicherheit" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ø Ensemble-Unsicherheit"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7114,6 +8624,12 @@
     "Offene Daten. Für immer kostenlos." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offene Daten. Für immer kostenlos."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7131,6 +8647,12 @@
     "Öffnet Details zu den Radarquellen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet Details zu den Radarquellen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7148,6 +8670,12 @@
     "Öffnet die Einstellungen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet die Einstellungen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7165,6 +8693,12 @@
     "Öffnet die Erklärung zu Wettermodellen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet die Erklärung zu Wettermodellen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7181,6 +8715,12 @@
     },
     "Öffnet die Karte" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet die Karte"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7197,6 +8737,12 @@
     },
     "Öffnet die Kartenebenen" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet die Kartenebenen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7213,6 +8759,12 @@
     },
     "Öffnet die Suche" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet die Suche"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7230,6 +8782,12 @@
     "Öffnet die tägliche Ensemble-Vorhersage" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet die tägliche Ensemble-Vorhersage"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7317,6 +8875,12 @@
     },
     "Open-Meteo" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7328,6 +8892,12 @@
     },
     "Open-Meteo ist eine Open-Source-Wetter-API, die offene Wetterdaten von verschiedenen internationalen Wetterdiensten sammelt. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu Open-Meteo, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo ist eine Open-Source-Wetter-API, die offene Wetterdaten von verschiedenen internationalen Wetterdiensten sammelt. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu Open-Meteo, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7348,6 +8918,12 @@
     "OPERA-Programm" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OPERA-Programm"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7433,6 +9009,12 @@
     "Orkan" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orkan"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7450,6 +9032,12 @@
     "Orkanartiger Sturm" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orkanartiger Sturm"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7469,6 +9057,12 @@
     },
     "Ort hinzufügen" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ort hinzufügen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7486,6 +9080,12 @@
     "Ort suchen …" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ort suchen …"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7526,6 +9126,12 @@
     "Orte verwalten" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orte verwalten"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7543,6 +9149,12 @@
     "Ortswerte" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ortswerte"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7606,6 +9218,12 @@
     "Oscar Radar-Daten werden geladen…" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar Radar-Daten werden geladen…"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7622,6 +9240,12 @@
     },
     "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7638,6 +9262,12 @@
     },
     "Oscar verwendet Prognosedaten des Global Forecast System (GFS), einem Wettervorhersagemodell der National Centers for Environmental Prediction (NCEP), bereitgestellt durch NOAA. NOAA/NWS-Daten sind in der Regel gemeinfrei, sofern nicht anders gekennzeichnet. Die Nutzung stellt keine Unterstützung, Empfehlung oder offizielle Verbindung zu NOAA, NWS oder NCEP dar." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet Prognosedaten des Global Forecast System (GFS), einem Wettervorhersagemodell der National Centers for Environmental Prediction (NCEP), bereitgestellt durch NOAA. NOAA/NWS-Daten sind in der Regel gemeinfrei, sofern nicht anders gekennzeichnet. Die Nutzung stellt keine Unterstützung, Empfehlung oder offizielle Verbindung zu NOAA, NWS oder NCEP dar."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7654,6 +9284,12 @@
     },
     "Oscar verwendet Wetter- und Geodaten des Deutschen Wetterdienstes (DWD), unter anderem Radardaten sowie Prognosedaten aus dem ICON-D2-Modell. Datenbasis: Deutscher Wetterdienst. Die Daten werden unter den Open-Data-Nutzungsbedingungen des DWD bereitgestellt." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet Wetter- und Geodaten des Deutschen Wetterdienstes (DWD), unter anderem Radardaten sowie Prognosedaten aus dem ICON-D2-Modell. Datenbasis: Deutscher Wetterdienst. Die Daten werden unter den Open-Data-Nutzungsbedingungen des DWD bereitgestellt."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7693,6 +9329,12 @@
     "Oscar° bündelt präzise Vorhersagen, Echtzeit-Radar und Klimadaten – werbefrei und ohne Konto." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar° bündelt präzise Vorhersagen, Echtzeit-Radar und Klimadaten – werbefrei und ohne Konto."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7709,6 +9351,12 @@
     },
     "Oscar° bündelt präzise Vorhersagen, Echtzeit-Radar und Klimadaten verschiedener Wetterdienste." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar° bündelt präzise Vorhersagen, Echtzeit-Radar und Klimadaten verschiedener Wetterdienste."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7728,6 +9376,12 @@
     },
     "Oscar° sagt dir Bescheid, bevor dich das Wetter überrascht – nur dann, wenn es wirklich zählt." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar° sagt dir Bescheid, bevor dich das Wetter überrascht – nur dann, wenn es wirklich zählt."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7744,6 +9398,12 @@
     },
     "Oscar° startet mit diesem Ort." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar° startet mit diesem Ort."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7924,6 +9584,12 @@
     "Präzise Vorhersagen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Präzise Vorhersagen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7941,6 +9607,12 @@
     "Präzise Wettervorhersagen, ermöglicht durch Open-Data-Projekte weltweiter Wetterdienste. Komplett kostenlos. Für immer." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Präzise Wettervorhersagen, ermöglicht durch Open-Data-Projekte weltweiter Wetterdienste. Komplett kostenlos. Für immer."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7968,6 +9640,12 @@
     "Privat by Design" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privat by Design"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7985,6 +9663,12 @@
     "QPESUMS-Komposit der taiwanischen Wetterbehörde über Taiwan und seinen Inselgruppen." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QPESUMS-Komposit der taiwanischen Wetterbehörde über Taiwan und seinen Inselgruppen."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8000,7 +9684,26 @@
       }
     },
     "Quelle: %@" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelle: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaynak: %@"
+          }
+        }
+      }
     },
     "Radar" : {
       "localizations" : {
@@ -8027,6 +9730,12 @@
     "Radar & Karten" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar & Karten"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8044,6 +9753,12 @@
     "Radarkomposit über Deutschland und den Nachbarländern. Neue Messung alle 5 Minuten, Kurzprognose für die nächsten 2 Stunden." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radarkomposit über Deutschland und den Nachbarländern. Neue Messung alle 5 Minuten, Kurzprognose für die nächsten 2 Stunden."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8060,6 +9775,12 @@
     },
     "Radarquellen in Oscar°" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radarquellen in Oscar°"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8146,6 +9867,12 @@
     "RainViewer stellt diverse Kartenlayer bereit. Darunter fallen unter anderem das globale Regenradar und Satellitenbilder." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RainViewer stellt diverse Kartenlayer bereit. Darunter fallen unter anderem das globale Regenradar und Satellitenbilder."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8163,6 +9890,12 @@
     "Rauch driftet leicht, Windfahnen bleiben ruhig." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rauch driftet leicht, Windfahnen bleiben ruhig."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8180,6 +9913,12 @@
     "Rauch steigt fast senkrecht auf." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rauch steigt fast senkrecht auf."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8266,6 +10005,12 @@
     "Referenz-Evapotranspiration (ET₀)" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Referenz-Evapotranspiration (ET₀)"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8283,6 +10028,12 @@
     "Regen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8300,6 +10051,12 @@
     "Regen · Schnee · Hagel" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen · Schnee · Hagel"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8317,6 +10074,12 @@
     "Regen im Anmarsch" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen im Anmarsch"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8334,6 +10097,12 @@
     "Regen und Schnee pro Stunde" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen und Schnee pro Stunde"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8351,6 +10120,12 @@
     "Regen, Blitze und Temperatur live auf der Karte – minutengenau für die nächsten Stunden." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen, Blitze und Temperatur live auf der Karte – minutengenau für die nächsten Stunden."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8368,6 +10143,12 @@
     "Regen, Schnee und Temperatur live auf der Karte, minutengenau für die nächsten Stunden." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen, Schnee und Temperatur live auf der Karte, minutengenau für die nächsten Stunden."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8385,6 +10166,12 @@
     "Regen, Temperatur, Wind und Luftdruck live auf der Karte, minutengenau für die nächsten Stunden." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen, Temperatur, Wind und Luftdruck live auf der Karte, minutengenau für die nächsten Stunden."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8402,6 +10189,12 @@
     "Regenradar" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenradar"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8463,10 +10256,35 @@
       }
     },
     "Regenzelle" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenzelle"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain Cell"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağış Hücresi"
+          }
+        }
+      }
     },
     "Regenzellen" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenzellen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8507,6 +10325,12 @@
     "Reist automatisch mit" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reist automatisch mit"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8569,6 +10393,12 @@
     "Ruhigster Tag" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruhigster Tag"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8609,6 +10439,12 @@
     "Sanfte Übergänge zwischen den Bildern" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sanfte Übergänge zwischen den Bildern"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8649,6 +10485,12 @@
     "Schauer" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schauer"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8689,6 +10531,12 @@
     "Schließen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schließen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8729,6 +10577,12 @@
     "Schneefall" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schneefall"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8746,6 +10600,12 @@
     "Schneeregen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schneeregen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8763,6 +10623,12 @@
     "Schule" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schule"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8780,6 +10646,12 @@
     "Schwache Brise" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schwache Brise"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8820,6 +10692,12 @@
     "Schwere Sturmschäden, im Binnenland selten." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schwere Sturmschäden, im Binnenland selten."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8837,6 +10715,12 @@
     "Schwere Verwüstungen, sehr selten im Landesinneren." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schwere Verwüstungen, sehr selten im Landesinneren."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8854,6 +10738,12 @@
     "Schwerer Sturm" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schwerer Sturm"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8894,6 +10784,12 @@
     "Sehr feines Raster über Zentraleuropa — erkennt auch kleine Schauer und Gewitter. Ideal für die nächsten 48 Stunden." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sehr feines Raster über Zentraleuropa — erkennt auch kleine Schauer und Gewitter. Ideal für die nächsten 48 Stunden."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9000,9 +10896,38 @@
         }
       }
     },
+    "Severe" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schwer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Severe"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şiddetli"
+          }
+        }
+      }
+    },
     "Sinkender Luftdruck deutet auf schlechtes Wetter oder Stürme hin, steigender Luftdruck auf gutes Wetter oder Hochdruckgebiete." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sinkender Luftdruck deutet auf schlechtes Wetter oder Stürme hin, steigender Luftdruck auf gutes Wetter oder Hochdruckgebiete."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9100,6 +11025,12 @@
     "So tief du willst" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So tief du willst"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9288,6 +11219,12 @@
     "Stabil" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stabil"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9305,6 +11242,12 @@
     "Standard entfernen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard entfernen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9366,6 +11309,12 @@
     "Standardort" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standardort"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9383,6 +11332,12 @@
     "Stark" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stark"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9397,9 +11352,38 @@
         }
       }
     },
+    "Starker Schauer" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starker Schauer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heavy Shower"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuvvetli Sağanak"
+          }
+        }
+      }
+    },
     "Starker Wind" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starker Wind"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9417,6 +11401,12 @@
     "Stärkster Tag" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stärkster Tag"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9454,12 +11444,15 @@
         }
       }
     },
-    "Start: %@" : {
-
-    },
     "Steifer Wind" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steifer Wind"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9477,6 +11470,12 @@
     "Steigend" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steigend"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9519,6 +11518,12 @@
     },
     "Stil der Hintergrundkarte" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stil der Hintergrundkarte"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9536,9 +11541,38 @@
     "Stufe %@" : {
 
     },
+    "Stufe %lld" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stufe %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Level %lld"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seviye %lld"
+          }
+        }
+      }
+    },
     "Stunde für Stunde, bis zu 14 Tage im Voraus – mit den besten Wettermodellen für deinen Ort." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stunde für Stunde, bis zu 14 Tage im Voraus – mit den besten Wettermodellen für deinen Ort."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9600,6 +11634,12 @@
     },
     "Stündliche Details" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stündliche Details"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9617,6 +11657,12 @@
     "Sturm" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sturm"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9634,6 +11680,12 @@
     "Stürmischer Wind" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stürmischer Wind"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9651,6 +11703,12 @@
     "Suche fehlgeschlagen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suche fehlgeschlagen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9667,6 +11725,12 @@
     },
     "Suche nach einem Ort oder wähle einen Punkt auf der Karte." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suche nach einem Ort oder wähle einen Punkt auf der Karte."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9707,6 +11771,12 @@
     "Summe" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summe"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9750,6 +11820,12 @@
     "System" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9813,6 +11889,12 @@
     "Tageshöchstwerte" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tageshöchstwerte"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9830,6 +11912,12 @@
     "Tagestiefwerte" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tagestiefwerte"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9868,6 +11956,12 @@
     },
     "Tägliche Details" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tägliche Details"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9885,6 +11979,12 @@
     "Teils bewölkt" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teils bewölkt"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9948,6 +12048,12 @@
     "Temperatur & Wind an Städten" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatur & Wind an Städten"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9965,6 +12071,12 @@
     "Temperatur in mehreren Bodentiefen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatur in mehreren Bodentiefen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9982,6 +12094,12 @@
     "Temperatur, Regen und Wind exakt für deine Koordinaten." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatur, Regen und Wind exakt für deine Koordinaten."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10021,6 +12139,12 @@
     "Tippe auf die Karte, um einen Ort hinzuzufügen." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf die Karte, um einen Ort hinzuzufügen."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10043,6 +12167,12 @@
     },
     "Tomorrow.io, vertreten durch die Tomorrow Companies Inc., stellt diverse Kartenlayer unter deren Free-Tier bereit. Darunter fallen unter anderem das globale Regenradar, Temperatur, Windgeschwindigkeit, Windrichtung, Wolken und Luftfeuchtigkeit." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomorrow.io, vertreten durch die Tomorrow Companies Inc., stellt diverse Kartenlayer unter deren Free-Tier bereit. Darunter fallen unter anderem das globale Regenradar, Temperatur, Windgeschwindigkeit, Windrichtung, Wolken und Luftfeuchtigkeit."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10083,6 +12213,12 @@
     "Trocken" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trocken"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10100,6 +12236,12 @@
     "Trockenster Tag" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trockenster Tag"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10344,6 +12486,12 @@
     "Unbekannter Ort" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unbekannter Ort"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10360,6 +12508,12 @@
     },
     "Unsicherheit & Modell" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unsicherheit & Modell"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10377,6 +12531,12 @@
     "Unsicherheit sichtbar machen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unsicherheit sichtbar machen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10394,6 +12554,12 @@
     "Unsicherster Tag" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unsicherster Tag"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10404,6 +12570,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "En Belirsiz Gün"
+          }
+        }
+      }
+    },
+    "Unwetterwarnung" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unwetterwarnung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Severe Weather Warning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şiddetli Hava Uyarısı"
           }
         }
       }
@@ -10434,6 +12623,12 @@
     "Unwetterwarnungen der offiziellen Wetterdienste für deinen Ort." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unwetterwarnungen der offiziellen Wetterdienste für deinen Ort."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10451,6 +12646,12 @@
     "Urlaub" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Urlaub"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10468,6 +12669,12 @@
     "US-Wetterbehörde NOAA" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "US-Wetterbehörde NOAA"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10558,6 +12765,12 @@
     "Verbund der europäischen Wetterdienste" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbund der europäischen Wetterdienste"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10601,6 +12814,12 @@
     "Volumetrischer Wassergehalt je Bodentiefe" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volumetrischer Wassergehalt je Bodentiefe"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10640,6 +12859,12 @@
     "Vorhersage nicht verfügbar" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorhersage nicht verfügbar"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10656,6 +12881,12 @@
     },
     "Vorschau" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorschau"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10696,6 +12927,12 @@
     "Wähle deinen Ort" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle deinen Ort"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10758,6 +12995,12 @@
     "Wann dieses Modell passt" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wann dieses Modell passt"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10843,6 +13086,12 @@
     "Wärmster Tag" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wärmster Tag"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10859,6 +13108,12 @@
     },
     "Was sind Wettermodelle?" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was sind Wettermodelle?"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10875,6 +13130,12 @@
     },
     "Was zeigt das Regenradar?" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was zeigt das Regenradar?"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10892,6 +13153,12 @@
     "Wasserverlust einer Referenzfläche" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wasserverlust einer Referenzfläche"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10954,6 +13221,12 @@
     },
     "Webseite" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Webseite"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10971,6 +13244,12 @@
     "Weiche Kanten statt harter Farbstufen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weiche Kanten statt harter Farbstufen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10988,6 +13267,12 @@
     "Weichzeichnen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weichzeichnen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11005,6 +13290,12 @@
     "Weiter" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weiter"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11045,6 +13336,12 @@
     "Weltweit" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weltweit"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11085,6 +13382,12 @@
     "Wetter" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetter"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11101,6 +13404,12 @@
     },
     "Wetter, das sich meldet." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetter, das sich meldet."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11118,6 +13427,12 @@
     "Wetterbehörde Taiwans" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetterbehörde Taiwans"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11135,6 +13450,12 @@
     "Wetterdaten werden geladen…" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetterdaten werden geladen…"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11151,6 +13472,12 @@
     },
     "Wettermodell" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wettermodell"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11168,6 +13495,12 @@
     "Wettermodelle" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wettermodelle"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11184,6 +13517,12 @@
     },
     "Wettermodelle in Oscar°" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wettermodelle in Oscar°"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11200,6 +13539,12 @@
     },
     "Wetterradare messen, wo es gerade regnet oder schneit. Oscar verbindet die Messung mit einer Kurzprognose: Aus der Zugbewegung des Niederschlags werden die nächsten ein bis zwei Stunden berechnet. Alles hinter der LIVE-Markierung ist berechnet — je weiter voraus, desto unsicherer." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetterradare messen, wo es gerade regnet oder schneit. Oscar verbindet die Messung mit einer Kurzprognose: Aus der Zugbewegung des Niederschlags werden die nächsten ein bis zwei Stunden berechnet. Alles hinter der LIVE-Markierung ist berechnet — je weiter voraus, desto unsicherer."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11215,10 +13560,35 @@
       }
     },
     "Wetterwarnung" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetterwarnung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather Warning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava Durumu Uyarısı"
+          }
+        }
+      }
     },
     "Wetterwarnungen" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetterwarnungen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11257,6 +13627,12 @@
     },
     "Willkommen bei" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Willkommen bei"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11274,6 +13650,12 @@
     "Wind" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wind"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11291,6 +13673,12 @@
     "Wind & Druck" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wind & Druck"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11308,6 +13696,12 @@
     "Windböen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Windböen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11348,6 +13742,12 @@
     "Windgeschwindigkeit in mehreren Höhen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Windgeschwindigkeit in mehreren Höhen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11365,6 +13765,12 @@
     "Windigster Tag" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Windigster Tag"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11382,6 +13788,12 @@
     "Windstille" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Windstille"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11399,6 +13811,12 @@
     "Windstillen" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Windstillen"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11416,6 +13834,12 @@
     "Zeitformat" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeitformat"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11502,6 +13926,12 @@
     "Zentraleuropa" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zentraleuropa"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11516,9 +13946,38 @@
         }
       }
     },
+    "Zieht voraussichtlich an %@ vorbei." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zieht voraussichtlich an %@ vorbei."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Will likely pass by %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muhtemelen %@ yakınından geçecek."
+          }
+        }
+      }
+    },
     "Zugbahnen kräftiger Schauer" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugbahnen kräftiger Schauer"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11533,9 +13992,38 @@
         }
       }
     },
+    "Zugrichtung" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugrichtung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movement"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hareket"
+          }
+        }
+      }
+    },
     "Zugrichtung im Regenradar" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugrichtung im Regenradar"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11553,6 +14041,12 @@
     "Zuhause" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zuhause"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11592,6 +14086,12 @@
     "Zur Vorhersage" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zur Vorhersage"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -11612,6 +14112,12 @@
     "Zweige bewegen sich, loses Papier hebt ab." : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zweige bewegen sich, loses Papier hebt ab."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",

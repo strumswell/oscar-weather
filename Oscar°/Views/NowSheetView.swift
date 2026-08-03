@@ -14,7 +14,12 @@ struct NowSheetView: View {
         case .climate(let summary):
             ClimateDetailView(summary: summary)
         case .alerts:
+            // Matches the map's polygon tap sheet; no .presentationBackground
+            // override — an explicit background would kill the glass.
             AlertListView()
+                .presentationDetents([.medium, .large])
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                .presentationDragIndicator(.hidden)
         case .settings:
             SettingsView()
         }

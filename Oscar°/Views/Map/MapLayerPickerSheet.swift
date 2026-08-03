@@ -40,6 +40,7 @@ struct MapLayerPickerSheet: View {
                     productSection(title: "Wind", layers: [.iconWind, .ecmwfWind])
                     productSection(title: "Luftdruck", layers: [.iconPressure, .ecmwfPressure])
                     displaySection
+                    attributionFooter
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 4)
@@ -135,6 +136,23 @@ struct MapLayerPickerSheet: View {
                 }
             }
         }
+    }
+
+    /// Brand strip for the sources feeding the map layers — CWA and REDEMET
+    /// stay text-only (their names are on the tiles; no bundled logos).
+    private var attributionFooter: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 18) {
+                ProviderLogo(asset: "logo-dwd", height: 28)
+                ProviderLogo(asset: "logo-ecmwf", height: 18)
+                ProviderLogo(asset: "logo-eumetnet", height: 28)
+                ProviderLogo(asset: "logo-noaa", height: 28)
+            }
+            PoweredByOscarServer()
+        }
+        .foregroundStyle(.secondary)
+        .frame(maxWidth: .infinity)
+        .padding(.top, 4)
     }
 
     /// The typed radar product exists for DWD and MRMS coverage, not OPERA or CWA.

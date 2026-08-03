@@ -134,9 +134,15 @@ struct WeatherMapView: UIViewRepresentable {
         // form — so MapLibre's ⓘ button and wordmark both stay hidden.
         mapView.logoView.isHidden = true
         mapView.attributionButton.isHidden = true
-        // North stays resettable via the two-finger gesture; the transient
-        // compass overlay just fights the close/layer buttons in that corner.
-        mapView.compassView.isHidden = true
+        // Compass: adaptive — appears only while the map is rotated off north,
+        // tap resets. Seated below the SwiftUI control capsule that owns the
+        // top-right corner (16pt top padding + two 46pt buttons + divider) and
+        // centered on its 46pt width (the compass image is 40pt). Margins are
+        // safe-area-relative, matching the SwiftUI overlay's frame. Previews
+        // disallow rotation, so the ornament never shows there.
+        mapView.compassView.compassVisibility = .adaptive
+        mapView.compassViewPosition = .topRight
+        mapView.compassViewMargins = CGPoint(x: 19, y: 121)
         if !userActionAllowed {
             mapView.allowsScrolling = false
             mapView.allowsZooming = false
@@ -965,10 +971,21 @@ struct WeatherMapView: UIViewRepresentable {
                   let chunks = Self.alertShapeChunks(data: data)
             else { return }
 
-            // DWD severity ranks: 1 Minor (default), 2 Moderate, 3 Severe, 4 Extreme.
+            // Severity ranks: 1 Minor (default), 2 Moderate, 3 Severe, 4 Extreme.
             // Typed constructor — MapLibre's NSExpression parser rejects the old
-            // MGL_MATCH format-string spelling at runtime.
-            let severityColor = NSExpression(
+            // MGL_MATCH format-string spelling at runtime. Meteoalarm's ladder has
+            // no Minor (yellow IS Moderate), so its shapes color one step lighter
+            // to match the national services' own maps; mirrors
+            // `AlertSeverityStyle.color(rank:source:)`.
+            let meteoalarmColor = NSExpression(
+                forMLNMatchingKey: NSExpression(forKeyPath: "severity_rank"),
+                in: [
+                    NSExpression(forConstantValue: 3): NSExpression(forConstantValue: UIColor.systemOrange),
+                    NSExpression(forConstantValue: 4): NSExpression(forConstantValue: UIColor.systemRed),
+                ],
+                default: NSExpression(forConstantValue: UIColor.systemYellow)
+            )
+            let nativeColor = NSExpression(
                 forMLNMatchingKey: NSExpression(forKeyPath: "severity_rank"),
                 in: [
                     NSExpression(forConstantValue: 2): NSExpression(forConstantValue: UIColor.systemOrange),
@@ -976,6 +993,11 @@ struct WeatherMapView: UIViewRepresentable {
                     NSExpression(forConstantValue: 4): NSExpression(forConstantValue: UIColor.systemPurple),
                 ],
                 default: NSExpression(forConstantValue: UIColor.systemYellow)
+            )
+            let severityColor = NSExpression(
+                forMLNMatchingKey: NSExpression(forKeyPath: "source"),
+                in: [NSExpression(forConstantValue: "meteoalarm"): meteoalarmColor],
+                default: nativeColor
             )
             for (index, chunk) in chunks.enumerated() {
                 let source = MLNShapeSource(
@@ -1591,7 +1613,7 @@ struct WeatherMapView: UIViewRepresentable {
 
         /// Query the tapped point's rendered features: cells win (small targets, padded
         /// hit box), then every warning polygon under the finger — deduped by alert id
-        /// (MultiPolygon parts return one feature each) and sorted most severe first.
+        /// (MultiPolygon parts return one feature each) and sorted active-first.
         @objc fileprivate func handleMapTap(_ gesture: UITapGestureRecognizer) {
             guard gesture.state == .ended, let mapView else { return }
             let point = gesture.location(in: mapView)
@@ -1640,7 +1662,7 @@ struct WeatherMapView: UIViewRepresentable {
                     alerts = attributeAlerts
                 }
                 guard !alerts.isEmpty else { return }
-                alerts.sort { $0.severityRank > $1.severityRank }
+                alerts = alerts.sortedForDisplay()
                 onAlertsTapped(alerts)
             }
         }
@@ -1843,8 +1865,7 @@ struct WeatherMapView: UIViewRepresentable {
                 layer.textHaloWidth = NSExpression(forConstantValue: 1)
                 layer.textAllowsOverlap = NSExpression(forConstantValue: true)
                 layer.textIgnoresPlacement = NSExpression(forConstantValue: true)
-                // The city name hangs under the capsule, same as the saved-city
-                // chips' custom label.
+                // The city name hangs under the capsule.
                 layer.textAnchor = NSExpression(forConstantValue: "top")
                 layer.textOffset = NSExpression(forConstantValue: NSValue(cgVector: CGVector(dx: 0, dy: 1.6)))
                 style.addLayer(layer)   // topmost — value chips read above the labels
@@ -1871,9 +1892,9 @@ struct WeatherMapView: UIViewRepresentable {
         private static let cityChipLayerID = "oscar-city-chips-layer"
 
         /// The picker map's city chips on the weather map: every saved city as
-        /// a conditions capsule (condition symbol + temperature, custom emoji
-        /// leading when set) with the custom label underneath. Fullscreen only;
-        /// the selected city keeps its red marker instead of a chip.
+        /// a conditions capsule (condition symbol + temperature) with the
+        /// identity line ("emoji label") underneath. Fullscreen only; the
+        /// selected city keeps its red marker instead of a chip.
         private func syncCityChips(style: MLNStyle) {
             guard parent.userActionAllowed else { return }
             // Read through the store so the observation loop re-fires this sync
@@ -1883,38 +1904,47 @@ struct WeatherMapView: UIViewRepresentable {
             var signature = ""
             for city in parent.cities where !city.selected {
                 let coordinate = CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
+                let customLabel = city.customLabel ?? ""
+                // The custom emoji leads the identity line under the capsule,
+                // not the capsule itself.
+                let identityLine = [city.emoji ?? "", customLabel]
+                    .filter { !$0.isEmpty }
+                    .joined(separator: " ")
                 let iconName: String
                 if let conditions = store.conditions(for: coordinate) {
                     let temperatureText = "\(Int(conditions.temperature.rounded()))°"
-                    iconName = "oscar-city-chip-\(city.emoji ?? "")-\(conditions.iconAssetName)-\(temperatureText)"
+                    iconName = "oscar-city-chip-\(conditions.iconAssetName)-\(temperatureText)-\(identityLine)"
                     if !registeredCityChipImages.contains(iconName) {
                         style.setImage(
-                            MapChip.conditions(
-                                iconAsset: conditions.iconAssetName,
-                                temperatureText: temperatureText,
-                                emoji: city.emoji
+                            MapChip.labeled(
+                                MapChip.conditions(
+                                    iconAsset: conditions.iconAssetName,
+                                    temperatureText: temperatureText
+                                ),
+                                label: identityLine
                             ),
                             forName: iconName
                         )
                         registeredCityChipImages.insert(iconName)
                     }
                 } else {
-                    // Conditions not in yet: the emoji/pin disc as fallback.
-                    iconName = "oscar-city-pin-\(city.emoji ?? "plain")"
+                    // Conditions not in yet: the emoji/pin disc as fallback (the
+                    // emoji already on the disc, only the label underneath).
+                    iconName = "oscar-city-pin-\(city.emoji ?? "plain")-\(customLabel)"
                     if !registeredCityChipImages.contains(iconName) {
-                        style.setImage(MapChip.pin(emoji: city.emoji), forName: iconName)
+                        style.setImage(
+                            MapChip.labeled(MapChip.pin(emoji: city.emoji), label: customLabel),
+                            forName: iconName
+                        )
                         registeredCityChipImages.insert(iconName)
                     }
                 }
 
                 let feature = MLNPointFeature()
                 feature.coordinate = coordinate
-                feature.attributes = [
-                    "icon": iconName,
-                    "label": city.customLabel ?? "",
-                ]
+                feature.attributes = ["icon": iconName]
                 features.append(feature)
-                signature += "\(iconName)|\(city.customLabel ?? "")|\(city.lat)|\(city.lon);"
+                signature += "\(iconName)|\(city.lat)|\(city.lon);"
             }
 
             ensureCityChipLayer(in: style)
@@ -1944,19 +1974,11 @@ struct WeatherMapView: UIViewRepresentable {
             layer.iconImageName = NSExpression(forKeyPath: "icon")
             layer.iconAllowsOverlap = NSExpression(forConstantValue: true)
             layer.iconIgnoresPlacement = NSExpression(forConstantValue: true)
-            layer.text = NSExpression(forKeyPath: "label")
-            // The ONLY font stack the OpenFreeMap styles serve glyphs for.
-            layer.textFontNames = NSExpression(forConstantValue: ["Noto Sans Regular"])
-            layer.textFontSize = NSExpression(forConstantValue: 11)
-            layer.textColor = NSExpression(forConstantValue: UIColor.white)
-            layer.textHaloColor = NSExpression(forConstantValue: UIColor.black.withAlphaComponent(0.45))
-            layer.textHaloWidth = NSExpression(forConstantValue: 1)
-            layer.textAllowsOverlap = NSExpression(forConstantValue: true)
-            layer.textIgnoresPlacement = NSExpression(forConstantValue: true)
-            // The custom label hangs under the capsule; cities without one carry
-            // an empty string, which renders nothing.
-            layer.textAnchor = NSExpression(forConstantValue: "top")
-            layer.textOffset = NSExpression(forConstantValue: NSValue(cgVector: CGVector(dx: 0, dy: 1.6)))
+            // The identity line is baked into the image (the glyph server has no
+            // emoji); top anchor + half-chip offset keeps the capsule centered
+            // on the city no matter how tall the label makes the image.
+            layer.iconAnchor = NSExpression(forConstantValue: "top")
+            layer.iconOffset = NSExpression(forConstantValue: NSValue(cgVector: CGVector(dx: 0, dy: -MapChip.height / 2)))
             style.addLayer(layer)   // topmost — chips read above every overlay
         }
 

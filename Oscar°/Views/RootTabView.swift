@@ -2,7 +2,7 @@
 //  RootTabView.swift
 //  Oscar°
 //
-//  App root: Orte / Wetter / Radar tabs. Orte is a plain tab, not the
+//  App root: Orte / Wetter / Karten tabs. Orte is a plain tab, not the
 //  system search role — the separated search pill is a button affordance
 //  (instant keyboard + round trip), wrong for a dwell space like the
 //  locations list; its search field lives inside the list instead.
@@ -43,7 +43,7 @@ struct RootTabView: View {
                 Tab("Wetter", systemImage: "cloud.sun", value: AppTab.forecast) {
                     NowView()
                 }
-                Tab("Radar", systemImage: "globe.europe.africa", value: AppTab.maps) {
+                Tab("Karten", systemImage: "globe.europe.africa", value: AppTab.maps) {
                     WeatherMapDetailView(settingsService: settingsService)
                         .tint(.primary)
                 }

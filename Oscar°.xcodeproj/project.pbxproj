@@ -67,6 +67,7 @@
 		ADC0FFEE2FE6000000000002 /* MapFeatureInfoSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADC0FFEE2FE6000000000001 /* MapFeatureInfoSheets.swift */; };
 		AD8000122FE6000000000001 /* WeatherModelInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000112FE6000000000001 /* WeatherModelInfoView.swift */; };
 		ADA300022FF8000000000001 /* RadarInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA300012FF8000000000001 /* RadarInfoView.swift */; };
+		ADA300712FF8000000000001 /* AttributionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA300702FF8000000000001 /* AttributionViews.swift */; };
 		AD8000142FE6000000000001 /* WeatherColormap.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000132FE6000000000001 /* WeatherColormap.swift */; };
 		AD8000152FE6000000000002 /* WeatherColormap.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000132FE6000000000001 /* WeatherColormap.swift */; };
 		AD8000162FE6000000000001 /* RadarRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000152FE6000000000001 /* RadarRegion.swift */; };
@@ -520,6 +521,7 @@
 		ADC0FFEE2FE6000000000001 /* MapFeatureInfoSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapFeatureInfoSheets.swift; sourceTree = "<group>"; };
 		AD8000112FE6000000000001 /* WeatherModelInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherModelInfoView.swift; sourceTree = "<group>"; };
 		ADA300012FF8000000000001 /* RadarInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarInfoView.swift; sourceTree = "<group>"; };
+		ADA300702FF8000000000001 /* AttributionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributionViews.swift; sourceTree = "<group>"; };
 		AD8000132FE6000000000001 /* WeatherColormap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherColormap.swift; sourceTree = "<group>"; };
 		AD8000152FE6000000000001 /* RadarRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarRegion.swift; sourceTree = "<group>"; };
 		AD8000182FE6000000000001 /* RadarFrameSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarFrameSupport.swift; sourceTree = "<group>"; };
@@ -1182,6 +1184,7 @@
 				AD9100093008000000000001 /* ToastBanner.swift */,
 				2536438026DACCB800C8A952 /* SettingsView.swift */,
 				259704E42757D7E800DFCA53 /* AlertDetailView.swift */,
+				ADA300702FF8000000000001 /* AttributionViews.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1861,6 +1864,7 @@
 				ADC0FFEE2FE6000000000002 /* MapFeatureInfoSheets.swift in Sources */,
 				AD8000122FE6000000000001 /* WeatherModelInfoView.swift in Sources */,
 				ADA300022FF8000000000001 /* RadarInfoView.swift in Sources */,
+				ADA300712FF8000000000001 /* AttributionViews.swift in Sources */,
 				AD8000142FE6000000000001 /* WeatherColormap.swift in Sources */,
 				AD8000162FE6000000000001 /* RadarRegion.swift in Sources */,
 				AD8000192FE6000000000001 /* RadarFrameSupport.swift in Sources */,
