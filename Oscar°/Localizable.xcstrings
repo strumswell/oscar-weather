@@ -521,6 +521,91 @@
         }
       }
     },
+    "≈ 1 km · 2 Min." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1 km · 2 min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1 km · 2 dk"
+          }
+        }
+      }
+    },
+    "≈ 1 km · 5 Min." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1 km · 5 min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1 km · 5 dk"
+          }
+        }
+      }
+    },
+    "≈ 1,4 km · 10 Min." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1.4 km · 10 min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1,4 km · 10 dk"
+          }
+        }
+      }
+    },
+    "≈ 2 km · 15 Min." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 2 km · 15 min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 2 km · 15 dk"
+          }
+        }
+      }
+    },
+    "≈ 2 km · 20 Min." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 2 km · 20 min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 2 km · 20 dk"
+          }
+        }
+      }
+    },
     "≈ 2 km Raster" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1472,6 +1557,22 @@
         }
       }
     },
+    "Auf meinen Standort zentrieren" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Center on my location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konumuma ortala"
+          }
+        }
+      }
+    },
     "Ausgewählt" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2095,7 +2196,25 @@
         }
       }
     },
+    "Brasilien" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brazil"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brezilya"
+          }
+        }
+      }
+    },
     "BrightSky" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2123,10 +2242,8 @@
         }
       }
     },
-    "BrightSky ist eine Open-Source-Wetter-API, die offene Wetterdaten vom DWD aufbereiten und für Oscar in Form von Wetterwarnungen für Deutschland zur Verfügung stellen. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu BrightSky, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro." : {
-
-    },
     "brightsky.dev" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3434,6 +3551,23 @@
         }
       }
     },
+    "Europaweites Komposit (OPERA-Programm) aus den Radaren von über 30 Ländern. Neue Messung alle 15 Minuten; die Zwischenschritte berechnet Oscar aus der Zugbewegung." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Europe-wide composite (OPERA programme) from the radars of more than 30 countries. A new measurement every 15 minutes; Oscar fills in the steps between from the motion of the rain."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30'dan fazla ülkenin radarlarından oluşan Avrupa geneli kompozit (OPERA programı). Her 15 dakikada bir yeni ölçüm; aradaki adımları Oscar yağışın hareketinden hesaplar."
+          }
+        }
+      }
+    },
     "Extrem" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3612,6 +3746,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fiord"
+          }
+        }
+      }
+    },
+    "Flugwetterdienst Brasiliens (DECEA)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brazil's aviation weather service (DECEA)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brezilya havacılık meteoroloji servisi (DECEA)"
           }
         }
       }
@@ -3805,6 +3956,23 @@
     },
     "Für diesen Standort liegen aktuell keine stündlichen Details vor." : {
 
+    },
+    "Für dieses Radar nicht verfügbar" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not available for this radar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu radar için kullanılamıyor"
+          }
+        }
+      }
     },
     "Ganz ohne Standortfreigabe. Du kannst später jederzeit wechseln oder weitere Orte hinzufügen." : {
       "extractionState" : "stale",
@@ -4187,6 +4355,23 @@
         }
       }
     },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Larger branches and small trees move."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
+          }
+        }
+      }
+    },
     "Großbritannien" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4206,23 +4391,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Birleşik Krallık"
-          }
-        }
-      }
-    },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Larger branches and small trees move."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
           }
         }
       }
@@ -6284,11 +6452,45 @@
         }
       }
     },
+    "Mosaik aus rund 29 Radarstandorten des brasilianischen Flugwetterdienstes. Einzelne Standorte melden unregelmäßig, Lücken sind möglich." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mosaic of about 29 radar sites run by Brazil's aviation weather service. Individual sites report irregularly, so gaps are possible."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brezilya havacılık meteoroloji servisinin yaklaşık 29 radar istasyonundan oluşan mozaik. Bazı istasyonlar düzensiz veri gönderir; boşluklar olabilir."
+          }
+        }
+      }
+    },
     "mph" : {
       "shouldTranslate" : false
     },
     "MSM & GSM - JMA" : {
       "shouldTranslate" : false
+    },
+    "Multi-Radar-Komposit über den zusammenhängenden USA mit sehr dichter Aktualisierung aus rund 180 Radaren." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Multi-radar composite over the contiguous US, updated at a very high rate from about 180 radars."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yaklaşık 180 radardan çok sık güncellenen, kıtasal ABD üzerinde çoklu radar kompoziti."
+          }
+        }
+      }
     },
     "N_compass" : {
       "extractionState" : "manual",
@@ -6926,6 +7128,23 @@
         }
       }
     },
+    "Öffnet Details zu den Radarquellen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens details about the radar sources"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar kaynakları hakkında ayrıntıları açar"
+          }
+        }
+      }
+    },
     "Öffnet die Einstellungen" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6944,6 +7163,7 @@
       }
     },
     "Öffnet die Erklärung zu Wettermodellen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7762,6 +7982,23 @@
         }
       }
     },
+    "QPESUMS-Komposit der taiwanischen Wetterbehörde über Taiwan und seinen Inselgruppen." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QPESUMS composite by Taiwan's weather agency, covering Taiwan and its island groups."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tayvan meteoroloji kurumunun Tayvan ve adalarını kapsayan QPESUMS kompoziti."
+          }
+        }
+      }
+    },
     "Quelle: %@" : {
 
     },
@@ -7800,6 +8037,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Radar ve haritalar"
+          }
+        }
+      }
+    },
+    "Radarkomposit über Deutschland und den Nachbarländern. Neue Messung alle 5 Minuten, Kurzprognose für die nächsten 2 Stunden." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar composite over Germany and its neighbors. A new measurement every 5 minutes, with a nowcast for the next 2 hours."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almanya ve komşu ülkeler üzerinde radar kompoziti. Her 5 dakikada bir yeni ölçüm, sonraki 2 saat için kısa vadeli tahmin."
+          }
+        }
+      }
+    },
+    "Radarquellen in Oscar°" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar sources in Oscar°"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar°'daki radar kaynakları"
           }
         }
       }
@@ -10195,6 +10465,23 @@
         }
       }
     },
+    "US-Wetterbehörde NOAA" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "US weather agency NOAA"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ABD meteoroloji kurumu NOAA"
+          }
+        }
+      }
+    },
     "USA" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -10267,6 +10554,23 @@
     },
     "UV: %.1f" : {
 
+    },
+    "Verbund der europäischen Wetterdienste" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Network of Europe's national weather services"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avrupa ulusal meteoroloji servisleri ağı"
+          }
+        }
+      }
     },
     "Verlauf der Tageshöchstwerte" : {
 
@@ -10569,6 +10873,22 @@
         }
       }
     },
+    "Was zeigt das Regenradar?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What does the rain radar show?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağış radarı ne gösterir?"
+          }
+        }
+      }
+    },
     "Wasserverlust einer Referenzfläche" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -10795,6 +11115,23 @@
         }
       }
     },
+    "Wetterbehörde Taiwans" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taiwan's weather agency"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tayvan meteoroloji kurumu"
+          }
+        }
+      }
+    },
     "Wetterdaten werden geladen…" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -10857,6 +11194,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oscar°'daki hava modelleri"
+          }
+        }
+      }
+    },
+    "Wetterradare messen, wo es gerade regnet oder schneit. Oscar verbindet die Messung mit einer Kurzprognose: Aus der Zugbewegung des Niederschlags werden die nächsten ein bis zwei Stunden berechnet. Alles hinter der LIVE-Markierung ist berechnet — je weiter voraus, desto unsicherer." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather radars measure where it is raining or snowing right now. Oscar combines the measurement with a nowcast: the next one to two hours are calculated from how the precipitation is moving. Everything past the LIVE marker is calculated, and the further ahead, the less certain it gets."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava radarları şu anda nerede yağmur veya kar yağdığını ölçer. Oscar bu ölçümü kısa vadeli bir tahminle birleştirir: Yağışın hareketinden sonraki bir-iki saat hesaplanır. LIVE işaretinden sonrası hesaplamadır; ne kadar ileriye bakılırsa belirsizlik o kadar artar."
           }
         }
       }

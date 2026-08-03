@@ -91,8 +91,6 @@ final class ScreenshotFixtureServer: URLProtocol {
             return json { _ in ScreenshotFixtures.forecastJSON() }
         case "air-quality-api.open-meteo.com":
             return json { _ in ScreenshotFixtures.airQualityJSON() }
-        case "api.brightsky.dev" where path.hasPrefix("/alerts"):
-            return json { _ in ScreenshotFixtures.alertsJSON() }
         case "ensemble-api.open-meteo.com":
             return json { _ in ScreenshotFixtures.ensembleJSON() }
         case "archive-api.open-meteo.com":
@@ -105,6 +103,9 @@ final class ScreenshotFixtureServer: URLProtocol {
 
         if path.hasPrefix("/radar/series") {
             return json { _ in ScreenshotFixtures.precipSeriesJSON() }
+        }
+        if path.hasPrefix("/weather-alerts/point") {
+            return json { _ in ScreenshotFixtures.alertsJSON() }
         }
         // The notifications scene must never register against the real backend.
         if path.hasPrefix("/notifications") {

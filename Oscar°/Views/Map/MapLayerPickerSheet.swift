@@ -21,9 +21,14 @@ struct MapLayerPickerSheet: View {
     let onSelectTileLayer: (WeatherTileLayer) -> Void
     @Environment(\.dismiss) private var dismissSheet
     @State private var showsModelInfo = false
+    @State private var showsRadarInfo = false
 
     private static let tileColumns = Array(
         repeating: GridItem(.flexible(), spacing: 12), count: 4)
+    /// Radar tiles scroll horizontally (five coverages don't fit a row), so they
+    /// need a fixed width — sized to the 4-column grid below on a compact phone,
+    /// which leaves a peek of the next tile as the scroll affordance.
+    private static let radarTileWidth: CGFloat = 76
 
     var body: some View {
         NavigationStack {
@@ -53,12 +58,19 @@ struct MapLayerPickerSheet: View {
             .navigationDestination(isPresented: $showsModelInfo) {
                 WeatherModelInfoView()
             }
+            .navigationDestination(isPresented: $showsRadarInfo) {
+                RadarInfoView()
+            }
         }
         .task {
-            // Testing hook: `-autoPresentModelInfo YES` jumps straight to the
-            // weather-model explainer (screenshot flows without touch input).
-            guard UserDefaults.standard.bool(forKey: "autoPresentModelInfo") else { return }
-            showsModelInfo = true
+            // Testing hooks: `-autoPresentModelInfo YES` / `-autoPresentRadarInfo
+            // YES` jump straight to the explainer pages (screenshot flows
+            // without touch input).
+            if UserDefaults.standard.bool(forKey: "autoPresentModelInfo") {
+                showsModelInfo = true
+            } else if UserDefaults.standard.bool(forKey: "autoPresentRadarInfo") {
+                showsRadarInfo = true
+            }
         }
     }
 
@@ -67,26 +79,44 @@ struct MapLayerPickerSheet: View {
     private var radarSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             LayerPickerSectionHeader(title: "Radar", detail: "Live + Kurzprognose",
-                                     showsLiveDot: true)
-            LazyVGrid(columns: Self.tileColumns, spacing: 14) {
-                LayerTile(title: "Zentraleuropa", subtitle: "DWD",
-                          imageName: "layer-radar-germany",
-                          isSelected: isRadarSelected(.germany),
-                          action: { select { onSelectRadar(.germany) } })
-                LayerTile(title: "Europa", subtitle: "OPERA",
-                          imageName: "layer-radar-europe",
-                          isSelected: isRadarSelected(.europe),
-                          action: { select { onSelectRadar(.europe) } })
-                LayerTile(title: "USA", subtitle: "NOAA",
-                          imageName: "layer-radar-usa",
-                          isSelected: isRadarSelected(.usa),
-                          action: { select { onSelectRadar(.usa) } })
-                LayerTile(title: "Taiwan", subtitle: "CWA",
-                          imageName: "layer-radar-taiwan",
-                          isSelected: isRadarSelected(.taiwan),
-                          action: { select { onSelectRadar(.taiwan) } })
+                                     infoSymbol: "info.circle",
+                                     showsLiveDot: true,
+                                     infoHint: "Öffnet Details zu den Radarquellen",
+                                     onInfoTap: { showsRadarInfo = true })
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(alignment: .top, spacing: 12) {
+                        radarTile(.germany, title: "Zentraleuropa", subtitle: "DWD",
+                                  imageName: "layer-radar-germany")
+                        radarTile(.europe, title: "Europa", subtitle: "EUMETNET",
+                                  imageName: "layer-radar-europe")
+                        radarTile(.usa, title: "USA", subtitle: "NOAA",
+                                  imageName: "layer-radar-usa")
+                        radarTile(.taiwan, title: "Taiwan", subtitle: "CWA",
+                                  imageName: "layer-radar-taiwan")
+                        radarTile(.brasil, title: "Brasilien", subtitle: "REDEMET",
+                                  imageName: "layer-radar-brasil")
+                    }
+                }
+                .scrollClipDisabled()
+                .onAppear {
+                    // A selected coverage at the row's end would otherwise open
+                    // hidden behind the fold.
+                    guard settingsService.oscarRadarLayer else { return }
+                    proxy.scrollTo(settingsService.oscarRadarRegion, anchor: .trailing)
+                }
             }
         }
+    }
+
+    private func radarTile(_ region: RadarRegion, title: LocalizedStringKey,
+                           subtitle: LocalizedStringKey, imageName: String) -> some View {
+        LayerTile(title: title, subtitle: subtitle,
+                  imageName: imageName,
+                  isSelected: isRadarSelected(region),
+                  action: { select { onSelectRadar(region) } })
+            .frame(width: Self.radarTileWidth)
+            .id(region)
     }
 
     private func productSection(title: LocalizedStringKey,
@@ -157,7 +187,7 @@ struct MapLayerPickerSheet: View {
                 LayerToggleRow(title: "Niederschlagsart",
                                subtitle: precipTypeAvailable
                                    ? "Schnee, Graupel & Hagel im Radar einfärben"
-                                   : "Für das Europa-Radar (OPERA) nicht verfügbar",
+                                   : "Für dieses Radar nicht verfügbar",
                                isOn: $settingsService.radarPrecipTypeOverlay)
                     .disabled(true)//!precipTypeAvailable)
                     .opacity(precipTypeAvailable ? 1 : 0.45)
@@ -234,6 +264,7 @@ struct LayerPickerSectionHeader: View {
     let detail: LocalizedStringKey?
     var infoSymbol: String?
     var showsLiveDot = false
+    var infoHint: LocalizedStringKey = "Öffnet die Erklärung zu Wettermodellen"
     var onInfoTap: (() -> Void)?
 
     var body: some View {
@@ -243,7 +274,7 @@ struct LayerPickerSectionHeader: View {
                     titleLabel
                 }
                 .buttonStyle(.plain)
-                .accessibilityHint(Text("Öffnet die Erklärung zu Wettermodellen"))
+                .accessibilityHint(Text(infoHint))
             } else {
                 titleLabel
             }

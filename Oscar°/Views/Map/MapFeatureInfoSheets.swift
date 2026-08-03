@@ -16,13 +16,17 @@ import simd
 
 // MARK: - Models
 
-/// One active warning, parsed from an `oscar-alert-fill` feature's attributes
-/// (the `/weather-alerts/area` GeoJSON properties).
+/// One active warning in the map's tap sheet. Since the `/area` overlay went
+/// dissolved (severity shapes without per-alert text), taps resolve through
+/// `/weather-alerts/point` and this is built from `OscarPointAlert`; the
+/// attribute-based init remains for servers still serving per-alert features.
 struct WeatherAlertInfo: Identifiable {
     let id: String
     /// Ingesting agency: "dwd" (Germany) or "nws" (US); nil from servers that
     /// predate the field. Drives attribution and severity terminology.
     let source: String?
+    /// Originating national service behind a Meteoalarm alert ("Météo-France").
+    let senderName: String?
     let event: String
     let severityRank: Int
     let headline: String?
@@ -33,16 +37,41 @@ struct WeatherAlertInfo: Identifiable {
 
     init?(attributes: [String: Any]) {
         guard let id = attributes["id"] as? String,
-              let event = attributes["event"] as? String else { return nil }
+              let event = attributes["event"] as? String, !event.isEmpty else { return nil }
         self.id = id
         self.event = event
         source = attributes["source"] as? String
+        senderName = attributes["sender_name"] as? String
         severityRank = attributes["severity_rank"] as? Int ?? 1
         headline = attributes["headline"] as? String
         details = attributes["description"] as? String
         instruction = attributes["instruction"] as? String
         onset = Self.date(attributes["onset_at"])
         expires = Self.date(attributes["expires_at"])
+    }
+
+    init(pointAlert: OscarPointAlert) {
+        id = pointAlert.alertId
+        source = pointAlert.source
+        senderName = pointAlert.senderName
+        event = pointAlert.event
+        severityRank = Self.rank(ofSeverity: pointAlert.severity)
+        headline = pointAlert.headline
+        details = pointAlert.description
+        instruction = pointAlert.instruction
+        onset = pointAlert.onsetAt
+        expires = pointAlert.expiresAt
+    }
+
+    /// Mirrors the server's `severityRank` CAP mapping.
+    private static func rank(ofSeverity severity: String) -> Int {
+        switch severity.trimmingCharacters(in: .whitespaces).lowercased() {
+        case "minor": 1
+        case "moderate": 2
+        case "severe": 3
+        case "extreme": 4
+        default: 1
+        }
     }
 
     private static func date(_ value: Any?) -> Date? {
@@ -112,9 +141,9 @@ enum AlertSeverityStyle {
     }
 
     static func label(rank: Int, source: String? = nil) -> LocalizedStringKey {
-        // NWS and CWA alerts both use the CAP severity terms (Minor/Moderate/Severe/
-        // Extreme); the DWD warning-level names are DWD-specific.
-        if source == "nws" || source == "cwa" {
+        // NWS, CWA and Meteoalarm alerts all use the CAP severity terms (Minor/
+        // Moderate/Severe/Extreme); the DWD warning-level names are DWD-specific.
+        if source == "nws" || source == "cwa" || source == "meteoalarm" {
             return switch rank {
             case 1: "Minor"
             case 2: "Moderate"
@@ -131,10 +160,14 @@ enum AlertSeverityStyle {
         }
     }
 
-    static func sourceName(_ source: String?) -> String {
+    /// Meteoalarm only aggregates the national services — when the server names
+    /// the originating one, attribution shows both.
+    static func sourceName(_ source: String?, senderName: String? = nil) -> String {
         switch source {
         case "nws": "NOAA / National Weather Service"
         case "cwa": "CWA / Central Weather Administration"
+        case "meteoalarm":
+            senderName.map { "\($0) · EUMETNET Meteoalarm" } ?? "EUMETNET Meteoalarm"
         default: "Deutscher Wetterdienst"
         }
     }
@@ -220,7 +253,7 @@ private struct AlertInfoCard: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Text("Quelle: \(AlertSeverityStyle.sourceName(alert.source))")
+            Text("Quelle: \(AlertSeverityStyle.sourceName(alert.source, senderName: alert.senderName))")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }

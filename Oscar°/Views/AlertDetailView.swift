@@ -15,10 +15,6 @@ struct AlertListView: View {
         NavigationStack {
             List {
                 switch weather.alerts {
-                case .brightsky(let brightskyAlerts):
-                    ForEach(brightskyAlerts.alerts ?? [], id: \.self) { alert in
-                        AlertDetailView(alert: .brightsky(alert))
-                    }
                 case .canadian(let canadianAlerts):
                     let alerts = canadianAlerts.flatMap { $0.alert?.alerts ?? [] }
                     ForEach(Array(alerts.enumerated()), id: \.offset) { _, alert in
@@ -46,7 +42,6 @@ struct AlertListView: View {
 
 struct AlertDetailView: View {
     enum AlertType {
-        case brightsky(Components.Schemas.WeatherAlert)
         case canadian(Operations.getCanadianWeatherAlerts.Output.Ok.Body.jsonPayloadPayload.alertPayload.alertsPayload)
         case oscar(OscarPointAlert)
     }
@@ -114,8 +109,6 @@ struct AlertDetailView: View {
 extension AlertDetailView {
     func getStartDate() -> String {
         switch alert {
-        case .brightsky(let brightskyAlert):
-            return brightskyAlert.onset.map(formatDate) ?? String(localized: "Unbekannt")
         case .canadian(let canadianAlert):
             if let dateString = canadianAlert.first?.eventOnsetTime {
                 return parseISO8601Date(dateString).map(formatDate) ?? String(localized: "Unbekannt")
@@ -129,8 +122,6 @@ extension AlertDetailView {
 
     func getEndDate() -> String {
         switch alert {
-        case .brightsky(let brightskyAlert):
-            return brightskyAlert.expires.map(formatDate) ?? String(localized: "Unbekannt")
         case .canadian(let canadianAlert):
             if let dateString = canadianAlert.first?.eventEndTime {
                 return parseISO8601Date(dateString).map(formatDate) ?? String(localized: "Unbekannt")
@@ -158,8 +149,6 @@ extension AlertDetailView {
     
     func getHeadline() -> String {
         switch alert {
-        case .brightsky(let brightskyAlert):
-            return brightskyAlert.event_de ?? brightskyAlert.event_en ?? ""
         case .canadian(let canadianAlert):
             return canadianAlert.first?.alertBannerText ?? ""
         case .oscar(let oscarAlert):
@@ -169,8 +158,6 @@ extension AlertDetailView {
 
     func getDescription() -> String {
         switch alert {
-        case .brightsky(let brightskyAlert):
-            return brightskyAlert.description_de ?? brightskyAlert.description_en ?? ""
         case .canadian(let canadianAlert):
             return canadianAlert.first?.text ?? ""
         case .oscar(let oscarAlert):
@@ -180,8 +167,6 @@ extension AlertDetailView {
 
     func getInstruction() -> String? {
         switch alert {
-        case .brightsky(let brightskyAlert):
-            return brightskyAlert.instruction_de ?? brightskyAlert.instruction_en
         case .canadian:
             return nil
         case .oscar(let oscarAlert):
@@ -191,14 +176,19 @@ extension AlertDetailView {
 
     func getSource() -> String {
         switch alert {
-        case .brightsky:
-            return "Deutscher Wetterdienst"
         case .canadian:
             return "Environment Canada"
         case .oscar(let oscarAlert):
             switch oscarAlert.source {
             case "nws": return "NOAA / National Weather Service"
             case "cwa": return "CWA / Central Weather Administration"
+            case "meteoalarm":
+                // Meteoalarm only aggregates — name the originating national
+                // service when the server identifies it.
+                if let sender = oscarAlert.senderName {
+                    return "\(sender) · EUMETNET Meteoalarm"
+                }
+                return "EUMETNET Meteoalarm"
             default: return "Deutscher Wetterdienst"
             }
         }

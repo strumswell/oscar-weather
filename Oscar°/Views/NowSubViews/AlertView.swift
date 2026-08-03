@@ -52,8 +52,6 @@ struct AlertView: View {
 extension AlertView {
     func hasAlert() -> Bool {
         switch weather.alerts {
-        case .brightsky(let brightskyAlerts):
-            return (brightskyAlerts.alerts?.count ?? 0) > 0
         case .canadian(let canadianAlerts):
             return !canadianAlerts.isEmpty && canadianAlerts.first?.alert != nil
         case .oscar(let oscarAlerts):
@@ -63,8 +61,6 @@ extension AlertView {
 
     func getAlertCount() -> Int {
         switch weather.alerts {
-        case .brightsky(let brightskyAlerts):
-            return brightskyAlerts.alerts?.count ?? 0
         case .canadian(let canadianAlerts):
             return canadianAlerts.reduce(0) { $0 + ($1.alert?.alerts?.count ?? 0) }
         case .oscar(let oscarAlerts):
@@ -74,18 +70,6 @@ extension AlertView {
 
     func getFormattedHeadline() -> String {
         switch weather.alerts {
-        case .brightsky(let brightskyAlerts):
-            let alertCount = getAlertCount()
-            let headlineDe = (brightskyAlerts.alerts?.first?.headline_de ?? "")
-                .replacingOccurrences(of: "Amtliche", with: "")
-                .replacingOccurrences(of: "UNWETTER", with: "")
-            let localizedEvent = headlineDe.uppercased()
-            
-            if alertCount > 1 {
-                return "\(localizedEvent) (+\(alertCount-1))"
-            } else {
-                return localizedEvent
-            }
         case .canadian(let canadianAlerts):
             let alertCount = getAlertCount()
             if let firstAlert = canadianAlerts.first?.alert?.alerts?.first {

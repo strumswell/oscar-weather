@@ -371,10 +371,11 @@ private struct MapLibreLocationPicker: UIViewRepresentable {
                 if let cityPin = annotation as? CityPinAnnotation, let chip = cityPin.chip {
                     if let temperature = chip.temperature, let iconAsset = chip.iconAsset {
                         let temperatureText = "\(Int(temperature.rounded()))°"
-                        let reuseID = "city-chip-\(iconAsset)-\(temperatureText)"
+                        let reuseID = "city-chip-\(chip.emoji ?? "")-\(iconAsset)-\(temperatureText)"
                         result = mapView.dequeueReusableAnnotationImage(withIdentifier: reuseID)
                             ?? MLNAnnotationImage(
-                                image: MapChip.conditions(iconAsset: iconAsset, temperatureText: temperatureText),
+                                image: MapChip.conditions(iconAsset: iconAsset, temperatureText: temperatureText,
+                                                          emoji: chip.emoji),
                                 reuseIdentifier: reuseID
                             )
                     } else {

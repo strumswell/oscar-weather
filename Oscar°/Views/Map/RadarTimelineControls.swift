@@ -71,18 +71,20 @@ struct OscarRadarTimelineControls: View {
     private var sourceLabel: String {
         switch radarState.region {
         case .germany: "DWD Radar"
-        case .europe: "OPERA Radar"
+        case .europe: "EUMETNET Radar"
         case .usa: "NOAA Radar"
         case .taiwan: "CWA Radar"
+        case .brasil: "REDEMET Radar"
         }
     }
 
     private var shortSourceLabel: String {
         switch radarState.region {
         case .germany: "DWD"
-        case .europe: "OPERA"
+        case .europe: "EUMETNET"
         case .usa: "NOAA"
         case .taiwan: "CWA"
+        case .brasil: "REDEMET"
         }
     }
 }

@@ -15,7 +15,7 @@ import UIKit
 /// UIKit after each rendered map frame and composite one display frame behind the
 /// Metal basemap — the dot visibly swims against the map during pans. Style layers
 /// render inside the map's own frame, locked to the basemap by construction (the
-/// selected-city marker is an annotation IMAGE and never swam for the same reason).
+/// selected-city marker is a style symbol layer for the same reason).
 ///
 /// The dot idles with a soft static halo; the fullscreen map additionally pulses
 /// via `pulseBeat` (paint-property transitions) — a beat forces the map to render

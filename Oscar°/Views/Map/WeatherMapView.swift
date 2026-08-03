@@ -53,9 +53,20 @@ struct WeatherMapView: UIViewRepresentable {
 
     fileprivate static let radarLayerID = "oscar-radar-layer"
     fileprivate static let modelLayerID = "oscar-model-image"
-    fileprivate static let alertSourceID = "oscar-alert-polygons"
-    fileprivate static let alertFillLayerID = "oscar-alert-fill"
-    fileprivate static let alertOutlineLayerID = "oscar-alert-outline"
+    // The warning overlay is SPLIT across several sources: MapLibre silently
+    // stops rendering features once one source's tile bucket packs too many
+    // vertices (a dense Meteoalarm viewport dropped whole department outlines,
+    // leaving stray fragments) — round-robin distribution keeps every bucket
+    // far below that threshold at full geometry fidelity. Eight sources put a
+    // ~30k-vertex continental viewport at ~4k per source, the empirically
+    // clean range (4 sources @ ~7k still dropped features).
+    fileprivate static let alertSourceCount = 8
+    fileprivate static func alertSourceID(_ index: Int) -> String { "oscar-alert-polygons-\(index)" }
+    fileprivate static func alertFillLayerID(_ index: Int) -> String { "oscar-alert-fill-\(index)" }
+    fileprivate static func alertOutlineLayerID(_ index: Int) -> String { "oscar-alert-outline-\(index)" }
+    fileprivate static var alertFillLayerIDs: Set<String> {
+        Set((0..<alertSourceCount).map(alertFillLayerID))
+    }
     // Isobars are double-buffered (two sources + layer sets): a frame change
     // loads the hidden buffer and cross-fades, instead of hard-swapping GeoJSON.
     fileprivate static let isobarBufferCount = 2
@@ -89,6 +100,20 @@ struct WeatherMapView: UIViewRepresentable {
         return override > 0 ? override : 7
     }
 
+    /// Initial camera center, overridable via `-mapInitialCenter "@lat,lon"` —
+    /// a capture knob (layer-picker preview tiles are screenshot at a fixed
+    /// spot regardless of the selected city), unset in every normal launch.
+    /// The `@` prefix keeps a negative latitude from being parsed as the next
+    /// launch-argument key.
+    private static var initialCenterOverride: CLLocationCoordinate2D? {
+        guard let raw = UserDefaults.standard.string(forKey: "mapInitialCenter") else { return nil }
+        let parts = raw.trimmingCharacters(in: CharacterSet(charactersIn: "@ "))
+            .split(separator: ",")
+            .compactMap { Double($0.trimmingCharacters(in: .whitespaces)) }
+        guard parts.count == 2 else { return nil }
+        return CLLocationCoordinate2D(latitude: parts[0], longitude: parts[1])
+    }
+
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     func makeUIView(context: Context) -> MLNMapView {
@@ -96,7 +121,8 @@ struct WeatherMapView: UIViewRepresentable {
         let mapView = MLNMapView(frame: .zero, styleURL: settingsService.mapBasemapStyle.styleURL)
         mapLibreLogger.info("map view created role=\(userActionAllowed ? "fullscreen" : "preview", privacy: .public)")
         mapView.delegate = context.coordinator
-        mapView.setCenter(coordinates, zoomLevel: Self.initialZoom, animated: false)
+        mapView.setCenter(Self.initialCenterOverride ?? coordinates,
+                          zoomLevel: Self.initialZoom, animated: false)
         mapView.allowsTilting = false
         // MapLibre requests location permission itself the moment this is enabled
         // while the status is undetermined — and the preview lives inside NowView,
@@ -211,7 +237,73 @@ struct WeatherMapView: UIViewRepresentable {
 
         private var alertOverlayData: Data?
         private var alertOverlayFetchedAt: Date?
-        private var alertOverlayCenter: CLLocationCoordinate2D?
+        private var alertOverlayBox: AlertFetchBox?
+
+        struct AlertFetchBox {
+            let minLat: Double
+            let maxLat: Double
+            let minLon: Double
+            let maxLon: Double
+        }
+
+        /// The map's visible bounds as a box; falls back to a viewport-sized window
+        /// around the given center before the map has laid out.
+        private func visibleAlertBox(fallbackCenter: CLLocationCoordinate2D) -> AlertFetchBox {
+            if let bounds = mapView?.visibleCoordinateBounds,
+               bounds.ne.latitude > bounds.sw.latitude {
+                return AlertFetchBox(
+                    minLat: bounds.sw.latitude, maxLat: bounds.ne.latitude,
+                    minLon: bounds.sw.longitude, maxLon: bounds.ne.longitude
+                )
+            }
+            return AlertFetchBox(
+                minLat: fallbackCenter.latitude - 5, maxLat: fallbackCenter.latitude + 5,
+                minLon: fallbackCenter.longitude - 7, maxLon: fallbackCenter.longitude + 7
+            )
+        }
+
+        /// Visible bounds + 50% pan/zoom headroom per side, clamped to the server's
+        /// 25°×40° `/area` guard and world bounds.
+        private func alertRequestBox(visible: AlertFetchBox) -> AlertFetchBox {
+            let latPad = (visible.maxLat - visible.minLat) * 0.5
+            let lonPad = (visible.maxLon - visible.minLon) * 0.5
+            return clampedToAreaGuard(AlertFetchBox(
+                minLat: visible.minLat - latPad, maxLat: visible.maxLat + latPad,
+                minLon: visible.minLon - lonPad, maxLon: visible.maxLon + lonPad
+            ))
+        }
+
+        /// Shrinks a box to the server's `/area` span guard (kept centered) and clamps
+        /// it to world bounds. Also applied to the *visible* box in the outgrown check:
+        /// a whole-continent viewport can never be contained by any fetchable box, and
+        /// comparing the clamped (= servable) part prevents a refetch-every-sync loop.
+        private func clampedToAreaGuard(_ box: AlertFetchBox) -> AlertFetchBox {
+            let maxLatSpan = 24.0
+            let maxLonSpan = 38.0
+            var minLat = box.minLat
+            var maxLat = box.maxLat
+            var minLon = box.minLon
+            var maxLon = box.maxLon
+            if maxLat - minLat > maxLatSpan {
+                let center = (minLat + maxLat) / 2
+                minLat = center - maxLatSpan / 2
+                maxLat = center + maxLatSpan / 2
+            }
+            if maxLon - minLon > maxLonSpan {
+                let center = (minLon + maxLon) / 2
+                minLon = center - maxLonSpan / 2
+                maxLon = center + maxLonSpan / 2
+            }
+            return AlertFetchBox(
+                minLat: max(-89.9, minLat), maxLat: min(89.9, maxLat),
+                minLon: max(-179.9, minLon), maxLon: min(179.9, maxLon)
+            )
+        }
+
+        private func alertBoxContains(_ outer: AlertFetchBox, _ inner: AlertFetchBox) -> Bool {
+            inner.minLat >= outer.minLat && inner.maxLat <= outer.maxLat
+                && inner.minLon >= outer.minLon && inner.maxLon <= outer.maxLon
+        }
         private var isLoadingAlertOverlay = false
 
         private var stormCells: [StormCellInfo]?
@@ -228,8 +320,7 @@ struct WeatherMapView: UIViewRepresentable {
         private var isobarCleanupGeneration = 0
 
 
-        private var selectedCityAnnotation: MLNPointAnnotation?
-        private var selectedCityIdentity: String?
+        private var selectedCityMarkerIdentity: String?
 
         private var cityChipSignature: String?
         private var registeredCityChipImages: Set<String> = []
@@ -239,6 +330,7 @@ struct WeatherMapView: UIViewRepresentable {
         private var isObservationLoopAlive = false
         private var isTornDown = false
         nonisolated(unsafe) private var reduceMotionObserver: NSObjectProtocol?
+        nonisolated(unsafe) private var centerOnUserObserver: NSObjectProtocol?
         nonisolated(unsafe) private var interactionEndWorkItem: DispatchWorkItem?
         nonisolated(unsafe) private var userDotPulseTimer: Timer?
         private var isMapInteractionActive = false
@@ -252,6 +344,13 @@ struct WeatherMapView: UIViewRepresentable {
             ) { [weak self] _ in
                 MainActor.assumeIsolated { self?.syncAll() }
             }
+            // Camera command from the fullscreen locate button. The NowView
+            // preview coordinator ignores it via userActionAllowed.
+            centerOnUserObserver = NotificationCenter.default.addObserver(
+                forName: .mapCenterOnUser, object: nil, queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated { self?.centerOnUserLocation() }
+            }
         }
 
         deinit {
@@ -260,6 +359,22 @@ struct WeatherMapView: UIViewRepresentable {
             if let reduceMotionObserver {
                 NotificationCenter.default.removeObserver(reduceMotionObserver)
             }
+            if let centerOnUserObserver {
+                NotificationCenter.default.removeObserver(centerOnUserObserver)
+            }
+        }
+
+        /// Locate button: fly to the user's position. Reads the app's own
+        /// location service (CLLocationManager's last fix) — MapLibre's
+        /// `userLocation` stays empty until ITS internal manager delivers one,
+        /// which made the button a silent no-op. Zooms in when the camera is
+        /// wide, keeps the user's closer zoom otherwise. Still a no-op without
+        /// any fix or permission.
+        private func centerOnUserLocation() {
+            guard parent.userActionAllowed, let mapView,
+                  let coordinate = LocationService.shared.getGPSCoordinates(),
+                  CLLocationCoordinate2DIsValid(coordinate) else { return }
+            mapView.setCenter(coordinate, zoomLevel: max(mapView.zoomLevel, 9), animated: true)
         }
 
         func tearDown() {
@@ -323,6 +438,7 @@ struct WeatherMapView: UIViewRepresentable {
                 isobarActiveBuffer = 0
                 cityChipSignature = nil
                 registeredCityChipImages.removeAll()
+                selectedCityMarkerIdentity = nil
                 syncAll()
             }
         }
@@ -344,13 +460,20 @@ struct WeatherMapView: UIViewRepresentable {
         nonisolated func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {
             MainActor.assumeIsolated {
                 windParticleView?.onMapRegionChanged()
-                guard parent.userActionAllowed, isMapInteractionActive else { return }
+                guard parent.userActionAllowed else { return }
                 interactionEndWorkItem?.cancel()
                 let workItem = DispatchWorkItem { [weak self] in
                     guard let self else { return }
-                    self.isMapInteractionActive = false
-                    self.parent.oscarRadarState?.endMapInteraction()
-                    self.parent.modelGridState?.endMapInteraction()
+                    if self.isMapInteractionActive {
+                        self.isMapInteractionActive = false
+                        self.parent.oscarRadarState?.endMapInteraction()
+                        self.parent.modelGridState?.endMapInteraction()
+                    }
+                    // The viewport is an input to the alert-polygon fetch box but
+                    // not an observable one — re-run the sync once the camera
+                    // settles so a long pan or zoom-out refetches the warnings
+                    // for the newly visible area.
+                    self.syncAll()
                 }
                 interactionEndWorkItem = workItem
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: workItem)
@@ -438,11 +561,13 @@ struct WeatherMapView: UIViewRepresentable {
             // over a model forecast layer, so they require the radar to be active.
             syncStormCells(style: style, active: stormCells && radarActive, region: radarRegion)
             syncWindParticles(selection: activeTileLayer, state: modelState)
-            syncSelectedCityAnnotation()
             syncUserLocationDot(style: style)
-            // Last: the chips re-assert themselves as the topmost layer, so they
-            // must run after every sync that may have added layers above them.
+            // Last: chips and the selected-city marker re-assert themselves as
+            // the topmost layers, so they must run after every sync that may
+            // have added layers above them. The marker runs after the chips —
+            // the selected city always reads above its neighbors.
             syncCityChips(style: style)
+            syncSelectedCityMarker(style: style)
         }
 
         // MARK: Radar (custom layer + motion morph + arrows)
@@ -785,60 +910,60 @@ struct WeatherMapView: UIViewRepresentable {
         /// translucent severity-colored fills plus a crisp outline, refreshed at
         /// most every 5 minutes while the toggle is on.
         private func syncAlertPolygons(style: MLNStyle, active: Bool) {
-            let sourceID = WeatherMapView.alertSourceID
-            let fillID = WeatherMapView.alertFillLayerID
-            let lineID = WeatherMapView.alertOutlineLayerID
             guard active else {
                 removeAlertPolygonLayers(from: style)
                 return
             }
 
             let center = mapView?.centerCoordinate ?? parent.coordinates
+            let visible = visibleAlertBox(fallbackCenter: center)
+            let request = alertRequestBox(visible: visible)
             let isStale = alertOverlayFetchedAt.map { Date().timeIntervalSince($0) > 300 } ?? true
-            // The fetch box is viewport-sized (±5°/±7° around the fetch center), so a
-            // long pan must refetch even inside the 5-min window — beyond ~2° the map
-            // edge approaches the old box's edge and warnings would silently stop.
-            let drifted = alertOverlayCenter.map {
-                abs($0.latitude - center.latitude) > 2 || abs($0.longitude - center.longitude) > 3
-            } ?? false
-            if (isStale || drifted), !isLoadingAlertOverlay {
+            // The fetch box is the visible bounds plus pan/zoom headroom, so a refetch
+            // is needed whenever the viewport outgrows the last fetched box (long pan
+            // OR zoom-out) — otherwise warnings would silently stop at the box edge.
+            let outgrown = alertOverlayBox.map { !alertBoxContains($0, clampedToAreaGuard(visible)) } ?? true
+            if (isStale || outgrown), !isLoadingAlertOverlay {
                 isLoadingAlertOverlay = true
                 Task { @MainActor [weak self] in
                     defer { self?.isLoadingAlertOverlay = false }
                     do {
-                        let data = try await APIClient.shared.getWeatherAlertPolygons(around: center)
+                        let data = try await APIClient.shared.getWeatherAlertPolygons(
+                            minLat: request.minLat, maxLat: request.maxLat,
+                            minLon: request.minLon, maxLon: request.maxLon
+                        )
                         guard let self, !self.isTornDown else { return }
                         self.alertOverlayData = data
                         self.alertOverlayFetchedAt = Date()
-                        self.alertOverlayCenter = center
-                        // Swap the shape into the existing source instead of tearing the
-                        // source + layers down: MapLibre re-tiles a fresh GeoJSON source
+                        self.alertOverlayBox = request
+                        // Swap the shapes into the existing sources instead of tearing
+                        // them down: MapLibre re-tiles a fresh GeoJSON source
                         // asynchronously, so a rebuild blanks the polygons for a beat on
                         // every refresh (the isobar sources use the same pattern).
                         if let style = self.mapView?.style,
-                           let source = style.source(withIdentifier: WeatherMapView.alertSourceID) as? MLNShapeSource,
-                           let shape = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue) {
-                            source.shape = shape
+                           style.source(withIdentifier: WeatherMapView.alertSourceID(0)) != nil,
+                           let chunks = Self.alertShapeChunks(data: data) {
+                            for (index, chunk) in chunks.enumerated() {
+                                (style.source(withIdentifier: WeatherMapView.alertSourceID(index)) as? MLNShapeSource)?
+                                    .shape = chunk
+                            }
                         } else {
                             self.syncAll()
                         }
                     } catch {
                         mapLibreLogger.error("Alert polygon fetch failed: \(error.localizedDescription, privacy: .public)")
                         // Back off until the staleness window elapses; keep stale data
-                        // visible and stop drift-retriggering for the attempted spot.
+                        // visible and stop outgrown-retriggering for the attempted box.
                         self?.alertOverlayFetchedAt = Date()
-                        self?.alertOverlayCenter = center
+                        self?.alertOverlayBox = request
                     }
                 }
             }
 
-            guard style.source(withIdentifier: sourceID) == nil else { return }
+            guard style.source(withIdentifier: WeatherMapView.alertSourceID(0)) == nil else { return }
             guard let data = alertOverlayData,
-                  let shape = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue)
+                  let chunks = Self.alertShapeChunks(data: data)
             else { return }
-
-            let source = MLNShapeSource(identifier: sourceID, shape: shape, options: nil)
-            style.addSource(source)
 
             // DWD severity ranks: 1 Minor (default), 2 Moderate, 3 Severe, 4 Extreme.
             // Typed constructor — MapLibre's NSExpression parser rejects the old
@@ -852,16 +977,57 @@ struct WeatherMapView: UIViewRepresentable {
                 ],
                 default: NSExpression(forConstantValue: UIColor.systemYellow)
             )
-            let fill = MLNFillStyleLayer(identifier: fillID, source: source)
-            fill.fillColor = severityColor
-            fill.fillOpacity = NSExpression(forConstantValue: 0.16)
-            insertOverlayLayer(fill, in: style)
+            for (index, chunk) in chunks.enumerated() {
+                let source = MLNShapeSource(
+                    identifier: WeatherMapView.alertSourceID(index), shape: chunk, options: nil)
+                style.addSource(source)
 
-            let outline = MLNLineStyleLayer(identifier: lineID, source: source)
-            outline.lineColor = severityColor
-            outline.lineWidth = NSExpression(forConstantValue: 1.6)
-            outline.lineOpacity = NSExpression(forConstantValue: 0.9)
-            insertOverlayLayer(outline, in: style)
+                let fill = MLNFillStyleLayer(
+                    identifier: WeatherMapView.alertFillLayerID(index), source: source)
+                fill.fillColor = severityColor
+                fill.fillOpacity = NSExpression(forConstantValue: 0.16)
+                insertOverlayLayer(fill, in: style)
+
+                let outline = MLNLineStyleLayer(
+                    identifier: WeatherMapView.alertOutlineLayerID(index), source: source)
+                outline.lineColor = severityColor
+                outline.lineWidth = NSExpression(forConstantValue: 1.6)
+                // Outlines only from regional zoom in: Meteoalarm neighbors
+                // genuinely neither touch nor share borders (thin gap strips
+                // between French departments), so at country scale the doubled
+                // border lines collapse into scribble artifacts — there the
+                // fills alone carry the severity, like DWD's own warning map.
+                outline.lineOpacity = NSExpression(
+                    forMLNInterpolating: NSExpression(forVariable: "zoomLevel"),
+                    curveType: .linear,
+                    parameters: nil,
+                    stops: NSExpression(forConstantValue: [6.2: 0, 7.2: 0.9])
+                )
+                // Round joins: the default miter shoots needle spikes off acute
+                // vertices in the server's viewport-decimated rings.
+                outline.lineJoin = NSExpression(forConstantValue: "round")
+                outline.lineCap = NSExpression(forConstantValue: "round")
+                insertOverlayLayer(outline, in: style)
+            }
+        }
+
+        /// The fetched FeatureCollection distributed round-robin into
+        /// `alertSourceCount` chunks (see the source-ID comment). Always returns
+        /// exactly that many shapes; a non-collection payload lands in chunk 0.
+        private static func alertShapeChunks(data: Data) -> [MLNShape]? {
+            guard let shape = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue)
+            else { return nil }
+            guard let collection = shape as? MLNShapeCollectionFeature else {
+                return [shape] + (1..<WeatherMapView.alertSourceCount).map { _ in
+                    MLNShapeCollectionFeature(shapes: [])
+                }
+            }
+            var buckets: [[MLNShape & MLNFeature]] = Array(
+                repeating: [], count: WeatherMapView.alertSourceCount)
+            for (index, feature) in collection.shapes.enumerated() {
+                buckets[index % WeatherMapView.alertSourceCount].append(feature)
+            }
+            return buckets.map { MLNShapeCollectionFeature(shapes: $0) }
         }
 
         // MARK: Isobars (Großwetterlage overlay)
@@ -1447,30 +1613,49 @@ struct WeatherMapView: UIViewRepresentable {
                 return
             }
 
-            guard let onAlertsTapped = parent.onAlertsTapped else { return }
+            guard parent.onAlertsTapped != nil else { return }
+            let warningFeatures = mapView.visibleFeatures(
+                at: point, styleLayerIdentifiers: WeatherMapView.alertFillLayerIDs)
+            guard !warningFeatures.isEmpty else { return }
+            UIApplication.shared.playHapticFeedback()
+
+            // The dissolved overlay features carry no per-alert text, so the tap
+            // resolves against `/weather-alerts/point` at the tapped coordinate —
+            // exact geometry containment, full official texts. If the fetch fails,
+            // fall back to whatever the rendered attributes carry (per-alert
+            // features from an older server still work fully offline-cached).
+            let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
             var seen = Set<String>()
-            var alerts: [WeatherAlertInfo] = []
-            for feature in mapView.visibleFeatures(
-                at: point, styleLayerIdentifiers: [WeatherMapView.alertFillLayerID]) {
+            var attributeAlerts: [WeatherAlertInfo] = []
+            for feature in warningFeatures {
                 guard let info = WeatherAlertInfo(attributes: feature.attributes),
                       seen.insert(info.id).inserted else { continue }
-                alerts.append(info)
+                attributeAlerts.append(info)
             }
-            guard !alerts.isEmpty else { return }
-            alerts.sort { $0.severityRank > $1.severityRank }
-            UIApplication.shared.playHapticFeedback()
-            onAlertsTapped(alerts)
+            Task { @MainActor [weak self] in
+                guard let self, let onAlertsTapped = self.parent.onAlertsTapped else { return }
+                var alerts = (try? await APIClient.shared.getOscarPointAlerts(coordinates: coordinate))
+                    .map { $0.alerts.map(WeatherAlertInfo.init(pointAlert:)) } ?? []
+                if alerts.isEmpty {
+                    alerts = attributeAlerts
+                }
+                guard !alerts.isEmpty else { return }
+                alerts.sort { $0.severityRank > $1.severityRank }
+                onAlertsTapped(alerts)
+            }
         }
 
         private func removeAlertPolygonLayers(from style: MLNStyle) {
-            if let layer = style.layer(withIdentifier: WeatherMapView.alertFillLayerID) {
-                style.removeLayer(layer)
-            }
-            if let layer = style.layer(withIdentifier: WeatherMapView.alertOutlineLayerID) {
-                style.removeLayer(layer)
-            }
-            if let source = style.source(withIdentifier: WeatherMapView.alertSourceID) {
-                style.removeSource(source)
+            for index in 0..<WeatherMapView.alertSourceCount {
+                if let layer = style.layer(withIdentifier: WeatherMapView.alertFillLayerID(index)) {
+                    style.removeLayer(layer)
+                }
+                if let layer = style.layer(withIdentifier: WeatherMapView.alertOutlineLayerID(index)) {
+                    style.removeLayer(layer)
+                }
+                if let source = style.source(withIdentifier: WeatherMapView.alertSourceID(index)) {
+                    style.removeSource(source)
+                }
             }
         }
 
@@ -1777,21 +1962,6 @@ struct WeatherMapView: UIViewRepresentable {
 
         // MARK: Annotations
 
-        /// iOS-style marker replica for the selected city (MapLibre's default is the
-        /// legacy pin): red balloon, white location glyph, tip anchored on the spot.
-        /// (Delegate callbacks arrive on the main thread; the `nonisolated(unsafe)`
-        /// locals only ferry the non-Sendable return out of `assumeIsolated`.)
-        nonisolated func mapView(_ mapView: MLNMapView, imageFor annotation: MLNAnnotation) -> MLNAnnotationImage? {
-            nonisolated(unsafe) var result: MLNAnnotationImage?
-            nonisolated(unsafe) let annotation = annotation
-            MainActor.assumeIsolated {
-                guard !(annotation is MLNUserLocation) else { return }
-                result = mapView.dequeueReusableAnnotationImage(withIdentifier: "selected-city-marker")
-                    ?? MLNAnnotationImage(image: Self.markerImage(), reuseIdentifier: "selected-city-marker")
-            }
-            return result
-        }
-
         nonisolated func mapView(_ mapView: MLNMapView, viewFor annotation: MLNAnnotation) -> MLNAnnotationView? {
             nonisolated(unsafe) var result: MLNAnnotationView?
             nonisolated(unsafe) let annotation = annotation
@@ -1834,34 +2004,64 @@ struct WeatherMapView: UIViewRepresentable {
             }
         }
 
-        private static func markerImage() -> UIImage {
-            CityMarkerImage.make()
-        }
+        // MARK: Selected-city marker (style layer)
 
-        private func syncSelectedCityAnnotation() {
-            guard let mapView else { return }
+        /// iOS-style marker replica for the selected city (red balloon, white
+        /// location glyph, tip anchored on the spot) as a style symbol layer.
+        /// The former MLNPointAnnotation rendered in MapLibre's internal
+        /// annotation layer, which sat BELOW later-added overlay layers — the
+        /// marker vanished under radar and warning fills. As a style layer it
+        /// re-hoists itself topmost like the chips and the user dot.
+        private static let cityMarkerSourceID = "oscar-selected-city"
+        private static let cityMarkerLayerID = "oscar-selected-city-layer"
+        private static let cityMarkerImageName = "oscar-selected-city-marker"
+
+        private func syncSelectedCityMarker(style: MLNStyle) {
             let selectedCity = parent.cities.first(where: \.selected)
 
             guard let selectedCity else {
-                if let existing = selectedCityAnnotation {
-                    mapView.removeAnnotation(existing)
-                    selectedCityAnnotation = nil
-                    selectedCityIdentity = nil
+                if selectedCityMarkerIdentity != nil {
+                    if let layer = style.layer(withIdentifier: Self.cityMarkerLayerID) {
+                        style.removeLayer(layer)
+                    }
+                    if let source = style.source(withIdentifier: Self.cityMarkerSourceID) {
+                        style.removeSource(source)
+                    }
+                    selectedCityMarkerIdentity = nil
                 }
                 return
             }
 
-            let identity = "\(selectedCity.label)|\(selectedCity.lat)|\(selectedCity.lon)"
-            guard selectedCityIdentity != identity else { return }
-            if let existing = selectedCityAnnotation {
-                mapView.removeAnnotation(existing)
+            let point = MLNPointAnnotation()
+            point.coordinate = CLLocationCoordinate2D(
+                latitude: selectedCity.lat, longitude: selectedCity.lon)
+
+            if let source = style.source(withIdentifier: Self.cityMarkerSourceID) as? MLNShapeSource {
+                let identity = "\(selectedCity.lat)|\(selectedCity.lon)"
+                if selectedCityMarkerIdentity != identity {
+                    source.shape = point
+                    selectedCityMarkerIdentity = identity
+                }
+            } else {
+                // The marker canvas is twice the balloon-tip's y, so the default
+                // center icon anchor pins the tip on the coordinate.
+                style.setImage(CityMarkerImage.make(), forName: Self.cityMarkerImageName)
+                let source = MLNShapeSource(identifier: Self.cityMarkerSourceID,
+                                            shape: point, options: nil)
+                style.addSource(source)
+                let layer = MLNSymbolStyleLayer(identifier: Self.cityMarkerLayerID, source: source)
+                layer.iconImageName = NSExpression(forConstantValue: Self.cityMarkerImageName)
+                layer.iconAllowsOverlap = NSExpression(forConstantValue: true)
+                layer.iconIgnoresPlacement = NSExpression(forConstantValue: true)
+                style.addLayer(layer)
+                selectedCityMarkerIdentity = "\(selectedCity.lat)|\(selectedCity.lon)"
             }
-            let annotation = MLNPointAnnotation()
-            annotation.coordinate = CLLocationCoordinate2D(latitude: selectedCity.lat, longitude: selectedCity.lon)
-            annotation.title = selectedCity.label
-            mapView.addAnnotation(annotation)
-            selectedCityAnnotation = annotation
-            selectedCityIdentity = identity
+
+            if style.layers.last?.identifier != Self.cityMarkerLayerID,
+               let layer = style.layer(withIdentifier: Self.cityMarkerLayerID) {
+                style.removeLayer(layer)
+                style.addLayer(layer)
+            }
         }
 
         // MARK: Helpers
@@ -1903,9 +2103,8 @@ struct WeatherMapView: UIViewRepresentable {
 
 /// iOS-style marker replica (`SelectedCityMarker` asset, 534×652 with the
 /// balloon tip at 97.4% height), shared by the weather map's selected-city
-/// annotation and the locations map picker's dropped pin. The canvas is twice
-/// the tip's y so the CENTER-anchored MLNAnnotationImage pins the tip on the
-/// coordinate.
+/// marker layer and the locations map picker's dropped pin. The canvas is twice
+/// the tip's y so a CENTER-anchored image pins the tip on the coordinate.
 @MainActor
 enum CityMarkerImage {
     static func make() -> UIImage {

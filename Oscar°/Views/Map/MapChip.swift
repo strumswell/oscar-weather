@@ -19,14 +19,19 @@ enum MapChip {
     static let fill = UIColor(white: 0.13, alpha: 0.92)
     static let stroke = UIColor(white: 1, alpha: 0.35)
 
-    /// A saved city's conditions as a capsule chip: the app's own weather icon
-    /// (01d…50n assets, same set as the forecast lists) + current temperature,
-    /// like a mini weather-map station label. A custom emoji, when set, leads
-    /// the capsule.
+    /// A saved city's conditions as a capsule chip: leading symbol + current
+    /// temperature, like a mini weather-map station label. The custom city
+    /// emoji, when set, IS the leading symbol; only cities without one fall
+    /// back to the app's weather icon (01d…50n assets, same set as the
+    /// forecast lists).
     static func conditions(iconAsset: String, temperatureText: String, emoji: String? = nil) -> UIImage {
-        let icon = UIImage(named: iconAsset)
+        let emojiText: NSAttributedString? = (emoji?.isEmpty == false)
+            ? NSAttributedString(string: emoji ?? "", attributes: [.font: UIFont.systemFont(ofSize: 13)])
+            : nil
+
         // Aspect-fit into the nominal box: the icon assets are not square
         // (clouds are up to ~1.4× wider than tall), a fixed square squishes them.
+        let icon: UIImage? = emojiText == nil ? UIImage(named: iconAsset) : nil
         let iconBox: CGFloat = 21
         let iconSize: CGSize = {
             guard let native = icon?.size, native.width > 0, native.height > 0 else {
@@ -36,32 +41,31 @@ enum MapChip {
             return CGSize(width: native.width * scale, height: native.height * scale)
         }()
 
-        let emojiText: NSAttributedString? = (emoji?.isEmpty == false)
-            ? NSAttributedString(string: emoji ?? "", attributes: [.font: UIFont.systemFont(ofSize: 13)])
-            : nil
-
         let text = NSAttributedString(
             string: temperatureText,
             attributes: [.font: textFont, .foregroundColor: UIColor.white]
         )
         let textSize = text.size()
         let emojiSize = emojiText?.size() ?? .zero
-        let emojiAdvance = emojiText == nil ? 0 : emojiSize.width + spacing
-        let width = padding + emojiAdvance + iconSize.width + spacing + textSize.width + padding
+        let leadingWidth = emojiText == nil ? iconSize.width : emojiSize.width
+        let width = padding + leadingWidth + spacing + textSize.width + padding
 
         return capsule(width: width) { _ in
-            emojiText?.draw(at: CGPoint(
-                x: padding,
-                y: (height - emojiSize.height) / 2
-            ))
-            icon?.draw(in: CGRect(
-                x: padding + emojiAdvance,
-                y: (height - iconSize.height) / 2,
-                width: iconSize.width,
-                height: iconSize.height
-            ))
+            if let emojiText {
+                emojiText.draw(at: CGPoint(
+                    x: padding,
+                    y: (height - emojiSize.height) / 2
+                ))
+            } else {
+                icon?.draw(in: CGRect(
+                    x: padding,
+                    y: (height - iconSize.height) / 2,
+                    width: iconSize.width,
+                    height: iconSize.height
+                ))
+            }
             text.draw(at: CGPoint(
-                x: padding + emojiAdvance + iconSize.width + spacing,
+                x: padding + leadingWidth + spacing,
                 y: (height - textSize.height) / 2
             ))
         }

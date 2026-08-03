@@ -101,14 +101,6 @@ struct SettingsView: View {
             Divider()
 
             settingsNavigationLink {
-              BrightSkyAttribution()
-            } label: {
-              BrightSkyLabel()
-            }
-
-            Divider()
-
-            settingsNavigationLink {
               DWDAttribution()
             } label: {
               DWDLabel()

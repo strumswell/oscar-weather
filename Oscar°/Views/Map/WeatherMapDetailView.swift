@@ -86,7 +86,7 @@ struct WeatherMapDetailView: View {
                     }
                     .padding(12)
                     Spacer()
-                    layerPickerButton
+                    mapControlStack
                         .padding(.trailing)
                         .padding(.top)
                 }
@@ -115,6 +115,16 @@ struct WeatherMapDetailView: View {
         // Declared BEFORE the load task so the source pick lands first (both run
         // on the main actor and the pick has no suspension points).
         .task(id: "\(location.coordinates.latitude)|\(location.coordinates.longitude)") {
+            // Capture knob: `-radarRegionLock brasil` pins the radar coverage
+            // (used with `-mapInitialCenter` to screenshot the layer-picker
+            // preview tiles), overriding the location-based pick.
+            if let raw = UserDefaults.standard.string(forKey: "radarRegionLock"),
+               let region = RadarRegion(rawValue: raw) {
+                settingsService.activeTileLayer = nil
+                settingsService.oscarRadarRegion = region
+                settingsService.oscarRadarLayer = true
+                return
+            }
             settingsService.autoSelectRadarSource(
                 latitude: location.coordinates.latitude,
                 longitude: location.coordinates.longitude)
@@ -241,20 +251,36 @@ struct WeatherMapDetailView: View {
         }
     }
 
-    // MARK: - Layer picker
+    // MARK: - Map controls
 
-    /// Apple-Maps-style entry point ("Kartenmodi"): a glassy circular button that
-    /// opens the half-height layer picker sheet.
-    private var layerPickerButton: some View {
-        Button(action: presentLayerPicker) {
-            Image(systemName: "map.fill")
-                .font(.system(size: 20, weight: .semibold))
-                .frame(width: 18, height: 18)
+    /// Apple-Maps-style control stack: the layer-picker entry point and the
+    /// locate button share ONE glass capsule (user request — no separate
+    /// floating circles). Locate flies the camera to the user's position
+    /// (no-op without a fix/permission).
+    private var mapControlStack: some View {
+        VStack(spacing: 0) {
+            Button(action: presentLayerPicker) {
+                Image(systemName: "map.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .frame(width: 46, height: 46)
+                    .contentShape(.rect)
+            }
+            .accessibilityLabel(Text("Kartenebenen"))
+            Divider()
+                .frame(width: 26)
+            Button {
+                UIApplication.shared.playHapticFeedback()
+                NotificationCenter.default.post(name: .mapCenterOnUser, object: nil)
+            } label: {
+                Image(systemName: "location")
+                    .font(.system(size: 18, weight: .semibold))
+                    .frame(width: 46, height: 46)
+                    .contentShape(.rect)
+            }
+            .accessibilityLabel(Text("Auf meinen Standort zentrieren"))
         }
-        .buttonStyle(.glass)
-        .buttonBorderShape(.circle)
-        .controlSize(.large)
-        .accessibilityLabel(Text("Kartenebenen"))
+        .buttonStyle(.plain)
+        .glassEffect(.regular, in: Capsule())
     }
 
     private func presentLayerPicker() {

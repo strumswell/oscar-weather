@@ -74,7 +74,7 @@ final class Weather {
             longitude: 0.0,
             current: .init(cloudcover: 0.0, time: 0.0, temperature: 20.0, windspeed: 0.0, wind_direction_10m: 0.0, weathercode: 0.0)
         )
-        alerts = .brightsky(.init())
+        alerts = .oscar(.empty)
         air = Operations.getAirQuality.Output.Ok.Body.jsonPayload.init(latitude: 0, longitude: 0, hourly: nil)
         precipSeries = nil
     }
@@ -240,7 +240,7 @@ extension Weather {
             } catch {
                 // Alerts are supplementary. Never retain warnings for the previous
                 // city or turn an otherwise successful forecast refresh into failure.
-                alerts = .brightsky(.init())
+                alerts = .oscar(.empty)
             }
             markFinished(.alerts)
         } catch is CancellationError {
@@ -330,7 +330,7 @@ extension Weather {
         
         // Set other properties
         mockWeather.time = 0.5 // Midday
-        mockWeather.alerts = .brightsky(.init()) // Empty alerts
+        mockWeather.alerts = .oscar(.empty) // Empty alerts
         mockWeather.air = Operations.getAirQuality.Output.Ok.Body.jsonPayload(latitude: 51.34, longitude: 12.379999, hourly: nil)
         mockWeather.precipSeries = nil // No radar series
 

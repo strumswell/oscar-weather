@@ -10,4 +10,6 @@ extension Notification.Name {
     /// A forced forecast model had no data for a location and best_match was used instead.
     /// `userInfo["modelName"]` carries the display name of the model that failed.
     static let forecastModelFallback = Notification.Name("ForecastModelFallback")
+    /// Fullscreen map control: fly the camera to the user's current location.
+    static let mapCenterOnUser = Notification.Name("MapCenterOnUser")
 }

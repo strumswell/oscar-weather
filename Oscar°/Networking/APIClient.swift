@@ -29,7 +29,6 @@ let radarBaseURL: String = {
 }()
 
 enum AlertResponse {
-  case brightsky(Operations.getAlerts.Output.Ok.Body.jsonPayload)
   case canadian(Operations.getCanadianWeatherAlerts.Output.Ok.Body.jsonPayload)
   case oscar(OscarPointAlertsResponse)
 }
@@ -41,11 +40,19 @@ enum AlertResponse {
 struct OscarPointAlertsResponse: Decodable {
   let alertCount: Int
   let alerts: [OscarPointAlert]
+
+  /// The "no active warnings" placeholder used before the first fetch and after
+  /// a failed one — alerts are supplementary and must never block a refresh.
+  static let empty = OscarPointAlertsResponse(alertCount: 0, alerts: [])
 }
 
 struct OscarPointAlert: Decodable {
   let alertId: String
   let source: String
+  /// Originating national weather service for Meteoalarm alerts ("Météo-France") —
+  /// the hub only aggregates, so attribution shows both. nil from older servers
+  /// and for natively ingested sources.
+  let senderName: String?
   let event: String
   let severity: String
   let urgency: String
@@ -66,7 +73,6 @@ final class APIClient: Sendable {
   let openMeteoGeo: Client
   let openMeteoEnsemble: Client
   let openMeteoArchive: Client
-  let brightsky: Client
   let canadaWeather: Client
 
   init() {
@@ -78,7 +84,6 @@ final class APIClient: Sendable {
     openMeteoGeo = APIClient.get(url: Self.serverURL(Servers.server3))
     openMeteoEnsemble = APIClient.get(url: Self.ensembleServerURL)
     openMeteoArchive = APIClient.get(url: Self.archiveServerURL)
-    brightsky = APIClient.get(url: Self.serverURL(Servers.server4))
     canadaWeather = APIClient.get(url: Self.serverURL(Servers.server5))
   }
 
@@ -425,25 +430,52 @@ final class APIClient: Sendable {
     let useCanadian: Bool
     let useUnitedStates: Bool
     let useTaiwan: Bool
+    let useMeteoalarm: Bool
     if let countryCode {
       useCanadian = countryCode == "CA"
       useUnitedStates = countryCode == "US"
       useTaiwan = countryCode == "TW"
+      useMeteoalarm = Self.meteoalarmCountryCodes.contains(countryCode)
     } else {
       useCanadian = isCanadianLocation(coordinates)
       useUnitedStates = !useCanadian && isUnitedStatesLocation(coordinates)
       useTaiwan = !useCanadian && !useUnitedStates && isTaiwanLocation(coordinates)
+      useMeteoalarm =
+        !useCanadian && !useUnitedStates && !useTaiwan && isMeteoalarmLocation(coordinates)
     }
 
     if useCanadian {
       return try await getCanadianWeatherAlerts(coordinates: coordinates)
-    } else if useUnitedStates || useTaiwan {
-      // Both NWS (US) and CWA (Taiwan) warnings are served by oscar-server on the
-      // same source-tagged endpoint; the response's `source` drives attribution.
+    } else if useUnitedStates || useTaiwan || useMeteoalarm {
+      // NWS (US), CWA (Taiwan), DWD (Germany) and Meteoalarm (rest of Europe)
+      // warnings are all served by oscar-server on the same source-tagged
+      // endpoint; the response's `source` drives attribution.
       return try await getOscarWeatherAlerts(coordinates: coordinates)
     } else {
-      return try await getBrightskyAlerts(coordinates: coordinates)
+      // No warning source for this location — report "none" without a fetch.
+      return .oscar(.empty)
     }
+  }
+
+  /// ISO codes of the countries whose warnings oscar-server ingests: the EUMETNET
+  /// Meteoalarm members plus Germany (DWD CAP feed, ingested natively); note the
+  /// UK's ISO code is "GB" even though Meteoalarm slugs it "uk".
+  private static let meteoalarmCountryCodes: Set<String> = [
+    "AT", "BA", "BE", "BG", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GB",
+    "GR", "HR", "HU", "IE", "IL", "IS", "IT", "LT", "LU", "LV", "MD", "ME", "MK", "MT",
+    "NL", "NO", "PL", "PT", "RO", "RS", "SE", "SI", "SK", "UA",
+  ]
+
+  /// European warning coverage for saved cities, which reach us without a country
+  /// code: greater Europe (Azores/Iceland to Ukraine, Canaries to the North Cape)
+  /// plus Israel. Germany falls inside this box and resolves to its native DWD
+  /// alerts on the same oscar-server endpoint.
+  private func isMeteoalarmLocation(_ coordinates: CLLocationCoordinate2D) -> Bool {
+    let lat = coordinates.latitude
+    let lon = coordinates.longitude
+    let europe = lat >= 27.0 && lat <= 72.0 && lon >= -32.0 && lon <= 45.0
+    let israel = lat >= 29.4 && lat <= 33.4 && lon >= 34.2 && lon <= 35.9
+    return europe || israel
   }
 
   private func isCanadianLocation(_ coordinates: CLLocationCoordinate2D) -> Bool {
@@ -488,6 +520,16 @@ final class APIClient: Sendable {
   private func getOscarWeatherAlerts(coordinates: CLLocationCoordinate2D) async throws
     -> AlertResponse
   {
+    .oscar(try await getOscarPointAlerts(coordinates: coordinates))
+  }
+
+  /// The raw `/weather-alerts/point` response. Also the map's tap-through
+  /// resolver: the `/area` overlay serves DISSOLVED severity shapes without
+  /// per-alert text, so a polygon tap asks this endpoint what is active at the
+  /// tapped coordinate.
+  func getOscarPointAlerts(coordinates: CLLocationCoordinate2D) async throws
+    -> OscarPointAlertsResponse
+  {
     let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
     let language = Locale.current.language.languageCode?.identifier == "de" ? "de" : "en"
     guard
@@ -501,7 +543,7 @@ final class APIClient: Sendable {
     request.addAPIContactIdentity()
     let (data, http) = try await Self.fetchWithRetry(request)
     guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
-    return .oscar(try Self.oscarAlertDecoder.decode(OscarPointAlertsResponse.self, from: data))
+    return try Self.oscarAlertDecoder.decode(OscarPointAlertsResponse.self, from: data)
   }
 
   /// oscar-server dates are ISO-8601 with fractional seconds; accept the plain
@@ -523,28 +565,6 @@ final class APIClient: Sendable {
     }
     return decoder
   }()
-
-  private func getBrightskyAlerts(coordinates: CLLocationCoordinate2D) async throws -> AlertResponse
-  {
-    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
-    let response = try await brightsky.getAlerts(
-      .init(
-        query: .init(
-          lat: outboundCoordinates.latitude,
-          lon: outboundCoordinates.longitude
-        )
-      ))
-
-    switch response {
-    case let .ok(response):
-      switch response.body {
-      case .json(let result):
-        return .brightsky(result)
-      }
-    case .undocumented:
-      return .brightsky(.init())
-    }
-  }
 
   private func getCanadianWeatherAlerts(coordinates: CLLocationCoordinate2D) async throws
     -> AlertResponse
@@ -616,15 +636,17 @@ final class APIClient: Sendable {
     return try JSONDecoder().decode(PrecipSeriesResponse.self, from: data)
   }
 
-  /// Active severe-weather warning polygons around a coordinate, as a raw GeoJSON
+  /// Active severe-weather warning polygons for a map viewport box, as a raw GeoJSON
   /// FeatureCollection from oscar-server — handed straight to MapLibre's shape
-  /// source. The viewport-sized box stays under the endpoint's 15°×25° cap.
-  func getWeatherAlertPolygons(around coordinates: CLLocationCoordinate2D) async throws -> Data {
+  /// sources. Callers pass the padded visible bounds (see `alertRequestBox` in the
+  /// map coordinator); the box must stay inside the endpoint's 25°×40° guard.
+  /// Deliberately NOT `dissolve=true`: warning outlines are built independently
+  /// per alert, so the server's parity dissolve shreds real-world data (slivers,
+  /// overlap punch-outs) — the per-alert mesh is the honest rendering.
+  func getWeatherAlertPolygons(
+    minLat: Double, maxLat: Double, minLon: Double, maxLon: Double
+  ) async throws -> Data {
     let language = Locale.current.language.languageCode?.identifier == "de" ? "de" : "en"
-    let minLat = max(-90.0, coordinates.latitude - 5)
-    let maxLat = min(90.0, coordinates.latitude + 5)
-    let minLon = max(-180.0, coordinates.longitude - 7)
-    let maxLon = min(180.0, coordinates.longitude + 7)
     guard
       let url = URL(
         string:
@@ -641,7 +663,7 @@ final class APIClient: Sendable {
 
   /// Tracked precipitation cells for a radar region as raw GeoJSON (Point features
   /// with velocity/bearing/intensity properties and an extrapolated `path`).
-  /// `region` is the region path component ("germany" | "europe" | "usa") — kept a
+  /// `region` is the region path component ("germany", "europe", "usa", …) — kept a
   /// string because RadarRegion isn't compiled into every target this file is.
   func getStormCells(region: String) async throws -> Data {
     guard let url = URL(string: "\(radarBaseURL)/radar/\(region)/cells")

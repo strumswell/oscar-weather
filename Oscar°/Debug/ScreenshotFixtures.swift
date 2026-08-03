@@ -260,19 +260,19 @@ enum ScreenshotFixtures {
         ]
     }
 
-    // MARK: - Alerts (api.brightsky.dev)
+    // MARK: - Alerts (oscar-server /weather-alerts/point)
 
     static func alertsJSON() -> [String: Any] {
-        if sunnyStory { return ["alerts": [] as [Any]] }
+        if sunnyStory { return ["alertCount": 0, "alerts": [] as [Any]] }
         let formatter = ISO8601DateFormatter()
         let now = Date.now
+        // The banner uppercases the event; Turkish ships pre-uppercased so İ/ı
+        // survive the locale-insensitive uppercased().
         let event = localized(
             de: "Ergiebiger Dauerregen",
             en: "Persistent heavy rain",
-            tr: "Şiddetli sürekli yağış"
+            tr: "ŞİDDETLİ SÜREKLİ YAĞIŞ"
         )
-        // The banner strips "Amtliche" and uppercases; Turkish ships
-        // pre-uppercased so İ/ı survive the locale-insensitive uppercased().
         let headline = localized(
             de: "Amtliche Warnung vor ergiebigem Dauerregen",
             en: "Warning of persistent heavy rain",
@@ -284,25 +284,19 @@ enum ScreenshotFixtures {
             tr: "Şiddetli ve sürekli yağış bekleniyor. 12 saat içinde metrekareye 60 litreye kadar yağış düşebilir. Yollarda ve alt geçitlerde su baskınları görülebilir."
         )
         let alert: [String: Any] = [
-            "id": 1,
-            "alert_id": "screenshot.heavy.rain",
-            "effective": formatter.string(from: now.addingTimeInterval(-2 * 3600)),
-            "onset": formatter.string(from: now.addingTimeInterval(-2 * 3600)),
-            "expires": formatter.string(from: now.addingTimeInterval(10 * 3600)),
-            "category": "met",
-            "response_type": "Prepare",
-            "urgency": "Immediate",
+            "alertId": "screenshot.heavy.rain",
+            "source": "dwd",
+            "event": event,
             "severity": "severe",
+            "urgency": "Immediate",
             "certainty": "Likely",
-            "event_code": 61,
-            "event_en": event,
-            "event_de": event,
-            "headline_en": headline,
-            "headline_de": headline,
-            "description_en": description,
-            "description_de": description,
+            "responseType": "Prepare",
+            "onsetAt": formatter.string(from: now.addingTimeInterval(-2 * 3600)),
+            "expiresAt": formatter.string(from: now.addingTimeInterval(10 * 3600)),
+            "headline": headline,
+            "description": description,
         ]
-        return ["alerts": [alert]]
+        return ["alertCount": 1, "alerts": [alert]]
     }
 
     // MARK: - Radar series (oscar-server /radar/series)
