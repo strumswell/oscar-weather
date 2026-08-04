@@ -192,6 +192,13 @@ final class NotificationSettingsManager: NSObject {
         await refreshAuthorizationStatus()
     }
 
+    /// Debug-menu path: raises the bare system prompt without enabling any
+    /// alert type, so the permission dance can be exercised in isolation.
+    func requestPermissionOnly() async {
+        _ = await requestNotificationPermission()
+        await refreshAuthorizationStatus()
+    }
+
     func syncTimeFormatPreferenceUpdate() async {
         notificationLogger.info("Lifecycle: time format preference changed; syncing subscription")
         await syncSubscriptionForCurrentState(forceRegister: false)

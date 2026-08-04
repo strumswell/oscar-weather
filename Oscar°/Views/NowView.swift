@@ -152,6 +152,7 @@ struct NowView: View {
                     .padding(.bottom, 24)
                     if weather.debug {
                         VStack {
+                            DebugPermissionControls()
                             Text(weather.isLoading.description)
                             Text("spinner=\(showRefreshIndicator.description) pending=\(spinnerPending.description)")
                             Text(weather.error)
