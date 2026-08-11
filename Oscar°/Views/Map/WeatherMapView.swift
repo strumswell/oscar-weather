@@ -46,6 +46,7 @@ struct WeatherMapView: UIViewRepresentable {
     var showWindParticles: Bool
     var oscarRadarState: OscarRadarState?
     var modelGridState: ModelGridLayerState?
+    var cloudLayerState: CloudLayerState?
     /// Tap on warning polygon(s) → all warnings under the finger, most severe first.
     var onAlertsTapped: (([WeatherAlertInfo]) -> Void)? = nil
     /// Tap on a storm-cell marker/footprint → that cell's details.
@@ -53,6 +54,7 @@ struct WeatherMapView: UIViewRepresentable {
 
     fileprivate static let radarLayerID = "oscar-radar-layer"
     fileprivate static let modelLayerID = "oscar-model-image"
+    fileprivate static let cloudsLayerID = "oscar-clouds-layer"
     // The warning overlay is SPLIT across several sources: MapLibre silently
     // stops rendering features once one source's tile bucket packs too many
     // vertices (a dense Meteoalarm viewport dropped whole department outlines,
@@ -236,6 +238,12 @@ struct WeatherMapView: UIViewRepresentable {
         private var modelPalette: [PixelRGBA]?
         private var lastModelFrameKey: String?
         private var lastModelBounds: OscarRadarBounds?
+
+        private var cloudsLayer: RadarCustomStyleLayer?
+        private var cloudsPalette: [PixelRGBA]?
+        private var cloudsPaletteFetching = false
+        private var lastCloudsPairKey: String?
+        private var lastCloudsBounds: OscarRadarBounds?
 
         private var bubbleSyncKey: String?
         private var lastBubbleSignature: String?
@@ -436,6 +444,10 @@ struct WeatherMapView: UIViewRepresentable {
                 modelPalette = nil
                 lastModelFrameKey = nil
                 lastModelBounds = nil
+                // Palette cache survives (id never changes); the layer handle must not.
+                cloudsLayer = nil
+                lastCloudsPairKey = nil
+                lastCloudsBounds = nil
                 arrowSourceID = nil
                 bubbleSyncKey = nil
                 lastBubbleSignature = nil
@@ -460,6 +472,7 @@ struct WeatherMapView: UIViewRepresentable {
                 isMapInteractionActive = true
                 parent.oscarRadarState?.beginMapInteraction()
                 parent.modelGridState?.beginMapInteraction()
+                parent.cloudLayerState?.beginMapInteraction()
             }
         }
 
@@ -474,6 +487,7 @@ struct WeatherMapView: UIViewRepresentable {
                         self.isMapInteractionActive = false
                         self.parent.oscarRadarState?.endMapInteraction()
                         self.parent.modelGridState?.endMapInteraction()
+                        self.parent.cloudLayerState?.endMapInteraction()
                     }
                     // The viewport is an input to the alert-polygon fetch box but
                     // not an observable one — re-run the sync once the camera
@@ -521,6 +535,18 @@ struct WeatherMapView: UIViewRepresentable {
             let radarIsPlaying = radarState?.isPlaying ?? false
             let radarMotion = radarState?.motion
 
+            let cloudsActive = settings.cloudLayerActive
+            let cloudState = parent.cloudLayerState
+            let cloudBounds = cloudState?.bounds
+            let cloudMotion = cloudState?.motion
+            let cloudIsPlaying = cloudState?.isPlaying ?? false
+            // Registers the dependency that re-fires the sync when cloud
+            // metadata/payloads land (payloads themselves are ObservationIgnored).
+            _ = cloudState?.loadRevision
+            _ = cloudState?.isActive
+            _ = cloudState?.currentFrameIndex
+            _ = cloudState?.renderFrameIndex
+
             let modelState = parent.modelGridState
             let modelBounds = modelState?.bounds
             let modelFrame = modelState?.currentFrame
@@ -546,6 +572,9 @@ struct WeatherMapView: UIViewRepresentable {
             guard let style = mapView?.style else { return blocked("style not loaded") }
             blocked(nil)
 
+            syncClouds(style: style, active: cloudsActive, state: cloudState,
+                       bounds: cloudBounds, motion: cloudMotion,
+                       cloudIsPlaying: cloudIsPlaying, smoothMotion: smoothMotion)
             syncRadar(style: style, active: radarActive, state: radarState, product: radarProduct,
                       bounds: radarBounds,
                       frame: radarFrame, next: radarNext, renderedIndex: radarRenderedIndex,
@@ -762,6 +791,105 @@ struct WeatherMapView: UIViewRepresentable {
             if let layer = style.layer(withIdentifier: Self.arrowSourceIdentifier) { style.removeLayer(layer) }
             if let source = style.source(withIdentifier: Self.arrowSourceIdentifier) { style.removeSource(source) }
             arrowSourceID = nil
+        }
+
+        // MARK: Satellite clouds (own layer with its own timeline)
+
+        /// The clouds are a SELECTABLE layer like the model layers: the cloud
+        /// state owns pair + playback via the display link. (The former
+        /// radar-synced underlay mode is gone — clouds, radar and model layers
+        /// are mutually exclusive.)
+        private func syncClouds(
+            style: MLNStyle, active: Bool,
+            state: CloudLayerState?, bounds: OscarRadarBounds?, motion: RadarMotionData?,
+            cloudIsPlaying: Bool, smoothMotion: Bool
+        ) {
+            guard active, let state else {
+                if let layer = cloudsLayer {
+                    layer.purgeTextures()
+                    style.removeLayer(layer)
+                    cloudsLayer = nil
+                    lastCloudsPairKey = nil
+                    lastCloudsBounds = nil
+                }
+                return
+            }
+            guard let bounds else { return }   // metadata not loaded yet
+
+            let layer: RadarCustomStyleLayer
+            if let existing = cloudsLayer {
+                layer = existing
+            } else {
+                layer = RadarCustomStyleLayer(identifier: WeatherMapView.cloudsLayerID)
+                insertOverlayLayer(layer, in: style)
+                cloudsLayer = layer
+            }
+            layer.configure(bounds: bounds, opacity: Float(parent.overlayOpacity))
+            // Clouds are soft by nature — the hard/sharp toggle is a radar look.
+            layer.setSampling(.soft)
+            layer.setMotion(motion)
+
+            if !layer.hasPalette {
+                if let cloudsPalette {
+                    layer.setPalette(cloudsPalette)
+                    layer.setNeedsDisplay()
+                } else if !cloudsPaletteFetching {
+                    cloudsPaletteFetching = true
+                    Task { @MainActor [weak self] in
+                        // Server palette with a local fallback — always resolves.
+                        let palette = await CloudLayerState.resolvedPalette()
+                        guard let self else { return }
+                        self.cloudsPaletteFetching = false
+                        self.cloudsPalette = palette
+                        self.syncAll()
+                    }
+                }
+            }
+
+            if lastCloudsBounds != bounds {
+                layer.purgeTextures()
+                lastCloudsBounds = bounds
+                lastCloudsPairKey = nil
+            }
+
+            defer {
+                if cloudIsPlaying, state.currentFrameKeyed != nil, parent.userActionAllowed {
+                    state.cancelInternalTimer()
+                    layer.startPlayback(
+                        interval: 0.5,
+                        interpolate: smoothMotion && !UIAccessibility.isReduceMotionEnabled
+                    ) { [weak state] in
+                        state?.advanceFrame()
+                    }
+                } else if layer.isPlaybackActive {
+                    layer.stopPlayback()
+                }
+            }
+            guard let current = state.currentFrameKeyed else { return }
+            let next = state.nextFrameKeyed
+            let pairKey = "\(current.key)|\(next?.key ?? "-")"
+            guard lastCloudsPairKey != pairKey else { return }
+            guard let textureA = layer.texture(key: current.key, payload: current.payload) else {
+                scheduleSyncRetry()
+                return
+            }
+            let textureB = next.flatMap { layer.texture(key: $0.key, payload: $0.payload) }
+            var flowFieldIndex: Int?
+            var flowScale: Float = 0
+            if let motion = state.motion, let next {
+                let pair = motion.pairs["\(current.key)|\(next.key)"] ?? motion.pairsByFrom[current.key]
+                if let pair,
+                   let from = state.timestamp(forKey: current.key),
+                   let to = state.timestamp(forKey: next.key),
+                   let gap = OscarRadarState.minutesBetween(from, to),
+                   gap > 0, gap <= 60 {
+                    flowFieldIndex = pair.fieldIndex
+                    flowScale = Float(gap) / Float(motion.stepMinutes)
+                }
+            }
+            layer.display(frameA: textureA, frameB: textureB,
+                          flowFieldIndex: flowFieldIndex, flowScale: flowScale)
+            lastCloudsPairKey = pairKey
         }
 
         // MARK: ICON-D2 / ECMWF model layer (value grids + palette, like the radar)

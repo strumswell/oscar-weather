@@ -545,29 +545,6 @@
         }
       }
     },
-    "≈ 1 km · 10 Min." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "≈ 1 km · 10 Min."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "≈ 1 km · 10 min"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "≈ 1 km · 10 dk"
-          }
-        }
-      }
-    },
     "≈ 1 km · 2 Min." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -610,6 +587,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "≈ 1 km · 5 dk"
+          }
+        }
+      }
+    },
+    "≈ 1 km · 10 Min." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1 km · 10 Min."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1 km · 10 min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 1 km · 10 dk"
           }
         }
       }
@@ -2831,6 +2831,9 @@
     "Condition: %@" : {
 
     },
+    "Contains modified EUMETSAT Meteosat data %@" : {
+      "shouldTranslate" : false
+    },
     "COSMO 2I & 5M - AM ARPAE ARPAP" : {
       "localizations" : {
         "de" : {
@@ -3386,6 +3389,9 @@
         }
       }
     },
+    "Die Ebene zeigt den Infrarot-Kanal (10,8 μm): ein Wärmebild, das Tag und Nacht funktioniert. Hohe, kalte Wolkenschirme erscheinen hell und dicht, dünne oder tiefe Bewölkung durchscheinend, wolkenfreier Boden bleibt durchsichtig — die Abstufung zeigt also auch, wie dick die Bewölkung ist. Aus der Zugbewegung berechnet Oscar Zwischenbilder im 5-Minuten-Takt und eine Kurzprognose; alles hinter der LIVE-Markierung ist berechnet." : {
+
+    },
     "Die weißen Bänder zeigen die Bewölkung in drei Höhenlagen, je dicker das Band, desto bedeckter der Himmel. Gelbe Flächen stehen für sonnige Abschnitte, Balken für Niederschlag, gestrichelte Verläufe für die Vergangenheit. Halte und ziehe für die Werte einer Stunde, mit zwei Fingern änderst du den Zeitraum." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3480,6 +3486,29 @@
     },
     "Die Wetterdaten konnten nicht geladen werden. Prüfe deine Verbindung und versuche es erneut." : {
 
+    },
+    "Die zuschaltbare Wolken-Ebene zeigt die Bewölkung aus Sicht des Wettersatelliten Meteosat (MTG) — alle 10 Minuten neu, von Oscar auf den 5-Minuten-Takt des Radars gerechnet und bis 90 Minuten vorausberechnet. Contains modified EUMETSAT Meteosat data." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die zuschaltbare Wolken-Ebene zeigt die Bewölkung aus Sicht des Wettersatelliten Meteosat (MTG) — alle 10 Minuten neu, von Oscar auf den 5-Minuten-Takt des Radars gerechnet und bis 90 Minuten vorausberechnet. Contains modified EUMETSAT Meteosat data."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The optional cloud layer shows cloud cover as seen by the Meteosat weather satellite (MTG) — updated every 10 minutes, resampled by Oscar to the radar's 5-minute rhythm and projected up to 90 minutes ahead. Contains modified EUMETSAT Meteosat data."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İsteğe bağlı bulut katmanı, Meteosat (MTG) meteoroloji uydusunun gördüğü bulutluluğu gösterir — her 10 dakikada bir güncellenir, Oscar tarafından radarın 5 dakikalık ritmine uyarlanır ve 90 dakikaya kadar ileriye hesaplanır. Contains modified EUMETSAT Meteosat data."
+          }
+        }
+      }
     },
     "Dieser Tag seit 1940" : {
       "localizations" : {
@@ -3640,6 +3669,9 @@
           }
         }
       }
+    },
+    "Echte Satellitenbilder statt Modellrechnung: Der europäische Wettersatellit Meteosat steht in rund 36.000 km Höhe über dem Äquator auf 0° Länge — geostationär, er dreht sich exakt mit der Erde mit und sieht dadurch immer dieselbe Erdhälfte, von Island bis Südafrika und vom Atlantik bis Arabien. Alle 15 Minuten tastet er die volle Erdscheibe neu ab." : {
+
     },
     "Eigener Name" : {
       "localizations" : {
@@ -5330,29 +5362,6 @@
         }
       }
     },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Größere Zweige und kleine Bäume bewegen sich."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Larger branches and small trees move."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
-          }
-        }
-      }
-    },
     "Großbritannien" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5395,6 +5404,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
+          }
+        }
+      }
+    },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Größere Zweige und kleine Bäume bewegen sich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Larger branches and small trees move."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
           }
         }
       }
@@ -10549,6 +10581,55 @@
         }
       }
     },
+    "Satellit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satellit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satellite"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uydu"
+          }
+        }
+      }
+    },
+    "Satellitenbilder werden geladen…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satellitenbilder werden geladen…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading satellite imagery…"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uydu görüntüleri yükleniyor…"
+          }
+        }
+      }
+    },
+    "Satellitenquelle in Oscar°" : {
+
+    },
     "Schadstoffe jetzt" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13307,6 +13388,9 @@
         }
       }
     },
+    "Was zeigt die Wolken-Ebene?" : {
+
+    },
     "Wasserverlust einer Referenzfläche" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -13984,6 +14068,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sakin Rüzgarlar"
+          }
+        }
+      }
+    },
+    "Wolken" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wolken"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clouds"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bulutlar"
+          }
+        }
+      }
+    },
+    "Wolken-Ebene" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wolken-Ebene"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloud layer"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bulut katmanı"
           }
         }
       }

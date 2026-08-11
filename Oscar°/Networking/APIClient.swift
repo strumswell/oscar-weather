@@ -636,6 +636,28 @@ final class APIClient: Sendable {
     return try JSONDecoder().decode(PrecipSeriesResponse.self, from: data)
   }
 
+  /// Per-location satellite cloudiness series (`/clouds/meteosat/series`) — the
+  /// head view's trend annotation. nil = outside the disk or clouds not ready
+  /// (404/503); both simply mean "no annotation".
+  func getCloudSeries(coordinates: CLLocationCoordinate2D) async throws
+    -> CloudSeriesResponse?
+  {
+    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
+    guard
+      let url = URL(
+        string:
+          "\(radarBaseURL)/clouds/meteosat/series?lat=\(outboundCoordinates.latitude)&lon=\(outboundCoordinates.longitude)"
+      )
+    else { return nil }
+
+    var request = URLRequest(url: url)
+    request.addAPIContactIdentity()
+    let (data, http) = try await Self.fetchWithRetry(request)
+    if http.statusCode == 204 || http.statusCode == 404 || http.statusCode == 503 { return nil }
+    guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
+    return try JSONDecoder().decode(CloudSeriesResponse.self, from: data)
+  }
+
   /// Active severe-weather warning polygons for a map viewport box, as a raw GeoJSON
   /// FeatureCollection from oscar-server — handed straight to MapLibre's shape
   /// sources. Callers pass the padded visible bounds (see `alertRequestBox` in the

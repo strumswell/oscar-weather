@@ -115,9 +115,12 @@ final class ScreenshotFixtureServer: URLProtocol {
         }
 
         // Synthetic radar: /radar/{region}[/precip-type]/frames[/{key}/(grid|tiles/z/x/y)]
-        // plus /radar/{region}/(motion|cells). Colormaps and basemaps stay live.
+        // plus /radar/{region}/(motion|cells). The clouds endpoints share the radar
+        // wire shape, so the same synthetic generators answer them. Colormaps and
+        // basemaps stay live.
         var parts = path.split(separator: "/").map(String.init)
-        guard parts.first == "radar", parts.count >= 3 else { return nil }
+        guard parts.first == "radar" || parts.first == "clouds", parts.count >= 3 else { return nil }
+        let isClouds = parts.first == "clouds"
         if parts[2] == "precip-type" { parts.remove(at: 2) }
 
         switch (parts.count, parts[2]) {
@@ -129,6 +132,9 @@ final class ScreenshotFixtureServer: URLProtocol {
             return json { _ in SyntheticRadar.cellsJSON() }
         case (5, "frames") where parts[4] == "grid":
             let key = parts[3]
+            if isClouds {
+                return png { _ in SyntheticRadar.cloudGridPNG(frameKey: key) }
+            }
             let typed = url.query()?.contains("style=typed") == true
             return png { _ in SyntheticRadar.gridPNG(frameKey: key, typed: typed) }
         case (8, "frames") where parts[4] == "tiles":

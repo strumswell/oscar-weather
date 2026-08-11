@@ -28,6 +28,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
             Task { @MainActor in
                 ModelGridLayerState.purgeDecodedCaches()
                 OscarRadarState.purgeDecodedGrids()
+                CloudLayerState.purgeDecodedCaches()
                 RadarCustomStyleLayer.purgeCachedTextures()
                 await WindFieldCache.shared.evict(retaining: [])
             }

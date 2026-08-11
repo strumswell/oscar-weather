@@ -59,6 +59,8 @@ final class Weather {
     var air: Operations.getAirQuality.Output.Ok.Body.jsonPayload
     var time: Double
     var precipSeries: PrecipSeriesResponse?
+    /// Satellite cloudiness at the location (not persisted — only meaningful fresh).
+    var cloudSeries: CloudSeriesResponse?
     var error: String = ""
     var lastUpdated: Date?
     var debug = false
@@ -108,10 +110,18 @@ extension Weather {
         case failed
     }
 
+    private enum CloudOutcome {
+        /// Fetch completed; nil is a server-confirmed "no coverage / not ready".
+        case fetched(CloudSeriesResponse?)
+        /// Transport/decode failure — keep the previous series.
+        case failed
+    }
+
     private enum UpdateResponse {
         case forecast(Operations.getForecast.Output.Ok.Body.jsonPayload)
         case airQuality(Operations.getAirQuality.Output.Ok.Body.jsonPayload)
         case precipSeries(RadarOutcome)
+        case cloudSeries(CloudOutcome)
     }
 
     func refresh(
@@ -154,6 +164,7 @@ extension Weather {
             var forecastResponse: Operations.getForecast.Output.Ok.Body.jsonPayload?
             var airQualityResponse: Operations.getAirQuality.Output.Ok.Body.jsonPayload?
             var radarOutcome: RadarOutcome = .failed
+            var cloudOutcome: CloudOutcome = .failed
 
             try await withThrowingTaskGroup(of: UpdateResponse.self) { group in
                 markLoading(.forecast)
@@ -175,6 +186,13 @@ extension Weather {
                     catch { return .precipSeries(.failed) }
                 }
 
+                group.addTask {
+                    // Same best-effort contract as radar; no loading query — the
+                    // trend annotation has no loading UI to drive.
+                    do { return .cloudSeries(.fetched(try await client.getCloudSeries(coordinates: coordinates))) }
+                    catch { return .cloudSeries(.failed) }
+                }
+
                 for try await response in group {
                     switch response {
                     case .forecast(let response):
@@ -186,6 +204,8 @@ extension Weather {
                     case .precipSeries(let outcome):
                         radarOutcome = outcome
                         markFinished(.rainRadar)
+                    case .cloudSeries(let outcome):
+                        cloudOutcome = outcome
                     }
                 }
             }
@@ -203,6 +223,9 @@ extension Weather {
             // depend on — keep the previous value until a real update arrives.
             if case .fetched(let value) = radarOutcome {
                 precipSeries = value
+            }
+            if case .fetched(let value) = cloudOutcome {
+                cloudSeries = value
             }
             updateTime()
             lastUpdated = .now

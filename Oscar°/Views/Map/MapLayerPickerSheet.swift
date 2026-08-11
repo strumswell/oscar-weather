@@ -19,9 +19,11 @@ struct MapLayerPickerSheet: View {
     @Bindable var settingsService: SettingService
     let onSelectRadar: (RadarRegion) -> Void
     let onSelectTileLayer: (WeatherTileLayer) -> Void
+    let onSelectClouds: () -> Void
     @Environment(\.dismiss) private var dismissSheet
     @State private var showsModelInfo = false
     @State private var showsRadarInfo = false
+    @State private var showsSatelliteInfo = false
 
     private static let tileColumns = Array(
         repeating: GridItem(.flexible(), spacing: 12), count: 4)
@@ -35,6 +37,7 @@ struct MapLayerPickerSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     radarSection
+                    satelliteSection
                     productSection(title: "Regen", layers: [.iconPrecip, .ecmwfPrecip])
                     productSection(title: "Temperatur", layers: [.iconTemp, .ecmwfTemp])
                     productSection(title: "Wind", layers: [.iconWind, .ecmwfWind])
@@ -62,15 +65,20 @@ struct MapLayerPickerSheet: View {
             .navigationDestination(isPresented: $showsRadarInfo) {
                 RadarInfoView()
             }
+            .navigationDestination(isPresented: $showsSatelliteInfo) {
+                SatelliteInfoView()
+            }
         }
         .task {
             // Testing hooks: `-autoPresentModelInfo YES` / `-autoPresentRadarInfo
-            // YES` jump straight to the explainer pages (screenshot flows
-            // without touch input).
+            // YES` / `-autoPresentSatelliteInfo YES` jump straight to the
+            // explainer pages (screenshot flows without touch input).
             if UserDefaults.standard.bool(forKey: "autoPresentModelInfo") {
                 showsModelInfo = true
             } else if UserDefaults.standard.bool(forKey: "autoPresentRadarInfo") {
                 showsRadarInfo = true
+            } else if UserDefaults.standard.bool(forKey: "autoPresentSatelliteInfo") {
+                showsSatelliteInfo = true
             }
         }
     }
@@ -122,6 +130,22 @@ struct MapLayerPickerSheet: View {
             .id(region)
     }
 
+    private var satelliteSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            LayerPickerSectionHeader(title: "Satellit", detail: "Live + Kurzprognose",
+                                     infoSymbol: "info.circle",
+                                     showsLiveDot: true,
+                                     infoHint: "Öffnet Details zur Satellitenquelle",
+                                     onInfoTap: { showsSatelliteInfo = true })
+            LazyVGrid(columns: Self.tileColumns, spacing: 14) {
+                LayerTile(title: "Wolken", subtitle: "Meteosat",
+                          imageName: "layer-clouds",
+                          isSelected: settingsService.cloudLayerActive,
+                          action: { select { onSelectClouds() } })
+            }
+        }
+    }
+
     private func productSection(title: LocalizedStringKey,
                                 layers: [WeatherTileLayer]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -150,6 +174,11 @@ struct MapLayerPickerSheet: View {
                 ProviderLogo(asset: "logo-eumetnet", height: 28)
                 ProviderLogo(asset: "logo-noaa", height: 28)
             }
+            // Attribution required by the EUMETSAT data policy for the cloud
+            // layer (Meteosat SEVIRI IR imagery).
+            Text("Contains modified EUMETSAT Meteosat data \(String(Calendar.current.component(.year, from: Date())))")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
             PoweredByOscarServer(lockupHeight: 32)
         }
         .foregroundStyle(.secondary)

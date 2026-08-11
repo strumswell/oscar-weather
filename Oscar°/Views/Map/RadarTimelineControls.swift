@@ -25,6 +25,7 @@ protocol TimelinePlayerState: AnyObject, Observable {
 
 extension OscarRadarState: TimelinePlayerState {}
 extension ModelGridLayerState: TimelinePlayerState {}
+extension CloudLayerState: TimelinePlayerState {}
 
 // MARK: - Shared timeline helpers
 
@@ -88,6 +89,23 @@ struct OscarRadarTimelineControls: View {
         case .brasil: "REDEMET"
         case .canarias: "AEMET"
         }
+    }
+}
+
+struct CloudTimelineControls: View {
+    let cloudState: CloudLayerState
+    /// Tapping the source badge opens the layer picker.
+    var onBadgeTap: (() -> Void)?
+
+    var body: some View {
+        TimelineControlsChip(
+            state: cloudState,
+            sourceLabel: "Meteosat",
+            shortSourceLabel: "Meteosat",
+            isLive: cloudState.isCurrentFrameLive,
+            loadingLabel: "Satellitenbilder werden geladen…",
+            onBadgeTap: onBadgeTap
+        )
     }
 }
 

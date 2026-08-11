@@ -84,6 +84,23 @@ struct HeadView: View {
     return status == .authorizedWhenInUse || status == .authorizedAlways
   }
 
+  private static let trendTimeFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.timeStyle = .short
+    formatter.dateStyle = .none
+    return formatter
+  }()
+
+  /// Arrow + minute for the cloud metric's annotation: the screenshot mock
+  /// (`-mockCloudTrend`) wins, otherwise the satellite series' detected
+  /// transition — nil (the usual case) renders nothing.
+  private var cloudTrendAnnotation: (arrow: String, time: String)? {
+    if let mock = MockCloudTrend.current { return (mock.arrow, mock.time) }
+    guard let trend = weather.cloudSeries?.trend() else { return nil }
+    return (trend.direction == .clearing ? "arrow.down.right" : "arrow.up.right",
+            Self.trendTimeFormatter.string(from: trend.at))
+  }
+
   /// Exclusive selection over the saved places, tagged by objectID URI;
   /// `nil` is the GPS pseudo-entry. Transient menu content, so the manual
   /// binding can't go stale.
@@ -218,7 +235,18 @@ struct HeadView: View {
         HStack(spacing: 6) {
           Spacer()
           Image(systemName: "cloud")
-          Text("\(weather.forecast.current?.cloudcover ?? 0, specifier: "%.0f") %")
+          Text("\(MockCloudTrend.current?.cover ?? weather.forecast.current?.cloudcover ?? 0, specifier: "%.0f") %")
+          if let annotation = cloudTrendAnnotation {
+            // The satellite nowcast's sky transition rides inline after the
+            // cloud value — smaller type, optically centered on the row.
+            HStack(spacing: 2) {
+              Image(systemName: annotation.arrow)
+                .font(.system(size: 9, weight: .bold))
+              Text(annotation.time)
+                .font(.caption2.weight(.medium))
+            }
+            .foregroundStyle(Color(UIColor.label).opacity(0.55))
+          }
           Image(systemName: "wind")
             .padding(.leading, 12)
           Text(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h"))
@@ -249,6 +277,21 @@ struct HeadView: View {
     }
   }
 
+}
+
+/// UI MOCK of the satellite cloud-trend hint (metrics-row variant): only active
+/// with `-mockCloudTrend clearing|clouding`.
+private enum MockCloudTrend: String {
+  case clearing
+  case clouding
+
+  static var current: MockCloudTrend? {
+    UserDefaults.standard.string(forKey: "mockCloudTrend").flatMap(MockCloudTrend.init)
+  }
+
+  var cover: Double { self == .clearing ? 92 : 5 }
+  var arrow: String { self == .clearing ? "arrow.down.right" : "arrow.up.right" }
+  var time: String { self == .clearing ? "22:40" : "23:15" }
 }
 
 extension HeadView {

@@ -22,6 +22,7 @@ struct WeatherMapDetailView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var radarState = OscarRadarState(renderMode: .fullscreen)
     @State private var modelGridState = ModelGridLayerState(renderMode: .fullscreen)
+    @State private var cloudLayerState = CloudLayerState()
     @State private var isLayerPickerPresented = false
     // sheet(item:), not sheet(isPresented:) + separate array state: the isPresented
     // variant renders its content once with the PRE-tap (empty) array on the first
@@ -45,6 +46,7 @@ struct WeatherMapDetailView: View {
                 showWindParticles: true,
                 oscarRadarState: radarState,
                 modelGridState: modelGridState,
+                cloudLayerState: cloudLayerState,
                 onAlertsTapped: { alerts in
                     tappedAlerts = TappedAlerts(alerts: alerts)
                 },
@@ -74,6 +76,14 @@ struct WeatherMapDetailView: View {
                             if settingsService.showStormCells {
                                 StormCellLegend()
                             }
+                        } else if settingsService.cloudLayerActive,
+                                  cloudLayerState.hasAnyLoadedFrame {
+                            if cloudLayerState.frameTimestamps.indices.contains(cloudLayerState.currentFrameIndex) {
+                                RadarTimestampBadge(
+                                    timestamp: cloudLayerState.frameTimestamps[cloudLayerState.currentFrameIndex],
+                                    isLive: cloudLayerState.isCurrentFrameLive
+                                )
+                            }
                         } else if settingsService.activeTileLayer != nil,
                                   modelGridState.hasAnyLoadedFrame {
                             if let timestamp = modelGridState.currentFrameTimestamp {
@@ -99,6 +109,10 @@ struct WeatherMapDetailView: View {
                 if settingsService.oscarRadarLayer {
                     OscarRadarTimelineControls(radarState: radarState,
                                                onBadgeTap: presentLayerPicker)
+                        .padding(.horizontal, 16)
+                } else if settingsService.cloudLayerActive {
+                    CloudTimelineControls(cloudState: cloudLayerState,
+                                          onBadgeTap: presentLayerPicker)
                         .padding(.horizontal, 16)
                 } else if settingsService.activeTileLayer != nil {
                     WeatherTileTimelineControls(imageState: modelGridState,
@@ -128,6 +142,12 @@ struct WeatherMapDetailView: View {
             settingsService.autoSelectRadarSource(
                 latitude: location.coordinates.latitude,
                 longitude: location.coordinates.longitude)
+        }
+        .task {
+            // Cloud layer activation is settings-derived (not sync-derived: the
+            // map coordinator's observation pass must stay read-only). Re-runs on
+            // every return to the tab; setActive no-ops when unchanged.
+            syncCloudActivation()
         }
         .task {
             // Re-runs on every return to the tab: full loads only the first time,
@@ -219,12 +239,14 @@ struct WeatherMapDetailView: View {
             // Leaving the tab: stop playback; frames stay cached for the next visit.
             radarState.pause()
             modelGridState.pause()
+            cloudLayerState.pause()
         }
         .sheet(isPresented: $isLayerPickerPresented) {
             MapLayerPickerSheet(
                 settingsService: settingsService,
                 onSelectRadar: activateOscarRadar,
-                onSelectTileLayer: activateTileLayer
+                onSelectTileLayer: activateTileLayer,
+                onSelectClouds: activateCloudLayer
             )
             // No .presentationBackground override: iOS 26 renders the sheet as
             // Liquid Glass at the medium detent and swaps to an opaque background
@@ -291,23 +313,45 @@ struct WeatherMapDetailView: View {
     private func refreshActiveLayerIfStale() async {
         if settingsService.oscarRadarLayer {
             await radarState.refreshIfStale()
+        } else if settingsService.cloudLayerActive {
+            cloudLayerState.refreshIfStale()
         } else if settingsService.activeTileLayer != nil {
             await modelGridState.refreshIfStale()
         }
     }
 
+    private func syncCloudActivation() {
+        cloudLayerState.setActive(settingsService.cloudLayerActive)
+    }
+
+    private func activateCloudLayer() {
+        settingsService.radarAutoFallbackActive = false
+        settingsService.oscarRadarLayer = false
+        radarState.pause()
+        settingsService.activeTileLayer = nil
+        modelGridState.pause()
+        settingsService.cloudLayerActive = true
+        syncCloudActivation()
+    }
+
     private func activateOscarRadar(_ region: RadarRegion) {
         settingsService.radarAutoFallbackActive = false
         settingsService.activeTileLayer = nil
+        settingsService.cloudLayerActive = false
+        cloudLayerState.pause()
         settingsService.oscarRadarRegion = region
         settingsService.oscarRadarLayer = true
         modelGridState.pause()
+        syncCloudActivation()
     }
 
     private func activateTileLayer(_ layer: WeatherTileLayer) {
         settingsService.radarAutoFallbackActive = false
         settingsService.oscarRadarLayer = false
         radarState.pause()
+        settingsService.cloudLayerActive = false
+        cloudLayerState.pause()
         settingsService.activeTileLayer = layer
+        syncCloudActivation()
     }
 }

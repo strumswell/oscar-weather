@@ -159,6 +159,14 @@ public final class SettingService {
             UserDefaults.standard.set(showIsobars, forKey: "showIsobars")
         }
     }
+    /// When true, the satellite cloud layer is the SELECTED map layer with its own
+    /// timeline (scrub through the cloud nowcast) — mutually exclusive with
+    /// `oscarRadarLayer` and `activeTileLayer`, like those are with each other.
+    var cloudLayerActive: Bool {
+        didSet {
+            UserDefaults.standard.set(cloudLayerActive, forKey: "cloudLayerActive")
+        }
+    }
     /// Opacity of the radar/model data overlays (0.3…1).
     var mapOverlayOpacity: Double {
         didSet {
@@ -283,6 +291,7 @@ public final class SettingService {
         showAlertPolygons = UserDefaults.standard.bool(forKey: "showAlertPolygons")
         showStormCells = UserDefaults.standard.bool(forKey: "showStormCells")
         showIsobars = UserDefaults.standard.bool(forKey: "showIsobars")
+        cloudLayerActive = UserDefaults.standard.bool(forKey: "cloudLayerActive")
         let storedOpacity = UserDefaults.standard.object(forKey: "mapOverlayOpacity") as? Double
         mapOverlayOpacity = min(max(storedOpacity ?? 0.7, 0.3), 1)
         mapBasemapStyleRaw = Self.defaults.string(forKey: "mapBasemapStyle") ?? MapBasemapStyle.fiord.rawValue

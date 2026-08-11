@@ -543,8 +543,7 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
                 playbackAdvance?()
             }
         } else {
-            let value = playbackInterpolates ? Float(t) : 0
-            stateLock.withLock { phase = value }
+            stateLock.withLock { phase = playbackInterpolates ? Float(t) : 0 }
         }
         setNeedsDisplay()
     }

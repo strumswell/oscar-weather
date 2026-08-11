@@ -67,6 +67,7 @@
 		ADC0FFEE2FE6000000000002 /* MapFeatureInfoSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADC0FFEE2FE6000000000001 /* MapFeatureInfoSheets.swift */; };
 		AD8000122FE6000000000001 /* WeatherModelInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000112FE6000000000001 /* WeatherModelInfoView.swift */; };
 		ADA300022FF8000000000001 /* RadarInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA300012FF8000000000001 /* RadarInfoView.swift */; };
+		ADA400022FFA000000000001 /* SatelliteInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA400012FFA000000000001 /* SatelliteInfoView.swift */; };
 		ADA300712FF8000000000001 /* AttributionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA300702FF8000000000001 /* AttributionViews.swift */; };
 		AD8000142FE6000000000001 /* WeatherColormap.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000132FE6000000000001 /* WeatherColormap.swift */; };
 		AD8000152FE6000000000002 /* WeatherColormap.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000132FE6000000000001 /* WeatherColormap.swift */; };
@@ -80,6 +81,8 @@
 		AD8000202FE6000000000001 /* WeatherTileLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD80001E2FE6000000000001 /* WeatherTileLayer.swift */; };
 		AD8000222FE6000000000001 /* ModelGridLayerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000212FE6000000000001 /* ModelGridLayerState.swift */; };
 		AD8000232FE6000000000001 /* ModelGridLayerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD8000212FE6000000000001 /* ModelGridLayerState.swift */; };
+		ADC100022FF9000000000001 /* CloudLayerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADC100012FF9000000000001 /* CloudLayerState.swift */; };
+		ADC100032FF9000000000001 /* CloudLayerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADC100012FF9000000000001 /* CloudLayerState.swift */; };
 		ADA200022FF7000000000001 /* RadarSharedGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA200012FF7000000000001 /* RadarSharedGeometry.swift */; };
 		ADA200032FF7000000000001 /* RadarSharedGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA200012FF7000000000001 /* RadarSharedGeometry.swift */; };
 		ADA200052FF7000000000001 /* RadarSharedDTOs.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA200042FF7000000000001 /* RadarSharedDTOs.swift */; };
@@ -522,6 +525,7 @@
 		ADC0FFEE2FE6000000000001 /* MapFeatureInfoSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapFeatureInfoSheets.swift; sourceTree = "<group>"; };
 		AD8000112FE6000000000001 /* WeatherModelInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherModelInfoView.swift; sourceTree = "<group>"; };
 		ADA300012FF8000000000001 /* RadarInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarInfoView.swift; sourceTree = "<group>"; };
+		ADA400012FFA000000000001 /* SatelliteInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SatelliteInfoView.swift; sourceTree = "<group>"; };
 		ADA300702FF8000000000001 /* AttributionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributionViews.swift; sourceTree = "<group>"; };
 		AD8000132FE6000000000001 /* WeatherColormap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherColormap.swift; sourceTree = "<group>"; };
 		AD8000152FE6000000000001 /* RadarRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarRegion.swift; sourceTree = "<group>"; };
@@ -529,6 +533,7 @@
 		AD80001B2FE6000000000001 /* RadarMotionData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarMotionData.swift; sourceTree = "<group>"; };
 		AD80001E2FE6000000000001 /* WeatherTileLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherTileLayer.swift; sourceTree = "<group>"; };
 		AD8000212FE6000000000001 /* ModelGridLayerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelGridLayerState.swift; sourceTree = "<group>"; };
+		ADC100012FF9000000000001 /* CloudLayerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudLayerState.swift; sourceTree = "<group>"; };
 		ADA200012FF7000000000001 /* RadarSharedGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarSharedGeometry.swift; sourceTree = "<group>"; };
 		ADA200042FF7000000000001 /* RadarSharedDTOs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarSharedDTOs.swift; sourceTree = "<group>"; };
 		2519538E2F124B27003D5302 /* RadarTimelineControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarTimelineControls.swift; sourceTree = "<group>"; };
@@ -1383,6 +1388,7 @@
 				ADC0FFEE2FE6000000000001 /* MapFeatureInfoSheets.swift */,
 				AD8000112FE6000000000001 /* WeatherModelInfoView.swift */,
 				ADA300012FF8000000000001 /* RadarInfoView.swift */,
+				ADA400012FFA000000000001 /* SatelliteInfoView.swift */,
 				AD8000132FE6000000000001 /* WeatherColormap.swift */,
 				2519538E2F124B27003D5302 /* RadarTimelineControls.swift */,
 				C05DF774DD1215A6E465D9AD /* WindParticleView.swift */,
@@ -1401,6 +1407,7 @@
 				AD80001B2FE6000000000001 /* RadarMotionData.swift */,
 				AD80001E2FE6000000000001 /* WeatherTileLayer.swift */,
 				AD8000212FE6000000000001 /* ModelGridLayerState.swift */,
+				ADC100012FF9000000000001 /* CloudLayerState.swift */,
 			);
 			path = Radar;
 			sourceTree = "<group>";
@@ -1867,6 +1874,7 @@
 				ADC0FFEE2FE6000000000002 /* MapFeatureInfoSheets.swift in Sources */,
 				AD8000122FE6000000000001 /* WeatherModelInfoView.swift in Sources */,
 				ADA300022FF8000000000001 /* RadarInfoView.swift in Sources */,
+				ADA400022FFA000000000001 /* SatelliteInfoView.swift in Sources */,
 				ADA300712FF8000000000001 /* AttributionViews.swift in Sources */,
 				AD8000142FE6000000000001 /* WeatherColormap.swift in Sources */,
 				AD8000162FE6000000000001 /* RadarRegion.swift in Sources */,
@@ -1876,6 +1884,7 @@
 				AD80001C2FE6000000000001 /* RadarMotionData.swift in Sources */,
 				AD80001F2FE6000000000001 /* WeatherTileLayer.swift in Sources */,
 				AD8000222FE6000000000001 /* ModelGridLayerState.swift in Sources */,
+				ADC100022FF9000000000001 /* CloudLayerState.swift in Sources */,
 				AD5000022FE3000000000001 /* NowSheet.swift in Sources */,
 				AD5000042FE3000000000001 /* NowPresentationCoordinator.swift in Sources */,
 				AD5000062FE3000000000001 /* NowSheetView.swift in Sources */,
@@ -2057,6 +2066,7 @@
 				AD80001D2FE6000000000001 /* RadarMotionData.swift in Sources */,
 				AD8000202FE6000000000001 /* WeatherTileLayer.swift in Sources */,
 				AD8000232FE6000000000001 /* ModelGridLayerState.swift in Sources */,
+				ADC100032FF9000000000001 /* CloudLayerState.swift in Sources */,
 				AD4000042FE2000000000001 /* NotificationNames.swift in Sources */,
 				AD40000B2FE2000000000001 /* WeatherSnapshotStore.swift in Sources */,
 				25761D5129F1D083006976BE /* StormDrop.swift in Sources */,

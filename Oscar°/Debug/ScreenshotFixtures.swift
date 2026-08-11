@@ -547,6 +547,18 @@ enum SyntheticRadar {
         return total
     }
 
+    /// Cloud opacity 0…1: a much wider deck around the rain band (rain implies
+    /// cloud; cloud reaches far beyond the rain), advected with the same flow —
+    /// so the clouds fixture visibly extends past the radar echoes.
+    static func cloudOpacity(lat: Double, lon: Double, minutes t: Double) -> Double {
+        let ax = lon - t * 0.011
+        let ay = lat - t * 0.006
+        let d = ((ay - 51.1) - (ax - 12.4) * 0.55) / 4.2
+        let envelope = exp(-d * d)
+        let deck = max(0, envelope * (fbm(ax * 0.8 + 12, ay * 0.8 + 31) * 1.6 - 0.25))
+        return min(1, deck + intensity(lat: lat, lon: lon, minutes: t) * 1.5)
+    }
+
     /// Intensity 0…1 at a coordinate, advected SW→NE over time.
     static func intensity(lat: Double, lon: Double, minutes t: Double) -> Double {
         let ax = lon - t * 0.011
@@ -599,6 +611,33 @@ enum SyntheticRadar {
                 pixels[j * w + i] = typed
                     ? UInt8(1 + min(152, v * 152))
                     : UInt8(1 + min(219, v * 219))
+            }
+        }
+        let png = grayPNG(pixels: pixels, width: w, height: h)
+        cacheLock.lock()
+        gridCache[cacheKey] = png
+        cacheLock.unlock()
+        return png
+    }
+
+    /// Clouds flavor of the value grid: opacity index 0…255 (the clouds palette
+    /// contract), from `cloudOpacity`'s wider deck.
+    static func cloudGridPNG(frameKey: String) -> Data {
+        let cacheKey = "\(frameKey)|clouds"
+        cacheLock.lock()
+        if let cached = gridCache[cacheKey] { cacheLock.unlock(); return cached }
+        cacheLock.unlock()
+        let t = offsetMinutes(fromKey: frameKey) ?? 0
+        let w = gridWidth, h = gridHeight
+        var pixels = [UInt8](repeating: 0, count: w * h)
+        let mN = mercY(north), mS = mercY(south)
+        for j in 0..<h {
+            let lat = latFromMercY(mN + (mS - mN) * Double(j) / Double(h))
+            for i in 0..<w {
+                let lon = west + (east - west) * Double(i) / Double(w)
+                let v = cloudOpacity(lat: lat, lon: lon, minutes: t)
+                guard v >= 0.03 else { continue }
+                pixels[j * w + i] = UInt8(min(255, 40 + v * 215))
             }
         }
         let png = grayPNG(pixels: pixels, width: w, height: h)
