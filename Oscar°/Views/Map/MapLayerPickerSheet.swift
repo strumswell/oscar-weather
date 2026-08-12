@@ -238,7 +238,7 @@ struct MapLayerPickerSheet: View {
                                    ? "Schnee, Graupel & Hagel im Radar einfärben"
                                    : "Für dieses Radar nicht verfügbar",
                                isOn: $settingsService.radarPrecipTypeOverlay)
-                    .disabled(true)//!precipTypeAvailable)
+                    .disabled(true)
                     .opacity(precipTypeAvailable ? 1 : 0.45)
                 Divider().padding(.leading, 16)
                 opacityRow

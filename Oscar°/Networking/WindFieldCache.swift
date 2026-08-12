@@ -2,24 +2,13 @@ import Foundation
 
 // MARK: - Response models
 
-struct WindFieldBounds: Decodable, Sendable {
-    let north: Double
-    let south: Double
-    let west: Double
-    let east: Double
+typealias WindFieldTile = Components.Schemas.WindFieldTile
 
+extension Components.Schemas.RadarBounds {
     func contains(latitude: Double, longitude: Double) -> Bool {
         latitude >= south && latitude <= north &&
         longitude >= west && longitude <= east
     }
-}
-
-struct WindFieldTile: Decodable, Sendable {
-    let gridWidth: Int
-    let gridHeight: Int
-    let bounds: WindFieldBounds
-    let u: [Double?]
-    let v: [Double?]
 }
 
 struct WindTileKey: Hashable, Sendable {
@@ -28,19 +17,6 @@ struct WindTileKey: Hashable, Sendable {
     let z: Int
     let x: Int
     let y: Int
-}
-
-// MARK: - WeatherTileLayer helpers for wind-field
-
-extension WeatherTileLayer {
-    var windFieldPrefix: String {
-        switch self {
-        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: "icon"
-        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: "ecmwf"
-        }
-    }
-
-    var windFieldSamples: Int { isGlobalModel ? 24 : 32 }
 }
 
 // MARK: - Cache
@@ -99,15 +75,7 @@ actor WindFieldCache {
     }
 
     private static func fetch(key: WindTileKey, layer: WeatherTileLayer) async -> WindFieldTile? {
-        let urlString =
-            "\(ModelGridLayerState.baseURL)/models/\(key.model)/frames"
-            + "/\(key.frameId)/wind/field/\(key.z)/\(key.x)/\(key.y).json?samples=\(layer.windFieldSamples)"
-        guard let url = URL(string: urlString) else { return nil }
-        var req = URLRequest(url: url)
-        req.addAPIContactIdentity()
-        guard let (data, response) = try? await URLSession.shared.data(for: req),
-              let http = response as? HTTPURLResponse,
-              http.statusCode == 200 else { return nil }
-        return try? JSONDecoder().decode(WindFieldTile.self, from: data)
+        try? await APIClient.shared.windField(
+            model: key.model, key: key.frameId, z: key.z, x: key.x, y: key.y, samples: layer.windFieldSamples)
     }
 }

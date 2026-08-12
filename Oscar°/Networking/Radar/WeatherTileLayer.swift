@@ -141,3 +141,15 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
         }
     }
 }
+
+extension WeatherTileLayer {
+    /// oscar-server model id path segment ("models/{id}/…") for this layer.
+    var windFieldPrefix: String {
+        switch self {
+        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: "icon"
+        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: "ecmwf"
+        }
+    }
+
+    var windFieldSamples: Int { isGlobalModel ? 24 : 32 }
+}

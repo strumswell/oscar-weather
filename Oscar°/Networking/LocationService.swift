@@ -110,20 +110,17 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         #endif
     }
 
-    ///  Update class state with all cities from storage and the current GPS coordinates, if available
     func update() {
         city.update()
         updateGPSCoordinates()
     }
-    
-    /// Update class state with current user GPS coordinates, if available
+
     func updateGPSCoordinates() {
         if let newGPSCoordinates = getGPSCoordinates() {
             gpsLocation = newGPSCoordinates
         }
     }
-    
-    /// Get current user GPS coordinates, if available
+
     func getGPSCoordinates() -> CLLocationCoordinate2D? {
         authStatus = manager.authorizationStatus
         

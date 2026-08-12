@@ -1,5 +1,5 @@
 //
-//  OpenMeteoAttribution.swift
+//  DWDAttribution.swift
 //  Oscar°
 //
 //  Created by Philipp Bolte on 05.07.24.

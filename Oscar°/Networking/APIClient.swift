@@ -28,52 +28,23 @@ let radarBaseURL: String = {
     return "https://server.oscars.love"
 }()
 
-enum AlertResponse {
-  case canadian(Operations.getCanadianWeatherAlerts.Output.Ok.Body.jsonPayload)
-  case oscar(OscarPointAlertsResponse)
-}
-
-/// oscar-server `/weather-alerts/point` response — hand-written like the other
-/// oscar-server calls (the server is not part of the generated OpenAPI client).
-/// Used for US locations, where the server ingests NWS alerts; `source` drives
-/// the attribution line ("nws" → NOAA / National Weather Service).
-struct OscarPointAlertsResponse: Decodable {
-  let alertCount: Int
-  let alerts: [OscarPointAlert]
-
-  /// The "no active warnings" placeholder used before the first fetch and after
-  /// a failed one — alerts are supplementary and must never block a refresh.
-  static let empty = OscarPointAlertsResponse(alertCount: 0, alerts: [])
-}
-
-struct OscarPointAlert: Decodable {
-  let alertId: String
-  let source: String
-  /// Originating national weather service for Meteoalarm alerts ("Météo-France") —
-  /// the hub only aggregates, so attribution shows both. nil from older servers
-  /// and for natively ingested sources.
-  let senderName: String?
-  let event: String
-  let severity: String
-  let urgency: String
-  let certainty: String
-  let responseType: String?
-  let onsetAt: Date?
-  let expiresAt: Date?
-  let headline: String?
-  let description: String?
-  let instruction: String?
-}
-
 final class APIClient: Sendable {
   static let shared = APIClient()
 
   let openMeteo: Client
   let openMeteoAqi: Client
   let openMeteoGeo: Client
-  let openMeteoEnsemble: Client
   let openMeteoArchive: Client
   let canadaWeather: Client
+  /// oscar-server via the generated client. No `CachingMiddleware`: the radar/model
+  /// states cache decoded frames themselves, and series/alerts callers keep
+  /// last-known-good — HTTP-level caching would only double-buffer megabyte grids.
+  let oscarServer: Client
+  /// oscar-server for widget snapshot rendering: WidgetKit grants a refresh only
+  /// ~30 s of wall clock, so requests time out after 20 s (the budget of the old
+  /// direct-URLSession path) and are never retried — a degraded basemap-only
+  /// snapshot beats an abandoned refresh that leaves a stale one on screen.
+  let oscarServerSnapshot: Client
 
   init() {
     openMeteo = APIClient.get(
@@ -82,12 +53,30 @@ final class APIClient: Sendable {
     )
     openMeteoAqi = APIClient.get(url: Self.serverURL(Servers.server2))
     openMeteoGeo = APIClient.get(url: Self.serverURL(Servers.server3))
-    openMeteoEnsemble = APIClient.get(url: Self.ensembleServerURL)
     openMeteoArchive = APIClient.get(url: Self.archiveServerURL)
-    canadaWeather = APIClient.get(url: Self.serverURL(Servers.server5))
+    canadaWeather = APIClient.get(url: Self.serverURL(Servers.server4))
+    oscarServer = Client(
+      serverURL: URL(string: radarBaseURL) ?? Self.serverURL(Servers.server6),
+      transport: URLSessionTransport(),
+      middlewares: Self.stagingMiddlewares + [
+        ContactIdentityMiddleware(),
+        RetryingMiddleware(
+          signals: [.code(429), .range(500..<600), .errorThrown],
+          policy: .upToAttempts(count: 3),
+          delay: .exponentialWithJitter(base: 0.5, maxSeconds: 8)
+        ),
+      ]
+    )
+    let snapshotConfiguration = URLSessionConfiguration.default
+    snapshotConfiguration.timeoutIntervalForRequest = 20
+    oscarServerSnapshot = Client(
+      serverURL: URL(string: radarBaseURL) ?? Self.serverURL(Servers.server6),
+      transport: URLSessionTransport(
+        configuration: .init(session: URLSession(configuration: snapshotConfiguration))),
+      middlewares: Self.stagingMiddlewares + [ContactIdentityMiddleware()]
+    )
   }
 
-  private static let ensembleServerURL = URL(string: "https://ensemble-api.open-meteo.com")!
   private static let archiveServerURL = URL(string: "https://archive-api.open-meteo.com")!
 
   /// The generated `Servers.serverN()` build compile-time-constant base URLs; a failure is a
@@ -178,9 +167,7 @@ final class APIClient: Sendable {
       query.models = Operations.getForecast.Input.Query.modelsPayload(rawValue: modelPreference.apiValue)
     }
     // For regions where ICON model is better
-    else if coordinates.country() == .spain || coordinates.country() == .portugal  //|| coordinates.country() == .centralEurope
-    {
-      // First request: Get 7 days with ICON model
+    else if coordinates.country() == .spain || coordinates.country() == .portugal {
       query.models = .icon_seamless
       query.forecast_days = ._7
 
@@ -199,7 +186,6 @@ final class APIClient: Sendable {
         throw URLError(.badServerResponse)
       }
 
-      // Second request: Get 14 days with best_match model
       query.models = .best_match
       query.forecast_days = ._14
 
@@ -331,6 +317,10 @@ final class APIClient: Sendable {
     }
   }
 
+  /// Deliberately NOT on the generated client: the ensemble response carries
+  /// per-member arrays under DYNAMIC keys (`temperature_2m_min_member01…N`),
+  /// which an OpenAPI schema can't express — `DailyEnsembleForecastResponse`
+  /// decodes them with a dynamic-key container instead.
   func getDailyEnsembleForecast(
     coordinates: CLLocationCoordinate2D,
     model: DailyEnsembleModel = .ecmwfAIFS025Ensemble
@@ -423,172 +413,6 @@ final class APIClient: Sendable {
     }
   }
 
-  func getAlerts(
-    coordinates: CLLocationCoordinate2D,
-    countryCode: String? = nil
-  ) async throws -> AlertResponse {
-    let useCanadian: Bool
-    let useUnitedStates: Bool
-    let useTaiwan: Bool
-    let useMeteoalarm: Bool
-    if let countryCode {
-      useCanadian = countryCode == "CA"
-      useUnitedStates = countryCode == "US"
-      useTaiwan = countryCode == "TW"
-      useMeteoalarm = Self.meteoalarmCountryCodes.contains(countryCode)
-    } else {
-      useCanadian = isCanadianLocation(coordinates)
-      useUnitedStates = !useCanadian && isUnitedStatesLocation(coordinates)
-      useTaiwan = !useCanadian && !useUnitedStates && isTaiwanLocation(coordinates)
-      useMeteoalarm =
-        !useCanadian && !useUnitedStates && !useTaiwan && isMeteoalarmLocation(coordinates)
-    }
-
-    if useCanadian {
-      return try await getCanadianWeatherAlerts(coordinates: coordinates)
-    } else if useUnitedStates || useTaiwan || useMeteoalarm {
-      // NWS (US), CWA (Taiwan), DWD (Germany) and Meteoalarm (rest of Europe)
-      // warnings are all served by oscar-server on the same source-tagged
-      // endpoint; the response's `source` drives attribution.
-      return try await getOscarWeatherAlerts(coordinates: coordinates)
-    } else {
-      // No warning source for this location — report "none" without a fetch.
-      return .oscar(.empty)
-    }
-  }
-
-  /// ISO codes of the countries whose warnings oscar-server ingests: the EUMETNET
-  /// Meteoalarm members plus Germany (DWD CAP feed, ingested natively); note the
-  /// UK's ISO code is "GB" even though Meteoalarm slugs it "uk".
-  private static let meteoalarmCountryCodes: Set<String> = [
-    "AT", "BA", "BE", "BG", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GB",
-    "GR", "HR", "HU", "IE", "IL", "IS", "IT", "LT", "LU", "LV", "MD", "ME", "MK", "MT",
-    "NL", "NO", "PL", "PT", "RO", "RS", "SE", "SI", "SK", "UA",
-  ]
-
-  /// European warning coverage for saved cities, which reach us without a country
-  /// code: greater Europe (Azores/Iceland to Ukraine, Canaries to the North Cape)
-  /// plus Israel. Germany falls inside this box and resolves to its native DWD
-  /// alerts on the same oscar-server endpoint.
-  private func isMeteoalarmLocation(_ coordinates: CLLocationCoordinate2D) -> Bool {
-    let lat = coordinates.latitude
-    let lon = coordinates.longitude
-    let europe = lat >= 27.0 && lat <= 72.0 && lon >= -32.0 && lon <= 45.0
-    let israel = lat >= 29.4 && lat <= 33.4 && lon >= 34.2 && lon <= 35.9
-    return europe || israel
-  }
-
-  private func isCanadianLocation(_ coordinates: CLLocationCoordinate2D) -> Bool {
-    guard coordinates.latitude <= 84.0,
-      coordinates.longitude >= -141.0,
-      coordinates.longitude <= -52.0
-    else {
-      return false
-    }
-
-    let minimumLatitude = coordinates.longitude < -95.0 ? 49.0 : 45.0
-    return coordinates.latitude >= minimumLatitude
-  }
-
-  /// NWS alert coverage boxes: CONUS, Alaska, Hawaii, Puerto Rico/USVI, and
-  /// Guam/Northern Marianas. Only consulted after the Canada check, so the
-  /// shared-border strip keeps resolving to Environment Canada as before.
-  private func isUnitedStatesLocation(_ coordinates: CLLocationCoordinate2D) -> Bool {
-    let lat = coordinates.latitude
-    let lon = coordinates.longitude
-    let conus = lat >= 24.3 && lat <= 49.5 && lon >= -125.0 && lon <= -66.5
-    let alaska = lat >= 51.0 && lat <= 72.0 && lon >= -170.0 && lon <= -129.5
-    let hawaii = lat >= 18.5 && lat <= 22.5 && lon >= -160.6 && lon <= -154.5
-    let caribbean = lat >= 17.4 && lat <= 18.6 && lon >= -68.0 && lon <= -64.3
-    let pacific = lat >= 12.9 && lat <= 20.6 && lon >= 144.5 && lon <= 146.1
-    return conus || alaska || hawaii || caribbean || pacific
-  }
-
-  /// CWA (Taiwan) alert coverage: the main island plus its outlying county groups
-  /// (Penghu, Kinmen, Matsu). Mirrors `RadarRegion.taiwan`'s coverage box and is only
-  /// consulted after the Canada/US checks.
-  private func isTaiwanLocation(_ coordinates: CLLocationCoordinate2D) -> Bool {
-    let lat = coordinates.latitude
-    let lon = coordinates.longitude
-    return lat >= 20.5 && lat <= 26.5 && lon >= 118.0 && lon <= 124.0
-  }
-
-  /// Active severe-weather alerts at a point from oscar-server
-  /// (`/weather-alerts/point`, NWS-sourced for US locations). Geometry is
-  /// skipped — the badge and detail list never render it, and US multi-zone
-  /// alerts can carry hundreds of KB of polygon rings.
-  private func getOscarWeatherAlerts(coordinates: CLLocationCoordinate2D) async throws
-    -> AlertResponse
-  {
-    .oscar(try await getOscarPointAlerts(coordinates: coordinates))
-  }
-
-  /// The raw `/weather-alerts/point` response. Also the map's tap-through
-  /// resolver: the `/area` overlay serves DISSOLVED severity shapes without
-  /// per-alert text, so a polygon tap asks this endpoint what is active at the
-  /// tapped coordinate.
-  func getOscarPointAlerts(coordinates: CLLocationCoordinate2D) async throws
-    -> OscarPointAlertsResponse
-  {
-    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
-    let language = Locale.current.language.languageCode?.identifier == "de" ? "de" : "en"
-    guard
-      let url = URL(
-        string:
-          "\(radarBaseURL)/weather-alerts/point?lat=\(outboundCoordinates.latitude)&lon=\(outboundCoordinates.longitude)&lang=\(language)&includeGeometry=false"
-      )
-    else { throw URLError(.badURL) }
-
-    var request = URLRequest(url: url)
-    request.addAPIContactIdentity()
-    let (data, http) = try await Self.fetchWithRetry(request)
-    guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
-    return try Self.oscarAlertDecoder.decode(OscarPointAlertsResponse.self, from: data)
-  }
-
-  /// oscar-server dates are ISO-8601 with fractional seconds; accept the plain
-  /// variant too.
-  private static let oscarAlertDecoder: JSONDecoder = {
-    let fractional = ISO8601DateFormatter()
-    fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-    let plain = ISO8601DateFormatter()
-    let decoder = JSONDecoder()
-    decoder.dateDecodingStrategy = .custom { decoder in
-      let container = try decoder.singleValueContainer()
-      let value = try container.decode(String.self)
-      guard let date = fractional.date(from: value) ?? plain.date(from: value) else {
-        throw DecodingError.dataCorruptedError(
-          in: container, debugDescription: "Unparseable date: \(value)"
-        )
-      }
-      return date
-    }
-    return decoder
-  }()
-
-  private func getCanadianWeatherAlerts(coordinates: CLLocationCoordinate2D) async throws
-    -> AlertResponse
-  {
-    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
-    let response = try await canadaWeather.getCanadianWeatherAlerts(
-      .init(
-        path: .init(
-          latitude: outboundCoordinates.latitude,
-          longitude: outboundCoordinates.longitude
-        )
-      ))
-
-    switch response {
-    case let .ok(response):
-      switch response.body {
-      case .json(let result):
-        return .canadian(result)
-      }
-    case .undocumented:
-      return .canadian([])
-    }
-  }
-
   func getGeocodeSearchResult(name: String) async throws -> Components.Schemas.SearchResponse {
     let appLanguage = Locale.current.language.languageCode?.identifier ?? "de"
     let response = try await openMeteoGeo.search(
@@ -606,109 +430,6 @@ final class APIClient: Sendable {
     case .undocumented:
       return .init()
     }
-  }
-
-  /// Per-location precipitation timeline (observations + nowcast, mm/h) from
-  /// oscar-server's `/radar/series`. Auto-routes DWD inside Germany / OPERA
-  /// elsewhere in Europe. Hand-written (oscar-server is not part of the
-  /// generated OpenAPI client).
-  ///
-  /// Returns `nil` only when the server *successfully* reports no coverage for
-  /// this location (204/404). Any real failure — transport error, cancellation,
-  /// unexpected status, or a decode failure — is thrown, so callers can tell
-  /// "no rain here" apart from "couldn't fetch" and avoid discarding good data.
-  func getRadarSeries(coordinates: CLLocationCoordinate2D) async throws
-    -> PrecipSeriesResponse?
-  {
-    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
-    guard
-      let url = URL(
-        string:
-          "\(radarBaseURL)/radar/series?lat=\(outboundCoordinates.latitude)&lon=\(outboundCoordinates.longitude)"
-      )
-    else { return nil }
-
-    var request = URLRequest(url: url)
-    request.addAPIContactIdentity()
-    let (data, http) = try await Self.fetchWithRetry(request)
-    if http.statusCode == 204 || http.statusCode == 404 { return nil }
-    guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
-    return try JSONDecoder().decode(PrecipSeriesResponse.self, from: data)
-  }
-
-  /// Per-location satellite cloudiness series (`/clouds/meteosat/series`) — the
-  /// head view's trend annotation. nil = outside the disk or clouds not ready
-  /// (404/503); both simply mean "no annotation".
-  func getCloudSeries(coordinates: CLLocationCoordinate2D) async throws
-    -> CloudSeriesResponse?
-  {
-    let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
-    guard
-      let url = URL(
-        string:
-          "\(radarBaseURL)/clouds/meteosat/series?lat=\(outboundCoordinates.latitude)&lon=\(outboundCoordinates.longitude)"
-      )
-    else { return nil }
-
-    var request = URLRequest(url: url)
-    request.addAPIContactIdentity()
-    let (data, http) = try await Self.fetchWithRetry(request)
-    if http.statusCode == 204 || http.statusCode == 404 || http.statusCode == 503 { return nil }
-    guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
-    return try JSONDecoder().decode(CloudSeriesResponse.self, from: data)
-  }
-
-  /// Active severe-weather warning polygons for a map viewport box, as a raw GeoJSON
-  /// FeatureCollection from oscar-server — handed straight to MapLibre's shape
-  /// sources. Callers pass the padded visible bounds (see `alertRequestBox` in the
-  /// map coordinator); the box must stay inside the endpoint's 25°×40° guard.
-  /// Deliberately NOT `dissolve=true`: warning outlines are built independently
-  /// per alert, so the server's parity dissolve shreds real-world data (slivers,
-  /// overlap punch-outs) — the per-alert mesh is the honest rendering.
-  func getWeatherAlertPolygons(
-    minLat: Double, maxLat: Double, minLon: Double, maxLon: Double
-  ) async throws -> Data {
-    let language = Locale.current.language.languageCode?.identifier == "de" ? "de" : "en"
-    guard
-      let url = URL(
-        string:
-          "\(radarBaseURL)/weather-alerts/area?minLat=\(minLat)&minLon=\(minLon)&maxLat=\(maxLat)&maxLon=\(maxLon)&lang=\(language)"
-      )
-    else { throw URLError(.badURL) }
-
-    var request = URLRequest(url: url)
-    request.addAPIContactIdentity()
-    let (data, http) = try await Self.fetchWithRetry(request)
-    guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
-    return data
-  }
-
-  /// Tracked precipitation cells for a radar region as raw GeoJSON (Point features
-  /// with velocity/bearing/intensity properties and an extrapolated `path`).
-  /// `region` is the region path component ("germany", "europe", "usa", …) — kept a
-  /// string because RadarRegion isn't compiled into every target this file is.
-  func getStormCells(region: String) async throws -> Data {
-    guard let url = URL(string: "\(radarBaseURL)/radar/\(region)/cells")
-    else { throw URLError(.badURL) }
-    var request = URLRequest(url: url)
-    request.addAPIContactIdentity()
-    let (data, http) = try await Self.fetchWithRetry(request)
-    guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
-    return data
-  }
-
-  /// Isobar GeoJSON for one model frame (`/{framesEndpoint}/{frameKey}/pressure/isolines`):
-  /// MSLP isolines as MultiLineStrings plus H/T pressure-center points.
-  /// `framesEndpoint` is the layer's frames path ("models/icon/frames") — kept a
-  /// string because WeatherTileLayer isn't compiled into every target this file is.
-  func getPressureIsolines(framesEndpoint: String, frameKey: String) async throws -> Data {
-    guard let url = URL(string: "\(radarBaseURL)/\(framesEndpoint)/\(frameKey)/pressure/isolines")
-    else { throw URLError(.badURL) }
-    var request = URLRequest(url: url)
-    request.addAPIContactIdentity()
-    let (data, http) = try await Self.fetchWithRetry(request)
-    guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
-    return data
   }
 
   /// Retry/backoff for the hand-written (non-OpenAPI) endpoints, mirroring the

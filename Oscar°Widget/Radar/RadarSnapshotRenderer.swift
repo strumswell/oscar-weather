@@ -40,9 +40,9 @@ enum RadarSnapshotRenderer {
     }
 
     /// Same framing as WidgetBasemapRenderer and the previous MapKit widget.
-    private static let mapSpanMeters = 65_000.0
+    static let mapSpanMeters = 65_000.0
     /// Matches the prerendered basemap PNGs.
-    private static let compositeScale: CGFloat = 2
+    static let compositeScale: CGFloat = 2
     private static let radarOverlayAlpha: CGFloat = 0.7
 
     /// Fallback canvas when no basemap has been prerendered yet for the widget's
@@ -79,7 +79,7 @@ enum RadarSnapshotRenderer {
         }
 
         let basemap = loadBasemap(center: center, size: size, style: options.style)
-        guard basemap != nil || plan.tileURLTemplate != nil else { return nil }
+        guard basemap != nil || plan.tileSource != nil else { return nil }
 
         let bounds = basemap?.bounds ?? fittedBounds(around: center, spanMeters: mapSpanMeters, size: size)
         let frame = MercatorFrame(bounds: bounds, size: size)
@@ -130,7 +130,7 @@ enum RadarSnapshotRenderer {
         } else {
             plan = await ecmwfPlan()
         }
-        guard plan.tileURLTemplate != nil else { return nil }
+        guard plan.tileSource != nil else { return nil }
         let bounds = fittedBounds(around: center, spanMeters: spanMeters, size: size)
         let frame = MercatorFrame(bounds: bounds, size: size)
         let tiles = await fetchOverlayTiles(plan: plan, frame: frame)
@@ -167,24 +167,23 @@ enum RadarSnapshotRenderer {
     private static func radarPlan(
         region: RadarRegion, around center: CLLocationCoordinate2D, includeArrows: Bool = true
     ) async -> RadarOverlayPlan {
-        guard let url = URL(string: "\(radarBaseURL)/radar/\(region.pathComponent)/frames"),
-              let data = await fetchData(url, freshest: true),
-              let response = try? JSONDecoder().decode(RadarFramesResponse.self, from: data),
+        guard let response = try? await APIClient.shared.radarFrames(
+                region: region.pathComponent, profile: .snapshot),
               let frame = closestFrame(in: response.frames.map { ($0.key, $0.timestamp) })
         else { return RadarOverlayPlan() }
 
         var plan = RadarOverlayPlan(
-            tileURLTemplate: "\(radarBaseURL)/radar/\(region.pathComponent)/frames/\(frame.key)/tiles/{z}/{x}/{y}",
+            tileSource: .radar(region: region, key: frame.key),
             maximumTileZoom: 10,
             frameDate: frame.date,
             colormapId: RadarProduct.precipitation.colormapId
         )
 
-        let bounds = (response.imageBounds ?? response.bounds).asDomain
+        let bounds = (response.image_bounds ?? response.bounds).asDomain
         if includeArrows,
-           let motionURL = URL(string: "\(radarBaseURL)/radar/\(region.pathComponent)/motion"),
-           let motionData = await fetchData(motionURL),
-           let motion = RadarMotionData(jsonData: motionData),
+           let motionResponse = try? await APIClient.shared.radarMotion(
+                region: region.pathComponent, profile: .snapshot),
+           let motion = RadarMotionData(payload: motionResponse),
            let pair = motion.pairsByFrom[frame.key] {
             let gate = await PrecipGate.load(
                 around: center, spanMeters: mapSpanMeters * 1.8,
@@ -202,14 +201,13 @@ enum RadarSnapshotRenderer {
     /// Global fallback outside all radar coverages: ECMWF precipitation forecast,
     /// frame closest to now. No motion fields — no arrows.
     private static func ecmwfPlan() async -> RadarOverlayPlan {
-        guard let url = URL(string: "\(radarBaseURL)/models/ecmwf/frames"),
-              let data = await fetchData(url, freshest: true),
-              let response = try? JSONDecoder().decode(ModelFramesResponse.self, from: data),
+        guard let response = try? await APIClient.shared.modelFrames(
+                model: "ecmwf", profile: .snapshot),
               let frame = closestFrame(in: response.frames.map { ($0.key, $0.validTime) })
         else { return RadarOverlayPlan() }
 
         return RadarOverlayPlan(
-            tileURLTemplate: "\(radarBaseURL)/models/ecmwf/frames/\(frame.key)/precipitation/tiles/{z}/{x}/{y}",
+            tileSource: .ecmwfModel(key: frame.key),
             maximumTileZoom: 7,
             frameDate: frame.date,
             colormapId: RadarProduct.precipitation.colormapId  // ECMWF precip shares plasma
@@ -225,7 +223,7 @@ enum RadarSnapshotRenderer {
 
     // MARK: - Overlay tiles
 
-    private struct OverlayTile {
+    struct OverlayTile {
         let rect: CGRect
         let image: UIImage
         /// Web-Mercator tile address — the smoothing resample stitches tiles into
@@ -238,7 +236,7 @@ enum RadarSnapshotRenderer {
     /// Fetches the raster tiles covering the frame at a zoom where tile pixels
     /// roughly match composite pixels (capped per source, like the app's layers).
     private static func fetchOverlayTiles(plan: RadarOverlayPlan, frame: MercatorFrame) async -> [OverlayTile] {
-        guard let template = plan.tileURLTemplate else { return [] }
+        guard let source = plan.tileSource else { return [] }
         let worldWidth = frame.x1 - frame.x0
         guard worldWidth > 0 else { return [] }
         let pixelWidth = Double(frame.size.width) * Double(compositeScale)
@@ -250,23 +248,28 @@ enum RadarSnapshotRenderer {
         let y0 = Int(floor(frame.y0 * n)), y1 = Int(floor(frame.y1 * n))
         guard x0 >= 0, y0 >= 0, (x1 - x0 + 1) * (y1 - y0 + 1) <= 16 else { return [] }
 
-        var requests: [(url: URL, tx: Int, ty: Int)] = []
+        var requests: [(tx: Int, ty: Int)] = []
         for tx in x0...x1 {
             for ty in y0...y1 {
-                let urlString = template
-                    .replacingOccurrences(of: "{z}", with: "\(zoom)")
-                    .replacingOccurrences(of: "{x}", with: "\(tx)")
-                    .replacingOccurrences(of: "{y}", with: "\(ty)")
-                guard let url = URL(string: urlString) else { continue }
-                requests.append((url, tx, ty))
+                requests.append((tx, ty))
             }
         }
 
         return await withTaskGroup(of: OverlayTile?.self) { group in
             for request in requests {
                 group.addTask {
-                    guard let data = await fetchData(request.url),
-                          let image = UIImage(data: data) else { return nil }
+                    let data: Data?
+                    switch source {
+                    case .radar(let region, let key):
+                        data = try? await APIClient.shared.radarTile(
+                            region: region.pathComponent, key: key, z: zoom, x: request.tx, y: request.ty,
+                            profile: .snapshot)
+                    case .ecmwfModel(let key):
+                        data = try? await APIClient.shared.modelTile(
+                            model: "ecmwf", key: key, variable: "precipitation",
+                            z: zoom, x: request.tx, y: request.ty, profile: .snapshot)
+                    }
+                    guard let data, let image = UIImage(data: data) else { return nil }
                     let tx = request.tx
                     let ty = request.ty
                 let origin = frame.point(forWorldX: Double(tx) / n, worldY: Double(ty) / n)
@@ -308,295 +311,6 @@ enum RadarSnapshotRenderer {
         }
     }
 
-    // MARK: - Smoothing (data-space, mirrors the fullscreen layer)
-
-    /// The app's "Weichzeichnen", CPU edition. The fullscreen Metal layer samples
-    /// the value grid with a bicubic B-spline and colormaps AFTER interpolation
-    /// through a premultiplied palette LUT with linear blending. Blurring the
-    /// colormapped tiles instead looks visibly different (off-palette color blends,
-    /// softened alpha rims), so this reverses the tiles to palette indices, runs
-    /// the same B-spline resample in data space, and recolormaps.
-    private static var cachedPalettes: [String: [PixelRGBA]] = [:]
-
-    private static func palette(id: String) async -> [PixelRGBA]? {
-        if let cached = cachedPalettes[id] { return cached }
-        guard let url = URL(string: "\(radarBaseURL)/colormaps/\(id)"),
-              let data = await fetchData(url), data.count >= 256 * 4 else { return nil }
-        let palette = (0..<256).map { entry -> PixelRGBA in
-            let o = entry * 4
-            return PixelRGBA(r: data[o], g: data[o + 1], b: data[o + 2], a: data[o + 3])
-        }
-        cachedPalettes[id] = palette
-        return palette
-    }
-
-    private static func dataSmoothedOverlay(
-        tiles: [OverlayTile], frame: MercatorFrame, palette: [PixelRGBA]
-    ) -> UIImage? {
-        guard let zoom = tiles.first?.zoom, !tiles.isEmpty else { return nil }
-        let n = pow(2, Double(zoom))
-
-        // Premultiplied palette, like the Metal layer's LUT texture — index
-        // reversal and linear blending both happen in premultiplied space.
-        let premul: [(r: Double, g: Double, b: Double, a: Double)] = palette.map { entry in
-            let a = Double(entry.a) / 255
-            return (Double(entry.r) * a, Double(entry.g) * a, Double(entry.b) * a, Double(entry.a))
-        }
-        var reverseLUT: [UInt32: UInt8] = [:]
-        for (index, entry) in premul.enumerated().reversed() {
-            let key = UInt32(entry.r.rounded()) << 24 | UInt32(entry.g.rounded()) << 16
-                | UInt32(entry.b.rounded()) << 8 | UInt32(entry.a.rounded())
-            reverseLUT[key] = UInt8(index)
-        }
-
-        // Stitch the tiles' index planes into one mosaic (0 = no data/dry).
-        let minX = tiles.map(\.tx).min()!, maxX = tiles.map(\.tx).max()!
-        let minY = tiles.map(\.ty).min()!, maxY = tiles.map(\.ty).max()!
-        let mosaicW = (maxX - minX + 1) * 256
-        let mosaicH = (maxY - minY + 1) * 256
-        var mosaic = [UInt8](repeating: 0, count: mosaicW * mosaicH)
-        var nearestMemo: [UInt32: UInt8] = [:]
-        for tile in tiles {
-            guard let rgba = rgbaPlane(from: tile.image) else { continue }
-            let originX = (tile.tx - minX) * 256
-            let originY = (tile.ty - minY) * 256
-            for py in 0..<256 {
-                let src = py * 256 * 4
-                let dst = (originY + py) * mosaicW + originX
-                for px in 0..<256 {
-                    let o = src + px * 4
-                    let a = rgba[o + 3]
-                    if a == 0 { continue }
-                    let key = UInt32(rgba[o]) << 24 | UInt32(rgba[o + 1]) << 16
-                        | UInt32(rgba[o + 2]) << 8 | UInt32(a)
-                    if let index = reverseLUT[key] {
-                        mosaic[dst + px] = index
-                    } else if let index = nearestMemo[key] {
-                        mosaic[dst + px] = index
-                    } else {
-                        // Off-palette color (server-side resampling rounding):
-                        // nearest premultiplied entry, memoized per distinct color.
-                        var best = 0
-                        var bestDistance = Double.infinity
-                        for (index, entry) in premul.enumerated() {
-                            let dr = entry.r - Double(rgba[o])
-                            let dg = entry.g - Double(rgba[o + 1])
-                            let db = entry.b - Double(rgba[o + 2])
-                            let da = entry.a - Double(a)
-                            let distance = dr * dr + dg * dg + db * db + da * da
-                            if distance < bestDistance {
-                                bestDistance = distance
-                                best = index
-                            }
-                        }
-                        nearestMemo[key] = UInt8(best)
-                        mosaic[dst + px] = UInt8(best)
-                    }
-                }
-            }
-        }
-
-        // Resample in data space at composite resolution: bicubic B-spline over
-        // the index mosaic (Sigg & Hadwiger weights, same as the shader), then
-        // linear palette blend — colormap strictly after interpolation.
-        let outW = Int(frame.size.width * compositeScale)
-        let outH = Int(frame.size.height * compositeScale)
-        guard outW > 0, outH > 0 else { return nil }
-        var out = [UInt8](repeating: 0, count: outW * outH * 4)
-
-        @inline(__always) func bsplineWeights(_ t: Double) -> (Double, Double, Double, Double) {
-            let t2 = t * t, t3 = t2 * t
-            return ((1 - 3 * t + 3 * t2 - t3) / 6,
-                    (4 - 6 * t2 + 3 * t3) / 6,
-                    (1 + 3 * t + 3 * t2 - 3 * t3) / 6,
-                    t3 / 6)
-        }
-
-        mosaic.withUnsafeBufferPointer { indices in
-            out.withUnsafeMutableBufferPointer { pixels in
-                for py in 0..<outH {
-                    let wy = frame.y0 + (Double(py) + 0.5) / Double(outH) * (frame.y1 - frame.y0)
-                    let my = (wy * n - Double(minY)) * 256 - 0.5
-                    guard my > -1, my < Double(mosaicH) else { continue }
-                    let iy = Int(my.rounded(.down))
-                    let (wy0, wy1, wy2, wy3) = bsplineWeights(my - Double(iy))
-
-                    for px in 0..<outW {
-                        let wx = frame.x0 + (Double(px) + 0.5) / Double(outW) * (frame.x1 - frame.x0)
-                        let mx = (wx * n - Double(minX)) * 256 - 0.5
-                        guard mx > -1, mx < Double(mosaicW) else { continue }
-                        let ix = Int(mx.rounded(.down))
-                        let (wx0, wx1, wx2, wx3) = bsplineWeights(mx - Double(ix))
-
-                        @inline(__always) func sampledRow(_ row: Int) -> Double {
-                            let sy = min(max(iy - 1 + row, 0), mosaicH - 1)
-                            let rowBase = sy * mosaicW
-                            let x0 = min(max(ix - 1, 0), mosaicW - 1)
-                            let x1 = min(max(ix, 0), mosaicW - 1)
-                            let x2 = min(max(ix + 1, 0), mosaicW - 1)
-                            let x3 = min(max(ix + 2, 0), mosaicW - 1)
-                            return wx0 * Double(indices[rowBase + x0])
-                                + wx1 * Double(indices[rowBase + x1])
-                                + wx2 * Double(indices[rowBase + x2])
-                                + wx3 * Double(indices[rowBase + x3])
-                        }
-                        let value = wy0 * sampledRow(0) + wy1 * sampledRow(1)
-                            + wy2 * sampledRow(2) + wy3 * sampledRow(3)
-                        guard value > 0.01 else { continue }
-
-                        let clamped = min(max(value, 0), 255)
-                        let i0 = Int(clamped)
-                        let i1 = min(255, i0 + 1)
-                        let f = clamped - Double(i0)
-                        let e0 = premul[i0], e1 = premul[i1]
-                        let o = (py * outW + px) * 4
-                        pixels[o]     = UInt8((e0.r + (e1.r - e0.r) * f).rounded())
-                        pixels[o + 1] = UInt8((e0.g + (e1.g - e0.g) * f).rounded())
-                        pixels[o + 2] = UInt8((e0.b + (e1.b - e0.b) * f).rounded())
-                        pixels[o + 3] = UInt8((e0.a + (e1.a - e0.a) * f).rounded())
-                    }
-                }
-            }
-        }
-
-        let cgImage: CGImage? = out.withUnsafeMutableBytes { raw in
-            guard let context = CGContext(
-                data: raw.baseAddress, width: outW, height: outH, bitsPerComponent: 8,
-                bytesPerRow: outW * 4, space: CGColorSpaceCreateDeviceRGB(),
-                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-            ) else { return nil }
-            return context.makeImage()
-        }
-        guard let cgImage else { return nil }
-        return UIImage(cgImage: cgImage, scale: compositeScale, orientation: .up)
-    }
-
-    /// Decode a 256 px tile into premultiplied RGBA bytes.
-    private static func rgbaPlane(from image: UIImage) -> [UInt8]? {
-        guard let cgImage = image.cgImage else { return nil }
-        var rgba = [UInt8](repeating: 0, count: 256 * 256 * 4)
-        let ok = rgba.withUnsafeMutableBytes { raw -> Bool in
-            guard let ctx = CGContext(
-                data: raw.baseAddress, width: 256, height: 256, bitsPerComponent: 8,
-                bytesPerRow: 256 * 4, space: CGColorSpaceCreateDeviceRGB(),
-                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-            ) else { return false }
-            ctx.draw(cgImage, in: CGRect(x: 0, y: 0, width: 256, height: 256))
-            return true
-        }
-        return ok ? rgba : nil
-    }
-
-    // MARK: - Storm cells (server /radar/{region}/cells, SCIT tracks)
-
-    private struct WidgetStormCell {
-        let center: CLLocationCoordinate2D
-        let peakMmh: Double
-        let velocityKmh: Double
-        /// Extrapolated centroids at +15/+30/+45/+60 min.
-        let path: [CLLocationCoordinate2D]
-        /// Convex-hull outline (closed ring); empty when the server sent none.
-        let footprint: [CLLocationCoordinate2D]
-    }
-
-    private static func stormCells(
-        region: RadarRegion, around center: CLLocationCoordinate2D
-    ) async -> [WidgetStormCell] {
-        struct CellsGeoJSON: Decodable {
-            struct Feature: Decodable {
-                struct Geometry: Decodable { let coordinates: [Double] }
-                struct Properties: Decodable {
-                    let peak_mmh: Double
-                    let velocity_kmh: Double
-                    let path: [[Double]]
-                    let footprint: [[Double]]?
-                }
-                let geometry: Geometry
-                let properties: Properties
-            }
-            let features: [Feature]
-        }
-
-        guard let url = URL(string: "\(radarBaseURL)/radar/\(region.pathComponent)/cells"),
-              let data = await fetchData(url, freshest: true),
-              let collection = try? JSONDecoder().decode(CellsGeoJSON.self, from: data)
-        else { return [] }
-
-        let cull = boundingBox(around: center, spanMeters: mapSpanMeters * 1.6)
-        func coordinate(_ pair: [Double]) -> CLLocationCoordinate2D? {
-            pair.count == 2
-                ? CLLocationCoordinate2D(latitude: pair[1], longitude: pair[0]) : nil
-        }
-        return collection.features.compactMap { feature in
-            guard feature.geometry.coordinates.count == 2 else { return nil }
-            let cellCenter = CLLocationCoordinate2D(
-                latitude: feature.geometry.coordinates[1],
-                longitude: feature.geometry.coordinates[0])
-            guard cull.contains(cellCenter) else { return nil }
-            return WidgetStormCell(
-                center: cellCenter,
-                peakMmh: feature.properties.peak_mmh,
-                velocityKmh: feature.properties.velocity_kmh,
-                path: feature.properties.path.compactMap(coordinate),
-                footprint: (feature.properties.footprint ?? []).compactMap(coordinate))
-        }
-    }
-
-    /// Widget-scale rendition of the app's cell overlay: footprint hull, dashed
-    /// extrapolated track, and an intensity-colored marker at the cell core.
-    private static func drawStormCells(_ cells: [WidgetStormCell], frame: MercatorFrame) {
-        for cell in cells {
-            let color = intensityColor(peakMmh: cell.peakMmh)
-
-            if cell.footprint.count >= 4 {
-                let hull = UIBezierPath()
-                for (index, coordinate) in cell.footprint.enumerated() {
-                    let point = frame.point(for: coordinate)
-                    index == 0 ? hull.move(to: point) : hull.addLine(to: point)
-                }
-                hull.close()
-                color.withAlphaComponent(0.15).setFill()
-                hull.fill()
-                color.withAlphaComponent(0.75).setStroke()
-                hull.lineWidth = 1
-                hull.stroke()
-            }
-
-            // Track only for cells that actually move — the app's rule.
-            let trackPoints = [cell.center] + cell.path
-            if cell.velocityKmh >= 3, trackPoints.count >= 2 {
-                let track = UIBezierPath()
-                track.move(to: frame.point(for: trackPoints[0]))
-                for coordinate in trackPoints.dropFirst() {
-                    track.addLine(to: frame.point(for: coordinate))
-                }
-                track.setLineDash([3, 2], count: 2, phase: 0)
-                track.lineWidth = 1.5
-                UIColor.white.withAlphaComponent(0.75).setStroke()
-                track.stroke()
-            }
-
-            let point = frame.point(for: cell.center)
-            let marker = CGRect(x: point.x - 4, y: point.y - 4, width: 8, height: 8)
-            color.setFill()
-            UIBezierPath(ovalIn: marker).fill()
-            let outline = UIBezierPath(ovalIn: marker)
-            UIColor.white.withAlphaComponent(0.9).setStroke()
-            outline.lineWidth = 1.5
-            outline.stroke()
-        }
-    }
-
-    /// The app's peak-intensity severity steps (WeatherMapView / StormCellLegend).
-    private static func intensityColor(peakMmh: Double) -> UIColor {
-        switch peakMmh {
-        case ..<2: UIColor(red: 0, green: 0.79, blue: 0.79, alpha: 1)       // #00caca
-        case ..<10: UIColor(red: 1, green: 1, blue: 0, alpha: 1)            // moderate
-        case ..<50: UIColor(red: 1, green: 0, blue: 0, alpha: 1)            // heavy
-        default: UIColor(red: 0.996, green: 0.2, blue: 1, alpha: 1)         // extreme
-        }
-    }
-
     /// Blue location dot, matching the previous MapKit widget's marker.
     private static func drawLocationMarker(at point: CGPoint) {
         let rect = CGRect(x: point.x - 6, y: point.y - 6, width: 12, height: 12)
@@ -608,206 +322,18 @@ enum RadarSnapshotRenderer {
         outline.stroke()
     }
 
-    // MARK: - Motion arrows (shares RadarArrowGeometry with WeatherMapView)
-
-    /// One arrow per coarse motion cell that carries precipitation and non-trivial
-    /// flow, culled to the widget's viewport. Identical placement math to the app
-    /// (RadarArrowGeometry); only the precip gate differs (raster-tile alpha
-    /// instead of the value grid).
-    private static func arrowFeatures(
-        motion: RadarMotionData, fieldIndex: Int, bounds: OscarRadarBounds,
-        cull: GeoBox, gate: PrecipGate?
-    ) -> [RadarArrow] {
-        guard let gate else { return [] }
-        let cols = motion.cols, rows = motion.rows
-        let coordinate = RadarArrowGeometry.coordinateMapper(bounds: bounds)
-
-        var arrows: [RadarArrow] = []
-        for cell in RadarArrowGeometry.arrowCells(motion: motion, fieldIndex: fieldIndex, bounds: bounds) {
-            guard cull.contains(cell.coordinate) else { continue }
-
-            // ≥2 of 25 subsampled points inside the cell footprint carry precip —
-            // the app's cellHasPrecip rule, sampled from the gate tiles.
-            var hits = 0
-            subsample: for sy in 0..<5 {
-                for sx in 0..<5 {
-                    let x = cell.uvX + (Double(sx) / 4 - 0.5) / Double(cols)
-                    let y = cell.uvY + (Double(sy) / 4 - 0.5) / Double(rows)
-                    guard x >= 0, x <= 1, y >= 0, y <= 1 else { continue }
-                    if gate.hasPrecip(at: coordinate(x, y)) {
-                        hits += 1
-                        if hits >= 2 { break subsample }
-                    }
-                }
-            }
-            guard hits >= 2 else { continue }
-
-            arrows.append(RadarArrow(coordinate: cell.coordinate, rotation: cell.rotation, scale: cell.scale))
-            if arrows.count >= 80 { break }
-        }
-        return arrows
-    }
-
-    // MARK: - Precip gate (alpha-sampled radar tiles)
-
-    /// A few 256 px radar tiles around the viewport, kept as alpha planes; answers
-    /// "is there precipitation at this coordinate" for the arrow gate. Bounded by
-    /// construction: at most 6 tiles ≈ 400 KB transient.
-    private struct PrecipGate {
-        let zoom: Int
-        let tiles: [Int: [UInt8]] // key: x << 16 | y, value: 256×256 alpha plane
-
-        static let gateZoom = 8
-
-        static func load(
-            around center: CLLocationCoordinate2D, spanMeters: Double,
-            region: RadarRegion, frameKey: String
-        ) async -> PrecipGate? {
-            let box = boundingBox(around: center, spanMeters: spanMeters)
-            let x0 = WebMercator.tileX(longitude: box.west, zoom: gateZoom)
-            let x1 = WebMercator.tileX(longitude: box.east, zoom: gateZoom)
-            let y0 = WebMercator.tileY(latitude: box.north, zoom: gateZoom)
-            let y1 = WebMercator.tileY(latitude: box.south, zoom: gateZoom)
-            guard (x1 - x0 + 1) * (y1 - y0 + 1) <= 6 else { return nil }
-
-            var tiles: [Int: [UInt8]] = [:]
-            for x in x0...x1 {
-                for y in y0...y1 {
-                    guard let url = URL(string:
-                        "\(radarBaseURL)/radar/\(region.pathComponent)/frames/\(frameKey)/tiles/\(gateZoom)/\(x)/\(y)"
-                    ), let data = await fetchData(url), let alpha = alphaPlane(from: data) else { continue }
-                    tiles[x << 16 | y] = alpha
-                }
-            }
-            return tiles.isEmpty ? nil : PrecipGate(zoom: gateZoom, tiles: tiles)
-        }
-
-        func hasPrecip(at coordinate: CLLocationCoordinate2D) -> Bool {
-            let scale = pow(2, Double(zoom)) * 256
-            let worldX = WebMercator.unitX(longitude: coordinate.longitude) * scale
-            let worldY = WebMercator.unitY(latitude: coordinate.latitude) * scale
-            let x = Int(worldX / 256), y = Int(worldY / 256)
-            guard let alpha = tiles[x << 16 | y] else { return false }
-            let px = min(255, max(0, Int(worldX) - x * 256))
-            let py = min(255, max(0, Int(worldY) - y * 256))
-            return alpha[py * 256 + px] > 16
-        }
-
-        /// Decode a 256 px tile and keep only its alpha channel (dry = transparent).
-        private static func alphaPlane(from data: Data) -> [UInt8]? {
-            guard let image = UIImage(data: data)?.cgImage else { return nil }
-            var rgba = [UInt8](repeating: 0, count: 256 * 256 * 4)
-            let ok = rgba.withUnsafeMutableBytes { raw -> Bool in
-                guard let ctx = CGContext(
-                    data: raw.baseAddress, width: 256, height: 256, bitsPerComponent: 8,
-                    bytesPerRow: 256 * 4, space: CGColorSpaceCreateDeviceRGB(),
-                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-                ) else { return false }
-                ctx.draw(image, in: CGRect(x: 0, y: 0, width: 256, height: 256))
-                return true
-            }
-            guard ok else { return nil }
-            return (0..<256 * 256).map { rgba[$0 * 4 + 3] }
-        }
-    }
-
-    // MARK: - Networking
-
-    /// `freshest` skips the URL cache — frame lists go stale within minutes.
-    /// (Per-frame tile URLs are immutable, so those cache freely.)
-    nonisolated private static func fetchData(_ url: URL, freshest: Bool = false) async -> Data? {
-        var request = URLRequest(url: url)
-        if freshest { request.cachePolicy = .reloadIgnoringLocalCacheData }
-        request.timeoutInterval = 20
-        request.addAPIContactIdentity()
-        guard let (data, response) = try? await URLSession.shared.data(for: request),
-              (response as? HTTPURLResponse).map({ $0.statusCode == 200 }) ?? true
-        else { return nil }
-        return data
-    }
-
-    // MARK: - Geo helpers
-
-    private struct GeoBox {
-        let south, west, north, east: Double
-
-        func contains(_ coordinate: CLLocationCoordinate2D) -> Bool {
-            coordinate.latitude >= south && coordinate.latitude <= north
-                && coordinate.longitude >= west && coordinate.longitude <= east
-        }
-    }
-
-    /// Linear Web-Mercator mapping between a coordinate rectangle and composite
-    /// points — the CPU analog of the basemap snapshot's point conversion.
-    private struct MercatorFrame {
-        let x0, x1: Double // world-fraction X at west/east
-        let y0, y1: Double // world-fraction Y at north/south
-        let size: CGSize
-
-        init(bounds: GeoBox, size: CGSize) {
-            x0 = WebMercator.unitX(longitude: bounds.west)
-            x1 = WebMercator.unitX(longitude: bounds.east)
-            y0 = WebMercator.unitY(latitude: bounds.north)
-            y1 = WebMercator.unitY(latitude: bounds.south)
-            self.size = size
-        }
-
-        func point(for coordinate: CLLocationCoordinate2D) -> CGPoint {
-            point(forWorldX: WebMercator.unitX(longitude: coordinate.longitude),
-                  worldY: WebMercator.unitY(latitude: coordinate.latitude))
-        }
-
-        func point(forWorldX wx: Double, worldY wy: Double) -> CGPoint {
-            CGPoint(
-                x: (wx - x0) / (x1 - x0) * size.width,
-                y: (wy - y0) / (y1 - y0) * size.height
-            )
-        }
-    }
-
-    /// The coordinate rectangle a bounds-fitted snapshot of `size` would show: the
-    /// 65 km box extended along one axis to the size's aspect ratio in Mercator
-    /// space. Used only when no prerendered basemap exists yet.
-    nonisolated private static func fittedBounds(
-        around center: CLLocationCoordinate2D, spanMeters: Double, size: CGSize
-    ) -> GeoBox {
-        let box = boundingBox(around: center, spanMeters: spanMeters)
-        var west = WebMercator.unitX(longitude: box.west)
-        var east = WebMercator.unitX(longitude: box.east)
-        var north = WebMercator.unitY(latitude: box.north)
-        var south = WebMercator.unitY(latitude: box.south)
-        let aspect = Double(size.width / size.height)
-        let width = east - west, height = south - north
-        if width / height < aspect {
-            let extra = (height * aspect - width) / 2
-            west -= extra
-            east += extra
-        } else {
-            let extra = (width / aspect - height) / 2
-            north -= extra
-            south += extra
-        }
-        return GeoBox(
-            south: WebMercator.latitude(fromUnitY: south), west: WebMercator.longitude(fromUnitX: west),
-            north: WebMercator.latitude(fromUnitY: north), east: WebMercator.longitude(fromUnitX: east)
-        )
-    }
-
-    nonisolated private static func boundingBox(around center: CLLocationCoordinate2D, spanMeters: Double) -> GeoBox {
-        let halfLat = spanMeters / 2 / 111_320
-        let halfLon = spanMeters / 2 / (111_320 * max(0.2, cos(center.latitude * .pi / 180)))
-        return GeoBox(
-            south: center.latitude - halfLat, west: center.longitude - halfLon,
-            north: center.latitude + halfLat, east: center.longitude + halfLon
-        )
-    }
-
 }
 
 // MARK: - Overlay plan
 
 private struct RadarOverlayPlan {
-    var tileURLTemplate: String?
+    /// Which oscar-server endpoint family the plan's tiles come from — carries
+    /// enough to address any tile of the chosen frame (region/key or model/key).
+    enum TileSource {
+        case radar(region: RadarRegion, key: String)
+        case ecmwfModel(key: String)
+    }
+    var tileSource: TileSource?
     var maximumTileZoom: Float = 10
     var frameDate: Date?
     /// Server palette (`/colormaps/{id}`) the tile colors index into — needed to
@@ -816,7 +342,7 @@ private struct RadarOverlayPlan {
     var arrows: [RadarArrow] = []
 }
 
-private struct RadarArrow {
+struct RadarArrow {
     let coordinate: CLLocationCoordinate2D
     let rotation: Double
     let scale: Double

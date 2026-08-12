@@ -24,9 +24,8 @@ import HTTPTypes
 import OpenAPIRuntime
 import OSLog
 
-/// A middleware that retries the request under certain conditions.
-///
-/// Only meant to be used for illustrative purposes.
+/// Retries failed requests for the signals and policy configured per client
+/// (wired into every production client in `APIClient.get(url:prepending:)`).
 nonisolated struct RetryingMiddleware {
 
   private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Retry")

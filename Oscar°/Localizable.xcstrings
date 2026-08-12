@@ -1,28 +1,6 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
-    "Berechtigungen verwaltet iOS: Beim ersten Aktivieren fragt Oscar direkt an, danach öffnet der Schalter die passende Stelle in den iOS-Einstellungen." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Berechtigungen verwaltet iOS: Beim ersten Aktivieren fragt Oscar direkt an, danach öffnet der Schalter die passende Stelle in den iOS-Einstellungen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iOS manages these permissions: the first time you turn one on, Oscar asks directly; after that, the switch opens the right place in iOS Settings."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bu izinleri iOS yönetir: Bir izni ilk kez açtığınızda Oscar doğrudan sorar; sonrasında anahtar, iOS Ayarları'nda ilgili yeri açar."
-          }
-        }
-      }
-    },
     "" : {
 
     },
@@ -2362,6 +2340,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "İzinler"
+          }
+        }
+      }
+    },
+    "Berechtigungen verwaltet iOS: Beim ersten Aktivieren fragt Oscar direkt an, danach öffnet der Schalter die passende Stelle in den iOS-Einstellungen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berechtigungen verwaltet iOS: Beim ersten Aktivieren fragt Oscar direkt an, danach öffnet der Schalter die passende Stelle in den iOS-Einstellungen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS manages these permissions: the first time you turn one on, Oscar asks directly; after that, the switch opens the right place in iOS Settings."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu izinleri iOS yönetir: Bir izni ilk kez açtığınızda Oscar doğrudan sorar; sonrasında anahtar, iOS Ayarları'nda ilgili yeri açar."
           }
         }
       }
@@ -12799,13 +12799,8 @@
         }
       }
     },
-    "Tomorrow" : {
-      "shouldTranslate" : false
-    },
-    "tomorrow.io" : {
-      "shouldTranslate" : false
-    },
     "Tomorrow.io, vertreten durch die Tomorrow Companies Inc., stellt diverse Kartenlayer unter deren Free-Tier bereit. Darunter fallen unter anderem das globale Regenradar, Temperatur, Windgeschwindigkeit, Windrichtung, Wolken und Luftfeuchtigkeit." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

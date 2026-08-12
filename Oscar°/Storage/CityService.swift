@@ -130,25 +130,21 @@ public final class CityService {
     }
     
     func toggleActiveCity(city: City) {
-        // Deselect all cities
         for city in cities {
             city.selected = false
         }
-        // Select the clicked city
         city.selected = true
         self.save()
     }
-    
+
     func moveCity(from source: IndexSet, to destination: Int) {
         var revisedCities = cities
         revisedCities.move(fromOffsets: source, toOffset: destination)
 
-        // Update the orderIndex to reflect the new order
         for (index, city) in revisedCities.enumerated() {
             city.orderIndex = Int64(index)
         }
 
-        // Save the updated order to the context
         save()
     }
 
@@ -266,35 +262,6 @@ public final class CityService {
         }
         return nil
     }
-    private func hasEntitiesWithoutOrderId() -> Bool {
-        let fetchRequest: NSFetchRequest<City> = City.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "orderIndex == nil")
-
-        do {
-            let results = try context.fetch(fetchRequest)
-            return !results.isEmpty
-        } catch {
-            Self.logger.error("Error fetching entities without orderIndex: \(error.localizedDescription, privacy: .public)")
-            return false
-        }
-    }
-    
-    private func assignOrderIndexesToExistingEntities() {
-        do {
-            let fetchRequest: NSFetchRequest<City>
-            fetchRequest = City.fetchRequest()
-            let results = try self.context.fetch(fetchRequest)
-            
-            for (index, entity) in results.enumerated() {
-                entity.orderIndex = Int64(index)
-            }
-
-            try context.save()
-        } catch {
-            Self.logger.error("Error assigning orderIndexes: \(error.localizedDescription, privacy: .public)")
-        }
-    }
-    
     private func getMaxOrderIndex() -> Int64 {
         let fetchRequest: NSFetchRequest<City> = City.fetchRequest()
         let sortDescriptor = NSSortDescriptor(key: "orderIndex", ascending: false)

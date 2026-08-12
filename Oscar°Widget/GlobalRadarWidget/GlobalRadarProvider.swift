@@ -1,5 +1,4 @@
 import MapKit
-import OSLog
 import SwiftUI
 import WidgetKit
 
@@ -10,9 +9,6 @@ struct GlobalRadarEntry: TimelineEntry {
 }
 
 struct GlobalRadarProvider: TimelineProvider {
-  private static let logger = Logger(
-    subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "RadarWidget")
-
   /// ≈ zoom level 14 (591657550.5 / 2^14) — the framing the widget always used.
   private static let spanMeters = 591657550.5 / Double(1 << 14)
   private static let snapshotSize = CGSize(width: 300, height: 300)

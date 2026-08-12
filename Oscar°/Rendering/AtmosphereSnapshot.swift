@@ -392,13 +392,6 @@ enum AtmosphereSampler {
         }
     }
 
-    static func widgetBackgroundColors(snapshot: AtmosphereSnapshot) -> [Color] {
-        [
-            color(for: snapshot, horizonFactor: 0),
-            color(for: snapshot, horizonFactor: 1)
-        ]
-    }
-
     /// Card wash for the Now stack, laid over the faded frosted material.
     /// In high sun it carries a darkened, saturation-pushed sample of the sky
     /// — the material's frost desaturates whatever shows through it, so a

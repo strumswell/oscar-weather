@@ -3,66 +3,6 @@ import SwiftUI
 import OSLog
 import WidgetKit
 
-enum MapBasemapStyle: String, CaseIterable, Identifiable {
-    case fiord
-    case dark
-    case positron
-
-    var id: String { rawValue }
-
-    /// OpenFreeMap style endpoint (no API key).
-    var styleURL: URL {
-        URL(string: "https://tiles.openfreemap.org/styles/\(rawValue)")!
-    }
-
-    var label: LocalizedStringKey {
-        switch self {
-        case .fiord: return "Fiord"
-        case .dark: return "Dunkel"
-        case .positron: return "Hell"
-        }
-    }
-}
-
-enum TimeFormatPreference: String, CaseIterable, Identifiable {
-    case system
-    case h24
-    case h12
-
-    var id: String { rawValue }
-
-    var resolvedAPIValue: String {
-        switch self {
-        case .system:
-            return Self.systemResolvedAPIValue
-        case .h24:
-            return "h24"
-        case .h12:
-            return "h12"
-        }
-    }
-
-    var label: LocalizedStringKey {
-        switch self {
-        case .system:
-            return "System"
-        case .h24:
-            return "24 Stunden"
-        case .h12:
-            return "12 Stunden"
-        }
-    }
-
-    static var systemResolvedAPIValue: String {
-        let dateFormat = DateFormatter.dateFormat(
-            fromTemplate: "j",
-            options: 0,
-            locale: .autoupdatingCurrent
-        ) ?? ""
-        return dateFormat.contains("a") ? "h12" : "h24"
-    }
-}
-
 @MainActor
 @Observable
 public final class SettingService {
@@ -348,7 +288,6 @@ public final class SettingService {
             fetchRequest = Settings.fetchRequest()
             let result = try self.context.fetch(fetchRequest)
             
-            // Create default settings if empty
             if (result.count < 1) {
                 let defaultSettings = Settings(context: self.context)
                 defaultSettings.druckLayer = false

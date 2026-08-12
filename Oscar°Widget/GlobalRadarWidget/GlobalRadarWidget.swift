@@ -1,5 +1,5 @@
 //
-//  LocalRadarWidget.swift
+//  GlobalRadarWidget.swift
 //  Oscar°
 //
 //  Created by Philipp Bolte on 13.04.24.

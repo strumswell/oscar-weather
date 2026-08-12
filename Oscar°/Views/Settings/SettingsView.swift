@@ -125,6 +125,7 @@ struct SettingsView: View {
   private var aboutFooter: some View {
     VStack(spacing: 2) {
       ProviderLogo(asset: "logo-oscar-cat", height: 44)
+        .opacity(0.7)
         .padding(.bottom, 6)
       Text(verbatim: "Oscar° \(appVersion) (\(appBuild))")
       Text("by Philipp Bolte")

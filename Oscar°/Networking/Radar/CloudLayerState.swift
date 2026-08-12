@@ -9,12 +9,12 @@
 
 import Foundation
 import Observation
+import OpenAPIRuntime
 
 @MainActor
 @Observable
 final class CloudLayerState {
 
-    nonisolated static let baseURL = radarBaseURL
     static let colormapId = "clouds"
 
     private(set) var frameKeys: [String] = []
@@ -251,38 +251,37 @@ final class CloudLayerState {
     }
 
     private func loadMetadata(sessionID: UUID) async {
-        guard let url = URL(string: "\(Self.baseURL)/clouds/meteosat/frames") else { return }
-        var request = URLRequest(url: url)
-        request.addAPIContactIdentity()
-        let data: Data
-        let http: HTTPURLResponse
+        let decoded: RadarFramesResponse
         do {
-            let (body, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
-            data = body
-            http = httpResponse
+            guard let response = try await APIClient.shared.cloudFrames() else {
+                guard loadSessionID == sessionID else { return }
+                // 503 = server warming up, 404 = layer not configured — treat both as
+                // "no cloud frames right now" and retry via the staleness loop.
+                lastMetadataLoad = Date()
+                if frameKeys.isEmpty {
+                    error = "Satellitenbilder sind derzeit nicht verfügbar."
+                    isLoading = false
+                }
+                return
+            }
+            decoded = response
         } catch {
             guard loadSessionID == sessionID else { return }
             // Held frames keep serving through a failed refresh; only an empty
             // state surfaces the failure (mirrors OscarRadarState). Cancellation
-            // (deactivating the layer mid-load) is not a failure.
-            let cancelled = error is CancellationError || (error as? URLError)?.code == .cancelled
+            // (deactivating the layer mid-load) is not a failure. The generated
+            // client wraps transport/decode errors in `ClientError`, so classify
+            // the cause inside, not the wrapper.
+            let cause = (error as? ClientError)?.underlyingError ?? error
+            let cancelled = cause is CancellationError || (cause as? URLError)?.code == .cancelled
             if frameKeys.isEmpty, !cancelled {
-                self.error = "Fehler beim Laden: \(error.localizedDescription)"
-                isLoading = false
-            }
-            return
-        }
-        guard http.statusCode == 200,
-              let decoded = try? JSONDecoder().decode(RadarFramesResponse.self, from: data) else {
-            guard loadSessionID == sessionID else { return }
-            // 503 = server warming up, 404 = layer not configured — treat both as
-            // "no cloud frames right now" and retry via the staleness loop.
-            if http.statusCode == 503 || http.statusCode == 404 {
-                lastMetadataLoad = Date()
-            }
-            if frameKeys.isEmpty {
-                error = "Satellitenbilder sind derzeit nicht verfügbar."
+                // Unexpected statuses and undecodable payloads read as "not
+                // available"; genuine transport failures keep their description.
+                if (cause as? URLError)?.code == .badServerResponse || cause is DecodingError {
+                    self.error = "Satellitenbilder sind derzeit nicht verfügbar."
+                } else {
+                    self.error = "Fehler beim Laden: \(cause.localizedDescription)"
+                }
                 isLoading = false
             }
             return
@@ -297,7 +296,7 @@ final class CloudLayerState {
         frameTimestamps = timestamps
         frameDates = timestamps.map(parseFrameDate)
         indexByKey = Dictionary(uniqueKeysWithValues: keys.enumerated().map { ($1, $0) })
-        bounds = (decoded.imageBounds ?? decoded.bounds).asDomain
+        bounds = (decoded.image_bounds ?? decoded.bounds).asDomain
         lastMetadataLoad = Date()
         // Metadata replaced the key list; drop payloads for keys that vanished and
         // remap the index-based bookkeeping to the new ordering.
@@ -313,13 +312,9 @@ final class CloudLayerState {
 
         let motionSession = sessionID
         Task { [weak self] in
-            guard let url = URL(string: "\(Self.baseURL)/clouds/meteosat/motion") else { return }
-            var request = URLRequest(url: url)
-            request.addAPIContactIdentity()
-            guard let (data, response) = try? await URLSession.shared.data(for: request),
-                  (response as? HTTPURLResponse)?.statusCode == 200 else { return }
+            guard let payload = try? await APIClient.shared.cloudMotion() else { return }
             guard let self, self.loadSessionID == motionSession else { return }
-            self.motion = RadarMotionData(jsonData: data)
+            self.motion = RadarMotionData(payload: payload)
             self.loadRevision += 1
         }
     }
@@ -387,11 +382,7 @@ final class CloudLayerState {
             loadingFrameIndices.remove(index)
         }
 
-        guard let url = URL(string: "\(Self.baseURL)/clouds/meteosat/frames/\(key)/grid") else { return }
-        var request = URLRequest(url: url)
-        request.addAPIContactIdentity()
-        guard let (data, response) = try? await URLSession.shared.data(for: request),
-              (response as? HTTPURLResponse)?.statusCode == 200 else { return }
+        guard let data = try? await APIClient.shared.cloudGrid(key: key) else { return }
         guard let payload = await RadarFrameDecodeLane.shared.decodeGrid(data) else { return }
         guard loadSessionID == sessionID, indexByKey[key] == index else { return }
         payloads[key] = payload

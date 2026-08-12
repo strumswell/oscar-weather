@@ -15,8 +15,6 @@ import Observation
 @Observable
 final class ModelGridLayerState {
 
-    nonisolated static let baseURL = radarBaseURL
-
     // Pre-sized when metadata arrives; slots fill in as grids download. Frames are
     // the server's 8-bit value grids; the map layer colormaps them on the GPU with
     // the variable's /colormaps palette (see WeatherTileLayer.colormapId).
@@ -101,11 +99,7 @@ final class ModelGridLayerState {
 
     static func palette(for colormapId: String) async -> [PixelRGBA]? {
         if let cached = cachedPalettes[colormapId] { return cached }
-        guard let url = URL(string: "\(baseURL)/colormaps/\(colormapId)") else { return nil }
-        var request = URLRequest(url: url)
-        request.addAPIContactIdentity()
-        guard let (data, response) = try? await URLSession.shared.data(for: request),
-              (response as? HTTPURLResponse)?.statusCode == 200,
+        guard let data = try? await APIClient.shared.colormap(id: colormapId),
               data.count == 256 * 4 else { return nil }
         let palette = (0..<256).map {
             let o = $0 * 4
@@ -264,7 +258,7 @@ final class ModelGridLayerState {
     // MARK: - Load
 
     func loadLayer(_ layer: WeatherTileLayer) async {
-        guard let imagePath = layer.imagePath else { return }
+        guard layer.imagePath != nil else { return }
         loadTask?.cancel()
         focusedLoadTask?.cancel()
         backgroundPreloadTask?.cancel()
@@ -289,18 +283,14 @@ final class ModelGridLayerState {
         loadTask = Task { [weak self] in
             guard let self else { return }
             do {
-                // 1. Fetch frame list + bounds
-                guard let url = URL(string: "\(Self.baseURL)/\(layer.framesEndpoint)") else { return }
-                // Default cache policy: the server sends max-age=600 + ETag, so a
-                // revisit within the window is free and after it a 304 revalidation.
-                var req = URLRequest(url: url)
-                req.addAPIContactIdentity()
-                let (data, _) = try await URLSession.shared.data(for: req)
-                let decoded = try JSONDecoder().decode(ModelFramesResponse.self, from: data)
+                // 1. Fetch frame list + bounds. The server sends max-age=600 + ETag,
+                // so a revisit within the window is free and after it a 304
+                // revalidation (still true under the generated client's transport).
+                let decoded = try await APIClient.shared.modelFrames(model: layer.windFieldPrefix)
                 guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
 
                 let fetchedFrameInfos = decoded.frames
-                let fetchedBounds = (decoded.imageBounds ?? decoded.bounds)?.asDomain
+                let fetchedBounds = decoded.image_bounds?.asDomain ?? decoded.bounds?.asDomain
                     ?? OscarRadarBounds(north: 85.051, south: -85.051, west: -180, east: 180)
 
                 // 2. Pre-size array so the scrubber can render immediately.
@@ -326,9 +316,9 @@ final class ModelGridLayerState {
                 // path). Precipitation only: temperature/wind never warp along
                 // the precip flow, so they skip the fetch entirely.
                 if layer.morphsAlongMotion {
-                    let motionEndpoint = layer.motionEndpoint
+                    let model = layer.windFieldPrefix
                     Task { [weak self] in
-                        let data = await Self.fetchMotionData(endpoint: motionEndpoint)
+                        let data = await Self.fetchMotionData(model: model)
                         guard let self, self.loadSessionID == sessionID else { return }
                         self.motion = data
                     }
@@ -337,7 +327,6 @@ final class ModelGridLayerState {
                 await self.loadFrameBatch(
                     indices: self.focusedFrameIndices(around: closest),
                     sessionID: sessionID,
-                    imagePath: imagePath,
                     layer: layer
                 )
 
@@ -372,13 +361,9 @@ final class ModelGridLayerState {
     /// Fetch + decode `/models/{model}/motion` (best-effort; nil on any failure).
     /// Byte-identical wire shape to `/radar/{region}/motion`, so the radar decoder
     /// parses it as-is. Server sends max-age 600 + ETag — refetches are cheap.
-    private static func fetchMotionData(endpoint: String) async -> RadarMotionData? {
-        guard let url = URL(string: "\(baseURL)/\(endpoint)") else { return nil }
-        var request = URLRequest(url: url)
-        request.addAPIContactIdentity()
-        guard let (data, response) = try? await URLSession.shared.data(for: request),
-              (response as? HTTPURLResponse)?.statusCode == 200 else { return nil }
-        return RadarMotionData(jsonData: data)
+    private static func fetchMotionData(model: String) async -> RadarMotionData? {
+        guard let payload = try? await APIClient.shared.modelMotion(model: model) else { return nil }
+        return RadarMotionData(payload: payload)
     }
 
     private func handleFrameSelectionChanged() {
@@ -392,7 +377,7 @@ final class ModelGridLayerState {
         }
 
         focusedLoadTask?.cancel()
-        guard let layer = currentLayer, let imagePath = layer.imagePath else { return }
+        guard let layer = currentLayer, layer.imagePath != nil else { return }
         let sessionID = loadSessionID
         let focusIndices = focusedFrameIndices(around: currentFrameIndex)
 
@@ -401,7 +386,6 @@ final class ModelGridLayerState {
             await self.loadFrameBatch(
                 indices: focusIndices,
                 sessionID: sessionID,
-                imagePath: imagePath,
                 layer: layer
             )
             guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
@@ -415,7 +399,7 @@ final class ModelGridLayerState {
               interactionState != .scrubbing,
               !isMapInteracting,
               let layer = currentLayer,
-              let imagePath = layer.imagePath,
+              layer.imagePath != nil,
               !frameInfos.isEmpty else { return }
 
         let sessionID = loadSessionID
@@ -428,7 +412,6 @@ final class ModelGridLayerState {
             await self.loadFrameBatch(
                 indices: ordered,
                 sessionID: sessionID,
-                imagePath: imagePath,
                 layer: layer
             )
         }
@@ -441,7 +424,6 @@ final class ModelGridLayerState {
     private func loadFrameBatch(
         indices: [Int],
         sessionID: UUID,
-        imagePath: String,
         layer: WeatherTileLayer
     ) async {
         for index in indices {
@@ -449,7 +431,6 @@ final class ModelGridLayerState {
             _ = await loadFrameIfNeeded(
                 at: index,
                 sessionID: sessionID,
-                imagePath: imagePath,
                 layer: layer
             )
         }
@@ -458,7 +439,6 @@ final class ModelGridLayerState {
     private func loadFrameIfNeeded(
         at index: Int,
         sessionID: UUID,
-        imagePath: String,
         layer: WeatherTileLayer
     ) async -> Bool {
         guard loadSessionID == sessionID,
@@ -489,27 +469,22 @@ final class ModelGridLayerState {
         if let cached = Self.gridCache.object(forKey: cacheKey as NSString) {
             payload = cached.payload
         } else {
-            guard !Task.isCancelled,
-                  let url = URL(string: "\(Self.baseURL)/\(imagePath)/\(info.key)/\(layer.variableSegment)/grid") else {
-                return false
-            }
-            var req = URLRequest(url: url)
-            req.addAPIContactIdentity()
-            guard let (data, response) = try? await URLSession.shared.data(for: req),
-                  let http = response as? HTTPURLResponse else {
+            guard !Task.isCancelled else { return false }
+            let fetched: Data?
+            do {
+                fetched = try await APIClient.shared.modelGrid(
+                    model: layer.windFieldPrefix, key: info.key, variable: layer.variableSegment)
+            } catch {
                 return false
             }
             let decoded: RadarGridPayload?
-            switch http.statusCode {
-            case 200:
+            if let data = fetched {
                 decoded = await RadarFrameDecodeLane.shared.decodeGrid(data)
-            case 404:
-                // A dry precip frame has no grid — that's data ("no precipitation"),
-                // not an error. Cache a 1×1 index-0 payload (renders fully
-                // transparent) so scrubbing doesn't refetch the 404 every visit.
+            } else {
+                // A dry precip frame has no grid (404) — that's data ("no
+                // precipitation"), not an error. Cache a 1×1 index-0 payload
+                // (renders fully transparent) so scrubbing doesn't refetch it.
                 decoded = RadarGridPayload(indices: [0], width: 1, height: 1)
-            default:
-                decoded = nil
             }
             guard let decoded else { return false }
             Self.gridCache.setObject(
@@ -561,14 +536,5 @@ extension WeatherTileLayer {
     /// wind cross-fade in data space (warping them along precip motion is wrong).
     var morphsAlongMotion: Bool {
         self == .iconPrecip || self == .ecmwfPrecip
-    }
-
-    /// `/models/{model}/motion` — per-pair flow fields sized to the same raster
-    /// as the frames' image_bounds.
-    var motionEndpoint: String {
-        switch self {
-        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "models/icon/motion"
-        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: return "models/ecmwf/motion"
-        }
     }
 }

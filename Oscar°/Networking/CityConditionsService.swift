@@ -240,6 +240,10 @@ final class CityConditionsStore {
         )
     }
 
+    /// Deliberately NOT on the generated client: the batch form of `/v1/forecast`
+    /// returns an object for one location but an array for several, and modeling
+    /// that oneOf onto the spec's existing single-point `/v1/forecast` operation
+    /// would break the generated types every forecast call site uses.
     private static func fetchBatch(
         coordinates: [CLLocationCoordinate2D]
     ) async throws -> [BatchCurrentEntry] {

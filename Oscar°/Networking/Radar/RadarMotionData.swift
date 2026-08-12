@@ -38,25 +38,8 @@ struct RadarMotionData: Sendable {
     /// flow — the caller rescales it by the actual timestamp gap.
     let pairsByFrom: [String: Pair]
 
-    init?(jsonData: Data) {
-        struct Payload: Decodable {
-            struct PairDTO: Decodable {
-                let from: String
-                let to: String
-                let field: Int
-                let gap_minutes: Int
-            }
-            let cols: Int
-            let rows: Int
-            let overview_width: Int
-            let overview_height: Int
-            let scale: Double
-            let step_minutes: Int
-            let fields: [String]
-            let pairs: [PairDTO]
-        }
-        guard let payload = try? JSONDecoder().decode(Payload.self, from: jsonData),
-              payload.cols > 1, payload.rows > 1,
+    init?(payload: Components.Schemas.MotionResponse) {
+        guard payload.cols > 1, payload.rows > 1,
               payload.overview_width > 0, payload.overview_height > 0 else { return nil }
         let count = payload.cols * payload.rows
         var decodedFields: [[Float]] = []

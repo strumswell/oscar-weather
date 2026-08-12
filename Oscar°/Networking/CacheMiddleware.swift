@@ -333,7 +333,6 @@ nonisolated final class CachingMiddleware: ClientMiddleware {
       return (cachedResponse, HTTPBody(cachedData))
     }
 
-    // If not cached or expired, perform the request
     do {
       let (response, responseBody) = try await next(request, body, baseURL)
 

@@ -19,91 +19,13 @@ servers:
     description: "Public AQI Open-Meteo endpoint"
   - url: https://geocoding-api.open-meteo.com/v1
     description: "Public Geocoding Open-Meteo endpoint"
-  - url: https://api.brightsky.dev
-    description: "Public BrightSky endpoint"
   - url: https://weather.gc.ca
     description: "Public Weather Service from Canada"
-  - url: https://ensemble-api.open-meteo.com
-    description: "Public Open-Meteo ensemble endpoint"
   - url: https://archive-api.open-meteo.com
     description: "Public Open-Meteo historical (archive) endpoint"
+  - url: https://server.oscars.love
+    description: "Oscar° companion server (radar, models, clouds, alerts, notifications)"
 paths:
-  /v1/ensemble:
-    servers:
-      - url: https://ensemble-api.open-meteo.com
-    get:
-      operationId: getEnsembleForecast
-      tags:
-        - Weather Forecast APIs
-      summary: Daily ensemble weather forecast for coordinates
-      description: Daily ensemble weather variables for given WGS84 latitude and longitude coordinates.
-      parameters:
-        - name: latitude
-          in: query
-          required: true
-          schema:
-            type: number
-            format: number
-        - name: longitude
-          in: query
-          required: true
-          schema:
-            type: number
-            format: number
-        - name: daily
-          in: query
-          required: true
-          explode: false
-          schema:
-            type: array
-            items:
-              type: string
-              enum:
-                - temperature_2m_min
-                - temperature_2m_max
-                - precipitation_sum
-                - wind_speed_10m_min
-                - wind_speed_10m_max
-                - wind_direction_10m_dominant
-        - name: models
-          in: query
-          required: true
-          schema:
-            type: string
-            enum:
-              - ecmwf_aifs025_ensemble
-              - ncep_aigefs025
-              - ncep_gefs05
-              - icon_global_eps
-              - icon_eu_eps
-        - name: timezone
-          in: query
-          schema:
-            type: string
-        - name: forecast_days
-          in: query
-          schema:
-            type: integer
-            enum:
-              - 35
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EnsembleForecastResponse"
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: boolean
-                  reason:
-                    type: string
   /v1/archive:
     servers:
       - url: https://archive-api.open-meteo.com
@@ -759,45 +681,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SearchResponse"
-  /alerts:
-    servers:
-      - url: https://api.brightsky.dev
-        description: "Public BrightSky endpoint for weather alerts"
-    get:
-      operationId: getAlerts
-      tags:
-        - Alerts
-      summary: Fetch weather alerts for a specific location
-      description: Retrieves current weather alerts based on latitude and longitude coordinates.
-      parameters:
-        - name: lat
-          in: query
-          required: true
-          description: Latitude of the location
-          schema:
-            type: number
-            format: double
-        - name: lon
-          in: query
-          required: true
-          description: Longitude of the location
-          schema:
-            type: number
-            format: double
-      responses:
-        200:
-          description: An array of weather alerts
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  alerts:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/WeatherAlert"
-                  location:
-                    $ref: "#/components/schemas/AlertLocation"
   /api/app/en/Location/{latitude},{longitude}:
     servers:
       - url: https://weather.gc.ca
@@ -909,6 +792,575 @@ paths:
                           type: array
                           items: {}
                           nullable: true
+  /radar/series:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getRadarSeries
+      tags:
+        - Oscar Server
+      summary: Per-location precipitation timeline (observed + nowcast)
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: lon
+          in: query
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Precipitation series
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrecipSeriesResponse"
+  /radar/{region}/frames:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getRadarFrames
+      tags:
+        - Oscar Server
+      summary: Radar frame index for a region
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Frame index
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RadarFramesResponse"
+  /radar/{region}/frames/{key}/grid:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getRadarGrid
+      tags:
+        - Oscar Server
+      summary: 8-bit value grid for a radar frame (lossless WebP)
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: style
+          in: query
+          required: false
+          description: '"typed" selects the categorical precip-type grid encoding'
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Value grid image
+          content:
+            image/webp:
+              schema:
+                type: string
+                format: binary
+  /radar/{region}/frames/{key}/tiles/{z}/{x}/{y}:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getRadarTile
+      tags:
+        - Oscar Server
+      summary: Rendered radar tile (widget compositing)
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: z
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: x
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: y
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Tile image
+          content:
+            image/webp:
+              schema:
+                type: string
+                format: binary
+  /radar/{region}/motion:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getRadarMotion
+      tags:
+        - Oscar Server
+      summary: Per-pair motion flow fields for radar frames
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Motion fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MotionResponse"
+  /radar/{region}/cells:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getRadarCells
+      tags:
+        - Oscar Server
+      summary: Tracked storm cells (SCIT) as GeoJSON point features
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cell feature collection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StormCellCollection"
+  /clouds/meteosat/series:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getCloudSeries
+      tags:
+        - Oscar Server
+      summary: Per-location satellite cloudiness timeline
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: lon
+          in: query
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Cloud series
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudSeriesResponse"
+  /clouds/meteosat/frames:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getCloudFrames
+      tags:
+        - Oscar Server
+      summary: Satellite cloud frame index
+      responses:
+        "200":
+          description: Frame index
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RadarFramesResponse"
+  /clouds/meteosat/frames/{key}/grid:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getCloudGrid
+      tags:
+        - Oscar Server
+      summary: 8-bit value grid for a cloud frame (lossless WebP)
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Value grid image
+          content:
+            image/webp:
+              schema:
+                type: string
+                format: binary
+  /clouds/meteosat/motion:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getCloudMotion
+      tags:
+        - Oscar Server
+      summary: Per-pair motion flow fields for cloud frames
+      responses:
+        "200":
+          description: Motion fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MotionResponse"
+  /models/{model}/frames:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getModelFrames
+      tags:
+        - Oscar Server
+      summary: Model frame index (ICON / ECMWF)
+      parameters:
+        - name: model
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Frame index
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelFramesResponse"
+  /models/{model}/motion:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getModelMotion
+      tags:
+        - Oscar Server
+      summary: Per-pair motion flow fields for model frames
+      parameters:
+        - name: model
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Motion fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MotionResponse"
+  /models/{model}/frames/{key}/{variable}/grid:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getModelGrid
+      tags:
+        - Oscar Server
+      summary: 8-bit value grid for a model frame variable (lossless WebP)
+      parameters:
+        - name: model
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: variable
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Value grid image
+          content:
+            image/webp:
+              schema:
+                type: string
+                format: binary
+  /models/{model}/frames/{key}/{variable}/tiles/{z}/{x}/{y}:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getModelTile
+      tags:
+        - Oscar Server
+      summary: Rendered model tile (widget compositing)
+      parameters:
+        - name: model
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: variable
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: z
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: x
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: y
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Tile image
+          content:
+            image/webp:
+              schema:
+                type: string
+                format: binary
+  /models/{model}/frames/{key}/wind/field/{z}/{x}/{y}.json:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getWindField
+      tags:
+        - Oscar Server
+      summary: Sampled wind vector field tile for the particle overlay
+      parameters:
+        - name: model
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: z
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: x
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: y
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: samples
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Wind field tile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WindFieldTile"
+  /colormaps/{id}:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getColormap
+      tags:
+        - Oscar Server
+      summary: 256-entry RGBA palette for value grids
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Raw 1024-byte RGBA palette
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  /weather-alerts/point:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getOscarPointAlerts
+      tags:
+        - Oscar Server
+      summary: Active severe-weather alerts at a coordinate
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: lon
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: lang
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: includeGeometry
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Active alerts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OscarPointAlertsResponse"
+  /notifications/register:
+    servers:
+      - url: https://server.oscars.love
+    post:
+      operationId: registerNotifications
+      tags:
+        - Oscar Server
+      summary: Register a device push subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Subscription created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationRegisterResponse"
+        "201":
+          description: Subscription created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationRegisterResponse"
+  /notifications/{subscriptionId}/settings:
+    servers:
+      - url: https://server.oscars.love
+    patch:
+      operationId: patchNotificationSettings
+      tags:
+        - Oscar Server
+      summary: Update a subscription's notification settings
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Settings updated
+        "204":
+          description: Settings updated
+  /notifications/{subscriptionId}/live-activity/{tokenKind}:
+    servers:
+      - url: https://server.oscars.love
+    patch:
+      operationId: patchLiveActivityToken
+      tags:
+        - Oscar Server
+      summary: Sync a Live Activity push token
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tokenKind
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Token stored
+        "204":
+          description: Token stored
+  /notifications/{subscriptionId}:
+    servers:
+      - url: https://server.oscars.love
+    delete:
+      operationId: deleteNotificationSubscription
+      tags:
+        - Oscar Server
+      summary: Delete a push subscription (legacy-host migration)
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
 components:
   schemas:
     WeatherAlert:
@@ -1535,3 +1987,284 @@ components:
         precipitation_probability_max:
           type: string
           example: "%"
+    RadarBounds:
+      type: object
+      required: [north, south, west, east]
+      properties:
+        north:
+          type: number
+        south:
+          type: number
+        west:
+          type: number
+        east:
+          type: number
+    # Model frames `bounds` varies by model: ECMWF serves lat/lon edges, ICON a
+    # Mercator {minX,maxX,minY,maxY} rectangle (its lat/lon rectangle arrives as
+    # `image_bounds`). All fields optional so either shape decodes; clients use
+    # lat/lon edges only when all four are present.
+    ModelBounds:
+      type: object
+      properties:
+        north:
+          type: number
+        south:
+          type: number
+        west:
+          type: number
+        east:
+          type: number
+    RadarFrameInfo:
+      type: object
+      required: [key, timestamp]
+      properties:
+        key:
+          type: string
+        timestamp:
+          type: string
+    RadarFramesResponse:
+      type: object
+      required: [frames, bounds]
+      properties:
+        frames:
+          type: array
+          items:
+            $ref: "#/components/schemas/RadarFrameInfo"
+        bounds:
+          $ref: "#/components/schemas/RadarBounds"
+        image_bounds:
+          $ref: "#/components/schemas/RadarBounds"
+    ModelFrameInfo:
+      type: object
+      required: [key, validTime]
+      properties:
+        key:
+          type: string
+        validTime:
+          type: string
+    ModelFramesResponse:
+      type: object
+      required: [frames]
+      properties:
+        frames:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModelFrameInfo"
+        bounds:
+          $ref: "#/components/schemas/ModelBounds"
+        image_bounds:
+          $ref: "#/components/schemas/RadarBounds"
+    PrecipPoint:
+      type: object
+      required: [timestamp, precipitation]
+      properties:
+        timestamp:
+          type: string
+        precipitation:
+          type: number
+        is_forecast:
+          type: boolean
+    PrecipSeriesResponse:
+      type: object
+      required: [source, unit, latitude, longitude, series]
+      properties:
+        source:
+          type: string
+        unit:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        series:
+          type: array
+          items:
+            $ref: "#/components/schemas/PrecipPoint"
+        generated_at:
+          type: string
+        last_observed_at:
+          type: string
+        forecast_horizon:
+          type: string
+    CloudPoint:
+      type: object
+      required: [timestamp, value]
+      properties:
+        timestamp:
+          type: string
+        value:
+          type: integer
+        is_forecast:
+          type: boolean
+    CloudSeriesResponse:
+      type: object
+      required: [source, latitude, longitude, series]
+      properties:
+        source:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        series:
+          type: array
+          items:
+            $ref: "#/components/schemas/CloudPoint"
+        generated_at:
+          type: string
+        forecast_horizon:
+          type: string
+    MotionPair:
+      type: object
+      required: [from, to, field, gap_minutes]
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+        field:
+          type: integer
+        gap_minutes:
+          type: integer
+    MotionResponse:
+      type: object
+      required: [cols, rows, overview_width, overview_height, scale, step_minutes, fields, pairs]
+      properties:
+        cols:
+          type: integer
+        rows:
+          type: integer
+        overview_width:
+          type: integer
+        overview_height:
+          type: integer
+        scale:
+          type: number
+        step_minutes:
+          type: integer
+        fields:
+          type: array
+          items:
+            type: string
+        pairs:
+          type: array
+          items:
+            $ref: "#/components/schemas/MotionPair"
+    StormCellGeometry:
+      type: object
+      required: [coordinates]
+      properties:
+        coordinates:
+          type: array
+          items:
+            type: number
+    StormCellProperties:
+      type: object
+      required: [id, area_km2, peak_mmh, velocity_kmh, path]
+      properties:
+        id:
+          type: integer
+        area_km2:
+          type: number
+        peak_mmh:
+          type: number
+        mean_mmh:
+          type: number
+        velocity_kmh:
+          type: number
+        bearing_deg:
+          type: number
+        path:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+        footprint:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+    StormCellFeature:
+      type: object
+      required: [geometry, properties]
+      properties:
+        geometry:
+          $ref: "#/components/schemas/StormCellGeometry"
+        properties:
+          $ref: "#/components/schemas/StormCellProperties"
+    StormCellCollection:
+      type: object
+      required: [features]
+      properties:
+        features:
+          type: array
+          items:
+            $ref: "#/components/schemas/StormCellFeature"
+    WindFieldTile:
+      type: object
+      required: [gridWidth, gridHeight, bounds, u, v]
+      properties:
+        gridWidth:
+          type: integer
+        gridHeight:
+          type: integer
+        bounds:
+          $ref: "#/components/schemas/RadarBounds"
+        u:
+          type: array
+          items:
+            type: [number, "null"]
+        v:
+          type: array
+          items:
+            type: [number, "null"]
+    OscarPointAlert:
+      type: object
+      required: [alertId, source, event, severity, urgency, certainty]
+      properties:
+        alertId:
+          type: string
+        source:
+          type: string
+        senderName:
+          type: string
+        event:
+          type: string
+        severity:
+          type: string
+        urgency:
+          type: string
+        certainty:
+          type: string
+        responseType:
+          type: string
+        onsetAt:
+          type: string
+        expiresAt:
+          type: string
+        headline:
+          type: string
+        description:
+          type: string
+        instruction:
+          type: string
+    OscarPointAlertsResponse:
+      type: object
+      required: [alertCount, alerts]
+      properties:
+        alertCount:
+          type: integer
+        alerts:
+          type: array
+          items:
+            $ref: "#/components/schemas/OscarPointAlert"
+    NotificationRegisterResponse:
+      type: object
+      required: [subscriptionId, apiKey]
+      properties:
+        subscriptionId:
+          type: string
+        apiKey:
+          type: string

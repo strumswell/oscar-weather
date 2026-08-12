@@ -17,7 +17,6 @@ struct MemberCardPlacedStickerView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @GestureState private var liveTransform: (scale: CGFloat, rotation: Angle) = (1, .zero)
     @State private var liftProgress: CGFloat = 0
-    @State private var latestDragTranslation: CGSize = .zero
     @State private var isDraggingSticker = false
     @State private var isTransformingSticker = false
 
@@ -101,7 +100,6 @@ struct MemberCardPlacedStickerView: View {
                     isDraggingSticker = true
                     updatePressState(true)
                 }
-                latestDragTranslation = value.translation
                 onDragChanged(value.translation)
             }
             .onEnded { value in
@@ -111,7 +109,6 @@ struct MemberCardPlacedStickerView: View {
                 }
                 updatePressState(false)
                 isDraggingSticker = false
-                latestDragTranslation = .zero
                 onDragEnded(value.translation)
             }
     }
@@ -153,7 +150,6 @@ struct MemberCardPlacedStickerView: View {
                 updatePressState(false)
                 isDraggingSticker = false
                 isTransformingSticker = false
-                latestDragTranslation = .zero
                 onDragEnded(.zero)
             }
     }

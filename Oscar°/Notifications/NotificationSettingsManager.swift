@@ -7,7 +7,10 @@
 
 import ActivityKit
 import Foundation
+import HTTPTypes
 import OSLog
+import OpenAPIRuntime
+import OpenAPIURLSession
 import Security
 import SwiftUI
 import UIKit
@@ -27,6 +30,20 @@ final class NotificationSettingsManager: NSObject {
     private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
     private let baseURL = URL(string: radarBaseURL)!
+    /// Generated client for the subscription endpoints. Deliberately NO retry
+    /// middleware (registers/patches were never retried; a blind retry could
+    /// double-register), and the bearer key is injected per request from the
+    /// Keychain — register runs before one exists and simply goes out bare.
+    @ObservationIgnored private lazy var oscarNotifications: Client = Client(
+        serverURL: baseURL,
+        transport: URLSessionTransport(),
+        middlewares: APIClient.stagingMiddlewares + [
+            ContactIdentityMiddleware(),
+            BearerAuthMiddleware { [subscriptionApiKey = apiKeyKey] in
+                Keychain.load(key: subscriptionApiKey)
+            },
+        ]
+    )
     private let locationService = LocationService.shared
 
     private let rainAlertsEnabledKey = "notificationRainAlertsEnabled"
@@ -231,7 +248,7 @@ final class NotificationSettingsManager: NSObject {
         enabled = rainAlertsEnabled || weatherAlertsEnabled
     }
 
-    private func notificationSettingsPayload() -> [String: Any] {
+    private func notificationSettingsPayload() -> [String: any Sendable] {
         [
             "rainAlertsEnabled": rainAlertsEnabled,
             "weatherAlertsEnabled": weatherAlertsEnabled,
@@ -302,7 +319,7 @@ final class NotificationSettingsManager: NSObject {
         let languageCode = Locale.current.language.languageCode?.identifier ?? "en"
         let language = languageCode.lowercased().hasPrefix("de") ? "de" : "en"
 
-        var patchBody: [String: Any] = [
+        var patchBody: [String: any Sendable] = [
             "locationLat": outboundCoordinates.latitude,
             "locationLon": outboundCoordinates.longitude,
             "locationName": cityName,
@@ -374,26 +391,25 @@ final class NotificationSettingsManager: NSObject {
         }
     }
 
-    private func register(body: [String: Any], token: String, state: SentSubscriptionState) async {
-        guard let url = URL(string: "/notifications/register", relativeTo: baseURL) else { return }
-        guard let httpBody = try? JSONSerialization.data(withJSONObject: body) else { return }
+    private func register(body: [String: any Sendable], token: String, state: SentSubscriptionState) async {
+        guard let payload = try? OpenAPIObjectContainer(unvalidatedValue: body.mapValues { $0 as (any Sendable)? })
+        else { return }
 
         notificationLogger.info("Lifecycle: subscription register request started; payload=\(self.loggablePayload(from: body), privacy: .public)")
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addAPIContactIdentity()
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = httpBody
-
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
-                let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+            let output = try await oscarNotifications.registerNotifications(
+                .init(body: .json(.init(additionalProperties: payload))))
+            let registerResponse: Components.Schemas.NotificationRegisterResponse
+            switch output {
+            case .ok(let ok):
+                registerResponse = try ok.body.json
+            case .created(let created):
+                registerResponse = try created.body.json
+            case .undocumented(let statusCode, _):
                 notificationLogger.error("Lifecycle: subscription register request failed; status=\(statusCode, privacy: .public)")
                 return
             }
-            let registerResponse = try JSONDecoder().decode(RegisterResponse.self, from: data)
             Keychain.save(key: subscriptionKey, value: registerResponse.subscriptionId)
             Keychain.save(key: apiKeyKey, value: registerResponse.apiKey)
             Keychain.save(key: lastSentDeviceTokenKey, value: token)
@@ -441,25 +457,29 @@ final class NotificationSettingsManager: NSObject {
             return
         }
 
-        guard let url = URL(string: "/notifications/\(subscriptionId)", relativeTo: legacyRadarBaseURL) else { return }
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.addAPIContactIdentity()
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.timeoutInterval = 10
-
         notificationLogger.info("Lifecycle: legacy radar de-registration request started")
 
-        // Fire-and-forget: `request` already captured the legacy credentials by value, so a
+        // Fire-and-forget on a one-off client: the credentials are captured by value, so a
         // later re-registration overwriting the Keychain cannot affect it, and launch is
-        // never blocked on the legacy host.
+        // never blocked on the legacy host (10 s request timeout).
+        let legacyBaseURL = legacyRadarBaseURL
         Task.detached {
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.timeoutIntervalForRequest = 10
+            let legacyClient = Client(
+                serverURL: legacyBaseURL,
+                transport: URLSessionTransport(
+                    configuration: .init(session: URLSession(configuration: configuration))),
+                middlewares: [
+                    ContactIdentityMiddleware(),
+                    BearerAuthMiddleware { apiKey },
+                ]
+            )
             do {
-                let (_, response) = try await URLSession.shared.data(for: request)
-                let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
                 // 204 = deleted, 404 = already gone; any other status is ignored (best-effort).
-                notificationLogger.info("Lifecycle: legacy radar de-registration finished; status=\(statusCode, privacy: .public)")
+                let output = try await legacyClient.deleteNotificationSubscription(
+                    .init(path: .init(subscriptionId: subscriptionId)))
+                notificationLogger.info("Lifecycle: legacy radar de-registration finished; outcome=\(String(describing: output), privacy: .public)")
             } catch {
                 // Legacy server offline/unreachable — silently give up.
                 notificationLogger.info("Lifecycle: legacy radar de-registration could not reach legacy server; giving up silently (\(error.localizedDescription, privacy: .public))")
@@ -467,45 +487,35 @@ final class NotificationSettingsManager: NSObject {
         }
     }
 
-    private func patchSettings(_ body: [String: Any], token: String, state: SentSubscriptionState) async -> PatchResult {
+    private func patchSettings(_ body: [String: any Sendable], token: String, state: SentSubscriptionState) async -> PatchResult {
         guard let subscriptionId = Keychain.load(key: subscriptionKey),
-              let apiKey = Keychain.load(key: apiKeyKey),
-              let url = URL(string: "/notifications/\(subscriptionId)/settings", relativeTo: baseURL),
-              let httpBody = try? JSONSerialization.data(withJSONObject: body)
+              Keychain.load(key: apiKeyKey) != nil,
+              let payload = try? OpenAPIObjectContainer(unvalidatedValue: body.mapValues { $0 as (any Sendable)? })
         else {
             return .notFound
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "PATCH"
-        request.addAPIContactIdentity()
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.httpBody = httpBody
-
         notificationLogger.info("Lifecycle: subscription patch request started; payload=\(self.loggablePayload(from: body), privacy: .public)")
 
         do {
-            let (_, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse else {
-                notificationLogger.error("Lifecycle: subscription patch request failed; response missing HTTPURLResponse")
-                return .failure
-            }
-            if httpResponse.statusCode == 404 {
+            let output = try await oscarNotifications.patchNotificationSettings(
+                .init(path: .init(subscriptionId: subscriptionId), body: .json(.init(additionalProperties: payload))))
+            switch output {
+            case .ok, .noContent:
+                Keychain.save(key: lastSentDeviceTokenKey, value: token)
+                persistLastSentSubscriptionState(state)
+                notificationLogger.info("Lifecycle: subscription patch request succeeded")
+                await flushPendingLiveActivityTokens()
+                return .success
+            case .undocumented(let statusCode, _) where statusCode == 404:
                 Keychain.delete(key: subscriptionKey)
                 Keychain.delete(key: apiKeyKey)
                 notificationLogger.info("Lifecycle: subscription patch request returned 404; cleared stored credentials")
                 return .notFound
+            case .undocumented(let statusCode, _):
+                notificationLogger.error("Lifecycle: subscription patch request failed; status=\(statusCode, privacy: .public)")
+                return .failure
             }
-            if (200...299).contains(httpResponse.statusCode) {
-                Keychain.save(key: lastSentDeviceTokenKey, value: token)
-                persistLastSentSubscriptionState(state)
-                notificationLogger.info("Lifecycle: subscription patch request succeeded; status=\(httpResponse.statusCode, privacy: .public)")
-                await flushPendingLiveActivityTokens()
-                return .success
-            }
-            notificationLogger.error("Lifecycle: subscription patch request failed; status=\(httpResponse.statusCode, privacy: .public)")
-            return .failure
         } catch {
             notificationLogger.error("Lifecycle: subscription patch request threw error=\(error.localizedDescription, privacy: .public)")
             return .failure
@@ -538,26 +548,23 @@ final class NotificationSettingsManager: NSObject {
         )
     }
 
-    private func patchLiveActivityToken(path: String, body: [String: Any]) async -> Bool {
+    private func patchLiveActivityToken(path: String, body: [String: any Sendable]) async -> Bool {
         guard let subscriptionId = Keychain.load(key: subscriptionKey),
-              let apiKey = Keychain.load(key: apiKeyKey),
-              let url = URL(string: "/notifications/\(subscriptionId)/live-activity/\(path)", relativeTo: baseURL),
-              let httpBody = try? JSONSerialization.data(withJSONObject: body)
+              Keychain.load(key: apiKeyKey) != nil,
+              let payload = try? OpenAPIObjectContainer(unvalidatedValue: body.mapValues { $0 as (any Sendable)? })
         else { return false }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "PATCH"
-        request.addAPIContactIdentity()
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.httpBody = httpBody
-
         do {
-            let (_, response) = try await URLSession.shared.data(for: request)
-            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
-            let succeeded = (200...299).contains(statusCode)
-            notificationLogger.info("Lifecycle: live-activity \(path, privacy: .public) patch finished; status=\(statusCode, privacy: .public)")
-            return succeeded
+            let output = try await oscarNotifications.patchLiveActivityToken(
+                .init(path: .init(subscriptionId: subscriptionId, tokenKind: path), body: .json(.init(additionalProperties: payload))))
+            switch output {
+            case .ok, .noContent:
+                notificationLogger.info("Lifecycle: live-activity \(path, privacy: .public) patch finished")
+                return true
+            case .undocumented(let statusCode, _):
+                notificationLogger.info("Lifecycle: live-activity \(path, privacy: .public) patch finished; status=\(statusCode, privacy: .public)")
+                return false
+            }
         } catch {
             notificationLogger.error("Lifecycle: live-activity \(path, privacy: .public) patch threw error=\(error.localizedDescription, privacy: .public)")
             return false
@@ -577,11 +584,6 @@ final class NotificationSettingsManager: NSObject {
         case success
         case notFound
         case failure
-    }
-
-    private struct RegisterResponse: Decodable {
-        let subscriptionId: String
-        let apiKey: String
     }
 
     private struct SentSubscriptionState: Codable, Equatable {
@@ -649,7 +651,7 @@ final class NotificationSettingsManager: NSObject {
         UserDefaults.standard.set(state.apnsEnvironment.rawValue, forKey: lastSentAPNsEnvironmentKey)
     }
 
-    private func loggablePayload(from body: [String: Any]) -> String {
+    private func loggablePayload(from body: [String: any Sendable]) -> String {
         var sanitizedBody = body
         if let deviceToken = sanitizedBody["deviceToken"] as? String {
             sanitizedBody["deviceToken"] = redactedDeviceToken(deviceToken)
@@ -758,5 +760,25 @@ private extension UNAuthorizationStatus {
         @unknown default:
             "unknown"
         }
+    }
+}
+
+/// Injects the subscription's bearer key into generated-client requests; skips
+/// the header while no key exists yet (register runs before one is issued).
+private struct BearerAuthMiddleware: ClientMiddleware {
+    let token: @Sendable () -> String?
+
+    func intercept(
+        _ request: HTTPRequest,
+        body: HTTPBody?,
+        baseURL: URL,
+        operationID: String,
+        next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
+    ) async throws -> (HTTPResponse, HTTPBody?) {
+        var request = request
+        if let token = token() {
+            request.headerFields[.authorization] = "Bearer \(token)"
+        }
+        return try await next(request, body, baseURL)
     }
 }

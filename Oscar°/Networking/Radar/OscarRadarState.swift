@@ -59,7 +59,6 @@ final class OscarRadarState {
     @ObservationIgnored private var backgroundPreloadTask: Task<Void, Never>?
     @ObservationIgnored private var focusedLoadTask: Task<Void, Never>?
     @ObservationIgnored private let renderMode: MapRenderMode
-    private static let baseURL = radarBaseURL
     private static let cacheLock = NSLock()
     // Live instances (preview + fullscreen come and go with their views) for the
     // app-level memory-warning purge.
@@ -194,7 +193,7 @@ final class OscarRadarState {
     private var sourceKey: SourceKey { SourceKey(region: region, product: product) }
 
     private static var cachedFrameInfos: [SourceKey: [RadarFrameInfo]] = [:]
-    private static var cachedBounds: [SourceKey: RadarBoundsDTO] = [:]
+    private static var cachedBounds: [SourceKey: Components.Schemas.RadarBounds] = [:]
     private static var lastFetchedTime: [SourceKey: Date] = [:]
     private static let cacheDuration: TimeInterval = 10 * 60
 
@@ -542,8 +541,8 @@ final class OscarRadarState {
 
     /// Fetches frame metadata from the server, or returns the cached list if still valid.
     /// Clears the image cache when the metadata expires, since frame keys will have changed.
-    private static func fetchFrameInfos(source: SourceKey) async throws -> ([RadarFrameInfo], RadarBoundsDTO) {
-        if let cached = cacheLock.withLock({ () -> ([RadarFrameInfo], RadarBoundsDTO)? in
+    private static func fetchFrameInfos(source: SourceKey) async throws -> ([RadarFrameInfo], Components.Schemas.RadarBounds) {
+        if let cached = cacheLock.withLock({ () -> ([RadarFrameInfo], Components.Schemas.RadarBounds)? in
             if isCacheValid(for: source),
                let bounds = cachedBounds[source],
                let infos = cachedFrameInfos[source], !infos.isEmpty {
@@ -554,16 +553,10 @@ final class OscarRadarState {
             return cached
         }
 
-        guard let url = URL(string: "\(baseURL)/\(source.product.framesPath(for: source.region))") else {
-            throw URLError(.badURL)
-        }
-        var request = URLRequest(url: url)
-        request.addAPIContactIdentity()
-        let (data, _) = try await URLSession.shared.data(for: request)
-        let response = try JSONDecoder().decode(RadarFramesResponse.self, from: data)
+        let response = try await APIClient.shared.radarFrames(region: source.region.pathComponent)
         // image_bounds (the rendered Mercator rectangle) over the tighter data
-        // footprint — see RadarFramesResponse.
-        let overlayBounds = response.imageBounds ?? response.bounds
+        // footprint — see RadarSharedDTOs.
+        let overlayBounds = response.image_bounds ?? response.bounds
         cacheLock.withLock {
             cachedFrameInfos[source] = response.frames
             cachedBounds[source] = overlayBounds
@@ -572,35 +565,25 @@ final class OscarRadarState {
         return (response.frames, overlayBounds)
     }
 
-    /// Fetch bytes for a frame asset. Network waits overlap freely across concurrent
-    /// loads (the await releases the main actor); decode does NOT happen here.
-    private static func fetchAssetData(_ url: URL) async -> Data? {
-        var request = URLRequest(url: url)
-        request.addAPIContactIdentity()
-        return (try? await URLSession.shared.data(for: request))?.0
-    }
-
     /// Download the raw 8-bit value grid and decode it (serial lane) to a compact index
     /// buffer. Colormapping happens on the GPU at draw time (palette LUT in the layer).
     private static func loadGridIndices(for frameInfo: RadarFrameInfo, source: SourceKey) async -> RadarGridPayload? {
-        guard let url = URL(string: "\(baseURL)/\(source.product.framesPath(for: source.region))/\(frameInfo.key)/grid\(source.product.gridQuery)") else {
+        let fetched: Data?
+        do {
+            fetched = try await APIClient.shared.radarGrid(
+                region: source.region.pathComponent,
+                key: frameInfo.key,
+                typed: source.product == .precipitationTyped)
+        } catch {
             return nil
         }
-        var request = URLRequest(url: url)
-        request.addAPIContactIdentity()
-        guard let (data, response) = try? await URLSession.shared.data(for: request),
-              let http = response as? HTTPURLResponse else { return nil }
-        switch http.statusCode {
-        case 200:
-            return await RadarFrameDecodeLane.shared.decodeGrid(data)
-        case 404:
-            // A dry frame has no grid — that's data ("no precipitation"), not an
-            // error. A 1×1 index-0 payload renders fully transparent and marks the
+        guard let data = fetched else {
+            // A dry frame has no grid (404) — that's data ("no precipitation"), not
+            // an error. A 1×1 index-0 payload renders fully transparent and marks the
             // tick loaded instead of leaving it on the orange loading state forever.
             return RadarGridPayload(indices: [0], width: 1, height: 1)
-        default:
-            return nil
         }
+        return await RadarFrameDecodeLane.shared.decodeGrid(data)
     }
 
     /// Minutes between two frame timestamps (nil if either fails to parse). The map
@@ -612,9 +595,8 @@ final class OscarRadarState {
 
     /// Fetch + decode `/radar/{region}/motion` (best-effort; nil on any failure).
     private static func fetchMotionData(region: RadarRegion) async -> RadarMotionData? {
-        guard let url = URL(string: "\(baseURL)/radar/\(region.pathComponent)/motion"),
-              let data = await fetchAssetData(url) else { return nil }
-        return RadarMotionData(jsonData: data)
+        guard let payload = try? await APIClient.shared.radarMotion(region: region.pathComponent) else { return nil }
+        return RadarMotionData(payload: payload)
     }
 
     // MARK: - Value-grid colormap (client-side rendering path)
@@ -635,17 +617,12 @@ final class OscarRadarState {
     /// (kept in sync with the server) if it's unavailable.
     private static func warmPalette(id: String) async {
         if cachedPalettes[id] != nil { return }
-        if let url = URL(string: "\(baseURL)/colormaps/\(id)") {
-            var request = URLRequest(url: url)
-            request.addAPIContactIdentity()
-            if let (data, response) = try? await URLSession.shared.data(for: request),
-               (response as? HTTPURLResponse)?.statusCode == 200, data.count == 256 * 4 {
-                cachedPalettes[id] = (0..<256).map {
-                    let o = $0 * 4
-                    return PixelRGBA(r: data[o], g: data[o + 1], b: data[o + 2], a: data[o + 3])
-                }
-                return
+        if let data = try? await APIClient.shared.colormap(id: id), data.count == 256 * 4 {
+            cachedPalettes[id] = (0..<256).map {
+                let o = $0 * 4
+                return PixelRGBA(r: data[o], g: data[o + 1], b: data[o + 2], a: data[o + 3])
             }
+            return
         }
         if cachedPalettes[id] == nil { cachedPalettes[id] = fallbackPalette(id: id) }
     }
@@ -661,104 +638,5 @@ final class OscarRadarState {
         focusedLoadTask?.cancel()
         backgroundPreloadTask?.cancel()
         playbackTimer?.invalidate()
-    }
-}
-
-// MARK: - Value grid palette
-
-/// Local fallback for the server `/colormaps/plasma` palette — kept in sync with
-/// oscar-server's `Colormaps.plasma` so on-device rendering matches the raster path
-/// when the palette endpoint is unreachable. idx 0 = transparent; sqrt-spaced.
-private enum RadarPlasma {
-    private struct Stop { let value: Double; let color: PixelRGBA }
-
-    private static func colorHex(_ hex: Int) -> PixelRGBA {
-        PixelRGBA(r: UInt8((hex >> 16) & 255), g: UInt8((hex >> 8) & 255), b: UInt8(hex & 255), a: 255)
-    }
-    private static func mmPer5(_ hourly: Double) -> Double { hourly / 12 }
-    private static func dbzToMmH(_ dbz: Double) -> Double {
-        let t: [(Double, Double)] = [(5, 0.07), (10, 0.15), (15, 0.3), (20, 0.6), (25, 1.3),
-            (30, 2.7), (35, 5.6), (40, 11.53), (45, 23.7), (50, 48.6), (55, 100), (60, 205), (65, 421)]
-        if dbz <= t[0].0 { return t[0].1 }
-        for p in zip(t, t.dropFirst()) where dbz <= p.1.0 {
-            return p.0.1 + (p.1.1 - p.0.1) * (dbz - p.0.0) / (p.1.0 - p.0.0)
-        }
-        let p = (t[t.count - 2], t[t.count - 1])
-        return p.0.1 + (p.1.1 - p.0.1) * (dbz - p.0.0) / (p.1.0 - p.0.0)
-    }
-    private static let stops: [Stop] = {
-        [Stop(value: 0, color: PixelRGBA(r: 0, g: 0, b: 0, a: 0))]
-            + ServerColormapStops.radar.map {
-                Stop(value: mmPer5(dbzToMmH($0.dbz)), color: colorHex($0.hex))
-            }
-    }()
-    private static let dbzMax = 85.0
-
-    private static func sample(_ value: Double) -> PixelRGBA {
-        guard let first = stops.first, let last = stops.last else { return PixelRGBA(r: 0, g: 0, b: 0, a: 0) }
-        if value <= first.value { return first.color }
-        if value >= last.value { return last.color }
-        for p in zip(stops, stops.dropFirst()) where value >= p.0.value && value < p.1.value {
-            let f = (value - p.0.value) / (p.1.value - p.0.value)
-            func mix(_ a: UInt8, _ b: UInt8) -> UInt8 {
-                UInt8(clamping: Int((Double(a) + f * (Double(b) - Double(a))).rounded()))
-            }
-            return PixelRGBA(r: mix(p.0.color.r, p.1.color.r), g: mix(p.0.color.g, p.1.color.g),
-                             b: mix(p.0.color.b, p.1.color.b), a: mix(p.0.color.a, p.1.color.a))
-        }
-        return last.color
-    }
-
-    static func buildPalette() -> [PixelRGBA] {
-        var pal = [PixelRGBA](repeating: PixelRGBA(r: 0, g: 0, b: 0, a: 0), count: 256)
-        for i in 1..<256 {
-            pal[i] = sample(mmPer5(dbzToMmH(Double(i) / 255 * dbzMax)))
-        }
-        return pal
-    }
-}
-
-/// Local fallback for the server `/colormaps/radar_typed` palette — kept in sync with
-/// oscar-server's `TypedRadar`: index 0 dry, rain 1…153 (the plasma radar ramp
-/// resampled — rain looks identical to the plain radar), snow 154…204 and ice/mix
-/// 205…255 from `ServerColormapStops.typedGroups` (shared with the map legend).
-private enum TypedRadarPalette {
-    static func buildPalette() -> [PixelRGBA] {
-        var pal = [PixelRGBA](repeating: PixelRGBA(r: 0, g: 0, b: 0, a: 0), count: 256)
-        let plasma = RadarPlasma.buildPalette()
-        let rainSpan = ServerColormapStops.typedRainSpan
-        let groupSpan = ServerColormapStops.typedGroupSpan
-        for shade in 1...rainSpan {
-            let f = Double(shade - 1) / Double(rainSpan - 1)
-            pal[shade] = plasma[1 + Int((f * 254).rounded())]
-        }
-        for offset in 0..<groupSpan {
-            let f = Double(offset) / Double(groupSpan - 1)
-            for (group, ramp) in ServerColormapStops.typedGroups.enumerated() {
-                pal[rainSpan + 1 + group * groupSpan + offset] = sample(ramp.stops, f)
-            }
-        }
-        return pal
-    }
-
-    private static func sample(_ stops: [(f: Double, hex: Int, a: UInt8)], _ f: Double) -> PixelRGBA {
-        func pixel(_ s: (f: Double, hex: Int, a: UInt8)) -> PixelRGBA {
-            PixelRGBA(r: UInt8((s.hex >> 16) & 255), g: UInt8((s.hex >> 8) & 255),
-                      b: UInt8(s.hex & 255), a: s.a)
-        }
-        guard let first = stops.first, let last = stops.last else {
-            return PixelRGBA(r: 0, g: 0, b: 0, a: 0)
-        }
-        if f <= first.f { return pixel(first) }
-        if f >= last.f { return pixel(last) }
-        for pair in zip(stops, stops.dropFirst()) where f >= pair.0.f && f < pair.1.f {
-            let t = (f - pair.0.f) / (pair.1.f - pair.0.f)
-            let a = pixel(pair.0), b = pixel(pair.1)
-            func mix(_ x: UInt8, _ y: UInt8) -> UInt8 {
-                UInt8(clamping: Int((Double(x) + t * (Double(y) - Double(x))).rounded()))
-            }
-            return PixelRGBA(r: mix(a.r, b.r), g: mix(a.g, b.g), b: mix(a.b, b.b), a: mix(a.a, b.a))
-        }
-        return pixel(last)
     }
 }

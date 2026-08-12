@@ -1,0 +1,329 @@
+//
+//  WindChart.swift
+//  Oscar°
+//
+//  Created by Philipp Bolte on 18.08.24.
+//
+
+import Charts
+import SwiftUI
+
+struct WindChart: View {
+  var windspeed10m: [Double]
+  var windspeed80m: [Double]
+  var windspeed120m: [Double]
+  var windspeed180m: [Double?]
+  var winddirection10m: [Double]
+  var time: [Double]
+  var unit: String
+  var maxTimeRange: ClosedRange<Date>
+  var referenceDate: Date
+  
+  @State private var selectedDate: Date?
+
+  var windData10m: [(time: Date, speed: Double, direction: Double)] {
+    let count = min(time.count, min(windspeed10m.count, winddirection10m.count))
+    return (0..<count).map { index in
+      (time: Date(timeIntervalSince1970: time[index]), speed: windspeed10m[index], direction: winddirection10m[index])
+    }
+  }
+
+  private var currentDataPoint: (time: Date, speed10m: Double, direction10m: Double, speed80m: Double, speed120m: Double, speed180m: Double)? {
+    allWindData.first(where: { $0.time >= referenceDate }) ?? allWindData.last
+  }
+
+  var windData80m: [(time: Date, speed: Double)] {
+    let count = min(time.count, windspeed80m.count)
+    return (0..<count).map { index in
+      (time: Date(timeIntervalSince1970: time[index]), speed: windspeed80m[index])
+    }
+  }
+
+  var windData120m: [(time: Date, speed: Double)] {
+    let count = min(time.count, windspeed120m.count)
+    return (0..<count).map { index in
+      (time: Date(timeIntervalSince1970: time[index]), speed: windspeed120m[index])
+    }
+  }
+
+  var windData180m: [(time: Date, speed: Double)] {
+    let count = min(time.count, windspeed180m.count)
+    return (0..<count).compactMap { index in
+      windspeed180m[index].map { speed in
+        (time: Date(timeIntervalSince1970: time[index]), speed: speed)
+      }
+    }
+  }
+
+  var allWindData: [(time: Date, speed10m: Double, direction10m: Double, speed80m: Double, speed120m: Double, speed180m: Double)] {
+    let count = min(time.count, min(windspeed10m.count, min(windspeed80m.count, min(windspeed120m.count, min(windspeed180m.count, winddirection10m.count)))))
+    return (0..<count).compactMap { index in
+      guard let speed180m = windspeed180m[index] else { return nil }
+      return (time: Date(timeIntervalSince1970: time[index]),
+       speed10m: windspeed10m[index],
+       direction10m: winddirection10m[index], 
+       speed80m: windspeed80m[index],
+       speed120m: windspeed120m[index],
+       speed180m: speed180m)
+    }
+  }
+
+  var body: some View {
+    VStack(alignment: .leading) {
+      Chart {
+        ForEach(windData180m.filter { $0.time <= referenceDate }, id: \.time) { data in
+          LineMark(
+            x: .value("Hour", data.time),
+            y: .value("Wind 180m (\(unit))", data.speed),
+            series: .value("Series", "180m-past")
+          )
+          .interpolationMethod(.catmullRom)
+          .foregroundStyle(.teal.opacity(0.16))
+          .lineStyle(.init(lineWidth: 1.5, dash: [7, 5]))
+        }
+        
+        ForEach(windData180m.filter { $0.time >= referenceDate }, id: \.time) { data in
+          LineMark(
+            x: .value("Hour", data.time),
+            y: .value("Wind 180m (\(unit))", data.speed),
+            series: .value("Series", "180m-future")
+          )
+          .interpolationMethod(.catmullRom)
+          .foregroundStyle(.teal.opacity(0.3))
+          .lineStyle(.init(lineWidth: 1.5))
+        }
+
+        ForEach(windData120m.filter { $0.time <= referenceDate }, id: \.time) { data in
+          LineMark(
+            x: .value("Hour", data.time),
+            y: .value("Wind 120m (\(unit))", data.speed),
+            series: .value("Series", "120m-past")
+          )
+          .interpolationMethod(.catmullRom)
+          .foregroundStyle(.teal.opacity(0.24))
+          .lineStyle(.init(lineWidth: 2, dash: [7, 5]))
+        }
+        
+        ForEach(windData120m.filter { $0.time >= referenceDate }, id: \.time) { data in
+          LineMark(
+            x: .value("Hour", data.time),
+            y: .value("Wind 120m (\(unit))", data.speed),
+            series: .value("Series", "120m-future")
+          )
+          .interpolationMethod(.catmullRom)
+          .foregroundStyle(.teal.opacity(0.5))
+          .lineStyle(.init(lineWidth: 2))
+        }
+
+        ForEach(windData80m.filter { $0.time <= referenceDate }, id: \.time) { data in
+          LineMark(
+            x: .value("Hour", data.time),
+            y: .value("Wind 80m (\(unit))", data.speed),
+            series: .value("Series", "80m-past")
+          )
+          .interpolationMethod(.catmullRom)
+          .foregroundStyle(.teal.opacity(0.34))
+          .lineStyle(.init(lineWidth: 2.5, dash: [7, 5]))
+        }
+        
+        ForEach(windData80m.filter { $0.time >= referenceDate }, id: \.time) { data in
+          LineMark(
+            x: .value("Hour", data.time),
+            y: .value("Wind 80m (\(unit))", data.speed),
+            series: .value("Series", "80m-future")
+          )
+          .interpolationMethod(.catmullRom)
+          .foregroundStyle(.teal.opacity(0.7))
+          .lineStyle(.init(lineWidth: 2.5))
+        }
+
+        ForEach(windData10m.filter { $0.time <= referenceDate }, id: \.time) { data in
+          LineMark(
+            x: .value("Hour", data.time),
+            y: .value("Wind 10m (\(unit))", data.speed),
+            series: .value("Series", "10m-past")
+          )
+          .interpolationMethod(.catmullRom)
+          .foregroundStyle(.teal.opacity(0.42))
+          .lineStyle(.init(lineWidth: 3, dash: [7, 5]))
+        }
+
+        ForEach(windData10m.filter { $0.time >= referenceDate }, id: \.time) { data in
+          LineMark(
+            x: .value("Hour", data.time),
+            y: .value("Wind 10m (\(unit))", data.speed),
+            series: .value("Series", "10m-future")
+          )
+          .interpolationMethod(.catmullRom)
+          .foregroundStyle(.teal)
+          .lineStyle(.init(lineWidth: 3))
+        }
+        
+        // Wind direction indicators (separate marks every 6 hours)
+        ForEach(Array(windData10m.enumerated()), id: \.offset) { index, data in
+          if index % 6 == 0 {
+            PointMark(
+              x: .value("Hour", data.time),
+              y: .value("Wind 10m (\(unit))", data.speed)
+            )
+            .symbol {
+              Image(systemName: "location.north.fill")
+                .resizable()
+                .frame(width: 12, height: 12)
+                .rotationEffect(.degrees(invertWindDirection(data.direction)))
+                .foregroundStyle(data.time < referenceDate ? .teal.opacity(0.42) : .teal)
+                .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
+            }
+          }
+        }
+
+        currentPointMarks
+        
+        if let selectedDate {
+          RuleMark(x: .value("Selected", selectedDate))
+            .foregroundStyle(.gray.opacity(0.3))
+            .lineStyle(.init(lineWidth: 2))
+            .annotation(
+              position: .topTrailing, spacing: 0,
+              overflowResolution: .init(
+                x: .fit(to: .chart),
+                y: .fit(to: .chart)
+              )
+            ) {
+              if let selectedData = getSelectedAllWindData(for: selectedDate) {
+                VStack(alignment: .center, spacing: 2) {
+                  Text(HourlyChartUtilities.timeString(from: selectedDate))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                  
+                  VStack(alignment: .leading, spacing: 1) {
+                    HStack(spacing: 4) {
+                      Circle().fill(.teal).frame(width: 6, height: 6)
+                      Image(systemName: "location.north.fill")
+                        .resizable()
+                        .frame(width: 8, height: 8)
+                        .rotationEffect(.degrees(invertWindDirection(selectedData.direction10m)))
+                        .foregroundStyle(.white)
+                      Text("\(formatted(selectedData.speed10m)) (10m)")
+                        .font(.caption2)
+                        .foregroundStyle(.white)
+                    }
+                    
+                    HStack(spacing: 4) {
+                      Circle().fill(.teal.opacity(0.7)).frame(width: 6, height: 6)
+                      Text("\(formatted(selectedData.speed80m)) (80m)")
+                        .font(.caption2)
+                        .foregroundStyle(.white)
+                    }
+                    
+                    HStack(spacing: 4) {
+                      Circle().fill(.teal.opacity(0.5)).frame(width: 6, height: 6)
+                      Text("\(formatted(selectedData.speed120m)) (120m)")
+                        .font(.caption2)
+                        .foregroundStyle(.white)
+                    }
+                    
+                    HStack(spacing: 4) {
+                      Circle().fill(.teal.opacity(0.3)).frame(width: 6, height: 6)
+                      Text("\(formatted(selectedData.speed180m)) (180m)")
+                        .font(.caption2)
+                        .foregroundStyle(.white)
+                    }
+                  }
+                }
+                .padding(8)
+                .background(.ultraThinMaterial.opacity(0.9))
+                .clipShape(.rect(cornerRadius: 8))
+                .shadow(radius: 4)
+              }
+            }
+        }
+
+        ForEach(dayChangeIndices(time: time), id: \.self) { index in
+          RuleMark(x: .value("Hour", Date(timeIntervalSince1970: TimeInterval(time[index]))))
+            .foregroundStyle(.gray.opacity(0.6))
+            .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [8, 4]))
+            .annotation(
+              position: .topTrailing, spacing: 8,
+              overflowResolution: .init(
+                x: .fit(to: .chart),
+                y: .fit(to: .chart)
+              )
+            ) {
+              Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: TimeInterval(time[index]))))
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.primary.opacity(0.7))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(.ultraThinMaterial, in: .capsule)
+            }
+        }
+      }
+      .chartForegroundStyleScale([
+        "10m (\(unit))": .teal,
+        "80m (\(unit))": .teal.opacity(0.6),
+        "120m (\(unit))": .teal.opacity(0.4),
+        "180m (\(unit))": .teal.opacity(0.2),
+      ])
+      .chartXAxis {
+        AxisMarks(values: .stride(by: .hour, count: 6)) { value in
+          AxisValueLabel {
+            if let date = value.as(Date.self) {
+              Text(HourlyChartUtilities.hourString(from: date))
+            }
+          }
+          AxisGridLine()
+          AxisTick()
+        }
+      }
+      .chartXScale(domain: maxTimeRange)
+      .chartScrollableAxes(.horizontal)
+      .chartXVisibleDomain(length: 129600)
+      .chartXSelection(value: .snapped(to: 3600, $selectedDate))
+      .frame(height: 200)
+    }
+  }
+
+  private func invertWindDirection(_ direction: Double) -> Double {
+    return (direction + 180).truncatingRemainder(dividingBy: 360)
+  }
+
+  private func formatted(_ value: Double?) -> String {
+    WindSpeedFormatter.string(value, unit: unit)
+  }
+  
+  private func getSelectedAllWindData(for selectedDate: Date) -> (time: Date, speed10m: Double, direction10m: Double, speed80m: Double, speed120m: Double, speed180m: Double)? {
+    return allWindData.min(by: { abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate)) })
+  }
+
+  @ChartContentBuilder
+  private var currentPointMarks: some ChartContent {
+    if let currentDataPoint {
+      currentPointMark(series: "10m", value: currentDataPoint.speed10m)
+      currentPointMark(series: "80m", value: currentDataPoint.speed80m)
+      currentPointMark(series: "120m", value: currentDataPoint.speed120m)
+      currentPointMark(series: "180m", value: currentDataPoint.speed180m)
+    }
+  }
+
+  @ChartContentBuilder
+  private func currentPointMark(series: String, value: Double) -> some ChartContent {
+    if let currentDataPoint {
+      PointMark(
+        x: .value("Current Hour", currentDataPoint.time),
+        y: .value(series, value)
+      )
+      .symbol(.circle)
+      .symbolSize(90)
+      .foregroundStyle(.black)
+
+      PointMark(
+        x: .value("Current Hour", currentDataPoint.time),
+        y: .value(series, value)
+      )
+      .symbol(.circle)
+      .symbolSize(42)
+      .foregroundStyle(.white)
+    }
+  }
+}
