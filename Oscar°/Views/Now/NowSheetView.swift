@@ -20,6 +20,11 @@ struct NowSheetView: View {
                 .presentationDetents([.medium, .large])
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
                 .presentationDragIndicator(.hidden)
+        case .meteorShower(let event):
+            MeteorShowerDetailView(event: event)
+                .presentationDetents([.medium, .large])
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                .presentationDragIndicator(.hidden)
         case .settings:
             SettingsView()
         }

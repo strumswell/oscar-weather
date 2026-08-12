@@ -5,6 +5,7 @@
 //  Created by Philipp Bolte on 04.01.24.
 //
 
+import CoreLocation
 import Foundation
 import SwiftUI
 
@@ -56,6 +57,9 @@ final class Weather {
     var loadingQueries: Set<WeatherLoadingQuery> = []
     var forecast: Operations.getForecast.Output.Ok.Body.jsonPayload
     var alerts: AlertResponse
+    /// Best-effort observing context from Oscar Astro. Nil also represents
+    /// unsupported locations, no noteworthy shower, and request failures.
+    var meteorShowerResponse: MeteorShowerResponse?
     var air: Operations.getAirQuality.Output.Ok.Body.jsonPayload
     var time: Double
     var precipSeries: PrecipSeriesResponse?
@@ -64,9 +68,18 @@ final class Weather {
     var error: String = ""
     var lastUpdated: Date?
     var debug = false
+    @ObservationIgnored private var meteorRequestID = UUID()
 
     var hasContent: Bool {
         lastUpdated != nil
+    }
+
+    var meteorEvents: [MeteorShowerEvent] {
+        meteorShowerResponse?.events ?? []
+    }
+
+    var primaryMeteorEvent: MeteorShowerEvent? {
+        MeteorShowerEventSelector.select(from: meteorEvents)
     }
     
     init() {
@@ -77,6 +90,7 @@ final class Weather {
             current: .init(cloudcover: 0.0, time: 0.0, temperature: 20.0, windspeed: 0.0, wind_direction_10m: 0.0, weathercode: 0.0)
         )
         alerts = .oscar(.empty)
+        meteorShowerResponse = nil
         air = Operations.getAirQuality.Output.Ok.Body.jsonPayload.init(latitude: 0, longitude: 0, hourly: nil)
         precipSeries = nil
     }
@@ -131,10 +145,13 @@ extension Weather {
     ) async {
         // Guard re-entrancy with a dedicated flag, not `isLoading`: the latter is cleared
         // early (once the main data lands) so the spinner hides promptly, but the function
-        // keeps running through the trailing alerts fetch — a second refresh must not start
-        // in that window.
+        // keeps running through the trailing supplementary fetches — a second refresh must
+        // not start in that window.
         guard !isRefreshing else { return }
         isRefreshing = true
+        let requestID = UUID()
+        meteorRequestID = requestID
+        meteorShowerResponse = nil
         isLoading = true
         error = ""
         // Only show the "loading" phase on the very first attempt; a retry after a failure
@@ -253,6 +270,22 @@ extension Weather {
             }
 
             markLoading(.alerts)
+            // Start only after the required forecast has been published, and
+            // don't keep the normal refresh guard or spinner alive for it.
+            #if os(iOS)
+            Task {
+                await refreshMeteorShowers(
+                    coordinates: coordinates,
+                    countryCode: location.countryCode,
+                    requestID: requestID
+                ) { coordinates, countryCode in
+                    try await client.getActiveMeteorShowers(
+                        coordinates: coordinates,
+                        countryCode: countryCode
+                    )
+                }
+            }
+            #endif
             do {
                 alerts = try await client.getAlerts(
                     coordinates: coordinates,
@@ -279,6 +312,36 @@ extension Weather {
             // a launch-time location update) cleared it. `loadState` stays `.failed` until a
             // refresh actually succeeds.
             if !hasContent { loadState = .failed }
+        }
+    }
+
+    /// Small injectable seam for the supplementary request. It deliberately
+    /// cannot mutate forecast load/error state, and always clears before a
+    /// missing country code, unsupported response, empty result, or failure.
+    func refreshMeteorShowers(
+        coordinates: CLLocationCoordinate2D,
+        countryCode: String?,
+        requestID: UUID? = nil,
+        fetch: (CLLocationCoordinate2D, String) async throws -> MeteorShowerResponse
+    ) async {
+        guard requestID == nil || requestID == meteorRequestID else { return }
+        meteorShowerResponse = nil
+        guard let countryCode = countryCode?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !countryCode.isEmpty else {
+            return
+        }
+
+        do {
+            let response = try await fetch(coordinates, countryCode.uppercased())
+            guard requestID == nil || requestID == meteorRequestID else { return }
+            guard response.supported, !response.events.isEmpty else { return }
+            meteorShowerResponse = response
+        } catch is CancellationError {
+            return
+        } catch let error as URLError where error.code == .cancelled {
+            return
+        } catch {
+            // Oscar Astro is supplementary: normal weather remains successful.
         }
     }
 

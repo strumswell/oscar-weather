@@ -53,19 +53,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy."
+            "value" : "Ihr auf ca. 100 m gerundeter Standort wird verwendet, um Wetter und astronomische Hinweise anzuzeigen, und dazu an open-meteo.com sowie astro.oscars.love übermittelt."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your approximate location is used to display the weather at your current location and is transmitted to open-meteo.com for this purpose. More information at oscars.love/privacy."
+            "value" : "Your location, rounded to about 100 m, is used to show weather and astronomy notices and is sent to open-meteo.com and astro.oscars.love."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yaklaşık konumunuz, bulunduğunuz yerdeki hava durumunu görüntülemek için kullanılır ve bu amaçla open-meteo.com'a iletilir. Daha fazla bilgi için oscars.love/privacy'yi ziyaret edin."
+            "value" : "Yaklaşık 100 m'ye yuvarlanan konumunuz hava durumu ve astronomi bildirimlerini göstermek için kullanılır; open-meteo.com ile astro.oscars.love'a iletilir."
           }
         }
       }
@@ -76,19 +76,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy."
+            "value" : "Ihr auf ca. 100 m gerundeter Standort wird verwendet, um Wetter und astronomische Hinweise anzuzeigen, und dazu an open-meteo.com sowie astro.oscars.love übermittelt."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your approximate location is used to display the weather at your current location and is transmitted to open-meteo.com for this purpose. More information at oscars.love/privacy."
+            "value" : "Your location, rounded to about 100 m, is used to show weather and astronomy notices and is sent to open-meteo.com and astro.oscars.love."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yaklaşık konumunuz, bulunduğunuz yerdeki hava durumunu görüntülemek için kullanılır ve bu amaçla open-meteo.com'a iletilir. Daha fazla bilgi için oscars.love/privacy'yi ziyaret edin."
+            "value" : "Yaklaşık 100 m'ye yuvarlanan konumunuz hava durumu ve astronomi bildirimlerini göstermek için kullanılır; open-meteo.com ile astro.oscars.love'a iletilir."
           }
         }
       }
@@ -99,19 +99,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy."
+            "value" : "Ihr auf ca. 100 m gerundeter Standort wird verwendet, um Wetter und astronomische Hinweise anzuzeigen, und dazu an open-meteo.com sowie astro.oscars.love übermittelt."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your approximate location is used to display the weather at your current location and is transmitted to open-meteo.com for this purpose. More information at oscars.love/privacy."
+            "value" : "Your location, rounded to about 100 m, is used to show weather and astronomy notices and is sent to open-meteo.com and astro.oscars.love."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yaklaşık konumunuz, bulunduğunuz yerdeki hava durumunu görüntülemek için kullanılır ve bu amaçla open-meteo.com'a iletilir. Daha fazla bilgi için oscars.love/privacy'yi ziyaret edin."
+            "value" : "Yaklaşık 100 m'ye yuvarlanan konumunuz hava durumu ve astronomi bildirimlerini göstermek için kullanılır; open-meteo.com ile astro.oscars.love'a iletilir."
           }
         }
       }
@@ -122,19 +122,19 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy."
+            "value" : "Ihr auf ca. 100 m gerundeter Standort wird verwendet, um Wetter und astronomische Hinweise anzuzeigen, und dazu an open-meteo.com sowie astro.oscars.love übermittelt."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your approximate location is used to display the weather at your current location and is transmitted to open-meteo.com for this purpose. More information at oscars.love/privacy."
+            "value" : "Your location, rounded to about 100 m, is used to show weather and astronomy notices and is sent to open-meteo.com and astro.oscars.love."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yaklaşık konumunuz, bulunduğunuz yerdeki hava durumunu görüntülemek için kullanılır ve bu amaçla open-meteo.com'a iletilir. Daha fazla bilgi için oscars.love/privacy'yi ziyaret edin."
+            "value" : "Yaklaşık 100 m'ye yuvarlanan konumunuz hava durumu ve astronomi bildirimlerini göstermek için kullanılır; open-meteo.com ile astro.oscars.love'a iletilir."
           }
         }
       }

@@ -84,6 +84,7 @@ Forecast map tiles are generated in-house for the next 3 days across three varia
 | [DWD](https://www.dwd.de/) | Radar tiles | Germany / Central Europe |
 | [RainViewer](https://www.rainviewer.com/) | Radar map overlay | Global |
 | [Environment Canada](https://weather.gc.ca/) | Weather alerts | Canada |
+| [Oscar Astro](https://astro.oscars.love/docs) / [IMO](https://imo.net/resources/calendar/) | Meteor-shower notices | Europe |
 
 ---
 
@@ -116,6 +117,7 @@ Contributions are welcome — bug fixes, new features, or improvements to existi
 - Rain radar & German weather alerts — [BrightSky](https://brightsky.dev/) / [DWD](https://www.dwd.de/)
 - Canadian weather alerts — [Environment Canada](https://weather.gc.ca/)
 - Radar overlay — [RainViewer](https://www.rainviewer.com/)
+- Meteor-shower data — [International Meteor Organization](https://imo.net/resources/calendar/), served by Oscar Astro
 - 3D weather icons — [Hosein Bagheri](https://ui8.net/hosein_bagheri/products/3d-weather-icons40)
 - Animated background techniques — [Hacking with Swift](https://www.hackingwithswift.com)
 - Error tracking — [Sentry](https://sentry.io/)

@@ -163,12 +163,55 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         await getPlacemarkInfo().name
     }
 
+    private func reverseGeocodedInfo(
+        for coordinates: CLLocationCoordinate2D
+    ) async throws -> (name: String, countryCode: String?) {
+        try await withTimeout(seconds: 6) {
+            let location = CLLocation(
+                latitude: coordinates.latitude,
+                longitude: coordinates.longitude
+            )
+            #if os(watchOS)
+            // CLGeocoder is deprecated AND non-functional on watchOS 26;
+            // MKReverseGeocodingRequest is its designated replacement.
+            return try await mapKitReverseGeocode(location)
+            #else
+            let placemarks = try await reverseGeocode(location)
+            guard let placemark = placemarks.first else {
+                return (name: "", countryCode: String?.none)
+            }
+            return (name: placemark.locality ?? "", countryCode: placemark.isoCountryCode)
+            #endif
+        }
+    }
+
     /// Get the current location name and country code, if reverse geocoding is available.
     func getPlacemarkInfo() async -> (name: String, countryCode: String?) {
-        let selectedCity = city.getSelectedCity()
+        if let selectedCity = city.getSelectedCity() {
+            let name = selectedCity.label ?? ""
+            if let countryCode = selectedCity.countryCode, !countryCode.isEmpty {
+                return (name, countryCode)
+            }
 
-        if (selectedCity !== nil) {
-            return (selectedCity!.label ?? "", nil)
+            // Cities saved before the meteor integration have no persisted
+            // country code. Resolve it lazily once and retain it for later
+            // refreshes instead of requiring users to delete and re-add them.
+            let coordinates = CLLocationCoordinate2D(
+                latitude: selectedCity.lat,
+                longitude: selectedCity.lon
+            )
+            do {
+                let geocoded = try await reverseGeocodedInfo(for: coordinates)
+                if let countryCode = geocoded.countryCode, !countryCode.isEmpty {
+                    city.backfillCountryCode(countryCode, for: selectedCity)
+                    return (name, countryCode)
+                }
+            } catch {
+                Self.logger.error(
+                    "Error reverse geocoding saved city: \(error.localizedDescription, privacy: .public)"
+                )
+            }
+            return (name, nil)
         }
 
         let coordinates = gpsLocation
@@ -186,39 +229,22 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
             }
         }
 
-        if let override = LocationService.localityOverride(for: coordinates) {
-            return (override, nil)
-        }
-
-        let latitude = coordinates.latitude
-        let longitude = coordinates.longitude
+        let overrideName = LocationService.localityOverride(for: coordinates)
         do {
             // Bound the reverse geocode: CLGeocoder has no timeout of its own and can
             // stall indefinitely (e.g. on a flaky network right after foregrounding),
             // which would otherwise hang the whole refresh.
-            let geocoded = try await withTimeout(seconds: 6) {
-                let location = CLLocation(latitude: latitude, longitude: longitude)
-                #if os(watchOS)
-                // CLGeocoder is deprecated AND non-functional on watchOS 26;
-                // MKReverseGeocodingRequest is its designated replacement.
-                return try await mapKitReverseGeocode(location)
-                #else
-                let placemarks = try await reverseGeocode(location)
-                guard let placemark = placemarks.first else {
-                    return (name: "", countryCode: String?.none)
-                }
-                return (name: placemark.locality ?? "", countryCode: placemark.isoCountryCode)
-                #endif
+            let geocoded = try await reverseGeocodedInfo(for: coordinates)
+            let name = overrideName ?? geocoded.name
+            if !name.isEmpty {
+                lastGeocoded = (coordinates, name, geocoded.countryCode)
             }
-            if !geocoded.name.isEmpty {
-                lastGeocoded = (coordinates, geocoded.name, geocoded.countryCode)
-            }
-            return (geocoded.name, geocoded.countryCode)
+            return (name, geocoded.countryCode)
         } catch {
             Self.logger.error("Error reverse geocoding: \(error.localizedDescription, privacy: .public)")
         }
 
-        return ("", nil)
+        return (overrideName ?? "", nil)
     }
     
     /// Get current Location object of the user's GPS reverse-geocoded cooridinates or city, if selected

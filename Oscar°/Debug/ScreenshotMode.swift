@@ -58,7 +58,8 @@ enum ScreenshotMode {
             CityService.shared.addCity(searchResult: .init(
                 name: "Leipzig",
                 latitude: Float(ScreenshotFixtures.latitude),
-                longitude: Float(ScreenshotFixtures.longitude)
+                longitude: Float(ScreenshotFixtures.longitude),
+                country_code: "DE"
             ))
         }
         if scene == .customization {

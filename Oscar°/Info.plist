@@ -34,13 +34,13 @@
 		<true/>
 	</dict>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
+	<string>Ihr auf ca. 100 m gerundeter Standort wird verwendet, um Wetter und astronomische Hinweise anzuzeigen, und dazu an open-meteo.com sowie astro.oscars.love übermittelt.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
+	<string>Ihr auf ca. 100 m gerundeter Standort wird verwendet, um Wetter und astronomische Hinweise anzuzeigen, und dazu an open-meteo.com sowie astro.oscars.love übermittelt.</string>
 	<key>NSLocationUsageDescription</key>
-	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
+	<string>Ihr auf ca. 100 m gerundeter Standort wird verwendet, um Wetter und astronomische Hinweise anzuzeigen, und dazu an open-meteo.com sowie astro.oscars.love übermittelt.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
+	<string>Ihr auf ca. 100 m gerundeter Standort wird verwendet, um Wetter und astronomische Hinweise anzuzeigen, und dazu an open-meteo.com sowie astro.oscars.love übermittelt.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSSupportsLiveActivitiesFrequentUpdates</key>

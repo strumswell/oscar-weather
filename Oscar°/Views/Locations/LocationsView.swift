@@ -460,7 +460,8 @@ struct LocationsView: View {
             name: result.name ?? String(localized: "Unbekannter Ort"),
             detail: formattedDetail(for: result),
             latitude: Double(lat),
-            longitude: Double(lon)
+            longitude: Double(lon),
+            countryCode: result.country_code
         )
     }
 
@@ -468,7 +469,8 @@ struct LocationsView: View {
         locationService.city.addCity(
             name: candidate.name,
             latitude: candidate.latitude,
-            longitude: candidate.longitude
+            longitude: candidate.longitude,
+            countryCode: candidate.countryCode
         )
         UIApplication.shared.playHapticFeedback()
         self.candidate = nil

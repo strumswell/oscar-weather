@@ -56,7 +56,7 @@ struct OnboardingLocationStep: View {
                                 systemImage: "lock.fill",
                                 iconTint: .blue,
                                 title: "Privat by Design",
-                                detail: "Dein Standort verlässt dein Gerät nur auf ca. 100 m gerundet und wird nur für eine Sache verwendet: dein Wetter."
+                                detail: "Dein Standort verlässt dein Gerät nur auf ca. 100 m gerundet und wird für dein Wetter und astronomische Hinweise verwendet."
                             )
                             .onboardingEntrance(appeared, delay: 0.38)
                         }
