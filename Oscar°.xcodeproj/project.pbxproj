@@ -40,6 +40,11 @@
 		572B0099860B428FB5545BF9 /* ForecastModelSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 744ED7295B254D8D9025BE39 /* ForecastModelSettingsView.swift */; };
 		2512E96A2C399B7D004670E4 /* AppIconSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E96B2C399B7D004670E4 /* AppIconSettingsView.swift */; };
 		2512E9702F70B000004670E4 /* ForecastDisplayModeOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E96F2F70B000004670E4 /* ForecastDisplayModeOption.swift */; };
+		AF30000000000000000000B2 /* SettingsIconLabelStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF30000000000000000000B1 /* SettingsIconLabelStyle.swift */; };
+		AF30000000000000000000B4 /* SettingsExternalLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF30000000000000000000B3 /* SettingsExternalLink.swift */; };
+		AF30000000000000000000B6 /* DataSourcesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF30000000000000000000B5 /* DataSourcesView.swift */; };
+		AF30000000000000000000B8 /* PermissionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF30000000000000000000B7 /* PermissionSettingsView.swift */; };
+		AF30000000000000000000BA /* RegionalProviderAttributions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF30000000000000000000B9 /* RegionalProviderAttributions.swift */; };
 		2512E9722F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9712F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift */; };
 		2512E9732F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9712F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift */; };
 		2512E9742F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512E9712F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift */; };
@@ -507,6 +512,11 @@
 		2512E9692C399B7D004670E4 /* AppIconCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconCatalog.swift; sourceTree = "<group>"; };
 		2512E96B2C399B7D004670E4 /* AppIconSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconSettingsView.swift; sourceTree = "<group>"; };
 		2512E96F2F70B000004670E4 /* ForecastDisplayModeOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDisplayModeOption.swift; sourceTree = "<group>"; };
+		AF30000000000000000000B1 /* SettingsIconLabelStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsIconLabelStyle.swift; sourceTree = "<group>"; };
+		AF30000000000000000000B3 /* SettingsExternalLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsExternalLink.swift; sourceTree = "<group>"; };
+		AF30000000000000000000B5 /* DataSourcesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSourcesView.swift; sourceTree = "<group>"; };
+		AF30000000000000000000B7 /* PermissionSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionSettingsView.swift; sourceTree = "<group>"; };
+		AF30000000000000000000B9 /* RegionalProviderAttributions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionalProviderAttributions.swift; sourceTree = "<group>"; };
 		2512E9712F70B000004670E4 /* ForecastDaytimeTemperatureRangeMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDaytimeTemperatureRangeMode.swift; sourceTree = "<group>"; };
 		2512E9752F70B000004670E4 /* ForecastDaytimeTemperatureDisplayMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDaytimeTemperatureDisplayMode.swift; sourceTree = "<group>"; };
 		A160F27B289249EBAB4BD512 /* ForecastModelPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastModelPreference.swift; sourceTree = "<group>"; };
@@ -835,6 +845,7 @@
 				2512E9402C37C765004670E4 /* OpenMeteoAttribution.swift */,
 				2512E94C2C398060004670E4 /* TomorrowAttribution.swift */,
 				2512E9512C398188004670E4 /* DWDAttribution.swift */,
+				AF30000000000000000000B9 /* RegionalProviderAttributions.swift */,
 			);
 			path = Legal;
 			sourceTree = "<group>";
@@ -858,6 +869,11 @@
 		AF10000000000000000000A1 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				2536438026DACCB800C8A952 /* SettingsView.swift */,
+				AF30000000000000000000B1 /* SettingsIconLabelStyle.swift */,
+				AF30000000000000000000B3 /* SettingsExternalLink.swift */,
+				AF30000000000000000000B5 /* DataSourcesView.swift */,
+				AF30000000000000000000B7 /* PermissionSettingsView.swift */,
 				2512E9682F70AA00004670E4 /* ForecastSettingsView.swift */,
 				744ED7295B254D8D9025BE39 /* ForecastModelSettingsView.swift */,
 				2512E96F2F70B000004670E4 /* ForecastDisplayModeOption.swift */,
@@ -1190,7 +1206,6 @@
 				3EB89016251A55700028FED0 /* NowView.swift */,
 				AD9100073008000000000001 /* RootTabView.swift */,
 				AD9100093008000000000001 /* ToastBanner.swift */,
-				2536438026DACCB800C8A952 /* SettingsView.swift */,
 				259704E42757D7E800DFCA53 /* AlertDetailView.swift */,
 				ADA300702FF8000000000001 /* AttributionViews.swift */,
 			);
@@ -1935,6 +1950,11 @@
 				AD2000082FCC000000000001 /* DailyEnsembleWindSummaryCard.swift in Sources */,
 				25A1C0022F8D000100000001 /* APIContactIdentity.swift in Sources */,
 				2536438126DACCB800C8A952 /* SettingsView.swift in Sources */,
+				AF30000000000000000000B2 /* SettingsIconLabelStyle.swift in Sources */,
+				AF30000000000000000000B4 /* SettingsExternalLink.swift in Sources */,
+				AF30000000000000000000B6 /* DataSourcesView.swift in Sources */,
+				AF30000000000000000000B8 /* PermissionSettingsView.swift in Sources */,
+				AF30000000000000000000BA /* RegionalProviderAttributions.swift in Sources */,
 				AC0000022FAA000000000001 /* NotificationSettingsManager.swift in Sources */,
 				AC1000032FAA200000000001 /* RainRadarActivityAttributes.swift in Sources */,
 				AC1000052FAA200000000001 /* RainRadarLiveActivityManager.swift in Sources */,

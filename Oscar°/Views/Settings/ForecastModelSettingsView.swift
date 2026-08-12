@@ -83,8 +83,8 @@ struct ForecastModelRow: View {
 
           if let specs = specsLine {
             Text(specs)
-              .font(.caption2)
-              .foregroundStyle(.secondary)
+              .font(.caption)
+              .foregroundStyle(.tertiary)
           }
 
           coverageText
@@ -115,12 +115,12 @@ struct ForecastModelRow: View {
     if let region = model.optimizedRegion {
       if model.regionalOnly {
         Text("Nur \(region) – andere Orte liefern keine Daten")
-          .font(.caption2)
+          .font(.caption)
           .foregroundStyle(.orange)
       } else {
         Text("Optimiert für \(region) · weltweite Daten")
-          .font(.caption2)
-          .foregroundStyle(.secondary)
+          .font(.caption)
+          .foregroundStyle(.tertiary)
       }
     }
   }

@@ -11,7 +11,7 @@ struct NOAAAttribution: View {
     var body: some View {
         List {
                 Section(header: Text("Über")) {
-                    Text("Oscar verwendet Prognosedaten des Global Forecast System (GFS), einem Wettervorhersagemodell der National Centers for Environmental Prediction (NCEP), bereitgestellt durch NOAA. NOAA/NWS-Daten sind in der Regel gemeinfrei, sofern nicht anders gekennzeichnet. Die Nutzung stellt keine Unterstützung, Empfehlung oder offizielle Verbindung zu NOAA, NWS oder NCEP dar.")
+                    Text("Oscar verwendet Daten der US-Wetterbehörde NOAA: Prognosedaten aus den Modellen GFS und HRRR, das MRMS-Radarkomposit für das Regenradar über den USA sowie amtliche Warnungen des National Weather Service (NWS). NOAA/NWS-Daten sind in der Regel gemeinfrei, sofern nicht anders gekennzeichnet. Die Nutzung stellt keine Unterstützung, Empfehlung oder offizielle Verbindung zu NOAA oder NWS dar.")
                 }
                 Section(header: Text("Webseite")) {
                     Link("noaa.gov", destination: URL(string: "https://www.noaa.gov/")!)
@@ -19,7 +19,7 @@ struct NOAAAttribution: View {
                     Link("NWS Disclaimer", destination: URL(string: "https://www.weather.gov/disclaimer/")!)
                 }
         }
-        .navigationTitle("NOAA GFS")
+        .navigationTitle(Text(verbatim: "NOAA"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -27,14 +27,12 @@ struct NOAAAttribution: View {
 
 struct NOAALabel: View {
     var body: some View {
-        HStack {
+        Label {
+            Text(verbatim: "NOAA & NWS")
+        } icon: {
             Image(systemName: "globe.americas.fill")
-                .frame(width: 30, height: 30)
-                .foregroundStyle(.white)
-                .background(Color.green)
-                .clipShape(.rect(cornerRadius: 5))
-            Text("NOAA Global Forecast System (GFS)")
         }
+        .labelStyle(.settingsIcon(.indigo))
     }
 }
 

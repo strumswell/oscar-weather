@@ -9,7 +9,7 @@ struct ForecastSettingsView: View {
   @Bindable private var settingsService = SettingService.shared
 
   var body: some View {
-    List {
+    Form {
         Section {
           NavigationLink {
             ForecastModelSettingsView()
@@ -83,20 +83,8 @@ struct ForecastSettingsView: View {
   }
 }
 
-struct ForecastSettingsLabel: View {
-  var body: some View {
-    HStack {
-      Image(systemName: "calendar")
-        .font(.body.weight(.semibold))
-        .frame(width: 30, height: 30)
-        .foregroundStyle(.white)
-        .background(Color.teal)
-        .clipShape(.rect(cornerRadius: 5))
-      Text("Vorhersage")
-    }
-  }
-}
-
 #Preview {
-  ForecastSettingsView()
+  NavigationStack {
+    ForecastSettingsView()
+  }
 }

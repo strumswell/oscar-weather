@@ -11,6 +11,7 @@ import UIKit
 @MainActor
 struct NotificationSettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
     private let notificationSettingsManager: NotificationSettingsManager
     @State private var isUpdating = false
     @State private var showPermissionAlert = false
@@ -28,22 +29,28 @@ struct NotificationSettingsView: View {
                 let weatherAlertsEnabled = notificationSettingsManager.weatherAlertsEnabled
                 let liveRainStatusEnabled = notificationSettingsManager.liveRainStatusEnabled
 
-                Toggle(
-                    String(localized: "Rain alerts (Beta)"),
-                    isOn: rainAlertsBinding(currentValue: rainAlertsEnabled)
-                )
+                Toggle(isOn: rainAlertsBinding(currentValue: rainAlertsEnabled)) {
+                    HStack(spacing: 8) {
+                        Text("Rain alerts")
+                        BetaBadge()
+                    }
+                }
                 .accessibilityIdentifier("notifications.rainAlerts")
 
-                Toggle(
-                    String(localized: "Weather alerts (Beta)"),
-                    isOn: weatherAlertsBinding(currentValue: weatherAlertsEnabled)
-                )
+                Toggle(isOn: weatherAlertsBinding(currentValue: weatherAlertsEnabled)) {
+                    HStack(spacing: 8) {
+                        Text("Weather alerts")
+                        BetaBadge()
+                    }
+                }
                 .accessibilityIdentifier("notifications.weatherAlerts")
 
-                Toggle(
-                    String(localized: "Live-Regenstatus (Beta)"),
-                    isOn: liveRainStatusBinding(currentValue: liveRainStatusEnabled)
-                )
+                Toggle(isOn: liveRainStatusBinding(currentValue: liveRainStatusEnabled)) {
+                    HStack(spacing: 8) {
+                        Text("Live-Regenstatus")
+                        BetaBadge()
+                    }
+                }
                 .disabled(!rainAlertsEnabled)
                 .accessibilityIdentifier("notifications.liveRainStatus")
             } footer: {
@@ -52,16 +59,14 @@ struct NotificationSettingsView: View {
             .disabled(isUpdating)
 
             Section {
-                Text(statusText)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-
                 if notificationSettingsManager.authorizationStatus == .denied {
-                    Button(String(localized: "Systemeinstellungen öffnen")) {
+                    Button("Systemeinstellungen öffnen") {
                         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-                        UIApplication.shared.open(url)
+                        openURL(url)
                     }
                 }
+            } footer: {
+                Text(statusText)
             }
         }
         .navigationTitle(String(localized: "Alerts"))
@@ -69,7 +74,7 @@ struct NotificationSettingsView: View {
         .alert(String(localized: "Benachrichtigungen deaktiviert"), isPresented: $showPermissionAlert) {
             Button(String(localized: "OK"), role: .cancel) {}
         } message: {
-            Text(String(localized: "Allow notifications in iOS Settings to receive rain alerts and weather alerts in Central Europe and the United States."))
+            Text(String(localized: "Allow notifications in iOS Settings to receive rain alerts and weather alerts."))
         }
         .task {
             await notificationSettingsManager.reloadNotificationStatus()
@@ -84,13 +89,13 @@ struct NotificationSettingsView: View {
         switch notificationSettingsManager.authorizationStatus {
         case .authorized, .provisional, .ephemeral:
             if !notificationSettingsManager.rainAlertsEnabled && !notificationSettingsManager.weatherAlertsEnabled {
-                return String(localized: "Both beta alert types are currently turned off. They are available for Central Europe and the United States.")
+                return String(localized: "Both beta alert types are currently turned off. They are available in Europe, the United States, Taiwan, and Brazil (rain alerts only).")
             }
-            return String(localized: "Oscar can send beta rain alerts and beta weather alerts for your current location in Central Europe and the United States. Turn each alert type on or off below.")
+            return String(localized: "Oscar can send beta rain alerts and beta weather alerts for your current location. Rain alerts cover the radar regions in Europe, the United States, Taiwan, and Brazil; weather alerts cover Europe, the United States, and Taiwan. Turn each alert type on or off below.")
         case .denied:
             return String(localized: "Mitteilungen sind auf Systemebene deaktiviert.")
         case .notDetermined:
-            return String(localized: "Turn on rain alerts or weather alerts to receive beta notifications in Central Europe and the United States. Your approximate location will be stored on an Oscar server for this.")
+            return String(localized: "Turn on rain alerts or weather alerts to receive beta notifications in Europe, the United States, Taiwan, and Brazil. Your approximate location will be stored on an Oscar server for this.")
         @unknown default:
             return String(localized: "Benachrichtigungsstatus unbekannt.")
         }
@@ -147,19 +152,19 @@ struct NotificationSettingsView: View {
     }
 }
 
-struct NotificationSettingsLabel: View {
+private struct BetaBadge: View {
     var body: some View {
-        HStack {
-            Image(systemName: "bell.badge.fill")
-                .frame(width: 30, height: 30)
-                .foregroundStyle(.white)
-                .background(Color.blue)
-                .clipShape(.rect(cornerRadius: 5))
-            Text(String(localized: "Alerts"))
-        }
+        Text("Beta")
+            .font(.caption.bold())
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(.quaternary, in: .capsule)
     }
 }
 
 #Preview {
-    NotificationSettingsView()
+    NavigationStack {
+        NotificationSettingsView()
+    }
 }

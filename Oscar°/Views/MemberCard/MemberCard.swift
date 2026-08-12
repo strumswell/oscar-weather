@@ -177,17 +177,25 @@ struct MemberCard: View {
             .frame(height: Self.dockHeight)
             .padding(.top, Self.dockSpacing)
             .opacity(dockRevealProgress)
+            .scaleEffect(dockRevealScale, anchor: .top)
             .offset(y: closedDockOffset)
             .allowsHitTesting(dockRevealProgress > 0.99)
+            .onAppear {
+                withAnimation(dockOpenAnimation) {
+                    dockRevealProgress = 1
+                }
+            }
         }
     }
 
     private func openDock() {
         guard !isEditing else { return }
         UIApplication.shared.playHapticFeedback()
-        isEditing = true
-        withAnimation(dockAnimation) {
-            dockRevealProgress = 1
+        // Discrete row height: an animated List row height jitters against the cell resize.
+        var instant = Transaction()
+        instant.disablesAnimations = true
+        withTransaction(instant) {
+            isEditing = true
         }
     }
 
@@ -198,8 +206,16 @@ struct MemberCard: View {
             activeDrag = nil
         } completion: {
             guard dockRevealProgress == 0 else { return }
-            isEditing = false
+            var instant = Transaction()
+            instant.disablesAnimations = true
+            withTransaction(instant) {
+                isEditing = false
+            }
         }
+    }
+
+    private var dockOpenAnimation: Animation {
+        reduceMotion ? .easeOut(duration: 0.12) : .spring(duration: 0.38, bounce: 0.22)
     }
 
     private var dockAnimation: Animation {
@@ -210,8 +226,12 @@ struct MemberCard: View {
         reduceMotion ? 0.12 : 0.2
     }
 
+    private var dockRevealScale: CGFloat {
+        reduceMotion ? 1 : 0.9 + 0.1 * dockRevealProgress
+    }
+
     private var dockOccupiedHeight: CGFloat {
-        (Self.dockSpacing + Self.dockHeight) * dockRevealProgress
+        isEditing ? Self.dockSpacing + Self.dockHeight : 0
     }
 
     private var dockSpacer: some View {
@@ -220,7 +240,7 @@ struct MemberCard: View {
     }
 
     private var closedDockOffset: CGFloat {
-        reduceMotion ? 0 : -10 * (1 - dockRevealProgress)
+        reduceMotion ? 0 : -18 * (1 - dockRevealProgress)
     }
 
     private func selectSticker(_ stickerID: UUID) {

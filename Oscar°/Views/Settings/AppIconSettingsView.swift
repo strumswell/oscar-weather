@@ -12,6 +12,7 @@ struct AppIconSettingsView: View {
     @State private var selectedIconName = UIApplication.shared.alternateIconName
     @State private var iconChangeError: String?
     @State private var isChangingIcon = false
+    @State private var iconChangeSuccessCount = 0
 
     var body: some View {
         List {
@@ -60,6 +61,7 @@ struct AppIconSettingsView: View {
         .onAppear {
             selectedIconName = UIApplication.shared.alternateIconName
         }
+        .sensoryFeedback(.success, trigger: iconChangeSuccessCount)
     }
 
     private var errorBinding: Binding<Bool> {
@@ -101,7 +103,7 @@ struct AppIconSettingsView: View {
         isChangingIcon = false
 
         if selectedIconName == icon.alternateIconName {
-            UIApplication.shared.playHapticFeedback()
+            iconChangeSuccessCount += 1
         }
     }
 
@@ -189,20 +191,6 @@ private struct AppIconPreview: View {
         .frame(width: 44, height: 44)
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .accessibilityHidden(true)
-    }
-}
-
-struct AppIconSettingsLabel: View {
-    var body: some View {
-        HStack {
-            Image(systemName: "app.grid")
-                .frame(width: 30, height: 30)
-                .foregroundStyle(.white)
-                .background(Color.blue)
-                .clipShape(RoundedRectangle(cornerRadius: 5))
-
-            Text("App-Symbol")
-        }
     }
 }
 

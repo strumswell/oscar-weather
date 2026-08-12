@@ -65,17 +65,9 @@ struct OpenMeteoAttribution: View {
 }
 
 struct OpenMeteoLabel: View {
-    @Environment(\.colorScheme) var colorScheme
-
     var body: some View {
-        HStack {
-            Image(systemName: "sun.max.fill")
-                .frame(width: 30, height: 30)
-                .foregroundStyle(.white)
-                .background(Color.green)
-                .clipShape(.rect(cornerRadius: 5))
-            Text("Open-Meteo")
-        }
+        Label("Open-Meteo", systemImage: "sun.max.fill")
+            .labelStyle(.settingsIcon(.orange))
     }
 }
 

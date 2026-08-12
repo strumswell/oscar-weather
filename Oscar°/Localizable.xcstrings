@@ -1,6 +1,28 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "Berechtigungen verwaltet iOS: Beim ersten Aktivieren fragt Oscar direkt an, danach öffnet der Schalter die passende Stelle in den iOS-Einstellungen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berechtigungen verwaltet iOS: Beim ersten Aktivieren fragt Oscar direkt an, danach öffnet der Schalter die passende Stelle in den iOS-Einstellungen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS manages these permissions: the first time you turn one on, Oscar asks directly; after that, the switch opens the right place in iOS Settings."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu izinleri iOS yönetir: Bir izni ilk kez açtığınızda Oscar doğrudan sorar; sonrasında anahtar, iOS Ayarları'nda ilgili yeri açar."
+          }
+        }
+      }
+    },
     "" : {
 
     },
@@ -2321,6 +2343,51 @@
         }
       }
     },
+    "Berechtigungen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berechtigungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permissions"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İzinler"
+          }
+        }
+      }
+    },
+    "Beta" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beta"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beta"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beta"
+          }
+        }
+      }
+    },
     "Beta User" : {
       "localizations" : {
         "de" : {
@@ -2637,6 +2704,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Her iki beta uyarı türü de şu anda kapalı. Bunlar Orta Avrupa, ABD ve Tayvan için kullanılabilir."
+          }
+        }
+      }
+    },
+    "Both beta alert types are currently turned off. They are available in Europe, the United States, Taiwan, and Brazil (rain alerts only)." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beide Beta-Warnungsarten sind derzeit ausgeschaltet. Verfügbar sind sie in Europa, den USA, Taiwan und Brasilien (nur Regenwarnungen)."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Both beta alert types are currently turned off. They are available in Europe, the United States, Taiwan, and Brazil (rain alerts only)."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her iki beta uyarı türü de şu anda kapalı. Avrupa, ABD, Tayvan ve Brezilya'da (yalnızca yağmur uyarıları) kullanılabilir."
           }
         }
       }
@@ -3055,6 +3145,29 @@
         }
       }
     },
+    "Datenquellen & Lizenzen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datenquellen & Lizenzen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data Sources & Licenses"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veri Kaynakları ve Lisanslar"
+          }
+        }
+      }
+    },
     "Datenschutz" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3350,6 +3463,7 @@
       }
     },
     "Deutscher Wetterdienst (DWD)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3388,9 +3502,6 @@
           }
         }
       }
-    },
-    "Die Ebene zeigt den Infrarot-Kanal (10,8 μm): ein Wärmebild, das Tag und Nacht funktioniert. Hohe, kalte Wolkenschirme erscheinen hell und dicht, dünne oder tiefe Bewölkung durchscheinend, wolkenfreier Boden bleibt durchsichtig — die Abstufung zeigt also auch, wie dick die Bewölkung ist. Aus der Zugbewegung berechnet Oscar Zwischenbilder im 5-Minuten-Takt und eine Kurzprognose; alles hinter der LIVE-Markierung ist berechnet." : {
-
     },
     "Die weißen Bänder zeigen die Bewölkung in drei Höhenlagen, je dicker das Band, desto bedeckter der Himmel. Gelbe Flächen stehen für sonnige Abschnitte, Balken für Niederschlag, gestrichelte Verläufe für die Vergangenheit. Halte und ziehe für die Werte einer Stunde, mit zwei Fingern änderst du den Zeitraum." : {
       "extractionState" : "manual",
@@ -3670,7 +3781,7 @@
         }
       }
     },
-    "Echte Satellitenbilder statt Modellrechnung: Der europäische Wettersatellit Meteosat steht in rund 36.000 km Höhe über dem Äquator auf 0° Länge — geostationär, er dreht sich exakt mit der Erde mit und sieht dadurch immer dieselbe Erdhälfte, von Island bis Südafrika und vom Atlantik bis Arabien. Alle 15 Minuten tastet er die volle Erdscheibe neu ab." : {
+    "Echte Aufnahmen des Wettersatelliten Meteosat, der die Erde geostationär aus rund 36.000 km Höhe beobachtet. Alle 15 Minuten kommt ein neues Bild, aufgenommen im Infrarot und damit auch nachts: je höher und dichter die Bewölkung, desto heller erscheint sie. Aus der Zugbewegung berechnet Oscar die Zwischenschritte und eine Kurzprognose; alles hinter der LIVE-Markierung ist berechnet." : {
 
     },
     "Eigener Name" : {
@@ -3855,6 +3966,7 @@
       }
     },
     "Einführung erneut ansehen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3877,6 +3989,7 @@
       }
     },
     "Einheiten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4290,9 +4403,6 @@
           }
         }
       }
-    },
-    "EUMETNET OPERA" : {
-
     },
     "Europa" : {
       "extractionState" : "stale",
@@ -6256,6 +6366,29 @@
         }
       }
     },
+    "Kartendaten © OpenStreetMap" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kartendaten © OpenStreetMap"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Map data © OpenStreetMap"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Harita verileri © OpenStreetMap"
+          }
+        }
+      }
+    },
     "Kartenebenen" : {
       "localizations" : {
         "de" : {
@@ -6959,6 +7092,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Canlı + kısa vadeli tahmin"
+          }
+        }
+      }
+    },
+    "Live-Regenstatus" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live-Regenstatus"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live rain status"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canlı yağmur durumu"
           }
         }
       }
@@ -7787,6 +7942,29 @@
         }
       }
     },
+    "Mitteilungen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mitteilungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirimler"
+          }
+        }
+      }
+    },
     "Mitteilungen sind auf Systemebene deaktiviert." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8397,9 +8575,6 @@
         }
       }
     },
-    "NOAA Global Forecast System (GFS)" : {
-      "shouldTranslate" : false
-    },
     "Noch keine Orte gespeichert." : {
       "localizations" : {
         "de" : {
@@ -8995,7 +9170,31 @@
         }
       }
     },
+    "Open Source" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Source"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Source"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açık Kaynak"
+          }
+        }
+      }
+    },
     "Open-Meteo" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -9314,6 +9513,29 @@
         }
       }
     },
+    "Oscar can send beta rain alerts and beta weather alerts for your current location. Rain alerts cover the radar regions in Europe, the United States, Taiwan, and Brazil; weather alerts cover Europe, the United States, and Taiwan. Turn each alert type on or off below." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar kann Beta-Regenwarnungen und Beta-Wetterwarnungen für deinen aktuellen Standort senden. Regenwarnungen decken die Radargebiete in Europa, den USA, Taiwan und Brasilien ab; Wetterwarnungen gibt es für Europa, die USA und Taiwan. Schalte jede Warnungsart unten ein oder aus."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar can send beta rain alerts and beta weather alerts for your current location. Rain alerts cover the radar regions in Europe, the United States, Taiwan, and Brazil; weather alerts cover Europe, the United States, and Taiwan. Turn each alert type on or off below."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, mevcut konumunuz için beta yağmur uyarıları ve beta hava durumu uyarıları gönderebilir. Yağmur uyarıları Avrupa, ABD, Tayvan ve Brezilya'daki radar bölgelerini kapsar; hava durumu uyarıları Avrupa, ABD ve Tayvan için sunulur. Her uyarı türünü aşağıdan ayrı ayrı açıp kapatabilirsiniz."
+          }
+        }
+      }
+    },
     "Oscar can send rain alerts and weather alerts for your current location. Turn each alert type on or off below." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -9360,7 +9582,52 @@
         }
       }
     },
+    "Oscar verwendet amtliche Wetterwarnungen von Environment and Climate Change Canada (ECCC) für Kanada. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu ECCC dar." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet amtliche Wetterwarnungen von Environment and Climate Change Canada (ECCC) für Kanada. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu ECCC dar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses official weather warnings from Environment and Climate Change Canada (ECCC) for Canada. Use does not imply endorsement by or official affiliation with ECCC."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, Kanada için Environment and Climate Change Canada (ECCC) resmi hava durumu uyarılarını kullanır. Kullanım, ECCC ile bir destek veya resmi bağlantı anlamına gelmez."
+          }
+        }
+      }
+    },
+    "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas sowie amtliche Warnmeldungen der europäischen Warnplattform Meteoalarm. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas sowie amtliche Warnmeldungen der europäischen Warnplattform Meteoalarm. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses the European radar composite from EUMETNET's OPERA program, the network of European meteorological services, for the rain radar in Europe outside Central Europe, as well as official warnings from the European alerting platform Meteoalarm. Use does not imply endorsement by or official affiliation with EUMETNET."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, Orta Avrupa dışındaki Avrupa'da yağmur radarı için Avrupa meteoroloji servisleri birliği EUMETNET'in OPERA programının Avrupa radar kompozitini ve Avrupa uyarı platformu Meteoalarm'ın resmi uyarılarını kullanır. Kullanım, EUMETNET ile bir destek veya resmi bağlantı anlamına gelmez."
+          }
+        }
+      }
+    },
     "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -9382,7 +9649,52 @@
         }
       }
     },
+    "Oscar verwendet Daten der Central Weather Administration (CWA), der Wetterbehörde Taiwans: das QPESUMS-Radarkomposit für das Regenradar über Taiwan sowie amtliche Warnungen auf Landkreisebene. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zur CWA dar." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet Daten der Central Weather Administration (CWA), der Wetterbehörde Taiwans: das QPESUMS-Radarkomposit für das Regenradar über Taiwan sowie amtliche Warnungen auf Landkreisebene. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zur CWA dar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses data from the Central Weather Administration (CWA), Taiwan's weather agency: the QPESUMS radar composite for the rain radar over Taiwan and official county-level warnings. Use does not imply endorsement by or official affiliation with the CWA."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, Tayvan'ın meteoroloji kurumu Central Weather Administration'ın (CWA) verilerini kullanır: Tayvan üzerindeki yağmur radarı için QPESUMS radar kompoziti ve ilçe düzeyinde resmi uyarılar. Kullanım, CWA ile bir destek veya resmi bağlantı anlamına gelmez."
+          }
+        }
+      }
+    },
+    "Oscar verwendet Daten der US-Wetterbehörde NOAA: Prognosedaten aus den Modellen GFS und HRRR, das MRMS-Radarkomposit für das Regenradar über den USA sowie amtliche Warnungen des National Weather Service (NWS). NOAA/NWS-Daten sind in der Regel gemeinfrei, sofern nicht anders gekennzeichnet. Die Nutzung stellt keine Unterstützung, Empfehlung oder offizielle Verbindung zu NOAA oder NWS dar." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet Daten der US-Wetterbehörde NOAA: Prognosedaten aus den Modellen GFS und HRRR, das MRMS-Radarkomposit für das Regenradar über den USA sowie amtliche Warnungen des National Weather Service (NWS). NOAA/NWS-Daten sind in der Regel gemeinfrei, sofern nicht anders gekennzeichnet. Die Nutzung stellt keine Unterstützung, Empfehlung oder offizielle Verbindung zu NOAA oder NWS dar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses data from the US agency NOAA: forecast data from the GFS and HRRR models, the MRMS radar composite for the rain radar over the United States, and official warnings from the National Weather Service (NWS). NOAA/NWS data is generally in the public domain unless marked otherwise. Use does not imply endorsement, recommendation, or official affiliation with NOAA or NWS."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, ABD kurumu NOAA'nın verilerini kullanır: GFS ve HRRR modellerinden tahmin verileri, ABD üzerindeki yağmur radarı için MRMS radar kompoziti ve National Weather Service (NWS) resmi uyarıları. NOAA/NWS verileri, aksi belirtilmedikçe genellikle kamu malıdır. Kullanım, NOAA veya NWS ile bir destek, tavsiye veya resmi bağlantı anlamına gelmez."
+          }
+        }
+      }
+    },
     "Oscar verwendet Prognosedaten des Global Forecast System (GFS), einem Wettervorhersagemodell der National Centers for Environmental Prediction (NCEP), bereitgestellt durch NOAA. NOAA/NWS-Daten sind in der Regel gemeinfrei, sofern nicht anders gekennzeichnet. Die Nutzung stellt keine Unterstützung, Empfehlung oder offizielle Verbindung zu NOAA, NWS oder NCEP dar." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -9404,7 +9716,52 @@
         }
       }
     },
+    "Oscar verwendet Radardaten der Agencia Estatal de Meteorología (AEMET), des staatlichen spanischen Wetterdienstes, für das Regenradar über den Kanarischen Inseln. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu AEMET dar." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet Radardaten der Agencia Estatal de Meteorología (AEMET), des staatlichen spanischen Wetterdienstes, für das Regenradar über den Kanarischen Inseln. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu AEMET dar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses radar data from the Agencia Estatal de Meteorología (AEMET), Spain's state meteorological agency, for the rain radar over the Canary Islands. Use does not imply endorsement by or official affiliation with AEMET."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, Kanarya Adaları üzerindeki yağmur radarı için İspanya'nın devlet meteoroloji kurumu Agencia Estatal de Meteorología'nın (AEMET) radar verilerini kullanır. Kullanım, AEMET ile bir destek veya resmi bağlantı anlamına gelmez."
+          }
+        }
+      }
+    },
+    "Oscar verwendet Radardaten des brasilianischen Flugwetterdienstes REDEMET (DECEA) für das Regenradar über Brasilien. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu REDEMET oder DECEA dar." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet Radardaten des brasilianischen Flugwetterdienstes REDEMET (DECEA) für das Regenradar über Brasilien. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu REDEMET oder DECEA dar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses radar data from REDEMET (DECEA), Brazil's aeronautical meteorology network, for the rain radar over Brazil. Use does not imply endorsement by or official affiliation with REDEMET or DECEA."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, Brezilya üzerindeki yağmur radarı için Brezilya havacılık meteoroloji ağı REDEMET'in (DECEA) radar verilerini kullanır. Kullanım, REDEMET veya DECEA ile bir destek veya resmi bağlantı anlamına gelmez."
+          }
+        }
+      }
+    },
     "Oscar verwendet Wetter- und Geodaten des Deutschen Wetterdienstes (DWD), unter anderem Radardaten sowie Prognosedaten aus dem ICON-D2-Modell. Datenbasis: Deutscher Wetterdienst. Die Daten werden unter den Open-Data-Nutzungsbedingungen des DWD bereitgestellt." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -9422,6 +9779,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oscar, Alman Meteoroloji Servisi (DWD) tarafından sağlanan hava durumu ve coğrafi verileri kullanır; buna radar verileri ve ICON-D2 modelinden alınan tahmin verileri de dahildir. Veri kaynağı: Alman Meteoroloji Servisi. Veriler, DWD Açık Veri Kullanım Koşulları kapsamında sağlanmaktadır."
+          }
+        }
+      }
+    },
+    "Oscar verwendet Wetter- und Geodaten des Deutschen Wetterdienstes (DWD), unter anderem Radardaten, Prognosedaten aus dem ICON-Modell sowie amtliche Warnmeldungen. Datenbasis: Deutscher Wetterdienst. Die Daten werden unter den Open-Data-Nutzungsbedingungen des DWD bereitgestellt." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet Wetter- und Geodaten des Deutschen Wetterdienstes (DWD), unter anderem Radardaten, Prognosedaten aus dem ICON-Modell sowie amtliche Warnmeldungen. Datenbasis: Deutscher Wetterdienst. Die Daten werden unter den Open-Data-Nutzungsbedingungen des DWD bereitgestellt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses weather and geodata from the German Meteorological Service (DWD), including radar data, forecast data from the ICON model, and official warnings. Data basis: Deutscher Wetterdienst. The data is provided under the DWD open data terms of use."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, Alman Meteoroloji Servisi'nin (DWD) hava durumu ve coğrafi verilerini kullanır; buna radar verileri, ICON modelinden tahmin verileri ve resmi uyarılar dahildir. Veri kaynağı: Deutscher Wetterdienst. Veriler, DWD'nin açık veri kullanım koşulları kapsamında sağlanır."
           }
         }
       }
@@ -9541,6 +9920,7 @@
       }
     },
     "Oscar° Weather" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -9918,7 +10298,6 @@
       }
     },
     "Rain alerts" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -11523,6 +11902,29 @@
         }
       }
     },
+    "Standort" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standort"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konum"
+          }
+        }
+      }
+    },
     "Standortsymbol" : {
       "localizations" : {
         "de" : {
@@ -12517,6 +12919,29 @@
         }
       }
     },
+    "Turn on rain alerts or weather alerts to receive beta notifications in Europe, the United States, Taiwan, and Brazil. Your approximate location will be stored on an Oscar server for this." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktiviere Regenwarnungen oder Wetterwarnungen, um Beta-Mitteilungen in Europa, den USA, Taiwan und Brasilien zu erhalten. Dafür wird dein ungefährer Standort auf einem Oscar-Server gespeichert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on rain alerts or weather alerts to receive beta notifications in Europe, the United States, Taiwan, and Brazil. Your approximate location will be stored on an Oscar server for this."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avrupa, ABD, Tayvan ve Brezilya'da beta bildirimleri almak için yağmur uyarılarını veya hava durumu uyarılarını açın. Bunun için yaklaşık konumunuz bir Oscar sunucusunda saklanır."
+          }
+        }
+      }
+    },
     "Turn on rain alerts or weather alerts to receive notifications. Your approximate location will be stored on an Oscar server for this." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -13073,6 +13498,7 @@
       }
     },
     "Vorhersage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -13415,7 +13841,6 @@
       }
     },
     "Weather alerts" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -13684,6 +14109,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tayvan meteoroloji kurumu"
+          }
+        }
+      }
+    },
+    "Wetterdaten" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetterdaten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather Data"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava Durumu Verileri"
           }
         }
       }

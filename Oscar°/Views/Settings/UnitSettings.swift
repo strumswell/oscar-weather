@@ -13,13 +13,14 @@ struct UnitSettings: View {
     @Bindable private var settingsService = SettingService.shared
 
     var body: some View {
-        List {
-                Picker(String(localized: "Temperatur"), selection: $settingsService.temperatureUnit) {
+        Form {
+            Section {
+                Picker("Temperatur", selection: $settingsService.temperatureUnit) {
                     Text("°C").tag("celsius")
                     Text("°F").tag("fahrenheit")
                 }
 
-                Picker(String(localized: "Windgeschwindigkeit"), selection: $settingsService.windSpeedUnit) {
+                Picker("Windgeschwindigkeit", selection: $settingsService.windSpeedUnit) {
                     Text("km/h").tag("kmh")
                     Text("m/s").tag("ms")
                     Text("mph").tag("mph")
@@ -27,16 +28,17 @@ struct UnitSettings: View {
                     Text("Bft").tag("bft")
                 }
 
-                Picker(String(localized: "Niederschlag"), selection: $settingsService.precipitationUnit) {
+                Picker("Niederschlag", selection: $settingsService.precipitationUnit) {
                     Text("mm").tag("mm")
                     Text("inch").tag("inch")
                 }
 
-                Picker(String(localized: "Zeitformat"), selection: $settingsService.timeFormatPreference) {
+                Picker("Zeitformat", selection: $settingsService.timeFormatPreference) {
                     ForEach(TimeFormatPreference.allCases) { preference in
                         Text(preference.label).tag(preference)
                     }
                 }
+            }
         }
         .onChange(of: settingsService.timeFormatPreference) {
                 Task {
@@ -48,22 +50,8 @@ struct UnitSettings: View {
     }
 }
 
-struct UnitSettingsLabel: View {
-    @Environment(\.colorScheme) var colorScheme
-
-    var body: some View {
-        HStack {
-            Text("°C")
-                .fontWeight(.medium)
-                .frame(width: 30, height: 30)
-                .foregroundStyle(.white)
-                .background(Color.orange)
-                .clipShape(.rect(cornerRadius: 5))
-            Text("Einheiten")
-        }
-    }
-}
-
 #Preview {
-    UnitSettings()
+    NavigationStack {
+        UnitSettings()
+    }
 }

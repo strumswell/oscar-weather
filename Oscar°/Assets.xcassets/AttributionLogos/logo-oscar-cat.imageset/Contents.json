@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "oscar-cat-logo.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
