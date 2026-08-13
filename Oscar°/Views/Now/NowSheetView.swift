@@ -5,8 +5,8 @@ struct NowSheetView: View {
 
     var body: some View {
         switch sheet {
-        case .hourly:
-            HourlyDetailView()
+        case .hourly(let target):
+            HourlyDetailView(initialTarget: target)
         case .daily:
             DailyDetailView()
         case .environment(let section):

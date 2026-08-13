@@ -10,6 +10,10 @@ import SwiftUI
 
 struct WeatherSimulationView: View {
     var isCoveredBySheet = false
+    /// Renders this snapshot instead of deriving one for "now" — the hourly detail
+    /// stage drives the sim with scrubbed hours through this. Same mechanism as
+    /// the debug override (which still wins while debugging).
+    var snapshotOverride: AtmosphereSnapshot? = nil
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
     @Environment(AtmosphereDebugState.self) private var debugState: AtmosphereDebugState?
@@ -22,12 +26,14 @@ struct WeatherSimulationView: View {
 
     var body: some View {
         let overrides = (weather.debug && debugState?.overrideEnabled == true) ? debugState : nil
-        let hasContent = weather.forecast.hourly != nil || overrides != nil
+        let hasContent = snapshotOverride != nil || weather.forecast.hourly != nil || overrides != nil
         let snapshot = overrides?.snapshot
-            ?? (hasContent
+            ?? snapshotOverride
+            ?? (weather.forecast.hourly != nil
                 ? snapshotCache.snapshot(from: weather, at: location.coordinates)
                 : .twilight)
-        let moonPhase = overrides?.moonPhase ?? MoonPhase.phaseFraction()
+        let moonPhase = overrides?.moonPhase
+            ?? MoonPhase.phaseFraction(for: Date(timeIntervalSince1970: snapshot.timestamp))
         let cloudThickness = cloudThickness(for: snapshot)
         let cloudsVisible = snapshot.cloudDensity + snapshot.cloudCoverage > 0.02
         let pacing: SimulationPacing = reduceMotion ? .still : (isCoveredBySheet ? .background : .active)
@@ -63,6 +69,9 @@ struct WeatherSimulationView: View {
                     let starOpacity = Double(snapshot.nightAmount)
                         * Double(1 - snapshot.cloudCoverage * 0.85)
                     if starOpacity > 0.02 {
+                        // StarsView's internal fade follows the wall clock;
+                        // under a scrub override the snapshot's night drives
+                        // the outer opacity instead.
                         StarsView(
                             pacing: pacing,
                             occlusionCenter: moonLayout.map {
@@ -71,10 +80,17 @@ struct WeatherSimulationView: View {
                                     y: proxy.size.height * $0.y
                                 )
                             },
-                            occlusionRadius: MoonView.diameter / 2 + 8
+                            occlusionRadius: MoonView.diameter / 2 + 8,
+                            opacityOverride: snapshotOverride != nil ? 1 : nil
                         )
                         .opacity(starOpacity)
                     }
+
+                    // Scrub steps land ~10 Hz; a matching linear tween turns
+                    // the stepped sun/moon positions into continuous motion.
+                    let celestialTween: Animation? = snapshotOverride != nil
+                        ? .linear(duration: 0.15)
+                        : nil
 
                     if let moonProgress, let moonLayout {
                         MoonView(
@@ -94,13 +110,21 @@ struct WeatherSimulationView: View {
                                 * Double(1 - snapshot.cloudDensity * 0.4)
                         )
                         .blur(radius: CGFloat(snapshot.cloudDensity) * 2.5)
+                        .animation(celestialTween, value: snapshot.timestamp)
                     }
 
                     if shouldShowSun(snapshot) {
                         SunView(progress: Double(snapshot.timeOfDay))
                             .opacity(Double((1 - snapshot.cloudDensity * 0.45) * snapshot.phase * snapshot.sunDiscVisibility))
+                            .animation(celestialTween, value: snapshot.timestamp)
                     }
 
+                    // Under scrub the fade must stay short: long cross-fades
+                    // overlap two translucent cloud decks during fast pans,
+                    // which reads as shadowy flicker.
+                    let deckTransition: Animation = snapshotOverride == nil
+                        ? .easeInOut(duration: 0.8)
+                        : .easeInOut(duration: 0.18)
                     ZStack {
                         if cloudsVisible {
                             CloudsView(
@@ -114,8 +138,8 @@ struct WeatherSimulationView: View {
                             .opacity(Double(min(1, snapshot.cloudDensity + snapshot.cloudCoverage * 0.25)))
                         }
                     }
-                    .animation(.easeInOut(duration: 0.8), value: cloudThickness)
-                    .animation(.easeInOut(duration: 0.8), value: cloudsVisible)
+                    .animation(deckTransition, value: cloudThickness)
+                    .animation(deckTransition, value: cloudsVisible)
 
                     // Fog banks sit in front of the clouds, near the ground.
                     let fogVisible = snapshot.condition == .fog
@@ -129,7 +153,7 @@ struct WeatherSimulationView: View {
                             .transition(.opacity)
                         }
                     }
-                    .animation(.easeInOut(duration: 1.2), value: fogVisible)
+                    .animation(.easeInOut(duration: snapshotOverride == nil ? 1.2 : 0.3), value: fogVisible)
 
                     let stormVisible = shouldShowStorm(snapshot)
                     ZStack {
@@ -145,7 +169,7 @@ struct WeatherSimulationView: View {
                             .opacity(reduceMotion ? 0.55 : 1)
                         }
                     }
-                    .animation(.easeInOut(duration: 0.8), value: stormVisible)
+                    .animation(.easeInOut(duration: snapshotOverride == nil ? 0.8 : 0.25), value: stormVisible)
                 } else {
                     // No forecast yet (first launch, or a failed cold-start fetch): a calm
                     // starry twilight rather than an empty gradient. The retry affordance lives

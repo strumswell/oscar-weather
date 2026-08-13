@@ -1,7 +1,7 @@
 import Foundation
 
 enum NowSheet: Identifiable {
-    case hourly
+    case hourly(Date?)
     case daily
     case environment(EnvironmentDetailSection)
     case climate(ClimateSummary)
