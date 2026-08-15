@@ -78,6 +78,36 @@ enum MeteorShowerCopy {
     }
   }
 
+  /// A plain-language observing hint derived from forecast cloud cover at the
+  /// event's best observing time. The astronomical classification above is a
+  /// separate signal: even an ideally placed radiant can be hidden by clouds.
+  static func cloudVisibilitySentence(
+    for cloudCover: Double?,
+    locale: Locale = .autoupdatingCurrent
+  ) -> String? {
+    guard let cloudCover, cloudCover.isFinite else { return nil }
+    return switch cloudCover {
+    case ...30:
+      localized(
+        "meteor.visibility.cloud.goodSentence",
+        defaultValue: "Wenig Wolken – gute Sicht auf Sternschnuppen.",
+        locale: locale
+      )
+    case ...70:
+      localized(
+        "meteor.visibility.cloud.mixedSentence",
+        defaultValue: "Einige Wolken können die Sicht zeitweise einschränken.",
+        locale: locale
+      )
+    default:
+      localized(
+        "meteor.visibility.cloud.poorSentence",
+        defaultValue: "Viele Wolken – schlechte Sicht auf Sternschnuppen.",
+        locale: locale
+      )
+    }
+  }
+
   static func statusText(
     for status: String?,
     locale: Locale = .autoupdatingCurrent

@@ -180,6 +180,27 @@ struct MeteorShowerCopyTests {
   }
 
   @Test
+  func cloudVisibilitySentenceUsesForecastCloudCoverThresholds() {
+    let german = Locale(identifier: "de")
+    let english = Locale(identifier: "en")
+
+    #expect(MeteorShowerCopy.cloudVisibilitySentence(
+      for: 30, locale: german
+    ) == "Wenig Wolken – gute Sicht auf Sternschnuppen.")
+    #expect(MeteorShowerCopy.cloudVisibilitySentence(
+      for: 31, locale: german
+    ) == "Einige Wolken können die Sicht zeitweise einschränken.")
+    #expect(MeteorShowerCopy.cloudVisibilitySentence(
+      for: 70, locale: english
+    ) == "Some clouds may limit visibility at times.")
+    #expect(MeteorShowerCopy.cloudVisibilitySentence(
+      for: 71, locale: english
+    ) == "Many clouds – poor visibility for shooting stars.")
+    #expect(MeteorShowerCopy.cloudVisibilitySentence(for: nil) == nil)
+    #expect(MeteorShowerCopy.cloudVisibilitySentence(for: .nan) == nil)
+  }
+
+  @Test
   func allCatalogueShowerNamesUseStableIDs() {
     let expectedGerman = [
       "QUA": "Quadrantiden",

@@ -266,9 +266,8 @@ struct HeadView: View {
         if hasWeatherAlerts() || weather.primaryMeteorEvent != nil {
           VStack(spacing: 8) {
             if hasWeatherAlerts() {
-              AlertView()
-            }
-            if let event = weather.primaryMeteorEvent {
+              AlertView(additionalMeteorEvent: weather.primaryMeteorEvent)
+            } else if let event = weather.primaryMeteorEvent {
               MeteorAlertView(event: event)
             }
           }

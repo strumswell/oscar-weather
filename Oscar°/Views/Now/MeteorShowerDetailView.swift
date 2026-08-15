@@ -38,9 +38,18 @@ struct MeteorShowerDetailView: View {
                 .font(.title2.weight(.semibold))
                 .foregroundStyle(.cyan)
                 .accessibilityHidden(true)
-            Text(MeteorShowerCopy.detailExplanation(for: event.presentation))
-                .font(.subheadline)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 5) {
+                Text(MeteorShowerCopy.detailExplanation(for: event.presentation))
+                    .font(.subheadline)
+                if let visibilitySentence = MeteorShowerCopy.cloudVisibilitySentence(
+                    for: observingCloudCover
+                ) {
+                    Text(visibilitySentence)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .fixedSize(horizontal: false, vertical: true)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
