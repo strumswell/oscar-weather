@@ -100,12 +100,22 @@ extension AtmosphereSnapshot {
 }
 
 enum AtmosphereWeatherMapper {
-    @MainActor static func snapshot(from weather: Weather, at location: CLLocationCoordinate2D) -> AtmosphereSnapshot {
+    @MainActor static func snapshot(
+        from weather: Weather,
+        at location: CLLocationCoordinate2D,
+        for date: Date? = nil
+    ) -> AtmosphereSnapshot {
         guard location.latitude != 0 || location.longitude != 0 else {
             return .fallback
         }
 
         let now = Date.now.timeIntervalSince1970
+        // Hourly-detail scrubs render an arbitrary forecast hour. Near "now" the
+        // live path below answers (current + radar stay authoritative); further
+        // out those sources describe the wrong moment and must not bleed in.
+        if let date, abs(date.timeIntervalSince1970 - now) > 900 {
+            return scrubbedSnapshot(from: weather, at: location, for: date)
+        }
         let forecastTimes = weather.forecast.hourly?.time ?? []
         let currentTimestamp: Double
         if let first = forecastTimes.first, let last = forecastTimes.last, now >= first, now <= last {
@@ -159,21 +169,123 @@ enum AtmosphereWeatherMapper {
             condition = .rain
             cloudCoverage = max(cloudCoverage, clamp(0.55 + precipitationIntensity * 0.45, 0, 1))
         }
-        let snowfallIntensity = condition == .snow ? max(clamp(snowfall / 6, 0, 1), precipitationIntensity * 0.6) : 0
-        let thunderIntensity = condition == .thunderstorm ? max(0.55, precipitationIntensity) : 0
         let windSpeed = Float(weather.forecast.current?.windspeed
             ?? value(at: hourlyIndex, in: weather.forecast.hourly?.windspeed_10m)
             ?? 0)
         let windDirection = Float(weather.forecast.current?.wind_direction_10m
             ?? value(at: hourlyIndex, in: weather.forecast.hourly?.winddirection_10m)
             ?? 0) * .pi / 180
-        let aqiHaze = airQualityHaze(weather: weather, timestamp: currentTimestamp)
+
+        return finalize(
+            weather: weather,
+            location: location,
+            timestamp: currentTimestamp,
+            condition: condition,
+            cloudCoverage: cloudCoverage,
+            humidity: humidity,
+            pressure: pressure,
+            precipitation: precipitation,
+            snowfall: snowfall,
+            precipitationIntensity: precipitationIntensity,
+            windSpeed: windSpeed,
+            windDirection: windDirection
+        )
+    }
+
+    /// Scrub path: a snapshot for an arbitrary forecast hour. Hourly values only
+    /// — `current` describes now, and the radar nowcast only knows its own span,
+    /// so neither may bleed into a scrubbed hour (radar still wins inside that
+    /// span, where it genuinely knows the minute). Continuous fields interpolate
+    /// between the surrounding hours so the sky doesn't step at hour boundaries
+    /// while scrubbing; the weather code (categorical) snaps to the nearest hour.
+    @MainActor private static func scrubbedSnapshot(
+        from weather: Weather,
+        at location: CLLocationCoordinate2D,
+        for date: Date
+    ) -> AtmosphereSnapshot {
+        let hourly = weather.forecast.hourly
+        let times = hourly?.time ?? []
+        var timestamp = date.timeIntervalSince1970
+        if let first = times.first, let last = times.last {
+            timestamp = min(max(timestamp, first), last)
+        }
+
+        let nearest = nearestIndex(to: timestamp, in: times)
+        let weatherCode = Int(value(at: nearest, in: hourly?.weathercode) ?? 0)
+        var condition = conditionFamily(for: weatherCode)
+        var cloudCoverage = normalized(
+            Float(interpolatedValue(at: timestamp, times: times, values: hourly?.cloudcover) ?? 0),
+            max: 100
+        )
+        let humidity = normalized(
+            Float(interpolatedValue(at: timestamp, times: times, values: hourly?.relativehumidity_2m) ?? 50),
+            max: 100
+        )
+        let pressure = clamp(
+            Float(interpolatedValue(at: timestamp, times: times, values: hourly?.pressure_msl) ?? 1013.25) / 1013.25,
+            0.86,
+            1.14
+        )
+
+        let radarRate = radarRate(from: weather.precipSeries, at: timestamp)
+        let modelPrecipitation = Float(interpolatedValue(at: timestamp, times: times, values: hourly?.precipitation) ?? 0)
+        let precipitation = radarRate ?? modelPrecipitation
+        let snowfall = radarRate.map { $0 * 0.7 }
+            ?? Float(interpolatedValue(at: timestamp, times: times, values: hourly?.snowfall) ?? 0)
+        let precipitationIntensity = radarRate.map { clamp($0 / 6, 0, 1) }
+            ?? clamp(modelPrecipitation / 8, 0, 1)
+        // Same sky/rain agreement rule as the live path: measurable radar rain
+        // must not fall out of a rendered blue sky.
+        if let radarRate, radarRate >= 0.1, condition == .clear || condition == .partlyCloudy || condition == .overcast {
+            condition = .rain
+            cloudCoverage = max(cloudCoverage, clamp(0.55 + precipitationIntensity * 0.45, 0, 1))
+        }
+        let windSpeed = Float(interpolatedValue(at: timestamp, times: times, values: hourly?.windspeed_10m) ?? 0)
+        // Direction is circular: interpolating across the 360° wrap would swing
+        // the drops through the whole rose, so it snaps to the nearest hour.
+        let windDirection = Float(value(at: nearest, in: hourly?.winddirection_10m) ?? 0) * .pi / 180
+
+        return finalize(
+            weather: weather,
+            location: location,
+            timestamp: timestamp,
+            condition: condition,
+            cloudCoverage: cloudCoverage,
+            humidity: humidity,
+            pressure: pressure,
+            precipitation: precipitation,
+            snowfall: snowfall,
+            precipitationIntensity: precipitationIntensity,
+            windSpeed: windSpeed,
+            windDirection: windDirection
+        )
+    }
+
+    /// Shared tail of both mapper paths: everything derived once condition,
+    /// coverage, moisture, and precipitation are settled.
+    @MainActor private static func finalize(
+        weather: Weather,
+        location: CLLocationCoordinate2D,
+        timestamp: Double,
+        condition: AtmosphereConditionFamily,
+        cloudCoverage: Float,
+        humidity: Float,
+        pressure: Float,
+        precipitation: Float,
+        snowfall: Float,
+        precipitationIntensity: Float,
+        windSpeed: Float,
+        windDirection: Float
+    ) -> AtmosphereSnapshot {
+        let snowfallIntensity = condition == .snow ? max(clamp(snowfall / 6, 0, 1), precipitationIntensity * 0.6) : 0
+        let thunderIntensity = condition == .thunderstorm ? max(0.55, precipitationIntensity) : 0
+        let aqiHaze = airQualityHaze(weather: weather, timestamp: timestamp)
         let sunElevation = solarElevation(
-            date: Date(timeIntervalSince1970: currentTimestamp),
+            date: Date(timeIntervalSince1970: timestamp),
             location: location,
             utcOffsetSeconds: weather.forecast.utc_offset_seconds ?? 0
         )
-        let localTimestamp = currentTimestamp + Double(weather.forecast.utc_offset_seconds ?? 0)
+        let localTimestamp = timestamp + Double(weather.forecast.utc_offset_seconds ?? 0)
         let timeOfDay = Float(((localTimestamp.truncatingRemainder(dividingBy: 86_400)) + 86_400)
             .truncatingRemainder(dividingBy: 86_400) / 86_400)
         let phase = daylightPhase(sunElevation: sunElevation)
@@ -204,7 +316,7 @@ enum AtmosphereWeatherMapper {
         )
 
         return AtmosphereSnapshot(
-            timestamp: currentTimestamp,
+            timestamp: timestamp,
             timeOfDay: timeOfDay,
             sunElevation: sunElevation,
             phase: phase,
@@ -252,6 +364,53 @@ enum AtmosphereWeatherMapper {
         default:
             return .overcast
         }
+    }
+
+    /// Linear interpolation over an ascending hourly series. Internal (not
+    /// private): the hourly detail timeline samples its HUD values with the same
+    /// semantics the sim renders.
+    static func interpolatedValue(at timestamp: Double, times: [Double], values: [Double]?) -> Double? {
+        guard let values, !values.isEmpty, !times.isEmpty else { return nil }
+        guard values.count == times.count else {
+            return value(at: nearestIndex(to: timestamp, in: times), in: values)
+        }
+        if timestamp <= times[0] { return values[0] }
+        if timestamp >= times[times.count - 1] { return values[values.count - 1] }
+
+        var low = 0
+        var high = times.count - 1
+        while low < high {
+            let mid = (low + high) / 2
+            if times[mid] < timestamp {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        }
+        let upper = low
+        let lower = low - 1
+        let span = times[upper] - times[lower]
+        guard span > 0 else { return values[upper] }
+        let fraction = (timestamp - times[lower]) / span
+        return values[lower] + (values[upper] - values[lower]) * fraction
+    }
+
+    /// Radar/nowcast rate at an arbitrary time — only within the series' own
+    /// span (± one 5-minute frame): beyond it the radar knows nothing and must
+    /// return nil so the model forecast answers instead.
+    private static func radarRate(from series: PrecipSeriesResponse?, at timestamp: Double) -> Float? {
+        guard let points = series?.series, !points.isEmpty else { return nil }
+        var nearest: PrecipPoint?
+        var nearestDistance = Double.infinity
+        for point in points {
+            let distance = abs(point.timestamp.timeIntervalSince1970 - timestamp)
+            if distance < nearestDistance {
+                nearest = point
+                nearestDistance = distance
+            }
+        }
+        guard let nearest, nearestDistance <= 300 else { return nil }
+        return Float(nearest.precipitation)
     }
 
     private static func nearestIndex(to timestamp: Double, in times: [Double]?) -> Int? {

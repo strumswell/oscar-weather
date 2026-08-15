@@ -98,35 +98,7 @@
         }
       }
     },
-    "%.0f" : {
-      "shouldTranslate" : false
-    },
-    "%.0f %@" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$.0f %2$@"
-          }
-        }
-      },
-      "shouldTranslate" : false
-    },
     "%.0f %%" : {
-      "shouldTranslate" : false
-    },
-    "%.0f%@" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$.0f%2$@"
-          }
-        }
-      },
-      "shouldTranslate" : false
-    },
-    "%.1f" : {
       "shouldTranslate" : false
     },
     "%.1f %@" : {
@@ -161,55 +133,6 @@
           }
         }
       }
-    },
-    "%.1f%@" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$.1f%2$@"
-          }
-        }
-      },
-      "shouldTranslate" : false
-    },
-    "%.1f° (0cm)" : {
-      "shouldTranslate" : false
-    },
-    "%.1f° (6cm)" : {
-      "shouldTranslate" : false
-    },
-    "%.1f° (18cm)" : {
-      "shouldTranslate" : false
-    },
-    "%.1f° (54cm)" : {
-      "shouldTranslate" : false
-    },
-    "%.2f (0-1cm)" : {
-      "shouldTranslate" : false
-    },
-    "%.2f (1-3cm)" : {
-      "shouldTranslate" : false
-    },
-    "%.2f (3-9cm)" : {
-      "shouldTranslate" : false
-    },
-    "%.2f (9-27cm)" : {
-      "shouldTranslate" : false
-    },
-    "%.2f (27-81cm)" : {
-      "shouldTranslate" : false
-    },
-    "%.2f%@" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$.2f%2$@"
-          }
-        }
-      },
-      "shouldTranslate" : false
     },
     "%@" : {
       "localizations" : {
@@ -278,18 +201,6 @@
         }
       }
     },
-    "%@ (10m)" : {
-
-    },
-    "%@ (80m)" : {
-
-    },
-    "%@ (120m)" : {
-
-    },
-    "%@ (180m)" : {
-
-    },
     "%@ %@" : {
       "localizations" : {
         "de" : {
@@ -327,9 +238,6 @@
     },
     "%@ Bft" : {
       "shouldTranslate" : false
-    },
-    "%@ cm" : {
-
     },
     "%@ mm/h" : {
 
@@ -762,9 +670,6 @@
           }
         }
       }
-    },
-    "0 %@" : {
-      "shouldTranslate" : false
     },
     "2" : {
       "extractionState" : "stale",
@@ -1921,6 +1826,29 @@
         }
       }
     },
+    "Ausgewählte Stunde" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewählte Stunde"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected hour"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçili saat"
+          }
+        }
+      }
+    },
     "Australien" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2167,6 +2095,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kapalı"
+          }
+        }
+      }
+    },
+    "Bedeckung in drei Höhenschichten" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedeckung in drei Höhenschichten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cover across three altitude layers"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üç yükseklik katmanında bulutluluk"
           }
         }
       }
@@ -2604,6 +2555,29 @@
         }
       }
     },
+    "Bodenfeuchte" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bodenfeuchte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soil moisture"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toprak nemi"
+          }
+        }
+      }
+    },
     "Bodennahes Ozon bildet sich bei starker Sonneneinstrahlung aus Abgasen. Es kann Husten, Reizungen und eine verringerte Lungenfunktion auslösen." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2692,6 +2666,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rüzgar hamlesi"
+          }
+        }
+      }
+    },
+    "Böiger Wind" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Böiger Wind"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gusty wind"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hamleli rüzgar"
           }
         }
       }
@@ -2865,6 +2862,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Philipp Bolte tarafından"
+          }
+        }
+      }
+    },
+    "Chance" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chance"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chance"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Olasılık"
           }
         }
       }
@@ -3514,6 +3534,29 @@
       },
       "shouldTranslate" : false
     },
+    "Diagramme" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diagramme"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Charts"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grafikler"
+          }
+        }
+      }
+    },
     "Dicke Äste bewegen sich, Drähte können pfeifen." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3673,6 +3716,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1940'tan beri bu gün"
+          }
+        }
+      }
+    },
+    "Druck" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Druck"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressure"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basınç"
+          }
+        }
+      }
+    },
+    "Druck fällt" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Druck fällt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pressure falling"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basınç düşüyor"
           }
         }
       }
@@ -4759,6 +4848,29 @@
         }
       }
     },
+    "Feuchte" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feuchte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Humidity"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nem"
+          }
+        }
+      }
+    },
     "Fiord" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5012,6 +5124,7 @@
       }
     },
     "Für die nächsten Tage wird kein Niederschlag vorhergesagt." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5147,6 +5260,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "GEFS uzun vadeli eğilimleri gösterir, ancak kaba ızgarası nedeniyle yerel ayrıntılarda daha zayıftır."
+          }
+        }
+      }
+    },
+    "Gefühlt" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gefühlt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feels like"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hissedilen"
           }
         }
       }
@@ -5506,6 +5642,29 @@
         }
       }
     },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Größere Zweige und kleine Bäume bewegen sich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Larger branches and small trees move."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
+          }
+        }
+      }
+    },
     "Großbritannien" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5548,29 +5707,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
-          }
-        }
-      }
-    },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Größere Zweige und kleine Bäume bewegen sich."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Larger branches and small trees move."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
           }
         }
       }
@@ -5976,6 +6112,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yüksek sağlık riski, korunma önlemleri gereklidir."
+          }
+        }
+      }
+    },
+    "Hohe Wolken" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hohe Wolken"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High clouds"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüksek bulutlar"
           }
         }
       }
@@ -6755,6 +6914,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Açık"
+          }
+        }
+      }
+    },
+    "Klare Nacht" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klare Nacht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear night"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açık gece"
           }
         }
       }
@@ -8110,6 +8292,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ortalama Yoğunluk"
+          }
+        }
+      }
+    },
+    "Mittlere Wolken" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mittlere Wolken"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mid-level clouds"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta bulutlar"
           }
         }
       }
@@ -10925,6 +11130,29 @@
         }
       }
     },
+    "Richtung" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Richtung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Direction"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yön"
+          }
+        }
+      }
+    },
     "Ruhigster Tag" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -12765,6 +12993,29 @@
         }
       }
     },
+    "Temperatur und Niederschlag" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatur und Niederschlag"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature and precipitation"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıcaklık ve yağış"
+          }
+        }
+      }
+    },
     "Temperatur, Regen und Wind exakt für deine Koordinaten." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -12784,6 +13035,75 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Koordinatlarınıza özel sıcaklık, yağmur ve rüzgar."
+          }
+        }
+      }
+    },
+    "Tendenz" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tendenz"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trend"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eğilim"
+          }
+        }
+      }
+    },
+    "Tief" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tief"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En düşük"
+          }
+        }
+      }
+    },
+    "Tiefe Wolken" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiefe Wolken"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low clouds"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alçak bulutlar"
           }
         }
       }
@@ -13035,6 +13355,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hakkında"
+          }
+        }
+      }
+    },
+    "Überblick" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überblick"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overview"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genel bakış"
           }
         }
       }
@@ -13477,6 +13820,29 @@
         }
       }
     },
+    "Verdunstung" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verdunstung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evaporation"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buharlaşma"
+          }
+        }
+      }
+    },
     "Verlauf der Tageshöchstwerte" : {
 
     },
@@ -13545,6 +13911,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tahmin"
+          }
+        }
+      }
+    },
+    "Vorhersage abspielen" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorhersage abspielen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play forecast"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tahmini oynat"
           }
         }
       }
@@ -14619,7 +15008,6 @@
       }
     },
     "Zeitleiste" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

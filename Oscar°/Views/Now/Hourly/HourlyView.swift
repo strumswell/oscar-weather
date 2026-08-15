@@ -86,6 +86,9 @@ struct HourlyView: View {
                       .scaleEffect(shouldReduceMotion || phase.isIdentity ? 1 : 0.9)
                   }
                   .padding(.vertical, 20)
+                  .onTapGesture {
+                    presentDetails(at: Date(timeIntervalSince1970: item.timestamp))
+                  }
               }
             }
           }
@@ -125,12 +128,16 @@ struct HourlyView: View {
   }
 
   private func presentDetails() {
+    presentDetails(at: nil)
+  }
+
+  private func presentDetails(at target: Date?) {
     guard hasHourlyDetailData else {
       return
     }
 
     detailPresentationCount += 1
-    presentation.present(.hourly)
+    presentation.present(.hourly(target))
   }
 
   private func scrollToStart() {
