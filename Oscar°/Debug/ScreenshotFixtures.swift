@@ -5,8 +5,9 @@
 //  Wire-format payloads served by ScreenshotFixtureServer: a heavy-rain "now"
 //  that clears into a warm week, with matching air quality, a severe-rain
 //  alert, a dramatic radar series, a warming climate archive, and a widening
-//  ensemble. Hourly data anchors to the launch hour so "now"-relative views
-//  line up; the values themselves never change between runs.
+//  ensemble. Everything anchors to `storyNow` (tomorrow, 14:00 local) so
+//  "now"-relative views line up in daylight; the values themselves never
+//  change between runs.
 //
 
 import Foundation
@@ -17,9 +18,30 @@ enum ScreenshotFixtures {
     static let latitude = 51.3397
     static let longitude = 12.3731
 
-    /// The forecast scene tells a different story than the rest of the set:
-    /// a sunny summer day instead of the heavy-rain "now".
-    private static var sunnyStory: Bool { ScreenshotMode.scene == .nowForecast }
+    /// Every fixture timestamp hangs off this instant instead of the launch
+    /// clock: tomorrow at 14:00 local. Two reasons. The set renders in daylight
+    /// whatever time of day the pipeline runs — the sky, the hourly icons and
+    /// every clock label agree on early afternoon. And because the served
+    /// arrays never straddle the real "now", `AtmosphereWeatherMapper` falls
+    /// through to `current.time` for the sky instead of the device clock (it
+    /// prefers the device clock only while the forecast actually covers it).
+    /// Tomorrow, not today, so the story is always ahead of the real clock;
+    /// 14:00 rather than noon so no clock label in the set has to render a
+    /// 12-hour "12:30 PM", which is wide enough to collide with its neighbour
+    /// on the rain chart's axis.
+    static var storyNow: Date {
+        let calendar = Calendar.current
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: .now) ?? .now
+        return calendar.date(bySettingHour: 14, minute: 0, second: 0, of: tomorrow) ?? tomorrow
+    }
+
+    static var storyDayStart: Date { Calendar.current.startOfDay(for: storyNow) }
+
+    /// Two scenes tell a different story than the rain set: a sunny summer day
+    /// with no precipitation and no alert.
+    private static var sunnyStory: Bool {
+        ScreenshotMode.scene == .nowForecast || ScreenshotMode.scene == .nowClear
+    }
 
     /// Fixture copy ships per-language here instead of the localization
     /// catalog — it is marketing staging, not product UI. The alert banner and
@@ -37,8 +59,8 @@ enum ScreenshotFixtures {
 
     static func forecastJSON() -> [String: Any] {
         let calendar = Calendar.current
-        let now = Date.now
-        let dayStart = calendar.startOfDay(for: now)
+        let now = storyNow
+        let dayStart = storyDayStart
         let hourIndex = calendar.component(.hour, from: now)
 
         let hourCount = 48
@@ -200,7 +222,7 @@ enum ScreenshotFixtures {
     // MARK: - Air quality (air-quality-api.open-meteo.com)
 
     static func airQualityJSON() -> [String: Any] {
-        let dayStart = Calendar.current.startOfDay(for: .now)
+        let dayStart = storyDayStart
         let hourCount = 72
         let times = (0..<hourCount).map { dayStart.timeIntervalSince1970 + Double($0) * 3600 }
 
@@ -265,7 +287,7 @@ enum ScreenshotFixtures {
     static func alertsJSON() -> [String: Any] {
         if sunnyStory { return ["alertCount": 0, "alerts": [] as [Any]] }
         let formatter = ISO8601DateFormatter()
-        let now = Date.now
+        let now = storyNow
         // The banner uppercases the event; Turkish ships pre-uppercased so İ/ı
         // survive the locale-insensitive uppercased().
         let event = localized(
@@ -303,7 +325,7 @@ enum ScreenshotFixtures {
 
     static func precipSeriesJSON() -> [String: Any] {
         let formatter = ISO8601DateFormatter()
-        let now = Date.now
+        let now = storyNow
         // -30 min … +105 min in 5-minute steps: rain peaking shortly after
         // "now", easing off within the next one and a half hours.
         let series = stride(from: -30, through: 105, by: 5).map { minutes -> [String: Any] in
@@ -373,7 +395,7 @@ enum ScreenshotFixtures {
     // MARK: - Ensemble (ensemble-api.open-meteo.com)
 
     static func ensembleJSON() -> [String: Any] {
-        let dayStart = Calendar.current.startOfDay(for: .now)
+        let dayStart = storyDayStart
         let dayCount = 16
         let memberCount = 30
         let tmax: [Double] = [16, 19, 22, 24, 26, 25, 21, 24, 27, 25, 23, 22, 24, 26, 27, 25]

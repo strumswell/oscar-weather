@@ -10,36 +10,15 @@ final class HourlyTimelineModel {
     struct DayMark {
         let start: Double
         let label: String
+        /// Compact variant for the minimap ("Heute", "Mo."), where fourteen
+        /// full date labels would collide.
+        let shortLabel: String
     }
 
     struct ExtremeMark {
         let timestamp: Double
         let value: Double
         let isHigh: Bool
-    }
-
-    enum HUDSwatch {
-        case line(dashed: Bool)
-        case bar
-        case none
-    }
-
-    struct HUDStat: Identifiable {
-        let label: String
-        let value: String
-        var color: Color?
-        var swatch: HUDSwatch = .none
-        var arrowDegrees: Double?
-
-        var id: String { label }
-    }
-
-    struct CardHeader {
-        let title: LocalizedStringKey
-        let value: String
-        let badge: String?
-        let color: Color
-        let subtitle: LocalizedStringKey
     }
 
     // MARK: - Timeline data
@@ -49,10 +28,8 @@ final class HourlyTimelineModel {
     private(set) var apparentTemperature: [Double] = []
     private(set) var precipitation: [Double] = []
     private(set) var snowfall: [Double] = []
-    private(set) var probability: [Double] = []
     private(set) var weathercode: [Double] = []
     private(set) var windspeed: [Double] = []
-    private(set) var windgusts: [Double] = []
     private(set) var winddirection: [Double] = []
     private(set) var windspeed80: [Double] = []
     private(set) var windspeed120: [Double] = []
@@ -130,10 +107,8 @@ final class HourlyTimelineModel {
         apparentTemperature = hourly?.apparent_temperature ?? []
         precipitation = hourly?.precipitation ?? []
         snowfall = hourly?.snowfall ?? []
-        probability = (hourly?.precipitation_probability ?? []).map { $0 ?? 0 }
         weathercode = hourly?.weathercode ?? []
         windspeed = hourly?.windspeed_10m ?? []
-        windgusts = hourly?.windgusts_10m ?? []
         winddirection = hourly?.winddirection_10m ?? []
         windspeed80 = hourly?.windspeed_80m ?? []
         windspeed120 = hourly?.windspeed_120m ?? []
@@ -229,6 +204,28 @@ final class HourlyTimelineModel {
         HourlyFormatting.temperatureString(sample(temperature))
     }
 
+    /// The scrubbed day's span ("H:24° T:12°"); nil on partial edge days.
+    var dayRangeLabel: String? {
+        var calendar = Calendar.current
+        calendar.timeZone = timeZone
+        let dayStart = calendar.startOfDay(for: Date(timeIntervalSince1970: scrubTime))
+        guard let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) else { return nil }
+        var high = -Double.infinity
+        var low = Double.infinity
+        var hours = 0
+        for (index, time) in times.enumerated()
+        where time >= dayStart.timeIntervalSince1970 && time < dayEnd.timeIntervalSince1970
+            && index < temperature.count {
+            high = max(high, temperature[index])
+            low = min(low, temperature[index])
+            hours += 1
+        }
+        guard hours >= 3 else { return nil }
+        return String(
+            localized: "H:\(HourlyFormatting.temperatureString(high)) T:\(HourlyFormatting.temperatureString(low))"
+        )
+    }
+
     var conditionLabel: String {
         guard hasData else { return "" }
         let code = Int(nearestValue(in: weathercode) ?? 0)
@@ -245,19 +242,6 @@ final class HourlyTimelineModel {
         sample(precipitation) ?? 0
     }
 
-    var feelsLabel: String {
-        HourlyFormatting.temperatureString(sample(apparentTemperature))
-    }
-
-    var rainLabel: String {
-        let rate = precipitationRate
-        if rate >= 0.05 {
-            return HourlyFormatting.precipitationString(value: rate, unit: precipitationUnit)
-        }
-        let chance = sample(probability) ?? 0
-        return "\(Int(chance.rounded())) %"
-    }
-
     var windLabel: String {
         guard let speed = sample(windspeed) else { return "--" }
         let unit = WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit)
@@ -267,228 +251,40 @@ final class HourlyTimelineModel {
         return "\(Int(speed.rounded())) \(windUnitString)"
     }
 
-    /// Old chart-card header: title, the scrubbed hour's key values, and a
-    /// subtitle saying what the chart shows (copy from the retired cards).
-    var cardHeader: CardHeader {
+    /// The strip card's title (full variable names, unlike the short pill
+    /// titles).
+    var lensTitle: LocalizedStringKey {
         switch lens {
-        case .overview:
-            return CardHeader(title: "Überblick", value: temperatureLabel,
-                              badge: rainLabel, color: .hourlyRain,
-                              subtitle: "Temperatur und Niederschlag")
-        case .temperature:
-            return CardHeader(title: "Temperatur", value: temperatureLabel,
-                              badge: String(localized: "Gefühlt") + " " + feelsLabel, color: .orange,
-                              subtitle: "Lufttemperatur und gefühlte Temperatur")
-        case .precipitation:
-            return CardHeader(title: "Niederschlag", value: rainLabel,
-                              badge: percentString(sample(probability)), color: .hourlyRain,
-                              subtitle: "Regen und Schnee pro Stunde")
-        case .wind:
-            return CardHeader(title: "Wind", value: windLabel,
-                              badge: String(localized: "Böen") + " " + gustLabel, color: .teal,
-                              subtitle: "Windgeschwindigkeit in mehreren Höhen")
-        case .pressure:
-            let trend = pressureTrendLabel
-            return CardHeader(title: "Luftdruck", value: pressureLabel,
-                              badge: trend == "--" ? nil : trend,
-                              color: .purple.mix(with: .black, by: 0.15),
-                              subtitle: "Meeresspiegel-Luftdruck")
-        case .humidity:
-            return CardHeader(title: "Luftfeuchtigkeit", value: percentString(sample(humidity)),
-                              badge: String(localized: "Gefühlt") + " " + feelsLabel,
-                              color: .mint.mix(with: .black, by: 0.2),
-                              subtitle: "Relative Luftfeuchtigkeit")
-        case .clouds:
-            return CardHeader(title: "Wolken", value: percentString(sample(cloudcover)),
-                              badge: nil, color: .gray,
-                              subtitle: "Bedeckung in drei Höhenschichten")
-        case .soilTemperature:
-            return CardHeader(title: "Bodentemperatur",
-                              value: HourlyFormatting.temperatureString(sample(soilTemperature0)),
-                              badge: nil,
-                              color: .brown,
-                              subtitle: "Temperatur in mehreren Bodentiefen")
-        case .soilMoisture:
-            return CardHeader(title: "Bodenwassergehalt",
-                              value: moistureString(soilMoisture.last),
-                              badge: nil, color: .blue,
-                              subtitle: "Volumetrischer Wassergehalt je Bodentiefe")
-        case .evapotranspiration:
-            let value = sample(et0).map {
-                $0.formatted(.number.precision(.fractionLength(2))) + " " + et0Unit
-            } ?? "--"
-            return CardHeader(title: "Referenz-Evapotranspiration", value: value,
-                              badge: nil, color: .hourlyRain,
-                              subtitle: "Wasserverlust einer Referenzfläche")
+        case .overview: "Überblick"
+        case .wind: "Wind"
+        case .pressure: "Luftdruck"
+        case .humidity: "Luftfeuchtigkeit"
+        case .clouds: "Wolken"
+        case .soilTemperature: "Bodentemperatur"
+        case .soilMoisture: "Bodenwassergehalt"
+        case .evapotranspiration: "Referenz-Evapotranspiration"
         }
     }
 
-    /// The sim readout row: lensStats minus what the header already shows big
-    /// (the temperature itself, wind's Böen badge, pressure's Wind filler) and
-    /// context stats the user pruned. The card legend keeps the full list.
-    var hudStats: [HUDStat] {
-        let excluded: Set<String>
+    /// One caption line under the card title saying what the chart shows —
+    /// the scrubbed hour's values live in the readout row over the sim (copy
+    /// from the retired chart cards).
+    var lensDescription: LocalizedStringKey {
         switch lens {
-        case .overview:
-            excluded = [String(localized: "Temperatur")]
-        case .temperature:
-            excluded = [String(localized: "Temperatur"),
-                        String(localized: "Feuchte"),
-                        String(localized: "Wind")]
-        case .pressure:
-            excluded = [String(localized: "Wind")]
-        default:
-            excluded = []
-        }
-        return lensStats.filter { !excluded.contains($0.label) }
-    }
-
-    /// Every series of the active lens, dot-colored to match its line.
-    var lensStats: [HUDStat] {
-        let feels = HUDStat(label: String(localized: "Gefühlt"), value: feelsLabel)
-        let rain = HUDStat(label: String(localized: "Regen"), value: rainLabel)
-        let wind = HUDStat(label: String(localized: "Wind"), value: windLabel)
-        let humidityStat = HUDStat(label: String(localized: "Feuchte"), value: percentString(sample(humidity)))
-
-        switch lens {
-        case .overview:
-            return [HUDStat(label: String(localized: "Temperatur"), value: temperatureLabel,
-                            color: .orange, swatch: .line(dashed: false)),
-                    HUDStat(label: String(localized: "Regen"), value: rainLabel,
-                            color: .hourlyRain, swatch: .bar),
-                    feels, wind]
-        case .temperature:
-            return [HUDStat(label: String(localized: "Temperatur"), value: temperatureLabel,
-                            color: .orange, swatch: .line(dashed: false)),
-                    HUDStat(label: String(localized: "Gefühlt"), value: feelsLabel,
-                            color: .orange.mix(with: .black, by: 0.25), swatch: .line(dashed: true)),
-                    humidityStat, wind]
-        case .precipitation:
-            var stats = [HUDStat(label: String(localized: "Regen"), value: rainLabel,
-                                 color: .hourlyRain, swatch: .bar),
-                         HUDStat(label: String(localized: "Chance"),
-                                 value: percentString(sample(probability)),
-                                 color: .blue.mix(with: .black, by: 0.3), swatch: .line(dashed: true))]
-            if let snow = sample(snowfall), snow > 0.005 {
-                stats.append(HUDStat(
-                    label: String(localized: "Schnee"),
-                    value: snow.formatted(.number.precision(.fractionLength(1))) + " cm",
-                    color: .cyan, swatch: .bar
-                ))
-            }
-            stats.append(HUDStat(label: String(localized: "Wolken"), value: percentString(sample(cloudcover))))
-            return stats
-        case .wind:
-            let direction = nearestValue(in: winddirection)
-            return [HUDStat(label: "10 m", value: windLabel,
-                            color: .teal, swatch: .line(dashed: false)),
-                    HUDStat(label: "80 m", value: speedLabel(sample(windspeed80)),
-                            color: .teal.mix(with: .black, by: 0.25), swatch: .line(dashed: false)),
-                    HUDStat(label: "120 m", value: speedLabel(sample(windspeed120)),
-                            color: .teal.mix(with: .black, by: 0.4), swatch: .line(dashed: false)),
-                    HUDStat(label: "180 m", value: speedLabel(sample(windspeed180)),
-                            color: .teal.mix(with: .black, by: 0.55), swatch: .line(dashed: false)),
-                    HUDStat(
-                        label: String(localized: "Richtung"),
-                        value: direction.map { "\(Int($0.rounded()))°" } ?? "--",
-                        arrowDegrees: direction.map { ($0 + 180).truncatingRemainder(dividingBy: 360) }
-                    )]
-        case .pressure:
-            return [HUDStat(label: String(localized: "Druck"), value: pressureLabel,
-                            color: .purple.mix(with: .black, by: 0.15), swatch: .line(dashed: false)),
-                    HUDStat(label: String(localized: "Tendenz"), value: pressureTrendLabel),
-                    wind]
-        case .humidity:
-            return [HUDStat(label: String(localized: "Feuchte"),
-                            value: percentString(sample(humidity)),
-                            color: .mint.mix(with: .black, by: 0.2), swatch: .line(dashed: false)),
-                    feels, rain]
-        case .clouds:
-            return [HUDStat(label: String(localized: "Wolken"), value: percentString(sample(cloudcover))),
-                    HUDStat(label: String(localized: "Hohe Wolken"),
-                            value: percentString(sample(cloudHigh)), color: .hourlyCloud, swatch: .bar),
-                    HUDStat(label: String(localized: "Mittlere Wolken"),
-                            value: percentString(sample(cloudMid)), color: .hourlyCloud, swatch: .bar),
-                    HUDStat(label: String(localized: "Tiefe Wolken"),
-                            value: percentString(sample(cloudLow)), color: .hourlyCloud, swatch: .bar)]
-        case .soilTemperature:
-            return [HUDStat(label: "0 cm",
-                            value: HourlyFormatting.temperatureString(sample(soilTemperature0)),
-                            color: .brown, swatch: .line(dashed: false)),
-                    HUDStat(label: "6 cm",
-                            value: HourlyFormatting.temperatureString(sample(soilTemperature6)),
-                            color: .brown.mix(with: .black, by: 0.25), swatch: .line(dashed: false)),
-                    HUDStat(label: "18 cm",
-                            value: HourlyFormatting.temperatureString(sample(soilTemperature18)),
-                            color: .brown.mix(with: .black, by: 0.4), swatch: .line(dashed: false)),
-                    HUDStat(label: "54 cm",
-                            value: HourlyFormatting.temperatureString(sample(soilTemperature54)),
-                            color: .brown.mix(with: .black, by: 0.55), swatch: .line(dashed: false))]
-        case .soilMoisture:
-            let depths = soilMoisture
-            return [HUDStat(label: "0–1 cm", value: moistureString(depths.last),
-                            color: .blue, swatch: .line(dashed: false)),
-                    HUDStat(label: "1–3 cm", value: moistureString(depths.count > 3 ? depths[3] : nil),
-                            color: .blue.mix(with: .black, by: 0.2), swatch: .line(dashed: false)),
-                    HUDStat(label: "3–9 cm", value: moistureString(depths.count > 2 ? depths[2] : nil),
-                            color: .blue.mix(with: .black, by: 0.35), swatch: .line(dashed: false)),
-                    HUDStat(label: "9–27 cm", value: moistureString(depths.count > 1 ? depths[1] : nil),
-                            color: .blue.mix(with: .black, by: 0.48), swatch: .line(dashed: false)),
-                    HUDStat(label: "27–81 cm", value: moistureString(depths.first),
-                            color: .blue.mix(with: .black, by: 0.6), swatch: .line(dashed: false))]
-        case .evapotranspiration:
-            let value = sample(et0).map {
-                $0.formatted(.number.precision(.fractionLength(2))) + " " + et0Unit
-            } ?? "--"
-            return [HUDStat(label: "ET₀", value: value, color: .hourlyRain, swatch: .line(dashed: false)),
-                    humidityStat, wind]
+        case .overview: "Temperatur und Niederschlag"
+        case .wind: "Windgeschwindigkeit in mehreren Höhen"
+        case .pressure: "Meeresspiegel-Luftdruck"
+        case .humidity: "Relative Luftfeuchtigkeit"
+        case .clouds: "Bedeckung in drei Höhenschichten"
+        case .soilTemperature: "Temperatur in mehreren Bodentiefen"
+        case .soilMoisture: "Volumetrischer Wassergehalt je Bodentiefe"
+        case .evapotranspiration: "Wasserverlust einer Referenzfläche"
         }
     }
 
-    private func speedLabel(_ speed: Double?) -> String {
-        guard let speed else { return "--" }
-        let unit = WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit)
-        if unit.usesBeaufortDisplay {
-            return "\(BeaufortScale.force(forKilometersPerHour: speed)) \(unit.displayUnit)"
-        }
-        return "\(Int(speed.rounded())) \(windUnitString)"
-    }
-
-    private var gustLabel: String {
-        speedLabel(sample(windgusts))
-    }
-
-    private var pressureLabel: String {
-        guard let value = sample(pressure) else { return "--" }
-        return "\(Int(value.rounded())) hPa"
-    }
-
-    /// Signed pressure change over the 3 hours leading up to the scrub.
-    private var pressureTrendLabel: String {
-        let earlier = scrubTime - 3 * 3_600
-        guard earlier >= domain.lowerBound,
-              let now = sample(pressure),
-              let past = AtmosphereWeatherMapper.interpolatedValue(at: earlier, times: times, values: pressure)
-        else { return "--" }
-        let delta = now - past
-        return delta.formatted(
-            .number.sign(strategy: .always(includingZero: false)).precision(.fractionLength(1))
-        ) + " hPa"
-    }
-
-    private func percentString(_ value: Double?) -> String {
-        guard let value else { return "--" }
-        return "\(Int(value.rounded())) %"
-    }
-
-    /// Fraction slash keeps "m³⁄m³" compact enough for the readout cells.
+    /// Fraction slash keeps "m³⁄m³" compact enough for the value labels.
     private var compactMoistureUnit: String {
         soilMoistureUnit.replacingOccurrences(of: "/", with: "\u{2044}")
-    }
-
-    private func moistureString(_ values: [Double]?) -> String {
-        guard let values, let value = sample(values) else { return "--" }
-        return value.formatted(.number.precision(.fractionLength(2))) + " " + compactMoistureUnit
     }
 
     var accessibilityValue: String {
@@ -500,21 +296,6 @@ final class HourlyTimelineModel {
     var isAwayFromNow: Bool {
         abs(scrubTime - Date.now.timeIntervalSince1970) > 1_800
     }
-
-    /// Signed offset to now, scale-aware ("+35 Min.", "+5 Std.", "+3 Tg.").
-    var nowDeltaLabel: String {
-        let delta = scrubTime - Date.now.timeIntervalSince1970
-        let formatted = Self.deltaFormatter.string(from: abs(delta)) ?? ""
-        return (delta > 0 ? "+" : "−") + formatted
-    }
-
-    private static let deltaFormatter: DateComponentsFormatter = {
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.day, .hour, .minute]
-        formatter.unitsStyle = .abbreviated
-        formatter.maximumUnitCount = 1
-        return formatter
-    }()
 
     // MARK: - Lens layouts
 
@@ -528,106 +309,75 @@ final class HourlyTimelineModel {
     }
 
     private func buildLayout(for lens: HourlyLens) -> HourlyLensLayout {
-        let f0: (Double) -> String = { "\(Int($0.rounded()))" }
-        let f1: (Double) -> String = { $0.formatted(.number.precision(.fractionLength(1))) }
-        let f2: (Double) -> String = { $0.formatted(.number.precision(.fractionLength(2))) }
+        // The format closures capture plain locals, not self: layouts live in
+        // a cache on the model, so a self capture would cycle.
+        let temperatureUnit = self.temperatureUnit
+        let temperatureFormat: (Double) -> String = { "\(Int($0.rounded()))\(temperatureUnit)" }
+        let percentFormat: (Double) -> String = { "\(Int($0.rounded()))%" }
 
         switch lens {
         case .overview:
             return HourlyLensLayout(
-                lines: [line(temperature, .orange)],
-                domain: paddedDomain([temperature]),
+                lines: [line(apparentTemperature, .red, width: 3.5,
+                             label: String(localized: "Gefühlt")),
+                        line(temperature, .orange, label: String(localized: "Temperatur"))],
+                domain: paddedDomain([temperature, apparentTemperature]),
                 showsBars: true,
                 barsAlpha: 0.75,
                 fillsPrimary: false,
-                topLabel: temperatureUnit.uppercased(),
-                bottomLabel: precipitationUnit.uppercased(),
                 extremes: extremeMarks(for: temperature),
-                extremeFormat: HourlyFormatting.temperatureString,
-                ridesBars: false,
-                primaryColor: .orange
-            )
-        case .temperature:
-            return HourlyLensLayout(
-                lines: [line(apparentTemperature, .orange.mix(with: .black, by: 0.25), width: 1.5, dashed: true),
-                        line(temperature, .orange)],
-                domain: paddedDomain([temperature, apparentTemperature]),
-                showsBars: false,
-                barsAlpha: 0,
-                fillsPrimary: false,
-                topLabel: temperatureUnit.uppercased(),
-                bottomLabel: nil,
-                extremes: extremeMarks(for: temperature),
-                extremeFormat: HourlyFormatting.temperatureString,
-                ridesBars: false,
-                primaryColor: .orange
-            )
-        case .precipitation:
-            return HourlyLensLayout(
-                lines: [line(probability, .blue.mix(with: .black, by: 0.3), width: 1.5, dashed: true)],
-                domain: 0...108,
-                showsBars: true,
-                barsAlpha: 0.95,
-                fillsPrimary: false,
-                topLabel: "%",
-                bottomLabel: precipitationUnit.uppercased(),
-                extremes: extremeMarks(for: precipitation, highsOnly: true, atLeast: 0.4),
-                extremeFormat: f1,
-                ridesBars: true,
-                primaryColor: .hourlyRain
+                extremeFormat: temperatureFormat,
+                primaryColor: .orange,
+                barsLabel: String(localized: "Regen")
             )
         case .wind:
             let unit = WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit)
             let displayed: ([Double]) -> [Double] = unit.usesBeaufortDisplay
                 ? BeaufortScale.convertedValues(fromKilometersPerHour:)
                 : { $0 }
-            let heights = [windspeed80, windspeed120, windspeed180].map(displayed)
-            let heightColors: [Color] = [.teal.mix(with: .black, by: 0.25),
+            // Highest altitude first: the readout box lists lines in reverse,
+            // so its rows read 10 m upwards.
+            let heights = [windspeed180, windspeed120, windspeed80].map(displayed)
+            let heightColors: [Color] = [.teal.mix(with: .black, by: 0.55),
                                          .teal.mix(with: .black, by: 0.4),
-                                         .teal.mix(with: .black, by: 0.55)]
+                                         .teal.mix(with: .black, by: 0.25)]
+            let heightLabels = ["180 m", "120 m", "80 m"]
             let speeds = displayed(windspeed)
+            let windUnit = unit.usesBeaufortDisplay ? unit.displayUnit : windUnitString
             return HourlyLensLayout(
-                lines: zip(heights, heightColors).map { line($0, $1, width: 1.2) }
-                    + [line(speeds, .teal)],
+                lines: zip(zip(heights, heightColors), heightLabels).map { pair, label in
+                    line(pair.0, pair.1, width: 2.5, label: label)
+                } + [line(speeds, .teal, label: "10 m")],
                 domain: paddedDomain(heights + [speeds], from: 0),
                 showsBars: false,
                 barsAlpha: 0,
                 fillsPrimary: false,
-                topLabel: unit.usesBeaufortDisplay ? "BFT" : windUnitString.uppercased(),
-                bottomLabel: nil,
-                extremes: extremeMarks(for: speeds),
-                extremeFormat: f0,
-                ridesBars: false,
+                extremes: [],
+                extremeFormat: { "\(Int($0.rounded())) \(windUnit)" },
                 primaryColor: .teal,
                 showsDirectionArrows: true
             )
         case .pressure:
             return HourlyLensLayout(
-                lines: [line(pressure, .purple.mix(with: .black, by: 0.15))],
+                lines: [line(pressure, .purple)],
                 domain: paddedDomain([pressure], minimumPad: 2),
                 showsBars: false,
                 barsAlpha: 0,
                 fillsPrimary: false,
-                topLabel: "HPA",
-                bottomLabel: nil,
                 extremes: extremeMarks(for: pressure),
-                extremeFormat: f0,
-                ridesBars: false,
-                primaryColor: .purple.mix(with: .black, by: 0.15)
+                extremeFormat: { "\(Int($0.rounded())) hPa" },
+                primaryColor: .purple
             )
         case .humidity:
             return HourlyLensLayout(
-                lines: [line(humidity, .mint.mix(with: .black, by: 0.2))],
+                lines: [line(humidity, .mint)],
                 domain: 0...105,
                 showsBars: false,
                 barsAlpha: 0,
                 fillsPrimary: false,
-                topLabel: "%",
-                bottomLabel: nil,
                 extremes: extremeMarks(for: humidity),
-                extremeFormat: f0,
-                ridesBars: false,
-                primaryColor: .mint.mix(with: .black, by: 0.2)
+                extremeFormat: percentFormat,
+                primaryColor: .mint
             )
         case .clouds:
             return HourlyLensLayout(
@@ -636,11 +386,8 @@ final class HourlyTimelineModel {
                 showsBars: false,
                 barsAlpha: 0,
                 fillsPrimary: false,
-                topLabel: nil,
-                bottomLabel: nil,
                 extremes: [],
-                extremeFormat: f0,
-                ridesBars: false,
+                extremeFormat: percentFormat,
                 primaryColor: .gray,
                 bands: [.init(values: cloudHigh, centerFraction: 0.30, label: String(localized: "Hohe Wolken")),
                         .init(values: cloudMid, centerFraction: 0.53, label: String(localized: "Mittlere Wolken")),
@@ -648,19 +395,16 @@ final class HourlyTimelineModel {
             )
         case .soilTemperature:
             return HourlyLensLayout(
-                lines: [line(soilTemperature54, .brown.mix(with: .black, by: 0.55), width: 1.2),
-                        line(soilTemperature18, .brown.mix(with: .black, by: 0.4), width: 1.4),
-                        line(soilTemperature6, .brown.mix(with: .black, by: 0.25), width: 1.6),
-                        line(soilTemperature0, .brown)],
+                lines: [line(soilTemperature54, .brown.mix(with: .black, by: 0.55), width: 2.5, label: "54 cm"),
+                        line(soilTemperature18, .brown.mix(with: .black, by: 0.4), width: 2.8, label: "18 cm"),
+                        line(soilTemperature6, .brown.mix(with: .black, by: 0.25), width: 3.1, label: "6 cm"),
+                        line(soilTemperature0, .brown, label: "0 cm")],
                 domain: paddedDomain([soilTemperature0, soilTemperature6, soilTemperature18, soilTemperature54]),
                 showsBars: false,
                 barsAlpha: 0,
                 fillsPrimary: false,
-                topLabel: temperatureUnit.uppercased(),
-                bottomLabel: nil,
-                extremes: extremeMarks(for: soilTemperature0),
-                extremeFormat: HourlyFormatting.temperatureString,
-                ridesBars: false,
+                extremes: [],
+                extremeFormat: temperatureFormat,
                 primaryColor: .brown
             )
         case .soilMoisture:
@@ -669,20 +413,20 @@ final class HourlyTimelineModel {
                                         .blue.mix(with: .black, by: 0.48),
                                         .blue.mix(with: .black, by: 0.35),
                                         .blue.mix(with: .black, by: 0.2)]
-            let secondaries = zip(depths.dropLast(), depthColors).map { values, color in
-                line(values, color, width: 1.2)
+            let depthLabels = ["27–81 cm", "9–27 cm", "3–9 cm", "1–3 cm"]
+            let secondaries = zip(zip(depths.dropLast(), depthColors), depthLabels).map { pair, label in
+                line(pair.0, pair.1, width: 2.5, label: label)
             }
             return HourlyLensLayout(
-                lines: secondaries + [line(depths.last ?? [], .blue)],
+                lines: secondaries + [line(depths.last ?? [], .blue, label: "0–1 cm")],
                 domain: paddedDomain(depths, minimumPad: 0.02),
                 showsBars: false,
                 barsAlpha: 0,
                 fillsPrimary: false,
-                topLabel: compactMoistureUnit.uppercased(),
-                bottomLabel: nil,
-                extremes: extremeMarks(for: depths.last ?? []),
-                extremeFormat: f2,
-                ridesBars: false,
+                extremes: [],
+                extremeFormat: { [moistureUnit = compactMoistureUnit] in
+                    "\($0.formatted(.number.precision(.fractionLength(2)))) \(moistureUnit)"
+                },
                 primaryColor: .blue
             )
         case .evapotranspiration:
@@ -691,12 +435,11 @@ final class HourlyTimelineModel {
                 domain: paddedDomain([et0], from: 0, minimumPad: 0.05),
                 showsBars: false,
                 barsAlpha: 0,
-                fillsPrimary: true,
-                topLabel: et0Unit.uppercased(),
-                bottomLabel: nil,
+                fillsPrimary: false,
                 extremes: extremeMarks(for: et0, highsOnly: true, atLeast: 0.05),
-                extremeFormat: f2,
-                ridesBars: false,
+                extremeFormat: { [unit = et0Unit] in
+                    "\($0.formatted(.number.precision(.fractionLength(2)))) \(unit)"
+                },
                 primaryColor: .hourlyRain
             )
         }
@@ -705,11 +448,14 @@ final class HourlyTimelineModel {
     private func line(
         _ values: [Double],
         _ color: Color,
-        width: CGFloat = 2,
+        width: CGFloat = 4,
         dashed: Bool = false,
-        opacity: Double = 1
+        opacity: Double = 1,
+        label: String? = nil
     ) -> HourlyLensLayout.Line {
-        HourlyLensLayout.Line(values: values, color: color, width: width, dashed: dashed, opacity: opacity)
+        HourlyLensLayout.Line(
+            values: values, color: color, width: width, dashed: dashed, opacity: opacity, label: label
+        )
     }
 
     /// Joint min/max over all series, padded so curves don't kiss the edges.
@@ -898,21 +644,30 @@ final class HourlyTimelineModel {
         var dayStart = calendar.startOfDay(for: Date(timeIntervalSince1970: first))
         while dayStart.timeIntervalSince1970 <= last {
             let start = max(dayStart.timeIntervalSince1970, first)
+            let weekday = HourlyFormatting.weekdayString(
+                timestamp: dayStart.timeIntervalSince1970,
+                timeZone: timeZone
+            )
             let label: String
+            let shortLabel: String
             if calendar.isDate(dayStart, inSameDayAs: now) {
                 label = String(localized: "Heute")
+                shortLabel = label
             } else if let tomorrow = calendar.date(byAdding: .day, value: 1, to: now),
                       calendar.isDate(dayStart, inSameDayAs: tomorrow) {
                 label = String(localized: "Morgen")
+                shortLabel = weekday
             } else {
-                label = HourlyFormatting.weekdayString(
-                    timestamp: dayStart.timeIntervalSince1970,
-                    timeZone: timeZone
-                )
+                label = weekday
+                shortLabel = weekday
             }
             let dayNumber = calendar.component(.day, from: dayStart)
             let monthNumber = calendar.component(.month, from: dayStart)
-            marks.append(DayMark(start: start, label: label + " \(dayNumber).\(monthNumber)."))
+            marks.append(DayMark(
+                start: start,
+                label: label + " \(dayNumber).\(monthNumber).",
+                shortLabel: shortLabel
+            ))
             guard let next = calendar.date(byAdding: .day, value: 1, to: dayStart) else { break }
             dayStart = next
         }

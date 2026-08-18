@@ -1,8 +1,9 @@
 import SwiftUI
 
 /// The hourly detail sheet. The atmosphere sim fills the whole sheet and
-/// renders the scrubbed hour; the readout floats at the top (label color +
-/// shadows over the sim), the strip and minimap scroll the timeline under a
+/// renders the scrubbed hour; date and clock sit in the sheet's top bar, a
+/// centered Now-style hero (big temperature, condition, day range) floats in
+/// the sky, and the strip and minimap scroll the timeline under a
 /// center-pinned playhead. Cards pick up the scene's hue via the Now stack's
 /// card wash.
 struct HourlyDetailView: View {
@@ -31,9 +32,14 @@ struct HourlyDetailView: View {
                     )
                 }
             }
-            .navigationTitle("Stündlich")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    if model.hasData {
+                        HourlyDetailHeader(model: model)
+                    }
+                }
+                .sharedBackgroundVisibility(.hidden)
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(role: .close, action: finish)
                 }
@@ -49,6 +55,9 @@ struct HourlyDetailView: View {
                 model.update(from: weather)
             }
         }
+        // Sheets don't inherit the app root's forced scheme, but the whole
+        // design (white ink, frost + wash over the sim) assumes dark.
+        .preferredColorScheme(.dark)
     }
 
     private var content: some View {
@@ -69,12 +78,13 @@ struct HourlyDetailView: View {
                     model.nudge(hours: direction == .increment ? 1 : -1)
                 }
 
-            VStack(spacing: 12) {
-                HourlyDetailHUD(model: model)
+            VStack(spacing: 0) {
+                // The 76pt line box carries a lot of top leading; the negative
+                // padding tucks the digits up under the bar clock.
+                HourlyDetailHero(model: model)
+                    .padding(.top, -10)
 
-                HourlyReadoutRow(model: model)
-
-                Spacer(minLength: 0)
+                Spacer(minLength: 40)
 
                 HourlyTimelineStrip(model: model)
                     .frame(height: 275)
@@ -82,16 +92,19 @@ struct HourlyDetailView: View {
 
                 HourlyTimelineMinimap(model: model)
                     .padding(.horizontal, 16)
+                    .padding(.top, 12)
 
                 HourlyLensRow(model: model)
+                    .padding(.top, 12)
             }
-            .padding(.top, 2)
             .padding(.bottom, 10)
         }
         .environment(\.cardTint, AtmosphereSampler.cardFill(snapshot: snapshot))
         .environment(\.cardBorderOpacity, AtmosphereSampler.cardBorderOpacity(snapshot: snapshot))
-        // Same lighter frost as the Now stack, so the cards match its look.
-        .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial.opacity(0.6)))
+        // Full-strength material, unlike the Now stack's lighter frost: the
+        // strip's hairlines and 10 pt labels need a steadier ground over the
+        // animated sim.
+        .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial))
     }
 
     private var skyDrag: some Gesture {
@@ -115,88 +128,66 @@ struct HourlyDetailView: View {
     }
 }
 
-/// The readout over the sim — Now-header treatment (white + shadows, no card):
-/// time, temperature, and condition, plus a "Jetzt" return button once the
-/// scrub has wandered off.
-private struct HourlyDetailHUD: View {
+/// The sheet's title, living in the top bar: a small-caps date eyebrow over
+/// the scrubbed clock time — this sheet's "place name" is a point in time.
+/// Bare white + shadow, no glass behind it.
+private struct HourlyDetailHeader: View {
     let model: HourlyTimelineModel
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(verbatim: model.temperatureLabel)
-                    .font(.system(size: 46, weight: .regular))
-                    .foregroundStyle(.white)
-                    .monospacedDigit()
-                    .shadow(radius: 8)
-                Text(verbatim: model.conditionLabel)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.white.opacity(0.9))
-                    .shadow(radius: 3)
-            }
+        VStack(spacing: 1) {
+            Text(verbatim: model.dateLabel)
+                .font(.caption.weight(.semibold))
+                .textCase(.uppercase)
+                .tracking(1.2)
+                .monospacedDigit()
+                .foregroundStyle(.white.opacity(0.72))
+                .shadow(radius: 3)
 
-            Spacer()
+            Text(verbatim: model.clockLabel)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(.white)
+                .monospacedDigit()
+                .shadow(radius: 5)
+        }
+        .accessibilityHidden(true)
+    }
+}
 
-            VStack(alignment: .trailing, spacing: 1) {
-                Text(verbatim: model.clockLabel)
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.95))
-                    .monospacedDigit()
-                    .shadow(radius: 3)
-                Text(verbatim: model.dateLabel)
-                    .font(.footnote.weight(.medium))
-                    .foregroundStyle(.white.opacity(0.75))
+/// The Now-style hero floating in the sky: big temperature, condition, and
+/// the day's range — white + shadows, no card. Hit testing is off so sky
+/// drags scrub right through the numbers.
+private struct HourlyDetailHero: View {
+    let model: HourlyTimelineModel
+
+    @ScaledMetric(relativeTo: .largeTitle) private var temperatureFontSize: CGFloat = 76
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Text(verbatim: model.temperatureLabel)
+                .font(.system(size: temperatureFontSize))
+                .foregroundStyle(.white)
+                .monospacedDigit()
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+                .shadow(radius: 12)
+
+            Text(verbatim: model.conditionLabel)
+                .font(.title3.weight(.medium))
+                .foregroundStyle(.white.opacity(0.95))
+                .shadow(radius: 3)
+
+            if let range = model.dayRangeLabel {
+                Text(verbatim: range)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.85))
                     .monospacedDigit()
                     .shadow(radius: 3)
             }
         }
         .padding(.horizontal, 20)
-        .padding(.top, 6)
+        .allowsHitTesting(false)
         .accessibilityHidden(true)
-    }
-}
-
-/// Every series of the active lens as a bare readout row over the sim — the
-/// same white-plus-shadow treatment as the header, no container chrome.
-private struct HourlyReadoutRow: View {
-    let model: HourlyTimelineModel
-
-    var body: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 16) {
-                ForEach(model.hudStats) { stat in
-                    cell(stat)
-                }
-            }
-            .padding(.horizontal, 20)
-        }
-        .scrollIndicators(.hidden)
-        .shadow(radius: 3)
-        .accessibilityHidden(true)
-    }
-
-    private func cell(_ stat: HourlyTimelineModel.HUDStat) -> some View {
-        HStack(spacing: 6) {
-            HourlySeriesSwatch(color: stat.color, kind: stat.swatch)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(verbatim: stat.label)
-                    .font(.system(size: 10, weight: .medium))
-                    .textCase(.uppercase)
-                    .foregroundStyle(.white.opacity(0.65))
-                HStack(spacing: 3) {
-                    if let degrees = stat.arrowDegrees {
-                        Image(systemName: "location.north.fill")
-                            .font(.system(size: 9))
-                            .rotationEffect(.degrees(degrees))
-                            .foregroundStyle(.teal)
-                    }
-                    Text(verbatim: stat.value)
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(.white)
-                        .monospacedDigit()
-                }
-            }
-        }
     }
 }
 
@@ -234,13 +225,13 @@ private struct HourlyLensRow: View {
             Label(lens.title, systemImage: lens.systemImage)
                 .font(.footnote.weight(.semibold))
                 .labelStyle(.titleAndIcon)
-                .foregroundStyle(isActive ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
+                .foregroundStyle(.white.opacity(isActive ? 1 : 0.65))
                 .padding(.horizontal, 12)
                 .padding(.vertical, 7)
                 .cardBackground(in: .capsule)
                 .overlay {
                     Capsule().stroke(
-                        isActive ? Color.primary.opacity(0.35) : Color.white.opacity(0.08),
+                        .white.opacity(isActive ? 0.5 : 0.1),
                         lineWidth: 1
                     )
                 }

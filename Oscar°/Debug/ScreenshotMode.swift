@@ -13,6 +13,7 @@ import Foundation
 
 enum ScreenshotScene: String {
     case nowRain
+    case nowClear
     case nowForecast
     case mapRadar
     case mapTemp

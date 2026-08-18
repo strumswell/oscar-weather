@@ -78,8 +78,13 @@ final class ScreenshotFixtureServer: URLProtocol {
         }
     }
 
-    private static func png(_ make: @escaping (URL) -> Data) -> Route {
-        Route { url in (make(url), "image/png") }
+    /// Binary radar assets. The payload is a PNG (`UIImage(data:)` sniffs the
+    /// format, and so does the widget's tile decoder), but it must be announced
+    /// as WebP: the generated oscar-server client accepts exactly the content
+    /// types the spec lists for these operations, and a mismatch throws instead
+    /// of returning the image — which silently emptied the radar map.
+    private static func radarImage(_ make: @escaping (URL) -> Data) -> Route {
+        Route { url in (make(url), "image/webp") }
     }
 
     private static func route(for url: URL) -> Route? {
@@ -133,14 +138,14 @@ final class ScreenshotFixtureServer: URLProtocol {
         case (5, "frames") where parts[4] == "grid":
             let key = parts[3]
             if isClouds {
-                return png { _ in SyntheticRadar.cloudGridPNG(frameKey: key) }
+                return radarImage { _ in SyntheticRadar.cloudGridPNG(frameKey: key) }
             }
             let typed = url.query()?.contains("style=typed") == true
-            return png { _ in SyntheticRadar.gridPNG(frameKey: key, typed: typed) }
+            return radarImage { _ in SyntheticRadar.gridPNG(frameKey: key, typed: typed) }
         case (8, "frames") where parts[4] == "tiles":
             let key = parts[3]
             guard let z = Int(parts[5]), let x = Int(parts[6]), let y = Int(parts[7]) else { return nil }
-            return png { _ in SyntheticRadar.tilePNG(frameKey: key, z: z, x: x, y: y) }
+            return radarImage { _ in SyntheticRadar.tilePNG(frameKey: key, z: z, x: x, y: y) }
         default:
             return nil
         }

@@ -4,8 +4,6 @@ import SwiftUI
 /// swappable focus: switching lenses never moves the playhead or the window.
 enum HourlyLens: String, CaseIterable, Identifiable {
     case overview
-    case temperature
-    case precipitation
     case wind
     case pressure
     case humidity
@@ -19,8 +17,6 @@ enum HourlyLens: String, CaseIterable, Identifiable {
     var title: LocalizedStringKey {
         switch self {
         case .overview: "Überblick"
-        case .temperature: "Temperatur"
-        case .precipitation: "Regen"
         case .wind: "Wind"
         case .pressure: "Druck"
         case .humidity: "Feuchte"
@@ -34,8 +30,6 @@ enum HourlyLens: String, CaseIterable, Identifiable {
     var systemImage: String {
         switch self {
         case .overview: "square.grid.2x2"
-        case .temperature: "thermometer.medium"
-        case .precipitation: "cloud.rain"
         case .wind: "wind"
         case .pressure: "barometer"
         case .humidity: "humidity"
@@ -48,47 +42,14 @@ enum HourlyLens: String, CaseIterable, Identifiable {
 }
 
 extension Color {
-    /// Rain's darkened blue reads on the light day frost; every
-    /// precipitation-blue in the sheet (bars, dots, badge, ET₀) shares it.
-    static let hourlyRain = Color.blue.mix(with: .black, by: 0.2)
+    /// Every precipitation-blue in the sheet (bars, dots, badge, ET₀) shares it.
+    static let hourlyRain = Color.blue
     static let hourlyCloud = Color(white: 0.9)
-}
-
-/// Series swatch shared by the strip legend and the readout chips: solid or
-/// dashed line sample, or a bar chip.
-struct HourlySeriesSwatch: View {
-    let color: Color?
-    let kind: HourlyTimelineModel.HUDSwatch
-
-    var body: some View {
-        if let color {
-            switch kind {
-            case .bar:
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(color)
-                    .frame(width: 6, height: 12)
-            case .line(let dashed):
-                Group {
-                    if dashed {
-                        HStack(spacing: 2) {
-                            Capsule().fill(color).frame(width: 5, height: 2.5)
-                            Capsule().fill(color).frame(width: 5, height: 2.5)
-                        }
-                    } else {
-                        Capsule().fill(color).frame(width: 12, height: 2.5)
-                    }
-                }
-                .frame(height: 12)
-            case .none:
-                EmptyView()
-            }
-        }
-    }
 }
 
 /// Everything the strip needs to render one lens: the line stack (the LAST
 /// entry is the primary the playhead rides), a shared y-domain, bar/fill
-/// flags, unit labels, and the per-day extreme marks.
+/// flags, and the per-day extreme marks.
 struct HourlyLensLayout {
     struct Line {
         let values: [Double]
@@ -96,6 +57,9 @@ struct HourlyLensLayout {
         let width: CGFloat
         let dashed: Bool
         let opacity: Double
+        /// Row label in the playhead readout box; nil keeps the row
+        /// value-only. The box rows double as the legend.
+        let label: String?
     }
 
     /// Cloud lens: a coverage ribbon at a fixed altitude row, thickness
@@ -111,13 +75,13 @@ struct HourlyLensLayout {
     let showsBars: Bool
     let barsAlpha: Double
     let fillsPrimary: Bool
-    let topLabel: String?
-    let bottomLabel: String?
     let extremes: [HourlyTimelineModel.ExtremeMark]
+    /// Formats a value with its unit ("12°C", "34 km/h") — used by the
+    /// gridline labels, the extreme marks, and the readout box alike.
     let extremeFormat: (Double) -> String
-    /// Rain lens: extremes and the playhead ride the bar tops, not a line.
-    let ridesBars: Bool
     let primaryColor: Color
+    /// The precipitation bars' row label in the readout box ("Regen").
+    var barsLabel: String? = nil
     var bands: [Band] = []
     /// Wind lens: direction arrows along the top of the strip.
     var showsDirectionArrows = false

@@ -101,13 +101,15 @@ final class ScreenshotTests: XCTestCase {
     func test02Forecast() {
         let app = launch(scene: "nowForecast")
         waitForNowContent(app)
-        // Composition: hourly strip at the top, the daily list filling the
+        // Composition: hourly strip near the top, the daily list filling the
         // rest. Scroll to the hourly section, then drag by the exact distance
-        // that puts its top just under the status bar (slow drag + hold, so
-        // no momentum overshoots the position).
+        // that parks its top at `targetY` (slow drag + hold, so no momentum
+        // overshoots the position). Not tighter than this: the conditions row
+        // sits right above the section and would land under the status bar,
+        // colliding with the clock.
         let hourly = app.descendants(matching: .any)["now.hourly"].firstMatch
         scrollTo(hourly, in: app)
-        let targetY: CGFloat = 80
+        let targetY: CGFloat = 150
         let delta = hourly.frame.minY - targetY
         if delta > 1 {
             let window = app.windows.firstMatch.frame
@@ -222,6 +224,15 @@ final class ScreenshotTests: XCTestCase {
         tapVisible(climateCard, in: app)
         sleep(3)
         snapshot("07_klima", timeWaitingForIdle: 0)
+    }
+
+    /// The calm counterpart to scene 01: same hero, clear summer sky, no rain
+    /// animation and no alert banner.
+    func test08NowClear() {
+        let app = launch(scene: "nowClear")
+        waitForNowContent(app)
+        sleep(4)
+        snapshot("08_now_clear", timeWaitingForIdle: 0)
     }
 
     // Parked scenes: rename back to test… to re-enable (the "skipped_" prefix
