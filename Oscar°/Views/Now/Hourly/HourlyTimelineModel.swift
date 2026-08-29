@@ -56,9 +56,6 @@ final class HourlyTimelineModel {
     private(set) var soilMoistureUnit = "m³/m³"
     private(set) var et0Unit = "mm"
 
-    /// The active strip lens; switching keeps playhead and window untouched.
-    var lens: HourlyLens = .overview
-
     /// Not observed: mutated lazily from `layout(for:)` during view updates.
     @ObservationIgnored private var layoutCache: [HourlyLens: HourlyLensLayout] = [:]
 
@@ -188,6 +185,24 @@ final class HourlyTimelineModel {
         return day + " \(components.day ?? 0).\(components.month ?? 0)."
     }
 
+    /// The scrubbed day's name: "Heute"/"Morgen", the weekday further out.
+    var titleLabel: String {
+        guard hasData else { return "" }
+        return HourlyFormatting.dayLabel(timestamp: scrubTime, timeZone: timeZone, now: .now)
+    }
+
+    /// The small-caps line above the title: weekday and date while the title
+    /// is relative ("Samstag · 29. Aug."), the date alone once the title IS
+    /// the weekday.
+    var eyebrowLabel: String {
+        guard hasData else { return "" }
+        let date = Date(timeIntervalSince1970: scrubTime)
+        let dayMonth = SettingService.formattedDayMonth(date, timeZone: timeZone)
+        let weekday = SettingService.formattedWeekday(date, timeZone: timeZone)
+        guard titleLabel != weekday else { return dayMonth }
+        return weekday + " · " + dayMonth
+    }
+
     var clockLabel: String {
         guard hasData else { return "" }
         // Snap the shown minutes to 10 so the label doesn't flicker mid-drag.
@@ -251,34 +266,19 @@ final class HourlyTimelineModel {
         return "\(Int(speed.rounded())) \(windUnitString)"
     }
 
-    /// The strip card's title (full variable names, unlike the short pill
-    /// titles).
-    var lensTitle: LocalizedStringKey {
+    /// The deck row's live value at the scrubbed hour, formatted like the
+    /// lens' chart labels so row and chart never disagree.
+    func rowValue(for lens: HourlyLens) -> String? {
+        guard hasData else { return nil }
+        let layout = layout(for: lens)
         switch lens {
-        case .overview: "Überblick"
-        case .wind: "Wind"
-        case .pressure: "Luftdruck"
-        case .humidity: "Luftfeuchtigkeit"
-        case .clouds: "Wolken"
-        case .soilTemperature: "Bodentemperatur"
-        case .soilMoisture: "Bodenwassergehalt"
-        case .evapotranspiration: "Referenz-Evapotranspiration"
-        }
-    }
-
-    /// One caption line under the card title saying what the chart shows —
-    /// the scrubbed hour's values live in the readout row over the sim (copy
-    /// from the retired chart cards).
-    var lensDescription: LocalizedStringKey {
-        switch lens {
-        case .overview: "Temperatur und Niederschlag"
-        case .wind: "Windgeschwindigkeit in mehreren Höhen"
-        case .pressure: "Meeresspiegel-Luftdruck"
-        case .humidity: "Relative Luftfeuchtigkeit"
-        case .clouds: "Bedeckung in drei Höhenschichten"
-        case .soilTemperature: "Temperatur in mehreren Bodentiefen"
-        case .soilMoisture: "Volumetrischer Wassergehalt je Bodentiefe"
-        case .evapotranspiration: "Wasserverlust einer Referenzfläche"
+        case .overview:
+            return HourlyFormatting.temperatureString(sample(temperature))
+        case .clouds:
+            return layout.extremeFormat(sample(cloudcover) ?? 0)
+        default:
+            guard let primary = layout.primary, let value = sample(primary.values) else { return nil }
+            return layout.extremeFormat(value)
         }
     }
 
@@ -291,10 +291,6 @@ final class HourlyTimelineModel {
         guard hasData else { return "" }
         return timeLabel + ", " + temperatureLabel + ", " + conditionLabel
             + ", " + String(localized: "Wind") + " " + windLabel
-    }
-
-    var isAwayFromNow: Bool {
-        abs(scrubTime - Date.now.timeIntervalSince1970) > 1_800
     }
 
     // MARK: - Lens layouts
@@ -388,7 +384,7 @@ final class HourlyTimelineModel {
                 fillsPrimary: false,
                 extremes: [],
                 extremeFormat: percentFormat,
-                primaryColor: .gray,
+                primaryColor: .hourlyCloud,
                 bands: [.init(values: cloudHigh, centerFraction: 0.30, label: String(localized: "Hohe Wolken")),
                         .init(values: cloudMid, centerFraction: 0.53, label: String(localized: "Mittlere Wolken")),
                         .init(values: cloudLow, centerFraction: 0.76, label: String(localized: "Tiefe Wolken"))]

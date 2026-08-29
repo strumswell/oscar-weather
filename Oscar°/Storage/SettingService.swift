@@ -416,6 +416,14 @@ public final class SettingService {
         }
     }
 
+    nonisolated static func formattedDayMonth(_ date: Date, timeZone: TimeZone) -> String {
+        format(date, key: "dayMonth|\(timeZone.identifier)") {
+            $0.locale = .autoupdatingCurrent
+            $0.timeZone = timeZone
+            $0.setLocalizedDateFormatFromTemplate("d MMM")
+        }
+    }
+
     nonisolated static func formattedShortWeekday(_ date: Date, timeZone: TimeZone) -> String {
         format(date, key: "shortWeekday|\(timeZone.identifier)") {
             $0.locale = .autoupdatingCurrent

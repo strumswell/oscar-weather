@@ -1,12 +1,12 @@
 import SwiftUI
 
-/// The variable the timeline strip currently shows. One shared timeline,
-/// swappable focus: switching lenses never moves the playhead or the window.
+/// One row of the deck card. Every lens is always on screen as a row showing
+/// its live value at the scrubbed hour; the expanded row carries the chart.
 enum HourlyLens: String, CaseIterable, Identifiable {
     case overview
     case wind
-    case pressure
     case humidity
+    case pressure
     case clouds
     case soilTemperature
     case soilMoisture
@@ -18,10 +18,10 @@ enum HourlyLens: String, CaseIterable, Identifiable {
         switch self {
         case .overview: "Überblick"
         case .wind: "Wind"
-        case .pressure: "Druck"
-        case .humidity: "Feuchte"
+        case .humidity: "Luftfeuchtigkeit"
+        case .pressure: "Luftdruck"
         case .clouds: "Wolken"
-        case .soilTemperature: "Boden"
+        case .soilTemperature: "Bodentemperatur"
         case .soilMoisture: "Bodenfeuchte"
         case .evapotranspiration: "Verdunstung"
         }
@@ -31,8 +31,8 @@ enum HourlyLens: String, CaseIterable, Identifiable {
         switch self {
         case .overview: "square.grid.2x2"
         case .wind: "wind"
-        case .pressure: "barometer"
         case .humidity: "humidity"
+        case .pressure: "barometer"
         case .clouds: "cloud"
         case .soilTemperature: "square.3.layers.3d"
         case .soilMoisture: "drop.halffull"

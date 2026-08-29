@@ -15,6 +15,7 @@ import SwiftUI
 /// minimap.
 struct HourlyTimelineStrip: View {
     let model: HourlyTimelineModel
+    let lens: HourlyLens
 
     @State private var isDragging = false
     @State private var readoutSize: CGSize = .zero
@@ -25,71 +26,49 @@ struct HourlyTimelineStrip: View {
         let scrubTime = model.scrubTime
         let windowStart = model.windowStart
         let nightRanges = model.nightRanges
-        let layout = model.layout(for: model.lens)
+        let layout = model.layout(for: lens)
 
-        VStack(spacing: 10) {
-            HStack(spacing: 8) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(model.lensTitle)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white)
-                    Text(model.lensDescription)
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.72))
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                if model.isAwayFromNow {
-                    backToNowButton
-                }
-            }
-            .animation(.snappy, value: model.isAwayFromNow)
-
-            GeometryReader { geometry in
-                let width = max(geometry.size.width, 1)
-                Canvas { context, size in
-                    draw(
-                        context: &context,
-                        size: size,
-                        layout: layout,
-                        scrubTime: scrubTime,
-                        windowStart: windowStart,
-                        nightRanges: nightRanges
-                    )
-                }
-                .contentShape(.rect)
-                .gesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { value in
-                            if !isDragging {
-                                isDragging = true
-                                model.beginPan()
-                            }
-                            model.pan(byFraction: value.translation.width / width)
-                        }
-                        .onEnded { value in
-                            isDragging = false
-                            if abs(value.translation.width) < 8, abs(value.translation.height) < 8 {
-                                model.endPan()
-                                model.tap(atFraction: min(max(0, value.location.x / width), 1))
-                            } else {
-                                let coast = (value.predictedEndTranslation.width - value.translation.width) / width
-                                model.endPan(coastFraction: coast)
-                            }
-                        }
+        GeometryReader { geometry in
+            let width = max(geometry.size.width, 1)
+            Canvas { context, size in
+                draw(
+                    context: &context,
+                    size: size,
+                    layout: layout,
+                    scrubTime: scrubTime,
+                    windowStart: windowStart,
+                    nightRanges: nightRanges
                 )
-                .overlay(alignment: .topLeading) {
-                    // Below the day-label row along the chart's top edge.
-                    HourlyReadoutBox(model: model, layout: layout)
-                        .onGeometryChange(for: CGSize.self, of: { $0.size }) { readoutSize = $0 }
-                        .offset(x: readoutX(width: width, layout: layout), y: 22)
-                        .allowsHitTesting(false)
-                }
             }
-            .frame(maxHeight: .infinity)
+            .contentShape(.rect)
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        if !isDragging {
+                            isDragging = true
+                            model.beginPan()
+                        }
+                        model.pan(byFraction: value.translation.width / width)
+                    }
+                    .onEnded { value in
+                        isDragging = false
+                        if abs(value.translation.width) < 8, abs(value.translation.height) < 8 {
+                            model.endPan()
+                            model.tap(atFraction: min(max(0, value.location.x / width), 1))
+                        } else {
+                            let coast = (value.predictedEndTranslation.width - value.translation.width) / width
+                            model.endPan(coastFraction: coast)
+                        }
+                    }
+            )
+            .overlay(alignment: .topLeading) {
+                // Below the day-label row along the chart's top edge.
+                HourlyReadoutBox(model: model, layout: layout)
+                    .onGeometryChange(for: CGSize.self, of: { $0.size }) { readoutSize = $0 }
+                    .offset(x: readoutX(width: width, layout: layout), y: 22)
+                    .allowsHitTesting(false)
+            }
         }
-        .padding(14)
-        .cardBackground(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .cardBorder(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .sensoryFeedback(.selection, trigger: model.hourTick)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Zeitleiste"))
@@ -111,23 +90,6 @@ struct HourlyTimelineStrip: View {
         let reserved = CGFloat(layout.extremeFormat(layout.domain.upperBound).count) * 5.5 + 12
         guard trailing + readoutSize.width > width - reserved else { return trailing }
         return max(width / 2 - 10 - readoutSize.width, 2)
-    }
-
-    // MARK: - Back button
-
-    private var backToNowButton: some View {
-        Button {
-            model.glide(to: Date.now.timeIntervalSince1970)
-        } label: {
-            Image(systemName: "arrow.uturn.backward")
-                .font(.caption.weight(.bold))
-                .foregroundStyle(.white.opacity(0.9))
-                .padding(8)
-                .glassEffect(.regular.tint(.white.opacity(0.35)), in: Circle())
-        }
-        .buttonStyle(.plain)
-        .transition(.opacity.combined(with: .scale(scale: 0.9)))
-        .accessibilityLabel(Text("Zur aktuellen Zeit springen"))
     }
 
     // MARK: - Drawing
@@ -559,6 +521,10 @@ private struct HourlyReadoutBox: View {
         let rows = self.rows
         if !rows.isEmpty {
             VStack(alignment: .leading, spacing: 3) {
+                Text(verbatim: model.clockLabel)
+                    .font(.caption2.weight(.medium).monospacedDigit())
+                    .foregroundStyle(.white.opacity(0.65))
+                    .padding(.bottom, 1)
                 ForEach(rows) { row in
                     HStack(spacing: 5) {
                         Circle()
@@ -617,9 +583,11 @@ private struct HourlyReadoutBox: View {
     }
 }
 
-/// Full-range overview under the strip: 14 days at a glance with the 48-hour
-/// viewport box around the playhead. Dragging the box (or tapping elsewhere)
-/// scrubs; the same grab-offset feel as the meteogram minimap.
+/// The day rail at the sheet's bottom: 14 days at a glance — white
+/// temperature line, precipitation ticks — with the 48-hour viewport box
+/// around the playhead. Lens-independent: the rail is navigation, not data
+/// display. Dragging the box (or tapping elsewhere) scrubs; the same
+/// grab-offset feel as the meteogram minimap.
 struct HourlyTimelineMinimap: View {
     let model: HourlyTimelineModel
 
@@ -630,11 +598,10 @@ struct HourlyTimelineMinimap: View {
 
     var body: some View {
         let scrubTime = model.scrubTime
-        let layout = model.layout(for: model.lens)
         GeometryReader { geometry in
             let width = max(geometry.size.width, 1)
             Canvas { context, size in
-                draw(context: &context, size: size, scrubTime: scrubTime, layout: layout)
+                draw(context: &context, size: size, scrubTime: scrubTime)
             }
             .contentShape(.rect)
             .gesture(
@@ -670,8 +637,7 @@ struct HourlyTimelineMinimap: View {
     private func draw(
         context: inout GraphicsContext,
         size: CGSize,
-        scrubTime: Double,
-        layout: HourlyLensLayout
+        scrubTime: Double
     ) {
         guard model.hasData else { return }
         let width = size.width
@@ -694,46 +660,26 @@ struct HourlyTimelineMinimap: View {
         }
 
         let times = model.times
-        if layout.showsBars {
-            let barWidth = max(1, width * CGFloat(7_200 / seconds))
-            for (index, value) in model.precipitation.enumerated() where value > 0 {
-                guard index < times.count else { break }
-                let barH = max(1.5, CGFloat(value / model.precipitationMax) * (height * 0.45))
-                context.fill(
-                    Path(CGRect(x: x(times[index]) - barWidth / 2, y: height - barH, width: barWidth, height: barH)),
-                    with: .color(.hourlyRain.opacity(0.8))
-                )
-            }
+        let barWidth = max(1, width * CGFloat(7_200 / seconds))
+        for (index, value) in model.precipitation.enumerated() where value > 0 {
+            guard index < times.count else { break }
+            let barH = max(1.5, CGFloat(value / model.precipitationMax) * (height * 0.45))
+            context.fill(
+                Path(CGRect(x: x(times[index]) - barWidth / 2, y: height - barH, width: barWidth, height: barH)),
+                with: .color(.hourlyRain.opacity(0.9))
+            )
         }
 
-        // Cloud lens: one total-cover ribbon instead of the three strip bands.
-        if !layout.bands.isEmpty {
-            let centerY = height * 0.45
-            var top: [CGPoint] = []
-            var bottom: [CGPoint] = []
-            for index in stride(from: 0, to: min(times.count, model.cloudcover.count), by: 2) {
-                let half = max(0.5, height * 0.3 * CGFloat(model.cloudcover[index] / 100))
-                let pointX = x(times[index])
-                top.append(CGPoint(x: pointX, y: centerY - half))
-                bottom.append(CGPoint(x: pointX, y: centerY + half))
-            }
-            if top.count > 1 {
-                var ribbon = Path()
-                ribbon.move(to: top[0])
-                for point in top.dropFirst() { ribbon.addLine(to: point) }
-                for point in bottom.reversed() { ribbon.addLine(to: point) }
-                ribbon.closeSubpath()
-                context.fill(ribbon, with: .color(.hourlyCloud.opacity(0.8)))
-            }
-        }
-
-        if let primary = layout.primary {
-            let lensDomain = layout.domain
-            let valueSpan = max(lensDomain.upperBound - lensDomain.lowerBound, 0.0001)
+        let temperature = model.temperature
+        if var low = temperature.min(), var high = temperature.max() {
+            let pad = max((high - low) * 0.08, 0.5)
+            low -= pad
+            high += pad
+            let valueSpan = max(high - low, 0.0001)
             var line = Path()
             var started = false
-            for index in stride(from: 0, to: min(times.count, primary.values.count), by: 2) {
-                let fraction = (primary.values[index] - lensDomain.lowerBound) / valueSpan
+            for index in stride(from: 0, to: min(times.count, temperature.count), by: 2) {
+                let fraction = (temperature[index] - low) / valueSpan
                 let point = CGPoint(x: x(times[index]), y: height * (0.78 - 0.56 * CGFloat(fraction)))
                 if started {
                     line.addLine(to: point)
@@ -742,7 +688,7 @@ struct HourlyTimelineMinimap: View {
                     started = true
                 }
             }
-            context.stroke(line, with: .color(layout.primaryColor), lineWidth: 1.25)
+            context.stroke(line, with: .color(.white.opacity(0.85)), lineWidth: 1.5)
         }
 
         let labelFont = Font.system(size: 9.5, weight: .medium)
