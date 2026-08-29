@@ -30,6 +30,7 @@ final class HourlyTimelineModel {
     private(set) var snowfall: [Double] = []
     private(set) var weathercode: [Double] = []
     private(set) var windspeed: [Double] = []
+    private(set) var windgusts: [Double] = []
     private(set) var winddirection: [Double] = []
     private(set) var windspeed80: [Double] = []
     private(set) var windspeed120: [Double] = []
@@ -49,6 +50,9 @@ final class HourlyTimelineModel {
     private(set) var precipitationMax: Double = 2.5
     private(set) var nightRanges: [ClosedRange<Double>] = []
     private(set) var dayMarks: [DayMark] = []
+    private(set) var chapters: [ChapterEngine.Chapter] = []
+    private(set) var radarTimes: [Double] = []
+    private(set) var radarRates: [Double] = []
     private(set) var timeZone: TimeZone = .current
     private(set) var precipitationUnit = "mm"
     private(set) var windUnitString = "km/h"
@@ -79,6 +83,7 @@ final class HourlyTimelineModel {
     var windowStart: Double { scrubTime - windowSeconds / 2 }
 
     var stageDate: Date { Date(timeIntervalSince1970: stageTime) }
+    var isGliding: Bool { glide != nil }
 
     private var panStartTime: Double?
     private var glide: (from: Double, to: Double, start: TimeInterval, duration: TimeInterval, easeOut: Bool)?
@@ -106,6 +111,7 @@ final class HourlyTimelineModel {
         snowfall = hourly?.snowfall ?? []
         weathercode = hourly?.weathercode ?? []
         windspeed = hourly?.windspeed_10m ?? []
+        windgusts = hourly?.windgusts_10m ?? []
         winddirection = hourly?.winddirection_10m ?? []
         windspeed80 = hourly?.windspeed_80m ?? []
         windspeed120 = hourly?.windspeed_120m ?? []
@@ -139,6 +145,44 @@ final class HourlyTimelineModel {
         precipitationMax = max(precipitation.max() ?? 0, 2.5)
         nightRanges = Self.nightRanges(times: newTimes, isDay: hourly?.is_day ?? [])
         dayMarks = Self.dayMarks(times: newTimes, timeZone: timeZone)
+        let radarPoints = (weather.precipSeries?.series ?? []).sorted { $0.timestamp < $1.timestamp }
+        radarTimes = radarPoints.map { $0.timestamp.timeIntervalSince1970 }
+        radarRates = radarPoints.map(\.precipitation)
+        chapters = ChapterEngine.chapters(
+            from: ChapterEngine.Input(
+                times: newTimes,
+                temperature: temperature,
+                precipitation: precipitation,
+                snowfall: snowfall,
+                weathercode: weathercode,
+                windgusts: windgusts,
+                cloudcover: cloudcover,
+                pressure: pressure,
+                isDay: hourly?.is_day ?? [],
+                timeZone: timeZone,
+                now: Date.now.timeIntervalSince1970,
+                precipitationUnit: precipitationUnit,
+                windUnitString: windUnitString,
+                windSpeedUnit: WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit),
+                sunrises: weather.forecast.daily?.sunrise ?? [],
+                sunsets: weather.forecast.daily?.sunset ?? [],
+                radarTimes: radarTimes,
+                radarRates: radarRates,
+                alertEvents: weather.alerts.displayInfos.map { info in
+                    ChapterEngine.AlertEvent(
+                        id: info.id,
+                        title: info.event,
+                        detail: info.details ?? info.headline,
+                        onset: info.onset?.timeIntervalSince1970,
+                        expires: info.expires?.timeIntervalSince1970,
+                        severityRank: info.severityRank,
+                        source: info.source
+                    )
+                }
+            ),
+            includingPast: true,
+            limit: nil
+        )
 
         if firstLoad {
             let now = Date.now.timeIntervalSince1970
@@ -166,6 +210,13 @@ final class HourlyTimelineModel {
         return AtmosphereWeatherMapper.interpolatedValue(at: scrubTime, times: times, values: values)
     }
 
+    /// Half-open: hours with `start <= time < end`.
+    func hourIndices(from start: Double, until end: Double) -> [Int]? {
+        guard hasData else { return nil }
+        let indices = times.indices.filter { times[$0] >= start && times[$0] < end }
+        return indices.isEmpty ? nil : indices
+    }
+
     /// Nearest-hour value for categorical series (weather code).
     private func nearestValue(in values: [Double]) -> Double? {
         guard hasData, let first = times.first, !values.isEmpty else { return nil }
@@ -185,7 +236,6 @@ final class HourlyTimelineModel {
         return day + " \(components.day ?? 0).\(components.month ?? 0)."
     }
 
-    /// The scrubbed day's name: "Heute"/"Morgen", the weekday further out.
     var titleLabel: String {
         guard hasData else { return "" }
         return HourlyFormatting.dayLabel(timestamp: scrubTime, timeZone: timeZone, now: .now)
@@ -259,15 +309,14 @@ final class HourlyTimelineModel {
 
     var windLabel: String {
         guard let speed = sample(windspeed) else { return "--" }
-        let unit = WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit)
-        if unit.usesBeaufortDisplay {
-            return "\(BeaufortScale.force(forKilometersPerHour: speed)) \(unit.displayUnit)"
-        }
-        return "\(Int(speed.rounded())) \(windUnitString)"
+        return HourlyFormatting.windString(
+            speed,
+            unit: WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit),
+            unitString: windUnitString
+        )
     }
 
-    /// The deck row's live value at the scrubbed hour, formatted like the
-    /// lens' chart labels so row and chart never disagree.
+    /// Formatted like the lens' chart labels so row and chart never disagree.
     func rowValue(for lens: HourlyLens) -> String? {
         guard hasData else { return nil }
         let layout = layout(for: lens)

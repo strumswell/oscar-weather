@@ -113,6 +113,13 @@ public final class SettingService {
             UserDefaults.standard.set(mapOverlayOpacity, forKey: "mapOverlayOpacity")
         }
     }
+    /// Which reading the hourly detail sheet opens in: the chapters timeline
+    /// (true) or the all-values deck.
+    var hourlyDetailShowsChapters: Bool {
+        didSet {
+            UserDefaults.standard.set(hourlyDetailShowsChapters, forKey: "hourlyDetailShowsChapters")
+        }
+    }
     var mapBasemapStyleRaw: String {
         didSet {
             // Shared app group so the widget basemap prerender follows the map style.
@@ -234,6 +241,7 @@ public final class SettingService {
         cloudLayerActive = UserDefaults.standard.bool(forKey: "cloudLayerActive")
         let storedOpacity = UserDefaults.standard.object(forKey: "mapOverlayOpacity") as? Double
         mapOverlayOpacity = min(max(storedOpacity ?? 0.7, 0.3), 1)
+        hourlyDetailShowsChapters = UserDefaults.standard.bool(forKey: "hourlyDetailShowsChapters")
         mapBasemapStyleRaw = Self.defaults.string(forKey: "mapBasemapStyle") ?? MapBasemapStyle.fiord.rawValue
         timeFormatPreference = TimeFormatPreference(
             rawValue: Self.defaults.string(forKey: Self.timeFormatPreferenceKey) ?? ""

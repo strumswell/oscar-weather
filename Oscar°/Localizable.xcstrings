@@ -1294,6 +1294,28 @@
         }
       }
     },
+    "Alle Werte anzeigen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Werte anzeigen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show all values"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm değerleri göster"
+          }
+        }
+      }
+    },
     "Alles auf einen Blick" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3230,6 +3252,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gizlilik"
+          }
+        }
+      }
+    },
+    "Dauer" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dauer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duration"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Süre"
           }
         }
       }
@@ -6908,7 +6953,6 @@
       }
     },
     "Klappt das Diagramm ein" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6926,6 +6970,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Grafiği kapatır"
+          }
+        }
+      }
+    },
+    "Klappt die Details ein" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klappt die Details ein"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collapses the details"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayrıntıları kapatır"
           }
         }
       }
@@ -11961,6 +12027,29 @@
         }
       }
     },
+    "Sonnenaufgang" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonnenaufgang"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunrise"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gün doğumu"
+          }
+        }
+      }
+    },
     "Sonnenaufgang bis Sonnenuntergang" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -11980,6 +12069,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gün doğumundan gün batımına"
+          }
+        }
+      }
+    },
+    "Sonnenuntergang" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonnenuntergang"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunset"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gün batımı"
           }
         }
       }
@@ -12082,6 +12194,29 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "spinner=%1$@ pending=%2$@"
+          }
+        }
+      }
+    },
+    "Spitze" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spitze"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peak"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En yüksek"
           }
         }
       }
@@ -13878,6 +14013,28 @@
         }
       }
     },
+    "Verlauf anzeigen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verlauf anzeigen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show timeline"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaman çizelgesini göster"
+          }
+        }
+      }
+    },
     "Verlauf der Tageshöchstwerte" : {
 
     },
@@ -15020,7 +15177,6 @@
       }
     },
     "Zeigt das Diagramm" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -15038,6 +15194,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Grafiği gösterir"
+          }
+        }
+      }
+    },
+    "Zeigt die Details" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigt die Details"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows the details"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayrıntıları gösterir"
           }
         }
       }

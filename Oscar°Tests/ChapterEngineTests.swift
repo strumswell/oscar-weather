@@ -97,19 +97,21 @@ struct ChapterEngineTests {
         let wind = some.first { $0.kind == .wind }
         #expect(wind != nil)
         #expect(wind?.jumpTime == Self.start + 9 * 3_600)
-        #expect(wind?.subtitle.contains("60") == true)
+        #expect(wind?.valueLabel.contains("60") == true)
     }
 
     @Test
-    func clearNightDetectedOnlyWhenClearAndDry() {
-        // Baseline: cloudcover 10, no precip → the 20:00–06:00 night qualifies.
+    func nightTitleFollowsCloudCover() {
+        // Baseline: cloudcover 10, no precip → the 20:00–06:00 night is clear.
         let clear = ChapterEngine.chapters(from: makeInput())
-        #expect(clear.contains { $0.kind == .clearNight })
+        #expect(clear.contains { $0.kind == .night && $0.systemImage == "moon.stars.fill" })
 
+        // Every night gets a chapter; an overcast one just isn't "klar".
         let cloudy = ChapterEngine.chapters(
             from: makeInput(cloudcover: Array(repeating: 80, count: Self.hours))
         )
-        #expect(!cloudy.contains { $0.kind == .clearNight })
+        #expect(cloudy.contains { $0.kind == .night })
+        #expect(!cloudy.contains { $0.kind == .night && $0.systemImage == "moon.stars.fill" })
     }
 
     @Test
@@ -142,6 +144,6 @@ struct ChapterEngineTests {
         temps[14] = 27.4
         let chapters = ChapterEngine.chapters(from: makeInput(temperature: temps))
         let day = chapters.first { $0.kind == .day }
-        #expect(day?.subtitle.contains("27°") == true)
+        #expect(day?.valueLabel.contains("27°") == true)
     }
 }

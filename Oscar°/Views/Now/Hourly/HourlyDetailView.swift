@@ -13,10 +13,14 @@ struct HourlyDetailView: View {
     @Environment(Location.self) private var location: Location
     @Environment(\.dismiss) private var dismiss
 
+    private let settingsService = SettingService.shared
+
     @State private var model = HourlyTimelineModel()
     @State private var expandedLens: HourlyLens? = .overview
     @State private var dismissalFeedback = false
     @State private var dragStartTime: Double?
+
+    private var showsChapters: Bool { settingsService.hourlyDetailShowsChapters }
 
     private static let secondsPerPoint: Double = 240
 
@@ -33,13 +37,29 @@ struct HourlyDetailView: View {
                     )
                 }
             }
+            .navigationTitle("Stündlich")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    if model.hasData {
+                        Button {
+                            withAnimation(.snappy) {
+                                settingsService.hourlyDetailShowsChapters.toggle()
+                            }
+                        } label: {
+                            Image(systemName: showsChapters ? "list.bullet" : "calendar.day.timeline.left")
+                        }
+                        .accessibilityLabel(showsChapters ? Text("Alle Werte anzeigen") : Text("Verlauf anzeigen"))
+                    }
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(role: .close, action: finish)
                 }
             }
             .sensoryFeedback(.success, trigger: dismissalFeedback)
             .sensoryFeedback(.selection, trigger: expandedLens)
+            .sensoryFeedback(.selection, trigger: showsChapters)
             .onAppear {
                 model.update(from: weather)
                 if let initialTarget {
@@ -74,18 +94,23 @@ struct HourlyDetailView: View {
                 }
 
             VStack(spacing: 0) {
-                Spacer(minLength: 0)
+                if showsChapters {
+                    HourlyChaptersView(model: model)
+                } else {
+                    Spacer(minLength: 0)
 
-                captionRow
-                    .padding(.horizontal, 2)
-                    .padding(.bottom, 14)
+                    captionRow
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 14)
 
-                HourlyDeck(model: model, expandedLens: $expandedLens)
+                    HourlyDeck(model: model, expandedLens: $expandedLens)
+                        .padding(.horizontal, 16)
+                }
 
                 HourlyTimelineMinimap(model: model)
+                    .padding(.horizontal, 16)
                     .padding(.top, 10)
             }
-            .padding(.horizontal, 16)
             .padding(.bottom, 10)
         }
         .environment(\.cardTint, AtmosphereSampler.cardFill(snapshot: snapshot))
@@ -93,13 +118,10 @@ struct HourlyDetailView: View {
         .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial.opacity(0.6)))
     }
 
-    /// The scrubbed day right above the deck: a small-caps eyebrow (weekday
-    /// and date) over the day's name — every row below shows its value on
-    /// this day; the exact time lives in the chart's readout box.
     private var captionRow: some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(verbatim: model.eyebrowLabel)
-                .font(.caption.weight(.semibold))
+                .font(.footnote.weight(.semibold))
                 .textCase(.uppercase)
                 .tracking(1.2)
                 .monospacedDigit()
@@ -107,7 +129,7 @@ struct HourlyDetailView: View {
                 .shadow(color: .black.opacity(0.35), radius: 1.5, y: 1)
 
             Text(verbatim: model.titleLabel)
-                .font(.title2.weight(.bold))
+                .font(.title.weight(.bold))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.3), radius: 2.5, y: 1)
         }
@@ -164,10 +186,8 @@ private struct HourlyDeck: View {
         .cardBorder(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
-    /// One view per lens in both states: the header keeps its identity across
-    /// the toggle (no crossfade), the chart unfolds from under it, and the
-    /// highlight fades in behind — clipped so the slide stays inside the
-    /// rounded block.
+    /// One view per lens in both states so the header keeps its identity
+    /// across the toggle; the chart unfolds from under it, clipped.
     private func row(_ lens: HourlyLens, isExpanded: Bool) -> some View {
         VStack(spacing: 0) {
             Button {
@@ -222,7 +242,7 @@ private struct HourlyDeck: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(lens.title)
         .accessibilityValue(Text(verbatim: model.rowValue(for: lens) ?? ""))
-        .accessibilityHint(Text(isExpanded ? "Klappt das Diagramm ein" : "Zeigt das Diagramm"))
+        .accessibilityHint(isExpanded ? Text("Klappt das Diagramm ein") : Text("Zeigt das Diagramm"))
     }
 }
 
