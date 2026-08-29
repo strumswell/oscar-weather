@@ -61,7 +61,7 @@ struct NowView: View {
         let cardFill = AtmosphereSampler.cardFill(snapshot: atmosphere)
 
         ZStack {
-            WeatherSimulationView(isCoveredBySheet: presentation.sheet != nil || presentation.selectedTab != .forecast)
+            WeatherSimulationView(isOffTab: presentation.selectedTab != .forecast)
                 .ignoresSafeArea()
             if weather.hasContent {
             ScrollView(.vertical) {

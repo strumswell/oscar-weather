@@ -39,16 +39,21 @@ struct RootTabView: View {
                 Tab("Orte", systemImage: "location.fill", value: AppTab.places) {
                     LocationsView()
                         .tint(.primary)
+                        .tabEntrance(.places)
                 }
                 Tab("Wetter", systemImage: "cloud.sun", value: AppTab.forecast) {
                     NowView()
+                        .tabEntrance(.forecast)
                 }
                 Tab("Karten", systemImage: "globe.europe.africa", value: AppTab.maps) {
                     WeatherMapDetailView(settingsService: settingsService)
                         .tint(.primary)
+                        .tabEntrance(.maps)
                 }
             }
-            .tabBarMinimizeBehavior(.onScrollDown)
+            // On Karten the bar stays full-size: map pans read as scroll-downs
+            // and would collapse it mid-interaction.
+            .tabBarMinimizeBehavior(presentation.selectedTab == .maps ? .never : .onScrollDown)
             // Monochrome bar like Apple Weather's bottom controls — the accent
             // tint on the selected item is unreadable on glass over a bright
             // sky. Tint cascades into tab content, so the tabs above swap in a
@@ -102,6 +107,43 @@ struct RootTabView: View {
                 WidgetCenter.shared.reloadAllTimelines()
             }
         }
+    }
+}
+
+/// One-shot reveal when a tab becomes selected: a quick fade with a subtle
+/// settle-in scale. Runs as a phase cycle (hide near-instantly, then animate
+/// in) so the trigger and the reveal can't coalesce into one no-op frame;
+/// re-taps of the current tab don't replay it. Under Reduce Motion the scale
+/// is dropped and only the crossfade remains.
+private struct TabEntranceEffect: ViewModifier {
+    let tab: AppTab
+    @Environment(NowPresentationCoordinator.self) private var presentation
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var entrances = 0
+
+    func body(content: Content) -> some View {
+        content
+            .phaseAnimator([true, false], trigger: entrances) { view, shown in
+                view
+                    .opacity(shown ? 1 : 0)
+                    .scaleEffect(shown || reduceMotion ? 1 : 0.98)
+            } animation: { shown in
+                shown ? .smooth(duration: 0.28) : .linear(duration: 0.01)
+            }
+            // initial: true covers a tab that mounts already selected (launch,
+            // first visit of a lazily created tab) — onChange alone would miss
+            // those because the selection changed before the view existed.
+            .onChange(of: presentation.selectedTab == tab, initial: true) { _, isSelected in
+                if isSelected {
+                    entrances += 1
+                }
+            }
+    }
+}
+
+private extension View {
+    func tabEntrance(_ tab: AppTab) -> some View {
+        modifier(TabEntranceEffect(tab: tab))
     }
 }
 

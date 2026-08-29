@@ -9,7 +9,11 @@ import CoreLocation
 import SwiftUI
 
 struct WeatherSimulationView: View {
-    var isCoveredBySheet = false
+    /// Another tab is in front, so the sim is fully hidden and animated layers
+    /// drop to the background frame rate. Sheets deliberately don't count:
+    /// iOS keeps the dimmed base view visible behind them, and the throttled
+    /// rate reads as jank there.
+    var isOffTab = false
     /// Renders this snapshot instead of deriving one for "now" — the hourly detail
     /// stage drives the sim with scrubbed hours through this. Same mechanism as
     /// the debug override (which still wins while debugging).
@@ -36,7 +40,7 @@ struct WeatherSimulationView: View {
             ?? MoonPhase.phaseFraction(for: Date(timeIntervalSince1970: snapshot.timestamp))
         let cloudThickness = cloudThickness(for: snapshot)
         let cloudsVisible = snapshot.cloudDensity + snapshot.cloudCoverage > 0.02
-        let pacing: SimulationPacing = reduceMotion ? .still : (isCoveredBySheet ? .background : .active)
+        let pacing: SimulationPacing = reduceMotion ? .still : (isOffTab ? .background : .active)
 
         GeometryReader { proxy in
             ZStack {
