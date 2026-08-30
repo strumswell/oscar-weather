@@ -263,9 +263,15 @@ struct HeadView: View {
           "Bewölkung \(Int((weather.forecast.current?.cloudcover ?? 0).rounded())) Prozent, Wind \(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h")), Richtung \(weather.forecast.current?.getWindDirection() ?? "unbekannt")"
         )
 
-        if hasWeatherAlerts() {
-          AlertView()
-            .padding(.top, 14)
+        if hasWeatherAlerts() || weather.primaryMeteorEvent != nil {
+          VStack(spacing: 8) {
+            if hasWeatherAlerts() {
+              AlertView(additionalMeteorEvent: weather.primaryMeteorEvent)
+            } else if let event = weather.primaryMeteorEvent {
+              MeteorAlertView(event: event)
+            }
+          }
+          .padding(.top, 14)
         }
       }
       .padding(.bottom, 40)

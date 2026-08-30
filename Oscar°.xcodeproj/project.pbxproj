@@ -295,6 +295,16 @@
 		A1F40D41971CCAB8F903D996 /* DailyEnsembleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1384FEBC1B8056F47473F23 /* DailyEnsembleModel.swift */; };
 		A4EEAFB9BDB5C695FFC3E53B /* EmojiKeyboardField.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91571E402BB124C98E222CE /* EmojiKeyboardField.swift */; };
 		A50C1FF47879E1CBDE1EBAAD /* OnboardingCollageCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221C7BB6C8216B9BB371AFAA /* OnboardingCollageCards.swift */; };
+		A570000430B0000000000001 /* APIClient+MeteorShowers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570000130B0000000000001 /* APIClient+MeteorShowers.swift */; };
+		A570000730B0000000000001 /* MeteorAlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570000630B0000000000001 /* MeteorAlertView.swift */; };
+		A570000930B0000000000001 /* MeteorShowerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570000830B0000000000001 /* MeteorShowerDetailView.swift */; };
+		A570000B30B0000000000001 /* MeteorShowerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570000A30B0000000000001 /* MeteorShowerTests.swift */; };
+		A570000F30B0000000000001 /* MeteorShowerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570000D30B0000000000001 /* MeteorShowerModels.swift */; };
+		A570001030B0000000000001 /* MeteorShowerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570000D30B0000000000001 /* MeteorShowerModels.swift */; };
+		A570001130B0000000000001 /* MeteorShowerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570000D30B0000000000001 /* MeteorShowerModels.swift */; };
+		A570001230B0000000000001 /* MeteorShowerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570000D30B0000000000001 /* MeteorShowerModels.swift */; };
+		A570001330B0000000000001 /* APIClient+MeteorShowers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570000130B0000000000001 /* APIClient+MeteorShowers.swift */; };
+		A570001430B0000000000001 /* MeteorShowerCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A570000E30B0000000000001 /* MeteorShowerCopy.swift */; };
 		A72137F1B7F5DF0662FE8D8D /* RadarTimestampBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 745875077E2E9308482DA83B /* RadarTimestampBadge.swift */; };
 		A90734B636C1E44431CA2177 /* WeatherMapView+Clouds.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0AE5DAEA03F35541715BD9 /* WeatherMapView+Clouds.swift */; };
 		A9EF23C70C7CC063E2C3A1FE /* RadarGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F6A9F92718A6327722214BF /* RadarGeometry.swift */; };
@@ -737,6 +747,13 @@
 		A1384FEBC1B8056F47473F23 /* DailyEnsembleModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyEnsembleModel.swift; sourceTree = "<group>"; };
 		A160F27B289249EBAB4BD512 /* ForecastModelPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastModelPreference.swift; sourceTree = "<group>"; };
 		A3A4A19A204C1F48E2A65853 /* DailyEnsembleForecastCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyEnsembleForecastCache.swift; sourceTree = "<group>"; };
+		A570000130B0000000000001 /* APIClient+MeteorShowers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIClient+MeteorShowers.swift"; sourceTree = "<group>"; };
+		A570000630B0000000000001 /* MeteorAlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeteorAlertView.swift; sourceTree = "<group>"; };
+		A570000830B0000000000001 /* MeteorShowerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeteorShowerDetailView.swift; sourceTree = "<group>"; };
+		A570000A30B0000000000001 /* MeteorShowerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeteorShowerTests.swift; sourceTree = "<group>"; };
+		A570000C30B0000000000001 /* DataModels 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "DataModels 2.xcdatamodel"; sourceTree = "<group>"; };
+		A570000D30B0000000000001 /* MeteorShowerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeteorShowerModels.swift; sourceTree = "<group>"; };
+		A570000E30B0000000000001 /* MeteorShowerCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeteorShowerCopy.swift; sourceTree = "<group>"; };
 		AA00000A2F9A00000000001A /* PollenSeverity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PollenSeverity.swift; sourceTree = "<group>"; };
 		AA00000C2F9A00000000001A /* EnvironmentMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentMetric.swift; sourceTree = "<group>"; };
 		AA00000E2F9A00000000001A /* AQIGaugeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AQIGaugeCard.swift; sourceTree = "<group>"; };
@@ -1048,6 +1065,9 @@
 				25ED4A4627A2F5C60050C4A9 /* HeadView.swift */,
 				2523367E27C3EB3900C2111A /* RainView.swift */,
 				2533940927C43F810087C220 /* AlertView.swift */,
+				A570000630B0000000000001 /* MeteorAlertView.swift */,
+				A570000830B0000000000001 /* MeteorShowerDetailView.swift */,
+				A570000E30B0000000000001 /* MeteorShowerCopy.swift */,
 				B0AD00203007000000000001 /* CardBackground.swift */,
 				3EB89016251A55700028FED0 /* NowView.swift */,
 				AD5000012FE3000000000001 /* NowSheet.swift */,
@@ -1134,6 +1154,8 @@
 				257D07DE2AC3561C005EBD16 /* openapi-generator-config.yml */,
 				25A1C0012F8D000100000001 /* APIContactIdentity.swift */,
 				25CB17E22B470335001D973A /* APIClient.swift */,
+				A570000130B0000000000001 /* APIClient+MeteorShowers.swift */,
+				A570000D30B0000000000001 /* MeteorShowerModels.swift */,
 				AD9100063008000000000001 /* CityConditionsService.swift */,
 				AD1000012FBB000000000001 /* DailyEnsembleForecast.swift */,
 				253BA18B2B0941670070BD5E /* LocationService.swift */,
@@ -1353,6 +1375,7 @@
 				5C22EF0630A2000000000001 /* WeatherLoadingQueryTests.swift */,
 				5C22EF0730A2000000000001 /* PollenSeverityTests.swift */,
 				5C22EF1530A2000000000001 /* OfflineCacheTests.swift */,
+				A570000A30B0000000000001 /* MeteorShowerTests.swift */,
 				80FA800919A0A233DCE02A11 /* ChapterEngineTests.swift */,
 				31FE4F7875A774F4DBE472FD /* HourlyFormattingTests.swift */,
 			);
@@ -1941,6 +1964,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A570000F30B0000000000001 /* MeteorShowerModels.swift in Sources */,
 				5A7C00012FAB000000000001 /* APIClient.swift in Sources */,
 				5A7C00022FAB000000000001 /* CacheMiddleware.swift in Sources */,
 				5A7C00032FAB000000000001 /* RetryClientMiddleware.swift in Sources */,
@@ -2010,6 +2034,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A570001030B0000000000001 /* MeteorShowerModels.swift in Sources */,
 				AD4000032FE2000000000001 /* NotificationNames.swift in Sources */,
 				AD40000A2FE2000000000001 /* WeatherSnapshotStore.swift in Sources */,
 				2598E93C2C729274004A9D5E /* CacheMiddleware.swift in Sources */,
@@ -2052,6 +2077,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A570000430B0000000000001 /* APIClient+MeteorShowers.swift in Sources */,
+				A570001130B0000000000001 /* MeteorShowerModels.swift in Sources */,
+				A570001430B0000000000001 /* MeteorShowerCopy.swift in Sources */,
+				A570000730B0000000000001 /* MeteorAlertView.swift in Sources */,
+				A570000930B0000000000001 /* MeteorShowerDetailView.swift in Sources */,
 				B0AD00133007000000000002 /* OnboardingStage.swift in Sources */,
 				B0AD00013007000000000002 /* OnboardingCoordinator.swift in Sources */,
 				B0AD00023007000000000002 /* OnboardingStep.swift in Sources */,
@@ -2315,6 +2345,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A570001330B0000000000001 /* APIClient+MeteorShowers.swift in Sources */,
+				A570001230B0000000000001 /* MeteorShowerModels.swift in Sources */,
 				AD8000172FE6000000000001 /* RadarRegion.swift in Sources */,
 				AD80001A2FE6000000000001 /* RadarFrameSupport.swift in Sources */,
 				ADA200032FF7000000000001 /* RadarSharedGeometry.swift in Sources */,
@@ -2406,6 +2438,7 @@
 				5C22EF0230A2000000000001 /* WeatherLoadingQueryTests.swift in Sources */,
 				5C22EF0330A2000000000001 /* PollenSeverityTests.swift in Sources */,
 				5C22EF1430A2000000000001 /* OfflineCacheTests.swift in Sources */,
+				A570000B30B0000000000001 /* MeteorShowerTests.swift in Sources */,
 				239CF94F17CB0520E248D95C /* ChapterEngineTests.swift in Sources */,
 				26C3C33BA63E28153264C20E /* HourlyFormattingTests.swift in Sources */,
 			);
@@ -3084,8 +3117,9 @@
 			isa = XCVersionGroup;
 			children = (
 				25BEDCE326CACF7D00D90D6B /* DataModels.xcdatamodel */,
+				A570000C30B0000000000001 /* DataModels 2.xcdatamodel */,
 			);
-			currentVersion = 25BEDCE326CACF7D00D90D6B /* DataModels.xcdatamodel */;
+			currentVersion = A570000C30B0000000000001 /* DataModels 2.xcdatamodel */;
 			path = DataModels.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

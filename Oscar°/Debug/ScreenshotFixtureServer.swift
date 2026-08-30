@@ -100,6 +100,11 @@ final class ScreenshotFixtureServer: URLProtocol {
             return json { _ in ScreenshotFixtures.ensembleJSON() }
         case "archive-api.open-meteo.com":
             return json { url in ScreenshotFixtures.archiveJSON(for: url) }
+        case "astro.oscars.love" where path.hasPrefix("/v1/meteor-showers/active"):
+            // Existing App Store scenes intentionally have no meteor notice;
+            // more importantly, screenshot mode must never fall through to a
+            // live location-bearing request.
+            return json { _ in ["supported": false, "events": [] as [Any]] }
         default:
             break
         }

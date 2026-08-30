@@ -80,22 +80,53 @@ public final class CityService {
         guard let lat = searchResult.latitude, let lon = searchResult.longitude else {
             return
         }
-        addCity(name: searchResult.name ?? "", latitude: Double(lat), longitude: Double(lon))
+        addCity(
+            name: searchResult.name ?? "",
+            latitude: Double(lat),
+            longitude: Double(lon),
+            countryCode: searchResult.country_code
+        )
     }
 
-    func addCity(name: String, latitude: Double, longitude: Double) {
+    func addCity(name: String, latitude: Double, longitude: Double, countryCode: String? = nil) {
+        let normalizedCountryCode = countryCode?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .uppercased()
         if let existingCity = self.getExistingCity(latitude: latitude, longitude: longitude) {
+            if existingCity.countryCode?.isEmpty != false,
+               normalizedCountryCode?.count == 2 {
+                existingCity.countryCode = normalizedCountryCode
+            }
             self.toggleActiveCity(city: existingCity)
         } else {
             let newCity = City(context: self.context)
             newCity.label = name
             newCity.lat = latitude
             newCity.lon = longitude
+            newCity.countryCode = normalizedCountryCode?.count == 2 ? normalizedCountryCode : nil
             newCity.selected = false
             newCity.orderIndex = self.getMaxOrderIndex() + 1
 
             save()
             self.toggleActiveCity(city: newCity)
+        }
+    }
+
+    /// Lightweight migration for cities created before country codes were
+    /// persisted. This intentionally avoids the normal `save()` fan-out: the
+    /// weather refresh that discovered the value is already in progress.
+    func backfillCountryCode(_ countryCode: String, for city: City) {
+        guard city.countryCode?.isEmpty != false else { return }
+        let normalized = countryCode.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        guard normalized.count == 2 else { return }
+        city.countryCode = normalized
+        do {
+            try context.save()
+        } catch {
+            Self.logger.error(
+                "City country-code backfill failed: \(error.localizedDescription, privacy: .public)"
+            )
+            context.rollback()
         }
     }
 

@@ -8,8 +8,14 @@
 import SwiftUI
 
 struct AlertView: View {
+    let additionalMeteorEvent: MeteorShowerEvent?
+
     @Environment(Weather.self) private var weather: Weather
     @Environment(NowPresentationCoordinator.self) private var presentation
+
+    init(additionalMeteorEvent: MeteorShowerEvent? = nil) {
+        self.additionalMeteorEvent = additionalMeteorEvent
+    }
 
     var body: some View {
         let alerts = weather.alerts.displayInfos
@@ -20,36 +26,70 @@ struct AlertView: View {
         let tint = alerts.first.map {
             AlertSeverityStyle.color(rank: $0.severityRank, source: $0.source)
         } ?? .orange
-        HStack(spacing: 5) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(tint)
-            if let top = alerts.first {
-                Text(formattedHeadline(top: top, count: alerts.count))
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.primary)
+        HStack(spacing: 0) {
+            Button(action: openAlerts) {
+                HStack(spacing: 5) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(tint)
+                    if let top = alerts.first {
+                        Text(formattedHeadline(top: top, count: alerts.count))
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.primary)
+                    }
+                }
+                .padding(.leading, 10)
+                .padding(.trailing, additionalMeteorEvent == nil ? 10 : 7)
+                .frame(minHeight: 44)
+                .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("now.alert.weather")
+            .accessibilityHint(Text("Öffnet die Wetterwarnungen"))
+
+            if let event = additionalMeteorEvent {
+                Rectangle()
+                    .fill(.primary.opacity(0.16))
+                    .frame(width: 1, height: 18)
+                    .accessibilityHidden(true)
+
+                Button {
+                    UIApplication.shared.playHapticFeedback()
+                    presentation.present(.meteorShower(event))
+                } label: {
+                    Text("+1")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(.cyan)
+                        .padding(.horizontal, 10)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(.rect)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("now.alert.meteor")
+                .accessibilityLabel(Text(MeteorShowerCopy.bannerText(for: event.presentation)))
+                .accessibilityHint(
+                    Text(String(
+                        localized: "meteor.accessibility.hint",
+                        defaultValue: "Öffnet Details zum Sternschnuppenschauer"
+                    ))
+                )
             }
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        // Translucent so the card base shows through and text stays legible
-        // on bright days.
-        .background(tint.opacity(0.52), in: Capsule())
-        .cardBackground(in: Capsule())
-        .cardBorder(Capsule())
+        // Keep the visual capsule as slim as the original alert pill while
+        // both halves retain a comfortable 44-point tap target.
+        .background {
+            Capsule()
+                .fill(tint.opacity(0.52))
+                .cardBackground(in: Capsule())
+                .cardBorder(Capsule())
+                .frame(height: 28)
+        }
         .frame(minWidth: 44, minHeight: 44)
-        .contentShape(.rect)
-        .onTapGesture {
-            UIApplication.shared.playHapticFeedback()
-            presentation.present(.alerts)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isButton)
-        .accessibilityHint(Text("Öffnet die Wetterwarnungen"))
-        .accessibilityAction {
-            UIApplication.shared.playHapticFeedback()
-            presentation.present(.alerts)
-        }
+    }
+
+    private func openAlerts() {
+        UIApplication.shared.playHapticFeedback()
+        presentation.present(.alerts)
     }
 }
 

@@ -8,6 +8,7 @@ struct LocationCandidate: Identifiable, Equatable {
     var detail: String?
     var latitude: Double
     var longitude: Double
+    var countryCode: String? = nil
 
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
