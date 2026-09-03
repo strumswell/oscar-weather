@@ -43,7 +43,9 @@ extension OnboardingStep {
         let notifications = NotificationSettingsManager.shared
         if notifications.authorizationStatus == .notDetermined,
            !notifications.enabled,
-           OnboardingRegion.hasAlertCoverage(locationService.getCoordinates()) {
+           // A fresh install has no fix yet right after the permission prompt;
+           // fall back to the last known or default coordinates instead of skipping.
+           OnboardingRegion.hasAlertCoverage(locationService.knownCoordinates() ?? locationService.getCoordinates()) {
             return .notifications
         }
         return .finale

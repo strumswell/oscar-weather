@@ -26,6 +26,10 @@ actor CacheStore {
   }
 
   private var cache: [String: (Date, HTTPResponse, Data)] = [:]
+
+  func dropMemory() {
+    cache.removeAll()
+  }
   private let fileManager = FileManager.default
   private let cacheDirectory: URL
   private let maxEntryCount: Int
@@ -351,7 +355,9 @@ nonisolated final class CachingMiddleware: ClientMiddleware {
         }
       }
 
-      if let (_, cachedResponse, cachedData) = cached {
+      if response.status.code == 429 || response.status.code >= 500,
+        let (_, cachedResponse, cachedData) = cached
+      {
         Self.logger.info(" ---> Return stale cache after HTTP \(response.status.code, privacy: .public) for \(baseURL, privacy: .public)")
         return (cachedResponse, HTTPBody(cachedData))
       }

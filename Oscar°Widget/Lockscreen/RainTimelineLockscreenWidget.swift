@@ -23,9 +23,6 @@ struct RainTimelineEntry: TimelineEntry {
 struct RainTimelineProvider: TimelineProvider {
     let client = APIClient.shared
 
-    static let horizon: TimeInterval = 90 * 60
-    static let maxBars = 18
-
     func placeholder(in context: Context) -> RainTimelineEntry {
         Self.makeEntry(from: Self.placeholderSeries(), now: Date())
     }
@@ -70,12 +67,7 @@ struct RainTimelineProvider: TimelineProvider {
             )
         }
 
-        // One radar step of slack into the past so the bar for "now" survives
-        // the 5-min cadence; everything else is the upcoming window.
-        let points = series.series
-            .filter { $0.timestamp > now.addingTimeInterval(-150) && $0.timestamp <= now.addingTimeInterval(Self.horizon) }
-            .sorted { $0.timestamp < $1.timestamp }
-            .prefix(Self.maxBars)
+        let points = RainNowcastSummary.points(from: series, now: now)
 
         guard let last = points.last else {
             // Series exists but has no usable frames around "now" (stale data).
@@ -91,36 +83,15 @@ struct RainTimelineProvider: TimelineProvider {
         return RainTimelineEntry(
             date: now,
             bars: points.map { max(0, $0.precipitation) },
-            headline: headline(for: Array(points), now: now),
+            headline: RainNowcastSummary.headline(for: points, now: now),
             spanMinutes: max(0, Int((last.timestamp.timeIntervalSince(now) / 60).rounded())),
             hasRadarCoverage: true
         )
     }
 
-    static func headline(for points: [PrecipPoint], now: Date) -> String {
-        let isRainingNow = (points.first?.precipitation ?? 0) > 0
-
-        if isRainingNow {
-            if let end = points.first(where: { $0.precipitation <= 0 }) {
-                let minutes = max(5, Int((end.timestamp.timeIntervalSince(now) / 60).rounded()))
-                if minutes <= 60 {
-                    return String(localized: "Regen · noch ~\(minutes) min", comment: "LS Widget Regenverlauf: Regen endet in X Minuten")
-                }
-                return String(localized: "Regen bis \(SettingService.formattedTime(end.timestamp))", comment: "LS Widget Regenverlauf: Regen endet um Uhrzeit")
-            }
-            let minutes = max(5, Int((points.last!.timestamp.timeIntervalSince(now) / 60).rounded()))
-            return String(localized: "Regen · noch >\(minutes) min", comment: "LS Widget Regenverlauf: Regen hält länger als das Radarfenster an")
-        }
-
-        if let start = points.first(where: { $0.precipitation > 0 }) {
-            return String(localized: "Regen ab \(SettingService.formattedTime(start.timestamp))", comment: "LS Widget Regenverlauf: Regen beginnt um Uhrzeit")
-        }
-        return String(localized: "Kein Regen in Sicht", comment: "LS Widget Regenverlauf: kein Regen im Radarfenster")
-    }
-
     /// Synthetic series for placeholder/snapshot: dry now, rain starting mid-window.
     static func placeholderSeries(now: Date = Date()) -> PrecipSeriesResponse {
-        let points: [PrecipPoint] = (0..<maxBars).map { step -> PrecipPoint in
+        let points: [PrecipPoint] = (0..<RainNowcastSummary.maxBars).map { step -> PrecipPoint in
             let timestamp = now.addingTimeInterval(Double(step) * 300)
             let precipitation: Double
             if step < 7 {
@@ -231,7 +202,7 @@ private struct RainTimelineBars: View {
     private static let barAreaHeight: CGFloat = 24
 
     private var reference: Double {
-        max(2.0, bars.max() ?? 0)
+        RainNowcastSummary.reference(for: bars)
     }
 
     var body: some View {
@@ -256,8 +227,7 @@ private struct RainTimelineBar: View {
 
     private var height: CGFloat {
         guard value > 0 else { return 3 }
-        // Square root emphasizes light rain, which is what matters at a glance.
-        let fraction = min(1.0, (value / reference).squareRoot())
+        let fraction = RainNowcastSummary.barFraction(value: value, reference: reference)
         return 4 + CGFloat(fraction) * (Self.barAreaHeight - 4)
     }
 

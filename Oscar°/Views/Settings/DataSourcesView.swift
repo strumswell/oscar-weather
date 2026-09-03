@@ -9,52 +9,12 @@ struct DataSourcesView: View {
   var body: some View {
     List {
       Section("Wetterdaten") {
-        NavigationLink {
-          OpenMeteoAttribution()
-        } label: {
-          OpenMeteoLabel()
-        }
-
-        NavigationLink {
-          DWDAttribution()
-        } label: {
-          DWDLabel()
-        }
-
-        NavigationLink {
-          OperaAttribution()
-        } label: {
-          OperaLabel()
-        }
-
-        NavigationLink {
-          NOAAAttribution()
-        } label: {
-          NOAALabel()
-        }
-
-        NavigationLink {
-          CwaAttribution()
-        } label: {
-          CwaLabel()
-        }
-
-        NavigationLink {
-          RedemetAttribution()
-        } label: {
-          RedemetLabel()
-        }
-
-        NavigationLink {
-          AemetAttribution()
-        } label: {
-          AemetLabel()
-        }
-
-        NavigationLink {
-          EcccAttribution()
-        } label: {
-          EcccLabel()
+        ForEach(DataProvider.all) { provider in
+          NavigationLink {
+            ProviderAttributionPage(provider: provider)
+          } label: {
+            ProviderRow(provider: provider)
+          }
         }
 
         SettingsExternalLink(destination: URL(string: "https://www.openstreetmap.org/copyright")!) {
@@ -64,7 +24,7 @@ struct DataSourcesView: View {
 
         SettingsExternalLink(destination: URL(string: "https://openfreemap.org")!) {
           Label {
-            Text(verbatim: "Kartenkacheln: OpenFreeMap")
+            Text("Kartenkacheln: OpenFreeMap")
           } icon: {
             Image(systemName: "square.grid.3x3.fill")
           }

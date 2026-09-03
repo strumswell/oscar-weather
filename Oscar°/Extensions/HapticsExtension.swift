@@ -1,16 +1,7 @@
-//
-//  HapticsExtension.swift
-//  Oscar°
-//
-//  Created by Philipp Bolte on 23.04.24.
-//
+import UIKit
 
-import Foundation
-import SwiftUI
-
-extension UIApplication {
-    func playHapticFeedback() {
-        let hapticFeedback = UIImpactFeedbackGenerator(style: .rigid)
-        hapticFeedback.impactOccurred(intensity: 0.5)
+enum Haptics {
+    @MainActor static func impact() {
+        UIImpactFeedbackGenerator(style: .rigid).impactOccurred(intensity: 0.5)
     }
 }

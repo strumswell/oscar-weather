@@ -1,0 +1,176 @@
+#if DEBUG
+//
+//  ScreenshotFixtureServer.swift
+//  Oscar°
+//
+//  URLProtocol fake server behind `-screenshotScene`: intercepts the forecast,
+//  air-quality, alert, ensemble, archive, and notification endpoints on
+//  URLSession.shared and answers from ScreenshotFixtures. oscar-server's radar
+//  endpoints (frames, value grids, raster tiles, motion, cells, series) are
+//  answered from SyntheticRadar so the map and widget scenes are deterministic.
+//  Everything else (basemap tiles, colormaps) passes through untouched.
+//
+
+import Foundation
+import HTTPTypes
+import OpenAPIRuntime
+
+final class ScreenshotFixtureServer: URLProtocol {
+    override class func canInit(with request: URLRequest) -> Bool {
+        guard ScreenshotMode.active, let url = request.url else { return false }
+        return route(for: url) != nil
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
+
+    override func startLoading() {
+        guard let url = request.url, let route = Self.route(for: url) else {
+            client?.urlProtocol(self, didFailWithError: URLError(.unsupportedURL))
+            return
+        }
+        do {
+            let (body, contentType) = try route.respond(url)
+            let response = HTTPURLResponse(
+                url: url,
+                statusCode: 200,
+                httpVersion: "HTTP/1.1",
+                headerFields: ["Content-Type": contentType]
+            )!
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: body)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
+        }
+    }
+
+    override func stopLoading() {}
+
+    // MARK: - Staged responses (non-URLProtocol paths)
+
+    /// The fixture payload for a URL, or nil to let it hit the network.
+    /// Backs the URLProtocol AND the APIClient staging seams — watchOS runs
+    /// URLSession loading out of process, so URLProtocol never fires there.
+    static func stagedResponse(for url: URL) -> (body: Data, contentType: String)? {
+        guard ScreenshotMode.active, let route = route(for: url) else { return nil }
+        return try? route.respond(url)
+    }
+
+    static func stagedFetch(_ request: URLRequest) -> (Data, HTTPURLResponse)? {
+        guard let url = request.url, let staged = stagedResponse(for: url) else { return nil }
+        let response = HTTPURLResponse(
+            url: url, statusCode: 200, httpVersion: "HTTP/1.1",
+            headerFields: ["Content-Type": staged.contentType]
+        )!
+        return (staged.body, response)
+    }
+
+    // MARK: - Routing
+
+    private struct Route {
+        let respond: (URL) throws -> (Data, String)
+    }
+
+    private static func json(_ make: @escaping (URL) -> Any) -> Route {
+        Route { url in
+            (try JSONSerialization.data(withJSONObject: make(url)), "application/json")
+        }
+    }
+
+    /// Binary radar assets. The payload is a PNG (`UIImage(data:)` sniffs the
+    /// format, and so does the widget's tile decoder), but it must be announced
+    /// as WebP: the generated oscar-server client accepts exactly the content
+    /// types the spec lists for these operations, and a mismatch throws instead
+    /// of returning the image — which silently emptied the radar map.
+    private static func radarImage(_ make: @escaping (URL) -> Data) -> Route {
+        Route { url in (make(url), "image/webp") }
+    }
+
+    private static func route(for url: URL) -> Route? {
+        guard let host = url.host() else { return nil }
+        let path = url.path()
+
+        switch host {
+        case "api.open-meteo.com" where path.hasPrefix("/v1/forecast"):
+            return json { _ in ScreenshotFixtures.forecastJSON() }
+        case "air-quality-api.open-meteo.com":
+            return json { _ in ScreenshotFixtures.airQualityJSON() }
+        case "ensemble-api.open-meteo.com":
+            return json { _ in ScreenshotFixtures.ensembleJSON() }
+        case "archive-api.open-meteo.com":
+            return json { url in ScreenshotFixtures.archiveJSON(for: url) }
+        default:
+            break
+        }
+
+        guard url.absoluteString.hasPrefix(radarBaseURL) else { return nil }
+
+        if path.hasPrefix("/radar/series") {
+            return json { _ in ScreenshotFixtures.precipSeriesJSON() }
+        }
+        if path.hasPrefix("/weather-alerts/point") {
+            return json { _ in ScreenshotFixtures.alertsJSON() }
+        }
+        // The notifications scene must never register against the real backend.
+        if path.hasPrefix("/notifications") {
+            return json { _ in
+                ["subscriptionId": "screenshot-subscription", "apiKey": "screenshot-key"]
+            }
+        }
+
+        // Synthetic radar: /radar/{region}/frames[/{key}/(grid|tiles/z/x/y)]
+        // plus /radar/{region}/(motion|cells). The clouds endpoints share the radar
+        // wire shape, so the same synthetic generators answer them. Colormaps and
+        // basemaps stay live.
+        let parts = path.split(separator: "/").map(String.init)
+        guard parts.first == "radar" || parts.first == "clouds", parts.count >= 3 else { return nil }
+        let isClouds = parts.first == "clouds"
+
+        switch (parts.count, parts[2]) {
+        case (3, "frames"):
+            return json { _ in SyntheticRadar.framesJSON() }
+        case (3, "motion"):
+            return json { _ in SyntheticRadar.motionJSON() }
+        case (3, "cells"):
+            return json { _ in SyntheticRadar.cellsJSON() }
+        case (5, "frames") where parts[4] == "grid":
+            let key = parts[3]
+            if isClouds {
+                return radarImage { _ in SyntheticRadar.cloudGridPNG(frameKey: key) }
+            }
+                return radarImage { _ in SyntheticRadar.gridPNG(frameKey: key) }
+        case (8, "frames") where parts[4] == "tiles":
+            let key = parts[3]
+            guard let z = Int(parts[5]), let x = Int(parts[6]), let y = Int(parts[7]) else { return nil }
+            return radarImage { _ in SyntheticRadar.tilePNG(frameKey: key, z: z, x: x, y: y) }
+        default:
+            return nil
+        }
+    }
+}
+
+/// OpenAPI-client edition of the fixture server, prepended to every generated
+/// client via `APIClient.stagingMiddlewares` (see there for the watchOS why).
+struct ScreenshotFixtureMiddleware: ClientMiddleware {
+    func intercept(
+        _ request: HTTPRequest,
+        body: HTTPBody?,
+        baseURL: URL,
+        operationID: String,
+        next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
+    ) async throws -> (HTTPResponse, HTTPBody?) {
+        // Concatenate, don't resolve: request.path is relative to the server
+        // URL, and URL(string:relativeTo:) would drop the base's own path
+        // segment (e.g. the /v1 in api.open-meteo.com/v1).
+        if let url = URL(string: baseURL.absoluteString + (request.path ?? "")),
+           let staged = ScreenshotFixtureServer.stagedResponse(for: url) {
+            var response = HTTPResponse(status: .ok)
+            response.headerFields[.contentType] = staged.contentType
+            return (response, HTTPBody(staged.body))
+        }
+        return try await next(request, body, baseURL)
+    }
+}
+#endif

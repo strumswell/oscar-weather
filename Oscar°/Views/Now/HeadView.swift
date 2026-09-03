@@ -1,6 +1,6 @@
 //
 //  HeadView.swift
-//  Weather
+//  Oscar°
 //
 //  Created by Philipp Bolte on 24.10.20.
 
@@ -8,6 +8,7 @@ import CoreLocation
 import SwiftUI
 
 struct HeadView: View {
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @Environment(Weather.self) private var weather: Weather
   @Environment(Location.self) private var location: Location
   @Environment(NowPresentationCoordinator.self) private var presentation
@@ -47,16 +48,7 @@ struct HeadView: View {
   /// never the generic base name, the city name below already covers that.
   /// The GPS entry's standard location glyph sits inline with the name instead.
   private var eyebrow: Text? {
-    let personalization = activePersonalization
-    var parts: [Text] = []
-    if let emoji = personalization.mark.emoji {
-      parts.append(Text(emoji))
-    }
-    if let label = personalization.customLabel {
-      parts.append(Text(label))
-    }
-    guard let first = parts.first else { return nil }
-    return parts.dropFirst().reduce(first) { $0 + Text(verbatim: " ") + $1 }
+    eyebrowDescription.map { Text(verbatim: $0) }
   }
 
   /// The GPS entry keeps its standard glyph directly before the resolved
@@ -84,13 +76,6 @@ struct HeadView: View {
     return status == .authorizedWhenInUse || status == .authorizedAlways
   }
 
-  private static let trendTimeFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.timeStyle = .short
-    formatter.dateStyle = .none
-    return formatter
-  }()
-
   /// Arrow + minute for the cloud metric's annotation: the screenshot mock
   /// (`-mockCloudTrend`) wins, otherwise the satellite series' detected
   /// transition — nil (the usual case) renders nothing.
@@ -98,7 +83,7 @@ struct HeadView: View {
     if let mock = MockCloudTrend.current { return (mock.arrow, mock.time) }
     guard let trend = weather.cloudSeries?.trend() else { return nil }
     return (trend.direction == .clearing ? "arrow.down.right" : "arrow.up.right",
-            Self.trendTimeFormatter.string(from: trend.at))
+            SettingService.formattedTime(trend.at, timeZone: weather.forecast.locationTimeZone))
   }
 
   /// Exclusive selection over the saved places, tagged by objectID URI;
@@ -138,13 +123,13 @@ struct HeadView: View {
 
   private func switchTo(_ city: City) {
     guard !city.selected else { return }
-    UIApplication.shared.playHapticFeedback()
+    Haptics.impact()
     cityService.toggleActiveCity(city: city)
   }
 
   private func switchToCurrentLocation() {
     guard cityService.getSelectedCity() != nil else { return }
-    UIApplication.shared.playHapticFeedback()
+    Haptics.impact()
     cityService.disableAllCities()
   }
 
@@ -191,7 +176,7 @@ struct HeadView: View {
       .shadow(radius: 5)
       .contentShape(Rectangle())
       .onTapGesture {
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
         presentation.selectedTab = .places
       }
       // Long-press shortcut for switching places without leaving the
@@ -200,7 +185,7 @@ struct HeadView: View {
         locationSwitchPicker
         Divider()
         Button {
-          UIApplication.shared.playHapticFeedback()
+          Haptics.impact()
           presentation.selectedTab = .places
         } label: {
           Label("Orte verwalten", systemImage: "list.bullet")
@@ -212,7 +197,7 @@ struct HeadView: View {
         Text("Ort ändern, aktuell \([eyebrowDescription, location.name].compactMap { $0 }.joined(separator: ", "))")
       )
       .accessibilityAction {
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
         presentation.selectedTab = .places
       }
       .padding(.bottom, 10)
@@ -229,6 +214,7 @@ struct HeadView: View {
           .shadow(radius: 15)
           .contentTransition(.numericText())
           .animation(.default, value: weather.forecast.current?.temperature)
+          .accessibilityLabel(Text("Temperatur \(roundTemperatureString(temperature: weather.forecast.current?.temperature))"))
 
         Spacer(minLength: Self.metricsGapMinHeight)
 
@@ -269,10 +255,10 @@ struct HeadView: View {
         }
       }
       .padding(.bottom, 40)
-      .scrollTransition { content, phase in
+      .scrollTransition { [reduceMotion] content, phase in
         content
           .opacity(phase.isIdentity ? 1 : 0.8)
-          .scaleEffect(phase.isIdentity ? 1 : 0.99)
+          .scaleEffect(reduceMotion || phase.isIdentity ? 1 : 0.99)
       }
     }
   }

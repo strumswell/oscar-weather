@@ -176,7 +176,7 @@ enum RadarSnapshotRenderer {
             tileSource: .radar(region: region, key: frame.key),
             maximumTileZoom: 10,
             frameDate: frame.date,
-            colormapId: RadarProduct.precipitation.colormapId
+            colormapId: RadarPlasma.colormapId
         )
 
         let bounds = (response.image_bounds ?? response.bounds).asDomain
@@ -210,7 +210,7 @@ enum RadarSnapshotRenderer {
             tileSource: .ecmwfModel(key: frame.key),
             maximumTileZoom: 7,
             frameDate: frame.date,
-            colormapId: RadarProduct.precipitation.colormapId  // ECMWF precip shares plasma
+            colormapId: RadarPlasma.colormapId // ECMWF precip shares plasma
         )
     }
 

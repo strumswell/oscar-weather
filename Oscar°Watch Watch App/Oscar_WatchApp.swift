@@ -23,13 +23,17 @@ struct Oscar_Watch_Watch_AppApp: App {
         let location = Location()
         let weather = MainActor.assumeIsolated {
             let weather = Weather()
+            #if DEBUG
             if ScreenshotMode.bootstrap() {
                 location.coordinates = CLLocationCoordinate2D(
                     latitude: ScreenshotFixtures.latitude,
                     longitude: ScreenshotFixtures.longitude
                 )
                 location.name = "Leipzig"
-            } else if let snapshot = WeatherSnapshotStore.load() {
+                return weather
+            }
+            #endif
+            if let snapshot = WeatherSnapshotStore.load() {
                 // Hydrate before the first frame so a cold start opens on the
                 // last session's scene instead of flashing the twilight
                 // fallback until scenePhase turns active (same pattern as the

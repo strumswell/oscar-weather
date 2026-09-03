@@ -19,8 +19,7 @@ struct DailyView: View {
     let showsPlaceholders = shouldShowPlaceholders
     let dayNumber = showsPlaceholders ? placeholderDayCount : dailyDisplayCount
     let temperatureScale = displayedTemperatureScale
-    let heading = String.localizedStringWithFormat(
-      NSLocalizedString("%d-Tage", comment: "Headline for Daily View"), dayNumber)
+    let heading = String(localized: "\(dayNumber)-Tage", comment: "Headline for Daily View")
     let temperatureUnit = weather.forecast.daily_units?.temperature_2m_min ?? "°C"
     let precipitationUnit = weather.forecast.daily_units?.precipitation_sum ?? "mm"
 
@@ -46,7 +45,7 @@ struct DailyView: View {
                   .foregroundStyle(Color(UIColor.label))
                   .bold()
                   .frame(width: weekdayColumnWidth, alignment: .leading)
-                Image(getWeatherIcon(pos: dayPos))
+                Image(decorative: getWeatherIcon(pos: dayPos))
                   .resizable()
                   .scaledToFit()
                   .frame(width: dayIconSize, height: dayIconSize)
@@ -72,6 +71,7 @@ struct DailyView: View {
                   .frame(width: temperatureColumnWidth, alignment: .leading)
               }
               .padding(.vertical, 4)
+              .accessibilityElement(children: .combine)
             }
           }
         }
@@ -210,7 +210,7 @@ extension DailyView {
         return nil
       }
 
-      let timeZone = TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? .current
+      let timeZone = weather.forecast.locationTimeZone
       var calendar = Calendar(identifier: .gregorian)
       calendar.timeZone = timeZone
 
@@ -236,33 +236,13 @@ extension DailyView {
     return values[index]
   }
 
-  public func getWeekDay(timestamp: Double) -> String {
-    let dateFormatter = DateFormatter()
-    dateFormatter.timeZone =
-      TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? TimeZone.current
-    dateFormatter.dateFormat = "E"
-    return dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(timestamp)))
+  func getWeekDay(timestamp: Double) -> String {
+    SettingService.formattedShortWeekday(
+      Date(timeIntervalSince1970: timestamp), timeZone: weather.forecast.locationTimeZone)
   }
 
-  public func getWeatherIcon(pos: Int) -> String {
-    switch weather.forecast.daily?.weathercode?[pos] ?? 0 {
-    case 0, 1:
-      return "01d"
-    case 2:
-      return "02d"
-    case 3:
-      return "04d"
-    case 45, 48:
-      return "50d"
-    case 51:
-      return "10d"
-    case 71, 73, 75, 77, 85, 86:
-      return "13d"
-    case 95, 96, 99:
-      return "11d"
-    default:
-      return "09d"
-    }
+  func getWeatherIcon(pos: Int) -> String {
+    HourlyFormatting.weatherIconName(weatherCode: weather.forecast.daily?.weathercode?[pos] ?? 0, isDay: 1)
   }
 
   private func presentDetails() {

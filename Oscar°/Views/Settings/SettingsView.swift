@@ -30,7 +30,7 @@ struct SettingsView: View {
             Label("Alerts", systemImage: "bell.badge.fill")
               .labelStyle(.settingsIcon(.red))
           }
-          .accessibilityIdentifier("legal.notifications")
+          .accessibilityIdentifier("settings.alerts")
 
           NavigationLink {
             UnitSettings()

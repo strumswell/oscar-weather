@@ -81,7 +81,7 @@ struct ClimateView: View {
             }
             .buttonStyle(.plain)
             .accessibilityElement(children: .combine)
-            .accessibilityLabel(Text("Klima. \(climateHeadline(summary)) \(climateStatLine(summary, unit))"))
+            .accessibilityLabel(Text("Klima. \(ClimateCopy.headline(summary)) \(ClimateCopy.statLine(summary, unit))"))
             .accessibilityHint(Text("Öffnet Klimadetails"))
             .accessibilityIdentifier("now.climate")
         } else {
@@ -90,7 +90,7 @@ struct ClimateView: View {
     }
 
     private func presentDetail(_ summary: ClimateSummary) {
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
         presentation.present(.climate(summary))
     }
 }

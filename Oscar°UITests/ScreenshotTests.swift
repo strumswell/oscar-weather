@@ -258,7 +258,7 @@ final class ScreenshotTests: XCTestCase {
         waitForNowContent(app)
         openSettingsTab(app)
 
-        let notificationsRow = app.descendants(matching: .any)["legal.notifications"].firstMatch
+        let notificationsRow = app.descendants(matching: .any)["settings.alerts"].firstMatch
         XCTAssertTrue(notificationsRow.waitForExistence(timeout: 10))
         notificationsRow.tap()
 
@@ -279,7 +279,7 @@ final class ScreenshotTests: XCTestCase {
         scrollTo(settingsButton, in: app, maxSwipes: 15)
         tapVisible(settingsButton, in: app)
         XCTAssertTrue(
-            app.descendants(matching: .any)["legal.notifications"].waitForExistence(timeout: 10),
+            app.descendants(matching: .any)["settings.alerts"].waitForExistence(timeout: 10),
             "Settings sheet did not open"
         )
     }

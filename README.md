@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="img/thumbnail.png" alt="Oscar° — Weather for iOS" width="800">
+  <img src="img/thumbnail.png" alt="Oscar° - Weather for iOS" width="800">
 </p>
 
 <h1 align="center">Oscar Weather</h1>
 
 <p align="center">
-  A SwiftUI weather app with global forecasts and enhanced regional coverage for Europe.
+  A SwiftUI weather app with global forecasts and enhanced regional coverage for radar, satellite, and alerts.
 </p>
 
 <p align="center">
@@ -13,7 +13,7 @@
     <img src="https://img.shields.io/badge/TestFlight-Join%20Beta-0075FF?style=flat&logo=apple" alt="TestFlight Beta">
   </a>
   <img src="https://img.shields.io/badge/iOS-26%2B-black?style=flat&logo=apple" alt="iOS 26+">
-  <img src="https://img.shields.io/badge/Swift-5.9-FA7343?style=flat&logo=swift&logoColor=white" alt="Swift 5.9">
+  <img src="https://img.shields.io/badge/Swift-6.0-FA7343?style=flat&logo=swift&logoColor=white" alt="Swift 6.0">
   <img src="https://img.shields.io/badge/SwiftUI-blue?style=flat" alt="SwiftUI">
 </p>
 
@@ -21,7 +21,7 @@
 
 ## Overview
 
-Oscar provides current conditions, hourly and daily forecasts, rain radar, air quality, and weather alerts. Forecasts work globally via Open-Meteo's `best_match` feature, which automatically selects from 15+ national weather services (DWD, ECMWF, NOAA, Météo-France, and others) based on location. Several features are region-specific -- see details below.
+Oscar provides current conditions, an hourly and daily forecast, rain radar, satellite imagery, air quality, and severe weather alerts, on iPhone and Apple Watch. Forecasts work globally through Open-Meteo's `best_match` feature, which automatically picks a national weather service for the location, and 17 individual models can be selected by hand. Radar, satellite, and alerts have their own regional coverage, listed below.
 
 > **Note:** Oscar° is in active development and not yet intended for production use.
 
@@ -29,49 +29,51 @@ Oscar provides current conditions, hourly and daily forecasts, rain radar, air q
 
 ## Features
 
-### Forecasts — Global
+### Forecasts, Ensembles & Climate: Global
 - Current conditions: temperature, wind, cloud cover, humidity, pressure, UV index
-- 36-hour hourly forecast and 12-day daily forecast
-- Probabilistic ensemble forecasts
-- Sunrise & sunset times
+- 48-hour hourly forecast and 12-day daily forecast
+- Probabilistic ensemble forecasts for temperature, precipitation, and wind
+- An hourly detail deck with a live value for every metric (wind, humidity, pressure, clouds, soil temperature and moisture, evapotranspiration), each expandable into its own chart, plus a toggleable chapter timeline
+- A warming-stripes climate timeline built from decades of daily-high history
+- 17 selectable forecast models (ECMWF, DWD ICON, NOAA GFS, Météo-France, UK Met Office, and more) in addition to the automatic best-match pick
+- Sunrise and sunset times
 
-### Rain Radar — Germany / Central Europe
-- Interactive radar map with self-hosted rain tiles and timeline playback
-- 2-hour rain intensity chart sourced from BrightSky (DWD data, Germany-focused)
-- RainViewer global radar overlay
+### Radar & Satellite: Regional
+- Live rain radar with short-term nowcast and a playable timeline: DWD (Germany / Central Europe), EUMETNET OPERA (Europe), NOAA MRMS (USA), CWA QPESUMS (Taiwan), REDEMET (Brazil), and AEMET (Canary Islands)
+- Storm cell tracking with footprints and projected paths, where radar coverage exists
+- Live satellite cloud imagery from EUMETSAT's Meteosat, covering Europe, Africa, and the Atlantic, updated every 15 minutes
+- Adjustable motion arrows, smoothing, and opacity, plus three basemap styles (Fiord, Dark, Light)
 
-### Air Quality & Environment — Global
-- Real-time AQI with hourly trend chart
-- Soil temperature and moisture at multiple depths (0–81 cm)
-- Evapotranspiration (ET0), atmospheric pressure, and humidity
-- Pollen levels by type -- Europe only (alder, birch, grass, mugwort, ragweed)
+### Map Layers: Central Europe and Global
+Forecast tiles for precipitation, temperature, wind, and pressure (with isobars), generated in-house:
 
-### Weather Alerts
-- Germany: live warnings via BrightSky (DWD data)
-- Canada: live warnings via Environment Canada
-- Alert details include valid time window and severity description
-- Push notifications for rain events -- Germany / Central Europe only
+| Coverage | Source |
+|---|---|
+| Central Europe | DWD ICON-D2 |
+| Global | ECMWF IFS |
 
-### Map Layers — Global / Central Europe
-Forecast map tiles are generated in-house for the next 3 days across three variables:
+### Air Quality & Environment
+- Global: real-time AQI (PM2.5, PM10, NO2, O3, SO2) with an hourly trend chart
+- Global: UV index, soil temperature and moisture at multiple depths, and evapotranspiration (ET0)
+- Europe only: pollen levels by type (alder, birch, grass, mugwort, ragweed)
 
-| Layer | Source | Coverage |
-|---|---|---|
-| Temperature | DWD ICON D2 | Central Europe |
-| Wind | DWD ICON D2 | Central Europe |
-| Precipitation | DWD ICON D2 | Central Europe |
-| Temperature | NOAA GFS | Global |
-| Wind | NOAA GFS | Global |
-| Precipitation | NOAA GFS | Global |
+### Weather Alerts & Notifications
+- In-app alerts and warning polygons: Germany (DWD, native), the rest of Europe plus Israel (Meteoalarm), the United States (NWS), Canada (Environment Canada), and Taiwan (CWA)
+- Beta push notifications: rain alerts for Europe, the United States, Taiwan, and Brazil, and severe weather alerts for Europe, the United States, and Taiwan
+- A Live Activity shows an approaching rain status on the Lock Screen and in the Dynamic Island
 
 ### Widgets
-- **Home Screen:** current conditions widget, global radar widget
-- **Lock Screen:** temperature and precipitation widgets
+- Home Screen: rain radar for the current location (configurable style, smoothing, motion arrows, storm cells), a global-reach rain radar, a current-conditions widget, and a multi-day forecast widget with a selectable city (small, medium, large)
+- Lock Screen and Apple Watch complications: temperature, precipitation, a rain-history graph, UV index, and wind
+- Live Activity: live rain status on the Lock Screen and in the Dynamic Island
+
+### Apple Watch App
+A four-page vertical stack: an animated current-conditions scene, a rain nowcast page (where radar coverage exists), the hourly forecast, and the daily forecast.
 
 ### Animated Backgrounds
 - Metal shader-rendered scenes that reflect current conditions
 - States: clear, partly cloudy, overcast, rain, storm, snow, night
-- Sun and meteor positions follow time of day and location
+- Sun and star positions follow time of day and location
 
 ---
 
@@ -79,20 +81,26 @@ Forecast map tiles are generated in-house for the next 3 days across three varia
 
 | Source | Used For | Coverage |
 |---|---|---|
-| [Open-Meteo](https://open-meteo.com/) | Forecasts, air quality, ensemble models | Global |
-| [BrightSky](https://brightsky.dev/) | Rain intensity chart, weather alerts | Germany |
-| [DWD](https://www.dwd.de/) | Radar tiles | Germany / Central Europe |
-| [RainViewer](https://www.rainviewer.com/) | Radar map overlay | Global |
+| [Open-Meteo](https://open-meteo.com/) | Forecasts, ensemble models, air quality, climate archive | Global (pollen: Europe) |
+| [DWD](https://www.dwd.de/) | Radar composite, weather warnings | Germany / Central Europe |
+| [EUMETNET](https://www.eumetnet.eu/) (OPERA) | Radar composite | Europe |
+| [NOAA](https://www.noaa.gov/) | Radar composite (MRMS), weather alerts (NWS) | USA |
+| [CWA](https://www.cwa.gov.tw/) | Radar composite (QPESUMS), weather alerts | Taiwan |
+| [REDEMET](https://redemet.decea.mil.br/) (DECEA) | Radar composite | Brazil |
+| [AEMET](https://www.aemet.es/) | Radar composite | Canary Islands |
+| [ECMWF](https://www.ecmwf.int/) | Global forecast model, map layers | Global |
+| [EUMETSAT](https://www.eumetsat.int/) | Satellite cloud imagery (Meteosat) | Europe / Africa / Atlantic |
 | [Environment Canada](https://weather.gc.ca/) | Weather alerts | Canada |
+| [OpenStreetMap](https://www.openstreetmap.org/) / [OpenFreeMap](https://openfreemap.org/) | Map data and tiles | Global |
 
 ---
 
 ## Getting Started
 
 1. Clone the repository
-2. Open `Oscar°.xcodeproj` in Xcode 16 or later
+2. Open `Oscar°.xcodeproj` in Xcode 26 or later
 3. Select your development team in the project signing settings
-4. Build and run on a device or simulator running iOS 26+
+4. Build and run on a device or simulator running iOS 26 or watchOS 26
 
 ---
 
@@ -100,22 +108,24 @@ Forecast map tiles are generated in-house for the next 3 days across three varia
 
 Public beta is available on TestFlight:
 
-**[Oscar° Beta → testflight.apple.com/join/xf5iJcHh](https://testflight.apple.com/join/xf5iJcHh)**
+**[Oscar° Beta on TestFlight: testflight.apple.com/join/xf5iJcHh](https://testflight.apple.com/join/xf5iJcHh)**
 
 ---
 
 ## Contributing
 
-Contributions are welcome — bug fixes, new features, or improvements to existing ones. Just open a pull request with a clear description of what you changed and why. For larger changes, opening an issue first to discuss the direction is appreciated.
+Contributions are welcome, whether bug fixes, new features, or improvements to existing ones. Just open a pull request with a clear description of what you changed and why. For larger changes, opening an issue first to discuss the direction is appreciated.
 
 ---
 
 ## Acknowledgements
 
-- Forecast & air quality data — [Open-Meteo](https://open-meteo.com/) (CC BY 4.0)
-- Rain radar & German weather alerts — [BrightSky](https://brightsky.dev/) / [DWD](https://www.dwd.de/)
-- Canadian weather alerts — [Environment Canada](https://weather.gc.ca/)
-- Radar overlay — [RainViewer](https://www.rainviewer.com/)
-- 3D weather icons — [Hosein Bagheri](https://ui8.net/hosein_bagheri/products/3d-weather-icons40)
-- Animated background techniques — [Hacking with Swift](https://www.hackingwithswift.com)
-- Error tracking — [Sentry](https://sentry.io/)
+- Forecast, air quality, and climate data: [Open-Meteo](https://open-meteo.com/) (CC BY 4.0)
+- Radar and weather warnings: [DWD](https://www.dwd.de/), [EUMETNET](https://www.eumetnet.eu/) (OPERA), [NOAA](https://www.noaa.gov/), [CWA](https://www.cwa.gov.tw/), [REDEMET](https://redemet.decea.mil.br/) / DECEA, [AEMET](https://www.aemet.es/)
+- Weather alerts: [Environment and Climate Change Canada](https://weather.gc.ca/)
+- Satellite cloud imagery: [EUMETSAT](https://www.eumetsat.int/)
+- Forecast models: [ECMWF](https://www.ecmwf.int/)
+- Map data and tiles: [OpenStreetMap](https://www.openstreetmap.org/) contributors, [OpenFreeMap](https://openfreemap.org/), rendered with [MapLibre Native](https://maplibre.org/)
+- 3D weather icons: [Hosein Bagheri](https://ui8.net/hosein_bagheri/products/3d-weather-icons40)
+- Error tracking: [Sentry](https://sentry.io/)
+- Networking: Apple's [swift-openapi-generator](https://github.com/apple/swift-openapi-generator), swift-openapi-runtime, and swift-openapi-urlsession

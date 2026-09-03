@@ -91,10 +91,7 @@ public final class CityService {
             newCity.label = name
             newCity.lat = latitude
             newCity.lon = longitude
-            newCity.selected = false
             newCity.orderIndex = self.getMaxOrderIndex() + 1
-
-            save()
             self.toggleActiveCity(city: newCity)
         }
     }

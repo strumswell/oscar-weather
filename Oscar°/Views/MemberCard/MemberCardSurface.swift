@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 struct MemberCardSurface: View {
     let osName: String
@@ -20,7 +19,6 @@ struct MemberCardSurface: View {
     let onStickerPressChanged: (MemberCardStickerPlacement, Bool) -> Void
     let onStickerDragChanged: (MemberCardStickerPlacement, CGSize) -> Void
     let onStickerDragEnded: (MemberCardStickerPlacement, CGSize) -> Void
-    let onStickerTransformEnded: (MemberCardStickerPlacement, Double, Angle) -> Void
 
     var body: some View {
         ZStack {
@@ -125,13 +123,6 @@ struct MemberCardSurface: View {
                     }
 
                     Spacer()
-
-                    Image(uiImage: UIImage(named: "AppIcon") ?? UIImage())
-                        .resizable()
-                        .frame(width: 38, height: 38)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .shadow(color: .black.opacity(0.18), radius: 8, y: 4)
-                        .accessibilityHidden(true)
                 }
 
                 Spacer()
@@ -146,7 +137,7 @@ struct MemberCardSurface: View {
                 }
 
                 HStack {
-                    Text("\(osName) \(osVersion)")
+                    Text(verbatim: "\(osName) \(osVersion)")
                         .font(.footnote)
                         .monospaced()
                         .foregroundStyle(.white.opacity(0.95))
@@ -173,7 +164,7 @@ struct MemberCardSurface: View {
     private var stickerLayer: some View {
         GeometryReader { proxy in
             ZStack {
-                ForEach(placements.sorted(by: { $0.zIndex < $1.zIndex })) { placement in
+                ForEach(placements) { placement in
                     let displayPlacement = displayedPlacement(for: placement, in: proxy.size)
                     MemberCardPlacedStickerView(
                         placement: displayPlacement,
@@ -194,9 +185,6 @@ struct MemberCardSurface: View {
                         },
                         onDragEnded: { translation in
                             onStickerDragEnded(placement, translation)
-                        },
-                        onTransformEnded: { multiplier, rotationDelta in
-                            onStickerTransformEnded(placement, multiplier, rotationDelta)
                         }
                     )
                     .position(

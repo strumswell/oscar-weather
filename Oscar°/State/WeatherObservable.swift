@@ -5,6 +5,7 @@
 //  Created by Philipp Bolte on 04.01.24.
 //
 
+import CoreLocation
 import Foundation
 import SwiftUI
 
@@ -53,6 +54,7 @@ final class Weather {
     var isLoading: Bool = false
     var loadState: WeatherLoadState = .idle
     @ObservationIgnored private var isRefreshing = false
+    @ObservationIgnored private var refreshRequestedWhileBusy = false
     var loadingQueries: Set<WeatherLoadingQuery> = []
     var forecast: Operations.getForecast.Output.Ok.Body.jsonPayload
     var alerts: AlertResponse
@@ -133,8 +135,17 @@ extension Weather {
         // early (once the main data lands) so the spinner hides promptly, but the function
         // keeps running through the trailing alerts fetch — a second refresh must not start
         // in that window.
-        guard !isRefreshing else { return }
+        guard !isRefreshing else {
+            refreshRequestedWhileBusy = true
+            return
+        }
         isRefreshing = true
+        defer {
+            if refreshRequestedWhileBusy {
+                refreshRequestedWhileBusy = false
+                Task { await refresh(location: location, client: client, locationService: locationService) }
+            }
+        }
         isLoading = true
         error = ""
         // Only show the "loading" phase on the very first attempt; a retry after a failure

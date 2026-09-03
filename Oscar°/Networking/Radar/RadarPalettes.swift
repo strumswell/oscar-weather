@@ -6,6 +6,7 @@ import Foundation
 /// oscar-server's `Colormaps.plasma` so on-device rendering matches the raster path
 /// when the palette endpoint is unreachable. idx 0 = transparent; sqrt-spaced.
 enum RadarPlasma {
+    static let colormapId = "plasma"
     private struct Stop { let value: Double; let color: PixelRGBA }
 
     private static func colorHex(_ hex: Int) -> PixelRGBA {
@@ -51,50 +52,5 @@ enum RadarPlasma {
             pal[i] = sample(mmPer5(dbzToMmH(Double(i) / 255 * dbzMax)))
         }
         return pal
-    }
-}
-
-/// Local fallback for the server `/colormaps/radar_typed` palette — kept in sync with
-/// oscar-server's `TypedRadar`: index 0 dry, rain 1…153 (the plasma radar ramp
-/// resampled — rain looks identical to the plain radar), snow 154…204 and ice/mix
-/// 205…255 from `ServerColormapStops.typedGroups` (shared with the map legend).
-enum TypedRadarPalette {
-    static func buildPalette() -> [PixelRGBA] {
-        var pal = [PixelRGBA](repeating: PixelRGBA(r: 0, g: 0, b: 0, a: 0), count: 256)
-        let plasma = RadarPlasma.buildPalette()
-        let rainSpan = ServerColormapStops.typedRainSpan
-        let groupSpan = ServerColormapStops.typedGroupSpan
-        for shade in 1...rainSpan {
-            let f = Double(shade - 1) / Double(rainSpan - 1)
-            pal[shade] = plasma[1 + Int((f * 254).rounded())]
-        }
-        for offset in 0..<groupSpan {
-            let f = Double(offset) / Double(groupSpan - 1)
-            for (group, ramp) in ServerColormapStops.typedGroups.enumerated() {
-                pal[rainSpan + 1 + group * groupSpan + offset] = sample(ramp.stops, f)
-            }
-        }
-        return pal
-    }
-
-    private static func sample(_ stops: [(f: Double, hex: Int, a: UInt8)], _ f: Double) -> PixelRGBA {
-        func pixel(_ s: (f: Double, hex: Int, a: UInt8)) -> PixelRGBA {
-            PixelRGBA(r: UInt8((s.hex >> 16) & 255), g: UInt8((s.hex >> 8) & 255),
-                      b: UInt8(s.hex & 255), a: s.a)
-        }
-        guard let first = stops.first, let last = stops.last else {
-            return PixelRGBA(r: 0, g: 0, b: 0, a: 0)
-        }
-        if f <= first.f { return pixel(first) }
-        if f >= last.f { return pixel(last) }
-        for pair in zip(stops, stops.dropFirst()) where f >= pair.0.f && f < pair.1.f {
-            let t = (f - pair.0.f) / (pair.1.f - pair.0.f)
-            let a = pixel(pair.0), b = pixel(pair.1)
-            func mix(_ x: UInt8, _ y: UInt8) -> UInt8 {
-                UInt8(clamping: Int((Double(x) + t * (Double(y) - Double(x))).rounded()))
-            }
-            return PixelRGBA(r: mix(a.r, b.r), g: mix(a.g, b.g), b: mix(a.b, b.b), a: mix(a.a, b.a))
-        }
-        return pixel(last)
     }
 }

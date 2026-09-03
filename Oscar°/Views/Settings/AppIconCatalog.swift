@@ -71,7 +71,8 @@ enum AppIconCatalog {
                 AppIconOption(id: "flat-oscar-classic", name: "Original", alternateIconName: "AppIconFlatOscarClassic", previewAssetName: "AppIconFlatOscarClassicPreview"),
                 AppIconOption(id: "flat-oscar-black", name: "Mono", alternateIconName: "AppIconFlatOscarBlack", previewAssetName: "AppIconFlatOscarBlackPreview"),
                 AppIconOption(id: "flat-oscar-kawaii", name: "Kawaii", alternateIconName: "AppIconFlatOscarKawaii", previewAssetName: "AppIconFlatOscarKawaiiPreview"),
-                AppIconOption(id: "flat-oscar-sky", name: "Himmel", alternateIconName: "AppIconFlatOscarSky", previewAssetName: "AppIconFlatOscarSkyPreview")
+                AppIconOption(id: "flat-oscar-sky", name: "Himmel", alternateIconName: "AppIconFlatOscarSky", previewAssetName: "AppIconFlatOscarSkyPreview"),
+                AppIconOption(id: "flat-oscar-sun", name: "Sonne", alternateIconName: "AppIconFlatOscarSun", previewAssetName: "AppIconFlatOscarSunPreview")
             ]
         )
     ]

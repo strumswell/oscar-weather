@@ -10,7 +10,7 @@ struct ForecastDisplayModeOption: View {
       VStack(alignment: .leading, spacing: 10) {
         HStack(alignment: .top, spacing: 6) {
           Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
-            .font(.system(size: 15, weight: .semibold))
+            .font(.subheadline.weight(.semibold))
             .foregroundStyle(isSelected ? Color.accentColor : .secondary)
             .padding(.top, 1)
           Text(mode.label)
@@ -75,7 +75,7 @@ struct ForecastDisplayModeOption: View {
   ) -> some View {
     HStack(spacing: 5) {
       Text(roundTemperatureString(temperature: labelLow))
-        .font(.system(size: 13, weight: .medium))
+        .font(.footnote.weight(.medium))
         .frame(width: 26, alignment: .trailing)
         .offset(y: height > 8 ? 9 : 0)
       TemperatureRangeView(
@@ -89,7 +89,7 @@ struct ForecastDisplayModeOption: View {
       )
       .frame(height: height)
       Text(roundTemperatureString(temperature: labelHigh))
-        .font(.system(size: 13, weight: .medium))
+        .font(.footnote.weight(.medium))
         .frame(width: 26, alignment: .leading)
         .offset(y: height > 8 ? 9 : 0)
     }

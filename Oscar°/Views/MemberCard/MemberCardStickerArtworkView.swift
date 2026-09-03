@@ -46,7 +46,7 @@ struct MemberCardStickerArtworkView: View, Animatable {
     }
 
     private var baseStickerImage: some View {
-        Image(MemberCard.imageName(for: assetName))
+        Image(assetName)
             .resizable()
             .scaledToFit()
             .frame(width: size, height: size)

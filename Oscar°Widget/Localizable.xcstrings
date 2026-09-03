@@ -4,16 +4,22 @@
     "%.1fmm" : {
       "extractionState" : "stale",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.1fmm"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%.1fmm"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%.1fmm"
           }
         }
       }
@@ -23,56 +29,82 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%@"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%@"
           }
         }
       }
     },
-    "%@ % • %.1f mm" : {
-      "extractionState" : "stale",
+    "%@ · Aktualisiert %@" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ %2$ • %3$.1f mm"
+            "state" : "translated",
+            "value" : "%1$@ · Aktualisiert %2$@"
           }
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : ""
+            "state" : "translated",
+            "value" : "%1$@ · Updated %2$@"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : ""
+            "state" : "translated",
+            "value" : "%1$@ · Güncellendi: %2$@"
           }
         }
       }
     },
-    "%@ %% · %.1f mm" : {
+    "%@ Tage" : {
+
+    },
+    "%@, noch %lld min" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ %% · %2$.1f mm"
+            "state" : "translated",
+            "value" : "%1$@, noch %2$lld min"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$lld min left"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$lld dakika kaldı"
           }
         }
       }
     },
-    "%@ %% • %.1f mm" : {
+    "%@, noch mindestens %lld min" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ %% • %2$.1f mm"
+            "state" : "translated",
+            "value" : "%1$@, noch mindestens %2$lld min"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, at least %2$lld min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, en az %2$lld dakika"
           }
         }
       }
@@ -81,33 +113,392 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%1$@: %2$@ bis %3$@"
           }
-        }
-      }
-    },
-    "%@°" : {
-      "localizations" : {
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%1$@: %2$@ to %3$@"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ""
+            "value" : "%1$@: %2$@ ile %3$@ arası"
           }
         }
       }
     },
-    "+%@ min" : {
+    "%@°" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@°"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@°"
+          }
+        }
+      }
+    },
+    "%lld" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
+    },
+    "%lld %% · %.1f mm" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld %% · %2$.1f mm"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld %% · %2$.1f mm"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld %% · %2$.1f mm"
+          }
+        }
+      }
+    },
+    "%lld %% • %.1f mm" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld %% • %2$.1f mm"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld %% • %2$.1f mm"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld %% • %2$.1f mm"
+          }
+        }
+      }
+    },
+    "%lld°" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld°"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld°"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld°"
+          }
+        }
+      }
+    },
+    "+%lld min" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld min"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld dk"
+          }
+        }
+      }
+    },
+    "+10 °C" : {
+
+    },
+    "+20 °C" : {
+
+    },
+    "+30 °C" : {
+
+    },
+    "+40 °C" : {
+
+    },
+    "+50 °C" : {
+
+    },
+    "−10 °C" : {
+
+    },
+    "−20 °C" : {
+
+    },
+    "−30 °C" : {
+
+    },
+    "−40 °C" : {
+
+    },
+    "≥8 m/s" : {
+
+    },
+    "0 °C" : {
+
+    },
+    "0 m/s" : {
+
+    },
+    "2 m/s" : {
+
+    },
+    "4 m/s" : {
+
+    },
+    "6 m/s" : {
+
+    },
+    "12 Stunden" : {
+
+    },
+    "13 km · 5 Tage" : {
+
+    },
+    "24 Stunden" : {
+
+    },
+    "25 km · 15 Tage" : {
+
+    },
+    "25 km · 16 Tage" : {
+
+    },
+    "26 km · 7,5 Tage" : {
+
+    },
+    "50 km · 35 Tage" : {
+
+    },
+    "950" : {
+
+    },
+    "970" : {
+
+    },
+    "990" : {
+
+    },
+    "1010" : {
+
+    },
+    "1030" : {
+
+    },
+    "1060" : {
+
+    },
+    "Aktuelle Temperatur und heute zu erwartende Temperaturen" : {
+      "comment" : "LS Widget",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuelle Temperatur und heute zu erwartende Temperaturen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current temperature and today's expected temperatures"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel sıcaklık ve bugün beklenen sıcaklıklar"
+          }
+        }
+      }
+    },
+    "Aktuelle Wetterbedingungen und Temperaturen für heute." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuelle Wetterbedingungen und Temperaturen für heute."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current conditions and temperatures for today."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugün için güncel hava durumu ve sıcaklıklar."
+          }
+        }
+      }
+    },
+    "Aktuelle Windgeschwindigkeit und Windrichtung" : {
+      "comment" : "LS Widget Wind Beschreibung",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuelle Windgeschwindigkeit und Windrichtung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current wind speed and direction"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel rüzgar hızı ve yönü"
+          }
+        }
+      }
+    },
+    "Aktueller Standort" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktueller Standort"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current Location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mevcut Konum"
+          }
+        }
+      }
+    },
+    "Aktueller UV-Index mit WHO-Farbskala" : {
+      "comment" : "LS Widget UV-Index Beschreibung",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktueller UV-Index mit WHO-Farbskala"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current UV index with WHO color scale"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DSÖ renk skalasıyla güncel UV indeksi"
+          }
+        }
+      }
+    },
+    "alle %lld Std." : {
+
+    },
+    "Äste brechen, kleinere Schäden sind möglich." : {
+
+    },
+    "Ausgewählter Ort" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewählter Ort"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected Location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçili Konum"
+          }
+        }
+      }
+    },
+    "Australien" : {
+
+    },
+    "Automatisch" : {
+
+    },
+    "Bäume können entwurzeln, Gebäude können Schaden nehmen." : {
+
+    },
+    "Bäume schwanken, Gehen gegen den Wind wird mühsam." : {
+
+    },
+    "Benutzerdefiniert" : {
 
     },
     "Bewegungspfeile" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -123,8 +514,16 @@
         }
       }
     },
+    "Blätter rascheln, Wind ist im Gesicht spürbar." : {
+
+    },
+    "China" : {
+
+    },
+    "Dicke Äste bewegen sich, Drähte können pfeifen." : {
+
+    },
     "Dunkel" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -140,8 +539,67 @@
         }
       }
     },
+    "Dünne Zweige bewegen sich, Wimpel strecken sich." : {
+
+    },
+    "E_compass" : {
+      "comment" : "East"
+    },
+    "ECMWF" : {
+
+    },
+    "Endet bald" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Endet bald"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ending soon"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakında bitiyor"
+          }
+        }
+      }
+    },
+    "Europa" : {
+
+    },
+    "Extrem" : {
+      "comment" : "UV-Kategorie 11+",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extrem"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extreme"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aşırı"
+          }
+        }
+      }
+    },
+    "Fehler beim Laden: %@" : {
+
+    },
     "Fiord" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -156,6 +614,30 @@
           }
         }
       }
+    },
+    "Frankreich & Europa" : {
+
+    },
+    "Frische Brise" : {
+
+    },
+    "Globales 0,25°-Modell (Open-Data, ca. 2 Std. Verzögerung)." : {
+
+    },
+    "Globales Modell des australischen Wetterdienstes." : {
+
+    },
+    "Globales Modell des chinesischen Wetterdienstes." : {
+
+    },
+    "Großbritannien" : {
+
+    },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+
+    },
+    "Große Bäume bewegen sich, Zweige können brechen." : {
+
     },
     "H: %@" : {
       "comment" : "Höchste Temperatur",
@@ -175,7 +657,6 @@
       }
     },
     "Hell" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -191,11 +672,90 @@
         }
       }
     },
-    "Jetzt" : {
+    "Heute" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heute"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugün"
+          }
+        }
+      }
+    },
+    "Hoch" : {
+      "comment" : "UV-Kategorie 6-7",
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüksek"
+          }
+        }
+      }
+    },
+    "Hochauflösendes Modell für Italien." : {
 
     },
+    "Hochauflösendes Regionalmodell, weltweit durch ECMWF ergänzt." : {
+
+    },
+    "Im Tagesverlauf markieren" : {
+
+    },
+    "Italien" : {
+
+    },
+    "Japan" : {
+
+    },
+    "Jetzt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Now"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şimdi"
+          }
+        }
+      }
+    },
     "Kartenstil" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -217,10 +777,930 @@
         }
       }
     },
-    "Radar ist für diesen Ort nicht verfügbar" : {
+    "Kein Regen in Sicht" : {
+      "comment" : "LS Widget Regenverlauf: kein Regen im Radarfenster",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Regen in Sicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Rain in Sight"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ufukta Yağmur Yok"
+          }
+        }
+      }
+    },
+    "Keine Radardaten" : {
+      "comment" : "LS Widget Regenverlauf ohne Radarabdeckung",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Radardaten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Radar Data"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar Verisi Yok"
+          }
+        }
+      }
+    },
+    "KI-basiertes Wettermodell von ECMWF." : {
 
     },
+    "Korea" : {
+
+    },
+    "Leicht" : {
+
+    },
+    "Leichte Brise" : {
+
+    },
+    "Leiser Zug" : {
+
+    },
+    "Letztes Radarbild %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letztes Radarbild %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last radar update %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son radar güncellemesi: %@"
+          }
+        }
+      }
+    },
+    "Mäßig" : {
+      "comment" : "UV-Kategorie 3-5",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mäßig"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moderate"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta"
+          }
+        }
+      }
+    },
+    "Mäßige Brise" : {
+
+    },
+    "Mehrtägige Vorhersage mit Temperaturverlauf." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehrtägige Vorhersage mit Temperaturverlauf."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Multi-day forecast with temperature trend."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıcaklık eğilimiyle çok günlük tahmin."
+          }
+        }
+      }
+    },
+    "Mein Standort" : {
+
+    },
+    "Mitteleuropa & Alpen" : {
+
+    },
+    "N" : {
+      "comment" : "Kompass Nord",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "N"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "N"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "K"
+          }
+        }
+      }
+    },
+    "N_compass" : {
+      "comment" : "North"
+    },
+    "Nationale Wetterdienste" : {
+
+    },
+    "Native 9-km-Auflösung direkt von ECMWF, stündlich bis +90 Std." : {
+
+    },
+    "NE_compass" : {
+      "comment" : "North-East"
+    },
+    "Niederlande & Westeuropa" : {
+
+    },
+    "Niedrig" : {
+      "comment" : "UV-Kategorie 0-2",
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niedrig"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düşük"
+          }
+        }
+      }
+    },
+    "Niesel" : {
+
+    },
+    "NO" : {
+      "comment" : "Kompass Nordost",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NO"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NE"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KD"
+          }
+        }
+      }
+    },
+    "Nordamerika" : {
+
+    },
+    "Nordeuropa" : {
+
+    },
+    "NW" : {
+      "comment" : "Kompass Nordwest",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NW"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NW"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KB"
+          }
+        }
+      }
+    },
+    "NW_compass" : {
+      "comment" : "North-West"
+    },
+    "O" : {
+      "comment" : "Kompass Ost",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D"
+          }
+        }
+      }
+    },
+    "Orkan" : {
+
+    },
+    "Orkanartiger Sturm" : {
+
+    },
+    "Ort" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ort"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konum"
+          }
+        }
+      }
+    },
+    "Ort wählen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ort wählen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose Location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konum Seç"
+          }
+        }
+      }
+    },
+    "Radar ist für diesen Ort nicht verfügbar" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar ist für diesen Ort nicht verfügbar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar unavailable for this location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu konum için radar kullanılamıyor"
+          }
+        }
+      }
+    },
+    "Radar wird aktualisiert" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar wird aktualisiert"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar updating"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar güncelleniyor"
+          }
+        }
+      }
+    },
+    "Radarbasierter Niederschlag der nächsten 90 Minuten" : {
+      "comment" : "LS Widget Regenverlauf Beschreibung",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radarbasierter Niederschlag der nächsten 90 Minuten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar-based precipitation for the next 90 minutes"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonraki 90 dakika için radar tabanlı yağış"
+          }
+        }
+      }
+    },
+    "Radardaten sind veraltet" : {
+      "comment" : "LS Widget Regenverlauf mit veralteten Radardaten",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radardaten sind veraltet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar data is outdated"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar verileri güncel değil"
+          }
+        }
+      }
+    },
+    "Rauch driftet leicht, Windfahnen bleiben ruhig." : {
+
+    },
+    "Rauch steigt fast senkrecht auf." : {
+
+    },
+    "Regen" : {
+      "comment" : "LS Widget Regen",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur"
+          }
+        }
+      }
+    },
+    "Regen · noch >%lld min" : {
+      "comment" : "LS Widget Regenverlauf: Regen hält länger als das Radarfenster an",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen · noch >%lld min"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain · >%lld min left"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur · >%lld dk kaldı"
+          }
+        }
+      }
+    },
+    "Regen · noch ~%lld min" : {
+      "comment" : "LS Widget Regenverlauf: Regen endet in X Minuten",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen · noch ~%lld min"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain · ~%lld min left"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur · ~%lld dk kaldı"
+          }
+        }
+      }
+    },
+    "Regen ab %@" : {
+      "comment" : "LS Widget Regenverlauf: Regen beginnt um Uhrzeit",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen ab %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain from %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ saatinden itibaren yağmur"
+          }
+        }
+      }
+    },
+    "Regen bis %@" : {
+      "comment" : "LS Widget Regenverlauf: Regen endet um Uhrzeit",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen bis %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain until %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ saatine kadar yağmur"
+          }
+        }
+      }
+    },
+    "Regen in %lld min" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen in %lld min"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain in %lld min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld dakika içinde yağmur"
+          }
+        }
+      }
+    },
+    "Regen in Kürze" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen in Kürze"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain soon"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakında yağmur"
+          }
+        }
+      }
+    },
+    "Regen vorbei" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen vorbei"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain ended"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur bitti"
+          }
+        }
+      }
+    },
+    "Regenmenge und -wahrscheinlichkeit für die aktuelle Stunde" : {
+      "comment" : "LS Widget Regenmenge und -wahrscheinlichkeit",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenmenge und -wahrscheinlichkeit für die aktuelle Stunde"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Precipitation amount and probability for the current hour"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel saat için yağış miktarı ve olasılığı"
+          }
+        }
+      }
+    },
+    "Regenradar" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenradar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain Radar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur Radarı"
+          }
+        }
+      }
+    },
+    "Regenradar (Global)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenradar (Global)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain Radar (Global)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur Radarı (Küresel)"
+          }
+        }
+      }
+    },
+    "Regenradar für aktuellen Standort" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenradar für aktuellen Standort"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain radar for the current location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel konum için yağmur radarı"
+          }
+        }
+      }
+    },
+    "Regenradar für aktuellen Standort mit globaler Reichweite" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenradar für aktuellen Standort mit globaler Reichweite"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain radar for the current location with global coverage"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel konum için küresel kapsamlı yağmur radarı"
+          }
+        }
+      }
+    },
+    "Regenverlauf" : {
+      "comment" : "LS Widget Regenverlauf",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenverlauf"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain Timeline"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur Zaman Çizelgesi"
+          }
+        }
+      }
+    },
     "Regenzellen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenzellen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain Cells"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur Hücreleri"
+          }
+        }
+      }
+    },
+    "Regnet gerade" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regnet gerade"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raining now"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu anda yağmur yağıyor"
+          }
+        }
+      }
+    },
+    "S" : {
+      "comment" : "Kompass Süd",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "G"
+          }
+        }
+      }
+    },
+    "S_compass" : {
+      "comment" : "South"
+    },
+    "Satellitenbilder sind derzeit nicht verfügbar." : {
+
+    },
+    "Schwache Brise" : {
+
+    },
+    "Schwere Sturmschäden, im Binnenland selten." : {
+
+    },
+    "Schwere Verwüstungen, sehr selten im Landesinneren." : {
+
+    },
+    "Schwerer Sturm" : {
+
+    },
+    "SE_compass" : {
+      "comment" : "South-East"
+    },
+    "Sehr hoch" : {
+      "comment" : "UV-Kategorie 8-10",
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sehr hoch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Very high"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çok yüksek"
+          }
+        }
+      }
+    },
+    "SO" : {
+      "comment" : "Kompass Südost",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SO"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SE"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GD"
+          }
+        }
+      }
+    },
+    "Sonnenaufgang bis Sonnenuntergang" : {
+
+    },
+    "Stark" : {
+
+    },
+    "Starker Wind" : {
+
+    },
+    "Steifer Wind" : {
+
+    },
+    "stündlich" : {
+
+    },
+    "Sturm" : {
+
+    },
+    "Stürmischer Wind" : {
+
+    },
+    "SW" : {
+      "comment" : "Kompass Südwest",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SW"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SW"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GB"
+          }
+        }
+      }
+    },
+    "SW_compass" : {
+      "comment" : "South-West"
+    },
+    "System" : {
 
     },
     "T: %@" : {
@@ -240,11 +1720,263 @@
         }
       }
     },
-    "UV" : {
+    "Tagesvorhersage" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tagesvorhersage"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily Forecast"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlük Tahmin"
+          }
+        }
+      }
+    },
+    "Temperatur" : {
+      "comment" : "LS Temperatur",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatur"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıcaklık"
+          }
+        }
+      }
+    },
+    "Trocken" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trocken"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dry"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kuru"
+          }
+        }
+      }
+    },
+    "USA" : {
 
     },
+    "UV" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV"
+          }
+        }
+      }
+    },
+    "UV %lld · %@" : {
+      "comment" : "LS Widget UV-Index inline: Wert und WHO-Kategorie",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV %1$lld · %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV %1$lld · %2$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV %1$lld · %2$@"
+          }
+        }
+      }
+    },
+    "UV-Index" : {
+      "comment" : "LS Widget UV-Index",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV-Index"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV Index"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV İndeksi"
+          }
+        }
+      }
+    },
+    "UV-Index –" : {
+      "comment" : "LS Widget UV-Index ohne Daten",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV-Index –"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV Index –"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UV İndeksi –"
+          }
+        }
+      }
+    },
+    "Vorhersage" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorhersage"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forecast"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tahmin"
+          }
+        }
+      }
+    },
+    "W" : {
+      "comment" : "Kompass West",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "W"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "W"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "B"
+          }
+        }
+      }
+    },
+    "W_compass" : {
+      "comment" : "West"
+    },
+    "Wähle den Ort für die Tagesvorhersage." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle den Ort für die Tagesvorhersage."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the location for the daily forecast."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlük tahmin için konumu seçin."
+          }
+        }
+      }
+    },
+    "Wählt für jeden Ort weltweit automatisch das beste Modell und kombiniert mehrere Wetterdienste." : {
+
+    },
+    "Warte auf aktuelle Radardaten" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warte auf aktuelle Radardaten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for fresh radar data"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel radar verisi bekleniyor"
+          }
+        }
+      }
+    },
     "Weichzeichnen" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -259,6 +1991,38 @@
           }
         }
       }
+    },
+    "Werte ersetzen" : {
+
+    },
+    "Wind" : {
+      "comment" : "LS Widget Wind",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wind"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wind"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rüzgar"
+          }
+        }
+      }
+    },
+    "Windstille" : {
+
+    },
+    "Zweige bewegen sich, loses Papier hebt ab." : {
+
     }
   },
   "version" : "1.0"

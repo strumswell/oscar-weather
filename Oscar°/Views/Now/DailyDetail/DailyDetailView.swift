@@ -66,7 +66,7 @@ struct DailyDetailView: View {
   var body: some View {
     NavigationStack {
       VStack(spacing: 0) {
-        DailyDetailSegmentedControl(selectedSection: $selectedSection)
+        DetailSectionPicker(label: "Ensemble-Details", selection: $selectedSection)
 
         TabView(selection: $selectedSection) {
           ForEach(DailyDetailSection.allCases) { section in
@@ -215,7 +215,7 @@ struct DailyDetailView: View {
   }
 
   private var ensembleContextCard: some View {
-    EnvironmentDetailCard {
+    DetailCard {
       Text("Ensemble-Vorhersage")
         .font(.caption.weight(.semibold))
         .foregroundStyle(.secondary)
@@ -237,13 +237,13 @@ struct DailyDetailView: View {
       HStack(spacing: 8) {
         detailPill("\(points.count) Tage", color: .blue)
         detailPill("\(detailModel.selectedModel.members) Mitglieder", color: .teal)
-        detailPill(detailModel.selectedModel.region, color: .green)
+        detailPill(LocalizedStringKey(detailModel.selectedModel.region), color: .green)
       }
       .padding(.top, 2)
     }
   }
 
-  private func detailPill(_ text: String, color: Color) -> some View {
+  private func detailPill(_ text: LocalizedStringKey, color: Color) -> some View {
     Text(text)
       .font(.caption.weight(.semibold))
       .lineLimit(1)
@@ -257,87 +257,6 @@ struct DailyDetailView: View {
   private func finish() {
     dismissalFeedback.toggle()
     dismiss()
-  }
-}
-
-extension DailyDetailView {
-  @MainActor
-  @Observable
-  final class DetailModel {
-    var selectedModel: DailyEnsembleModel = .ecmwfIFS025Ensemble
-    var response: DailyEnsembleForecastResponse?
-    var isLoading = false
-    var errorMessage: String?
-
-    private let client = APIClient.shared
-    private var loadedKeys: Set<String> = []
-
-    func load(coordinates: CLLocationCoordinate2D, force: Bool = false) async {
-      let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
-      let key = "\(outboundCoordinates.latitude),\(outboundCoordinates.longitude),\(selectedModel.rawValue)"
-      guard force || !loadedKeys.contains(key) else { return }
-
-      isLoading = true
-      errorMessage = nil
-      response = nil
-
-      do {
-        response = try await client.getDailyEnsembleForecast(
-          coordinates: coordinates,
-          model: selectedModel
-        )
-        loadedKeys.insert(key)
-      } catch is CancellationError {
-        return
-      } catch {
-        errorMessage = error.localizedDescription
-      }
-
-      isLoading = false
-    }
-  }
-}
-
-private struct DailyDetailChartCard<Content: View>: View {
-  let title: LocalizedStringKey
-  let color: Color
-  let isLoading: Bool
-  private let content: Content
-
-  init(
-    title: LocalizedStringKey,
-    color: Color,
-    isLoading: Bool,
-    @ViewBuilder content: () -> Content
-  ) {
-    self.title = title
-    self.color = color
-    self.isLoading = isLoading
-    self.content = content()
-  }
-
-  var body: some View {
-    EnvironmentDetailCard {
-      Text(title)
-        .font(.caption.weight(.semibold))
-        .foregroundStyle(.secondary)
-
-      ZStack {
-        content
-      }
-    }
-    .accessibilityElement(children: .contain)
-  }
-}
-
-private struct DailyDetailLoadingChart: View {
-  var body: some View {
-    ZStack {
-      RoundedRectangle(cornerRadius: 8)
-        .fill(.secondary.opacity(0.08))
-      ProgressView()
-    }
-    .frame(height: 220)
   }
 }
 

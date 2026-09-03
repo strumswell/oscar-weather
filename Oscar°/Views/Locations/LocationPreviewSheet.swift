@@ -164,9 +164,8 @@ struct LocationPreviewSheet: View {
             weather.updateTime()
             weather.lastUpdated = .now
             weather.loadState = .loaded
-        } catch is CancellationError {
-            return
         } catch {
+            guard !Task.isCancelled else { return }
             loadFailed = true
         }
     }

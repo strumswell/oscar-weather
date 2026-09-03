@@ -23,6 +23,7 @@ struct LocationMapSheet: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var picked: PickedPoint?
+    @State private var resolveTask: Task<Void, Never>?
     @State private var pickCount = 0
     @State private var candidate: LocationCandidate?
     private var conditionsStore = CityConditionsStore.shared
@@ -88,11 +89,11 @@ struct LocationMapSheet: View {
                 HStack {
                     Spacer()
                     Button {
-                        UIApplication.shared.playHapticFeedback()
+                        Haptics.impact()
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.title3.weight(.semibold))
                             .frame(width: 18, height: 18)
                     }
                     .buttonStyle(.glass)
@@ -199,7 +200,8 @@ struct LocationMapSheet: View {
         withAnimation(.spring(duration: 0.35)) {
             picked = PickedPoint(latitude: coordinate.latitude, longitude: coordinate.longitude)
         }
-        Task {
+        resolveTask?.cancel()
+        resolveTask = Task {
             await resolveName(for: coordinate)
         }
     }
@@ -212,7 +214,7 @@ struct LocationMapSheet: View {
         let placemark = try? await geocoder.reverseGeocodeLocation(location).first
 
         // A new tap may have replaced the pin while geocoding ran.
-        guard var current = picked,
+        guard !Task.isCancelled, var current = picked,
               current.latitude == coordinate.latitude,
               current.longitude == coordinate.longitude else {
             return

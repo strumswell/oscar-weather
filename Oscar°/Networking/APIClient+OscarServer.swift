@@ -91,9 +91,9 @@ extension APIClient {
 
   /// nil = 404, which the radar/model states render as a dry (fully
   /// transparent) frame rather than an error.
-  func radarGrid(region: String, key: String, typed: Bool) async throws -> Data? {
+  func radarGrid(region: String, key: String) async throws -> Data? {
     let output = try await oscarServer.getRadarGrid(
-      .init(path: .init(region: region, key: key), query: .init(style: typed ? "typed" : nil)))
+      .init(path: .init(region: region, key: key)))
     switch output {
     case .ok(let ok):
       return try await Data(collecting: ok.body.image_webp, upTo: Self.assetByteLimit)

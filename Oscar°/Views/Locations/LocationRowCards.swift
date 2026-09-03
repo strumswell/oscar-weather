@@ -2,18 +2,18 @@ import SwiftUI
 
 // MARK: - Row cards
 
-/// City row content as its own view, observing the managed object directly:
-/// List rows diff by ForEach element, and an edited City is the SAME reference
-/// as before — without the subscription a label/emoji edit never re-renders
-/// the row until the sheet is reopened.
+/// City row content. Personalization and the default flag arrive as values:
+/// an edited City is the SAME reference as before, so a row keyed on the
+/// object alone would never re-render, while every mutation goes through
+/// CityService.save(), which reassigns `cities` and re-runs the list body.
 struct CityCard: View {
-    @ObservedObject var city: City
+    let personalization: PlacePersonalization
+    let isDefault: Bool
     let conditions: CityConditions?
     let isSelected: Bool
     let backdropPaused: Bool
 
     var body: some View {
-        let personalization = city.personalization
         LocationCard(
             title: personalization.title,
             detail: personalization.detailLine(condition: conditions?.conditionText),
@@ -21,7 +21,7 @@ struct CityCard: View {
             temperature: conditions?.temperature,
             snapshot: conditions?.snapshot,
             isSelected: isSelected,
-            isDefault: city.isDefault,
+            isDefault: isDefault,
             backdropPaused: backdropPaused
         )
     }

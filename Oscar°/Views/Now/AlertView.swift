@@ -22,7 +22,7 @@ struct AlertView: View {
         } ?? .orange
         HStack(spacing: 5) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 11, weight: .semibold))
+                .font(.caption2.weight(.semibold))
                 .foregroundStyle(tint)
             if let top = alerts.first {
                 Text(formattedHeadline(top: top, count: alerts.count))
@@ -40,14 +40,14 @@ struct AlertView: View {
         .frame(minWidth: 44, minHeight: 44)
         .contentShape(.rect)
         .onTapGesture {
-            UIApplication.shared.playHapticFeedback()
+            Haptics.impact()
             presentation.present(.alerts)
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
         .accessibilityHint(Text("Öffnet die Wetterwarnungen"))
         .accessibilityAction {
-            UIApplication.shared.playHapticFeedback()
+            Haptics.impact()
             presentation.present(.alerts)
         }
     }

@@ -12,20 +12,17 @@ struct MemberCardPlacedStickerView: View {
     let onPressChanged: (Bool) -> Void
     let onDragChanged: (CGSize) -> Void
     let onDragEnded: (CGSize) -> Void
-    let onTransformEnded: (Double, Angle) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @GestureState private var liveTransform: (scale: CGFloat, rotation: Angle) = (1, .zero)
     @State private var liftProgress: CGFloat = 0
     @State private var isDraggingSticker = false
-    @State private var isTransformingSticker = false
 
     private var effectiveScale: Double {
-        min(max(placement.scale * liveTransform.scale, 0.4), 2.5)
+        MemberCardStickerCatalog.clampedScale(placement.scale)
     }
 
     private var effectiveRotation: Angle {
-        Angle(radians: placement.rotation) + liveTransform.rotation
+        Angle(radians: placement.rotation)
     }
 
     // Peel on card position: lift phase (animates in on press) or settle phase (from external foldProgress)
@@ -58,9 +55,8 @@ struct MemberCardPlacedStickerView: View {
             if isEditing {
                 stickerBody
                     .highPriorityGesture(moveGesture, including: isGestureLocked ? .subviews : .all)
-                    .simultaneousGesture(transformGesture, including: isGestureLocked ? .none : .all)
-                    .accessibilityLabel(MemberCard.stickerTitle(for: placement.assetName))
-                    .accessibilityHint("Drag to reposition. Pinch to resize or rotate.")
+                    .accessibilityLabel(MemberCardStickerCatalog.title(for: placement.assetName))
+                    .accessibilityHint("Drag to reposition. While dragging, pinch with a second finger to resize or rotate.")
                     .accessibilityAddTraits(.isButton)
                     .accessibilityAction { onTap() }
             } else {
@@ -73,11 +69,11 @@ struct MemberCardPlacedStickerView: View {
     private var stickerBody: some View {
         MemberCardStickerArtworkView(
             assetName: placement.assetName,
-            size: MemberCard.stickerImageSize(for: effectiveScale),
+            size: MemberCardStickerCatalog.imageSize(for: effectiveScale),
             foldProgress: effectiveFoldProgress
         )
             .rotationEffect(effectiveRotation)
-            .padding(MemberCard.stickerTouchPadding)
+            .padding(MemberCardStickerCatalog.touchPadding)
             .shadow(
                 color: .black.opacity(shadowOpacity),
                 radius: shadowRadius,
@@ -86,8 +82,8 @@ struct MemberCardPlacedStickerView: View {
             .offset(y: liftOffset)
             .scaleEffect(liftedScale)
             .frame(
-                width: MemberCard.stickerHitSize(for: effectiveScale),
-                height: MemberCard.stickerHitSize(for: effectiveScale)
+                width: MemberCardStickerCatalog.hitSize(for: effectiveScale),
+                height: MemberCardStickerCatalog.hitSize(for: effectiveScale)
             )
             .contentShape(Rectangle())
     }
@@ -121,36 +117,5 @@ struct MemberCardPlacedStickerView: View {
             liftProgress = isPressed ? 1 : 0
         }
         onPressChanged(isPressed)
-    }
-
-    private var transformGesture: some Gesture {
-        MagnificationGesture()
-            .simultaneously(with: RotationGesture())
-            .updating($liveTransform) { value, state, _ in
-                if !isTransformingSticker {
-                    DispatchQueue.main.async {
-                        guard !isTransformingSticker else { return }
-                        isTransformingSticker = true
-                    }
-                }
-                state.scale = value.first ?? 1
-                state.rotation = value.second ?? .zero
-            }
-            .onEnded { value in
-                let scale = Double(value.first ?? 1)
-                let rotation = value.second ?? .zero
-
-                if abs(scale - 1) > 0.01 || abs(rotation.radians) > 0.01 {
-                    onTransformEnded(
-                        scale,
-                        rotation
-                    )
-                }
-
-                updatePressState(false)
-                isDraggingSticker = false
-                isTransformingSticker = false
-                onDragEnded(.zero)
-            }
     }
 }

@@ -220,7 +220,7 @@ private struct HourlyDeck: View {
     private func rowHeader(_ lens: HourlyLens, isExpanded: Bool) -> some View {
         HStack(spacing: 12) {
             Image(systemName: lens.systemImage)
-                .font(.system(size: 15, weight: .medium))
+                .font(.subheadline.weight(.medium))
                 .foregroundStyle(model.layout(for: lens).primaryColor)
                 .frame(width: 24)
 

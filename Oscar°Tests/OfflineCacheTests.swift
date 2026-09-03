@@ -19,14 +19,28 @@ struct WeatherSnapshotCoordinateTests {
     }
 
     @Test
-    func nearbyButDifferentLocationDoesNotMatch() {
+    func movementInsideTheAreaStillMatches() {
         let snapshot = CodableCoordinate(
             CLLocationCoordinate2D(latitude: 51.3397, longitude: 12.3731)
         )
 
-        #expect(!WeatherSnapshotStore.coordinatesMatch(
+        // ~1.2 km: a GPS drift or a trip across town keeps the cached forecast.
+        #expect(WeatherSnapshotStore.coordinatesMatch(
             snapshot: snapshot,
             current: CLLocationCoordinate2D(latitude: 51.35, longitude: 12.38)
+        ))
+    }
+
+    @Test
+    func distantLocationDoesNotMatch() {
+        let snapshot = CodableCoordinate(
+            CLLocationCoordinate2D(latitude: 51.3397, longitude: 12.3731)
+        )
+
+        // Leipzig -> Dresden, ~100 km: another forecast area entirely.
+        #expect(!WeatherSnapshotStore.coordinatesMatch(
+            snapshot: snapshot,
+            current: CLLocationCoordinate2D(latitude: 51.0504, longitude: 13.7373)
         ))
     }
 }

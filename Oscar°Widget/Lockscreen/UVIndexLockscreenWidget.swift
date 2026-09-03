@@ -131,18 +131,7 @@ struct UVIndexLockScreenView: View {
 
     /// WHO exposure categories.
     static func category(for uvIndex: Double) -> String {
-        switch Int(uvIndex.rounded()) {
-        case ..<3:
-            return String(localized: "Niedrig", comment: "UV-Kategorie 0-2")
-        case 3...5:
-            return String(localized: "Mäßig", comment: "UV-Kategorie 3-5")
-        case 6...7:
-            return String(localized: "Hoch", comment: "UV-Kategorie 6-7")
-        case 8...10:
-            return String(localized: "Sehr hoch", comment: "UV-Kategorie 8-10")
-        default:
-            return String(localized: "Extrem", comment: "UV-Kategorie 11+")
-        }
+        UVIndexCategory(uvIndex: uvIndex).localizedTitle
     }
 }
 

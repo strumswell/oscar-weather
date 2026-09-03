@@ -25,13 +25,10 @@ final class RainRadarLiveActivityManager {
         guard !isMonitoring else { return }
         isMonitoring = true
 
-        if #available(iOS 17.2, *) {
-            Task { await observePushToStartTokens() }
-        }
+        Task { await observePushToStartTokens() }
         Task { await observeActivities() }
     }
 
-    @available(iOS 17.2, *)
     private func observePushToStartTokens() async {
         for await tokenData in Activity<RainRadarActivityAttributes>.pushToStartTokenUpdates {
             let token = tokenData.hexEncodedString()

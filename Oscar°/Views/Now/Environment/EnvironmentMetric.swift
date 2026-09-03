@@ -19,15 +19,7 @@ struct EnvironmentMetric: Identifiable {
 
     var gaugeValue: Double { severityFraction }
 
-    // EU AQI color stops (0-20 good → >100 extremely poor)
-    private static let aqiColorStops: [(location: Double, color: Color)] = [
-        (0.0, Color(red: 79/255,  green: 240/255, blue: 230/255)), // #4ff0e6 good
-        (0.2, Color(red: 81/255,  green: 204/255, blue: 170/255)), // #51ccaa fair
-        (0.4, Color(red: 240/255, green: 230/255, blue: 65/255)),  // #f0e641 moderate
-        (0.6, Color(red: 255/255, green: 81/255,  blue: 80/255)),  // #ff5150 poor
-        (0.8, Color(red: 150/255, green: 1/255,   blue: 50/255)),  // #960132 very poor
-        (1.0, Color(red: 125/255, green: 33/255,  blue: 129/255)), // #7d2181 extremely poor
-    ]
+    private static let aqiColorStops = EUAirQualityBand.gradientStops
 
     // Pollen tier colors (none → very high, 5 equal steps)
     private static let pollenColorStops: [(location: Double, color: Color)] = [
@@ -64,8 +56,8 @@ struct EnvironmentMetric: Identifiable {
         return Gradient(stops: uvColors.enumerated().map { .init(color: $1, location: Double($0) / last) })
     }()
 
-    static func forAQI(id: String, label: String, subscript_: String? = nil, value: Double?) -> EnvironmentMetric {
-        let v = value ?? 0
+    static func forAQI(id: String, label: String, subscript_: String? = nil, value: Double?) -> EnvironmentMetric? {
+        guard let v = value else { return nil }
         let fraction = min(v / 100.0, 1.0)
         return EnvironmentMetric(
             id: id, label: label, subscriptLabel: subscript_,
@@ -76,8 +68,8 @@ struct EnvironmentMetric: Identifiable {
         )
     }
 
-    static func forUV(value: Double?) -> EnvironmentMetric {
-        let v = value ?? 0
+    static func forUV(value: Double?) -> EnvironmentMetric? {
+        guard let v = value else { return nil }
         let idx = min(Int(v), uvColors.count - 1)
         let fraction = min(v / Double(uvColors.count - 1), 1.0)
         return EnvironmentMetric(

@@ -46,7 +46,7 @@ final class CloudLayerState {
     private(set) var loadedFrameIndices: Set<Int> = []
     private(set) var loadingFrameIndices: Set<Int> = []
     var hasAnyLoadedFrame: Bool { !loadedFrameIndices.isEmpty }
-    @ObservationIgnored nonisolated(unsafe) private var playbackTimer: Timer?
+    @ObservationIgnored private let playback = PlaybackTicker()
     @ObservationIgnored private var suppressSelectionSideEffects = false
 
     @ObservationIgnored private var frameDates: [Date?] = []
@@ -61,10 +61,11 @@ final class CloudLayerState {
 
     /// Mirrors the radar metadata cache window.
     private static let metadataStaleAfter: TimeInterval = 10 * 60
-    /// Decoded payloads kept around the anchor (≈3.6 MB each at the 2048 overview;
-    /// ±14 covers the whole served series on a healthy device without approaching
-    /// the radar state's budget).
-    private static let residencyRadius = 14
+    /// Decoded payloads kept around the anchor (≈3.6 MB each at the 2048 overview),
+    /// sized from the process's memory headroom like the radar grids.
+    private static let residencyBudget = adaptiveCacheBudget(
+        fraction: 0.06, floor: 32 * 1024 * 1024, cap: 100 * 1024 * 1024)
+    private static let residencyRadius = max(4, residencyBudget / 3_600_000 / 2)
     /// Frames fetched around the anchor per prefetch pass — clouds are the
     /// secondary consumer, one below the radar's focused window.
     private static let focusedCount = 4
@@ -78,7 +79,7 @@ final class CloudLayerState {
     /// Resolved clouds palette: server `/colormaps/clouds` preferred, local
     /// fallback when unreachable (mirrors `OscarRadarState.resolvedPalette`).
     static func resolvedPalette() async -> [PixelRGBA] {
-        await ModelGridLayerState.palette(for: colormapId) ?? localPalette
+        await ServerPalettes.resolve(id: colormapId) ?? localPalette
     }
 
     /// Kept in sync with oscar-server's `Colormaps.cloudsPalette256`: index 0
@@ -117,7 +118,6 @@ final class CloudLayerState {
     deinit {
         metadataTask?.cancel()
         prefetchTask?.cancel()
-        playbackTimer?.invalidate()
     }
 
     // MARK: - Activation
@@ -133,7 +133,9 @@ final class CloudLayerState {
         } else {
             pause()
             metadataTask?.cancel()
+            metadataTask = nil
             prefetchTask?.cancel()
+            prefetchTask = nil
             loadingKeys.removeAll()
             loadingFrameIndices.removeAll()
             payloads.removeAll()
@@ -148,19 +150,13 @@ final class CloudLayerState {
 
     func play() {
         guard !frameKeys.isEmpty else { return }
-        playbackTimer?.invalidate()
         isPlaying = true
-        playbackTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                self?.advanceFrame()
-            }
-        }
+        playback.start(interval: .milliseconds(500)) { [weak self] in self?.advanceFrame() }
     }
 
     func pause() {
         isPlaying = false
-        playbackTimer?.invalidate()
-        playbackTimer = nil
+        playback.stop()
     }
 
     func advanceFrame() {
@@ -175,8 +171,7 @@ final class CloudLayerState {
     /// the map layer's display link owns frame advancement (both running would
     /// double-advance; same ownership rule as the radar/model layers).
     func cancelInternalTimer() {
-        playbackTimer?.invalidate()
-        playbackTimer = nil
+        playback.stop()
     }
 
     func beginScrubbing() {
@@ -246,7 +241,7 @@ final class CloudLayerState {
         loadSessionID = sessionID
         metadataTask = Task { [weak self] in
             await self?.loadMetadata(sessionID: sessionID)
-            self?.metadataTask = nil
+            if self?.loadSessionID == sessionID { self?.metadataTask = nil }
         }
     }
 
@@ -259,7 +254,7 @@ final class CloudLayerState {
                 // "no cloud frames right now" and retry via the staleness loop.
                 lastMetadataLoad = Date()
                 if frameKeys.isEmpty {
-                    error = "Satellitenbilder sind derzeit nicht verfügbar."
+                    error = String(localized: "Satellitenbilder sind derzeit nicht verfügbar.")
                     isLoading = false
                 }
                 return
@@ -278,9 +273,9 @@ final class CloudLayerState {
                 // Unexpected statuses and undecodable payloads read as "not
                 // available"; genuine transport failures keep their description.
                 if (cause as? URLError)?.code == .badServerResponse || cause is DecodingError {
-                    self.error = "Satellitenbilder sind derzeit nicht verfügbar."
+                    self.error = String(localized: "Satellitenbilder sind derzeit nicht verfügbar.")
                 } else {
-                    self.error = "Fehler beim Laden: \(cause.localizedDescription)"
+                    self.error = String(localized: "Fehler beim Laden: \(cause.localizedDescription)")
                 }
                 isLoading = false
             }
@@ -356,7 +351,7 @@ final class CloudLayerState {
                 guard !Task.isCancelled, self.loadSessionID == sessionID else { break }
                 await self.loadFrame(at: index, sessionID: sessionID)
             }
-            self.prefetchTask = nil
+            if self.loadSessionID == sessionID { self.prefetchTask = nil }
             self.evict(around: self.lastAnchorIndex)
         }
     }

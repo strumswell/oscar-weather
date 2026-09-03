@@ -16,7 +16,7 @@ struct EnvironmentUVSectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            EnvironmentDetailCard {
+            DetailCard {
                 EnvironmentDetailHeaderView(
                     title: "UV-Index",
                     value: currentUV.map { $0.formatted(.number.precision(.fractionLength(1))) } ?? "--",
@@ -38,7 +38,7 @@ struct EnvironmentUVSectionView: View {
                 .id(chartTimelineVersion)
             }
 
-            EnvironmentDetailCard {
+            DetailCard {
                 Text("Gesundheitsbewertung")
                     .font(.headline)
                     .foregroundStyle(.primary)

@@ -23,8 +23,9 @@ struct RadarProvider: AppIntentTimelineProvider {
     }
 
     func snapshot(for configuration: RadarWidgetConfigIntent, in context: Context) async -> RadarEntry {
-        await buildWidgetEntry(configuration: configuration, displaySize: context.displaySize,
-                               family: context.family)
+        if context.isPreview { return placeholder(in: context) }
+        return await buildWidgetEntry(configuration: configuration, displaySize: context.displaySize,
+                                      family: context.family)
     }
 
     func timeline(for configuration: RadarWidgetConfigIntent, in context: Context) async -> Timeline<RadarEntry> {

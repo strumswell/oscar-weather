@@ -21,10 +21,12 @@ import OpenAPIURLSession
 /// Only the app process sees the override; widget/watch extensions read their own
 /// defaults and stay on production.
 let radarBaseURL: String = {
+    #if DEBUG
     if let override = UserDefaults.standard.string(forKey: "radarBaseURL"),
        !override.isEmpty {
         return override.hasSuffix("/") ? String(override.dropLast()) : override
     }
+    #endif
     return "https://server.oscars.love"
 }()
 
@@ -53,7 +55,7 @@ final class APIClient: Sendable {
     )
     openMeteoAqi = APIClient.get(url: Self.serverURL(Servers.server2))
     openMeteoGeo = APIClient.get(url: Self.serverURL(Servers.server3))
-    openMeteoArchive = APIClient.get(url: Self.archiveServerURL)
+    openMeteoArchive = APIClient.get(url: Self.serverURL(Servers.server5))
     canadaWeather = APIClient.get(url: Self.serverURL(Servers.server4))
     oscarServer = Client(
       serverURL: URL(string: radarBaseURL) ?? Self.serverURL(Servers.server6),
@@ -77,7 +79,6 @@ final class APIClient: Sendable {
     )
   }
 
-  private static let archiveServerURL = URL(string: "https://archive-api.open-meteo.com")!
 
   /// The generated `Servers.serverN()` build compile-time-constant base URLs; a failure is a
   /// spec/build error, so fail loudly with a clear message instead of force-trying.
@@ -215,15 +216,15 @@ final class APIClient: Sendable {
           // so the merged timeline stays contiguous and the parallel arrays stay aligned.
           let startIndex = iconDaily.time.count
           guard bestMatchDaily.time.count > startIndex else { return iconForecast }
-          iconDaily.time.append(contentsOf: bestMatchDaily.time.suffix(from: startIndex))
-          iconDaily.temperature_2m_max?.append(contentsOf: maxTemps.suffix(from: startIndex))
-          iconDaily.temperature_2m_min?.append(contentsOf: minTemps.suffix(from: startIndex))
-          iconDaily.precipitation_sum?.append(contentsOf: precip.suffix(from: startIndex))
+          iconDaily.time.append(contentsOf: bestMatchDaily.time.dropFirst(startIndex))
+          iconDaily.temperature_2m_max?.append(contentsOf: maxTemps.dropFirst(startIndex))
+          iconDaily.temperature_2m_min?.append(contentsOf: minTemps.dropFirst(startIndex))
+          iconDaily.precipitation_sum?.append(contentsOf: precip.dropFirst(startIndex))
           iconDaily.precipitation_probability_max?.append(
-            contentsOf: precipProb.suffix(from: startIndex))
-          iconDaily.weathercode?.append(contentsOf: codes.suffix(from: startIndex))
-          iconDaily.sunrise?.append(contentsOf: sunrises.suffix(from: startIndex))
-          iconDaily.sunset?.append(contentsOf: sunsets.suffix(from: startIndex))
+            contentsOf: precipProb.dropFirst(startIndex))
+          iconDaily.weathercode?.append(contentsOf: codes.dropFirst(startIndex))
+          iconDaily.sunrise?.append(contentsOf: sunrises.dropFirst(startIndex))
+          iconDaily.sunset?.append(contentsOf: sunsets.dropFirst(startIndex))
 
           iconForecast.daily = iconDaily
           return iconForecast
@@ -279,7 +280,7 @@ final class APIClient: Sendable {
 
   private func notifyModelFallback(_ model: ForecastModelPreference) {
     let modelName = model.name
-    DispatchQueue.main.async {
+    Task { @MainActor in
       NotificationCenter.default.post(
         name: .forecastModelFallback,
         object: nil,
@@ -428,7 +429,7 @@ final class APIClient: Sendable {
         return result
       }
     case .undocumented:
-      return .init()
+      throw URLError(.badServerResponse)
     }
   }
 

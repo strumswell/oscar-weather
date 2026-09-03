@@ -46,6 +46,9 @@ struct WatchRootView: View {
                 .tag(3)
         }
         .tabViewStyle(.verticalPage)
+        .onChange(of: weather.precipSeries == nil) { _, isNil in
+            if isNil, selection == 1 { selection = 0 }
+        }
         .preferredColorScheme(.dark)
     }
 }

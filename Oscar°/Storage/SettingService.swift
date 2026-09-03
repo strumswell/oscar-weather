@@ -5,24 +5,23 @@ import WidgetKit
 
 @MainActor
 @Observable
-public final class SettingService {
+final class SettingService {
     static let shared = SettingService()
     private static let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier ?? "Oscar",
         category: "Storage"
     )
-    var settings: Settings?
-    /// Units are mirrored out of Core Data into plain stored properties: mutating an
-    /// @NSManaged field fires no @Observable change, so views bound to `settings` went
-    /// stale. Views read/write these; the didSet persists back to Core Data.
+    /// Units live in the shared app-group defaults so the widget process reads the
+    /// same value the app just wrote. The watch has its own container and keeps
+    /// its own copy.
     var temperatureUnit: String {
-        didSet { unitDidChange() }
+        didSet { unitDidChange(key: Self.temperatureUnitKey, value: temperatureUnit) }
     }
     var windSpeedUnit: String {
-        didSet { unitDidChange() }
+        didSet { unitDidChange(key: Self.windSpeedUnitKey, value: windSpeedUnit) }
     }
     var precipitationUnit: String {
-        didSet { unitDidChange() }
+        didSet { unitDidChange(key: Self.precipitationUnitKey, value: precipitationUnit) }
     }
     var oscarRadarLayer: Bool {
         didSet {
@@ -38,15 +37,6 @@ public final class SettingService {
         didSet {
             // Shared app group so the radar widget reads the same region.
             Self.defaults.set(oscarRadarRegionRaw, forKey: "oscarRadarRegion")
-        }
-    }
-    /// When true, the radar layer shows the TYPED product (rain/snow/hail coloring
-    /// baked into the grid) where available — DWD and MRMS, not OPERA. The resolved
-    /// product accessor lives in WeatherTileLayer.swift — `RadarProduct` isn't
-    /// compiled into every target this file is.
-    var radarPrecipTypeOverlay: Bool {
-        didSet {
-            UserDefaults.standard.set(radarPrecipTypeOverlay, forKey: "radarPrecipTypeOverlay")
         }
     }
     /// When true (default), radar playback morphs between frames along the server's
@@ -192,12 +182,7 @@ public final class SettingService {
             nc.post(name: .weatherRefreshNeeded, object: nil)
         }
     }
-    private let context: NSManagedObjectContext
-    private let pc = PersistenceController.shared
     private let nc = NotificationCenter.default
-    /// True while `update()` copies Core Data values into the mirrored properties, so
-    /// their didSet doesn't write straight back and re-post a refresh.
-    private var isHydrating = false
     nonisolated private static let timeFormatPreferenceKey = "timeFormatPreference"
     private static let dailyForecastDaytimeTemperaturesEnabledKey = "dailyForecastDaytimeTemperaturesEnabled"
     private static let dailyForecastDaytimeTemperatureDisplayModeKey = "dailyForecastDaytimeTemperatureDisplayMode"
@@ -205,19 +190,16 @@ public final class SettingService {
     private static let dailyForecastDaytimeCustomStartHourKey = "dailyForecastDaytimeCustomStartHour"
     private static let dailyForecastDaytimeCustomEndHourKey = "dailyForecastDaytimeCustomEndHour"
     nonisolated private static let forecastModelPreferenceKey = "forecastModelPreference"
-    // Units live in Core Data but are mirrored into shared defaults so the widget process (whose
-    // Core Data view is cached at launch) reads the current value. See resolvedTemperatureUnit.
     nonisolated private static let temperatureUnitKey = "temperatureUnit"
     nonisolated private static let windSpeedUnitKey = "windSpeedUnit"
     nonisolated private static let precipitationUnitKey = "precipitationUnit"
-    nonisolated(unsafe) private static let defaults = UserDefaults(suiteName: "group.cloud.bolte.Oscar") ?? .standard
-    nonisolated private static let formatterLock = NSLock()
-    nonisolated(unsafe) private static var formatterCache: [String: DateFormatter] = [:]
+    nonisolated private static var defaults: UserDefaults { AppGroup.defaults }
 
     private init() {
-        temperatureUnit = "celsius"
-        windSpeedUnit = "kmh"
-        precipitationUnit = "mm"
+        Self.migrateUnitsFromCoreDataIfNeeded()
+        temperatureUnit = Self.resolvedTemperatureUnit
+        windSpeedUnit = Self.resolvedWindSpeedUnit
+        precipitationUnit = Self.resolvedPrecipitationUnit
         oscarRadarLayer = UserDefaults.standard.bool(forKey: "oscarRadarLayer")
         activeTileLayerRaw = UserDefaults.standard.string(forKey: "activeTileLayer")
         // Prefer the shared app group; migrate a value written to standard defaults by older
@@ -227,10 +209,8 @@ public final class SettingService {
             ?? "germany"
         oscarRadarRegionRaw = resolvedRadarRegion
         Self.defaults.set(resolvedRadarRegion, forKey: "oscarRadarRegion")
-        // Migration: the standalone "Niederschlagsart" layer (oscarRadarProduct ==
-        // "precip_type") became a toggle on the radar layer.
-        radarPrecipTypeOverlay = (UserDefaults.standard.object(forKey: "radarPrecipTypeOverlay") as? Bool)
-            ?? (UserDefaults.standard.string(forKey: "oscarRadarProduct") == "precip_type")
+        UserDefaults.standard.removeObject(forKey: "radarPrecipTypeOverlay")
+        UserDefaults.standard.removeObject(forKey: "oscarRadarProduct")
         radarSmoothMotion = (UserDefaults.standard.object(forKey: "radarSmoothMotion") as? Bool) ?? true
         radarSoftRendering = (UserDefaults.standard.object(forKey: "radarSoftRendering") as? Bool) ?? true
         radarMotionArrows = (UserDefaults.standard.object(forKey: "radarMotionArrows") as? Bool) ?? true
@@ -276,70 +256,23 @@ public final class SettingService {
         forecastModelPreference = ForecastModelPreference(
             rawValue: Self.defaults.string(forKey: Self.forecastModelPreferenceKey) ?? ""
         ) ?? .bestMatch
-        self.context = pc.container.viewContext
-        self.update()
-    }
-    
-    func save() {
-        do {
-            try self.context.save()
-            update()
-        } catch {
-            Self.logger.error("Settings save failed: \(error.localizedDescription, privacy: .public)")
-            context.rollback()
-        }
-    }
-    
-    private func update() {
-        do {
-            let fetchRequest: NSFetchRequest<Settings>
-            fetchRequest = Settings.fetchRequest()
-            let result = try self.context.fetch(fetchRequest)
-            
-            if (result.count < 1) {
-                let defaultSettings = Settings(context: self.context)
-                defaultSettings.druckLayer = false
-                defaultSettings.dwdLayer = true
-                defaultSettings.infrarotLayer = false
-                defaultSettings.tempLayer = false
-                defaultSettings.humidityLayer = false
-                defaultSettings.windDirectionLayer = false
-                defaultSettings.temperatureUnit = "celsius"
-                defaultSettings.windSpeedUnit = "kmh"
-                defaultSettings.precipitationUnit = "mm"
-                self.save()
-            } else {
-                self.settings = result.first!
-                isHydrating = true
-                temperatureUnit = settings?.temperatureUnit ?? "celsius"
-                windSpeedUnit = settings?.windSpeedUnit ?? "kmh"
-                precipitationUnit = settings?.precipitationUnit ?? "mm"
-                isHydrating = false
-                mirrorUnitsToSharedDefaults()
-            }
-        } catch {
-            Self.logger.error("Settings fetch failed: \(error.localizedDescription, privacy: .public)")
-            return
-        }
     }
 
-    private func unitDidChange() {
-        guard !isHydrating else { return }
-        settings?.temperatureUnit = temperatureUnit
-        settings?.windSpeedUnit = windSpeedUnit
-        settings?.precipitationUnit = precipitationUnit
-        save()
+    private func unitDidChange(key: String, value: String) {
+        Self.defaults.set(value, forKey: key)
         nc.post(name: .weatherRefreshNeeded, object: nil)
         WidgetCenter.shared.reloadAllTimelines()
     }
 
-    /// Copies the Core Data unit settings into shared defaults. Called after every load/save so
-    /// the widget process (which can't see another process's Core Data writes) reads the latest
-    /// units when it builds a timeline.
-    private func mirrorUnitsToSharedDefaults() {
-        Self.defaults.set(settings?.temperatureUnit ?? "celsius", forKey: Self.temperatureUnitKey)
-        Self.defaults.set(settings?.windSpeedUnit ?? "kmh", forKey: Self.windSpeedUnitKey)
-        Self.defaults.set(settings?.precipitationUnit ?? "mm", forKey: Self.precipitationUnitKey)
+    /// Units used to live in the Core Data `Settings` row; installs that predate the
+    /// app-group defaults copy them over once.
+    private static func migrateUnitsFromCoreDataIfNeeded() {
+        guard defaults.string(forKey: temperatureUnitKey) == nil else { return }
+        let context = PersistenceController.shared.container.viewContext
+        guard let stored = try? context.fetch(Settings.fetchRequest()).first else { return }
+        defaults.set(stored.temperatureUnit ?? "celsius", forKey: temperatureUnitKey)
+        defaults.set(stored.windSpeedUnit ?? "kmh", forKey: windSpeedUnitKey)
+        defaults.set(stored.precipitationUnit ?? "mm", forKey: precipitationUnitKey)
     }
 
     nonisolated static var resolvedTimeFormatAPIValue: String {
@@ -376,85 +309,4 @@ public final class SettingService {
         min(max(hour, 0), 23)
     }
 
-    nonisolated static func formattedTime(
-        _ date: Date,
-        timeZone: TimeZone? = nil,
-        showsMinutes: Bool = true
-    ) -> String {
-        let mode = resolvedTimeFormatPreference
-        let key = "time|\(mode.rawValue)|\(showsMinutes)|\(timeZone?.identifier ?? "local")"
-        return format(date, key: key) {
-            $0.locale = .autoupdatingCurrent
-            $0.timeZone = timeZone
-            switch mode {
-            case .system:
-                $0.dateStyle = .none
-                $0.timeStyle = showsMinutes ? .short : .none
-                if !showsMinutes {
-                    $0.dateFormat = DateFormatter.dateFormat(
-                        fromTemplate: "j",
-                        options: 0,
-                        locale: .autoupdatingCurrent
-                    )
-                }
-            case .h24:
-                $0.dateFormat = showsMinutes ? "HH:mm" : "HH"
-            case .h12:
-                $0.dateFormat = showsMinutes ? "h:mm a" : "h a"
-            }
-        }
-    }
-
-    nonisolated static func formattedDateTime(_ date: Date, timeZone: TimeZone? = nil) -> String {
-        let key = "date|\(timeZone?.identifier ?? "local")"
-        let dateString = format(date, key: key) {
-            $0.locale = .autoupdatingCurrent
-            $0.timeZone = timeZone
-            $0.dateStyle = .short
-            $0.timeStyle = .none
-        }
-        return "\(dateString), \(formattedTime(date, timeZone: timeZone))"
-    }
-
-    nonisolated static func formattedWeekday(_ date: Date, timeZone: TimeZone) -> String {
-        format(date, key: "weekday|\(timeZone.identifier)") {
-            $0.locale = .autoupdatingCurrent
-            $0.timeZone = timeZone
-            $0.dateFormat = "EEEE"
-        }
-    }
-
-    nonisolated static func formattedDayMonth(_ date: Date, timeZone: TimeZone) -> String {
-        format(date, key: "dayMonth|\(timeZone.identifier)") {
-            $0.locale = .autoupdatingCurrent
-            $0.timeZone = timeZone
-            $0.setLocalizedDateFormatFromTemplate("d MMM")
-        }
-    }
-
-    nonisolated static func formattedShortWeekday(_ date: Date, timeZone: TimeZone) -> String {
-        format(date, key: "shortWeekday|\(timeZone.identifier)") {
-            $0.locale = .autoupdatingCurrent
-            $0.timeZone = timeZone
-            $0.dateFormat = "EEE"
-        }
-    }
-
-    nonisolated private static func format(
-        _ date: Date,
-        key: String,
-        configure: (DateFormatter) -> Void
-    ) -> String {
-        formatterLock.withLock {
-            let formatter: DateFormatter
-            if let cached = formatterCache[key] {
-                formatter = cached
-            } else {
-                formatter = DateFormatter()
-                configure(formatter)
-                formatterCache[key] = formatter
-            }
-            return formatter.string(from: date)
-        }
-    }
 }

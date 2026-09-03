@@ -9,6 +9,8 @@ struct HourlyChaptersView: View {
     @State private var expandedID: String?
     @State private var centerItemID: String?
     @State private var scrollPhase: ScrollPhase = .idle
+    @State private var items: [Item] = []
+    @State private var viewportHeight: CGFloat = 0
 
     private enum Item: Identifiable {
         case divider(id: String, label: String)
@@ -35,6 +37,9 @@ struct HourlyChaptersView: View {
                         chapterRow(chapter, now: now)
                     }
                 }
+                // Room below the last chapter so it can reach the center marker.
+                Color.clear
+                    .frame(height: max(0, viewportHeight * 0.45))
             }
             .scrollTargetLayout()
             .background(alignment: .leading) {
@@ -48,7 +53,7 @@ struct HourlyChaptersView: View {
         }
         .overlay(alignment: .leading) {
             Image(systemName: "arrowtriangle.right.fill")
-                .font(.system(size: 12, weight: .bold))
+                .font(.caption.weight(.bold))
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.35), radius: 1.5)
                 .padding(.leading, 21)
@@ -61,7 +66,10 @@ struct HourlyChaptersView: View {
         .onScrollPhaseChange { _, newPhase in
             scrollPhase = newPhase
         }
-        .onAppear {
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewportHeight = $0 }
+        .sensoryFeedback(.selection, trigger: centerItemID) { _, _ in scrollPhase != .idle }
+        .onChange(of: model.chapters, initial: true) { _, _ in
+            items = makeItems()
             guard centerItemID == nil else { return }
             let timeline = model.chapters.filter { $0.kind != .day }
             centerItemID = (timeline.last(where: { $0.range.lowerBound <= model.scrubTime })
@@ -74,7 +82,9 @@ struct HourlyChaptersView: View {
             guard userIsScrolling,
                   let chapter = model.chapters.first(where: { $0.id == id }),
                   chapter.kind != .day else { return }
-            model.glide(to: chapter.jumpTime)
+            // Scrolling should feel like scrubbing: a short ease-out follows the
+            // finger instead of the slow-in glide that a tap deserves.
+            model.glide(to: chapter.jumpTime, easeOut: true)
         }
         .onChange(of: activeID) { _, id in
             guard expandedID == nil, !model.isGliding, scrollPhase == .idle,
@@ -93,7 +103,7 @@ struct HourlyChaptersView: View {
             .id
     }
 
-    private var items: [Item] {
+    private func makeItems() -> [Item] {
         var calendar = Calendar.current
         calendar.timeZone = model.timeZone
 
@@ -118,7 +128,7 @@ struct HourlyChaptersView: View {
     private func dayDivider(_ label: String) -> some View {
         HStack(spacing: 10) {
             Text(verbatim: label)
-                .font(.system(size: 13, weight: .semibold))
+                .font(.footnote.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.85))
                 .shadow(color: .black.opacity(0.35), radius: 2, y: 1)
                 .fixedSize()
@@ -156,11 +166,11 @@ struct HourlyChaptersView: View {
         }
         .opacity(isPast ? 0.55 : 1)
         .onDisappear {
+            // Re-arm the auto-recenter once an expanded card scrolls out of view.
             if expandedID == chapter.id {
                 expandedID = nil
             }
         }
-        .id(chapter.id)
     }
 
     private func card(_ chapter: ChapterEngine.Chapter, isExpanded: Bool) -> some View {
@@ -225,7 +235,7 @@ struct HourlyChaptersView: View {
                     .fill(tint.opacity(0.22))
                     .frame(width: 34, height: 34)
                 Image(systemName: chapter.systemImage)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.subheadline.weight(.medium))
                     .foregroundStyle(iconColor(for: chapter))
             }
 
@@ -281,7 +291,7 @@ struct HourlyChaptersView: View {
                         .tracking(0.8)
                         .foregroundStyle(.white.opacity(0.6))
                     Text(verbatim: stat.value)
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.footnote.weight(.semibold))
                         .monospacedDigit()
                         .foregroundStyle(.white)
                 }

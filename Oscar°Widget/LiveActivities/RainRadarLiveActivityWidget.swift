@@ -81,7 +81,7 @@ private struct RainRadarTimelineView: View {
                 Capsule()
                     .fill(bucket.isWet ? Color.cyan : Color.white.opacity(0.28))
                     .frame(width: compact ? 5 : 8, height: height(for: bucket))
-                    .accessibilityLabel(Text(bucket.isWet ? "Rain" : "Dry"))
+                    .accessibilityLabel(Text(bucket.isWet ? "Regen" : "Trocken"))
             }
         }
         .frame(height: compact ? 28 : 42, alignment: .bottom)
@@ -138,21 +138,21 @@ private extension RainRadarActivityAttributes.ContentState {
     }
 
     func primaryText(isStale: Bool) -> String {
-        if isStale { return String(localized: "Radar updating") }
+        if isStale { return String(localized: "Radar wird aktualisiert") }
         switch phase {
         case .upcoming:
             if let minutesUntilStart {
-                return String(localized: "Rain in \(minutesUntilStart) min")
+                return String(localized: "Regen in \(minutesUntilStart) min")
             }
-            return String(localized: "Rain soon")
+            return String(localized: "Regen in Kürze")
         case .raining:
-            return String(localized: "Raining now")
+            return String(localized: "Regnet gerade")
         case .endingSoon:
-            return String(localized: "Ending soon")
+            return String(localized: "Endet bald")
         case .ended:
-            return String(localized: "Rain ended")
+            return String(localized: "Regen vorbei")
         case .stale:
-            return String(localized: "Radar updating")
+            return String(localized: "Radar wird aktualisiert")
         }
     }
 
@@ -160,17 +160,17 @@ private extension RainRadarActivityAttributes.ContentState {
         if isStale { return "..." }
         if let minutesUntilStart, phase == .upcoming { return "\(minutesUntilStart)m" }
         if let minutesUntilEnd { return "\(minutesUntilEnd)m" }
-        return phase == .raining ? "Now" : ""
+        return phase == .raining ? String(localized: "Jetzt") : ""
     }
 
     func secondaryText(isStale: Bool) -> String {
         if isStale {
-            return String(localized: "Waiting for fresh radar data")
+            return String(localized: "Warte auf aktuelle Radardaten")
         }
         if let minutesUntilEnd, phase == .raining || phase == .endingSoon {
             return isEndOpenEnded
-                ? String(localized: "\(intensityLabel), at least \(minutesUntilEnd) min")
-                : String(localized: "\(intensityLabel), \(minutesUntilEnd) min left")
+                ? String(localized: "\(intensityLabel), noch mindestens \(minutesUntilEnd) min")
+                : String(localized: "\(intensityLabel), noch \(minutesUntilEnd) min")
         }
         return intensityLabel
     }
@@ -178,20 +178,12 @@ private extension RainRadarActivityAttributes.ContentState {
     func footerText(isStale: Bool) -> String {
         let date = SettingService.formattedTime(lastObservedDate)
         if isStale {
-            return String(localized: "Last radar update \(date)")
+            return String(localized: "Letztes Radarbild \(date)")
         }
-        return String(localized: "\(locationName) · Updated \(date)")
+        return String(localized: "\(locationName) · Aktualisiert \(date)")
     }
 
     private var lastObservedDate: Date {
-        ISO8601DateFormatter.liveActivity.date(from: lastObservedAt) ?? Date()
+        PrecipSeriesDate.parse(lastObservedAt) ?? Date()
     }
-}
-
-private extension ISO8601DateFormatter {
-    nonisolated(unsafe) static let liveActivity: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter
-    }()
 }

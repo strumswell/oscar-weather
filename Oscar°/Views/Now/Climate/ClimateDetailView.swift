@@ -27,17 +27,17 @@ struct ClimateDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(climateHeadline(summary))
+                        Text(ClimateCopy.headline(summary))
                             .font(.title3)
                             .fontWeight(.semibold)
                             .fixedSize(horizontal: false, vertical: true)
                         if !isRecord {
-                            Text(climateRankLine(summary))
+                            Text(ClimateCopy.rankLine(summary))
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
-                        if let analog = climateAnalogLine(summary, unit) {
+                        if let analog = ClimateCopy.analogLine(summary, unit) {
                             Text(analog)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
@@ -112,13 +112,13 @@ struct ClimateDetailView: View {
                 Divider()
                 ClimateStatRow(
                     label: "Hitze (\(summary.hotThresholdLabel(unit)))",
-                    value: climateYearCount(summary.hotYears, of: summary.totalYears))
+                    value: ClimateCopy.yearCount(summary.hotYears, of: summary.totalYears))
             }
             if summary.frostYears > 0 {
                 Divider()
                 ClimateStatRow(
                     label: "Frost (\(summary.frostThresholdLabel(unit)))",
-                    value: climateYearCount(summary.frostYears, of: summary.totalYears))
+                    value: ClimateCopy.yearCount(summary.frostYears, of: summary.totalYears))
             }
         }
         .padding(.horizontal, 16)

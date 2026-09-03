@@ -63,7 +63,7 @@ struct HourlyLensLayout {
     }
 
     /// Cloud lens: a coverage ribbon at a fixed altitude row, thickness
-    /// modulated by cover — same idea as the meteogram's cloud ribbons.
+    /// modulated by cover.
     struct Band {
         let values: [Double]
         let centerFraction: CGFloat

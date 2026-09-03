@@ -36,7 +36,7 @@ struct AQIGaugeCard: View {
     @ViewBuilder private var titleText: some View {
         if let sub = metric.subscriptLabel {
             let base = Text(metric.label).fontWeight(.semibold)
-            let subscriptText = Text(sub).font(.system(size: 12)).fontWeight(.semibold)
+            let subscriptText = Text(sub).font(.caption).fontWeight(.semibold)
             Text("\(base)\(subscriptText)")
         } else {
             Text(LocalizedStringKey(metric.label)).fontWeight(.semibold)

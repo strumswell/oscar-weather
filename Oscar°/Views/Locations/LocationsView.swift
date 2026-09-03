@@ -91,7 +91,7 @@ struct LocationsView: View {
                     }
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            UIApplication.shared.playHapticFeedback()
+                            Haptics.impact()
                             isSearchPresented = true
                         } label: {
                             Image(systemName: "plus")
@@ -191,7 +191,7 @@ struct LocationsView: View {
 
                 if cities.isEmpty {
                     Section {
-                        emptyHint
+                        LocationsEmptyHint()
                             .listRowStyling()
                     }
                 }
@@ -208,172 +208,45 @@ struct LocationsView: View {
     }
 
     private var currentLocationRow: some View {
-        Button {
-            selectCurrentLocation()
-        } label: {
-            CurrentLocationCard(
-                conditions: currentLocationConditions,
-                isSelected: selectedCityURI == nil,
-                backdropPaused: cardBackdropsPaused
-            )
-        }
-        .buttonStyle(LocationCardButtonStyle())
-        .contextMenu {
-            Button {
-                editTarget = .currentLocation
-            } label: {
-                Label("Bearbeiten", systemImage: "pencil")
+        CurrentLocationRow(
+            conditions: currentLocationConditions,
+            isSelected: selectedCityURI == nil,
+            isDefault: locationService.city.defaultIsCurrentLocation,
+            backdropPaused: cardBackdropsPaused,
+            onSelect: selectCurrentLocation,
+            onEdit: { editTarget = .currentLocation },
+            onToggleDefault: {
+                locationService.city.setDefault(
+                    city: nil,
+                    asCurrentLocation: !locationService.city.defaultIsCurrentLocation
+                )
             }
-            currentLocationDefaultButton
-        }
-        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-            Button {
-                editTarget = .currentLocation
-            } label: {
-                Label("Bearbeiten", systemImage: "pencil")
-            }
-            .tint(.indigo)
-        }
-        .swipeActions(edge: .leading) {
-            currentLocationDefaultButton
-                .tint(.yellow)
-        }
-        .listRowStyling()
-        .moveDisabled(true)
-        .deleteDisabled(true)
+        )
     }
 
     private func cityRow(_ city: City) -> some View {
-        Button {
-            select(city)
-        } label: {
-            CityCard(
-                city: city,
-                conditions: conditionsStore.conditions(
-                    for: CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
-                ),
-                isSelected: city.objectID.uriRepresentation() == selectedCityURI,
-                backdropPaused: cardBackdropsPaused
-            )
-        }
-        .buttonStyle(LocationCardButtonStyle())
-        .contextMenu {
-            Button {
-                editTarget = .city(city)
-            } label: {
-                Label("Bearbeiten", systemImage: "pencil")
-            }
-            defaultButton(for: city)
-            Button(role: .destructive) {
-                delete(city)
-            } label: {
-                Label("Löschen", systemImage: "trash")
-            }
-            // The destructive role only reds the text — the icon follows the
-            // cascading label tint and stayed white without this.
-            .tint(.red)
-        }
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button(role: .destructive) {
-                delete(city)
-            } label: {
-                Label("Löschen", systemImage: "trash")
-            }
-            // Explicit red: the role's default is lost to the tab bar's
-            // cascading white tint, same reason the neighbors set theirs.
-            .tint(.red)
-            Button {
-                editTarget = .city(city)
-            } label: {
-                Label("Bearbeiten", systemImage: "pencil")
-            }
-            .tint(.indigo)
-        }
-        .swipeActions(edge: .leading) {
-            defaultButton(for: city)
-                .tint(.yellow)
-        }
-        .listRowStyling()
-    }
-
-    @ViewBuilder
-    private func defaultButton(for city: City) -> some View {
-        if city.isDefault {
-            Button {
-                locationService.city.setDefault(city: nil)
-            } label: {
-                Label("Standard entfernen", systemImage: "star.slash")
-            }
-        } else {
-            Button {
-                locationService.city.setDefault(city: city)
-            } label: {
-                Label("Als Standard festlegen", systemImage: "star")
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var currentLocationDefaultButton: some View {
-        if locationService.city.defaultIsCurrentLocation {
-            Button {
-                locationService.city.setDefault(city: nil)
-            } label: {
-                Label("Standard entfernen", systemImage: "star.slash")
-            }
-        } else {
-            Button {
-                locationService.city.setDefault(city: nil, asCurrentLocation: true)
-            } label: {
-                Label("Als Standard festlegen", systemImage: "star")
-            }
-        }
-    }
-
-    private var emptyHint: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "sparkle.magnifyingglass")
-                .font(.title2)
-                .foregroundStyle(.secondary)
-            Text("Noch keine Orte gespeichert.")
-                .font(.headline)
-            Text("Suche nach einem Ort oder wähle einen Punkt auf der Karte.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 32)
+        LocationCityRow(
+            personalization: city.personalization,
+            isDefault: city.isDefault,
+            conditions: conditionsStore.conditions(
+                for: CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
+            ),
+            isSelected: city.objectID.uriRepresentation() == selectedCityURI,
+            backdropPaused: cardBackdropsPaused,
+            onSelect: { select(city) },
+            onEdit: { editTarget = .city(city) },
+            onDelete: { delete(city) },
+            onToggleDefault: { locationService.city.setDefault(city: city.isDefault ? nil : city) }
+        )
     }
 
     // MARK: - Search
 
     private var searchResultRows: some View {
         ForEach(searchResult.results ?? [], id: \.self) { result in
-            Button {
+            LocationSearchResultRow(result: result) {
                 preview(result)
-            } label: {
-                HStack(spacing: 10) {
-                    Text(flagEmoji(countryCode: result.country_code) ?? "📍")
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(result.name ?? String(localized: "Unbekannter Ort"))
-                            .foregroundStyle(.primary)
-                        if let detail = formattedDetail(for: result) {
-                            Text(detail)
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.tertiary)
-                        .accessibilityHidden(true)
-                }
-                .contentShape(.rect)
-                .accessibilityElement(children: .combine)
             }
-            .buttonStyle(.plain)
         }
     }
 
@@ -444,7 +317,7 @@ struct LocationsView: View {
     }
 
     private func presentMapPicker() {
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
         isMapPresented = true
     }
 
@@ -455,10 +328,10 @@ struct LocationsView: View {
 
     private func preview(_ result: Components.Schemas.Location) {
         guard let lat = result.latitude, let lon = result.longitude else { return }
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
         candidate = LocationCandidate(
-            name: result.name ?? String(localized: "Unbekannter Ort"),
-            detail: formattedDetail(for: result),
+            name: result.displayName,
+            detail: result.detailLine,
             latitude: Double(lat),
             longitude: Double(lon)
         )
@@ -470,33 +343,11 @@ struct LocationsView: View {
             latitude: candidate.latitude,
             longitude: candidate.longitude
         )
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
         self.candidate = nil
         isMapPresented = false
         searchText = ""
         showForecast()
-    }
-
-    private func formattedDetail(for location: Components.Schemas.Location) -> String? {
-        let detail = [location.admin3, location.admin1, location.country]
-            .compactMap { $0 }
-            .filter { $0 != location.name }
-            .joined(separator: ", ")
-        return detail.isEmpty ? nil : detail
-    }
-
-    private func flagEmoji(countryCode: String?) -> String? {
-        guard let countryCode = countryCode?.uppercased(), countryCode.count == 2 else {
-            return nil
-        }
-        var flag = ""
-        for scalar in countryCode.unicodeScalars {
-            guard let regional = UnicodeScalar(0x1F1E6 + scalar.value - UnicodeScalar("A").value) else {
-                return nil
-            }
-            flag.unicodeScalars.append(regional)
-        }
-        return flag
     }
 }
 

@@ -1,21 +1,26 @@
-set -e
+#!/bin/bash
+set -euo pipefail
 
-if [ ! -d "$CI_ARCHIVE_PATH" ]; then
+if [ ! -d "${CI_ARCHIVE_PATH:-}" ]; then
     echo "Archive does not exist, skipping Sentry upload"
     exit 0
 fi
 
-# This is necessary in order to have sentry-cli
-# install locally into the current directory
-export INSTALL_DIR=$PWD
+# sentry-cli installs into the current directory (ci_scripts) on Xcode Cloud
+export INSTALL_DIR="$PWD"
+CLI="${CI_PRIMARY_REPOSITORY_PATH:?CI_PRIMARY_REPOSITORY_PATH is not set}/ci_scripts/sentry-cli"
 
-if [[ $(command -v sentry-cli) == "" ]]; then
-    echo "Installing Sentry CLI"
-    curl -sL https://sentry.io/get-cli/ | bash
+if [ ! -x "$CLI" ]; then
+    if command -v sentry-cli >/dev/null 2>&1; then
+        CLI="$(command -v sentry-cli)"
+    else
+        echo "Installing Sentry CLI"
+        curl -sL https://sentry.io/get-cli/ | bash
+    fi
 fi
 
 echo "Authenticate to Sentry"
-$CI_PRIMARY_REPOSITORY_PATH/ci_scripts/sentry-cli login --auth-token $SENTRY_AUTH_TOKEN
+"$CLI" login --auth-token "${SENTRY_AUTH_TOKEN:?SENTRY_AUTH_TOKEN is not set}"
 
 echo "Uploading dSYM to Sentry"
-$CI_PRIMARY_REPOSITORY_PATH/ci_scripts/sentry-cli debug-files upload --include-sources -o 'philipp-bolte' -p 'oscar' $CI_ARCHIVE_PATH
+"$CLI" debug-files upload --include-sources -o 'philipp-bolte' -p 'oscar' "$CI_ARCHIVE_PATH"

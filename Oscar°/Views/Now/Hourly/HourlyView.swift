@@ -1,6 +1,6 @@
 //
 //  HourlyView.swift
-//  Weather
+//  Oscar°
 //
 //  Created by Philipp Bolte on 24.10.20.
 //
@@ -30,7 +30,7 @@ struct HourlyView: View {
     let shouldReduceMotion = reduceMotion
     let items = self.items
     let shouldShowPlaceholders = weather.isLoading && items.isEmpty
-    let timeZone = TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? .current
+    let timeZone = weather.forecast.locationTimeZone
     let now = Date(timeIntervalSince1970: weather.forecast.current?.time ?? 0)
     let firstID = items.first?.id
     let leadingItem = items.first { $0.id == leadingItemID }
@@ -146,7 +146,7 @@ struct HourlyView: View {
       return
     }
 
-    UIApplication.shared.playHapticFeedback()
+    Haptics.impact()
     withAnimation(.snappy) { leadingItemID = firstID }
   }
 }

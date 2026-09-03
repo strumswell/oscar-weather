@@ -7,26 +7,10 @@ struct MemberCard: View {
     static let dockHeight: CGFloat = 112
     static let dockSpacing: CGFloat = 14
     static let dockBinSize = CGSize(width: 88, height: 88)
-    static let stickerImageBaseSize: CGFloat = 64
-    static let stickerTouchPadding: CGFloat = 8
-    static let minimumStickerHitSize: CGFloat = 56
     static let dockStickerTouchSize: CGFloat = 86
     static let dockPickupHoldDuration: TimeInterval = 0.22
     static let dockPickupAllowableMovement: CGFloat = 12
     static let minimumStickerVisibleRatio: CGFloat = 0.65
-    static let minimumStickerScale: Double = 0.4
-    static let maximumStickerScale: Double = 2.5
-    static let availableStickerAssets = [
-        "sticker_sun",
-        "sticker_grumpy_cloud",
-        "sticker_lightning_bolt",
-        "sticker_umbrella",
-        "sticker_oscar",
-        "sticker_oscar_sleeping",
-        "sticker_pest",
-        "sticker_solar_panel",
-        "sticker_qourses"
-    ]
 
     private let os = UIDevice.current.systemName
     private let version = UIDevice.current.systemVersion
@@ -44,7 +28,7 @@ struct MemberCard: View {
     @State private var settlingStickerFoldProgress: CGFloat = 0
 
     init() {
-        _placements = State(initialValue: MemberCardStickerStore().load())
+        _placements = State(initialValue: MemberCardStickerStore().load().filter { MemberCardStickerCatalog.assets.contains($0.assetName) })
     }
 
     var body: some View {
@@ -114,9 +98,6 @@ struct MemberCard: View {
                         in: cardSize,
                         removeBinFrame: removeBinFrame(for: cardSize.width).insetBy(dx: -20, dy: -24)
                     )
-                },
-                onStickerTransformEnded: { placement, multiplier, rotationDelta in
-                    transformSticker(placement.id, scaledBy: multiplier, rotatedBy: rotationDelta)
                 }
             )
         }
@@ -156,7 +137,7 @@ struct MemberCard: View {
     private func dockSlot(layoutFrame: CGRect, cardSize: CGSize, isHoveringRemoveBin: Bool) -> some View {
         if isEditing {
             MemberCardStickerDock(
-                assetNames: Self.availableStickerAssets,
+                assetNames: MemberCardStickerCatalog.assets,
                 activeDragAssetName: activeDrag?.isPalette == true ? activeDrag?.assetName : nil,
                 isRemoveTargeted: isHoveringRemoveBin,
                 canRemoveSelection: selectedStickerID != nil || activeDrag?.isExisting == true,
@@ -190,7 +171,7 @@ struct MemberCard: View {
 
     private func openDock() {
         guard !isEditing else { return }
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
         // Discrete row height: an animated List row height jitters against the cell resize.
         var instant = Transaction()
         instant.disablesAnimations = true
@@ -246,7 +227,7 @@ struct MemberCard: View {
     private func selectSticker(_ stickerID: UUID) {
         selectedStickerID = stickerID
         bringStickerToFront(stickerID)
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
     }
 
     private var activeExistingStickerCenter: CGPoint? {
@@ -319,7 +300,7 @@ struct MemberCard: View {
         updatedPlacements.append(sticker)
         persist(updatedPlacements)
         selectedStickerID = nil
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
     }
 
     private func addSticker(assetName: String, in cardSize: CGSize) {
@@ -337,7 +318,7 @@ struct MemberCard: View {
         updatedPlacements.append(sticker)
         persist(updatedPlacements)
         selectedStickerID = sticker.id
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
     }
 
     private func updateExistingStickerPress(placement: MemberCardStickerPlacement, isPressed: Bool, in cardSize: CGSize) {
@@ -381,12 +362,14 @@ struct MemberCard: View {
             inFlightScaleMultiplier = 1.0
             inFlightRotationDelta = .zero
             removeSticker(placement.id)
-            UIApplication.shared.playHapticFeedback()
+            Haptics.impact()
             return
         }
 
         let finalScale = clampedScale(placement.scale * inFlightScaleMultiplier)
-        let allowedCenterBounds = stickerCenterBounds(for: finalScale, in: cardSize)
+        // Reject only drops that left the card. The check uses the pre-pinch size so a
+        // resize near the edge is kept and clamped instead of thrown away.
+        let allowedCenterBounds = stickerCenterBounds(for: placement.scale, in: cardSize)
 
         guard allowedCenterBounds.contains(proposedCenter) else {
             activeDrag = nil
@@ -419,22 +402,13 @@ struct MemberCard: View {
         selectedStickerID = nil
         inFlightScaleMultiplier = 1.0
         inFlightRotationDelta = .zero
-        UIApplication.shared.playHapticFeedback()
-    }
-
-    private func transformSticker(_ stickerID: UUID, scaledBy multiplier: Double, rotatedBy delta: Angle) {
-        var updatedPlacements = placements
-        guard let index = updatedPlacements.firstIndex(where: { $0.id == stickerID }) else { return }
-        updatedPlacements[index].scale = clampedScale(updatedPlacements[index].scale * multiplier)
-        updatedPlacements[index].rotation += delta.radians
-        persist(updatedPlacements)
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
     }
 
     private func removeSelectedSticker() {
         guard let selectedStickerID else { return }
         removeSticker(selectedStickerID)
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
     }
 
     private func removeSticker(_ stickerID: UUID) {
@@ -488,11 +462,11 @@ struct MemberCard: View {
     }
 
     private func clampedScale(_ scale: Double) -> Double {
-        min(max(scale, Self.minimumStickerScale), Self.maximumStickerScale)
+        MemberCardStickerCatalog.clampedScale(scale)
     }
 
     private func stickerCenterBounds(for scale: Double, in size: CGSize) -> CGRect {
-        let stickerSize = Self.stickerImageSize(for: scale)
+        let stickerSize = MemberCardStickerCatalog.imageSize(for: scale)
         let imageHalfSize = stickerSize / 2
         let minimumVisibleExtent = min(stickerSize * Self.minimumStickerVisibleRatio, min(size.width, size.height))
         let inset = minimumVisibleExtent - imageHalfSize
@@ -510,7 +484,7 @@ struct MemberCard: View {
     private func stickerPreview(for drag: ActiveDrag) -> some View {
         let displayScale = drag.baseScale * inFlightScaleMultiplier
         let displayRotation = Angle(radians: drag.baseRotation) + inFlightRotationDelta
-        let size = Self.stickerImageSize(for: displayScale)
+        let size = MemberCardStickerCatalog.imageSize(for: displayScale)
 
         return MemberCardStickerArtworkView(
             assetName: drag.assetName,
@@ -539,43 +513,6 @@ struct MemberCard: View {
 
     static var coordinateSpaceName: String {
         "MemberCardLayoutSpace"
-    }
-
-    nonisolated static func imageName(for assetName: String) -> String {
-         return assetName
-    }
-
-    static func stickerTitle(for assetName: String) -> String {
-        switch assetName {
-        case "sticker_sun":
-            String(localized: "Sun sticker")
-        case "sticker_grumpy_cloud":
-            String(localized: "Grumpy cloud sticker")
-        case "sticker_lightning_bolt":
-            String(localized: "Lightning bolt sticker")
-        case "sticker_umbrella":
-            String(localized: "Umbrella sticker")
-        case "sticker_oscar":
-            String(localized: "Oscar sticker")
-        case "sticker_pest":
-            String(localized: "Pest sticker")
-        case "sticker_solar_panel":
-            String(localized: "Solar panel sticker")
-        case "sticker_qourses":
-            String(localized: "Qourses sticker")
-        case "sticker_oscar_sleeping":
-            String(localized: "Sleeping Oscar sticker")
-        default:
-            String(localized: "Sticker")
-        }
-    }
-
-    static func stickerImageSize(for scale: Double) -> CGFloat {
-        stickerImageBaseSize * CGFloat(scale)
-    }
-
-    static func stickerHitSize(for scale: Double) -> CGFloat {
-        max(stickerImageSize(for: scale) + (stickerTouchPadding * 2), minimumStickerHitSize)
     }
 }
 

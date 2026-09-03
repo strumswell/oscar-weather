@@ -3,24 +3,23 @@
   "strings" : {
     "CFBundleDisplayName" : {
       "comment" : "Bundle display name",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "OscarWidget"
+            "state" : "translated",
+            "value" : "Oscar°"
           }
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "OscarWidget"
+            "state" : "translated",
+            "value" : "Oscar°"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "OscarWidget"
+            "state" : "translated",
+            "value" : "Oscar°"
           }
         }
       }
