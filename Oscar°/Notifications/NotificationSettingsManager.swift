@@ -55,12 +55,15 @@ final class NotificationSettingsManager: NSObject {
     let lastSentAPNsEnvironmentKey = "notificationLastSentAPNsEnvironment"
     let lastSentStateKey = "notificationLastSentState"
     let installationRegistrationCompletedKey = "notificationInstallationRegistrationCompleted"
-    let pendingLiveActivityPushToStartTokenKey = "notificationPendingLiveActivityPushToStartToken"
-    let latestLiveActivityPushToStartTokenKey = "notificationLatestLiveActivityPushToStartToken"
+    let liveActivityPushToStartTokenKey = "notificationLiveActivityPushToStartToken"
+    let syncedLiveActivityPushToStartTokenKey = "notificationSyncedLiveActivityPushToStartToken"
+    let pendingLiveActivityReportsKey = "notificationPendingLiveActivityReports"
     let legacyDeregistrationCompletedKey = "notificationDidDeregisterLegacyRadarSubscription"
     @ObservationIgnored private var subscriptionSyncTask: Task<Void, Never>?
     @ObservationIgnored private var pendingSyncRequested = false
     @ObservationIgnored private var pendingSyncForceRegister = false
+    @ObservationIgnored var liveActivityFlushInProgress = false
+    @ObservationIgnored var liveActivityFlushRequested = false
 
     private override init() {
         let defaults = UserDefaults.standard
@@ -69,7 +72,10 @@ final class NotificationSettingsManager: NSObject {
 
         rainAlertsEnabled = storedRainAlertsEnabled
         weatherAlertsEnabled = storedWeatherAlertsEnabled
-        liveRainStatusEnabled = false
+        // Live rain status rides on the rain-alert subscription: it can't be on alone.
+        // Restored here, not later: a background wake for a push-to-start reports the
+        // card's update token before any view appears.
+        liveRainStatusEnabled = defaults.bool(forKey: liveRainStatusEnabledKey) && storedRainAlertsEnabled
         enabled = storedRainAlertsEnabled || storedWeatherAlertsEnabled
         super.init()
     }
@@ -91,12 +97,15 @@ final class NotificationSettingsManager: NSObject {
             notificationLogger.info("Lifecycle: launch skipped APNs registration; authorization=\(self.authorizationStatus.debugName, privacy: .public) enabled=\(self.enabled, privacy: .public) storedCredentials=\(self.hasStoredSubscriptionCredentials, privacy: .public)")
         }
 
-        // Live rain status rides on the rain-alert subscription — it can't be on alone.
-        let storedLiveRainStatus = UserDefaults.standard.bool(forKey: liveRainStatusEnabledKey)
-        setLiveRainStatusEnabledLocally(storedLiveRainStatus && rainAlertsEnabled)
-        if liveRainStatusEnabled {
-            RainRadarLiveActivityManager.shared.startMonitoring()
-        }
+        await RainRadarLiveActivityManager.shared.reconcile()
+        await flushPendingLiveActivityReports()
+    }
+
+    /// Foreground pass: end cards the server lost and deliver reports that failed
+    /// while the app was in the background.
+    func handleForeground() async {
+        await RainRadarLiveActivityManager.shared.reconcile()
+        await flushPendingLiveActivityReports()
     }
 
     func setRainAlertsEnabled(_ enabled: Bool) async -> Bool {
@@ -121,6 +130,7 @@ final class NotificationSettingsManager: NSObject {
         setRainAlertsEnabledLocally(false)
         setLiveRainStatusEnabledLocally(false)
         refreshEnabledState()
+        await RainRadarLiveActivityManager.shared.endAll()
         notificationLogger.info("Lifecycle: rain alerts disabled locally; syncing subscription")
         await syncSubscriptionForCurrentState(forceRegister: false)
         return true
@@ -166,13 +176,13 @@ final class NotificationSettingsManager: NSObject {
                 return false
             }
             setLiveRainStatusEnabledLocally(true)
-            RainRadarLiveActivityManager.shared.startMonitoring()
             await syncSubscriptionForCurrentState(forceRegister: false)
-            await flushPendingLiveActivityTokens()
+            await flushPendingLiveActivityReports()
             return true
         }
 
         setLiveRainStatusEnabledLocally(false)
+        await RainRadarLiveActivityManager.shared.endAll()
         await syncSubscriptionForCurrentState(forceRegister: false)
         return true
     }

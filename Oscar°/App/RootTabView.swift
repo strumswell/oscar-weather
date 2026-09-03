@@ -73,6 +73,11 @@ struct RootTabView: View {
             }
         }
         .sheet(item: $presentation.sheet, content: NowSheetView.init)
+        // The rain Live Activity opens the radar map.
+        .onOpenURL { url in
+            guard url.scheme == "oscar", url.host == "radar" else { return }
+            presentation.selectedTab = .maps
+        }
         // Outermost so the presented sheet content inherits it too — an
         // environment set inside a .sheet modifier does not reach its
         // presented content.

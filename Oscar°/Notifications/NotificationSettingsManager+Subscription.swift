@@ -136,13 +136,10 @@ extension NotificationSettingsManager {
             persistLastSentSubscriptionState(state)
             UserDefaults.standard.set(true, forKey: installationRegistrationCompletedKey)
             notificationLogger.info("Lifecycle: subscription register request succeeded; subscriptionIdLength=\(registerResponse.subscriptionId.count, privacy: .public)")
-            // A register creates a new subscription row: a previously synced
-            // push-to-start token belongs to the old one — re-send it.
-            if let latest = UserDefaults.standard.string(forKey: latestLiveActivityPushToStartTokenKey) {
-                UserDefaults.standard.set(latest, forKey: pendingLiveActivityPushToStartTokenKey)
-                UserDefaults.standard.removeObject(forKey: latestLiveActivityPushToStartTokenKey)
-            }
-            await flushPendingLiveActivityTokens()
+            // A register creates a new subscription row: the push-to-start token
+            // synced to the old one has to be sent again.
+            UserDefaults.standard.removeObject(forKey: syncedLiveActivityPushToStartTokenKey)
+            await flushPendingLiveActivityReports()
         } catch {
             notificationLogger.error("Lifecycle: subscription register request threw error=\(error.localizedDescription, privacy: .public)")
         }
@@ -166,7 +163,7 @@ extension NotificationSettingsManager {
                 keychain.save(key: lastSentDeviceTokenKey, value: token)
                 persistLastSentSubscriptionState(state)
                 notificationLogger.info("Lifecycle: subscription patch request succeeded")
-                await flushPendingLiveActivityTokens()
+                await flushPendingLiveActivityReports()
                 return .success
             case .undocumented(let statusCode, _) where statusCode == 404:
                 keychain.delete(key: subscriptionKey)

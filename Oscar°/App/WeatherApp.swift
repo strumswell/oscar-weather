@@ -39,6 +39,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         }
         MainActor.assumeIsolated {
             UNUserNotificationCenter.current().delegate = NotificationSettingsManager.shared
+            // Here and not in a view task: a push-to-start wakes the app in the
+            // background without UI, and that wake is when ActivityKit hands out the
+            // per-card update token the server needs to update and end the card.
+            RainRadarLiveActivityManager.shared.startMonitoring()
         }
         return true
     }
@@ -70,7 +74,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct WeatherApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
+    @Environment(\.scenePhase) private var scenePhase
+
     init() {
         // Increase shared URLCache so aggressive tile preloading survives across frames.
         URLCache.shared = URLCache(
@@ -148,6 +153,10 @@ struct WeatherApp: App {
                     await weather.refresh(location: location)
                     await notificationSettingsManager.configureOnLaunch()
                     await WidgetBasemapRenderer.refreshIfNeeded()
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    guard phase == .active else { return }
+                    Task { await notificationSettingsManager.handleForeground() }
                 }
                 .sentryTrace("RootTabView")
         }
