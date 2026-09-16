@@ -22,7 +22,7 @@ struct OnboardingFinaleStep: View {
             Image(systemName: "sparkles")
                 .font(.system(size: 40))
                 .foregroundStyle(.yellow.gradient)
-                .symbolEffect(.bounce, options: .repeat(.periodic(delay: 2.5)))
+                .symbolEffect(.bounce, options: .repeat(.periodic(delay: 2.5)), isActive: !reduceMotion)
                 .opacity(appeared ? 1 : 0)
                 .accessibilityHidden(true)
 

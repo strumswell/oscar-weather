@@ -14,6 +14,7 @@ nonisolated final class ForecastSanitizingMiddleware: ClientMiddleware {
   /// Series the schema already declares nullable; their generated type tolerates `null`.
   private static let nullableHourly: Set<String> = [
     "precipitation_probability",
+    "windspeed_180m", "winddirection_180m",
     "soil_temperature_0cm", "soil_temperature_6cm", "soil_temperature_18cm", "soil_temperature_54cm",
     "soil_moisture_0_1cm", "soil_moisture_1_3cm", "soil_moisture_3_9cm",
     "soil_moisture_9_27cm", "soil_moisture_27_81cm",
@@ -38,14 +39,18 @@ nonisolated final class ForecastSanitizingMiddleware: ClientMiddleware {
     else {
       return (response, responseBody)
     }
-
     let data = try await Data(collecting: responseBody, upTo: 10 * 1024 * 1024)
     guard var root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
       return (response, HTTPBody(data))
     }
 
-    sanitizeSeries(&root, key: "hourly", nullableFields: Self.nullableHourly)
-    sanitizeSeries(&root, key: "daily", nullableFields: Self.nullableDaily)
+    // Only a forced model returns null series; best_match arrays pass through
+    // untouched. The current block and unit labels are repaired for every model.
+    let models = queryParameters(from: request)["models"]
+    if let models, models != "best_match" {
+      sanitizeSeries(&root, key: "hourly", nullableFields: Self.nullableHourly)
+      sanitizeSeries(&root, key: "daily", nullableFields: Self.nullableDaily)
+    }
     sanitizeCurrent(&root)
     sanitizeUnits(&root, request: request)
 

@@ -35,6 +35,9 @@ struct DebugPermissionControls: View {
             ) {
                 Task { await notificationManager.requestPermissionOnly() }
             }
+            #if DEBUG
+            liveActivityRow
+            #endif
         }
         .padding(.bottom, 12)
         .task {
@@ -64,6 +67,30 @@ struct DebugPermissionControls: View {
             .buttonStyle(.bordered)
         }
     }
+
+    #if DEBUG
+    /// Local sample cards for checking the Live Activity layout without rain.
+    private var liveActivityRow: some View {
+        let phases: [RainRadarActivityAttributes.ContentState.Phase] = [.upcoming, .raining, .ending, .ended]
+        return HStack(spacing: 6) {
+            Text(verbatim: "Live Activity")
+            ForEach(phases, id: \.self) { phase in
+                Button {
+                    try? RainRadarLiveActivityManager.shared.startPreview(phase: phase)
+                } label: {
+                    Text(verbatim: phase.rawValue)
+                }
+            }
+            Button {
+                Task { await RainRadarLiveActivityManager.shared.endAll() }
+            } label: {
+                Text(verbatim: "End")
+            }
+        }
+        .font(.caption)
+        .buttonStyle(.bordered)
+    }
+    #endif
 
     private var locationStatusName: String {
         switch locationService.authStatus {

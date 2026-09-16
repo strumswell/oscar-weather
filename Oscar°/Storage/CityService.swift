@@ -104,10 +104,7 @@ public final class CityService {
             newCity.lat = latitude
             newCity.lon = longitude
             newCity.countryCode = normalizedCountryCode?.count == 2 ? normalizedCountryCode : nil
-            newCity.selected = false
             newCity.orderIndex = self.getMaxOrderIndex() + 1
-
-            save()
             self.toggleActiveCity(city: newCity)
         }
     }

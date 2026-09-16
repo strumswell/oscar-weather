@@ -1,6 +1,6 @@
 //
 //  RainView.swift
-//  Weather
+//  Oscar°
 //
 //  Created by Philipp Bolte on 24.10.20.
 //
@@ -10,6 +10,7 @@ import Charts
 struct RainView: View {
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var openRadarMap: () -> Void = {}
 
     private var oscarPoints: [PrecipChartPoint] {
@@ -23,14 +24,14 @@ struct RainView: View {
             VStack(alignment: .leading) {
                 Button(action: openRadarMap) {
                     Text("Radar")
-                        .font(.system(size: 20))
+                        .font(.title3)
                         .bold()
                         .foregroundStyle(Color(UIColor.label))
                 }
                 .buttonStyle(.plain)
                 .padding([.leading, .top])
 
-                PrecipitationSeriesChart(points: oscarPoints)
+                PrecipitationSeriesChart(points: oscarPoints, timeZone: weather.forecast.locationTimeZone)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 20)
                     .cardBackground()
@@ -45,10 +46,10 @@ struct RainView: View {
                     // accidentally open the map.
                     .simultaneousGesture(TapGesture().onEnded { openRadarMap() })
             }
-            .scrollTransition { content, phase in
+            .scrollTransition { [reduceMotion] content, phase in
                 content
                     .opacity(phase.isIdentity ? 1 : 0.8)
-                    .scaleEffect(phase.isIdentity ? 1 : 0.99)
+                    .scaleEffect(reduceMotion || phase.isIdentity ? 1 : 0.99)
             }
         }
     }
@@ -78,6 +79,7 @@ struct PrecipChartPoint: Identifiable {
 /// Renders the oscar-server precipitation time series (mm/h) as an area chart.
 private struct PrecipitationSeriesChart: View {
     let points: [PrecipChartPoint]
+    let timeZone: TimeZone
 
     @State private var rawSelectedDate: Date?
 
@@ -125,12 +127,12 @@ private struct PrecipitationSeriesChart: View {
                         overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))
                     ) {
                         VStack(alignment: .center) {
-                            Text(SettingService.formattedTime(rawSelectedDate))
-                                .font(.system(size: 11)).foregroundStyle(.white.opacity(0.72))
+                            Text(SettingService.formattedTime(rawSelectedDate, timeZone: timeZone))
+                                .font(.caption2).foregroundStyle(.white.opacity(0.72))
                             VStack {
                                 Text(nearestPrecipitation(for: rawSelectedDate))
                                     .bold().foregroundStyle(.white)
-                                Text("mm/h").font(.system(size: 11)).foregroundStyle(.white.opacity(0.72))
+                                Text("mm/h").font(.caption2).foregroundStyle(.white.opacity(0.72))
                                     .padding(.top, -12)
                             }
                         }
@@ -148,7 +150,7 @@ private struct PrecipitationSeriesChart: View {
                 // instead of being clipped at the leading edge.
                 AxisValueLabel(anchor: value.index == 0 ? .topLeading : .top) {
                     if let date = value.as(Date.self) {
-                        Text(SettingService.formattedTime(date))
+                        Text(SettingService.formattedTime(date, timeZone: timeZone))
                             // Charts' default axis gray vanishes over a bright
                             // sky behind the translucent card.
                             .foregroundStyle(.white.opacity(0.72))
@@ -168,13 +170,15 @@ private struct PrecipitationSeriesChart: View {
             }
         }
         .chartXSelection(value: $rawSelectedDate)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Regenradar"))
     }
 
     private func nearestPrecipitation(for date: Date) -> String {
         guard let nearest = points.min(by: {
             abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date))
         }) else {
-            return "No Data"
+            return String(localized: "Keine Daten")
         }
         return nearest.value.formatted(.number.precision(.fractionLength(1)))
     }

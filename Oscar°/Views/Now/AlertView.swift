@@ -24,7 +24,7 @@ struct AlertView: View {
             Button(action: openAlerts) {
                 HStack(spacing: 5) {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.caption2.weight(.semibold))
                         .foregroundStyle(tint)
                     if let top = alerts.first {
                         Text(formattedHeadline(top: top, count: alerts.count))
@@ -39,7 +39,6 @@ struct AlertView: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("now.alert.weather")
             .accessibilityHint(Text("Öffnet die Wetterwarnungen"))
-
         }
         // Keep the visual capsule as slim as the original alert pill while
         // the button retains a comfortable 44-point tap target.
@@ -54,7 +53,7 @@ struct AlertView: View {
     }
 
     private func openAlerts() {
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
         presentation.present(.alerts)
     }
 }

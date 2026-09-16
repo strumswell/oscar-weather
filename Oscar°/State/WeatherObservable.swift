@@ -54,6 +54,7 @@ final class Weather {
     var isLoading: Bool = false
     var loadState: WeatherLoadState = .idle
     @ObservationIgnored private var isRefreshing = false
+    @ObservationIgnored private var refreshRequestedWhileBusy = false
     var loadingQueries: Set<WeatherLoadingQuery> = []
     var forecast: Operations.getForecast.Output.Ok.Body.jsonPayload
     var alerts: AlertResponse
@@ -148,8 +149,17 @@ extension Weather {
         // early (once the main data lands) so the spinner hides promptly, but the function
         // keeps running through the trailing supplementary fetches — a second refresh must
         // not start in that window.
-        guard !isRefreshing else { return }
+        guard !isRefreshing else {
+            refreshRequestedWhileBusy = true
+            return
+        }
         isRefreshing = true
+        defer {
+            if refreshRequestedWhileBusy {
+                refreshRequestedWhileBusy = false
+                Task { await refresh(location: location, client: client, locationService: locationService) }
+            }
+        }
         let requestID = UUID()
         meteorRequestID = requestID
         meteorShowerResponse = nil

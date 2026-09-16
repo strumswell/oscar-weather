@@ -86,7 +86,7 @@ final class HomeProvider: TimelineProvider, Sendable {
                     temperatureMin: temperatureMin,
                     temperatureMax: temperatureMax,
                     temperatureNow: temperatureNow,
-                    icon: getWeatherIcon(weathercode: weathercode, isDay: isDay, isRaining: precipSeries?.isRaining() ?? false, precipitation: precipitation),
+                    icon: WeatherSymbol.sfSymbol(weathercode: weathercode, isDay: isDay, isRaining: precipSeries?.isRaining() ?? false, precipitation: precipitation),
                     backgroundGradient: backgroundGradient
                 )
 
@@ -104,55 +104,4 @@ final class HomeProvider: TimelineProvider, Sendable {
         }
     }
     
-    public func getWeatherIcon(weathercode: Double, isDay: Double, isRaining: Bool, precipitation: Double) -> String {
-        let shouldShowRainingIcon = isRaining || precipitation > 0
-
-        if (isDay > 0) {
-            switch weathercode {
-            case 0, 1:
-                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "sun.max.fill"
-            case 2:
-                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.sun.fill"
-            case 3:
-                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fill"
-            case 45, 48:
-                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fog.fill"
-            case 51, 53, 55, 61, 63, 65:
-                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fill"
-            case 56, 57:
-                return shouldShowRainingIcon ? "cloud.sleet.fill" : "cloud.fill"
-            case 71, 73, 75, 77:
-                return shouldShowRainingIcon ?"cloud.snow.fill" : "cloud.fill"
-            case 80, 81, 82, 85, 86:
-                return shouldShowRainingIcon ? "cloud.heavyrain.fill" : "cloud.fill"
-            case 95, 96, 99:
-                return shouldShowRainingIcon ? "cloud.bolt.rain.fill" : "cloud.fill"
-            default:
-                return "cloud.fill"
-            }
-        } else {
-            switch weathercode {
-            case 0, 1:
-                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "moon.stars.fill"
-            case 2:
-                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.moon.fill"
-            case 3:
-                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fill"
-            case 45, 48:
-                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fog.fill"
-            case 51, 53, 55, 61, 63, 65:
-                return shouldShowRainingIcon ? "cloud.drizzle.fill" : "cloud.fill"
-            case 56, 57:
-                return shouldShowRainingIcon ? "cloud.sleet.fill" : "cloud.fill"
-            case 71, 73, 75, 77:
-                return shouldShowRainingIcon ? "cloud.snow.fill" : "cloud.fill"
-            case 80, 81, 82, 85, 86:
-                return shouldShowRainingIcon ? "cloud.heavyrain.fill" : "cloud.fill"
-            case 95, 96, 99:
-                return shouldShowRainingIcon ? "cloud.bolt.rain.fill" : "cloud.fill"
-            default:
-                return "cloud.fill"
-            }
-        }
-    }
 }

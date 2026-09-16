@@ -6,13 +6,13 @@ struct ClimateSummaryCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(climateHeadline(summary))
+            Text(ClimateCopy.headline(summary))
                 .font(.subheadline)
                 .fontWeight(.bold)
                 .foregroundStyle(.primary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            if let analog = climateAnalogLine(summary, unit) {
+            if let analog = ClimateCopy.analogLine(summary, unit) {
                 Text(analog)
                     .font(.footnote)
                     .foregroundStyle(.secondary)

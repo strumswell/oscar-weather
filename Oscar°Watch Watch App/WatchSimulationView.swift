@@ -23,7 +23,7 @@ struct WatchSimulationView: View {
     @Environment(Location.self) private var location: Location
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.isLuminanceReduced) private var luminanceReduced
-    @State private var snapshotCache = WatchAtmosphereSnapshotCache()
+    @State private var snapshotCache = AtmosphereSnapshotCache()
 
     private static let moonDiameter: CGFloat = 34
 
@@ -102,14 +102,14 @@ struct WatchSimulationView: View {
                     .blur(radius: CGFloat(snapshot.cloudDensity) * 2)
                 }
 
-                if shouldShowSun(snapshot) {
+                if snapshot.showsSunDisc {
                     SunView(progress: Double(snapshot.timeOfDay))
                         .opacity(Double((1 - snapshot.cloudDensity * 0.45) * snapshot.phase * snapshot.sunDiscVisibility))
                 }
 
                 if cloudsVisible {
                     CloudsView(
-                        thickness: cloudThickness(for: snapshot),
+                        thickness: snapshot.cloudThickness,
                         topTint: AtmosphereSampler.cloudTopTint(snapshot: snapshot, moonGlow: moonGlow),
                         bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snapshot, moonGlow: moonGlow),
                         pacing: pacing
@@ -117,11 +117,11 @@ struct WatchSimulationView: View {
                     .opacity(Double(min(1, snapshot.cloudDensity + snapshot.cloudCoverage * 0.25)))
                 }
 
-                if shouldShowStorm(snapshot) {
+                if snapshot.showsPrecipitation {
                     StormView(
                         type: snapshot.condition == .snow ? .snow : .rain,
-                        direction: stormDirection(for: snapshot),
-                        strength: stormStrength(for: snapshot),
+                        direction: snapshot.stormSlant,
+                        strength: snapshot.stormStrength(rainBase: 22, snowBase: 45, weight: 85, floor: 8, cap: 110),
                         pacing: stormPacing
                     )
                     .opacity(reduceMotion ? 0.55 : 1)
@@ -131,14 +131,6 @@ struct WatchSimulationView: View {
             .background(AtmosphereSampler.skyGradient(snapshot: snapshot))
         }
         .ignoresSafeArea()
-    }
-
-    private func shouldShowSun(_ snapshot: AtmosphereSnapshot) -> Bool {
-        snapshot.sunDiscVisibility > 0.01 && snapshot.cloudDensity < 0.82 && snapshot.precipitationIntensity < 0.55
-    }
-
-    private func shouldShowStorm(_ snapshot: AtmosphereSnapshot) -> Bool {
-        max(snapshot.precipitationIntensity, snapshot.snowfallIntensity) > 0.001
     }
 
     private func moonAltitudeProgress(_ snapshot: AtmosphereSnapshot, phase: Double) -> Double? {
@@ -152,70 +144,6 @@ struct WatchSimulationView: View {
         )
     }
 
-    private func cloudThickness(for snapshot: AtmosphereSnapshot) -> Cloud.Thickness {
-        switch snapshot.cloudCoverage {
-        case ..<0.08:
-            return .none
-        case ..<0.25:
-            return .thin
-        case ..<0.45:
-            return .light
-        case ..<0.68:
-            return .regular
-        case ..<0.92:
-            return .thick
-        default:
-            return .ultra
-        }
-    }
-
-    private func stormDirection(for snapshot: AtmosphereSnapshot) -> Angle {
-        let horizontalSlant = min(35, max(-35, Double(sin(snapshot.windDirection)) * Double(snapshot.windSpeed) * 55))
-        return .degrees(horizontalSlant)
-    }
-
-    /// Half the iPhone's particle counts: the canvas is a fraction of the size
-    /// and every drop costs battery here.
-    private func stormStrength(for snapshot: AtmosphereSnapshot) -> Int {
-        let isSnow = snapshot.condition == .snow
-        let intensity = isSnow ? snapshot.snowfallIntensity : snapshot.precipitationIntensity
-        let base = Double(isSnow ? 45 : 22)
-        let ramp = min(1, Double(intensity) / 0.05)
-        return max(8, min(110, Int(base * ramp + Double(intensity) * 85)))
-    }
-}
-
-/// Same @State-as-cache pattern as the iPhone simulation: reuse the derived
-/// snapshot across body re-evaluations, recomputing only when the weather
-/// data, location, or a coarse 60-second time bucket changes.
-@MainActor
-private final class WatchAtmosphereSnapshotCache {
-    private struct Key: Equatable {
-        let lastUpdated: Date?
-        let latitude: Double
-        let longitude: Double
-        let timeBucket: Int
-    }
-
-    private var key: Key?
-    private var cached: AtmosphereSnapshot?
-
-    func snapshot(from weather: Weather, at location: CLLocationCoordinate2D) -> AtmosphereSnapshot {
-        let key = Key(
-            lastUpdated: weather.lastUpdated,
-            latitude: location.latitude,
-            longitude: location.longitude,
-            timeBucket: Int(Date.now.timeIntervalSince1970 / 60)
-        )
-        if key == self.key, let cached {
-            return cached
-        }
-
-        let snapshot = AtmosphereWeatherMapper.snapshot(from: weather, at: location)
-        self.key = key
-        self.cached = snapshot
-        return snapshot
-    }
 }
 
 #Preview {

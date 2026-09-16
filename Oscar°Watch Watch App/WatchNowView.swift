@@ -98,30 +98,7 @@ struct WatchNowView: View {
             code = rate >= 2.5 ? 61 : 51
         }
 
-        switch code {
-        case 0, 1:
-            return String(localized: "Klar")
-        case 2:
-            return String(localized: "Teils bewölkt")
-        case 3:
-            return String(localized: "Bedeckt")
-        case 45, 48:
-            return String(localized: "Nebel")
-        case 51...57:
-            return String(localized: "Nieselregen")
-        case 61...65:
-            return String(localized: "Regen")
-        case 66, 67:
-            return String(localized: "Gefrierender Regen")
-        case 71...77, 85, 86:
-            return String(localized: "Schneefall")
-        case 80...82:
-            return String(localized: "Schauer")
-        case 95...99:
-            return String(localized: "Gewitter")
-        default:
-            return String(localized: "Bewölkt")
-        }
+        return WeatherConditionLabel.text(for: code)
     }
 }
 

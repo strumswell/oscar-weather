@@ -90,7 +90,8 @@ struct LocationCard: View {
                         endPoint: .bottom
                     )
                 )
-                .frame(width: UIScreen.main.bounds.width, height: cardHeight)
+                .containerRelativeFrame(.horizontal)
+                .frame(height: cardHeight)
         }
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay(
@@ -130,7 +131,7 @@ struct LocationCard: View {
             Image(systemName: "location.fill")
                 // Fixed size: .body grows past the 44pt badge circle at
                 // accessibility text sizes.
-                .font(.system(size: 17))
+                .font(.body)
                 .foregroundStyle(.white)
         case .plain:
             EmptyView()
@@ -169,14 +170,14 @@ struct LocationSimBackdrop: View {
                     StarsView(pacing: .still, opacityOverride: starOpacity)
                 }
 
-                if snap.sunDiscVisibility > 0.01 && snap.cloudDensity < 0.82 && snap.precipitationIntensity < 0.55 {
+                if snap.showsSunDisc {
                     SunView(progress: Double(snap.timeOfDay))
                         .opacity(Double((1 - snap.cloudDensity * 0.45) * snap.phase * snap.sunDiscVisibility))
                 }
 
                 if snap.cloudDensity + snap.cloudCoverage > 0.02 {
                     CloudsView(
-                        thickness: cloudThickness(for: snap),
+                        thickness: snap.cloudThickness,
                         topTint: AtmosphereSampler.cloudTopTint(snapshot: snap),
                         bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snap),
                         pacing: .still
@@ -187,11 +188,11 @@ struct LocationSimBackdrop: View {
             // storm stays outside so its ticks don't re-rasterize the stack.
             .drawingGroup()
             .overlay {
-                if max(snap.precipitationIntensity, snap.snowfallIntensity) > 0.001 {
+                if snap.showsPrecipitation {
                     StormView(
-                        type: snap.condition == .snow ? .snow : .rain,
+                        type: snap.stormContents,
                         direction: .degrees(0),
-                        strength: stormStrength(for: snap),
+                        strength: snap.stormStrength(rainBase: 25, snowBase: 25, weight: 80, floor: 10, cap: 90, ramped: false),
                         pacing: reduceMotion || paused ? .still : .active,
                         // Drop speed is per view height; at card height the
                         // unscaled fall reads as slow motion.
@@ -205,24 +206,6 @@ struct LocationSimBackdrop: View {
         .allowsHitTesting(false)
     }
 
-    /// Same coverage → deck mapping as the full simulation.
-    private func cloudThickness(for snapshot: AtmosphereSnapshot) -> Cloud.Thickness {
-        switch snapshot.cloudCoverage {
-        case ..<0.08: .none
-        case ..<0.25: .thin
-        case ..<0.45: .light
-        case ..<0.68: .regular
-        case ..<0.92: .thick
-        default: .ultra
-        }
-    }
-
-    /// Fewer frozen drops than the live sim; a card only needs the impression.
-    private func stormStrength(for snapshot: AtmosphereSnapshot) -> Int {
-        let isSnow = snapshot.condition == .snow
-        let intensity = Double(isSnow ? snapshot.snowfallIntensity : snapshot.precipitationIntensity)
-        return max(10, min(90, Int(25 + intensity * 80)))
-    }
 }
 
 /// Press feedback for card rows: a gentle shrink, no gray highlight.

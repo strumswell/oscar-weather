@@ -44,6 +44,21 @@ struct PollenChart: View {
         .compactMap { $0 }
     }
 
+    private var accessibilitySummary: String {
+        let loads = series.compactMap { pollenSeries -> String? in
+            let peak = pollenSeries.points.map(\.severityFraction).max() ?? 0
+            guard peak > 0 else { return nil }
+            let tier: String = switch peak {
+            case ..<0.5: String(localized: "Gering")
+            case ..<0.75: String(localized: "Mäßig")
+            case ..<1: String(localized: "Hoch")
+            default: String(localized: "Sehr Hoch")
+            }
+            return "\(pollenSeries.label) \(tier)"
+        }
+        return loads.isEmpty ? String(localized: "Keine Belastung") : loads.joined(separator: ", ")
+    }
+
     private var currentSeriesPoints: [(label: String, time: Date, value: Double)] {
         series.compactMap { pollenSeries in
             guard let point = pollenSeries.points.first(where: { $0.time >= referenceDate }) ?? pollenSeries.points.last else {
@@ -155,7 +170,7 @@ struct PollenChart: View {
                         }
                 }
 
-                ForEach(dayChangeIndices(time: time), id: \.self) { index in
+                ForEach(HourlyChartUtilities.dayChangeIndices(time: time), id: \.self) { index in
                     RuleMark(x: .value("Hour", Date(timeIntervalSince1970: time[index])))
                         .foregroundStyle(.gray.opacity(0.6))
                         .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [8, 4]))
@@ -164,7 +179,7 @@ struct PollenChart: View {
                             spacing: 8,
                             overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))
                         ) {
-                            Text(dayAbbreviation(from: Date(timeIntervalSince1970: time[index])))
+                            Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: time[index])))
                                 .font(.caption.weight(.medium))
                                 .foregroundStyle(.primary.opacity(0.7))
                                 .padding(.horizontal, 6)
@@ -211,8 +226,11 @@ struct PollenChart: View {
             .chartXScale(domain: maxTimeRange)
             .chartScrollableAxes(.horizontal)
             .chartXVisibleDomain(length: 108_000)
-            .chartXSelection(value: $selectedDate)
+            .chartXSelection(value: .snapped(to: 3600, $selectedDate))
             .frame(height: 240)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("Pollenverlauf"))
+            .accessibilityValue(accessibilitySummary)
 
             PollenChartLegendView(items: series.map { ($0.label, $0.lineColor) })
         }

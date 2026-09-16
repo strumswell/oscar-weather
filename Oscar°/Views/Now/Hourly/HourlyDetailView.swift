@@ -1,10 +1,11 @@
 import SwiftUI
 
-/// The hourly detail sheet. The atmosphere sim fills the whole sheet and
-/// renders the scrubbed hour; the readout floats at the top (label color +
-/// shadows over the sim), the strip and minimap scroll the timeline under a
-/// center-pinned playhead. Cards pick up the scene's hue via the Now stack's
-/// card wash.
+/// The hourly detail sheet, organized as a deck: the atmosphere sim fills the
+/// sheet and renders the scrubbed hour, and one card holds every lens as a
+/// row showing its live value at that hour. The selected row expands in place
+/// to carry the full chart, so scrubbing anywhere updates all rows at once.
+/// The 14-day rail sits at the very bottom, in the thumb zone. Cards pick up
+/// the scene's hue via the Now stack's card wash.
 struct HourlyDetailView: View {
     var initialTarget: Date? = nil
 
@@ -12,9 +13,14 @@ struct HourlyDetailView: View {
     @Environment(Location.self) private var location: Location
     @Environment(\.dismiss) private var dismiss
 
+    private let settingsService = SettingService.shared
+
     @State private var model = HourlyTimelineModel()
+    @State private var expandedLens: HourlyLens? = .overview
     @State private var dismissalFeedback = false
     @State private var dragStartTime: Double?
+
+    private var showsChapters: Bool { settingsService.hourlyDetailShowsChapters }
 
     private static let secondsPerPoint: Double = 240
 
@@ -34,11 +40,26 @@ struct HourlyDetailView: View {
             .navigationTitle("Stündlich")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    if model.hasData {
+                        Button {
+                            withAnimation(.snappy) {
+                                settingsService.hourlyDetailShowsChapters.toggle()
+                            }
+                        } label: {
+                            Image(systemName: showsChapters ? "list.bullet" : "calendar.day.timeline.left")
+                        }
+                        .accessibilityLabel(showsChapters ? Text("Alle Werte anzeigen") : Text("Verlauf anzeigen"))
+                    }
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(role: .close, action: finish)
                 }
             }
             .sensoryFeedback(.success, trigger: dismissalFeedback)
+            .sensoryFeedback(.selection, trigger: expandedLens)
+            .sensoryFeedback(.selection, trigger: showsChapters)
             .onAppear {
                 model.update(from: weather)
                 if let initialTarget {
@@ -49,6 +70,9 @@ struct HourlyDetailView: View {
                 model.update(from: weather)
             }
         }
+        // Sheets don't inherit the app root's forced scheme, but the whole
+        // design (white ink, frost + wash over the sim) assumes dark.
+        .preferredColorScheme(.dark)
     }
 
     private var content: some View {
@@ -69,30 +93,51 @@ struct HourlyDetailView: View {
                     model.nudge(hours: direction == .increment ? 1 : -1)
                 }
 
-            VStack(spacing: 12) {
-                HourlyDetailHUD(model: model)
+            VStack(spacing: 0) {
+                if showsChapters {
+                    HourlyChaptersView(model: model)
+                } else {
+                    Spacer(minLength: 0)
 
-                HourlyReadoutRow(model: model)
+                    captionRow
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 14)
 
-                Spacer(minLength: 0)
-
-                HourlyTimelineStrip(model: model)
-                    .frame(height: 275)
-                    .padding(.horizontal, 16)
+                    HourlyDeck(model: model, expandedLens: $expandedLens)
+                        .padding(.horizontal, 16)
+                }
 
                 HourlyTimelineMinimap(model: model)
                     .padding(.horizontal, 16)
-
-                HourlyLensRow(model: model)
+                    .padding(.top, 10)
             }
-            .padding(.top, 2)
             .padding(.bottom, 10)
         }
         .environment(\.cardTint, AtmosphereSampler.cardFill(snapshot: snapshot))
         .environment(\.cardBorderOpacity, AtmosphereSampler.cardBorderOpacity(snapshot: snapshot))
-        // Same lighter frost as the Now stack, so the cards match its look.
         .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial.opacity(0.6)))
     }
+
+    private var captionRow: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(verbatim: model.eyebrowLabel)
+                .font(.footnote.weight(.semibold))
+                .textCase(.uppercase)
+                .tracking(1.2)
+                .monospacedDigit()
+                .foregroundStyle(.white.opacity(0.72))
+                .shadow(color: .black.opacity(0.35), radius: 1.5, y: 1)
+
+            Text(verbatim: model.titleLabel)
+                .font(.title.weight(.bold))
+                .foregroundStyle(.white)
+                .shadow(color: .black.opacity(0.3), radius: 2.5, y: 1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
+
+    // MARK: - Gestures
 
     private var skyDrag: some Gesture {
         DragGesture(minimumDistance: 12)
@@ -115,137 +160,89 @@ struct HourlyDetailView: View {
     }
 }
 
-/// The readout over the sim — Now-header treatment (white + shadows, no card):
-/// time, temperature, and condition, plus a "Jetzt" return button once the
-/// scrub has wandered off.
-private struct HourlyDetailHUD: View {
+/// The deck card: every lens as a row with its live value at the scrubbed
+/// hour; the expanded row carries the chart in place. One gesture anywhere,
+/// eight answers.
+private struct HourlyDeck: View {
     let model: HourlyTimelineModel
+    @Binding var expandedLens: HourlyLens?
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(verbatim: model.temperatureLabel)
-                    .font(.system(size: 46, weight: .regular))
-                    .foregroundStyle(.white)
-                    .monospacedDigit()
-                    .shadow(radius: 8)
-                Text(verbatim: model.conditionLabel)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.white.opacity(0.9))
-                    .shadow(radius: 3)
-            }
-
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 1) {
-                Text(verbatim: model.clockLabel)
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.95))
-                    .monospacedDigit()
-                    .shadow(radius: 3)
-                Text(verbatim: model.dateLabel)
-                    .font(.footnote.weight(.medium))
-                    .foregroundStyle(.white.opacity(0.75))
-                    .monospacedDigit()
-                    .shadow(radius: 3)
+        VStack(spacing: 0) {
+            ForEach(Array(HourlyLens.allCases.enumerated()), id: \.element) { index, lens in
+                let isExpanded = lens == expandedLens
+                // The expanded block separates itself with its own highlight;
+                // hairlines only run between collapsed rows.
+                if index > 0, !isExpanded, HourlyLens.allCases[index - 1] != expandedLens {
+                    Rectangle()
+                        .fill(.white.opacity(0.08))
+                        .frame(height: 1)
+                }
+                row(lens, isExpanded: isExpanded)
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 6)
-        .accessibilityHidden(true)
-    }
-}
-
-/// Every series of the active lens as a bare readout row over the sim — the
-/// same white-plus-shadow treatment as the header, no container chrome.
-private struct HourlyReadoutRow: View {
-    let model: HourlyTimelineModel
-
-    var body: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 16) {
-                ForEach(model.hudStats) { stat in
-                    cell(stat)
-                }
-            }
-            .padding(.horizontal, 20)
-        }
-        .scrollIndicators(.hidden)
-        .shadow(radius: 3)
-        .accessibilityHidden(true)
+        .padding(6)
+        .cardBackground(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .cardBorder(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
-    private func cell(_ stat: HourlyTimelineModel.HUDStat) -> some View {
-        HStack(spacing: 6) {
-            HourlySeriesSwatch(color: stat.color, kind: stat.swatch)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(verbatim: stat.label)
-                    .font(.system(size: 10, weight: .medium))
-                    .textCase(.uppercase)
-                    .foregroundStyle(.white.opacity(0.65))
-                HStack(spacing: 3) {
-                    if let degrees = stat.arrowDegrees {
-                        Image(systemName: "location.north.fill")
-                            .font(.system(size: 9))
-                            .rotationEffect(.degrees(degrees))
-                            .foregroundStyle(.teal)
-                    }
-                    Text(verbatim: stat.value)
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(.white)
-                        .monospacedDigit()
-                }
-            }
-        }
-    }
-}
-
-/// One shared timeline, swappable focus: the lens pills swap what the strip
-/// shows without ever moving the playhead or the window.
-private struct HourlyLensRow: View {
-    let model: HourlyTimelineModel
-
-    var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal) {
-                HStack(spacing: 6) {
-                    ForEach(HourlyLens.allCases) { lens in
-                        pill(lens)
-                            .id(lens.id)
-                    }
-                }
-                .padding(.horizontal, 16)
-            }
-            .scrollIndicators(.hidden)
-            .onChange(of: model.lens) { _, lens in
+    /// One view per lens in both states so the header keeps its identity
+    /// across the toggle; the chart unfolds from under it, clipped.
+    private func row(_ lens: HourlyLens, isExpanded: Bool) -> some View {
+        VStack(spacing: 0) {
+            Button {
                 withAnimation(.snappy) {
-                    proxy.scrollTo(lens.id, anchor: .center)
+                    expandedLens = isExpanded ? nil : lens
                 }
+            } label: {
+                rowHeader(lens, isExpanded: isExpanded)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 11)
+                    .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
+
+            if isExpanded {
+                HourlyTimelineStrip(model: model, lens: lens)
+                    .frame(height: 176)
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 12)
+                    .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
-        .sensoryFeedback(.selection, trigger: model.lens)
+        .background {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(.white.opacity(isExpanded ? 0.09 : 0))
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    private func pill(_ lens: HourlyLens) -> some View {
-        let isActive = model.lens == lens
-        return Button {
-            model.lens = lens
-        } label: {
-            Label(lens.title, systemImage: lens.systemImage)
-                .font(.footnote.weight(.semibold))
-                .labelStyle(.titleAndIcon)
-                .foregroundStyle(isActive ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
-                .cardBackground(in: .capsule)
-                .overlay {
-                    Capsule().stroke(
-                        isActive ? Color.primary.opacity(0.35) : Color.white.opacity(0.08),
-                        lineWidth: 1
-                    )
-                }
+    private func rowHeader(_ lens: HourlyLens, isExpanded: Bool) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: lens.systemImage)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(model.layout(for: lens).primaryColor)
+                .frame(width: 24)
+
+            Text(lens.title)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Text(verbatim: model.rowValue(for: lens) ?? "--")
+                .font(.subheadline.weight(.semibold))
+                .monospacedDigit()
+                .foregroundStyle(.white.opacity(0.9))
+
+            Image(systemName: "chevron.down")
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(.white.opacity(isExpanded ? 0.5 : 0.4))
+                .rotationEffect(.degrees(isExpanded ? 180 : 0))
         }
-        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(lens.title)
+        .accessibilityValue(Text(verbatim: model.rowValue(for: lens) ?? ""))
+        .accessibilityHint(isExpanded ? Text("Klappt das Diagramm ein") : Text("Zeigt das Diagramm"))
     }
 }
 

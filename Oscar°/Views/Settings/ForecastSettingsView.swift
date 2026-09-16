@@ -51,20 +51,20 @@ struct ForecastSettingsView: View {
           }
 
           Section {
-            Picker(String(localized: "Zeitraum"), selection: $settingsService.dailyForecastDaytimeTemperatureRangeMode) {
+            Picker("Zeitraum", selection: $settingsService.dailyForecastDaytimeTemperatureRangeMode) {
               ForEach(ForecastDaytimeTemperatureRangeMode.allCases) { mode in
                 Text(mode.label).tag(mode)
               }
             }
 
             if settingsService.dailyForecastDaytimeTemperatureRangeMode == .customHours {
-              Picker(String(localized: "Start"), selection: $settingsService.dailyForecastDaytimeCustomStartHour) {
+              Picker("Start", selection: $settingsService.dailyForecastDaytimeCustomStartHour) {
                 ForEach(0...settingsService.dailyForecastDaytimeCustomEndHour, id: \.self) { hour in
                   Text(hourLabel(hour)).tag(hour)
                 }
               }
 
-              Picker(String(localized: "Ende"), selection: $settingsService.dailyForecastDaytimeCustomEndHour) {
+              Picker("Ende", selection: $settingsService.dailyForecastDaytimeCustomEndHour) {
                 ForEach(settingsService.dailyForecastDaytimeCustomStartHour...23, id: \.self) { hour in
                   Text(hourLabel(hour)).tag(hour)
                 }

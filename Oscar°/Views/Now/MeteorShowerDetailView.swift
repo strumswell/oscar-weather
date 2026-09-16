@@ -15,7 +15,7 @@ struct MeteorShowerDetailView: View {
     }
 
     private var timeZone: TimeZone {
-        TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? .current
+        weather.forecast.locationTimeZone
     }
 
     private var isExpired: Bool {

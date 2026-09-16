@@ -12,6 +12,35 @@ enum HourlyFormatting {
     return SettingService.formattedTime(date, timeZone: timeZone, showsMinutes: false)
   }
 
+  /// Hour span like "14–17 Uhr" or "2–5 PM": a suffix both hours share
+  /// ("Uhr", "PM") is written once.
+  static func hourRangeString(start: Double, end: Double, timeZone: TimeZone) -> String {
+    joinedHourRange(
+      from: hourString(timestamp: start, timeZone: timeZone),
+      to: hourString(timestamp: end, timeZone: timeZone)
+    )
+  }
+
+  /// Splits on any whitespace: 12-hour system formats separate "2 PM" with a
+  /// narrow no-break space, not a plain one.
+  static func joinedHourRange(from: String, to: String) -> String {
+    let fromParts = from.split(whereSeparator: \.isWhitespace)
+    let toParts = to.split(whereSeparator: \.isWhitespace)
+    if fromParts.count > 1, fromParts.last == toParts.last {
+      return fromParts.dropLast().joined(separator: " ") + "–" + to
+    }
+    return from + "–" + to
+  }
+
+  /// Beaufort shows force + "Bft"; every other unit the rounded speed in the
+  /// unit the API delivered.
+  static func windString(_ value: Double, unit: WindSpeedUnit, unitString: String) -> String {
+    if unit.usesBeaufortDisplay {
+      return "\(BeaufortScale.force(forKilometersPerHour: value)) \(unit.displayUnit)"
+    }
+    return "\(Int(value.rounded())) \(unitString)"
+  }
+
   static func timeString(timestamp: Double, timeZone: TimeZone) -> String {
     let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
 

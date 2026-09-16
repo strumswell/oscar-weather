@@ -49,7 +49,7 @@ struct EnvironmentDetailView: View {
     }
 
     private var currentAQIColor: Color {
-        EnvironmentMetric.forAQI(id: "aqi", label: "AQI", value: currentAQI).color
+        EnvironmentMetric.forAQI(id: "aqi", label: "AQI", value: currentAQI)?.color ?? .secondary
     }
 
     private var aqiComponents: [AQIComponentSnapshot] {
@@ -102,7 +102,7 @@ struct EnvironmentDetailView: View {
     }
 
     private var currentUVColor: Color {
-        EnvironmentMetric.forUV(value: currentUV).color
+        EnvironmentMetric.forUV(value: currentUV)?.color ?? .secondary
     }
 
     private var currentPollen: [PollenSnapshot] {
@@ -133,7 +133,7 @@ struct EnvironmentDetailView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                EnvironmentDetailSegmentedControl(selectedSection: $selectedSection)
+                DetailSectionPicker(label: "Umweltdetails", selection: $selectedSection)
 
                 TabView(selection: $selectedSection) {
                     ForEach(EnvironmentDetailSection.allCases) { section in
@@ -196,10 +196,10 @@ struct EnvironmentDetailView: View {
         case .uv:
             EnvironmentUVSectionView(
                 currentUV: currentUV,
-                currentUVBadge: currentUV.map { LocalizedStringKey(uvStatusKey(for: $0)) } ?? "Keine Daten",
+                currentUVBadge: currentUV.map { UVIndexCategory(uvIndex: $0).title } ?? "Keine Daten",
                 currentUVColor: currentUVColor,
-                riskTitle: currentUV.map(uvRiskTitleKey(for:)) ?? "Keine Daten",
-                riskBody: currentUV.map(uvRiskBodyKey(for:)) ?? "Für die aktuelle Stunde liegen keine UV-Daten vor.",
+                riskTitle: currentUV.map { UVIndexCategory(uvIndex: $0).riskTitleKey } ?? "Keine Daten",
+                riskBody: currentUV.map { UVIndexCategory(uvIndex: $0).riskBodyKey } ?? "Für die aktuelle Stunde liegen keine UV-Daten vor.",
                 uvIndex: weather.air.hourly?.uv_index ?? [],
                 time: time,
                 maxTimeRange: maxTimeRange,
@@ -251,7 +251,7 @@ struct EnvironmentDetailView: View {
             value: value,
             accentColor: accentColor,
             status: value.map(aqiStatusKey),
-            statusColor: value.map { EnvironmentMetric.forAQI(id: id, label: label, value: $0).color },
+            statusColor: value.flatMap { EnvironmentMetric.forAQI(id: id, label: label, value: $0)?.color },
             explanationBodyKey: explanationBodyKey
         )
     }
@@ -271,65 +271,7 @@ struct EnvironmentDetailView: View {
     }
 
     private func aqiStatusKey(for value: Double) -> String {
-        switch value {
-        case ..<20:
-            "Gut"
-        case ..<40:
-            "Akzeptabel"
-        case ..<60:
-            "Mäßig"
-        case ..<80:
-            "Schlecht"
-        case ..<100:
-            "Sehr schlecht"
-        default:
-            "Extrem schlecht"
-        }
-    }
-
-    private func uvStatusKey(for value: Double) -> String {
-        switch value {
-        case ..<3:
-            "Gering"
-        case ..<6:
-            "Mittel"
-        case ..<8:
-            "Hoch"
-        case ..<11:
-            "Sehr Hoch"
-        default:
-            "Extrem"
-        }
-    }
-
-    private func uvRiskTitleKey(for value: Double) -> String {
-        switch value {
-        case ..<3:
-            "Geringe gesundheitliche Gefährdung"
-        case ..<6:
-            "Mittlere gesundheitliche Gefährdung, Schutzmaßnahmen sind erforderlich."
-        case ..<8:
-            "Hohe gesundheitliche Gefährdung, Schutzmaßnahmen sind erforderlich."
-        case ..<11:
-            "Sehr hohe gesundheitliche Gefährdung, Schutzmaßnahmen sind unbedingt erforderlich."
-        default:
-            "Extreme gesundheitliche Gefährdung, Besondere Schutzmaßnahmen sind ein Muss."
-        }
-    }
-
-    private func uvRiskBodyKey(for value: Double) -> String {
-        switch value {
-        case ..<3:
-            "Bei diesem UV-Wert besteht nur eine geringe gesundheitliche Gefährdung. Meist sind keine besonderen Schutzmaßnahmen erforderlich."
-        case ..<6:
-            "Hemd, Sonnencreme und Sonnenbrille schützen vor zu viel UV-Strahlung."
-        case ..<8:
-            "Die Weltgesundheitsorganisation (WHO) rät, mittags den Schatten zu suchen. In der Sonne werden Hemd, Sonnencreme, Sonnenbrille und Kopfbedeckung benötigt."
-        case ..<11:
-            "Die Weltgesundheitsorganisation (WHO) rät, zwischen 11 und 16 Uhr den Aufenthalt im Freien zu vermeiden, aber auch im Schatten gehören ein sonnendichtes Hemd, lange Hosen, Sonnencreme, Sonnenbrille und ein breitkrempiger Hut zum sonnengerechten Verhalten."
-        default:
-            "Die Weltgesundheitsorganisation (WHO) empfiehlt, zwischen 11 und 16 Uhr im Schutz eines Hauses zu bleiben und auch außerhalb dieser Zeit unbedingt Schatten zu suchen. Ein sonnendichtes Hemd, lange Hosen, Sonnencreme, Sonnenbrille und ein breitkrempiger Hut sind auch im Schatten unerlässlich."
-        }
+        EUAirQualityBand(value: value).statusKey
     }
 
     private func pollenTierKey(_ tier: PollenTier) -> String {

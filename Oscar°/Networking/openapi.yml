@@ -333,6 +333,8 @@ paths:
                     description: Applied timezone offset from the &timezone= parameter.
                   timezone_abbreviation:
                     type: string
+                  timezone:
+                    type: string
                   hourly:
                     type: object
                     required:
@@ -856,12 +858,6 @@ paths:
         - name: key
           in: path
           required: true
-          schema:
-            type: string
-        - name: style
-          in: query
-          required: false
-          description: '"typed" selects the categorical precip-type grid encoding'
           schema:
             type: string
       responses:
@@ -1424,191 +1420,6 @@ components:
           type: string
         state_short:
           type: string
-    HourlyResponse:
-      type: object
-      required:
-        - time
-      properties:
-        time:
-          type: array
-          items:
-            type: string
-        temperature_2m:
-          type: array
-          items:
-            type: number
-        relativehumidity_2m:
-          type: array
-          items:
-            type: number
-        dewpoint_2m:
-          type: array
-          items:
-            type: number
-        apparent_temperature:
-          type: array
-          items:
-            type: number
-        pressure_msl:
-          type: array
-          items:
-            type: number
-        cloudcover:
-          type: array
-          items:
-            type: number
-        cloudcover_low:
-          type: array
-          items:
-            type: number
-        cloudcover_mid:
-          type: array
-          items:
-            type: number
-        cloudcover_high:
-          type: array
-          items:
-            type: number
-        windspeed_10m:
-          type: array
-          items:
-            type: number
-        windspeed_80m:
-          type: array
-          items:
-            type: number
-        windspeed_120m:
-          type: array
-          items:
-            type: number
-        windspeed_180m:
-          type: array
-          nullable: true
-          items:
-            nullable: true
-            type: number
-        winddirection_10m:
-          type: array
-          items:
-            type: number
-        winddirection_80m:
-          type: array
-          items:
-            type: number
-        winddirection_120m:
-          type: array
-          items:
-            type: number
-        winddirection_180m:
-          type: array
-          nullable: true
-          items:
-            nullable: true
-            type: number
-        windgusts_10m:
-          type: array
-          items:
-            type: number
-        shortwave_radiation:
-          type: array
-          items:
-            type: number
-        direct_radiation:
-          type: array
-          items:
-            type: number
-        direct_normal_irradiance:
-          type: array
-          items:
-            type: number
-        diffuse_radiation:
-          type: array
-          items:
-            type: number
-        vapor_pressure_deficit:
-          type: array
-          items:
-            type: number
-        evapotranspiration:
-          type: array
-          items:
-            type: number
-        precipitation:
-          type: array
-          items:
-            type: number
-        precipitation_probability:
-          type: array
-          nullable: true
-          items:
-            nullable: true
-            type: number
-        weathercode:
-          type: array
-          items:
-            type: number
-        snow_height:
-          type: array
-          items:
-            type: number
-        freezinglevel_height:
-          type: array
-          items:
-            type: number
-        soil_temperature_0cm:
-          type: array
-          nullable: true
-          items:
-            nullable: true
-            type: number
-        soil_temperature_6cm:
-          type: array
-          nullable: true
-          items:
-            nullable: true
-            type: number
-        soil_temperature_18cm:
-          type: array
-          nullable: true
-          items:
-            nullable: true
-            type: number
-        soil_temperature_54cm:
-          type: array
-          nullable: true
-          items:
-            nullable: true
-            type: number
-        soil_moisture_0_1cm:
-          type: array
-          nullable: true
-          items:
-            nullable: true
-            type: number
-        soil_moisture_1_3cm:
-          type: array
-          nullable: true
-          items:
-            nullable: true
-            type: number
-        soil_moisture_3_9cm:
-          type: array
-          nullable: true
-          items:
-            nullable: true
-            type: number
-        soil_moisture_9_27cm:
-          type: array
-          nullable: true
-          items:
-            nullable: true
-            type: number
-        soil_moisture_27_81cm:
-          type: array
-          nullable: true
-          items:
-            nullable: true
-            type: number
     DailyResponse:
       type: object
       properties:

@@ -2,8 +2,8 @@
 //  OscarRadarState.swift
 //  Oscar°
 //
-//  Timeline state for the live radar layer (precipitation or precip-type product):
-//  metadata + frame grid loading, playback, scrubbing, and the shared palettes.
+//  Timeline state for the live radar layer: metadata + frame grid loading,
+//  playback and scrubbing.
 //
 
 import Foundation
@@ -30,9 +30,6 @@ final class OscarRadarState {
     /// Active radar coverage (DWD Germany / OPERA Europe / MRMS USA). Use `setRegion(_:)`
     /// to change it — it clears loaded frames so the next load re-fetches.
     private(set) var region: RadarRegion = .germany
-    /// Active radar product (precipitation radar / categorical precip-type). Use
-    /// `setProduct(_:)` to change it — same clearing semantics as `setRegion(_:)`.
-    private(set) var product: RadarProduct = .precipitation
     var isLoading: Bool = false
     var currentFrameIndex: Int = 0 {
         didSet {
@@ -50,7 +47,7 @@ final class OscarRadarState {
     private(set) var interactionState: MapInteractionState = .idle
     private(set) var isMapInteracting = false
 
-    @ObservationIgnored nonisolated(unsafe) private var playbackTimer: Timer?
+    @ObservationIgnored private let playback = PlaybackTicker()
     @ObservationIgnored private var frameInfos: [RadarFrameInfo] = []
     @ObservationIgnored private var frameDates: [Date?] = []
     @ObservationIgnored private var loadSessionID = UUID()
@@ -58,14 +55,13 @@ final class OscarRadarState {
     @ObservationIgnored private var bootstrapTask: Task<Void, Never>?
     @ObservationIgnored private var backgroundPreloadTask: Task<Void, Never>?
     @ObservationIgnored private var focusedLoadTask: Task<Void, Never>?
-    @ObservationIgnored private let renderMode: MapRenderMode
-    private static let cacheLock = NSLock()
-    // Live instances (preview + fullscreen come and go with their views) for the
-    // app-level memory-warning purge.
+    @ObservationIgnored private var lastMetadataLoad: Date?
+    private static let metadataStaleAfter: TimeInterval = 10 * 60
+    // Live instances (they come and go with their views) for the app-level
+    // memory-warning purge.
     private static let instances = NSHashTable<OscarRadarState>.weakObjects()
 
-    init(renderMode: MapRenderMode = .fullscreen) {
-        self.renderMode = renderMode
+    init() {
         Self.instances.add(self)
     }
 
@@ -101,29 +97,6 @@ final class OscarRadarState {
 
     var isSelectedFrameReady: Bool {
         frames.indices.contains(currentFrameIndex) && frames[currentFrameIndex] != nil
-    }
-
-    var contiguousReadyRange: ClosedRange<Int>? {
-        contiguousLoadedRange(
-            in: frames.map { $0 != nil },
-            around: isSelectedFrameReady ? currentFrameIndex : renderFrameIndex
-        )
-    }
-
-    var highestContiguouslyReadyForwardIndex: Int? {
-        guard isSelectedFrameReady else { return nil }
-
-        var index = currentFrameIndex
-        while index + 1 < frames.count, frames[index + 1] != nil {
-            index += 1
-        }
-        return index
-    }
-
-    var furthestContiguouslyReadyTimestamp: String? {
-        guard let index = highestContiguouslyReadyForwardIndex,
-              frameTimestamps.indices.contains(index) else { return nil }
-        return frameTimestamps[index]
     }
 
     // MARK: - Grid residency
@@ -181,43 +154,14 @@ final class OscarRadarState {
         }
     }
 
-    // MARK: - Shared Cache
-
-    // Keyed by region + product: frame keys are bare timestamps that collide
-    // across sources, so caches must be source-qualified.
-    private struct SourceKey: Hashable {
-        let region: RadarRegion
-        let product: RadarProduct
-    }
-
-    private var sourceKey: SourceKey { SourceKey(region: region, product: product) }
-
-    private static var cachedFrameInfos: [SourceKey: [RadarFrameInfo]] = [:]
-    private static var cachedBounds: [SourceKey: Components.Schemas.RadarBounds] = [:]
-    private static var lastFetchedTime: [SourceKey: Date] = [:]
-    private static let cacheDuration: TimeInterval = 10 * 60
-
-    private static func isCacheValid(for source: SourceKey) -> Bool {
-        guard let last = lastFetchedTime[source] else { return false }
-        return Date().timeIntervalSince(last) < cacheDuration
-    }
-
-    // MARK: - Region / product
+    // MARK: - Region
 
     /// Switches radar coverage. Clears the loaded frames + in-flight work so the
-    /// next `loadCurrentFrame()`/`loadAllFrames()` fetches the new region. No-op
+    /// next `loadAllFrames()` fetches the new region. No-op
     /// if the region is unchanged.
     func setRegion(_ newRegion: RadarRegion) {
         guard newRegion != region else { return }
         region = newRegion
-        resetForSourceChange()
-    }
-
-    /// Switches between the precipitation radar and the categorical precip-type
-    /// product. Same clearing semantics as `setRegion(_:)`.
-    func setProduct(_ newProduct: RadarProduct) {
-        guard newProduct != product else { return }
-        product = newProduct
         resetForSourceChange()
     }
 
@@ -228,6 +172,7 @@ final class OscarRadarState {
         pause()
 
         loadSessionID = UUID()
+        lastMetadataLoad = nil
         suppressSelectionSideEffects = true
         frames = []
         frameInfos = []
@@ -242,15 +187,8 @@ final class OscarRadarState {
         suppressSelectionSideEffects = false
     }
 
-    /// Reloads for the active region, picking the load depth that matches the
-    /// configured render mode (preview = current frame only, fullscreen = all).
     func reloadForCurrentRegion() async {
-        switch renderMode {
-        case .preview:
-            await loadCurrentFrame()
-        case .fullscreen:
-            await loadAllFrames()
-        }
+        await loadAllFrames()
     }
 
     /// Reload only when the shared metadata cache has expired (or nothing ever
@@ -260,51 +198,41 @@ final class OscarRadarState {
     /// frames as "live".
     func refreshIfStale() async {
         guard !isLoading else { return }
-        guard !Self.isCacheValid(for: sourceKey) || !hasAnyLoadedFrame else { return }
+        if hasAnyLoadedFrame, let lastMetadataLoad,
+           Date().timeIntervalSince(lastMetadataLoad) < Self.metadataStaleAfter {
+            return
+        }
         await reloadForCurrentRegion()
     }
 
     // MARK: - Loading
 
-    /// Loads only the frame closest to the current time.
-    /// Designed for NowView: fast, minimal network work.
-    func loadCurrentFrame() async {
-        await loadFrames(allowBackgroundPreload: false)
-    }
-
     /// Loads all frames, showing the scrubber skeleton immediately after metadata
     /// arrives and filling in ticks progressively as each image downloads.
     func loadAllFrames() async {
-        await loadFrames(allowBackgroundPreload: allowsBackgroundPreload(for: renderMode))
+        await loadFrames(allowBackgroundPreload: allowsBackgroundPreload())
     }
 
     // MARK: - Playback
 
     func play() {
         guard hasAnyLoadedFrame else { return }
-        playbackTimer?.invalidate()
         isPlaying = true
         interactionState = .playing
         restartBackgroundPreloadIfNeeded()
-        playbackTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                self?.advanceFrame()
-            }
-        }
+        playback.start(interval: .milliseconds(500)) { [weak self] in self?.advanceFrame() }
     }
 
     func pause() {
         isPlaying = false
         interactionState = .idle
-        playbackTimer?.invalidate()
-        playbackTimer = nil
+        playback.stop()
     }
 
-    /// Stops the internal Timer without changing `isPlaying`.
+    /// Stops the internal ticker without changing `isPlaying`.
     /// Called when the Metal display link takes over frame advancement.
     func cancelInternalTimer() {
-        playbackTimer?.invalidate()
-        playbackTimer = nil
+        playback.stop()
     }
 
     /// Advance to the next loaded frame. Called by the Metal display-link tick.
@@ -357,7 +285,7 @@ final class OscarRadarState {
             guard let self else { return }
 
             do {
-                let (allFrameInfos, boundsInfo) = try await Self.fetchFrameInfos(source: self.sourceKey)
+                let (allFrameInfos, boundsInfo) = try await Self.fetchFrameInfos(region: self.region)
                 guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
                 // Deep-past observation frames add little and eat preload/residency
                 // budget — keep ~25 min of past plus the entire nowcast.
@@ -384,11 +312,10 @@ final class OscarRadarState {
                 self.loadedFrameIndices = []
                 self.currentFrameIndex = closest
                 self.suppressSelectionSideEffects = false
+                self.lastMetadataLoad = Date()
 
-                // Motion fields load in parallel and are optional — the layer renders a
-                // plain cross-fade until they arrive. The typed product morphs too:
-                // the warp moves sampling POSITIONS, and the layer blends typed frames
-                // in color space (categorical indices are never interpolated).
+            // Motion fields load in parallel and are optional — the layer renders a
+            // plain cross-fade until they arrive.
                 let motionRegion = self.region
                 Task { [weak self] in
                     let data = await Self.fetchMotionData(region: motionRegion)
@@ -406,7 +333,7 @@ final class OscarRadarState {
                 }
             } catch {
                 guard self.loadSessionID == sessionID else { return }
-                self.error = "Fehler beim Laden: \(error.localizedDescription)"
+                self.error = String(localized: "Fehler beim Laden: \(error.localizedDescription)")
                 self.isLoading = false
             }
         }
@@ -437,7 +364,7 @@ final class OscarRadarState {
 
     private func restartBackgroundPreloadIfNeeded() {
         backgroundPreloadTask?.cancel()
-        guard allowsBackgroundPreload(for: renderMode),
+        guard allowsBackgroundPreload(),
               interactionState != .scrubbing,
               !isMapInteracting,
               !frameInfos.isEmpty else { return }
@@ -456,7 +383,7 @@ final class OscarRadarState {
     }
 
     private func focusedFrameIndices(around center: Int) -> [Int] {
-        Array(prioritizedFrameIndices(count: frameInfos.count, around: center).prefix(renderMode.focusedPreloadCount))
+        Array(prioritizedFrameIndices(count: frameInfos.count, around: center).prefix(5))
     }
 
     private func loadFocusedFrames(around center: Int, sessionID: UUID) async {
@@ -509,8 +436,7 @@ final class OscarRadarState {
         defer { loadingFrameIndices.remove(index) }
 
         let info = frameInfos[index]
-        await Self.warmPalette(id: product.colormapId)
-        guard let grid = await Self.loadGridIndices(for: info, source: sourceKey) else { return false }
+        guard let grid = await Self.loadGridIndices(for: info, region: region) else { return false }
         let loadedFrame = OscarRadarFrame(key: info.key, timestamp: info.timestamp,
                                           gridIndices: grid.indices, width: grid.width, height: grid.height)
 
@@ -539,41 +465,22 @@ final class OscarRadarState {
         return frames[index]
     }
 
-    /// Fetches frame metadata from the server, or returns the cached list if still valid.
-    /// Clears the image cache when the metadata expires, since frame keys will have changed.
-    private static func fetchFrameInfos(source: SourceKey) async throws -> ([RadarFrameInfo], Components.Schemas.RadarBounds) {
-        if let cached = cacheLock.withLock({ () -> ([RadarFrameInfo], Components.Schemas.RadarBounds)? in
-            if isCacheValid(for: source),
-               let bounds = cachedBounds[source],
-               let infos = cachedFrameInfos[source], !infos.isEmpty {
-                return (infos, bounds)
-            }
-            return nil
-        }) {
-            return cached
-        }
-
-        let response = try await APIClient.shared.radarFrames(region: source.region.pathComponent)
+    /// Frame metadata; the transport cache (max-age + ETag) answers repeat calls.
+    private static func fetchFrameInfos(region: RadarRegion) async throws -> ([RadarFrameInfo], Components.Schemas.RadarBounds) {
+        let response = try await APIClient.shared.radarFrames(region: region.pathComponent)
         // image_bounds (the rendered Mercator rectangle) over the tighter data
         // footprint — see RadarSharedDTOs.
-        let overlayBounds = response.image_bounds ?? response.bounds
-        cacheLock.withLock {
-            cachedFrameInfos[source] = response.frames
-            cachedBounds[source] = overlayBounds
-            lastFetchedTime[source] = Date()
-        }
-        return (response.frames, overlayBounds)
+        return (response.frames, response.image_bounds ?? response.bounds)
     }
 
     /// Download the raw 8-bit value grid and decode it (serial lane) to a compact index
     /// buffer. Colormapping happens on the GPU at draw time (palette LUT in the layer).
-    private static func loadGridIndices(for frameInfo: RadarFrameInfo, source: SourceKey) async -> RadarGridPayload? {
+    private static func loadGridIndices(for frameInfo: RadarFrameInfo, region: RadarRegion) async -> RadarGridPayload? {
         let fetched: Data?
         do {
             fetched = try await APIClient.shared.radarGrid(
-                region: source.region.pathComponent,
-                key: frameInfo.key,
-                typed: source.product == .precipitationTyped)
+                region: region.pathComponent,
+                key: frameInfo.key)
         } catch {
             return nil
         }
@@ -599,44 +506,9 @@ final class OscarRadarState {
         return RadarMotionData(payload: payload)
     }
 
-    // MARK: - Value-grid colormap (client-side rendering path)
-
-    // Resolved once per palette id (server-preferred, local fallback); every grid
-    // frame colormaps against its product's entry.
-    private static var cachedPalettes: [String: [PixelRGBA]] = [:]
-
-    /// The resolved 256-entry palette for a colormap id (warming it on first call). Used by
-    /// the off-main GPU materialization path; resolution is cheap (one cached network fetch,
-    /// then memory).
-    static func resolvedPalette(id: String) async -> [PixelRGBA] {
-        await warmPalette(id: id)
-        return cachedPalettes[id] ?? fallbackPalette(id: id)
-    }
-
-    /// Resolves a 256-entry palette: server `/colormaps/{id}` preferred, local fallback
-    /// (kept in sync with the server) if it's unavailable.
-    private static func warmPalette(id: String) async {
-        if cachedPalettes[id] != nil { return }
-        if let data = try? await APIClient.shared.colormap(id: id), data.count == 256 * 4 {
-            cachedPalettes[id] = (0..<256).map {
-                let o = $0 * 4
-                return PixelRGBA(r: data[o], g: data[o + 1], b: data[o + 2], a: data[o + 3])
-            }
-            return
-        }
-        if cachedPalettes[id] == nil { cachedPalettes[id] = fallbackPalette(id: id) }
-    }
-
-    private static func fallbackPalette(id: String) -> [PixelRGBA] {
-        id == RadarProduct.precipitationTyped.colormapId
-            ? TypedRadarPalette.buildPalette()
-            : RadarPlasma.buildPalette()
-    }
-
     deinit {
         bootstrapTask?.cancel()
         focusedLoadTask?.cancel()
         backgroundPreloadTask?.cancel()
-        playbackTimer?.invalidate()
     }
 }

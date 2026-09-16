@@ -49,13 +49,12 @@ final class ModelGridLayerState {
     @ObservationIgnored private var loadTask: Task<Void, Never>?
     @ObservationIgnored private var backgroundPreloadTask: Task<Void, Never>?
     @ObservationIgnored private var focusedLoadTask: Task<Void, Never>?
-    @ObservationIgnored nonisolated(unsafe) private var playbackTimer: Timer?
+    @ObservationIgnored private let playback = PlaybackTicker()
     @ObservationIgnored private var frameInfos: [ModelFrameInfo] = []
     @ObservationIgnored private var frameDates: [Date?] = []
     @ObservationIgnored private var loadSessionID = UUID()
     @ObservationIgnored private var suppressSelectionSideEffects = false
     @ObservationIgnored private var lastMetadataLoad: Date?
-    @ObservationIgnored private let renderMode: MapRenderMode
     /// How long loaded metadata counts as fresh for `refreshIfStale` — a full
     /// reload re-decodes every grid, so this is deliberately coarser than the
     /// server's 60 s frames max-age. Mirrors the radar metadata cache window.
@@ -93,24 +92,7 @@ final class ModelGridLayerState {
         }
     }
 
-    /// Per-variable palettes from `/colormaps/{id}` (256 RGBA entries), cached for the
-    /// process. nil until fetched; the layer renders once it resolves.
-    @ObservationIgnored private static var cachedPalettes: [String: [PixelRGBA]] = [:]
-
-    static func palette(for colormapId: String) async -> [PixelRGBA]? {
-        if let cached = cachedPalettes[colormapId] { return cached }
-        guard let data = try? await APIClient.shared.colormap(id: colormapId),
-              data.count == 256 * 4 else { return nil }
-        let palette = (0..<256).map {
-            let o = $0 * 4
-            return PixelRGBA(r: data[o], g: data[o + 1], b: data[o + 2], a: data[o + 3])
-        }
-        cachedPalettes[colormapId] = palette
-        return palette
-    }
-
-    init(renderMode: MapRenderMode = .fullscreen) {
-        self.renderMode = renderMode
+    init() {
         Self.instances.add(self)
     }
 
@@ -159,10 +141,6 @@ final class ModelGridLayerState {
         currentFrame != nil
     }
 
-    var hasRenderableFrame: Bool {
-        currentFrame != nil || nextFrame != nil
-    }
-
     var hasAnyLoadedFrame: Bool {
         frames.contains { $0 != nil }
     }
@@ -171,49 +149,20 @@ final class ModelGridLayerState {
         frames.indices.contains(currentFrameIndex) && frames[currentFrameIndex] != nil
     }
 
-    var contiguousReadyRange: ClosedRange<Int>? {
-        contiguousLoadedRange(
-            in: frames.map { $0 != nil },
-            around: isSelectedFrameReady ? currentFrameIndex : renderFrameIndex
-        )
-    }
-
-    var highestContiguouslyReadyForwardIndex: Int? {
-        guard isSelectedFrameReady else { return nil }
-
-        var index = currentFrameIndex
-        while index + 1 < frames.count, frames[index + 1] != nil {
-            index += 1
-        }
-        return index
-    }
-
-    var furthestContiguouslyReadyTimestamp: String? {
-        guard let index = highestContiguouslyReadyForwardIndex,
-              frameTimestamps.indices.contains(index) else { return nil }
-        return frameTimestamps[index]
-    }
-
     // MARK: - Playback
 
     func play() {
         guard !frames.isEmpty else { return }
-        playbackTimer?.invalidate()
         isPlaying = true
         interactionState = .playing
         restartBackgroundPreloadIfNeeded()
-        playbackTimer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                self?.advanceFrame()
-            }
-        }
+        playback.start(interval: .milliseconds(800)) { [weak self] in self?.advanceFrame() }
     }
 
     func pause() {
         isPlaying = false
         interactionState = .idle
-        playbackTimer?.invalidate()
-        playbackTimer = nil
+        playback.stop()
     }
 
     func advanceFrame() {
@@ -225,12 +174,11 @@ final class ModelGridLayerState {
         currentFrameIndex = nextIndex
     }
 
-    /// Stops the internal Timer without changing `isPlaying` — the map layer's
+    /// Stops the internal ticker without changing `isPlaying` — the map layer's
     /// display link owns frame advancement while it runs (same ownership rule as
     /// the radar layer; both running would double-advance).
     func cancelInternalTimer() {
-        playbackTimer?.invalidate()
-        playbackTimer = nil
+        playback.stop()
     }
 
     func beginScrubbing() {
@@ -336,7 +284,7 @@ final class ModelGridLayerState {
             } catch {
                 guard self.loadSessionID == sessionID else { return }
                 self.isLoading = false
-                self.error = error.localizedDescription
+                self.error = String(localized: "Fehler beim Laden: \(error.localizedDescription)")
             }
         }
 
@@ -395,7 +343,7 @@ final class ModelGridLayerState {
 
     private func restartBackgroundPreloadIfNeeded() {
         backgroundPreloadTask?.cancel()
-        guard allowsBackgroundPreload(for: renderMode),
+        guard allowsBackgroundPreload(),
               interactionState != .scrubbing,
               !isMapInteracting,
               let layer = currentLayer,
@@ -418,7 +366,7 @@ final class ModelGridLayerState {
     }
 
     private func focusedFrameIndices(around center: Int) -> [Int] {
-        Array(prioritizedFrameIndices(count: frameInfos.count, around: center).prefix(renderMode.focusedPreloadCount))
+        Array(prioritizedFrameIndices(count: frameInfos.count, around: center).prefix(5))
     }
 
     private func loadFrameBatch(
@@ -525,7 +473,6 @@ final class ModelGridLayerState {
         loadTask?.cancel()
         backgroundPreloadTask?.cancel()
         focusedLoadTask?.cancel()
-        playbackTimer?.invalidate()
     }
 }
 

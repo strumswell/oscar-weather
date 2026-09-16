@@ -78,47 +78,14 @@ func adaptiveCacheBudget(fraction: Double, floor floorBytes: Int, cap: Int) -> I
     return min(cap, max(floorBytes, Int(Double(available) * fraction)))
 }
 
-enum MapRenderMode {
-    case preview
-    case fullscreen
-
-    var focusedPreloadCount: Int {
-        switch self {
-        case .preview:
-            3
-        case .fullscreen:
-            5
-        }
-    }
-
-    var allowsBackgroundPreload: Bool {
-        self == .fullscreen
-    }
-}
-
 enum MapInteractionState {
     case idle
     case scrubbing
     case playing
 }
 
-private enum FrameDateParser {
-    nonisolated(unsafe) static let plain: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter
-    }()
-    nonisolated(unsafe) static let fractional: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter
-    }()
-}
-
 func parseFrameDate(_ timestamp: String) -> Date? {
-    FrameDateParser.fractional.date(from: timestamp)
-        ?? FrameDateParser.plain.date(from: timestamp)
-        ?? Double(timestamp).map { Date(timeIntervalSince1970: $0) }
+    PrecipSeriesDate.parse(timestamp)
 }
 
 func closestTimestampIndex(in dates: [Date?]) -> Int {
@@ -180,27 +147,7 @@ func nextLoadedIndex(in loaded: [Bool], after index: Int) -> Int? {
     return nil
 }
 
-func contiguousLoadedRange(in loaded: [Bool], around anchor: Int?) -> ClosedRange<Int>? {
-    guard !loaded.isEmpty, let anchor else { return nil }
-    let clampedAnchor = max(0, min(loaded.count - 1, anchor))
-    guard loaded[clampedAnchor] else { return nil }
-
-    var lower = clampedAnchor
-    while lower > 0, loaded[lower - 1] {
-        lower -= 1
-    }
-
-    var upper = clampedAnchor
-    while upper + 1 < loaded.count, loaded[upper + 1] {
-        upper += 1
-    }
-
-    return lower...upper
-}
-
-func allowsBackgroundPreload(for renderMode: MapRenderMode) -> Bool {
-    guard renderMode.allowsBackgroundPreload else { return false }
-
+func allowsBackgroundPreload() -> Bool {
     switch ProcessInfo.processInfo.thermalState {
     case .serious, .critical:
         return false

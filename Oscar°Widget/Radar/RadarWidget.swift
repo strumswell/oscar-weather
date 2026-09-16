@@ -56,15 +56,10 @@ struct RadarWidgetEntryView: View {
         // push it out of the visible top-left corner (shipped once on systemLarge).
         Color.clear
             .overlay {
-                if #available(iOSApplicationExtension 18.0, *) {
-                    mapImage
-                        .widgetAccentedRenderingMode(.accentedDesaturated)
-                        .aspectRatio(contentMode: .fill)
-                        .contrast(widgetRenderingMode == .accented ? 1.5 : 1)
-                } else {
-                    mapImage
-                        .aspectRatio(contentMode: .fill)
-                }
+                mapImage
+                    .widgetAccentedRenderingMode(.accentedDesaturated)
+                    .aspectRatio(contentMode: .fill)
+                    .contrast(widgetRenderingMode == .accented ? 1.5 : 1)
             }
             .clipped()
             .overlay(alignment: .topLeading) {

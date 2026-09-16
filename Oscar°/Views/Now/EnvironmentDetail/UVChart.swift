@@ -37,17 +37,18 @@ struct UVChart: View {
     }
 
     private var severityBands: [(lower: Double, upper: Double, color: Color)] {
-        [
-            (0, 3, .green),
-            (3, 6, .yellow),
-            (6, 8, .orange),
-            (8, 11, .red),
-            (11, maxYValue, .purple),
-        ]
+        UVIndexCategory.allCases.map {
+            (lower: $0.range.lowerBound, upper: min($0.range.upperBound, maxYValue), color: $0.color)
+        }
     }
 
     private var currentDataPoint: UVDataPoint? {
         dataPoints.first(where: { $0.time >= referenceDate }) ?? dataPoints.last
+    }
+
+    private var accessibilitySummary: String {
+        guard let peak = uvIndex.max() else { return "" }
+        return String(localized: "UV-Index bis \(Int(peak.rounded())) (\(UVIndexCategory(uvIndex: peak).localizedTitle))")
     }
 
     var body: some View {
@@ -116,7 +117,7 @@ struct UVChart: View {
                     }
             }
 
-            ForEach(dayChangeIndices(time: time), id: \.self) { index in
+            ForEach(HourlyChartUtilities.dayChangeIndices(time: time), id: \.self) { index in
                 RuleMark(x: .value("Hour", Date(timeIntervalSince1970: time[index])))
                     .foregroundStyle(.gray.opacity(0.6))
                     .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [8, 4]))
@@ -125,7 +126,7 @@ struct UVChart: View {
                         spacing: 8,
                         overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))
                     ) {
-                        Text(dayAbbreviation(from: Date(timeIntervalSince1970: time[index])))
+                        Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: time[index])))
                             .font(.caption.weight(.medium))
                             .foregroundStyle(.primary.opacity(0.7))
                             .padding(.horizontal, 6)
@@ -161,8 +162,11 @@ struct UVChart: View {
         .chartXScale(domain: maxTimeRange)
         .chartScrollableAxes(.horizontal)
         .chartXVisibleDomain(length: 108_000)
-        .chartXSelection(value: $selectedDate)
+        .chartXSelection(value: .snapped(to: 3600, $selectedDate))
         .frame(height: 220)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("UV-Index-Verlauf"))
+        .accessibilityValue(accessibilitySummary)
     }
 
     @ChartContentBuilder

@@ -20,8 +20,8 @@ struct WeatherMapDetailView: View {
     let settingsService: SettingService
     @Environment(Location.self) private var location: Location
     @Environment(\.scenePhase) private var scenePhase
-    @State private var radarState = OscarRadarState(renderMode: .fullscreen)
-    @State private var modelGridState = ModelGridLayerState(renderMode: .fullscreen)
+    @State private var radarState = OscarRadarState()
+    @State private var modelGridState = ModelGridLayerState()
     @State private var cloudLayerState = CloudLayerState()
     @State private var isLayerPickerPresented = false
     // sheet(item:), not sheet(isPresented:) + separate array state: the isPresented
@@ -42,7 +42,6 @@ struct WeatherMapDetailView: View {
                 coordinates: location.coordinates,
                 cities: LocationService.shared.city.cities,
                 overlayOpacity: settingsService.mapOverlayOpacity,
-                userActionAllowed: true,
                 showWindParticles: true,
                 oscarRadarState: radarState,
                 modelGridState: modelGridState,
@@ -69,9 +68,7 @@ struct WeatherMapDetailView: View {
                                     timestamp: timestamp,
                                     isLive: radarState.isCurrentFrameLive
                                 )
-                                ColormapVerticalLegend(
-                                    colormap: settingsService.oscarRadarProduct == .precipitationTyped
-                                        ? .radarTyped : .radar)
+                                ColormapVerticalLegend(colormap: .radar)
                             }
                             if settingsService.showStormCells {
                                 StormCellLegend()
@@ -153,7 +150,6 @@ struct WeatherMapDetailView: View {
             // Re-runs on every return to the tab: full loads only the first time,
             // cheap staleness checks after that.
             if settingsService.oscarRadarLayer {
-                radarState.setProduct(settingsService.oscarRadarProduct)
                 radarState.setRegion(settingsService.oscarRadarRegion)
                 if radarState.frames.isEmpty {
                     await radarState.loadAllFrames()
@@ -208,7 +204,6 @@ struct WeatherMapDetailView: View {
         .onChange(of: settingsService.oscarRadarLayer) { _, isEnabled in
             if isEnabled {
                 modelGridState.pause()
-                radarState.setProduct(settingsService.oscarRadarProduct)
                 radarState.setRegion(settingsService.oscarRadarRegion)
                 if radarState.frames.isEmpty {
                     Task { await radarState.loadAllFrames() }
@@ -220,11 +215,6 @@ struct WeatherMapDetailView: View {
         .onChange(of: settingsService.oscarRadarRegion) { _, newRegion in
             guard settingsService.oscarRadarLayer else { return }
             radarState.setRegion(newRegion)
-            Task { await radarState.reloadForCurrentRegion() }
-        }
-        .onChange(of: settingsService.oscarRadarProduct) { _, newProduct in
-            guard settingsService.oscarRadarLayer else { return }
-            radarState.setProduct(newProduct)
             Task { await radarState.reloadForCurrentRegion() }
         }
         .onChange(of: settingsService.activeTileLayer) { _, newLayer in
@@ -283,7 +273,7 @@ struct WeatherMapDetailView: View {
         VStack(spacing: 0) {
             Button(action: presentLayerPicker) {
                 Image(systemName: "map.fill")
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.title3.weight(.semibold))
                     .frame(width: 46, height: 46)
                     .contentShape(.rect)
             }
@@ -291,7 +281,7 @@ struct WeatherMapDetailView: View {
             Divider()
                 .frame(width: 26)
             Button {
-                UIApplication.shared.playHapticFeedback()
+                Haptics.impact()
                 NotificationCenter.default.post(name: .mapCenterOnUser, object: nil)
             } label: {
                 Image(systemName: "location")
@@ -306,7 +296,7 @@ struct WeatherMapDetailView: View {
     }
 
     private func presentLayerPicker() {
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
         isLayerPickerPresented = true
     }
 

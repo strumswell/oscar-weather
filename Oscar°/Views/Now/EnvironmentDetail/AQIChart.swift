@@ -69,15 +69,13 @@ struct AQIChart: View {
         return max(120, ceil(highestValue / 20) * 20)
     }
 
+    private var accessibilitySummary: String {
+        guard let low = aqi.min(), let high = aqi.max() else { return "" }
+        return String(localized: "AQI \(Int(low.rounded())) bis \(Int(high.rounded())), Spitze \(EUAirQualityBand(value: high).localizedStatus)")
+    }
+
     private var severityBands: [(lower: Double, upper: Double, color: Color)] {
-        [
-            (0, 20, Color(red: 79 / 255, green: 240 / 255, blue: 230 / 255)),
-            (20, 40, Color(red: 81 / 255, green: 204 / 255, blue: 170 / 255)),
-            (40, 60, Color(red: 240 / 255, green: 230 / 255, blue: 65 / 255)),
-            (60, 80, Color(red: 255 / 255, green: 81 / 255, blue: 80 / 255)),
-            (80, 100, Color(red: 150 / 255, green: 1 / 255, blue: 50 / 255)),
-            (100, maxYValue, Color(red: 125 / 255, green: 33 / 255, blue: 129 / 255)),
-        ]
+        EUAirQualityBand.allCases.map { ($0.lowerBound, $0.upperBound ?? maxYValue, $0.color) }
     }
 
     private var currentDataPoint: AQIDataPoint? {
@@ -115,8 +113,11 @@ struct AQIChart: View {
             .chartXScale(domain: maxTimeRange)
             .chartScrollableAxes(.horizontal)
             .chartXVisibleDomain(length: 108_000)
-            .chartXSelection(value: $selectedDate)
+            .chartXSelection(value: .snapped(to: 3600, $selectedDate))
             .frame(height: 240)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("Luftqualitätsverlauf"))
+            .accessibilityValue(accessibilitySummary)
 
             AQIChartLegendView(items: [
                 ("PM2.5", .blue),
@@ -172,7 +173,7 @@ struct AQIChart: View {
 
     @ChartContentBuilder
     private var daySeparatorMarks: some ChartContent {
-        ForEach(dayChangeIndices(time: time), id: \.self) { index in
+        ForEach(HourlyChartUtilities.dayChangeIndices(time: time), id: \.self) { index in
             RuleMark(x: .value("Hour", Date(timeIntervalSince1970: time[index])))
                 .foregroundStyle(.gray.opacity(0.6))
                 .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [8, 4]))
@@ -181,7 +182,7 @@ struct AQIChart: View {
                     spacing: 8,
                     overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))
                 ) {
-                    Text(dayAbbreviation(from: Date(timeIntervalSince1970: time[index])))
+                    Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: time[index])))
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.primary.opacity(0.7))
                         .padding(.horizontal, 6)

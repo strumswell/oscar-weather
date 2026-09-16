@@ -40,11 +40,6 @@ struct UnitSettings: View {
                 }
             }
         }
-        .onChange(of: settingsService.timeFormatPreference) {
-                Task {
-                    await NotificationSettingsManager.shared.syncTimeFormatPreferenceUpdate()
-                }
-        }
         .navigationTitle("Einheiten")
         .navigationBarTitleDisplayMode(.inline)
     }

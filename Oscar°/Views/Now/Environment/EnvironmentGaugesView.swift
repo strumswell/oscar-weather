@@ -35,7 +35,7 @@ struct EnvironmentGaugesView: View {
             .forAQI(id: "no2",  label: "NO",   subscript_: "2",   value: no2Value),
             .forAQI(id: "o3",   label: "O",    subscript_: "3",   value: o3Value),
             .forAQI(id: "so2",  label: "SO",   subscript_: "2",   value: so2Value),
-        ]
+        ].compactMap { $0 }
 
         let pollen: [EnvironmentMetric] = [
             .forPollen(type: .alder,   label: "Erle",     value: alderValue),
@@ -115,6 +115,6 @@ struct EnvironmentGaugesView: View {
             return Text("\(metric.label) \(subscriptLabel), \(Int(metric.rawValue))")
         }
 
-        return Text("\(LocalizedStringKey(metric.label)), \(Int(metric.rawValue))")
+        return Text("\(Text(LocalizedStringKey(metric.label))), \(Int(metric.rawValue))")
     }
 }

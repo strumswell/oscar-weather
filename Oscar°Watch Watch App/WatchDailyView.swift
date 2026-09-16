@@ -17,7 +17,7 @@ struct WatchDailyView: View {
         let count = dayCount(daily)
         let scale = temperatureScale(daily, count: count)
         let unit = weather.forecast.daily_units?.temperature_2m_min ?? "°C"
-        let timeZone = TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? .current
+        let timeZone = weather.forecast.locationTimeZone
         let weekdayFormatter = Self.weekdayFormatter(timeZone: timeZone)
 
         ScrollView {
@@ -64,7 +64,7 @@ struct WatchDailyView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
 
-            Image(weatherIcon(for: daily?.weathercode?[day]))
+            Image(decorative: weatherIcon(for: daily?.weathercode?[day]))
                 .resizable()
                 .scaledToFit()
                 .frame(width: 22, height: 22)
@@ -131,26 +131,8 @@ struct WatchDailyView: View {
         return formatter
     }
 
-    /// Daily weather code to icon asset, mirrors DailyView.getWeatherIcon.
     private func weatherIcon(for code: Double?) -> String {
-        switch Int(code ?? 0) {
-        case 0, 1:
-            return "01d"
-        case 2:
-            return "02d"
-        case 3:
-            return "04d"
-        case 45, 48:
-            return "50d"
-        case 51:
-            return "10d"
-        case 71, 73, 75, 77, 85, 86:
-            return "13d"
-        case 95, 96, 99:
-            return "11d"
-        default:
-            return "09d"
-        }
+        HourlyFormatting.weatherIconName(weatherCode: code ?? 0, isDay: 1)
     }
 }
 

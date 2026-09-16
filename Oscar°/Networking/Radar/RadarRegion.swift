@@ -15,39 +15,6 @@ struct OscarRadarBounds: Equatable {
     let east: Double
 }
 
-/// Radar product family served by oscar-server: the plain precipitation radar or
-/// the typed variant — the same frames with the "Niederschlagsart" overlay baked in
-/// (intensity+type combined grid, DWD HG / MRMS PrecipFlag; see server `TypedRadar`).
-enum RadarProduct: String, CaseIterable, Equatable, Sendable {
-    case precipitation
-    case precipitationTyped = "precipitation_typed"
-
-    /// Frames endpoint path (`{framesPath}/…` also prefixes the grid URLs).
-    /// Both products share ONE timeline — typed only changes the grid encoding.
-    func framesPath(for region: RadarRegion) -> String {
-        "radar/\(region.pathComponent)/frames"
-    }
-
-    /// Query string appended to grid asset URLs (`grid?style=typed`).
-    var gridQuery: String {
-        self == .precipitationTyped ? "?style=typed" : ""
-    }
-
-    /// Server palette id (`/colormaps/{id}`) the value grids of this product index into.
-    var colormapId: String {
-        switch self {
-        case .precipitation:      return "plasma"
-        case .precipitationTyped: return "radar_typed"
-        }
-    }
-
-    /// The typed product exists only for the DWD and MRMS composites — neither
-    /// OPERA, CWA, REDEMET nor AEMET publishes a hydrometeor-classification product.
-    func isAvailable(in region: RadarRegion) -> Bool {
-        self == .precipitation || region == .germany || region == .usa
-    }
-}
-
 /// Radar coverage the user can choose between in the map's layer menu.
 /// Mirrors oscar-server's radar sources: high-res DWD (Germany), the pan-European
 /// EUMETNET OPERA composite, the NOAA MRMS CONUS composite (USA), the CWA
@@ -63,6 +30,20 @@ enum RadarRegion: String, CaseIterable, Equatable, Sendable {
 
     /// Path component used in oscar-server radar URLs (`/radar/{pathComponent}/…`).
     var pathComponent: String { rawValue }
+
+    /// Provider names for the timeline chip and the layer picker.
+    var shortSourceLabel: String {
+        switch self {
+        case .germany: "DWD"
+        case .europe: "EUMETNET"
+        case .usa: "NOAA"
+        case .taiwan: "CWA"
+        case .brasil: "REDEMET"
+        case .canarias: "AEMET"
+        }
+    }
+
+    var sourceLabel: String { "\(shortSourceLabel) Radar" }
 
     /// Approximate data coverage, fixed client-side so the location-based source
     /// pick works before any metadata fetch. germany/usa mirror the server

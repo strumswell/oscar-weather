@@ -1,14 +1,10 @@
 //
 //  NowView.swift
-//  Weather
+//  Oscar°
 //
 //  Created by Philipp Bolte on 22.09.20.
 
 import SwiftUI
-import OpenAPIRuntime
-import OpenAPIURLSession
-import MapKit
-import WidgetKit
 
 #Preview {
     NowView()
@@ -61,7 +57,7 @@ struct NowView: View {
         let cardFill = AtmosphereSampler.cardFill(snapshot: atmosphere)
 
         ZStack {
-            WeatherSimulationView(isCoveredBySheet: presentation.sheet != nil || presentation.selectedTab != .forecast)
+            WeatherSimulationView(isOffTab: presentation.selectedTab != .forecast)
                 .ignoresSafeArea()
             if weather.hasContent {
             ScrollView(.vertical) {
@@ -86,12 +82,12 @@ struct NowView: View {
                         }
                         HeadView()
                             .padding(.top, 24)
-                            .onTapGesture {
+                            .debugConsoleTap {
                                 self.tapCount += 1
                                 if self.tapCount == 10 {
                                     self.tapCount = 0
                                     weather.debug.toggle()
-                                    UIApplication.shared.playHapticFeedback()
+                                    Haptics.impact()
                                 }
                             }
                         RainView(openRadarMap: openRadarMap)
@@ -133,7 +129,7 @@ struct NowView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 16)
                     Button {
-                        UIApplication.shared.playHapticFeedback()
+                        Haptics.impact()
                         presentation.present(.settings)
                     } label: {
                         // Bare text over the sim: same white + shadow plate as
@@ -151,6 +147,7 @@ struct NowView: View {
                     .accessibilityIdentifier("now.settings")
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 24)
+                    #if DEBUG
                     if weather.debug {
                         VStack {
                             DebugPermissionControls()
@@ -178,6 +175,7 @@ struct NowView: View {
                             Text(String(reflecting: weather.forecast))
                         }
                     }
+                    #endif
                 }
                 .animation(.easeInOut(duration: 0.3), value: showRefreshIndicator)
             }
@@ -232,12 +230,14 @@ struct NowView: View {
                     Task { await weather.refresh(location: location) }
                 }
             }
+            #if DEBUG
             if weather.debug {
                 AtmosphereDebugPanel(state: atmosphereDebug)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                     .padding(.horizontal, 12)
                     .padding(.bottom, 12)
             }
+            #endif
         }
         .environment(atmosphereDebug)
         .environment(\.cardTint, cardFill)
@@ -304,7 +304,17 @@ extension NowView {
     private func openRadarMap() {
         settingsService.activeTileLayer = nil
         settingsService.oscarRadarLayer = true
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
         presentation.selectedTab = .maps
+    }
+}
+
+private extension View {
+    func debugConsoleTap(_ action: @escaping () -> Void) -> some View {
+        #if DEBUG
+        onTapGesture(perform: action)
+        #else
+        self
+        #endif
     }
 }

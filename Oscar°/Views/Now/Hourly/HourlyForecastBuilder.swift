@@ -22,8 +22,9 @@ enum HourlyForecastBuilder {
       return []
     }
 
-    let timeZone = TimeZone(secondsFromGMT: forecast.utc_offset_seconds ?? 0) ?? .current
+    let timeZone = forecast.locationTimeZone
     let precipitationUnit = forecast.hourly_units?.precipitation ?? "mm"
+    let sunEvents = SunEventIndex(daily: forecast.daily, timeZone: timeZone)
 
     // "Jetzt" replaces the current hour: a card with the live conditions —
     // radar-aware precipitation and icon — followed by the whole hours strictly
@@ -38,21 +39,17 @@ enum HourlyForecastBuilder {
       // A sunrise/sunset between now and the first whole hour lives in the hour
       // slot the Jetzt card replaces — carry it over instead of dropping it.
       if !isLoading, firstFutureIndex > 0,
-         let sunEvent = sunEventItem(
-           for: hourly.time[firstFutureIndex - 1],
-           daily: forecast.daily,
-           timeZone: timeZone
-         ),
+         let sunEvent = sunEvents.item(forHourAt: hourly.time[firstFutureIndex - 1]),
          sunEvent.timestamp > current.time {
         items.append(.sunEvent(sunEvent))
       }
 
       items += hourlyItems(
         range: firstFutureIndex...min(firstFutureIndex + 47, availableCount - 1),
-        forecast: forecast,
         hourly: hourly,
         precipitationUnit: precipitationUnit,
         timeZone: timeZone,
+        sunEvents: sunEvents,
         isLoading: isLoading
       )
       return items
@@ -63,20 +60,20 @@ enum HourlyForecastBuilder {
     let startIndex = min(localizedHourIndex(currentTime: forecast.current?.time, hours: hourly.time), availableCount - 1)
     return hourlyItems(
       range: startIndex...min(startIndex + 48, availableCount - 1),
-      forecast: forecast,
       hourly: hourly,
       precipitationUnit: precipitationUnit,
       timeZone: timeZone,
+      sunEvents: sunEvents,
       isLoading: isLoading
     )
   }
 
   private static func hourlyItems(
     range: ClosedRange<Int>,
-    forecast: Operations.getForecast.Output.Ok.Body.jsonPayload,
     hourly: Operations.getForecast.Output.Ok.Body.jsonPayload.hourlyPayload,
     precipitationUnit: String,
     timeZone: TimeZone,
+    sunEvents: SunEventIndex,
     isLoading: Bool
   ) -> [HourlyTimelineItem] {
     var items: [HourlyTimelineItem] = []
@@ -99,12 +96,7 @@ enum HourlyForecastBuilder {
 
       items.append(.forecast(forecastItem))
 
-      if !isLoading,
-         let sunEvent = sunEventItem(
-           for: timestamp,
-           daily: forecast.daily,
-           timeZone: timeZone
-         ) {
+      if !isLoading, let sunEvent = sunEvents.item(forHourAt: timestamp) {
         items.append(.sunEvent(sunEvent))
       }
     }
@@ -181,63 +173,46 @@ enum HourlyForecastBuilder {
     return closestIndex
   }
 
-  private static func sunEventItem(
-    for hourlyTimestamp: Double,
-    daily: Components.Schemas.DailyResponse?,
-    timeZone: TimeZone
-  ) -> HourlySunEventItem? {
-    guard let daily,
-          let sunrise = daily.sunrise,
-          let sunset = daily.sunset,
-          let dayIndex = dayIndex(for: hourlyTimestamp, sunrise: sunrise, timeZone: timeZone)
-    else {
-      return nil
-    }
+  /// Sunrise and sunset per local day, built once per item list so the
+  /// per-hour lookup is a dictionary hit instead of a calendar scan.
+  private struct SunEventIndex {
+    private var byDay: [Double: (sunrise: Double?, sunset: Double?)] = [:]
+    private var calendar: Calendar
 
-    if sunrise.indices.contains(dayIndex),
-       isWithinSameHour(hourlyTimestamp, sunrise[dayIndex], timeZone: timeZone) {
-      return HourlySunEventItem(
-        kind: .sunrise,
-        timestamp: sunrise[dayIndex],
-        time: HourlyFormatting.timeString(timestamp: sunrise[dayIndex], timeZone: timeZone),
-        weekday: HourlyFormatting.weekdayString(timestamp: sunrise[dayIndex], timeZone: timeZone)
-      )
-    }
-
-    if sunset.indices.contains(dayIndex),
-       isWithinSameHour(hourlyTimestamp, sunset[dayIndex], timeZone: timeZone) {
-      return HourlySunEventItem(
-        kind: .sunset,
-        timestamp: sunset[dayIndex],
-        time: HourlyFormatting.timeString(timestamp: sunset[dayIndex], timeZone: timeZone),
-        weekday: HourlyFormatting.weekdayString(timestamp: sunset[dayIndex], timeZone: timeZone)
-      )
-    }
-
-    return nil
-  }
-
-  private static func dayIndex(for hourlyTimestamp: Double, sunrise: [Double], timeZone: TimeZone) -> Int? {
-    let hourlyDate = Date(timeIntervalSince1970: TimeInterval(hourlyTimestamp))
-    var calendar = Calendar.current
-    calendar.timeZone = timeZone
-
-    for (index, sunriseTimestamp) in sunrise.enumerated() {
-      let sunriseDate = Date(timeIntervalSince1970: TimeInterval(sunriseTimestamp))
-      if calendar.isDate(hourlyDate, inSameDayAs: sunriseDate) {
-        return index
+    init(daily: Components.Schemas.DailyResponse?, timeZone: TimeZone) {
+      calendar = Calendar.current
+      calendar.timeZone = timeZone
+      let sunrises = daily?.sunrise ?? []
+      let sunsets = daily?.sunset ?? []
+      for (index, sunrise) in sunrises.enumerated() {
+        let day = calendar.startOfDay(for: Date(timeIntervalSince1970: sunrise)).timeIntervalSince1970
+        byDay[day] = (sunrise, sunsets.indices.contains(index) ? sunsets[index] : nil)
       }
     }
 
-    return nil
-  }
-
-  private static func isWithinSameHour(_ firstTimestamp: Double, _ secondTimestamp: Double, timeZone: TimeZone) -> Bool {
-    let firstDate = Date(timeIntervalSince1970: TimeInterval(firstTimestamp))
-    let secondDate = Date(timeIntervalSince1970: TimeInterval(secondTimestamp))
-    var calendar = Calendar.current
-    calendar.timeZone = timeZone
-
-    return calendar.component(.hour, from: firstDate) == calendar.component(.hour, from: secondDate)
+    func item(forHourAt hourlyTimestamp: Double) -> HourlySunEventItem? {
+      let hourDate = Date(timeIntervalSince1970: hourlyTimestamp)
+      guard let events = byDay[calendar.startOfDay(for: hourDate).timeIntervalSince1970] else { return nil }
+      let hour = calendar.component(.hour, from: hourDate)
+      if let sunrise = events.sunrise,
+         calendar.component(.hour, from: Date(timeIntervalSince1970: sunrise)) == hour {
+        return HourlySunEventItem(
+          kind: .sunrise,
+          timestamp: sunrise,
+          time: HourlyFormatting.timeString(timestamp: sunrise, timeZone: calendar.timeZone),
+          weekday: HourlyFormatting.weekdayString(timestamp: sunrise, timeZone: calendar.timeZone)
+        )
+      }
+      if let sunset = events.sunset,
+         calendar.component(.hour, from: Date(timeIntervalSince1970: sunset)) == hour {
+        return HourlySunEventItem(
+          kind: .sunset,
+          timestamp: sunset,
+          time: HourlyFormatting.timeString(timestamp: sunset, timeZone: calendar.timeZone),
+          weekday: HourlyFormatting.weekdayString(timestamp: sunset, timeZone: calendar.timeZone)
+        )
+      }
+      return nil
+    }
   }
 }

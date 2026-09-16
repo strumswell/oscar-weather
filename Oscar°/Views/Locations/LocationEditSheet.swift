@@ -115,7 +115,7 @@ struct LocationEditSheet: View {
                                             mark = .emoji(suggestion.emoji)
                                         }
                                     }
-                                    UIApplication.shared.playHapticFeedback()
+                                    Haptics.impact()
                                 } label: {
                                     Text("\(suggestion.emoji) \(suggestion.label)")
                                         .font(.subheadline)
@@ -190,7 +190,7 @@ struct LocationEditSheet: View {
         let isSelected = mark == value
         return Button {
             withAnimation(.snappy) { mark = value }
-            UIApplication.shared.playHapticFeedback()
+            Haptics.impact()
         } label: {
             Group {
                 if let symbol {
@@ -199,7 +199,7 @@ struct LocationEditSheet: View {
                         .foregroundStyle(isSelected ? AnyShapeStyle(.blue) : AnyShapeStyle(.secondary))
                 } else {
                     Text(value.emoji ?? "")
-                        .font(.system(size: 22))
+                        .font(.title2)
                 }
             }
             .frame(maxWidth: .infinity, minHeight: 44)
@@ -236,7 +236,7 @@ struct LocationEditSheet: View {
         ZStack {
             if customEmojiSelected, let emoji = mark.emoji {
                 Text(emoji)
-                    .font(.system(size: 22))
+                    .font(.title2)
             } else {
                 Image(systemName: "face.smiling")
                     .font(.body)
@@ -251,7 +251,7 @@ struct LocationEditSheet: View {
             }
             EmojiKeyboardField(isFocused: $emojiFieldFocused) { picked in
                 withAnimation(.snappy) { mark = .emoji(picked) }
-                UIApplication.shared.playHapticFeedback()
+                Haptics.impact()
                 emojiFieldFocused = false
             }
         }
@@ -289,7 +289,7 @@ struct LocationEditSheet: View {
                 cityService.setDefault(city: nil, asCurrentLocation: isDefault)
             }
         }
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
         dismiss()
     }
 }

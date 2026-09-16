@@ -18,6 +18,15 @@ extension Components.Schemas.CurrentWeather {
     }
 }
 
+extension Operations.getForecast.Output.Ok.Body.jsonPayload {
+    /// The forecast location's zone: Open-Meteo's IANA zone, else the offset it applied.
+    var locationTimeZone: TimeZone {
+        timezone.flatMap(TimeZone.init(identifier:))
+            ?? TimeZone(secondsFromGMT: utc_offset_seconds ?? 0)
+            ?? .current
+    }
+}
+
 extension PrecipSeriesResponse {
     /// How far the sample nearest to "now" may be from the wall clock before the
     /// series counts as stale (e.g. the app slept in the background) and reads as

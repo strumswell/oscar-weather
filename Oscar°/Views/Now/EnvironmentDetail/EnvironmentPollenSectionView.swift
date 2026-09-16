@@ -19,14 +19,14 @@ struct EnvironmentPollenSectionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             if currentPollen.isEmpty {
-                EnvironmentDetailCard {
+                DetailCard {
                     EnvironmentDetailEmptyStateView(
                         title: "Keine Pollendaten verfügbar",
                         message: "Für den aktuellen Zeitraum liegen keine Pollendaten vor."
                     )
                 }
             } else {
-                EnvironmentDetailCard {
+                DetailCard {
                     EnvironmentDetailHeaderView(
                         title: "Pollen",
                         value: dominantPollen?.label ?? "--",
@@ -52,7 +52,7 @@ struct EnvironmentPollenSectionView: View {
                     .id(chartTimelineVersion)
                 }
 
-                EnvironmentDetailCard {
+                DetailCard {
                     Text("Aktuelle Werte")
                         .font(.headline)
                         .foregroundStyle(.primary)

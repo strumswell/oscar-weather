@@ -14,7 +14,7 @@ struct WatchHourlyView: View {
     private static let maxRows = 14
 
     var body: some View {
-        let timeZone = TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? .current
+        let timeZone = weather.forecast.locationTimeZone
         let hourFormatter = Self.hourFormatter(timeZone: timeZone)
         let items = HourlyForecastBuilder.makeItems(
             forecast: weather.forecast,
@@ -55,14 +55,14 @@ struct WatchHourlyView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
 
-            Image(item.iconName)
+            Image(decorative: item.iconName)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 22, height: 22)
 
             if item.precipitationValue > 0 {
                 Text(item.precipitation)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.caption.weight(.medium))
                     .foregroundStyle(.cyan)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
@@ -87,7 +87,7 @@ struct WatchHourlyView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
 
-            Image(item.kind.imageName)
+            Image(decorative: item.kind.imageName)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 22, height: 22)

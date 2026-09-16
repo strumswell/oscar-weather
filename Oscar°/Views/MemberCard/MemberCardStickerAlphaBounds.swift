@@ -30,7 +30,7 @@ enum MemberCardStickerAlphaBounds {
             return cached
         }
 
-        guard let image = UIImage(named: MemberCard.imageName(for: assetName)),
+        guard let image = UIImage(named: assetName),
               let sourceImage = image.cgImage else {
             let fallback = Metrics(
                 bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
@@ -40,8 +40,11 @@ enum MemberCardStickerAlphaBounds {
             return fallback
         }
 
-        let width = sourceImage.width
-        let height = sourceImage.height
+        // Normalized metrics only need a coarse scan; the 1024 px sources
+        // would cost a million alpha reads on the main actor per asset.
+        let downscale = min(1, 160 / Double(max(sourceImage.width, sourceImage.height)))
+        let width = max(1, Int(Double(sourceImage.width) * downscale))
+        let height = max(1, Int(Double(sourceImage.height) * downscale))
         let bytesPerPixel = 4
         let bytesPerRow = width * bytesPerPixel
         guard let context = CGContext(
@@ -55,6 +58,7 @@ enum MemberCardStickerAlphaBounds {
         ), let rawData = context.data else {
             return fallbackMetrics(for: assetName)
         }
+        context.interpolationQuality = .high
         context.draw(sourceImage, in: CGRect(x: 0, y: 0, width: width, height: height))
         let bytes = rawData.assumingMemoryBound(to: UInt8.self)
         let alphaOffset = 3

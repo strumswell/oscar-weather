@@ -4,115 +4,44 @@ struct DailyEnsemblePrecipitationSummaryCard: View {
   let points: [DailyEnsembleDayPoint]
   let unit: String
 
-  private var wettestDay: DailyEnsembleDayPoint? {
-    points.max { ($0.precipitationSum ?? -1) < ($1.precipitationSum ?? -1) }
-  }
-
-  private var driestDay: DailyEnsembleDayPoint? {
-    points.min { ($0.precipitationSum ?? 999) < ($1.precipitationSum ?? 999) }
-  }
-
-  private var highestUncertaintyDay: (point: DailyEnsembleDayPoint, span: Double)? {
-    points.compactMap { point -> (DailyEnsembleDayPoint, Double)? in
-      guard let high = point.precipitationSumMemberHigh,
-            let low = point.precipitationSumMemberLow else { return nil }
-      return (point, high - low)
-    }.max { $0.1 < $1.1 }
-  }
-
-  private var avgUncertainty: Double? {
-    let spans = points.compactMap { p -> Double? in
-      guard let h = p.precipitationSumMemberHigh, let l = p.precipitationSumMemberLow else { return nil }
-      return h - l
-    }
-    guard !spans.isEmpty else { return nil }
-    return spans.reduce(0, +) / Double(spans.count)
-  }
-
-  private var totalPrecipitation: Double? {
-    let values = points.compactMap(\.precipitationSum)
-    guard !values.isEmpty else { return nil }
-    return values.reduce(0, +)
-  }
-
   var body: some View {
-    EnvironmentDetailCard {
-      Text("Nächsten Tage")
-        .font(.headline)
-        .foregroundStyle(.primary)
-
-      statRow(
+    let wettest = points.max { ($0.precipitationSum ?? -1) < ($1.precipitationSum ?? -1) }
+    let driest = points.min { ($0.precipitationSum ?? 999) < ($1.precipitationSum ?? 999) }
+    let fuzziest = points.widestSpan(high: \.precipitationSumMemberHigh, low: \.precipitationSumMemberLow)
+    let sums = points.compactMap(\.precipitationSum)
+    DailyEnsembleSummaryCard(stats: [
+      DailyEnsembleStat(
         label: "Stärkster Tag",
-        subtitle: nil,
-        value: formatted(wettestDay?.precipitationSum),
+        value: formatted(wettest?.precipitationSum),
         valueColor: .blue,
-        date: wettestDay.map { shortDate($0.date) }
-      )
-      Divider().overlay(.white.opacity(0.08))
-      statRow(
+        date: wettest?.date.ensembleShortDate
+      ),
+      DailyEnsembleStat(
         label: "Trockenster Tag",
-        subtitle: nil,
-        value: formatted(driestDay?.precipitationSum),
+        value: formatted(driest?.precipitationSum),
         valueColor: .yellow,
-        date: driestDay.map { shortDate($0.date) }
-      )
-      Divider().overlay(.white.opacity(0.08))
-      statRow(
+        date: driest?.date.ensembleShortDate
+      ),
+      DailyEnsembleStat(
         label: "Unsicherster Tag",
-        subtitle: nil,
-        value: highestUncertaintyDay.map { "±\(($0.span / 2).formatted(.number.precision(.fractionLength(1)))) \(unit)" } ?? "--",
+        value: fuzziest.map { "±" + formatted($0.span / 2) } ?? "--",
         valueColor: .orange,
-        date: highestUncertaintyDay.map { shortDate($0.point.date) }
-      )
-      Divider().overlay(.white.opacity(0.08))
-      statRow(
+        date: fuzziest?.point.date.ensembleShortDate
+      ),
+      DailyEnsembleStat(
         label: "Ø Ensemble-Unsicherheit",
-        subtitle: nil,
-        value: avgUncertainty.map { "\($0.formatted(.number.precision(.fractionLength(1)))) \(unit)" } ?? "--",
-        valueColor: .secondary,
-        date: nil
-      )
-      Divider().overlay(.white.opacity(0.08))
-      statRow(
+        value: formatted(points.averageSpan(high: \.precipitationSumMemberHigh, low: \.precipitationSumMemberLow)),
+        valueColor: .secondary
+      ),
+      DailyEnsembleStat(
         label: "Gesamtniederschlag",
-        subtitle: nil,
-        value: totalPrecipitation.map { "\($0.formatted(.number.precision(.fractionLength(1)))) \(unit)" } ?? "--",
-        valueColor: .blue,
-        date: nil
-      )
-    }
+        value: sums.isEmpty ? "--" : formatted(sums.reduce(0, +)),
+        valueColor: .blue
+      ),
+    ])
   }
 
   private func formatted(_ value: Double?) -> String {
-    guard let value else { return "--" }
-    return "\(value.formatted(.number.precision(.fractionLength(1)))) \(unit)"
-  }
-
-  private func shortDate(_ date: Date) -> String {
-    date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
-  }
-
-  private func statRow(label: LocalizedStringKey, subtitle: LocalizedStringKey?, value: String, valueColor: Color, date: String?) -> some View {
-    LabeledContent {
-      VStack(alignment: .trailing, spacing: 2) {
-        Text(value)
-          .fontWeight(.semibold)
-          .foregroundStyle(valueColor)
-        if let date {
-          Text(date)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        }
-      }
-    } label: {
-      VStack(alignment: .leading, spacing: 2) {
-        Text(label)
-        if let subtitle {
-          Text(subtitle)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        }
-      }
-    }
+    DailyEnsembleFormat.value(value, unit: unit)
   }
 }

@@ -19,6 +19,10 @@ struct GlobalRadarProvider: TimelineProvider {
   }
 
   func getSnapshot(in context: Context, completion: @escaping @Sendable (GlobalRadarEntry) -> Void) {
+    if context.isPreview {
+      completion(placeholder(in: context))
+      return
+    }
     generateMapSnapshot { entry in
       completion(entry)
     }
@@ -76,8 +80,10 @@ struct GlobalRadarProvider: TimelineProvider {
     let mapSnapshotOptions = MKMapSnapshotter.Options()
     mapSnapshotOptions.region = region
     mapSnapshotOptions.size = Self.snapshotSize
-    mapSnapshotOptions.scale = 3
-    mapSnapshotOptions.traitCollection = UITraitCollection(userInterfaceStyle: .dark)
+    mapSnapshotOptions.traitCollection = UITraitCollection { traits in
+      traits.userInterfaceStyle = .dark
+      traits.displayScale = 3
+    }
 
     let snapshotter = MKMapSnapshotter(options: mapSnapshotOptions)
     snapshotter.start { snapshot, error in

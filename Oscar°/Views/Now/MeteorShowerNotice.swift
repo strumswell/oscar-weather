@@ -58,7 +58,7 @@ struct MeteorShowerNotice: View {
     }
 
     private func openDetails() {
-        UIApplication.shared.playHapticFeedback()
+        Haptics.impact()
         presentation.present(.meteorShower(event))
     }
 }

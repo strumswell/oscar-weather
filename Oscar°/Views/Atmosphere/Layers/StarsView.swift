@@ -1,0 +1,130 @@
+//
+//  StarsView.swift
+//  Oscar°
+//
+//  Created by Paul Hudson on 09/01/2022.
+//
+
+import SwiftUI
+
+struct StarsView: View {
+    var pacing: SimulationPacing = .active
+    /// Stars within `occlusionRadius` of this point (canvas coordinates)
+    /// are skipped so they don't shine through the moon's disc.
+    var occlusionCenter: CGPoint? = nil
+    var occlusionRadius: CGFloat = 0
+    /// Forces the layer's strength (0…1); the parent normally drives it via `.opacity`.
+    var opacityOverride: Double? = nil
+    @State private var starField = StarField()
+    @State private var meteorShower: MeteorShower
+
+    init(
+        pacing: SimulationPacing = .active,
+        occlusionCenter: CGPoint? = nil,
+        occlusionRadius: CGFloat = 0,
+        opacityOverride: Double? = nil,
+        meteorDelayRange: ClosedRange<Double> = 5...10
+    ) {
+        self.pacing = pacing
+        self.occlusionCenter = occlusionCenter
+        self.occlusionRadius = occlusionRadius
+        self.opacityOverride = opacityOverride
+        _meteorShower = State(initialValue: MeteorShower(delayRange: meteorDelayRange))
+    }
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: pacing.minimumInterval(base: 1.0 / 30.0), paused: pacing.isPaused)) { timeline in
+            if (opacityOverride ?? 1) > 0.01 {
+                Canvas { context, size in
+                    let timeInterval = timeline.date.timeIntervalSince1970
+                    starField.update(date: timeline.date)
+                    meteorShower.update(date: timeline.date, size: size)
+                    
+                    let rightColors = [.clear, Color(red: 0.8, green: 1, blue: 1), .white]
+                    let leftColors = Array(rightColors.reversed())
+                    
+                    for meteor in meteorShower.meteors {
+                        var contextCopy = context
+                        
+                        if meteor.isMovingRight {
+                            contextCopy.rotate(by: .degrees(10))
+                            let path = Path(CGRect(x: meteor.x - meteor.length, y: meteor.y, width: meteor.length, height: 2))
+                            contextCopy.fill(path, with: .linearGradient(.init(colors: rightColors), startPoint: CGPoint(x: meteor.x - meteor.length, y: 0), endPoint: CGPoint(x: meteor.x, y: 0)))
+                        } else {
+                            contextCopy.rotate(by: .degrees(-10))
+                            let path = Path(CGRect(x: meteor.x, y: meteor.y, width: meteor.length, height: 2))
+                            contextCopy.fill(path, with: .linearGradient(.init(colors: leftColors), startPoint: CGPoint(x: meteor.x, y: 0), endPoint: CGPoint(x: meteor.x + meteor.length, y: 0)))
+                        }
+                        
+                        let glow = Path(ellipseIn: CGRect(x: meteor.x - 1, y: meteor.y - 1, width: 4, height: 4))
+                        contextCopy.addFilter(.blur(radius: 1))
+                        contextCopy.fill(glow, with: .color(white: 1))
+                    }
+                    
+                    context.addFilter(.blur(radius: 0.3))
+                    
+                    for (index, star) in starField.stars.enumerated() {
+                        // The field spans 600×550pt regardless of canvas size —
+                        // skip stars outside it (4pt margin covers the bloom blur).
+                        if star.y > size.height + 4 || star.x > size.width + 4 || star.x + star.size < -4 {
+                            continue
+                        }
+                        // Fade stars over a soft band around the moon instead
+                        // of popping them out at the disc edge.
+                        var occlusionFade = 1.0
+                        if let occlusionCenter {
+                            let distance = hypot(star.x - occlusionCenter.x, star.y - occlusionCenter.y)
+                            occlusionFade = min(max((distance - occlusionRadius) / 28, 0), 1)
+                            if occlusionFade <= 0.01 {
+                                continue
+                            }
+                        }
+
+                        let path = Path(ellipseIn: CGRect(x: star.x, y: star.y, width: star.size, height: star.size))
+
+                        if star.flickerInterval == 0 {
+                            // flashing star
+                            var flashLevel = sin(Double(index) + timeInterval * 4)
+                            flashLevel = abs(flashLevel)
+                            flashLevel /= 1.5
+                            context.opacity = (0.5 + flashLevel) * occlusionFade
+                        } else {
+                            // blooming star
+                            var flashLevel = sin(Double(index) + timeInterval)
+                            flashLevel *= star.flickerInterval
+                            flashLevel -= star.flickerInterval - 1
+
+                            if flashLevel > 0 {
+                                var contextCopy = context
+                                contextCopy.opacity = flashLevel * occlusionFade
+                                contextCopy.addFilter(.blur(radius: 3))
+
+                                contextCopy.fill(path, with: .color(white: 1))
+                                contextCopy.fill(path, with: .color(white: 1))
+                                contextCopy.fill(path, with: .color(white: 1))
+                            }
+
+                            context.opacity = occlusionFade
+                        }
+                        
+                        if index.isMultiple(of: 5) {
+                            context.fill(path, with: .color(red: 1, green: 0.85, blue: 0.8))
+                        } else {
+                            context.fill(path, with: .color(white: 1))
+                        }
+                    }
+                }
+                .transition(.opacity)
+            }
+        }
+        .opacity(opacityOverride ?? 1)
+        .ignoresSafeArea()
+        .mask(
+            LinearGradient(colors: [.white, .clear], startPoint: .top, endPoint: .bottom)
+        )
+    }
+}
+
+#Preview {
+    StarsView()
+}

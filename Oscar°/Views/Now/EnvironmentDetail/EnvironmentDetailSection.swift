@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum EnvironmentDetailSection: String, CaseIterable, Hashable, Identifiable {
+enum EnvironmentDetailSection: String, DetailSection {
     case aqi
     case uv
     case pollen

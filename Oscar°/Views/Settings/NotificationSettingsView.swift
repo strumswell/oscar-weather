@@ -54,7 +54,7 @@ struct NotificationSettingsView: View {
                 .disabled(!rainAlertsEnabled)
                 .accessibilityIdentifier("notifications.liveRainStatus")
             } footer: {
-                Text(String(localized: "Der Live-Regenstatus zeigt aufziehenden Regen als Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island. Er benötigt aktive Regen-Warnungen."))
+                Text("Der Live-Regenstatus zeigt aufziehenden Regen als Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island. Er benötigt aktive Regen-Warnungen.")
             }
             .disabled(isUpdating)
 
@@ -69,12 +69,12 @@ struct NotificationSettingsView: View {
                 Text(statusText)
             }
         }
-        .navigationTitle(String(localized: "Alerts"))
+        .navigationTitle("Alerts")
         .navigationBarTitleDisplayMode(.inline)
         .alert(String(localized: "Benachrichtigungen deaktiviert"), isPresented: $showPermissionAlert) {
             Button(String(localized: "OK"), role: .cancel) {}
         } message: {
-            Text(String(localized: "Allow notifications in iOS Settings to receive rain alerts and weather alerts."))
+            Text("Allow notifications in iOS Settings to receive rain alerts and weather alerts.")
         }
         .task {
             await notificationSettingsManager.reloadNotificationStatus()

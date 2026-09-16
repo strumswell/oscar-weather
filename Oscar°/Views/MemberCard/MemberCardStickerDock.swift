@@ -13,6 +13,10 @@ struct MemberCardStickerDock: View {
     let onRemoveSelection: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var pickupAssetName: String?
+    @State private var railScrollOffset: CGFloat = 0
+
+    private static let itemPitch = MemberCard.dockStickerTouchSize - 1
 
     var body: some View {
         HStack(spacing: 0) {
@@ -36,14 +40,6 @@ struct MemberCardStickerDock: View {
                 .strokeBorder(.white.opacity(0.16), lineWidth: 1)
         }
         .shadow(color: .black.opacity(0.16), radius: 22, y: 12)
-        .accessibilityElement(children: .contain)
-        .accessibilityActions {
-            ForEach(assetNames, id: \.self) { assetName in
-                Button(MemberCard.stickerTitle(for: assetName)) {
-                    onAccessibleAdd(assetName)
-                }
-            }
-        }
     }
 
     private var stickerRail: some View {
@@ -54,13 +50,40 @@ struct MemberCardStickerDock: View {
                 .foregroundStyle(.white.opacity(0.62))
                 .padding(.leading, 16)
 
-            MemberCardStickerDockBridge(
-                assetNames: assetNames,
-                activeDragAssetName: activeDragAssetName,
-                onPickupStarted: onPickupStarted,
-                onPickupMoved: onPickupMoved,
-                onPickupEnded: onPickupEnded
-            )
+            ScrollView(.horizontal) {
+                HStack(spacing: -1) {
+                    ForEach(assetNames, id: \.self) { assetName in
+                        dockItem(assetName)
+                    }
+                }
+            }
+            .scrollIndicators(.hidden)
+            // Lifted stickers and their shadows may spill above and below the rail,
+            // but never sideways into the divider and bin.
+            .scrollClipDisabled()
+            .mask { Rectangle().padding(.vertical, -32) }
+            // The rail stops scrolling the moment a press turns into a pickup.
+            .scrollDisabled(pickupAssetName != nil)
+            .onScrollGeometryChange(for: CGFloat.self, of: { $0.contentOffset.x }) { _, offset in
+                railScrollOffset = offset
+            }
+            .gesture(DockPickupGesture(
+                onBegan: { local, global in
+                    let index = Int(floor((local.x + railScrollOffset) / Self.itemPitch))
+                    guard assetNames.indices.contains(index) else { return }
+                    pickupAssetName = assetNames[index]
+                    onPickupStarted(assetNames[index], global)
+                },
+                onMoved: { global in
+                    guard pickupAssetName != nil else { return }
+                    onPickupMoved(global)
+                },
+                onEnded: { global in
+                    guard pickupAssetName != nil else { return }
+                    pickupAssetName = nil
+                    onPickupEnded(global)
+                }
+            ))
             .frame(maxWidth: .infinity)
             .frame(height: 62)
         }
@@ -69,6 +92,23 @@ struct MemberCardStickerDock: View {
         .padding(.vertical, 8)
         .padding(.top, 12)
         .padding(.bottom, 12)
+    }
+
+    private func dockItem(_ assetName: String) -> some View {
+        let isActive = assetName == activeDragAssetName
+        return Image(decorative: assetName)
+            .resizable()
+            .scaledToFit()
+            .frame(width: MemberCardStickerCatalog.imageBaseSize, height: MemberCardStickerCatalog.imageBaseSize)
+            .frame(width: MemberCard.dockStickerTouchSize, height: MemberCard.dockStickerTouchSize)
+            .shadow(color: .black.opacity(isActive ? 0.18 : 0.08), radius: 12, y: 8)
+            .scaleEffect(isActive && !reduceMotion ? 1.12 : 1)
+            .animation(.easeOut(duration: 0.15), value: isActive)
+            .accessibilityElement()
+            .accessibilityLabel(Text(verbatim: MemberCardStickerCatalog.title(for: assetName)))
+            .accessibilityAction(named: Text("Auf Karte legen")) {
+                onAccessibleAdd(assetName)
+            }
     }
 
     private var removeZone: some View {
@@ -128,221 +168,33 @@ struct MemberCardStickerDock: View {
     }
 }
 
-private struct MemberCardStickerDockBridge: UIViewRepresentable {
-    let assetNames: [String]
-    let activeDragAssetName: String?
-    let onPickupStarted: (String, CGPoint) -> Void
-    let onPickupMoved: (CGPoint) -> Void
-    let onPickupEnded: (CGPoint) -> Void
+/// Press-and-hold pickup that coexists with the rail's horizontal scroll: a short
+/// hold with little movement lifts a sticker, a swipe keeps scrolling.
+private struct DockPickupGesture: UIGestureRecognizerRepresentable {
+    let onBegan: (CGPoint, CGPoint) -> Void
+    let onMoved: (CGPoint) -> Void
+    let onEnded: (CGPoint) -> Void
 
-    func makeUIView(context: Context) -> MemberCardStickerDockScrollView {
-        let dockView = MemberCardStickerDockScrollView()
-        dockView.onPickupStarted = onPickupStarted
-        dockView.onPickupMoved = onPickupMoved
-        dockView.onPickupEnded = onPickupEnded
-        dockView.assetNames = assetNames
-        dockView.activeDragAssetName = activeDragAssetName
-        return dockView
-    }
-
-    func updateUIView(_ uiView: MemberCardStickerDockScrollView, context: Context) {
-        uiView.onPickupStarted = onPickupStarted
-        uiView.onPickupMoved = onPickupMoved
-        uiView.onPickupEnded = onPickupEnded
-        uiView.assetNames = assetNames
-        uiView.activeDragAssetName = activeDragAssetName
-    }
-}
-
-private final class MemberCardStickerDockScrollView: UIView {
-    var onPickupStarted: ((String, CGPoint) -> Void)?
-    var onPickupMoved: ((CGPoint) -> Void)?
-    var onPickupEnded: ((CGPoint) -> Void)?
-
-    var assetNames: [String] = [] {
-        didSet {
-            guard assetNames != oldValue else { return }
-            rebuildStickerViews()
-        }
-    }
-
-    var activeDragAssetName: String? {
-        didSet {
-            guard activeDragAssetName != oldValue else { return }
-            updateActiveState()
-        }
-    }
-
-    private let scrollView = UIScrollView()
-    private let stackView = UIStackView()
-    private var stickerViews: [MemberCardDockStickerItemView] = []
-    private var activePickupAssetName: String?
-
-    private lazy var pickupGestureRecognizer: UILongPressGestureRecognizer = {
-        let recognizer = UILongPressGestureRecognizer(target: self, action: #selector(handlePickupGesture(_:)))
+    func makeUIGestureRecognizer(context: Context) -> UILongPressGestureRecognizer {
+        let recognizer = UILongPressGestureRecognizer()
         recognizer.minimumPressDuration = MemberCard.dockPickupHoldDuration
         recognizer.allowableMovement = MemberCard.dockPickupAllowableMovement
         recognizer.cancelsTouchesInView = false
         return recognizer
-    }()
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setUpViewHierarchy()
-        rebuildStickerViews()
     }
 
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    @objc
-    private func handlePickupGesture(_ recognizer: UILongPressGestureRecognizer) {
-        let stackLocation = recognizer.location(in: stackView)
-        let selfLocation = recognizer.location(in: self)
-        let globalLocation = convertToGlobalPoint(selfLocation)
-
+    func handleUIGestureRecognizerAction(_ recognizer: UILongPressGestureRecognizer, context: Context) {
+        let local = context.converter.location(in: .local)
+        let global = context.converter.location(in: .global)
         switch recognizer.state {
         case .began:
-            guard let stickerView = stickerView(at: stackLocation) else { return }
-            activePickupAssetName = stickerView.assetName
-            scrollView.isScrollEnabled = false
-            onPickupStarted?(stickerView.assetName, globalLocation)
+            onBegan(local, global)
         case .changed:
-            guard activePickupAssetName != nil else { return }
-            onPickupMoved?(globalLocation)
-        case .ended:
-            finishPickup(at: globalLocation)
-        case .cancelled, .failed:
-            finishPickup(at: globalLocation)
+            onMoved(global)
+        case .ended, .cancelled, .failed:
+            onEnded(global)
         default:
             break
         }
-    }
-
-    private func finishPickup(at globalLocation: CGPoint) {
-        defer {
-            scrollView.isScrollEnabled = true
-            activePickupAssetName = nil
-        }
-
-        guard activePickupAssetName != nil else { return }
-        onPickupEnded?(globalLocation)
-    }
-
-    private func setUpViewHierarchy() {
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.showsHorizontalScrollIndicator = false
-        scrollView.alwaysBounceHorizontal = true
-        scrollView.delaysContentTouches = false
-        scrollView.canCancelContentTouches = true
-        addSubview(scrollView)
-
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .horizontal
-        stackView.alignment = .center
-        stackView.spacing = -1
-        scrollView.addSubview(stackView)
-
-        NSLayoutConstraint.activate([
-            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            scrollView.topAnchor.constraint(equalTo: topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
-
-            stackView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            stackView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            stackView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            stackView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor)
-        ])
-
-        addGestureRecognizer(pickupGestureRecognizer)
-    }
-
-    private func rebuildStickerViews() {
-        for arrangedSubview in stackView.arrangedSubviews {
-            stackView.removeArrangedSubview(arrangedSubview)
-            arrangedSubview.removeFromSuperview()
-        }
-
-        stickerViews = assetNames.map { assetName in
-            let stickerView = MemberCardDockStickerItemView(assetName: assetName)
-            stickerView.translatesAutoresizingMaskIntoConstraints = false
-            stickerView.widthAnchor.constraint(equalToConstant: MemberCard.dockStickerTouchSize).isActive = true
-            stickerView.heightAnchor.constraint(equalToConstant: MemberCard.dockStickerTouchSize).isActive = true
-            stackView.addArrangedSubview(stickerView)
-            return stickerView
-        }
-
-        updateActiveState()
-    }
-
-    private func updateActiveState() {
-        for stickerView in stickerViews {
-            stickerView.isActive = stickerView.assetName == activeDragAssetName
-        }
-    }
-
-    private func stickerView(at point: CGPoint) -> MemberCardDockStickerItemView? {
-        stickerViews.first { $0.frame.insetBy(dx: -8, dy: -8).contains(point) }
-    }
-
-    private func convertToGlobalPoint(_ point: CGPoint) -> CGPoint {
-        guard let window else { return convert(point, to: nil) }
-        return convert(point, to: window)
-    }
-}
-
-private final class MemberCardDockStickerItemView: UIView {
-    let assetName: String
-
-    var isActive: Bool = false {
-        didSet {
-            guard isActive != oldValue else { return }
-            updateActiveAppearance()
-        }
-    }
-
-    private let imageView = UIImageView()
-
-    init(assetName: String) {
-        self.assetName = assetName
-        super.init(frame: .zero)
-        setUpViewHierarchy()
-        updateActiveAppearance()
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setUpViewHierarchy() {
-        isAccessibilityElement = true
-        accessibilityLabel = MemberCard.stickerTitle(for: assetName)
-        accessibilityHint = "Press and hold, then drag onto the member card."
-
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.image = UIImage(named: MemberCard.imageName(for: assetName))
-        imageView.contentMode = .scaleAspectFit
-        addSubview(imageView)
-
-        NSLayoutConstraint.activate([
-            imageView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            imageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            imageView.widthAnchor.constraint(equalToConstant: 64),
-            imageView.heightAnchor.constraint(equalToConstant: 64)
-        ])
-    }
-
-    private func updateActiveAppearance() {
-        let shadowOpacity: Float = isActive ? 0.18 : 0.08
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = shadowOpacity
-        layer.shadowRadius = 12
-        layer.shadowOffset = CGSize(width: 0, height: 8)
-        transform = isActive ? CGAffineTransform(scaleX: 1.12, y: 1.12) : .identity
     }
 }

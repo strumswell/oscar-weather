@@ -7,7 +7,7 @@ xcuserdata/
 
 .sentryclirc
 
-# Xcode build output (SYMROOT points at ./build)
+# Stray xcodebuild output
 build/
 
 # Stray dir from a misfired -I include flag being treated as a path

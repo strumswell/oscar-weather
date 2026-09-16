@@ -21,7 +21,7 @@ struct EnvironmentAirQualitySectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            EnvironmentDetailCard {
+            DetailCard {
                 EnvironmentDetailHeaderView(
                     title: "Luftqualität",
                     value: currentAQI.map { String(Int($0)) } ?? "--",
@@ -48,7 +48,7 @@ struct EnvironmentAirQualitySectionView: View {
                 .id(chartTimelineVersion)
             }
 
-            EnvironmentDetailCard {
+            DetailCard {
                 Text("Hauptschadstoff")
                     .font(.headline)
                     .foregroundStyle(.primary)
@@ -73,7 +73,7 @@ struct EnvironmentAirQualitySectionView: View {
                 }
             }
 
-            EnvironmentDetailCard {
+            DetailCard {
                 Text("Schadstoffe jetzt")
                     .font(.headline)
                     .foregroundStyle(.primary)

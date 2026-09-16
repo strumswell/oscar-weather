@@ -64,7 +64,7 @@ struct MapLibreLocationPicker: UIViewRepresentable {
     // MARK: Coordinator
 
     @MainActor
-    final class Coordinator: NSObject, MLNMapViewDelegate {
+    final class Coordinator: NSObject, @preconcurrency MLNMapViewDelegate {
         var parent: MapLibreLocationPicker
         weak var mapView: MLNMapView?
         private var cityAnnotations: [CityPinAnnotation] = []
@@ -135,82 +135,68 @@ struct MapLibreLocationPicker: UIViewRepresentable {
             }
         }
 
-        // MARK: Delegate (delegate callbacks arrive on the main thread; the
-        // `nonisolated(unsafe)` locals only ferry non-Sendable values across
-        // `assumeIsolated`, same as WeatherMapView)
+        // MARK: Delegate (main-actor methods behind a @preconcurrency
+        // conformance; MapLibre delivers its callbacks on the main thread)
 
-        nonisolated func mapView(_ mapView: MLNMapView, imageFor annotation: MLNAnnotation) -> MLNAnnotationImage? {
-            nonisolated(unsafe) var result: MLNAnnotationImage?
-            nonisolated(unsafe) let annotation = annotation
-            MainActor.assumeIsolated {
-                if let cityPin = annotation as? CityPinAnnotation, let chip = cityPin.chip {
-                    // Same identity line as the weather map's chips: the emoji
-                    // leads the name under the capsule.
-                    let identity = [chip.emoji ?? "", chip.title]
-                        .filter { !$0.isEmpty }
-                        .joined(separator: " ")
-                    if let temperature = chip.temperature, let iconAsset = chip.iconAsset {
-                        let temperatureText = "\(Int(temperature.rounded()))°"
-                        let reuseID = "city-chip-\(iconAsset)-\(temperatureText)-\(identity)"
-                        result = mapView.dequeueReusableAnnotationImage(withIdentifier: reuseID)
-                            ?? MLNAnnotationImage(
-                                image: MapChip.labeled(
-                                    MapChip.conditions(iconAsset: iconAsset, temperatureText: temperatureText),
-                                    label: identity,
-                                    balancedAnchor: true
-                                ),
-                                reuseIdentifier: reuseID
-                            )
-                    } else {
-                        // Conditions not in yet: the emoji/pin disc as fallback
-                        // (emoji on the disc, only the name underneath).
-                        let reuseID = "city-pin-\(chip.emoji ?? "plain")-\(chip.title)"
-                        result = mapView.dequeueReusableAnnotationImage(withIdentifier: reuseID)
-                            ?? MLNAnnotationImage(
-                                image: MapChip.labeled(
-                                    MapChip.pin(emoji: chip.emoji),
-                                    label: chip.title,
-                                    balancedAnchor: true
-                                ),
-                                reuseIdentifier: reuseID
-                            )
-                    }
-                } else if annotation is PickedPinAnnotation {
-                    result = mapView.dequeueReusableAnnotationImage(withIdentifier: "picked-pin")
-                        ?? MLNAnnotationImage(image: CityMarkerImage.make(), reuseIdentifier: "picked-pin")
+        func mapView(_ mapView: MLNMapView, imageFor annotation: MLNAnnotation) -> MLNAnnotationImage? {
+            var result: MLNAnnotationImage?
+            if let cityPin = annotation as? CityPinAnnotation, let chip = cityPin.chip {
+                // Same identity line as the weather map's chips: the emoji
+                // leads the name under the capsule.
+                let identity = [chip.emoji ?? "", chip.title]
+                    .filter { !$0.isEmpty }
+                    .joined(separator: " ")
+                if let temperature = chip.temperature, let iconAsset = chip.iconAsset {
+                    let temperatureText = "\(Int(temperature.rounded()))°"
+                    let reuseID = "city-chip-\(iconAsset)-\(temperatureText)-\(identity)"
+                    result = mapView.dequeueReusableAnnotationImage(withIdentifier: reuseID)
+                        ?? MLNAnnotationImage(
+                            image: MapChip.labeled(
+                                MapChip.conditions(iconAsset: iconAsset, temperatureText: temperatureText),
+                                label: identity,
+                                balancedAnchor: true
+                            ),
+                            reuseIdentifier: reuseID
+                        )
+                } else {
+                    // Conditions not in yet: the emoji/pin disc as fallback
+                    // (emoji on the disc, only the name underneath).
+                    let reuseID = "city-pin-\(chip.emoji ?? "plain")-\(chip.title)"
+                    result = mapView.dequeueReusableAnnotationImage(withIdentifier: reuseID)
+                        ?? MLNAnnotationImage(
+                            image: MapChip.labeled(
+                                MapChip.pin(emoji: chip.emoji),
+                                label: chip.title,
+                                balancedAnchor: true
+                            ),
+                            reuseIdentifier: reuseID
+                        )
                 }
+            } else if annotation is PickedPinAnnotation {
+                result = mapView.dequeueReusableAnnotationImage(withIdentifier: "picked-pin")
+                    ?? MLNAnnotationImage(image: CityMarkerImage.make(), reuseIdentifier: "picked-pin")
             }
             return result
         }
 
-        nonisolated func mapView(_ mapView: MLNMapView, viewFor annotation: MLNAnnotation) -> MLNAnnotationView? {
-            nonisolated(unsafe) var result: MLNAnnotationView?
-            nonisolated(unsafe) let annotation = annotation
-            MainActor.assumeIsolated {
-                guard annotation is MLNUserLocation else { return }
-                // Empty view suppresses the stock puck; the visible dot renders
-                // in-style instead (UserLocationDot, below).
-                result = MLNUserLocationAnnotationView(reuseIdentifier: "user-location-hidden")
-            }
-            return result
+        func mapView(_ mapView: MLNMapView, viewFor annotation: MLNAnnotation) -> MLNAnnotationView? {
+            guard annotation is MLNUserLocation else { return nil }
+            // Empty view suppresses the stock puck; the visible dot renders
+            // in-style instead (UserLocationDot, below).
+            return MLNUserLocationAnnotationView(reuseIdentifier: "user-location-hidden")
         }
 
-        nonisolated func mapView(_ mapView: MLNMapView, annotationCanShowCallout annotation: MLNAnnotation) -> Bool {
+        func mapView(_ mapView: MLNMapView, annotationCanShowCallout annotation: MLNAnnotation) -> Bool {
             annotation is CityPinAnnotation
         }
 
-        nonisolated func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
-            nonisolated(unsafe) let style = style
-            MainActor.assumeIsolated {
-                UserLocationDot.sync(style: style, coordinate: mapView.userLocation?.coordinate)
-            }
+        func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
+            UserLocationDot.sync(style: style, coordinate: mapView.userLocation?.coordinate)
         }
 
-        nonisolated func mapView(_ mapView: MLNMapView, didUpdate userLocation: MLNUserLocation?) {
-            MainActor.assumeIsolated {
-                guard let style = mapView.style else { return }
-                UserLocationDot.sync(style: style, coordinate: mapView.userLocation?.coordinate)
-            }
+        func mapView(_ mapView: MLNMapView, didUpdate userLocation: MLNUserLocation?) {
+            guard let style = mapView.style else { return }
+            UserLocationDot.sync(style: style, coordinate: mapView.userLocation?.coordinate)
         }
 
     }
