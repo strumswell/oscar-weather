@@ -38,7 +38,7 @@ struct StormCellInfoSheet: View {
             Circle()
                 .fill(intensity.color)
                 .frame(width: 12, height: 12)
-                .overlay(Circle().stroke(.white.opacity(0.8), lineWidth: 1))
+                .overlay { Circle().stroke(.white.opacity(0.8), lineWidth: 1) }
             Text(intensity.label)
                 .font(.headline)
             Spacer()

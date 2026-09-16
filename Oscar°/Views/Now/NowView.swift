@@ -39,16 +39,25 @@ struct NowView: View {
     /// (whose cards end 20pt higher) still clears the glass.
     private static let firstPageOvershoot: CGFloat = 48
 
+    // Drive the pull-down spinner only while the scene is actually active. Coming
+    // back from the background, `willEnterForeground` starts a refresh before the app
+    // is on-screen; if we debounced from that moment, the spinner's whole show/hide
+    // cycle could play out during the invisible transition and the user would catch
+    // only its tail — a jump as the view snapped back up. Gating on `.active` measures
+    // the debounce from when the app is visible, so a refresh that finishes around the
+    // time the app appears shows no spinner, and a genuinely slow one shows a full,
+    // on-screen cycle.
+    private var spinnerPending: Bool {
+        weather.isLoading && weather.hasContent && !manualRefreshInFlight && scenePhase == .active
+    }
+
+    private var sections: [NowSection] { settingsService.nowSections }
+
+    /// The launch "page" is the head plus the first section — plus the next
+    /// one when the first is the short, optional radar teaser.
+    private var firstPageCount: Int { sections.first == .radar ? 2 : 1 }
+
     var body: some View {
-        // Drive the pull-down spinner only while the scene is actually active. Coming
-        // back from the background, `willEnterForeground` starts a refresh before the app
-        // is on-screen; if we debounced from that moment, the spinner's whole show/hide
-        // cycle could play out during the invisible transition and the user would catch
-        // only its tail — a jump as the view snapped back up. Gating on `.active` measures
-        // the debounce from when the app is visible, so a refresh that finishes around the
-        // time the app appears shows no spinner, and a genuinely slow one shows a full,
-        // on-screen cycle.
-        let spinnerPending = weather.isLoading && weather.hasContent && !manualRefreshInFlight && scenePhase == .active
         // Cards share the sky's hue instead of a fixed dark material (same
         // snapshot the sim renders; twilight before any data).
         let atmosphere = weather.forecast.hourly != nil
@@ -61,122 +70,7 @@ struct NowView: View {
                 .ignoresSafeArea()
             if weather.hasContent {
             ScrollView(.vertical) {
-                VStack(alignment: .leading) {
-                    // The launch "page": head, radar teaser, and the hourly
-                    // strip, stretched so the bar never floats over the
-                    // hourly cards — it overlays the daily section title
-                    // right behind it instead. HeadView's
-                    // flexible sky gaps absorb the stretch (and whatever
-                    // extra content shows: alert, radar card, eyebrow), so
-                    // this holds across display sizes; when the content
-                    // genuinely doesn't fit, the page overflows past the
-                    // minimum and scrolls like before.
-                    VStack(alignment: .leading) {
-                        if showRefreshIndicator {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                                .tint(Color(UIColor.label))
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 20)
-                                .transition(.move(edge: .top).combined(with: .opacity))
-                        }
-                        HeadView()
-                            .padding(.top, 35)
-                            .debugConsoleTap {
-                                self.tapCount += 1
-                                if self.tapCount == 10 {
-                                    self.tapCount = 0
-                                    weather.debug.toggle()
-                                    Haptics.impact()
-                                }
-                            }
-                        RainView(openRadarMap: openRadarMap)
-                        HourlyView()
-                            .accessibilityIdentifier("now.hourly")
-                            // The strip's horizontal ScrollView is greedy in
-                            // height and would swallow part of the stretch —
-                            // pin it to its content so all surplus lands in
-                            // HeadView's sky gaps.
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .frame(minHeight: firstPageMinHeight, alignment: .topLeading)
-                    DailyView()
-                    EnvironmentGaugesView()
-                    ClimateView()
-                        .padding(.bottom, 20)
-                    // Low-opacity white like the map's basemap credit, but the
-                    // large lockups need more than its hairline shadow: a crisp
-                    // edge plus a soft ambient plate to lift them off bright sky.
-                    HStack(spacing: 24) {
-                        ProviderLogo(asset: "logo-dwd", height: 36)
-                        ProviderLogo(asset: "logo-open-meteo", height: 32)
-                        ProviderLogo(asset: "logo-oscar-server", height: 28)
-                    }
-                    .foregroundStyle(.white)
-                    .opacity(0.7)
-                    .shadow(color: .black.opacity(0.35), radius: 1)
-                    .shadow(color: .black.opacity(0.45), radius: 8, y: 2)
-                    // The stacked shadows hit every logo separately — six blur
-                    // passes over the animated sim. Rasterize the static row
-                    // once; the padding keeps the 8pt blur inside the offscreen
-                    // bounds, the negative pad gives the layout size back.
-                    .padding(12)
-                    .drawingGroup()
-                    .padding(-12)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(Text(verbatim: "DWD, Open-Meteo & Oscar Server"))
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, 16)
-                    Button {
-                        Haptics.impact()
-                        presentation.present(.settings)
-                    } label: {
-                        // Bare text over the sim: same white + shadow plate as
-                        // the attribution row above so it reads on bright sky.
-                        Label("Einstellungen", systemImage: "gearshape")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.white)
-                            .opacity(0.7)
-                            .shadow(color: .black.opacity(0.35), radius: 1)
-                            .shadow(color: .black.opacity(0.45), radius: 8, y: 2)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 9)
-                            .contentShape(Rectangle())
-                    }
-                    .accessibilityIdentifier("now.settings")
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, 24)
-                    #if DEBUG
-                    if weather.debug {
-                        VStack {
-                            DebugPermissionControls()
-                            Text(weather.isLoading.description)
-                            Text("spinner=\(showRefreshIndicator.description) pending=\(spinnerPending.description)")
-                            Text(weather.error)
-                            Text("Air")
-                                .padding(.top, 20)
-                            Text(String(reflecting: weather.air))
-                            Text("Radar")
-                                .padding(.top, 20)
-                            Text(String(reflecting: weather.precipSeries))
-                            Text("Alerts")
-                                .padding(.top, 20)
-                            Text(String(reflecting: weather.alerts))
-                            Text("Time")
-                                .padding(.top, 20)
-                            Text(String(reflecting: weather.time))
-                            Text("Location")
-                                .padding(.top, 20)
-                            Text(String(reflecting: location.coordinates))
-                            Text(String(reflecting: location.name))
-                            Text("Forecast")
-                                .padding(.top, 20)
-                            Text(String(reflecting: weather.forecast))
-                        }
-                    }
-                    #endif
-                }
-                .animation(.easeInOut(duration: 0.3), value: showRefreshIndicator)
+                page
             }
             .scrollIndicators(.hidden)
             .padding(.top, Self.scrollTopPadding)
@@ -253,6 +147,146 @@ struct NowView: View {
             if stageSize?.width != size.width {
                 stageSize = size
             }
+        }
+    }
+
+    /// The scroll content: head, the user's sections, attribution, settings.
+    private var page: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // The launch "page": head plus the leading section(s), stretched
+            // so the bar never floats over the first strip's cards — it
+            // overlays the next section's title right behind it instead.
+            // HeadView's flexible sky gaps absorb the stretch (and whatever
+            // extra content shows: alert, radar card, eyebrow), so this holds
+            // across display sizes; when the content genuinely doesn't fit,
+            // the page overflows past the minimum and scrolls like before.
+            VStack(alignment: .leading, spacing: 0) {
+                if showRefreshIndicator {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .tint(Color(uiColor: .label))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 20)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
+                HeadView()
+                    .padding(.top, 35)
+                    .debugConsoleTap {
+                        self.tapCount += 1
+                        if self.tapCount == 10 {
+                            self.tapCount = 0
+                            weather.debug.toggle()
+                            Haptics.impact()
+                        }
+                    }
+                sectionList(sections.prefix(firstPageCount))
+            }
+            .frame(minHeight: firstPageMinHeight, alignment: .topLeading)
+            sectionList(sections.dropFirst(firstPageCount))
+            if sections.isEmpty {
+                // Everything hidden: offer the way back in.
+                Button("Abschnitte hinzufügen", systemImage: "plus") {
+                    Haptics.impact()
+                    presentation.present(.layout)
+                }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 28)
+            }
+            footer
+                .padding(.top, 28)
+            #if DEBUG
+            if weather.debug {
+                VStack {
+                    DebugPermissionControls()
+                    Text(weather.isLoading.description)
+                    Text("spinner=\(showRefreshIndicator.description) pending=\(spinnerPending.description)")
+                    Text(weather.error)
+                    Text("Air")
+                        .padding(.top, 20)
+                    Text(String(reflecting: weather.air))
+                    Text("Radar")
+                        .padding(.top, 20)
+                    Text(String(reflecting: weather.precipSeries))
+                    Text("Alerts")
+                        .padding(.top, 20)
+                    Text(String(reflecting: weather.alerts))
+                    Text("Time")
+                        .padding(.top, 20)
+                    Text(String(reflecting: weather.time))
+                    Text("Location")
+                        .padding(.top, 20)
+                    Text(String(reflecting: location.coordinates))
+                    Text(String(reflecting: location.name))
+                    Text("Forecast")
+                        .padding(.top, 20)
+                    Text(String(reflecting: weather.forecast))
+                }
+            }
+            #endif
+        }
+        .animation(.easeInOut(duration: 0.3), value: showRefreshIndicator)
+        .animation(.snappy, value: sections)
+    }
+
+    /// One run of sections in the user's order (the first page holds the
+    /// leading one or two, the rest follow below the stretch).
+    private func sectionList(_ sections: ArraySlice<NowSection>) -> some View {
+        ForEach(sections) { section in
+            section.view(openRadarMap: openRadarMap)
+                // Horizontal strips are greedy in height and would swallow
+                // the first page's stretch — pin every section to its content.
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 28)
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+        }
+    }
+
+    private var footer: some View {
+        VStack(spacing: 0) {
+            // Low-opacity white like the map's basemap credit, but the
+            // large lockups need more than its hairline shadow: a crisp
+            // edge plus a soft ambient plate to lift them off bright sky.
+            HStack(spacing: 24) {
+                ProviderLogo(asset: "logo-dwd", height: 36)
+                ProviderLogo(asset: "logo-open-meteo", height: 32)
+                ProviderLogo(asset: "logo-oscar-server", height: 28)
+            }
+            .foregroundStyle(.white)
+            .opacity(0.7)
+            .shadow(color: .black.opacity(0.35), radius: 1)
+            .shadow(color: .black.opacity(0.45), radius: 8, y: 2)
+            // The stacked shadows hit every logo separately — six blur
+            // passes over the animated sim. Rasterize the static row
+            // once; the padding keeps the 8pt blur inside the offscreen
+            // bounds, the negative pad gives the layout size back.
+            .padding(12)
+            .drawingGroup()
+            .padding(-12)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(verbatim: "DWD, Open-Meteo & Oscar Server"))
+            .frame(maxWidth: .infinity)
+            .padding(.bottom, 16)
+            Button {
+                Haptics.impact()
+                presentation.present(.settings)
+            } label: {
+                // Bare text over the sim: same white + shadow plate as
+                // the attribution row above so it reads on bright sky.
+                Label("Einstellungen", systemImage: "gearshape")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.white)
+                    .opacity(0.7)
+                    .shadow(color: .black.opacity(0.35), radius: 1)
+                    .shadow(color: .black.opacity(0.45), radius: 8, y: 2)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 9)
+                    .contentShape(Rectangle())
+            }
+            .accessibilityIdentifier("now.settings")
+            .frame(maxWidth: .infinity)
+            .padding(.bottom, 24)
         }
     }
 

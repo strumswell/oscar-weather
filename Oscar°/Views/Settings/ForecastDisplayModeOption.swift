@@ -16,7 +16,7 @@ struct ForecastDisplayModeOption: View {
           Text(mode.label)
             .font(.subheadline)
             .fontWeight(.medium)
-            .foregroundStyle(Color(UIColor.label))
+            .foregroundStyle(Color(uiColor: .label))
             .lineLimit(2)
             .minimumScaleFactor(0.75)
         }
@@ -27,7 +27,7 @@ struct ForecastDisplayModeOption: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
       .background(
         RoundedRectangle(cornerRadius: 8)
-          .fill(Color(UIColor.secondarySystemGroupedBackground))
+          .fill(Color(uiColor: .secondarySystemGroupedBackground))
       )
       .overlay(
         RoundedRectangle(cornerRadius: 8)

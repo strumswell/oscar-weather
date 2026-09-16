@@ -52,7 +52,7 @@ enum ServerColormapStops {
     /// Storm-cell marker steps (peak intensity → dot color), mirror of the
     /// `intensityColor` expression in WeatherMapView's cell layer. Labels reuse the
     /// radar legend's localization keys.
-    static let stormCellSteps: [(hex: Int, label: String)] = [
+    static let stormCellSteps: [(hex: Int, label: LocalizedStringResource)] = [
         (0x00CACA, "Leicht"),
         (0xFFFF00, "Mäßig"),
         (0xFF0000, "Stark"),
@@ -171,13 +171,13 @@ struct StormCellLegend: View {
             Text("Regenzellen")
                 .font(.system(size: 9, weight: .semibold))
                 .foregroundStyle(.secondary)
-            ForEach(Array(ServerColormapStops.stormCellSteps.enumerated()), id: \.offset) { _, step in
+            ForEach(ServerColormapStops.stormCellSteps.enumerated(), id: \.offset) { _, step in
                 HStack(spacing: 5) {
                     Circle()
                         .fill(Color(hex: step.hex))
                         .frame(width: 8, height: 8)
-                        .overlay(Circle().stroke(.white.opacity(0.8), lineWidth: 1))
-                    Text(LocalizedStringKey(step.label))
+                        .overlay { Circle().stroke(.white.opacity(0.8), lineWidth: 1) }
+                    Text(step.label)
                         .font(.system(size: 9, weight: .medium))
                         .foregroundStyle(.secondary)
                 }
@@ -206,7 +206,7 @@ struct ColormapVerticalLegend: View {
             // Labels pinned by fraction
             ZStack(alignment: .topLeading) {
                 Color.clear.frame(width: 52, height: barHeight)
-                ForEach(Array(colormap.verticalLabels.enumerated()), id: \.offset) { _, entry in
+                ForEach(colormap.verticalLabels.enumerated(), id: \.offset) { _, entry in
                     let inset = barWidth / 2
                     Text(entry.1)
                         .font(.system(size: 9, weight: .medium))

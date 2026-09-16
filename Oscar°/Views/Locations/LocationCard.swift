@@ -31,7 +31,7 @@ struct LocationCard: View {
                     ZStack {
                         Circle()
                             .fill(.white.opacity(0.16))
-                            .overlay(Circle().strokeBorder(.white.opacity(0.22), lineWidth: 1))
+                            .overlay { Circle().strokeBorder(.white.opacity(0.22), lineWidth: 1) }
                         badgeContent
                     }
                     .frame(width: 44, height: 44)

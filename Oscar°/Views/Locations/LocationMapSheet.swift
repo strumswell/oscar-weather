@@ -70,7 +70,7 @@ struct LocationMapSheet: View {
         }
 
         var coordinateText: String {
-            String(format: "%.3f°, %.3f°", latitude, longitude)
+            "\(latitude.formatted(.number.precision(.fractionLength(3))))°, \(longitude.formatted(.number.precision(.fractionLength(3))))°"
         }
     }
 

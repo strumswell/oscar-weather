@@ -10,17 +10,8 @@ struct UVDataPoint: Identifiable {
     let id: Int
     let time: Date
     let value: Double
-}
 
-struct UVChart: View {
-    var uvIndex: [Double]
-    var time: [Double]
-    var maxTimeRange: ClosedRange<Date>
-    var referenceDate: Date
-
-    @State private var selectedDate: Date?
-
-    private var dataPoints: [UVDataPoint] {
+    static func points(time: [Double], uvIndex: [Double]) -> [UVDataPoint] {
         let count = min(time.count, uvIndex.count)
         return (0..<count).map { index in
             UVDataPoint(
@@ -30,9 +21,19 @@ struct UVChart: View {
             )
         }
     }
+}
+
+struct UVChart: View {
+    let points: [UVDataPoint]
+    /// Raw hourly stamps for the day-separator rules.
+    let time: [Double]
+    let maxTimeRange: ClosedRange<Date>
+    let referenceDate: Date
+
+    @State private var selectedDate: Date?
 
     private var maxYValue: Double {
-        let highestValue = dataPoints.map(\.value).max() ?? 0
+        let highestValue = points.map(\.value).max() ?? 0
         return max(13, ceil(highestValue))
     }
 
@@ -43,17 +44,20 @@ struct UVChart: View {
     }
 
     private var currentDataPoint: UVDataPoint? {
-        dataPoints.first(where: { $0.time >= referenceDate }) ?? dataPoints.last
+        points.first(where: { $0.time >= referenceDate }) ?? points.last
     }
 
     private var accessibilitySummary: String {
-        guard let peak = uvIndex.max() else { return "" }
+        guard let peak = points.map(\.value).max() else { return "" }
         return String(localized: "UV-Index bis \(Int(peak.rounded())) (\(UVIndexCategory(uvIndex: peak).localizedTitle))")
     }
 
     var body: some View {
+        let past = points.filter { $0.time <= referenceDate }
+        let future = points.filter { $0.time >= referenceDate }
+
         Chart {
-            ForEach(Array(severityBands.enumerated()), id: \.offset) { _, band in
+            ForEach(severityBands.enumerated(), id: \.offset) { _, band in
                 RectangleMark(
                     xStart: .value("Start", maxTimeRange.lowerBound),
                     xEnd: .value("End", maxTimeRange.upperBound),
@@ -63,7 +67,7 @@ struct UVChart: View {
                 .foregroundStyle(band.color.opacity(0.1))
             }
 
-            ForEach(dataPoints.filter { $0.time <= referenceDate }) { dataPoint in
+            ForEach(past) { dataPoint in
                 LineMark(
                     x: .value("Hour", dataPoint.time),
                     y: .value(String(localized: "UV-Index"), dataPoint.value),
@@ -74,7 +78,7 @@ struct UVChart: View {
                 .lineStyle(.init(lineWidth: 3, dash: [7, 5]))
             }
 
-            ForEach(dataPoints.filter { $0.time >= referenceDate }) { dataPoint in
+            ForEach(future) { dataPoint in
                 LineMark(
                     x: .value("Hour", dataPoint.time),
                     y: .value(String(localized: "UV-Index"), dataPoint.value),
@@ -153,7 +157,7 @@ struct UVChart: View {
     }
 
     private func selectedDataPoint(for selectedDate: Date) -> UVDataPoint? {
-        dataPoints.min {
+        points.min {
             abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate))
         }
     }

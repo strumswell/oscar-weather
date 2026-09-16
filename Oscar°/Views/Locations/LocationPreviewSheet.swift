@@ -46,10 +46,10 @@ struct LocationPreviewSheet: View {
 
             if weather.hasContent {
                 ScrollView(.vertical) {
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 20) {
                         header
                             .padding(.top, 52)
-                            .padding(.bottom, 28)
+                            .padding(.bottom, 8)
                         RainView()
                         HourlyView()
                         DailyView()
@@ -98,14 +98,14 @@ struct LocationPreviewSheet: View {
         VStack(spacing: 4) {
             Text(candidate.name)
                 .font(.title2.weight(.bold))
-                .foregroundStyle(Color(UIColor.label))
+                .foregroundStyle(Color(uiColor: .label))
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
             Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
                 .font(.system(size: temperatureFontSize))
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
-                .foregroundStyle(Color(UIColor.label))
+                .foregroundStyle(Color(uiColor: .label))
                 .contentTransition(.numericText())
                 .padding(.top, 2)
         }

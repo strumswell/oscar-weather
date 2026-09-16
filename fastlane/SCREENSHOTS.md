@@ -30,8 +30,8 @@ simulators down before every language run, and beta runtimes pay 10–20 min of
 silent device preparation per cold boot (that once turned a run into 82 min).
 Bump the pin when a new stable runtime lands.
 
-Requirements: `brew install fastlane`, Xcode-beta at
-`/Applications/Xcode-beta.app`.
+Requirements: `brew install fastlane`, Xcode at
+`/Applications/Xcode.app`.
 
 ## Framing (Frame Studio)
 

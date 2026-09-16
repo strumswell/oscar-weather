@@ -54,6 +54,13 @@ struct SettingsView: View {
           .accessibilityIdentifier("settings.forecast")
 
           NavigationLink {
+            NowLayoutSettingsView()
+          } label: {
+            Label("Ansicht anpassen", systemImage: "rectangle.stack")
+              .labelStyle(.settingsIcon(.pink))
+          }
+
+          NavigationLink {
             AppIconSettingsView()
           } label: {
             Label("App-Symbol", systemImage: "app.grid")

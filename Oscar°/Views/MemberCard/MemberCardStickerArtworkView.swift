@@ -1,14 +1,10 @@
 import SwiftUI
 
-struct MemberCardStickerArtworkView: View, Animatable {
+@Animatable
+struct MemberCardStickerArtworkView: View {
     let assetName: String
     let size: CGFloat
     var foldProgress: CGFloat
-
-    nonisolated var animatableData: CGFloat {
-        get { foldProgress }
-        set { foldProgress = newValue }
-    }
 
     var body: some View {
         let opaqueBounds = MemberCardStickerAlphaBounds.rect(for: assetName, in: size)

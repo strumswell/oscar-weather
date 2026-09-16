@@ -17,7 +17,7 @@ struct AppIconSettingsView: View {
     var body: some View {
         List {
             ForEach(AppIconCatalog.sections) { section in
-                Section(String(localized: section.title)) {
+                Section {
                     ForEach(section.icons) { icon in
                         Button {
                             Task {

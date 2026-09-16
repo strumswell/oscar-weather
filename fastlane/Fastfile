@@ -1,5 +1,5 @@
 # App Store screenshot pipeline. Run through bin/screenshots.sh: it points
-# DEVELOPER_DIR at Xcode-beta (repo build convention), builds once up front,
+# DEVELOPER_DIR at Xcode (repo build convention), builds once up front,
 # and resets the simulator's Live Activity consent between language passes —
 # the `screenshots` lane alone captures a second locale with that consent
 # already answered, which breaks the lock-screen Live Activity scene.

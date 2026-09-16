@@ -84,6 +84,22 @@ final class SettingService {
     var hourlyDetailShowsChapters: Bool {
         didSet { UserDefaults.standard.set(hourlyDetailShowsChapters, forKey: "hourlyDetailShowsChapters") }
     }
+    /// Raw ids of the forecast page's sections and head values: the user's
+    /// order of all of them, and the hidden ones. The app's typed accessors
+    /// (`nowSectionOrder`, `hiddenNowSections`, ...) live next to the enums;
+    /// nil = defaults.
+    var nowSectionOrderRaw: [String]? {
+        didSet { UserDefaults.standard.set(nowSectionOrderRaw, forKey: "nowSectionOrder") }
+    }
+    var hiddenNowSectionsRaw: [String]? {
+        didSet { UserDefaults.standard.set(hiddenNowSectionsRaw, forKey: "hiddenNowSections") }
+    }
+    var headMetricOrderRaw: [String]? {
+        didSet { UserDefaults.standard.set(headMetricOrderRaw, forKey: "headMetricOrder") }
+    }
+    var hiddenHeadMetricsRaw: [String]? {
+        didSet { UserDefaults.standard.set(hiddenHeadMetricsRaw, forKey: "hiddenHeadMetrics") }
+    }
     /// Shared app group so the widget basemap prerender follows the map style.
     var mapBasemapStyleRaw: String {
         didSet { Self.defaults.set(mapBasemapStyleRaw, forKey: "mapBasemapStyle") }
@@ -185,6 +201,10 @@ final class SettingService {
         let storedOpacity = UserDefaults.standard.object(forKey: "mapOverlayOpacity") as? Double
         mapOverlayOpacity = min(max(storedOpacity ?? 0.7, 0.3), 1)
         hourlyDetailShowsChapters = UserDefaults.standard.bool(forKey: "hourlyDetailShowsChapters")
+        nowSectionOrderRaw = UserDefaults.standard.stringArray(forKey: "nowSectionOrder")
+        hiddenNowSectionsRaw = UserDefaults.standard.stringArray(forKey: "hiddenNowSections")
+        headMetricOrderRaw = UserDefaults.standard.stringArray(forKey: "headMetricOrder")
+        hiddenHeadMetricsRaw = UserDefaults.standard.stringArray(forKey: "hiddenHeadMetrics")
         mapBasemapStyleRaw = Self.defaults.string(forKey: "mapBasemapStyle") ?? MapBasemapStyle.fiord.rawValue
         timeFormatPreference = TimeFormatPreference(
             rawValue: Self.defaults.string(forKey: Self.timeFormatPreferenceKey) ?? ""

@@ -7,6 +7,7 @@ enum NowSheet: Identifiable {
     case climate(ClimateSummary)
     case alerts
     case settings
+    case layout
 
     var id: String {
         switch self {
@@ -22,6 +23,8 @@ enum NowSheet: Identifiable {
             "alerts"
         case .settings:
             "settings"
+        case .layout:
+            "layout"
         }
     }
 }

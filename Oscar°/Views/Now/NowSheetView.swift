@@ -22,6 +22,8 @@ struct NowSheetView: View {
                 .presentationDragIndicator(.hidden)
         case .settings:
             SettingsView()
+        case .layout:
+            NowLayoutSheet()
         }
     }
 }

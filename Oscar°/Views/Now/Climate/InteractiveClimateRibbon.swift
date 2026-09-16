@@ -23,7 +23,7 @@ struct InteractiveClimateRibbon: View {
                         Rectangle()
                             .fill(.white)
                             .frame(width: 2, height: height)
-                            .overlay(Rectangle().stroke(.black.opacity(0.35), lineWidth: 0.5))
+                            .overlay { Rectangle().stroke(.black.opacity(0.35), lineWidth: 0.5) }
                             .position(x: centerX(for: index, width: width), y: height / 2)
                     }
                 }
@@ -82,7 +82,7 @@ struct InteractiveClimateRibbon: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .cardBackground(in: Capsule())
-            .overlay(Capsule().stroke(.secondary.opacity(0.15), lineWidth: 0.5))
+            .overlay { Capsule().stroke(.secondary.opacity(0.15), lineWidth: 0.5) }
             .position(
                 x: min(max(centerX(for: index, width: width), half), max(width - half, half)),
                 y: 11)

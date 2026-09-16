@@ -31,12 +31,7 @@ struct EnvironmentAirQualitySectionView: View {
                 )
 
                 AQIChart(
-                    aqi: aqi,
-                    pm25: pm25,
-                    pm10: pm10,
-                    no2: no2,
-                    o3: o3,
-                    so2: so2,
+                    points: AQIDataPoint.points(time: time, aqi: aqi, pm25: pm25, pm10: pm10, no2: no2, o3: o3, so2: so2),
                     time: time,
                     maxTimeRange: maxTimeRange,
                     referenceDate: referenceDate
@@ -78,7 +73,7 @@ struct EnvironmentAirQualitySectionView: View {
                     .font(.headline)
                     .foregroundStyle(.primary)
 
-                ForEach(Array(aqiComponents.enumerated()), id: \.element.id) { index, component in
+                ForEach(aqiComponents.enumerated(), id: \.element.id) { index, component in
                     if index > 0 {
                         Divider().overlay(.white.opacity(0.08))
                     }

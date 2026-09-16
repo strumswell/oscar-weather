@@ -36,12 +36,8 @@ struct EnvironmentPollenSectionView: View {
                     )
 
                     PollenChart(
+                        series: PollenSeries.build(time: time, alder: alder, birch: birch, grass: grass, mugwort: mugwort, ragweed: ragweed),
                         time: time,
-                        alder: alder,
-                        birch: birch,
-                        grass: grass,
-                        mugwort: mugwort,
-                        ragweed: ragweed,
                         maxTimeRange: maxTimeRange,
                         referenceDate: referenceDate
                     )
@@ -57,7 +53,7 @@ struct EnvironmentPollenSectionView: View {
                         .font(.headline)
                         .foregroundStyle(.primary)
 
-                    ForEach(Array(currentPollen.enumerated()), id: \.element.id) { index, pollen in
+                    ForEach(currentPollen.enumerated(), id: \.element.id) { index, pollen in
                         if index > 0 {
                             Divider().overlay(.white.opacity(0.08))
                         }

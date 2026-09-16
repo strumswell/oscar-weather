@@ -170,7 +170,7 @@ private struct HourlyDeck: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ForEach(Array(HourlyLens.allCases.enumerated()), id: \.element) { index, lens in
+            ForEach(HourlyLens.allCases.enumerated(), id: \.element) { index, lens in
                 let isExpanded = lens == expandedLens
                 // The expanded block separates itself with its own highlight;
                 // hairlines only run between collapsed rows.

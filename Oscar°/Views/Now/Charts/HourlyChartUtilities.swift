@@ -100,7 +100,7 @@ struct ChartLegendView: View {
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: minimumItemWidth), spacing: 12)], alignment: .leading, spacing: 8) {
-            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+            ForEach(items.enumerated(), id: \.offset) { _, item in
                 HStack(spacing: 6) {
                     Circle()
                         .fill(item.color)

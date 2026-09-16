@@ -42,27 +42,6 @@ struct DailyDetailView: View {
     location.coordinates
   }
 
-  private var modelContextText: String {
-    let model = detailModel.selectedModel
-
-    switch model {
-    case .ecmwfAIFS025Ensemble:
-      return String(localized: "AIFS eignet sich gut für mittelfristige Unsicherheit, lokale Details können geglättet wirken.")
-    case .ecmwfIFS025Ensemble:
-      return String(localized: "IFS ENS liefert eine breit gestreute Unsicherheit für die mittlere Frist.")
-    case .googleWeatherNext2Ensemble:
-      return String(localized: "WeatherNext 2 ist ein KI-Modell und gut für mittelfristige Trends geeignet.")
-    case .ncepAIGFS025:
-      return String(localized: "AI GEFS ist ein guter Kompromiss für die nächsten ein bis zwei Wochen.")
-    case .ncepGEFS05:
-      return String(localized: "GEFS zeigt lange Trends, ist aber wegen des groben Gitters weniger lokal.")
-    case .iconGlobalEPS:
-      return String(localized: "ICON Global EPS passt für kurze bis mittlere Trends weltweit.")
-    case .iconEUEPS:
-      return String(localized: "ICON EU EPS ist für Europa feiner aufgelöst, reicht aber nur wenige Tage.")
-    }
-  }
-
   var body: some View {
     NavigationStack {
       VStack(spacing: 0) {
@@ -70,8 +49,19 @@ struct DailyDetailView: View {
 
         TabView(selection: $selectedSection) {
           ForEach(DailyDetailSection.allCases) { section in
-            sectionPage(for: section)
-              .tag(section)
+            DailyDetailSectionPage(
+              section: section,
+              points: points,
+              windPoints: windPoints,
+              temperatureUnit: temperatureUnit,
+              windSpeedUnit: windSpeedUnit,
+              precipitationUnit: precipitationUnit,
+              usesBeaufortDisplay: windSpeedSetting.usesBeaufortDisplay,
+              isLoading: detailModel.isLoading,
+              errorMessage: detailModel.errorMessage,
+              selectedModel: detailModel.selectedModel
+            )
+            .tag(section)
           }
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
@@ -93,50 +83,6 @@ struct DailyDetailView: View {
         await detailModel.load(coordinates: currentCoordinate)
       }
     }
-  }
-
-  @ViewBuilder
-  private func sectionPage(for section: DailyDetailSection) -> some View {
-    ScrollView {
-      if points.isEmpty && !detailModel.isLoading {
-        ContentUnavailableView(
-          "Keine Ensemble-Daten",
-          systemImage: "chart.line.downtrend.xyaxis",
-          description: detailModel.errorMessage != nil
-            ? Text(detailModel.errorMessage!)
-            : Text("Außerhalb der Modellabdeckung")
-        )
-        .frame(maxWidth: .infinity)
-        .padding(.top, 48)
-      } else {
-        LazyVStack(alignment: .leading, spacing: 16) {
-          switch section {
-          case .temperature:
-            temperatureSection
-            if !points.isEmpty {
-              DailyEnsembleTemperatureSummaryCard(points: points, unit: temperatureUnit)
-            }
-          case .precipitation:
-            precipitationSumSection
-            if !points.isEmpty {
-              DailyEnsemblePrecipitationSummaryCard(points: points, unit: precipitationUnit)
-            }
-          case .wind:
-            windSection
-            if !points.isEmpty {
-              DailyEnsembleWindSummaryCard(points: windPoints, unit: windSpeedUnit)
-            }
-          }
-          ensembleContextCard
-          if section == .wind && windSpeedSetting.usesBeaufortDisplay {
-            BeaufortScaleInfoCard()
-          }
-        }
-        .padding()
-      }
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .ignoresSafeArea(.container, edges: .bottom)
   }
 
   private var modelMenu: some View {
@@ -161,97 +107,6 @@ struct DailyDetailView: View {
         .labelStyle(.iconOnly)
     }
     .accessibilityLabel(Text("Wettermodell"))
-  }
-
-  private var temperatureSection: some View {
-    DailyDetailChartCard(
-      title: "Temperatur",
-      color: .red,
-      isLoading: detailModel.isLoading && points.isEmpty
-    ) {
-      if points.isEmpty {
-        DailyDetailLoadingChart()
-      } else {
-        DailyEnsembleTemperatureChart(
-          points: points,
-          unit: temperatureUnit
-        )
-      }
-    }
-  }
-
-  private var windSection: some View {
-    DailyDetailChartCard(
-      title: "Wind",
-      color: .cyan,
-      isLoading: detailModel.isLoading && points.isEmpty
-    ) {
-      if points.isEmpty {
-        DailyDetailLoadingChart()
-      } else {
-        DailyEnsembleWindChart(
-          points: windPoints,
-          unit: windSpeedUnit
-        )
-      }
-    }
-  }
-
-  private var precipitationSumSection: some View {
-    DailyDetailChartCard(
-      title: "Niederschlagssumme",
-      color: .blue,
-      isLoading: detailModel.isLoading && points.isEmpty
-    ) {
-      if points.isEmpty {
-        DailyDetailLoadingChart()
-      } else {
-        DailyEnsemblePrecipitationSumChart(
-          points: points,
-          unit: precipitationUnit
-        )
-      }
-    }
-  }
-
-  private var ensembleContextCard: some View {
-    DetailCard {
-      Text("Ensemble-Vorhersage")
-        .font(.caption.weight(.semibold))
-        .foregroundStyle(.secondary)
-
-      Text("Unsicherheit & Modell")
-        .font(.headline.weight(.semibold))
-        .foregroundStyle(.primary)
-        .fixedSize(horizontal: false, vertical: true)
-
-      Text(
-        String(
-          format: String(localized: "Mehrere Modellläufe zeigen, wie stabil die Vorhersage ist. %@"),
-          modelContextText
-        )
-      )
-        .font(.subheadline)
-        .foregroundStyle(.secondary)
-
-      HStack(spacing: 8) {
-        detailPill("\(points.count) Tage", color: .blue)
-        detailPill("\(detailModel.selectedModel.members) Mitglieder", color: .teal)
-        detailPill(LocalizedStringKey(detailModel.selectedModel.region), color: .green)
-      }
-      .padding(.top, 2)
-    }
-  }
-
-  private func detailPill(_ text: LocalizedStringKey, color: Color) -> some View {
-    Text(text)
-      .font(.caption.weight(.semibold))
-      .lineLimit(1)
-      .minimumScaleFactor(0.8)
-      .padding(.horizontal, 10)
-      .padding(.vertical, 6)
-      .background(color.opacity(0.18), in: .capsule)
-      .foregroundStyle(color)
   }
 
   private func finish() {

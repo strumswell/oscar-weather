@@ -80,7 +80,7 @@ struct TimelineScrubber: View {
             // the contiguous ranges grow; islands from scrub-triggered preloads
             // render as their own segments.
             ZStack(alignment: .leading) {
-                ForEach(Array(runs.enumerated()), id: \.offset) { _, run in
+                ForEach(runs.enumerated(), id: \.offset) { _, run in
                     Capsule()
                         .fill(.white.opacity(0.26))
                         .frame(width: bandWidth(for: run, trackWidth: trackWidth),
@@ -116,7 +116,7 @@ struct TimelineScrubber: View {
 
             if !fullyBuffered && !reduceMotion {
                 ShimmerBand(trackWidth: trackWidth, height: trackHeight)
-                    .mask(SegmentsShape(segments: gapSegments(runs: runs, trackWidth: trackWidth)))
+                    .mask { SegmentsShape(segments: gapSegments(runs: runs, trackWidth: trackWidth)) }
                     .frame(width: trackWidth, height: trackHeight)
                     .padding(.leading, thumbRadius)
             }

@@ -37,7 +37,7 @@ struct WatchSimulationView: View {
         case .gradientOnly:
             Rectangle()
                 .fill(AtmosphereSampler.skyGradient(snapshot: snapshot))
-                .overlay(Color.black.opacity(0.35))
+                .overlay(.black.opacity(0.35))
                 .ignoresSafeArea()
         case .full:
             fullScene(snapshot: snapshot)

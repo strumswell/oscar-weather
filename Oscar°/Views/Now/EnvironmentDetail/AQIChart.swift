@@ -15,38 +15,13 @@ struct AQIDataPoint: Identifiable {
     let no2: Double
     let o3: Double
     let so2: Double
-}
 
-struct AQIChart: View {
-    var aqi: [Double]
-    var pm25: [Double]
-    var pm10: [Double]
-    var no2: [Double]
-    var o3: [Double]
-    var so2: [Double]
-    var time: [Double]
-    var maxTimeRange: ClosedRange<Date>
-    var referenceDate: Date
-
-    @State private var selectedDate: Date?
-
-    private let seriesColors: [String: Color] = [
-        "PM2.5": .blue,
-        "PM10": .cyan,
-        "NO₂": .orange,
-        "O₃": .green,
-        "SO₂": .yellow,
-    ]
-
-    private var dataPoints: [AQIDataPoint] {
-        let count = min(
-            time.count,
-            min(
-                aqi.count,
-                min(pm25.count, min(pm10.count, min(no2.count, min(o3.count, so2.count))))
-            )
-        )
-
+    /// Zips the parallel Open-Meteo arrays once; the chart body only iterates.
+    static func points(
+        time: [Double], aqi: [Double], pm25: [Double], pm10: [Double],
+        no2: [Double], o3: [Double], so2: [Double]
+    ) -> [AQIDataPoint] {
+        let count = [time.count, aqi.count, pm25.count, pm10.count, no2.count, o3.count, so2.count].min() ?? 0
         return (0..<count).map { index in
             AQIDataPoint(
                 id: index,
@@ -60,9 +35,27 @@ struct AQIChart: View {
             )
         }
     }
+}
+
+struct AQIChart: View {
+    let points: [AQIDataPoint]
+    /// Raw hourly stamps for the day-separator rules.
+    let time: [Double]
+    let maxTimeRange: ClosedRange<Date>
+    let referenceDate: Date
+
+    @State private var selectedDate: Date?
+
+    private let seriesColors: [String: Color] = [
+        "PM2.5": .blue,
+        "PM10": .cyan,
+        "NO₂": .orange,
+        "O₃": .green,
+        "SO₂": .yellow,
+    ]
 
     private var maxYValue: Double {
-        let highestValue = dataPoints
+        let highestValue = points
             .map { max($0.pm25, $0.pm10, $0.no2, $0.o3, $0.so2) }
             .max() ?? 100
 
@@ -70,6 +63,7 @@ struct AQIChart: View {
     }
 
     private var accessibilitySummary: String {
+        let aqi = points.map(\.aqi)
         guard let low = aqi.min(), let high = aqi.max() else { return "" }
         return String(localized: "AQI \(Int(low.rounded())) bis \(Int(high.rounded())), Spitze \(EUAirQualityBand(value: high).localizedStatus)")
     }
@@ -79,7 +73,7 @@ struct AQIChart: View {
     }
 
     private var currentDataPoint: AQIDataPoint? {
-        dataPoints.first(where: { $0.time >= referenceDate }) ?? dataPoints.last
+        points.first(where: { $0.time >= referenceDate }) ?? points.last
     }
 
     var body: some View {
@@ -121,7 +115,7 @@ struct AQIChart: View {
 
     @ChartContentBuilder
     private var severityBandMarks: some ChartContent {
-        ForEach(Array(severityBands.enumerated()), id: \.offset) { _, band in
+        ForEach(severityBands.enumerated(), id: \.offset) { _, band in
             RectangleMark(
                 xStart: .value("Start", maxTimeRange.lowerBound),
                 xEnd: .value("End", maxTimeRange.upperBound),
@@ -134,11 +128,13 @@ struct AQIChart: View {
 
     @ChartContentBuilder
     private var seriesMarks: some ChartContent {
-        seriesLineMarks(series: "PM2.5", color: .blue, value: \.pm25)
-        seriesLineMarks(series: "PM10", color: .cyan, value: \.pm10)
-        seriesLineMarks(series: "NO₂", color: .orange, value: \.no2)
-        seriesLineMarks(series: "O₃", color: .green, value: \.o3)
-        seriesLineMarks(series: "SO₂", color: .yellow, value: \.so2)
+        let past = points.filter { $0.time <= referenceDate }
+        let future = points.filter { $0.time >= referenceDate }
+        seriesLineMarks(past: past, future: future, series: "PM2.5", color: .blue, value: \.pm25)
+        seriesLineMarks(past: past, future: future, series: "PM10", color: .cyan, value: \.pm10)
+        seriesLineMarks(past: past, future: future, series: "NO₂", color: .orange, value: \.no2)
+        seriesLineMarks(past: past, future: future, series: "O₃", color: .green, value: \.o3)
+        seriesLineMarks(past: past, future: future, series: "SO₂", color: .yellow, value: \.so2)
         currentPointMarks
     }
 
@@ -163,11 +159,13 @@ struct AQIChart: View {
 
     @ChartContentBuilder
     private func seriesLineMarks(
+        past: [AQIDataPoint],
+        future: [AQIDataPoint],
         series: String,
         color: Color,
         value: KeyPath<AQIDataPoint, Double>
     ) -> some ChartContent {
-        ForEach(dataPoints.filter { $0.time <= referenceDate }) { dataPoint in
+        ForEach(past) { dataPoint in
             LineMark(
                 x: .value("Hour", dataPoint.time),
                 y: .value(series, dataPoint[keyPath: value]),
@@ -178,7 +176,7 @@ struct AQIChart: View {
             .lineStyle(.init(lineWidth: 2, dash: [7, 5]))
         }
 
-        ForEach(dataPoints.filter { $0.time >= referenceDate }) { dataPoint in
+        ForEach(future) { dataPoint in
             LineMark(
                 x: .value("Hour", dataPoint.time),
                 y: .value(series, dataPoint[keyPath: value]),
@@ -232,7 +230,7 @@ struct AQIChart: View {
     }
 
     private func selectedDataPoint(for selectedDate: Date) -> AQIDataPoint? {
-        dataPoints.min {
+        points.min {
             abs($0.time.timeIntervalSince(selectedDate)) < abs($1.time.timeIntervalSince(selectedDate))
         }
     }
@@ -257,7 +255,7 @@ private struct AQIChartAnnotationView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+            ForEach(rows.enumerated(), id: \.offset) { _, row in
                 HStack(spacing: 6) {
                     Circle()
                         .fill(row.seriesColor)

@@ -7,7 +7,7 @@ struct BeaufortScaleInfoCard: View {
         .font(.headline)
         .foregroundStyle(.primary)
 
-      ForEach(Array(BeaufortScale.entries.enumerated()), id: \.element.id) { index, entry in
+      ForEach(BeaufortScale.entries.enumerated(), id: \.element.id) { index, entry in
         if index > 0 {
           Divider().overlay(.white.opacity(0.08))
         }

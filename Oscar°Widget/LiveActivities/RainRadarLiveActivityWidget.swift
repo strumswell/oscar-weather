@@ -443,7 +443,7 @@ private func previewModel(_ phase: RainRadarActivityAttributes.ContentState.Phas
             .padding(.horizontal, 12)
             .frame(height: 37)
             .background(.black, in: .capsule)
-            .overlay(Capsule().stroke(.white.opacity(0.2)))
+            .overlay { Capsule().stroke(.white.opacity(0.2)) }
         }
         VStack(alignment: .leading, spacing: 6) {
             let model = previewModel(.raining)
@@ -459,7 +459,7 @@ private func previewModel(_ phase: RainRadarActivityAttributes.ContentState.Phas
         .padding(16)
         .frame(width: 366)
         .background(.black, in: .rect(cornerRadius: 44))
-        .overlay(RoundedRectangle(cornerRadius: 44).stroke(.white.opacity(0.2)))
+        .overlay { RoundedRectangle(cornerRadius: 44).stroke(.white.opacity(0.2)) }
     }
     .padding()
     .background(Color(white: 0.15))

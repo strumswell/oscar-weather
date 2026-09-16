@@ -56,7 +56,6 @@ struct EnvironmentGaugesView: View {
                 .bold()
                 .foregroundStyle(.primary)
                 .padding([.leading, .bottom])
-                .padding(.top, 30)
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 14) {
                     ForEach(metrics) { metric in

@@ -116,7 +116,7 @@ struct OnboardingManualLocationStep: View {
             )
         } else if !results.isEmpty {
             VStack(spacing: 0) {
-                ForEach(Array(results.prefix(5).enumerated()), id: \.offset) { index, result in
+                ForEach(results.prefix(5).enumerated(), id: \.element.id) { index, result in
                     // Row and its divider cascade in together, so no divider
                     // ever underlines an empty slot.
                     VStack(spacing: 0) {

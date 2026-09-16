@@ -42,20 +42,20 @@ struct MemberCard: View {
         .overlay(alignment: .topLeading) {
             overlayLayer
         }
-        .coordinateSpace(name: Self.coordinateSpaceName)
+        .coordinateSpace(.named(Self.coordinateSpaceName))
         // Card-level gesture captures scale+rotation while dragging a sticker.
         .simultaneousGesture(
-            MagnificationGesture()
-                .simultaneously(with: RotationGesture())
+            MagnifyGesture()
+                .simultaneously(with: RotateGesture())
                 .onChanged { value in
                     guard activeDrag != nil else { return }
-                    inFlightScaleMultiplier = Double(value.first ?? 1)
-                    inFlightRotationDelta = value.second ?? .zero
+                    inFlightScaleMultiplier = Double(value.first?.magnification ?? 1)
+                    inFlightRotationDelta = value.second?.rotation ?? .zero
                 }
                 .onEnded { value in
                     guard activeDrag != nil else { return }
-                    inFlightScaleMultiplier = Double(value.first ?? 1)
-                    inFlightRotationDelta = value.second ?? .zero
+                    inFlightScaleMultiplier = Double(value.first?.magnification ?? 1)
+                    inFlightRotationDelta = value.second?.rotation ?? .zero
                 }
         )
     }

@@ -18,7 +18,7 @@ struct DailyEnsembleSummaryCard: View {
         .font(.headline)
         .foregroundStyle(.primary)
 
-      ForEach(Array(stats.enumerated()), id: \.offset) { index, stat in
+      ForEach(stats.enumerated(), id: \.offset) { index, stat in
         if index > 0 {
           Divider().overlay(.white.opacity(0.08))
         }

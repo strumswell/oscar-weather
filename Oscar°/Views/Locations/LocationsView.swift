@@ -77,10 +77,10 @@ struct LocationsView: View {
                                         // the map. Explicit color — the
                                         // .background STYLE renders as a hazy
                                         // material on the glass toolbar.
-                                        .foregroundStyle(Color(.systemBackground), .primary)
+                                        .foregroundStyle(Color(uiColor: .systemBackground), .primary)
                                         .background {
                                             Circle()
-                                                .fill(Color(.systemBackground))
+                                                .fill(Color(uiColor: .systemBackground))
                                                 .scaleEffect(1.3)
                                         }
                                         .offset(x: 4, y: 4)
@@ -243,7 +243,7 @@ struct LocationsView: View {
     // MARK: - Search
 
     private var searchResultRows: some View {
-        ForEach(searchResult.results ?? [], id: \.self) { result in
+        ForEach(searchResult.results ?? [], id: \.id) { result in
             LocationSearchResultRow(result: result) {
                 preview(result)
             }

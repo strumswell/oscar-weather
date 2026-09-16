@@ -19,30 +19,50 @@ struct PollenSeries: Identifiable {
     let label: String
     let lineColor: Color
     let points: [PollenDataPoint]
-}
 
-struct PollenChart: View {
-    var time: [Double]
-    var alder: [Double?]
-    var birch: [Double?]
-    var grass: [Double?]
-    var mugwort: [Double?]
-    var ragweed: [Double?]
-    var maxTimeRange: ClosedRange<Date>
-    var referenceDate: Date
-
-    @State private var selectedDate: Date?
-
-    private var series: [PollenSeries] {
+    /// Builds the series once from the parallel Open-Meteo arrays; types with
+    /// no data drop out.
+    static func build(
+        time: [Double], alder: [Double?], birch: [Double?], grass: [Double?],
+        mugwort: [Double?], ragweed: [Double?]
+    ) -> [PollenSeries] {
         [
-            makeSeries(type: .alder, label: String(localized: "Erle"), values: alder, color: .pink),
-            makeSeries(type: .birch, label: String(localized: "Birke"), values: birch, color: .teal),
-            makeSeries(type: .grass, label: String(localized: "Gräser"), values: grass, color: .green),
-            makeSeries(type: .mugwort, label: String(localized: "Beifuß"), values: mugwort, color: .indigo),
-            makeSeries(type: .ragweed, label: String(localized: "Ambrosia"), values: ragweed, color: .brown),
+            make(type: .alder, label: String(localized: "Erle"), time: time, values: alder, color: .pink),
+            make(type: .birch, label: String(localized: "Birke"), time: time, values: birch, color: .teal),
+            make(type: .grass, label: String(localized: "Gräser"), time: time, values: grass, color: .green),
+            make(type: .mugwort, label: String(localized: "Beifuß"), time: time, values: mugwort, color: .indigo),
+            make(type: .ragweed, label: String(localized: "Ambrosia"), time: time, values: ragweed, color: .brown),
         ]
         .compactMap { $0 }
     }
+
+    private static func make(type: PollenType, label: String, time: [Double], values: [Double?], color: Color) -> PollenSeries? {
+        let count = min(time.count, values.count)
+        let points = (0..<count).compactMap { index -> PollenDataPoint? in
+            guard let rawValue = values[index] else { return nil }
+
+            return PollenDataPoint(
+                id: index,
+                time: Date(timeIntervalSince1970: time[index]),
+                rawValue: rawValue,
+                severityFraction: type.tier(for: rawValue).severityFraction
+            )
+        }
+
+        guard !points.isEmpty else { return nil }
+
+        return PollenSeries(id: label, type: type, label: label, lineColor: color, points: points)
+    }
+}
+
+struct PollenChart: View {
+    let series: [PollenSeries]
+    /// Raw hourly stamps for the day-separator rules.
+    let time: [Double]
+    let maxTimeRange: ClosedRange<Date>
+    let referenceDate: Date
+
+    @State private var selectedDate: Date?
 
     private var accessibilitySummary: String {
         let loads = series.compactMap { pollenSeries -> String? in
@@ -56,7 +76,7 @@ struct PollenChart: View {
             }
             return "\(pollenSeries.label) \(tier)"
         }
-        return loads.isEmpty ? String(localized: "Keine Belastung") : loads.joined(separator: ", ")
+        return loads.isEmpty ? String(localized: "Keine Belastung") : loads.formatted(.list(type: .and))
     }
 
     private var severityBands: [(lower: Double, upper: Double, color: Color)] {
@@ -80,7 +100,7 @@ struct PollenChart: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Chart {
-                ForEach(Array(severityBands.enumerated()), id: \.offset) { _, band in
+                ForEach(severityBands.enumerated(), id: \.offset) { _, band in
                     RectangleMark(
                         xStart: .value("Start", maxTimeRange.lowerBound),
                         xEnd: .value("End", maxTimeRange.upperBound),
@@ -91,7 +111,9 @@ struct PollenChart: View {
                 }
 
                 ForEach(series) { pollenSeries in
-                    ForEach(pollenSeries.points.filter { $0.time <= referenceDate }) { dataPoint in
+                    let past = pollenSeries.points.filter { $0.time <= referenceDate }
+                    let future = pollenSeries.points.filter { $0.time >= referenceDate }
+                    ForEach(past) { dataPoint in
                         LineMark(
                             x: .value("Hour", dataPoint.time),
                             y: .value(pollenSeries.label, dataPoint.severityFraction),
@@ -102,7 +124,7 @@ struct PollenChart: View {
                         .lineStyle(.init(lineWidth: 2.5, dash: [7, 5]))
                     }
 
-                    ForEach(pollenSeries.points.filter { $0.time >= referenceDate }) { dataPoint in
+                    ForEach(future) { dataPoint in
                         LineMark(
                             x: .value("Hour", dataPoint.time),
                             y: .value(pollenSeries.label, dataPoint.severityFraction),
@@ -133,7 +155,7 @@ struct PollenChart: View {
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
 
-                                    ForEach(Array(selectedRows.enumerated()), id: \.offset) { _, row in
+                                    ForEach(selectedRows.enumerated(), id: \.offset) { _, row in
                                         HStack(spacing: 6) {
                                             Circle()
                                                 .fill(row.lineColor)
@@ -194,33 +216,9 @@ struct PollenChart: View {
 
     @ChartContentBuilder
     private var currentPointMarks: some ChartContent {
-        ForEach(Array(currentSeriesPoints.enumerated()), id: \.offset) { _, point in
+        ForEach(currentSeriesPoints.enumerated(), id: \.offset) { _, point in
             HourlyChartUtilities.currentPointMark(x: point.time, series: point.label, value: point.value)
         }
-    }
-
-    private func makeSeries(type: PollenType, label: String, values: [Double?], color: Color) -> PollenSeries? {
-        let count = min(time.count, values.count)
-        let points = (0..<count).compactMap { index -> PollenDataPoint? in
-            guard let rawValue = values[index] else { return nil }
-
-            return PollenDataPoint(
-                id: index,
-                time: Date(timeIntervalSince1970: time[index]),
-                rawValue: rawValue,
-                severityFraction: type.tier(for: rawValue).severityFraction
-            )
-        }
-
-        guard !points.isEmpty else { return nil }
-
-        return PollenSeries(
-            id: label,
-            type: type,
-            label: label,
-            lineColor: color,
-            points: points
-        )
     }
 
     private func selectedRows(for selectedDate: Date) -> [(time: Date, label: String, rawValue: Double, lineColor: Color)] {

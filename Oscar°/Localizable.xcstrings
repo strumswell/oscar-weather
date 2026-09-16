@@ -54,9 +54,6 @@
         }
       }
     },
-    "%.0f %%" : {
-      "shouldTranslate" : false
-    },
     "%.1f %@" : {
       "localizations" : {
         "de" : {
@@ -1303,6 +1300,50 @@
         }
       }
     },
+    "Abschnitte" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abschnitte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sections"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölümler"
+          }
+        }
+      }
+    },
+    "Abschnitte hinzufügen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abschnitte hinzufügen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add sections"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölüm ekleyin"
+          }
+        }
+      }
+    },
     "Air" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1777,7 +1818,6 @@
       }
     },
     "Ansicht" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1795,6 +1835,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Görünüm"
+          }
+        }
+      }
+    },
+    "Ansicht anpassen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ansicht anpassen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Customize View"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görünümü özelleştir"
           }
         }
       }
@@ -2838,6 +2900,7 @@
       }
     },
     "Bewölkung %lld Prozent, Wind %@, Richtung %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6364,28 +6427,6 @@
         }
       }
     },
-    "Großbritannien" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Großbritannien"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "United Kingdom"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Birleşik Krallık"
-          }
-        }
-      }
-    },
     "Größere Zweige und kleine Bäume bewegen sich." : {
       "localizations" : {
         "de" : {
@@ -6404,6 +6445,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
+          }
+        }
+      }
+    },
+    "Großbritannien" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Großbritannien"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "United Kingdom"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birleşik Krallık"
           }
         }
       }
@@ -7671,6 +7734,28 @@
         }
       }
     },
+    "Keine Abschnitte" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Abschnitte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No sections"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölüm yok"
+          }
+        }
+      }
+    },
     "Keine Belastung" : {
       "localizations" : {
         "de" : {
@@ -7841,6 +7926,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ECMWF'nin yapay zeka tabanlı hava durumu modeli."
+          }
+        }
+      }
+    },
+    "Kennzahlen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kennzahlen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metrics"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Göstergeler"
           }
         }
       }
@@ -12402,6 +12509,28 @@
         }
       }
     },
+    "Regenwahrscheinlichkeit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenwahrscheinlichkeit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chance of rain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur olasılığı"
+          }
+        }
+      }
+    },
     "Regenwarnungen (Beta)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -13760,6 +13889,28 @@
         }
       }
     },
+    "Standard wiederherstellen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard wiederherstellen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore default"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varsayılanı geri yükle"
+          }
+        }
+      }
+    },
     "Standardmäßig wählt Oscar automatisch das beste Wettermodell. Fortgeschrittene Nutzer können ein bestimmtes Modell erzwingen." : {
       "localizations" : {
         "de" : {
@@ -14637,6 +14788,28 @@
         }
       }
     },
+    "Täglich" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Täglich"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlük"
+          }
+        }
+      }
+    },
     "Tägliche Details" : {
       "localizations" : {
         "de" : {
@@ -15441,6 +15614,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "En Belirsiz Gün"
+          }
+        }
+      }
+    },
+    "Unter der Temperatur" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unter der Temperatur"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Below the temperature"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıcaklığın altında"
           }
         }
       }
@@ -16500,6 +16695,28 @@
         }
       }
     },
+    "Wetterabschnitte" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetterabschnitte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather sections"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava durumu bölümleri"
+          }
+        }
+      }
+    },
     "Wetterbehörde Taiwans" : {
       "localizations" : {
         "de" : {
@@ -16876,6 +17093,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "En Rüzgarlı Gün"
+          }
+        }
+      }
+    },
+    "Windrichtung" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Windrichtung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wind direction"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rüzgar yönü"
           }
         }
       }

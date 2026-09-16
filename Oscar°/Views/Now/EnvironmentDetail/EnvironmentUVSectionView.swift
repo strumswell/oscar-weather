@@ -26,7 +26,7 @@ struct EnvironmentUVSectionView: View {
                 )
 
                 UVChart(
-                    uvIndex: uvIndex,
+                    points: UVDataPoint.points(time: time, uvIndex: uvIndex),
                     time: time,
                     maxTimeRange: maxTimeRange,
                     referenceDate: referenceDate

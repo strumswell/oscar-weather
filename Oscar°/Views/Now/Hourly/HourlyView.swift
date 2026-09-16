@@ -64,46 +64,44 @@ struct HourlyView: View {
       .animation(.snappy, value: dayLabel)
       .animation(.snappy, value: showDayBadge)
 
-      Group {
-        ScrollView(.horizontal) {
-          LazyHStack(spacing: 12) {
-            if shouldShowPlaceholders {
-              ForEach(0..<10, id: \.self) { _ in
-                HourlyPlaceholderCard()
-                  .scrollTransition { content, phase in
-                    content
-                      .opacity(phase.isIdentity ? 1 : 0.5)
-                      .scaleEffect(shouldReduceMotion || phase.isIdentity ? 1 : 0.9)
-                  }
-                  .padding(.vertical, 20)
-              }
-            } else {
-              ForEach(items) { item in
-                timelineItemView(item)
-                  .scrollTransition { content, phase in
-                    content
-                      .opacity(phase.isIdentity ? 1 : 0.5)
-                      .scaleEffect(shouldReduceMotion || phase.isIdentity ? 1 : 0.9)
-                  }
-                  .padding(.vertical, 20)
-                  .onTapGesture {
-                    presentDetails(at: Date(timeIntervalSince1970: item.timestamp))
-                  }
-              }
+      ScrollView(.horizontal) {
+        LazyHStack(spacing: 12) {
+          if shouldShowPlaceholders {
+            ForEach(0..<10, id: \.self) { _ in
+              HourlyPlaceholderCard()
+                .scrollTransition { content, phase in
+                  content
+                    .opacity(phase.isIdentity ? 1 : 0.5)
+                    .scaleEffect(shouldReduceMotion || phase.isIdentity ? 1 : 0.9)
+                }
+                .padding(.vertical, 20)
+            }
+          } else {
+            ForEach(items) { item in
+              timelineItemView(item)
+                .scrollTransition { content, phase in
+                  content
+                    .opacity(phase.isIdentity ? 1 : 0.5)
+                    .scaleEffect(shouldReduceMotion || phase.isIdentity ? 1 : 0.9)
+                }
+                .padding(.vertical, 20)
+                .onTapGesture {
+                  presentDetails(at: Date(timeIntervalSince1970: item.timestamp))
+                }
             }
           }
-          .scrollTargetLayout()
-          .font(.system(size: 18))
-          .padding(.leading)
         }
-        .scrollIndicators(.hidden)
-        // .never lets a flick travel several cards; the default limit stops
-        // momentum after one page, which reads as a stiff scroll.
-        .scrollTargetBehavior(.viewAligned(limitBehavior: .never))
-        .scrollPosition(id: $leadingItemID)
-        .contentMargins(.trailing, 16, for: .scrollContent)
-        .frame(maxWidth: .infinity)
+        .scrollTargetLayout()
+        .font(.system(size: 18))
+        .padding(.leading)
       }
+      .scrollIndicators(.hidden)
+      // .never lets a flick travel several cards; the default limit stops
+      // momentum after one page, which reads as a stiff scroll.
+      .scrollTargetBehavior(.viewAligned(limitBehavior: .never))
+      .scrollPosition(id: $leadingItemID)
+      .contentMargins(.trailing, 16, for: .scrollContent)
+      .frame(maxWidth: .infinity)
       .contentShape(.rect)
       .onTapGesture(perform: presentDetails)
       .disabled(!hasHourlyDetailData)
@@ -115,15 +113,19 @@ struct HourlyView: View {
         .scaleEffect(shouldReduceMotion || phase.isIdentity ? 1 : 0.99)
     }
     .sensoryFeedback(.impact, trigger: detailPresentationCount)
+    .accessibilityIdentifier("now.hourly")
   }
 
-  @ViewBuilder
+  /// Single-root container keeps the lazy row unary, so the stack can template
+  /// row identity without evaluating every card.
   private func timelineItemView(_ item: HourlyTimelineItem) -> some View {
-    switch item {
-    case .forecast(let forecast):
-      HourlyForecastCard(item: forecast)
-    case .sunEvent(let sunEvent):
-      HourlySunEventCard(item: sunEvent)
+    VStack(spacing: 0) {
+      switch item {
+      case .forecast(let forecast):
+        HourlyForecastCard(item: forecast)
+      case .sunEvent(let sunEvent):
+        HourlySunEventCard(item: sunEvent)
+      }
     }
   }
 

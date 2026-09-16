@@ -13,7 +13,7 @@ import SwiftUI
 /// Cheap stand-in for the cards' live material: dozens of copies drift over
 /// the animated sky, and each `.thinMaterial` would re-blur its backdrop
 /// every frame. A translucent fill composites with plain alpha instead.
-let collageCardFill = AnyShapeStyle(Color(.systemBackground).opacity(0.78))
+let collageCardFill = AnyShapeStyle(Color(uiColor: .systemBackground).opacity(0.78))
 
 struct OnboardingCollage: View {
     var body: some View {

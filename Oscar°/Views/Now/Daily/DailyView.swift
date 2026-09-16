@@ -23,67 +23,66 @@ struct DailyView: View {
     let temperatureUnit = weather.forecast.daily_units?.temperature_2m_min ?? "°C"
     let precipitationUnit = weather.forecast.daily_units?.precipitation_sum ?? "mm"
 
-    Group {
-      VStack(alignment: .leading) {
-        Text(heading)
-          .font(.title3)
-          .bold()
-          .foregroundStyle(Color(UIColor.label))
-          .padding([.leading, .top, .bottom])
+    VStack(alignment: .leading) {
+      Text(heading)
+        .font(.title3)
+        .bold()
+        .foregroundStyle(Color(uiColor: .label))
+        .padding([.leading, .bottom])
 
-        VStack {
-          if showsPlaceholders {
-            ForEach(0..<placeholderDayCount, id: \.self) { _ in
-              DailyPlaceholderRow()
-                .redacted(reason: .placeholder)
-            }
-          } else {
-            ForEach(Array(0..<dayNumber), id: \.self) { dayPos in
-              let rowTemperatures = temperatureRow(for: dayPos)
-              HStack {
-                Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0))
-                  .foregroundStyle(Color(UIColor.label))
-                  .bold()
-                  .frame(width: weekdayColumnWidth, alignment: .leading)
-                Image(decorative: getWeatherIcon(pos: dayPos))
-                  .resizable()
-                  .scaledToFit()
-                  .frame(width: dayIconSize, height: dayIconSize)
-                VStack {
-                  Text(
-                    "\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") \(precipitationUnit)"
-                  )
-                  .font(.caption)
-                  .foregroundStyle(Color(UIColor.label))
-                }
-                .frame(width: precipitationColumnWidth)
-                Text(roundTemperatureString(temperature: rowTemperatures.labelLow))
-                  .frame(width: temperatureColumnWidth, alignment: .trailing)
-                TemperatureRangeView(
-                  low: rowTemperatures.barLow, high: rowTemperatures.barHigh,
-                  focusLow: rowTemperatures.focusLow,
-                  focusHigh: rowTemperatures.focusHigh,
-                  minTemp: temperatureScale.min, maxTemp: temperatureScale.max,
-                  unit: temperatureUnit
+      VStack {
+        if showsPlaceholders {
+          ForEach(0..<placeholderDayCount, id: \.self) { _ in
+            DailyPlaceholderRow()
+              .redacted(reason: .placeholder)
+          }
+        } else {
+          ForEach(0..<dayNumber, id: \.self) { dayPos in
+            let rowTemperatures = temperatureRow(for: dayPos)
+            HStack {
+              Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0))
+                .foregroundStyle(Color(uiColor: .label))
+                .bold()
+                .frame(width: weekdayColumnWidth, alignment: .leading)
+              Image(decorative: getWeatherIcon(pos: dayPos))
+                .resizable()
+                .scaledToFit()
+                .frame(width: dayIconSize, height: dayIconSize)
+              VStack {
+                Text(
+                  "\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") \(precipitationUnit)"
                 )
-                .frame(height: rowTemperatures.focusLow == nil ? 5 : 28)
-                Text(roundTemperatureString(temperature: rowTemperatures.labelHigh))
-                  .frame(width: temperatureColumnWidth, alignment: .leading)
+                .font(.caption)
+                .foregroundStyle(Color(uiColor: .label))
               }
-              .padding(.vertical, 4)
-              .accessibilityElement(children: .combine)
+              .frame(width: precipitationColumnWidth)
+              Text(roundTemperatureString(temperature: rowTemperatures.labelLow))
+                .frame(width: temperatureColumnWidth, alignment: .trailing)
+              TemperatureRangeView(
+                low: rowTemperatures.barLow, high: rowTemperatures.barHigh,
+                focusLow: rowTemperatures.focusLow,
+                focusHigh: rowTemperatures.focusHigh,
+                minTemp: temperatureScale.min, maxTemp: temperatureScale.max,
+                unit: temperatureUnit
+              )
+              .frame(height: rowTemperatures.focusLow == nil ? 5 : 28)
+              Text(roundTemperatureString(temperature: rowTemperatures.labelHigh))
+                .frame(width: temperatureColumnWidth, alignment: .leading)
             }
+            .padding(.vertical, 4)
+            .accessibilityElement(children: .combine)
           }
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 10)
-        .cardBackground()
-        .clipShape(.rect(cornerRadius: 10))
-        .cardBorder()
-        .font(.body)
-        .padding([.leading, .trailing])
-
       }
+      .padding(.horizontal, 20)
+      .padding(.vertical, 10)
+      .cardBackground()
+      .clipShape(.rect(cornerRadius: 10))
+      .cardBorder()
+      .font(.body)
+      .padding([.leading, .trailing])
+      .padding(.bottom, 20)
+
     }
     .contentShape(.rect)
     .onTapGesture(perform: presentDetails)

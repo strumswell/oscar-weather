@@ -15,7 +15,7 @@
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
-export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode-beta.app}"
+export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app}"
 
 WATCH_NAME="Apple Watch Series 11 (46mm)"
 WATCH_OS="watchOS 26.5"

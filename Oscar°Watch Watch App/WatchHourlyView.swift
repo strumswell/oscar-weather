@@ -33,12 +33,14 @@ struct WatchHourlyView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(Array(items)) { item in
-                        switch item {
-                        case .forecast(let forecast):
-                            forecastRow(forecast, hourFormatter: hourFormatter)
-                        case .sunEvent(let sunEvent):
-                            sunEventRow(sunEvent)
+                    ForEach(items) { item in
+                        VStack(spacing: 0) {
+                            switch item {
+                            case .forecast(let forecast):
+                                forecastRow(forecast, hourFormatter: hourFormatter)
+                            case .sunEvent(let sunEvent):
+                                sunEventRow(sunEvent)
+                            }
                         }
                     }
                 }

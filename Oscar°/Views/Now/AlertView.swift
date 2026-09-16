@@ -58,7 +58,7 @@ extension AlertView {
     /// The event name is the badge-sized label ("SEVERE THUNDERSTORM WARNING");
     /// headlines are long provenance sentences.
     func formattedHeadline(top: WeatherAlertInfo, count: Int) -> String {
-        let event = top.event.uppercased()
+        let event = top.event.localizedUppercase
         return count > 1 ? "\(event) (+\(count - 1))" : event
     }
 }

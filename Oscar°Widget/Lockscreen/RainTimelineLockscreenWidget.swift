@@ -191,7 +191,7 @@ private struct RainTimelineBars: View {
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 2) {
-            ForEach(Array(bars.enumerated()), id: \.offset) { _, value in
+            ForEach(bars.enumerated(), id: \.offset) { _, value in
                 RainNowcastBar(
                     value: value, reference: reference, areaHeight: Self.barAreaHeight,
                     fill: value > 0 ? AnyShapeStyle(Color.primary) : AnyShapeStyle(Color.secondary.opacity(0.35))

@@ -42,7 +42,6 @@ struct ClimateView: View {
                         .bold()
                         .foregroundStyle(.primary)
                         .padding([.leading, .bottom])
-                        .padding(.top, 30)
 
                     content
                         .padding(.horizontal)

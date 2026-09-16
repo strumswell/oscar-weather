@@ -11,7 +11,7 @@ struct ToastBanner: View {
     var body: some View {
         Text(message)
             .font(.footnote.weight(.medium))
-            .foregroundStyle(Color(UIColor.label))
+            .foregroundStyle(Color(uiColor: .label))
             .lineLimit(1)
             .padding(.horizontal, 16)
             .padding(.vertical, 9)

@@ -20,18 +20,20 @@ struct RainView: View {
     }
 
     var body: some View {
-        if oscarPoints.contains(where: { $0.value > 0 }) {
+        let points = oscarPoints
+        let hasRain = points.contains(where: { $0.value > 0 })
+        if hasRain {
             VStack(alignment: .leading) {
                 Button(action: openRadarMap) {
                     Text("Radar")
                         .font(.title3)
                         .bold()
-                        .foregroundStyle(Color(UIColor.label))
+                        .foregroundStyle(Color(uiColor: .label))
                 }
                 .buttonStyle(.plain)
-                .padding([.leading, .top])
+                .padding(.leading)
 
-                PrecipitationSeriesChart(points: oscarPoints, timeZone: weather.forecast.locationTimeZone)
+                PrecipitationSeriesChart(points: points, timeZone: weather.forecast.locationTimeZone)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 20)
                     .cardBackground()
@@ -77,7 +79,7 @@ struct PrecipChartPoint: Identifiable {
 }
 
 /// Renders the oscar-server precipitation time series (mm/h) as an area chart.
-private struct PrecipitationSeriesChart: View {
+struct PrecipitationSeriesChart: View {
     let points: [PrecipChartPoint]
     let timeZone: TimeZone
 

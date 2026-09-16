@@ -59,37 +59,10 @@ struct WeatherMapDetailView: View {
             // here, so it stays even though the chip header shows it too.
             VStack {
                 HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        if settingsService.oscarRadarLayer {
-                            if radarState.hasAnyLoadedFrame,
-                               let timestamp = radarState.currentFrameTimestamp {
-                                RadarTimestampBadge(
-                                    timestamp: timestamp,
-                                    isLive: radarState.isCurrentFrameLive
-                                )
-                                ColormapVerticalLegend(colormap: .radar)
-                            }
-                            if settingsService.showStormCells {
-                                StormCellLegend()
-                            }
-                        } else if settingsService.cloudLayerActive,
-                                  cloudLayerState.hasAnyLoadedFrame {
-                            if cloudLayerState.frameTimestamps.indices.contains(cloudLayerState.currentFrameIndex) {
-                                RadarTimestampBadge(
-                                    timestamp: cloudLayerState.frameTimestamps[cloudLayerState.currentFrameIndex],
-                                    isLive: cloudLayerState.isCurrentFrameLive
-                                )
-                            }
-                        } else if settingsService.activeTileLayer != nil,
-                                  modelGridState.hasAnyLoadedFrame {
-                            if let timestamp = modelGridState.currentFrameTimestamp {
-                                RadarTimestampBadge(timestamp: timestamp, isLive: false)
-                            }
-                            if let colormap = settingsService.activeTileLayer?.colormap {
-                                ColormapVerticalLegend(colormap: colormap)
-                            }
-                        }
-                    }
+                    MapLegendStack(settingsService: settingsService,
+                                   radarState: radarState,
+                                   cloudLayerState: cloudLayerState,
+                                   modelGridState: modelGridState)
                     .padding(12)
                     Spacer()
                     mapControlStack
@@ -320,5 +293,50 @@ struct WeatherMapDetailView: View {
         settingsService.activeTileLayer = model
         settingsService.cloudLayerActive = clouds
         syncCloudActivation()
+    }
+}
+
+// MARK: - Legend stack
+
+/// Own view so the per-tick `currentFrameTimestamp` reads invalidate only this
+/// stack, not the whole fullscreen map body.
+private struct MapLegendStack: View {
+    let settingsService: SettingService
+    let radarState: OscarRadarState
+    let cloudLayerState: CloudLayerState
+    let modelGridState: ModelGridLayerState
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if settingsService.oscarRadarLayer {
+                if radarState.hasAnyLoadedFrame,
+                   let timestamp = radarState.currentFrameTimestamp {
+                    RadarTimestampBadge(
+                        timestamp: timestamp,
+                        isLive: radarState.isCurrentFrameLive
+                    )
+                    ColormapVerticalLegend(colormap: .radar)
+                }
+                if settingsService.showStormCells {
+                    StormCellLegend()
+                }
+            } else if settingsService.cloudLayerActive,
+                      cloudLayerState.hasAnyLoadedFrame {
+                if cloudLayerState.frameTimestamps.indices.contains(cloudLayerState.currentFrameIndex) {
+                    RadarTimestampBadge(
+                        timestamp: cloudLayerState.frameTimestamps[cloudLayerState.currentFrameIndex],
+                        isLive: cloudLayerState.isCurrentFrameLive
+                    )
+                }
+            } else if settingsService.activeTileLayer != nil,
+                      modelGridState.hasAnyLoadedFrame {
+                if let timestamp = modelGridState.currentFrameTimestamp {
+                    RadarTimestampBadge(timestamp: timestamp, isLive: false)
+                }
+                if let colormap = settingsService.activeTileLayer?.colormap {
+                    ColormapVerticalLegend(colormap: colormap)
+                }
+            }
+        }
     }
 }

@@ -22,13 +22,13 @@ struct OnboardingStage: View {
                     .frame(height: max(proxy.size.height * Self.heroFraction - Self.featherHeight, 0))
 
                 LinearGradient(
-                    colors: [Color(.systemBackground).opacity(0), Color(.systemBackground)],
+                    colors: [Color(uiColor: .systemBackground).opacity(0), Color(uiColor: .systemBackground)],
                     startPoint: .top,
                     endPoint: .bottom
                 )
                 .frame(height: Self.featherHeight)
 
-                Color(.systemBackground)
+                Color(uiColor: .systemBackground)
                     // The stage as a whole measures ABOVE the keyboard (see
                     // below), but the canvas still has to paint all the way to
                     // the screen edge: the keyboard is translucent, and over a

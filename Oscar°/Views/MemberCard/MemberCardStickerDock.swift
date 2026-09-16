@@ -33,7 +33,7 @@ struct MemberCardStickerDock: View {
         .frame(height: 100)
         .padding(.leading, 2)
         .padding(.trailing, 0)
-        .background(dockBackground)
+        .background { dockBackground }
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 30, style: .continuous)

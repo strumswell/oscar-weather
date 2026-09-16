@@ -22,7 +22,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode-beta.app}"
+export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app}"
 
 command -v fastlane >/dev/null 2>&1 || {
   echo "fastlane not found. Install with: brew install fastlane" >&2

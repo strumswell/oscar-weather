@@ -81,7 +81,7 @@ struct MapLayerPickerSheet: View {
                                      infoHint: "Öffnet Details zu den Radarquellen",
                                      onInfoTap: { showsRadarInfo = true })
             ScrollViewReader { proxy in
-                ScrollView(.horizontal, showsIndicators: false) {
+                ScrollView(.horizontal) {
                     HStack(alignment: .top, spacing: 12) {
                         radarTile(.germany, title: "Zentraleuropa", subtitle: "DWD",
                                   imageName: "layer-radar-germany")
@@ -97,6 +97,7 @@ struct MapLayerPickerSheet: View {
                                   imageName: "layer-radar-canarias")
                     }
                 }
+                .scrollIndicators(.hidden)
                 .scrollClipDisabled()
                 .onAppear {
                     // A selected coverage at the row's end would otherwise open

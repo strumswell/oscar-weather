@@ -1,5 +1,5 @@
 # fastlane snapshot configuration for the App Store screenshot run.
-# Invoke through bin/screenshots.sh (sets DEVELOPER_DIR to Xcode-beta).
+# Invoke through bin/screenshots.sh (sets DEVELOPER_DIR to Xcode).
 
 project("./Oscar°.xcodeproj")
 scheme("Oscar°Screenshots")

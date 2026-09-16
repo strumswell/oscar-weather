@@ -27,14 +27,12 @@ struct HeadView: View {
   private static let temperatureGapMinHeight: CGFloat = 70
   private static let metricsGapMinHeight: CGFloat = 110
 
-  private var windSpeedUnit: WindSpeedUnit {
-    WindSpeedUnit(settingValue: settingsService.windSpeedUnit)
-  }
-
-  private var currentWindSpeed: Double? {
-    let speed = weather.forecast.current?.windspeed
-    guard windSpeedUnit.usesBeaufortDisplay else { return speed }
-    return BeaufortScale.value(forKilometersPerHour: speed)
+  /// Spoken form of the metrics row: "Bewölkung 45 %, Wind 12 km/h, …".
+  private var metricsDescription: String {
+    settingsService.headMetrics.compactMap { metric in
+      metric.value(in: weather).map { "\(String(localized: metric.title)) \($0)" }
+    }
+    .joined(separator: ", ")
   }
 
   /// The active place's personalization: the selected city's, or the current
@@ -140,7 +138,7 @@ struct HeadView: View {
           .font(.caption.weight(.semibold))
           .textCase(.uppercase)
           .tracking(1.2)
-          .foregroundStyle(Color(UIColor.label).opacity(0.6))
+          .foregroundStyle(Color(uiColor: .label).opacity(0.6))
           .lineLimit(1)
           // Mutes the emoji too — foregroundStyle can't touch its colors, and
           // at full saturation it outweighs the city name above it.
@@ -153,13 +151,13 @@ struct HeadView: View {
           // to the eyebrow's level so the name keeps the weight.
           Image(systemName: "location.fill")
             .font(.system(size: cityNameFontSize * 0.55, weight: .bold))
-            .foregroundStyle(Color(UIColor.label).opacity(0.75))
+            .foregroundStyle(Color(uiColor: .label).opacity(0.75))
         }
         Text(location.name)
           .font(.system(size: cityNameFontSize, weight: .bold))
           .lineSpacing(10)
           .multilineTextAlignment(.center)
-          .foregroundStyle(Color(UIColor.label))
+          .foregroundStyle(Color(uiColor: .label))
       }
     }
   }
@@ -205,7 +203,7 @@ struct HeadView: View {
         Spacer(minLength: Self.temperatureGapMinHeight)
 
         Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
-          .foregroundStyle(Color(UIColor.label))
+          .foregroundStyle(Color(uiColor: .label))
           .font(.system(size: temperatureFontSize))
           .minimumScaleFactor(0.5)
           .lineLimit(1)
@@ -216,36 +214,33 @@ struct HeadView: View {
 
         Spacer(minLength: Self.metricsGapMinHeight)
 
-        HStack(spacing: 6) {
-          Spacer()
-          Image(systemName: "cloud")
-          Text("\(weather.forecast.current?.cloudcover ?? 0, specifier: "%.0f") %")
-          if let annotation = cloudTrendAnnotation {
-            // The satellite nowcast's sky transition rides inline after the
-            // cloud value — smaller type, optically centered on the row.
-            HStack(spacing: 2) {
-              Image(systemName: annotation.arrow)
-                .font(.system(size: 9, weight: .bold))
-              Text(annotation.time)
-                .font(.caption2.weight(.medium))
+        HStack(spacing: 18) {
+          ForEach(settingsService.headMetrics) { metric in
+            if let value = metric.value(in: weather) {
+              HStack(spacing: 6) {
+                Image(systemName: metric.systemImage)
+                Text(value)
+                if metric == .cloudCover, let annotation = cloudTrendAnnotation {
+                  // The satellite nowcast's sky transition rides inline after the
+                  // cloud value — smaller type, optically centered on the row.
+                  HStack(spacing: 2) {
+                    Image(systemName: annotation.arrow)
+                      .font(.system(size: 9, weight: .bold))
+                    Text(annotation.time)
+                      .font(.caption2.weight(.medium))
+                  }
+                  .foregroundStyle(Color(uiColor: .label).opacity(0.55))
+                }
+              }
             }
-            .foregroundStyle(Color(UIColor.label).opacity(0.55))
           }
-          Image(systemName: "wind")
-            .padding(.leading, 12)
-          Text(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h"))
-          Image(systemName: "location")
-            .padding(.leading, 12)
-          Text(weather.forecast.current?.getWindDirection() ?? "")
-          Spacer()
         }
         .font(.subheadline.weight(.medium))
-        .foregroundStyle(Color(UIColor.label).opacity(0.85))
+        .foregroundStyle(Color(uiColor: .label).opacity(0.85))
         .shadow(radius: 3)
+        .frame(maxWidth: .infinity, minHeight: 20)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(
-          "Bewölkung \(Int((weather.forecast.current?.cloudcover ?? 0).rounded())) Prozent, Wind \(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h")), Richtung \(weather.forecast.current?.getWindDirection() ?? "unbekannt")"
-        )
+        .accessibilityLabel(Text(metricsDescription))
 
         if hasWeatherAlerts() {
           AlertView()
