@@ -92,6 +92,7 @@ A four-page vertical stack: an animated current-conditions scene, a rain nowcast
 | [EUMETSAT](https://www.eumetsat.int/) | Satellite cloud imagery (Meteosat) | Europe / Africa / Atlantic |
 | [Environment Canada](https://weather.gc.ca/) | Weather alerts | Canada |
 | [OpenStreetMap](https://www.openstreetmap.org/) / [OpenFreeMap](https://openfreemap.org/) | Map data and tiles | Global |
+| Oscar Server / [IMO](https://imo.net/resources/calendar/) | Meteor-shower observing conditions | Global |
 
 ---
 
@@ -101,6 +102,19 @@ A four-page vertical stack: an animated current-conditions scene, a rain nowcast
 2. Open `Oscar°.xcodeproj` in Xcode 26 or later
 3. Select your development team in the project signing settings
 4. Build and run on a device or simulator running iOS 26 or watchOS 26
+
+### Meteor showers
+
+The app requests `GET https://server.oscars.love/astro/meteors?lat=…&lon=…` with the
+selected place's rounded coordinates (see `docs/astro-integration.md` in
+[oscar-server](https://github.com/strumswell/oscar-server)). The `-radarBaseURL`
+launch argument points it at a local server like the other oscar-server requests.
+
+When the server rates a shower for tonight, a small notice joins the hourly
+forecast at the start of its best observing window, in the same style as the other
+cards. Tapping it opens observing details. Nights without an active shower, with
+low meteor activity or without an observing window, as well as server failures,
+hide the notice without interrupting the forecast.
 
 ---
 
@@ -126,6 +140,7 @@ Contributions are welcome, whether bug fixes, new features, or improvements to e
 - Satellite cloud imagery: [EUMETSAT](https://www.eumetsat.int/)
 - Forecast models: [ECMWF](https://www.ecmwf.int/)
 - Map data and tiles: [OpenStreetMap](https://www.openstreetmap.org/) contributors, [OpenFreeMap](https://openfreemap.org/), rendered with [MapLibre Native](https://maplibre.org/)
+- Meteor-shower data: [International Meteor Organization](https://imo.net/resources/calendar/), rated by Oscar Server
 - 3D weather icons: [Hosein Bagheri](https://ui8.net/hosein_bagheri/products/3d-weather-icons40)
 - Error tracking: [Sentry](https://sentry.io/)
 - Networking: Apple's [swift-openapi-generator](https://github.com/apple/swift-openapi-generator), swift-openapi-runtime, and swift-openapi-urlsession

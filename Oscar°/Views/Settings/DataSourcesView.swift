@@ -17,6 +17,15 @@ struct DataSourcesView: View {
           }
         }
 
+        SettingsExternalLink(destination: URL(string: "https://imo.net/resources/calendar/")!) {
+          Label {
+            Text(verbatim: "International Meteor Organization (IMO)")
+          } icon: {
+            Image(systemName: "sparkles")
+          }
+          .labelStyle(.settingsIcon(.cyan))
+        }
+
         SettingsExternalLink(destination: URL(string: "https://www.openstreetmap.org/copyright")!) {
           Label("Kartendaten © OpenStreetMap", systemImage: "map.fill")
             .labelStyle(.settingsIcon(.teal))

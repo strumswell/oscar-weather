@@ -110,6 +110,12 @@ final class ScreenshotFixtureServer: URLProtocol {
         if path.hasPrefix("/radar/series") {
             return json { _ in ScreenshotFixtures.precipSeriesJSON() }
         }
+        if path.hasPrefix("/astro/meteors") {
+            // Meteor data is opt-in so the established App Store scenes keep
+            // their composition. Always intercept this endpoint, including
+            // without the flag, to keep staged location requests offline.
+            return json { _ in ScreenshotFixtures.meteorsJSON() }
+        }
         if path.hasPrefix("/weather-alerts/point") {
             return json { _ in ScreenshotFixtures.alertsJSON() }
         }

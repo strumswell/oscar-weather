@@ -58,6 +58,9 @@ final class Weather {
     var loadingQueries: Set<WeatherLoadingQuery> = []
     var forecast: Operations.getForecast.Output.Ok.Body.jsonPayload
     var alerts: AlertResponse
+    /// Best-effort meteor observing conditions from oscar-server. Nil also
+    /// represents nights without an active shower and request failures.
+    var meteorShowerResponse: MeteorShowerResponse?
     var air: Operations.getAirQuality.Output.Ok.Body.jsonPayload
     var time: Double
     var precipSeries: PrecipSeriesResponse?
@@ -66,9 +69,19 @@ final class Weather {
     var error: String = ""
     var lastUpdated: Date?
     var debug = false
+    @ObservationIgnored private var meteorRequestID = UUID()
 
     var hasContent: Bool {
         lastUpdated != nil
+    }
+
+    var meteorEvents: [MeteorShowerEvent] {
+        meteorShowerResponse?.showers ?? []
+    }
+
+    /// The shower the server ranked best for tonight's observing window.
+    var primaryMeteorEvent: MeteorShowerEvent? {
+        meteorShowerResponse?.primaryShower
     }
     
     init() {
@@ -79,6 +92,7 @@ final class Weather {
             current: .init(cloudcover: 0.0, time: 0.0, temperature: 20.0, windspeed: 0.0, wind_direction_10m: 0.0, weathercode: 0.0)
         )
         alerts = .oscar(.empty)
+        meteorShowerResponse = nil
         air = Operations.getAirQuality.Output.Ok.Body.jsonPayload.init(latitude: 0, longitude: 0, hourly: nil)
         precipSeries = nil
     }
@@ -133,8 +147,8 @@ extension Weather {
     ) async {
         // Guard re-entrancy with a dedicated flag, not `isLoading`: the latter is cleared
         // early (once the main data lands) so the spinner hides promptly, but the function
-        // keeps running through the trailing alerts fetch — a second refresh must not start
-        // in that window.
+        // keeps running through the trailing supplementary fetches — a second refresh must
+        // not start in that window.
         guard !isRefreshing else {
             refreshRequestedWhileBusy = true
             return
@@ -146,6 +160,9 @@ extension Weather {
                 Task { await refresh(location: location, client: client, locationService: locationService) }
             }
         }
+        let requestID = UUID()
+        meteorRequestID = requestID
+        meteorShowerResponse = nil
         isLoading = true
         error = ""
         // Only show the "loading" phase on the very first attempt; a retry after a failure
@@ -264,6 +281,18 @@ extension Weather {
             }
 
             markLoading(.alerts)
+            // Start only after the required forecast has been published, and
+            // don't keep the normal refresh guard or spinner alive for it.
+            #if os(iOS)
+            Task {
+                await refreshMeteorShowers(
+                    coordinates: coordinates,
+                    requestID: requestID
+                ) { coordinates in
+                    try await client.getMeteorShowers(coordinates: coordinates)
+                }
+            }
+            #endif
             do {
                 alerts = try await client.getAlerts(
                     coordinates: coordinates,
@@ -290,6 +319,31 @@ extension Weather {
             // a launch-time location update) cleared it. `loadState` stays `.failed` until a
             // refresh actually succeeds.
             if !hasContent { loadState = .failed }
+        }
+    }
+
+    /// Small injectable seam for the supplementary request. It deliberately
+    /// cannot mutate forecast load/error state, and always clears before a
+    /// night without active showers or a failure.
+    func refreshMeteorShowers(
+        coordinates: CLLocationCoordinate2D,
+        requestID: UUID? = nil,
+        fetch: (CLLocationCoordinate2D) async throws -> MeteorShowerResponse
+    ) async {
+        guard requestID == nil || requestID == meteorRequestID else { return }
+        meteorShowerResponse = nil
+
+        do {
+            let response = try await fetch(coordinates)
+            guard requestID == nil || requestID == meteorRequestID else { return }
+            guard !response.showers.isEmpty else { return }
+            meteorShowerResponse = response
+        } catch is CancellationError {
+            return
+        } catch let error as URLError where error.code == .cancelled {
+            return
+        } catch {
+            // Meteor conditions are supplementary: normal weather remains successful.
         }
     }
 

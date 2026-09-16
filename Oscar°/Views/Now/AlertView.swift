@@ -20,36 +20,41 @@ struct AlertView: View {
         let tint = alerts.first.map {
             AlertSeverityStyle.color(rank: $0.severityRank, source: $0.source)
         } ?? .orange
-        HStack(spacing: 5) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(tint)
-            if let top = alerts.first {
-                Text(formattedHeadline(top: top, count: alerts.count))
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.primary)
+        HStack(spacing: 0) {
+            Button(action: openAlerts) {
+                HStack(spacing: 5) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(tint)
+                    if let top = alerts.first {
+                        Text(formattedHeadline(top: top, count: alerts.count))
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.primary)
+                    }
+                }
+                .padding(.horizontal, 10)
+                .frame(minHeight: 44)
+                .contentShape(.rect)
             }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("now.alert.weather")
+            .accessibilityHint(Text("Öffnet die Wetterwarnungen"))
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        // Translucent so the card base shows through and text stays legible
-        // on bright days.
-        .background(tint.opacity(0.52), in: Capsule())
-        .cardBackground(in: Capsule())
-        .cardBorder(Capsule())
+        // Keep the visual capsule as slim as the original alert pill while
+        // the button retains a comfortable 44-point tap target.
+        .background {
+            Capsule()
+                .fill(tint.opacity(0.52))
+                .cardBackground(in: Capsule())
+                .cardBorder(Capsule())
+                .frame(height: 28)
+        }
         .frame(minWidth: 44, minHeight: 44)
-        .contentShape(.rect)
-        .onTapGesture {
-            Haptics.impact()
-            presentation.present(.alerts)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isButton)
-        .accessibilityHint(Text("Öffnet die Wetterwarnungen"))
-        .accessibilityAction {
-            Haptics.impact()
-            presentation.present(.alerts)
-        }
+    }
+
+    private func openAlerts() {
+        Haptics.impact()
+        presentation.present(.alerts)
     }
 }
 

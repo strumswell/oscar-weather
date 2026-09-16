@@ -333,7 +333,8 @@ struct LocationsView: View {
             name: result.displayName,
             detail: result.detailLine,
             latitude: Double(lat),
-            longitude: Double(lon)
+            longitude: Double(lon),
+            countryCode: result.country_code
         )
     }
 
@@ -341,7 +342,8 @@ struct LocationsView: View {
         locationService.city.addCity(
             name: candidate.name,
             latitude: candidate.latitude,
-            longitude: candidate.longitude
+            longitude: candidate.longitude,
+            countryCode: candidate.countryCode
         )
         Haptics.impact()
         self.candidate = nil

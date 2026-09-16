@@ -11,7 +11,8 @@ enum MemberCardStickerCatalog {
         "sticker_oscar_sleeping",
         "sticker_pest",
         "sticker_solar_panel",
-        "sticker_qourses"
+        "sticker_qourses",
+        "sticker_star"
     ]
 
     static let imageBaseSize: CGFloat = 64
@@ -40,6 +41,8 @@ enum MemberCardStickerCatalog {
             String(localized: "Qourses sticker")
         case "sticker_oscar_sleeping":
             String(localized: "Sleeping Oscar sticker")
+        case "sticker_star":
+            String(localized: "Shooting star sticker")
         default:
             String(localized: "Sticker")
         }

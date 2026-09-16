@@ -322,6 +322,64 @@ enum ScreenshotFixtures {
         return ["alertCount": 1, "alerts": [alert]]
     }
 
+    // MARK: - Meteor observing conditions (oscar-server /astro/meteors)
+
+    /// Opt-in data for UI regression checks: launch an existing Now scene
+    /// with `-screenshotMeteor YES`. Dates hang off `storyNow`, just like the
+    /// weather fixtures, so the window lands inside the served hourly strip.
+    static func meteorsJSON() -> [String: Any] {
+        let formatter = ISO8601DateFormatter()
+        let now = storyNow
+        func timestamp(_ hours: Double) -> String {
+            formatter.string(from: now.addingTimeInterval(hours * 3600))
+        }
+        let night: [String: Any] = [
+            "darkness_start": timestamp(2),
+            "darkness_end": timestamp(8),
+            "type": "astronomical",
+        ]
+        guard UserDefaults.standard.bool(forKey: "screenshotMeteor") else {
+            return [
+                "condition": "unobservable",
+                "night": night,
+                "showers": [] as [Any],
+                "weather": ["source": "none"],
+                "valid_until": timestamp(8),
+                "reasons": ["no_active_shower"],
+            ]
+        }
+        let condition = sunnyStory ? "good" : "poor"
+        let window: [String: Any] = [
+            "start": timestamp(2),
+            "end": timestamp(4),
+            "shower": "PER",
+            "radiant_altitude": 55.6,
+            "moon_illumination": 0.15,
+            "cloud_cover": sunnyStory ? 15.0 : 100.0,
+            "precipitation_mm_h": sunnyStory ? 0.0 : 5.2,
+        ]
+        var response: [String: Any] = [
+            "condition": condition,
+            "best_window": window,
+            "night": night,
+            "showers": [[
+                "id": "PER",
+                "peak": timestamp(3),
+                "uncertainty_hours": 3,
+                "condition": condition,
+                "best_window": window,
+            ] as [String: Any]],
+            "weather": sunnyStory
+                ? ["source": "ecmwf", "issued_at": timestamp(-6)]
+                : ["source": "ecmwf", "issued_at": timestamp(-6), "precipitation_source": "dwd-nowcast"],
+            "valid_until": timestamp(4),
+        ]
+        if !sunnyStory {
+            response["reasons"] = ["cloud_cover", "precipitation"]
+        }
+        return response
+    }
+
     // MARK: - Radar series (oscar-server /radar/series)
 
     static func precipSeriesJSON() -> [String: Any] {

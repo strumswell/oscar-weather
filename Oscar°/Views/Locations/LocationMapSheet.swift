@@ -61,6 +61,7 @@ struct LocationMapSheet: View {
         var longitude: Double
         var name: String?
         var detail: String?
+        var countryCode: String?
         /// Reverse geocoding still running: the card shows a spinner, never the
         /// raw coordinates (those remain only as the failure fallback).
         var isResolving = true
@@ -191,7 +192,8 @@ struct LocationMapSheet: View {
             name: point.name ?? point.coordinateText,
             detail: point.detail,
             latitude: point.latitude,
-            longitude: point.longitude
+            longitude: point.longitude,
+            countryCode: point.countryCode
         )
     }
 
@@ -225,6 +227,7 @@ struct LocationMapSheet: View {
             current.detail = [placemark.administrativeArea, placemark.country]
                 .compactMap { $0 }
                 .joined(separator: ", ")
+            current.countryCode = placemark.isoCountryCode
             if current.detail?.isEmpty == true {
                 current.detail = nil
             }
