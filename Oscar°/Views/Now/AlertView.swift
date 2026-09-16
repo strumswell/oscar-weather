@@ -8,14 +8,8 @@
 import SwiftUI
 
 struct AlertView: View {
-    let additionalMeteorEvent: MeteorShowerEvent?
-
     @Environment(Weather.self) private var weather: Weather
     @Environment(NowPresentationCoordinator.self) private var presentation
-
-    init(additionalMeteorEvent: MeteorShowerEvent? = nil) {
-        self.additionalMeteorEvent = additionalMeteorEvent
-    }
 
     var body: some View {
         let alerts = weather.alerts.displayInfos
@@ -38,8 +32,7 @@ struct AlertView: View {
                             .foregroundStyle(.primary)
                     }
                 }
-                .padding(.leading, 10)
-                .padding(.trailing, additionalMeteorEvent == nil ? 10 : 7)
+                .padding(.horizontal, 10)
                 .frame(minHeight: 44)
                 .contentShape(.rect)
             }
@@ -47,36 +40,9 @@ struct AlertView: View {
             .accessibilityIdentifier("now.alert.weather")
             .accessibilityHint(Text("Öffnet die Wetterwarnungen"))
 
-            if let event = additionalMeteorEvent {
-                Rectangle()
-                    .fill(.primary.opacity(0.16))
-                    .frame(width: 1, height: 18)
-                    .accessibilityHidden(true)
-
-                Button {
-                    UIApplication.shared.playHapticFeedback()
-                    presentation.present(.meteorShower(event))
-                } label: {
-                    Text("+1")
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(.cyan)
-                        .padding(.horizontal, 10)
-                        .frame(minWidth: 44, minHeight: 44)
-                        .contentShape(.rect)
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("now.alert.meteor")
-                .accessibilityLabel(Text(MeteorShowerCopy.bannerText(for: event.presentation)))
-                .accessibilityHint(
-                    Text(String(
-                        localized: "meteor.accessibility.hint",
-                        defaultValue: "Öffnet Details zum Sternschnuppenschauer"
-                    ))
-                )
-            }
         }
         // Keep the visual capsule as slim as the original alert pill while
-        // both halves retain a comfortable 44-point tap target.
+        // the button retains a comfortable 44-point tap target.
         .background {
             Capsule()
                 .fill(tint.opacity(0.52))

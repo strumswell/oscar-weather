@@ -57,8 +57,8 @@ final class Weather {
     var loadingQueries: Set<WeatherLoadingQuery> = []
     var forecast: Operations.getForecast.Output.Ok.Body.jsonPayload
     var alerts: AlertResponse
-    /// Best-effort observing context from Oscar Astro. Nil also represents
-    /// unsupported locations, no noteworthy shower, and request failures.
+    /// Best-effort meteor observing conditions from oscar-server. Nil also
+    /// represents nights without an active shower and request failures.
     var meteorShowerResponse: MeteorShowerResponse?
     var air: Operations.getAirQuality.Output.Ok.Body.jsonPayload
     var time: Double
@@ -75,11 +75,12 @@ final class Weather {
     }
 
     var meteorEvents: [MeteorShowerEvent] {
-        meteorShowerResponse?.events ?? []
+        meteorShowerResponse?.showers ?? []
     }
 
+    /// The shower the server ranked best for tonight's observing window.
     var primaryMeteorEvent: MeteorShowerEvent? {
-        MeteorShowerEventSelector.select(from: meteorEvents)
+        meteorShowerResponse?.primaryShower
     }
     
     init() {
@@ -276,13 +277,9 @@ extension Weather {
             Task {
                 await refreshMeteorShowers(
                     coordinates: coordinates,
-                    countryCode: location.countryCode,
                     requestID: requestID
-                ) { coordinates, countryCode in
-                    try await client.getActiveMeteorShowers(
-                        coordinates: coordinates,
-                        countryCode: countryCode
-                    )
+                ) { coordinates in
+                    try await client.getMeteorShowers(coordinates: coordinates)
                 }
             }
             #endif
@@ -317,31 +314,26 @@ extension Weather {
 
     /// Small injectable seam for the supplementary request. It deliberately
     /// cannot mutate forecast load/error state, and always clears before a
-    /// missing country code, unsupported response, empty result, or failure.
+    /// night without active showers or a failure.
     func refreshMeteorShowers(
         coordinates: CLLocationCoordinate2D,
-        countryCode: String?,
         requestID: UUID? = nil,
-        fetch: (CLLocationCoordinate2D, String) async throws -> MeteorShowerResponse
+        fetch: (CLLocationCoordinate2D) async throws -> MeteorShowerResponse
     ) async {
         guard requestID == nil || requestID == meteorRequestID else { return }
         meteorShowerResponse = nil
-        guard let countryCode = countryCode?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !countryCode.isEmpty else {
-            return
-        }
 
         do {
-            let response = try await fetch(coordinates, countryCode.uppercased())
+            let response = try await fetch(coordinates)
             guard requestID == nil || requestID == meteorRequestID else { return }
-            guard response.supported, !response.events.isEmpty else { return }
+            guard !response.showers.isEmpty else { return }
             meteorShowerResponse = response
         } catch is CancellationError {
             return
         } catch let error as URLError where error.code == .cancelled {
             return
         } catch {
-            // Oscar Astro is supplementary: normal weather remains successful.
+            // Meteor conditions are supplementary: normal weather remains successful.
         }
     }
 

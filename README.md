@@ -84,7 +84,7 @@ Forecast map tiles are generated in-house for the next 3 days across three varia
 | [DWD](https://www.dwd.de/) | Radar tiles | Germany / Central Europe |
 | [RainViewer](https://www.rainviewer.com/) | Radar map overlay | Global |
 | [Environment Canada](https://weather.gc.ca/) | Weather alerts | Canada |
-| [Oscar Astro](https://astro.oscars.love/docs) / [IMO](https://imo.net/resources/calendar/) | Meteor-shower notices | Europe |
+| Oscar Server / [IMO](https://imo.net/resources/calendar/) | Meteor-shower observing conditions | Global |
 
 ---
 
@@ -94,6 +94,19 @@ Forecast map tiles are generated in-house for the next 3 days across three varia
 2. Open `Oscar°.xcodeproj` in Xcode 16 or later
 3. Select your development team in the project signing settings
 4. Build and run on a device or simulator running iOS 26+
+
+### Meteor showers
+
+The app requests `GET https://server.oscars.love/astro/meteors?lat=…&lon=…` with the
+selected place's rounded coordinates (see `docs/astro-integration.md` in
+[oscar-server](https://github.com/strumswell/oscar-server)). The `-radarBaseURL`
+launch argument points it at a local server like the other oscar-server requests.
+
+When the server rates a shower for tonight, a small notice joins the hourly
+forecast at the start of its best observing window, in the same style as the other
+cards. Tapping it opens observing details. Nights without an active shower, with
+low meteor activity or without an observing window, as well as server failures,
+hide the notice without interrupting the forecast.
 
 ---
 
@@ -117,7 +130,7 @@ Contributions are welcome — bug fixes, new features, or improvements to existi
 - Rain radar & German weather alerts — [BrightSky](https://brightsky.dev/) / [DWD](https://www.dwd.de/)
 - Canadian weather alerts — [Environment Canada](https://weather.gc.ca/)
 - Radar overlay — [RainViewer](https://www.rainviewer.com/)
-- Meteor-shower data — [International Meteor Organization](https://imo.net/resources/calendar/), served by Oscar Astro
+- Meteor-shower data — [International Meteor Organization](https://imo.net/resources/calendar/), rated by Oscar Server
 - 3D weather icons — [Hosein Bagheri](https://ui8.net/hosein_bagheri/products/3d-weather-icons40)
 - Animated background techniques — [Hacking with Swift](https://www.hackingwithswift.com)
 - Error tracking — [Sentry](https://sentry.io/)

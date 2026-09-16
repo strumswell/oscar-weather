@@ -85,7 +85,7 @@ struct NowView: View {
                                 .transition(.move(edge: .top).combined(with: .opacity))
                         }
                         HeadView()
-                            .padding(.top, 35)
+                            .padding(.top, 24)
                             .onTapGesture {
                                 self.tapCount += 1
                                 if self.tapCount == 10 {
@@ -96,6 +96,7 @@ struct NowView: View {
                             }
                         RainView(openRadarMap: openRadarMap)
                         HourlyView()
+                            .accessibilityElement(children: .contain)
                             .accessibilityIdentifier("now.hourly")
                             // The strip's horizontal ScrollView is greedy in
                             // height and would swallow part of the stretch —

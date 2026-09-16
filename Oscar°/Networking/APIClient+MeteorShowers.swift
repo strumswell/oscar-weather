@@ -2,18 +2,13 @@ import CoreLocation
 import Foundation
 
 extension APIClient {
-  /// Noteworthy meteor showers for the active Oscar location. The backend owns
-  /// observing-date and astronomical visibility logic; coordinates follow the
-  /// same approximately 100 m rounding contract as the weather requests.
-  func getActiveMeteorShowers(
-    coordinates: CLLocationCoordinate2D,
-    countryCode: String
-  ) async throws -> MeteorShowerResponse {
-    let request = try Self.activeMeteorShowersRequest(
-      coordinates: coordinates,
-      countryCode: countryCode
-    )
-    let (data, response) = try await Self.fetchWithRetry(request, attempts: 1)
+  /// Tonight's meteor observing conditions for the active Oscar location from
+  /// oscar-server. The server owns the catalogue, astronomy and weather rating;
+  /// coordinates follow the same approximately 100 m rounding contract as the
+  /// weather requests.
+  func getMeteorShowers(coordinates: CLLocationCoordinate2D) async throws -> MeteorShowerResponse {
+    let request = try Self.meteorShowersRequest(coordinates: coordinates)
+    let (data, response) = try await Self.fetchWithRetry(request)
     guard (200...299).contains(response.statusCode) else {
       throw URLError(.badServerResponse)
     }
@@ -21,34 +16,25 @@ extension APIClient {
   }
 
   /// Pure request builder used by the transport and unit tests.
-  static func activeMeteorShowersRequest(
+  static func meteorShowersRequest(
     coordinates: CLLocationCoordinate2D,
-    countryCode: String
+    baseURL: String = radarBaseURL
   ) throws -> URLRequest {
-    let normalizedCountryCode = countryCode
-      .trimmingCharacters(in: .whitespacesAndNewlines)
-      .uppercased()
-    guard normalizedCountryCode.unicodeScalars.count == 2,
-          normalizedCountryCode.unicodeScalars.allSatisfy({ (65...90).contains($0.value) }) else {
-      throw URLError(.badURL)
-    }
-
-    guard var components = URLComponents(
-      string: "https://astro.oscars.love/v1/meteor-showers/active"
-    ) else {
+    guard CLLocationCoordinate2DIsValid(coordinates),
+          var components = URLComponents(string: baseURL + "/astro/meteors") else {
       throw URLError(.badURL)
     }
     let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
     components.queryItems = [
       URLQueryItem(name: "lat", value: String(outboundCoordinates.latitude)),
       URLQueryItem(name: "lon", value: String(outboundCoordinates.longitude)),
-      URLQueryItem(name: "country_code", value: normalizedCountryCode),
     ]
     guard let url = components.url else { throw URLError(.badURL) }
 
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
     request.timeoutInterval = 10
+    request.setValue("application/json", forHTTPHeaderField: "Accept")
     request.addAPIContactIdentity()
     return request
   }

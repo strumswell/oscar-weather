@@ -162,61 +162,59 @@ struct HeadView: View {
           // Mutes the emoji too — foregroundStyle can't touch its colors, and
           // at full saturation it outweighs the city name above it.
           .opacity(0.8)
+          .accessibilityHidden(true)
       }
+      locationButton
+    }
+  }
+
+  private var locationButton: some View {
+    Button {
+      openPlaces()
+    } label: {
       HStack(spacing: 6) {
         if showsLocationGlyph {
-          // Concatenated Text put the small glyph on the name's baseline,
-          // hanging low — the stack centers it on the optical middle. Muted
-          // to the eyebrow's level so the name keeps the weight.
           Image(systemName: "location.fill")
             .font(.system(size: cityNameFontSize * 0.55, weight: .bold))
             .foregroundStyle(Color(UIColor.label).opacity(0.75))
         }
         Text(location.name)
           .font(.system(size: cityNameFontSize, weight: .bold))
-          .lineSpacing(10)
           .multilineTextAlignment(.center)
           .foregroundStyle(Color(UIColor.label))
+          .lineLimit(2)
+          .minimumScaleFactor(0.75)
+      }
+      .frame(minHeight: 44)
+      .contentShape(Rectangle())
+    }
+    .buttonStyle(.plain)
+    .shadow(radius: 5)
+    .contextMenu {
+      locationSwitchPicker
+      Divider()
+      Button(action: openPlaces) {
+        Label("Orte verwalten", systemImage: "list.bullet")
       }
     }
+    .accessibilityIdentifier("now.location")
+    .accessibilityLabel(
+      Text("Ort ändern, aktuell \([eyebrowDescription, location.name].compactMap { $0 }.joined(separator: ", "))")
+    )
+  }
+
+  private func openPlaces() {
+    UIApplication.shared.playHapticFeedback()
+    presentation.selectedTab = .places
   }
 
   var body: some View {
     VStack(spacing: 0) {
-      HStack {
-        Spacer()
-        locationHeader
-        Spacer()
-      }
-      .shadow(radius: 5)
-      .contentShape(Rectangle())
-      .onTapGesture {
-        UIApplication.shared.playHapticFeedback()
-        presentation.selectedTab = .places
-      }
-      // Long-press shortcut for switching places without leaving the
-      // forecast — Tab accepts no gestures or menus, so it lives here.
-      .contextMenu {
-        locationSwitchPicker
-        Divider()
-        Button {
-          UIApplication.shared.playHapticFeedback()
-          presentation.selectedTab = .places
-        } label: {
-          Label("Orte verwalten", systemImage: "list.bullet")
-        }
-      }
-      .accessibilityElement(children: .combine)
-      .accessibilityAddTraits(.isButton)
-      .accessibilityLabel(
-        Text("Ort ändern, aktuell \([eyebrowDescription, location.name].compactMap { $0 }.joined(separator: ", "))")
-      )
-      .accessibilityAction {
-        UIApplication.shared.playHapticFeedback()
-        presentation.selectedTab = .places
-      }
-      .padding(.bottom, 10)
-      .padding(.top)
+      locationHeader
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 20)
+        // Keep the place near the status area, with the breathing room below.
+        .padding(.bottom, 36)
 
       VStack(spacing: 0) {
         Spacer(minLength: Self.temperatureGapMinHeight)
@@ -263,15 +261,9 @@ struct HeadView: View {
           "Bewölkung \(Int((weather.forecast.current?.cloudcover ?? 0).rounded())) Prozent, Wind \(WindSpeedFormatter.string(currentWindSpeed, unit: windSpeedUnit.usesBeaufortDisplay ? windSpeedUnit.displayUnit : weather.forecast.hourly_units?.windspeed_10m ?? "km/h")), Richtung \(weather.forecast.current?.getWindDirection() ?? "unbekannt")"
         )
 
-        if hasWeatherAlerts() || weather.primaryMeteorEvent != nil {
-          VStack(spacing: 8) {
-            if hasWeatherAlerts() {
-              AlertView(additionalMeteorEvent: weather.primaryMeteorEvent)
-            } else if let event = weather.primaryMeteorEvent {
-              MeteorAlertView(event: event)
-            }
-          }
-          .padding(.top, 14)
+        if hasWeatherAlerts() {
+          AlertView()
+            .padding(.top, 14)
         }
       }
       .padding(.bottom, 40)

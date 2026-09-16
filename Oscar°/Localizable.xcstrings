@@ -8036,29 +8036,6 @@
         }
       }
     },
-    "meteor.banner.manyTonight" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Heute Nacht viele Sternschnuppen möglich"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Many shooting stars possible tonight"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bu gece çok sayıda kayan yıldız görülebilir"
-          }
-        }
-      }
-    },
     "meteor.banner.nearPeak" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8128,25 +8105,70 @@
         }
       }
     },
-    "meteor.detail.astronomicalVisibility" : {
+    "meteor.detail.annualEstimate" : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Astronomische Sichtbarkeit"
+            "value" : "Der Höhepunkt ist eine jährliche Schätzung. Der tatsächliche Zeitpunkt kann um einen Tag oder mehr abweichen."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Astronomical visibility"
+            "value" : "The peak is an annual estimate. The actual timing may differ by a day or more."
           }
-        },
-        "tr" : {
+        }
+      }
+    },
+    "meteor.detail.astronomicalWindow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Astronomik görünürlük"
+            "value" : "Astronomisches Beobachtungsfenster"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Astronomical observing window"
+          }
+        }
+      }
+    },
+    "meteor.detail.astronomySourceFormat" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Astronomie: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Astronomy: %@"
+          }
+        }
+      }
+    },
+    "meteor.detail.bestTime" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beste Beobachtungszeit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Best observing time"
           }
         }
       }
@@ -8197,71 +8219,127 @@
         }
       }
     },
-    "meteor.detail.explanation.active" : {
+    "meteor.detail.derivedClassification" : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Heute Nacht sind Sternschnuppen möglich."
+            "value" : "Die Beobachtungsbedingungen werden aus Wetter- und Astronomiedaten abgeleitet."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Shooting stars may be visible tonight."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bu gece kayan yıldızlar görülebilir."
+            "value" : "Observing conditions are derived from weather and astronomy data."
           }
         }
       }
     },
-    "meteor.detail.explanation.manyTonight" : {
+    "meteor.detail.estimatedPeak" : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Heute Nacht sind besonders viele Sternschnuppen möglich."
+            "value" : "Geschätzter Höhepunkt"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Particularly many shooting stars may be visible tonight."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bu gece özellikle çok sayıda kayan yıldız görülebilir."
+            "value" : "Estimated peak"
           }
         }
       }
     },
-    "meteor.detail.explanation.peakTonight" : {
+    "meteor.detail.idealRateFormat" : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Höhepunkt dieses Sternschnuppenschauers ist heute Nacht."
+            "value" : "Bis zu %@ pro Stunde unter idealen Bedingungen"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This meteor shower peaks tonight."
+            "value" : "Up to %@ per hour under ideal conditions"
+          }
+        }
+      }
+    },
+    "meteor.detail.localTime" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ortszeit am gewählten Standort"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local time at the selected location"
+          }
+        }
+      }
+    },
+    "meteor.detail.moon" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mond zur Beobachtungszeit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moon during the observing window"
+          }
+        }
+      }
+    },
+    "meteor.detail.moonIlluminationFormat" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %% beleuchtet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %% illuminated"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bu meteor yağmuru bu gece zirveye ulaşıyor."
+            "value" : "%%%lld aydınlık"
+          }
+        }
+      }
+    },
+    "meteor.detail.observingTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein dunkler Ort abseits von Straßenlaternen verbessert die Sicht. Die tatsächliche Zahl sichtbarer Sternschnuppen kann deutlich niedriger sein."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A dark location away from streetlights improves visibility. The actual number of visible meteors may be much lower."
           }
         }
       }
@@ -8289,25 +8367,42 @@
         }
       }
     },
-    "meteor.detail.source" : {
+    "meteor.detail.radiantAltitude" : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Quelle"
+            "value" : "Höhe des Radianten"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Source"
+            "value" : "Radiant altitude"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaynak"
+            "value" : "Radyant yüksekliği"
+          }
+        }
+      }
+    },
+    "meteor.detail.staleNotice" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Teil der Daten konnte nicht aktualisiert werden. Die Einschätzung kann sich ändern."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Some data could not be updated. The assessment may change."
           }
         }
       }
@@ -8335,25 +8430,246 @@
         }
       }
     },
-    "meteor.detail.zhrFormat" : {
+    "meteor.detail.weatherSourceFormat" : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bis zu %lld pro Stunde unter idealen Bedingungen"
+            "value" : "Wetter: %@"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Up to %lld per hour under ideal conditions"
+            "value" : "Weather: %@"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "İdeal koşullarda saatte %lld adede kadar"
+            "value" : "Hava durumu: %@"
+          }
+        }
+      }
+    },
+    "meteor.hourly.notice" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meteore"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meteors"
+          }
+        }
+      }
+    },
+    "meteor.observing.explanation.fair" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sternschnuppen sind möglich. Wetter, Mondlicht oder die Position am Himmel können die Sicht einschränken."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shooting stars may be visible. Weather, moonlight or the position in the sky may limit visibility."
+          }
+        }
+      }
+    },
+    "meteor.observing.explanation.good" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetter und Mondlicht sprechen für eine gute Sicht im angegebenen Zeitfenster."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather and moonlight suggest good visibility during the indicated window."
+          }
+        }
+      }
+    },
+    "meteor.observing.explanation.poor" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetter, Mondlicht oder die Position am Himmel erschweren die Beobachtung im angegebenen Zeitfenster."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather, moonlight or the position in the sky make observing difficult during the indicated window."
+          }
+        }
+      }
+    },
+    "meteor.observing.explanation.unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Daten reichen derzeit nicht für eine aktuelle Beobachtungsempfehlung aus."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There is not enough current data for an observing recommendation."
+          }
+        }
+      }
+    },
+    "meteor.observing.explanation.unknown" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für die Beobachtungszeit liegen keine verlässlichen Wetterdaten vor. Die astronomische Sichtbarkeit allein sagt nichts über die Bewölkung aus."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reliable weather data is unavailable for the observing window. Astronomical visibility alone does not indicate cloud cover."
+          }
+        }
+      }
+    },
+    "meteor.observing.explanation.unobservable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für diese Nacht ist kein geeignetes Beobachtungsfenster mehr verfügbar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No suitable observing window remains for this night."
+          }
+        }
+      }
+    },
+    "meteor.observing.fair" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mäßige Bedingungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fair conditions"
+          }
+        }
+      }
+    },
+    "meteor.observing.good" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gute Bedingungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Good conditions"
+          }
+        }
+      }
+    },
+    "meteor.observing.poor" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ungünstige Bedingungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poor conditions"
+          }
+        }
+      }
+    },
+    "meteor.observing.unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einschätzung nicht verfügbar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assessment unavailable"
+          }
+        }
+      }
+    },
+    "meteor.observing.unknown" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetterbedingungen unklar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather conditions unknown"
+          }
+        }
+      }
+    },
+    "meteor.observing.unobservable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Beobachtungsfenster"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No observing window"
           }
         }
       }
@@ -8611,29 +8927,6 @@
         }
       }
     },
-    "meteor.status.peak" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Höhepunkt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Peak"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zirve"
-          }
-        }
-      }
-    },
     "meteor.status.tonight" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8653,190 +8946,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bu gece"
-          }
-        }
-      }
-    },
-    "meteor.visibility.cloud.goodSentence" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wenig Wolken – gute Sicht auf Sternschnuppen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Few clouds – good visibility for shooting stars."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Az bulut var – kayan yıldızlar için görüş iyi."
-          }
-        }
-      }
-    },
-    "meteor.visibility.cloud.mixedSentence" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Einige Wolken können die Sicht zeitweise einschränken."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Some clouds may limit visibility at times."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bazı bulutlar zaman zaman görüşü kısıtlayabilir."
-          }
-        }
-      }
-    },
-    "meteor.visibility.cloud.poorSentence" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Viele Wolken – schlechte Sicht auf Sternschnuppen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Many clouds – poor visibility for shooting stars."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Çok bulut var – kayan yıldızlar için görüş zayıf."
-          }
-        }
-      }
-    },
-    "meteor.visibility.excellent" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ausgezeichnet"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Excellent"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mükemmel"
-          }
-        }
-      }
-    },
-    "meteor.visibility.fair" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mäßig"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fair"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Orta"
-          }
-        }
-      }
-    },
-    "meteor.visibility.good" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gut"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Good"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "İyi"
-          }
-        }
-      }
-    },
-    "meteor.visibility.notVisible" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nicht sichtbar"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not visible"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Görünmüyor"
-          }
-        }
-      }
-    },
-    "meteor.visibility.poor" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schlecht"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Poor"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kötü"
           }
         }
       }

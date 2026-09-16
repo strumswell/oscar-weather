@@ -95,11 +95,6 @@ final class ScreenshotFixtureServer: URLProtocol {
             return json { _ in ScreenshotFixtures.ensembleJSON() }
         case "archive-api.open-meteo.com":
             return json { url in ScreenshotFixtures.archiveJSON(for: url) }
-        case "astro.oscars.love" where path.hasPrefix("/v1/meteor-showers/active"):
-            // Existing App Store scenes intentionally have no meteor notice;
-            // more importantly, screenshot mode must never fall through to a
-            // live location-bearing request.
-            return json { _ in ["supported": false, "events": [] as [Any]] }
         default:
             break
         }
@@ -108,6 +103,12 @@ final class ScreenshotFixtureServer: URLProtocol {
 
         if path.hasPrefix("/radar/series") {
             return json { _ in ScreenshotFixtures.precipSeriesJSON() }
+        }
+        if path.hasPrefix("/astro/meteors") {
+            // Meteor data is opt-in so the established App Store scenes keep
+            // their composition. Always intercept this endpoint, including
+            // without the flag, to keep staged location requests offline.
+            return json { _ in ScreenshotFixtures.meteorsJSON() }
         }
         if path.hasPrefix("/weather-alerts/point") {
             return json { _ in ScreenshotFixtures.alertsJSON() }

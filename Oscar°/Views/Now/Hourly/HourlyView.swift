@@ -13,13 +13,29 @@ struct HourlyView: View {
   @Environment(NowPresentationCoordinator.self) private var presentation
   @State private var detailPresentationCount = 0
   @State private var leadingItemID: String?
+  @State private var observingDate = Date.now
 
-  private var items: [HourlyTimelineItem] {
-    HourlyForecastBuilder.makeItems(
+  private var nextMeteorUpdate: Date? {
+    guard let window = weather.primaryMeteorEvent?.bestWindow else { return nil }
+    return [window.start, window.end].filter { $0 > observingDate }.min()
+  }
+
+  private var items: [HourlyDisplayItem] {
+    var items = HourlyForecastBuilder.makeItems(
       forecast: weather.forecast,
       precipSeries: weather.precipSeries,
       isLoading: weather.isLoading
-    )
+    ).map(HourlyDisplayItem.weather)
+
+    if let response = weather.meteorShowerResponse,
+       let notice = MeteorShowerForecast.notice(in: response, now: observingDate),
+       let first = items.first, let last = items.last,
+       notice.date.timeIntervalSince1970 >= first.timestamp,
+       notice.date.timeIntervalSince1970 <= last.timestamp {
+      let index = items.firstIndex { $0.timestamp > notice.date.timeIntervalSince1970 } ?? items.endIndex
+      items.insert(.meteor(notice.event, notice.date), at: index)
+    }
+    return items
   }
 
   private var hasHourlyDetailData: Bool {
@@ -86,9 +102,6 @@ struct HourlyView: View {
                       .scaleEffect(shouldReduceMotion || phase.isIdentity ? 1 : 0.9)
                   }
                   .padding(.vertical, 20)
-                  .onTapGesture {
-                    presentDetails(at: Date(timeIntervalSince1970: item.timestamp))
-                  }
               }
             }
           }
@@ -96,6 +109,7 @@ struct HourlyView: View {
           .font(.system(size: 18))
           .padding(.leading)
         }
+        .accessibilityIdentifier("now.hourly.strip")
         .scrollIndicators(.hidden)
         // .never lets a flick travel several cards; the default limit stops
         // momentum after one page, which reads as a stiff scroll.
@@ -104,9 +118,6 @@ struct HourlyView: View {
         .contentMargins(.trailing, 16, for: .scrollContent)
         .frame(maxWidth: .infinity)
       }
-      .contentShape(.rect)
-      .onTapGesture(perform: presentDetails)
-      .disabled(!hasHourlyDetailData)
       .accessibilityAction(named: Text("Stündliche Details"), presentDetails)
     }
     .scrollTransition { content, phase in
@@ -115,15 +126,43 @@ struct HourlyView: View {
         .scaleEffect(shouldReduceMotion || phase.isIdentity ? 1 : 0.99)
     }
     .sensoryFeedback(.impact, trigger: detailPresentationCount)
+    .task(id: nextMeteorUpdate) {
+      // Expire the notice even when the forecast stays open without a refresh.
+      observingDate = .now
+      guard let nextMeteorUpdate else { return }
+      do {
+        try await Task.sleep(for: .seconds(max(0, nextMeteorUpdate.timeIntervalSinceNow)))
+        observingDate = .now
+      } catch {
+        // Leaving this view or receiving newer data cancels the old deadline.
+      }
+    }
   }
 
   @ViewBuilder
-  private func timelineItemView(_ item: HourlyTimelineItem) -> some View {
+  private func timelineItemView(_ item: HourlyDisplayItem) -> some View {
     switch item {
-    case .forecast(let forecast):
-      HourlyForecastCard(item: forecast)
-    case .sunEvent(let sunEvent):
-      HourlySunEventCard(item: sunEvent)
+    case .weather(let item):
+      Button {
+        presentDetails(at: Date(timeIntervalSince1970: item.timestamp))
+      } label: {
+        switch item {
+        case .forecast(let forecast):
+          HourlyForecastCard(item: forecast)
+        case .sunEvent(let sunEvent):
+          HourlySunEventCard(item: sunEvent)
+        }
+      }
+      .buttonStyle(.plain)
+      .disabled(!hasHourlyDetailData)
+      .accessibilityIdentifier("now.hourly.forecast.\(item.id)")
+    case .meteor(let event, let date):
+      MeteorShowerNotice(
+        event: event,
+        phase: MeteorShowerPhase.of(event, night: weather.meteorShowerResponse?.night, now: observingDate),
+        date: date,
+        timeZone: TimeZone(secondsFromGMT: weather.forecast.utc_offset_seconds ?? 0) ?? .current
+      )
     }
   }
 
@@ -148,6 +187,27 @@ struct HourlyView: View {
 
     UIApplication.shared.playHapticFeedback()
     withAnimation(.snappy) { leadingItemID = firstID }
+  }
+}
+
+/// Presentation-only additions keep the shared iPhone/Watch weather timeline
+/// unchanged. The observing notice uses the same ordering and scroll IDs.
+private enum HourlyDisplayItem: Identifiable {
+  case weather(HourlyTimelineItem)
+  case meteor(MeteorShowerEvent, Date)
+
+  var id: String {
+    switch self {
+    case .weather(let item): item.id
+    case .meteor(let event, _): "meteor-\(event.id)"
+    }
+  }
+
+  var timestamp: Double {
+    switch self {
+    case .weather(let item): item.timestamp
+    case .meteor(_, let date): date.timeIntervalSince1970
+    }
   }
 }
 
