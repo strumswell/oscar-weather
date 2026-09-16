@@ -12,6 +12,8 @@ struct AppIconOption: Identifiable, Equatable {
     let name: LocalizedStringResource
     let alternateIconName: String?
     let previewAssetName: String
+
+    var isFree: Bool { AppIconCatalog.freeIDs.contains(id) }
 }
 
 struct AppIconSection: Identifiable {
@@ -21,6 +23,9 @@ struct AppIconSection: Identifiable {
 }
 
 enum AppIconCatalog {
+    /// Everything else unlocks by supporting Oscar (see `SupporterStore`).
+    static let freeIDs: Set<String> = ["original", "chill-day", "tv-classic", "mecha-oscar", "flat-oscar-classic", "flat-oscar-black"]
+
     static let sections: [AppIconSection] = [
         AppIconSection(
             id: "original",

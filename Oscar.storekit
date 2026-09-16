@@ -1,0 +1,201 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "0A5C1E2B",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "3.99",
+      "familyShareable" : false,
+      "internalID" : "1A000001",
+      "localizations" : [
+        {
+          "description" : "Ein kleines Dankeschön für Oscar.",
+          "displayName" : "Kleines Dankeschön",
+          "locale" : "de"
+        },
+        {
+          "description" : "A small thank you for Oscar.",
+          "displayName" : "Small thank you",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "cloud.bolte.Oscar.tip.small",
+      "referenceName" : "Tip small",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : false,
+      "internalID" : "1A000002",
+      "localizations" : [
+        {
+          "description" : "Ein Dankeschön für Oscar.",
+          "displayName" : "Dankeschön",
+          "locale" : "de"
+        },
+        {
+          "description" : "A thank you for Oscar.",
+          "displayName" : "Thank you",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "cloud.bolte.Oscar.tip.medium",
+      "referenceName" : "Tip medium",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "24.99",
+      "familyShareable" : false,
+      "internalID" : "1A000003",
+      "localizations" : [
+        {
+          "description" : "Ein großes Dankeschön für Oscar.",
+          "displayName" : "Großes Dankeschön",
+          "locale" : "de"
+        },
+        {
+          "description" : "A big thank you for Oscar.",
+          "displayName" : "Big thank you",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "cloud.bolte.Oscar.tip.large",
+      "referenceName" : "Tip large",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_locale" : "de",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "DEU",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionBundleGroups" : [
+
+  ],
+  "subscriptionGroups" : [
+    {
+      "id" : "A1B2C3D4",
+      "localizations" : [
+
+      ],
+      "name" : "Unterstützer",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "0.99",
+              "displayPrice" : "0.99",
+              "internalID" : "2EE090C4",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "0.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "2A000001",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+            {
+              "description" : "Oscar jeden Monat unterstützen.",
+              "displayName" : "Monatlich",
+              "locale" : "de"
+            },
+            {
+              "description" : "Support Oscar every month.",
+              "displayName" : "Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "cloud.bolte.Oscar.supporter.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Supporter monthly",
+          "subscriptionGroupID" : "A1B2C3D4",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "billingPlans" : [
+            {
+              "billingPlanType" : "BILLED_UPFRONT",
+              "commitmentDisplayPrice" : "7.99",
+              "displayPrice" : "7.99",
+              "internalID" : "40DAFE62",
+              "isEnabled" : true
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "7.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "2A000002",
+          "introductoryOffers" : [
+
+          ],
+          "localizations" : [
+            {
+              "description" : "Oscar jedes Jahr unterstützen.",
+              "displayName" : "Jährlich",
+              "locale" : "de"
+            },
+            {
+              "description" : "Support Oscar every year.",
+              "displayName" : "Yearly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "cloud.bolte.Oscar.supporter.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Supporter yearly",
+          "subscriptionGroupID" : "A1B2C3D4",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "subscriptionSuiteGroups" : [
+
+  ],
+  "version" : {
+    "major" : 6,
+    "minor" : 3
+  }
+}

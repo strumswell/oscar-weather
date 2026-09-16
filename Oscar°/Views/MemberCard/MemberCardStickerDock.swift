@@ -70,7 +70,8 @@ struct MemberCardStickerDock: View {
             .gesture(DockPickupGesture(
                 onBegan: { local, global in
                     let index = Int(floor((local.x + railScrollOffset) / Self.itemPitch))
-                    guard assetNames.indices.contains(index) else { return }
+                    guard assetNames.indices.contains(index),
+                          !MemberCardStickerCatalog.isLocked(assetNames[index]) else { return }
                     pickupAssetName = assetNames[index]
                     onPickupStarted(assetNames[index], global)
                 },
@@ -94,21 +95,46 @@ struct MemberCardStickerDock: View {
         .padding(.bottom, 12)
     }
 
+    @ViewBuilder
     private func dockItem(_ assetName: String) -> some View {
-        let isActive = assetName == activeDragAssetName
-        return Image(decorative: assetName)
+        if MemberCardStickerCatalog.isLocked(assetName) {
+            NavigationLink {
+                SupportView()
+            } label: {
+                stickerImage(assetName)
+                    .opacity(0.55)
+                    .overlay(alignment: .bottomTrailing) {
+                        Image(systemName: "lock.fill")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(5)
+                            .background(.black.opacity(0.55), in: .circle)
+                            .padding(10)
+                    }
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text(verbatim: MemberCardStickerCatalog.title(for: assetName)))
+            .accessibilityValue(Text("Für Unterstützer:innen"))
+        } else {
+            let isActive = assetName == activeDragAssetName
+            stickerImage(assetName)
+                .shadow(color: .black.opacity(isActive ? 0.18 : 0.08), radius: 12, y: 8)
+                .scaleEffect(isActive && !reduceMotion ? 1.12 : 1)
+                .animation(.easeOut(duration: 0.15), value: isActive)
+                .accessibilityElement()
+                .accessibilityLabel(Text(verbatim: MemberCardStickerCatalog.title(for: assetName)))
+                .accessibilityAction(named: Text("Auf Karte legen")) {
+                    onAccessibleAdd(assetName)
+                }
+        }
+    }
+
+    private func stickerImage(_ assetName: String) -> some View {
+        Image(decorative: assetName)
             .resizable()
             .scaledToFit()
             .frame(width: MemberCardStickerCatalog.imageBaseSize, height: MemberCardStickerCatalog.imageBaseSize)
             .frame(width: MemberCard.dockStickerTouchSize, height: MemberCard.dockStickerTouchSize)
-            .shadow(color: .black.opacity(isActive ? 0.18 : 0.08), radius: 12, y: 8)
-            .scaleEffect(isActive && !reduceMotion ? 1.12 : 1)
-            .animation(.easeOut(duration: 0.15), value: isActive)
-            .accessibilityElement()
-            .accessibilityLabel(Text(verbatim: MemberCardStickerCatalog.title(for: assetName)))
-            .accessibilityAction(named: Text("Auf Karte legen")) {
-                onAccessibleAdd(assetName)
-            }
     }
 
     private var removeZone: some View {

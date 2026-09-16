@@ -13,35 +13,47 @@ struct AppIconSettingsView: View {
     @State private var iconChangeError: String?
     @State private var isChangingIcon = false
     @State private var iconChangeSuccessCount = 0
+    private let supporter = SupporterStore.shared
 
     var body: some View {
         List {
             ForEach(AppIconCatalog.sections) { section in
                 Section {
                     ForEach(section.icons) { icon in
-                        Button {
-                            Task {
-                                await select(icon)
+                        let isSelected = selectedIconName == icon.alternateIconName
+                        // A locked icon that is already set (chosen before the
+                        // lock existed) stays selectable, nobody loses their icon.
+                        if icon.isFree || supporter.isSupporter || isSelected {
+                            Button {
+                                Task {
+                                    await select(icon)
+                                }
+                            } label: {
+                                AppIconRow(icon: icon, isSelected: isSelected, isLocked: false)
                             }
-                        } label: {
-                            AppIconRow(
-                                icon: icon,
-                                isSelected: selectedIconName == icon.alternateIconName
-                            )
+                            .buttonStyle(.plain)
+                            .disabled(isChangingIcon)
+                            .accessibilityLabel(Text(icon.name))
+                            .accessibilityValue(isSelected ? Text("Ausgewählt") : Text(""))
+                        } else {
+                            NavigationLink {
+                                SupportView()
+                            } label: {
+                                AppIconRow(icon: icon, isSelected: false, isLocked: true)
+                            }
+                            .accessibilityLabel(Text(icon.name))
+                            .accessibilityValue(Text("Für Unterstützer:innen"))
                         }
-                        .buttonStyle(.plain)
-                        .disabled(isChangingIcon)
-                        .accessibilityLabel(Text(icon.name))
-                        .accessibilityValue(
-                            selectedIconName == icon.alternateIconName
-                                ? Text("Ausgewählt")
-                                : Text("")
-                        )
                     }
                 }
             }
 
             Section {
+                if !supporter.isSupporter {
+                    Text("Symbole mit Schloss schaltest du frei, wenn du Oscar unterstützt. Alle Funktionen bleiben kostenlos.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
                 Text("app_icon_ai_disclosure")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
@@ -147,6 +159,7 @@ private enum AppIconChangeService {
 private struct AppIconRow: View {
     let icon: AppIconOption
     let isSelected: Bool
+    let isLocked: Bool
 
     var body: some View {
         HStack(spacing: 12) {
@@ -158,7 +171,11 @@ private struct AppIconRow: View {
 
             Spacer()
 
-            if isSelected {
+            if isLocked {
+                Image(systemName: "lock.fill")
+                    .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
+            } else if isSelected {
                 Image(systemName: "checkmark")
                     .font(.body.bold())
                     .foregroundStyle(Color.accentColor)

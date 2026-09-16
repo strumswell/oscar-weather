@@ -1229,6 +1229,75 @@
         }
       }
     },
+    "Abos verlängern sich automatisch, bis du sie in den Einstellungen deiner Apple-ID kündigst." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abos verlängern sich automatisch, bis du sie in den Einstellungen deiner Apple-ID kündigst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subscriptions renew automatically until you cancel them in your Apple ID settings."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abonelikler, Apple Kimliği ayarlarınızdan iptal edene kadar otomatik olarak yenilenir."
+          }
+        }
+      }
+    },
+    "Abrufe" : {
+
+    },
+    "Abschnitte" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abschnitte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sections"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölümler"
+          }
+        }
+      }
+    },
+    "Abschnitte hinzufügen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abschnitte hinzufügen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add sections"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bölüm ekleyin"
+          }
+        }
+      }
+    },
     "ACCESS-G - Australian Bureau of Meteorology (BOM)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1300,50 +1369,6 @@
         }
       }
     },
-    "Abschnitte" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abschnitte"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sections"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bölümler"
-          }
-        }
-      }
-    },
-    "Abschnitte hinzufügen" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abschnitte hinzufügen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add sections"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bölüm ekleyin"
-          }
-        }
-      }
-    },
     "Air" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1363,6 +1388,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hava"
+          }
+        }
+      }
+    },
+    "Aktiv" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktiv"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkin"
+          }
+        }
+      }
+    },
+    "Aktive Tage" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktive Tage"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active days"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktif günler"
           }
         }
       }
@@ -1592,6 +1661,28 @@
         }
       }
     },
+    "Alle App-Symbole und Sticker sind für dich freigeschaltet." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle App-Symbole und Sticker sind für dich freigeschaltet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All app icons and stickers are unlocked for you."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm uygulama simgeleri ve çıkartmalar sizin için açıldı."
+          }
+        }
+      }
+    },
     "Alle Werte" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1637,6 +1728,28 @@
         }
       }
     },
+    "Alle Zahlen bleiben auf deinem Gerät und in deiner iCloud." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Zahlen bleiben auf deinem Gerät und in deiner iCloud."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All numbers stay on your device and in your iCloud."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm sayılar cihazınızda ve iCloud'unuzda kalır."
+          }
+        }
+      }
+    },
     "Alles auf einen Blick" : {
       "localizations" : {
         "de" : {
@@ -1660,7 +1773,6 @@
       }
     },
     "Allgemein" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1723,6 +1835,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yağmur uyarıları ve hava durumu uyarıları almak için iOS Ayarları'nda bildirimlere izin verin."
+          }
+        }
+      }
+    },
+    "Als Dankeschön: alle App-Symbole und Sticker." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als Dankeschön: alle App-Symbole und Sticker."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As a thank you: every app icon and sticker."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teşekkür olarak: tüm uygulama simgeleri ve çıkartmalar."
           }
         }
       }
@@ -1794,6 +1929,28 @@
         }
       }
     },
+    "Anfragen an Wetterdienste" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anfragen an Wetterdienste"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requests to weather services"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava durumu servislerine istekler"
+          }
+        }
+      }
+    },
     "Angenehm" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1835,6 +1992,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Görünüm"
+          }
+        }
+      }
+    },
+    "Ansicht angepasst" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ansicht angepasst"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Layout customized"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görünüm özelleştirme"
           }
         }
       }
@@ -3590,6 +3769,50 @@
     "CWA" : {
 
     },
+    "Dabei seit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dabei seit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Since"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başlangıç"
+          }
+        }
+      }
+    },
+    "Danke" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Danke"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thank you"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teşekkürler"
+          }
+        }
+      }
+    },
     "Danke, dass Du Oscar ausprobierst. Viele Jahre und viel Herzblut sind hier reingeflossen. Ich hoffe, es gefällt Dir mindestens so viel wie mir! - Philipp. Für Oscar, Daniela, Ursel, Werner, Reinhard & Sammy" : {
       "localizations" : {
         "de" : {
@@ -3608,6 +3831,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Thank you for trying out Oscar. So many years and so much heart went into this. I hope you like it at least as much as I do! - Philipp"
+          }
+        }
+      }
+    },
+    "Danke, dass du Oscar unterstützt." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Danke, dass du Oscar unterstützt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thank you for supporting Oscar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar'a destek olduğunuz için teşekkürler."
           }
         }
       }
@@ -3963,6 +4208,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hava durumunuz. Tam burada."
+          }
+        }
+      }
+    },
+    "Deine Orte" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Orte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your places"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konumlarınız"
           }
         }
       }
@@ -4682,6 +4949,28 @@
         }
       }
     },
+    "Ein Teil von allem, was hier zusammenkommt, geht an Projekte gegen die Klimakrise." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Teil von allem, was hier zusammenkommt, geht an Projekte gegen die Klimakrise."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A share of everything that comes in goes to projects fighting the climate crisis."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buraya gelen her şeyin bir kısmı iklim kriziyle mücadele eden projelere gidiyor."
+          }
+        }
+      }
+    },
     "Ein Wetterbericht mit allem, was Du wissen musst." : {
       "localizations" : {
         "de" : {
@@ -4815,6 +5104,28 @@
         }
       }
     },
+    "Einmal unterstützen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einmal unterstützen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Support once"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tek seferlik destek"
+          }
+        }
+      }
+    },
     "Einordnung" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4856,6 +5167,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ayarlar"
+          }
+        }
+      }
+    },
+    "Einstellungen geöffnet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen geöffnet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings opened"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar açılma"
           }
         }
       }
@@ -4998,6 +5331,9 @@
           }
         }
       }
+    },
+    "Environment Canada" : {
+
     },
     "Erlaube Mitteilungen in den iOS Einstellungen, um Regenwarnungen zu erhalten." : {
       "extractionState" : "stale",
@@ -5430,6 +5766,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aşırı Sağanak"
+          }
+        }
+      }
+    },
+    "Extremwerte" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extremwerte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extremes"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uç değerler"
           }
         }
       }
@@ -5883,6 +6241,28 @@
         }
       }
     },
+    "Für Unterstützer:innen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für Unterstützer:innen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For supporters"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destekçiler için"
+          }
+        }
+      }
+    },
     "Ganz ohne Standortfreigabe. Du kannst später jederzeit wechseln oder weitere Orte hinzufügen." : {
       "localizations" : {
         "de" : {
@@ -6064,6 +6444,28 @@
       },
       "shouldTranslate" : false
     },
+    "Geöffnet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geöffnet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opened"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açılma"
+          }
+        }
+      }
+    },
     "Gering" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6173,6 +6575,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hazır!"
+          }
+        }
+      }
+    },
+    "Gescrollt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gescrollt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scrolled"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydırılan mesafe"
           }
         }
       }
@@ -6676,6 +7100,28 @@
         }
       }
     },
+    "Heißester Moment" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heißester Moment"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hottest moment"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En sıcak an"
+          }
+        }
+      }
+    },
     "Hell" : {
       "localizations" : {
         "de" : {
@@ -6944,6 +7390,28 @@
         }
       }
     },
+    "Höchster UV-Index" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Höchster UV-Index"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highest UV index"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En yüksek UV indeksi"
+          }
+        }
+      }
+    },
     "Höchstwerte %@, Tiefstwerte %@, %lld Tage" : {
       "localizations" : {
         "de" : {
@@ -7035,6 +7503,74 @@
     },
     "Hour" : {
 
+    },
+    "Ich bin Philipp und entwickle Oscar allein. Ich zahle den Apple-Entwickleraccount und den Server, der die Kartenebenen, Wetterwarnungen und Mitteilungen liefert. Ob Oscar weiterläuft, hängt von euch ab." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ich bin Philipp und entwickle Oscar allein. Ich zahle den Apple-Entwickleraccount und den Server, der die Kartenebenen, Wetterwarnungen und Mitteilungen liefert. Ob Oscar weiterläuft, hängt von euch ab."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I am Philipp and I build Oscar on my own. I pay for the Apple developer account and for the server that delivers the map layers, weather alerts and notifications. Whether Oscar keeps running depends on you."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ben Philipp, Oscar'ı tek başıma geliştiriyorum. Apple geliştirici hesabını ve harita katmanlarını, hava durumu uyarılarını ve bildirimleri sunan sunucuyu ben ödüyorum. Oscar'ın devam edip etmeyeceği size bağlı."
+          }
+        }
+      }
+    },
+    "Ich bin Philipp und entwickle Oscar allein. Server und Entwicklerkonto zahle ich selbst. Alle Funktionen bleiben kostenlos, für alle." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ich bin Philipp und entwickle Oscar allein. Server und Entwicklerkonto zahle ich selbst. Alle Funktionen bleiben kostenlos, für alle."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I am Philipp and I build Oscar on my own. I pay for the server and the developer account myself. Every feature stays free, for everyone."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ben Philipp, Oscar'ı tek başıma geliştiriyorum. Sunucuyu ve geliştirici hesabını kendim ödüyorum. Tüm özellikler herkes için ücretsiz kalıyor."
+          }
+        }
+      }
+    },
+    "Ich entwickle Oscar alleine in meiner Freizeit und trage jegliche Kosten aus eigener Tasche. Durch deine Unterstützung kann ich Oscar betreiben und weiterentwickeln. Zahl was du kannst und erhalte dafür als Dankeschön Zugriff auf eine wachsende Anzahl an App-Icons und Sticker." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ich entwickle Oscar alleine in meiner Freizeit und trage jegliche Kosten aus eigener Tasche. Durch deine Unterstützung kann ich Oscar betreiben und weiterentwickeln. Zahl was du kannst und erhalte dafür als Dankeschön Zugriff auf eine wachsende Anzahl an App-Icons und Sticker."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I build Oscar alone in my spare time and pay every cost out of my own pocket. Your support lets me keep Oscar running and keep developing it. Pay what you can, and as a thank you you get access to a growing set of app icons and stickers."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar'ı boş zamanlarımda tek başıma geliştiriyorum ve tüm masrafları kendi cebimden karşılıyorum. Desteğinizle Oscar'ı çalıştırmaya ve geliştirmeye devam edebiliyorum. Ne kadar verebiliyorsanız verin; teşekkür olarak giderek büyüyen uygulama simgesi ve çıkartma koleksiyonuna erişim kazanırsınız."
+          }
+        }
+      }
     },
     "ICON - Deutscher Wetterdienst (DWD)" : {
       "extractionState" : "stale",
@@ -7419,6 +7955,28 @@
         }
       }
     },
+    "Kältester Moment" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kältester Moment"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coldest moment"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En soğuk an"
+          }
+        }
+      }
+    },
     "Kältester Tag" : {
       "localizations" : {
         "de" : {
@@ -7592,6 +8150,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Harita karoları: OpenFreeMap"
+          }
+        }
+      }
+    },
+    "Käufe wiederherstellen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Käufe wiederherstellen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore Purchases"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satın Alımları Geri Yükle"
           }
         }
       }
@@ -7908,28 +8488,6 @@
         }
       }
     },
-    "KI-basiertes Wettermodell von ECMWF." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "KI-basiertes Wettermodell von ECMWF."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "AI-based weather model from ECMWF."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ECMWF'nin yapay zeka tabanlı hava durumu modeli."
-          }
-        }
-      }
-    },
     "Kennzahlen" : {
       "localizations" : {
         "de" : {
@@ -7948,6 +8506,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Göstergeler"
+          }
+        }
+      }
+    },
+    "KI-basiertes Wettermodell von ECMWF." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KI-basiertes Wettermodell von ECMWF."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI-based weather model from ECMWF."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ECMWF'nin yapay zeka tabanlı hava durumu modeli."
           }
         }
       }
@@ -8058,6 +8638,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "İklim"
+          }
+        }
+      }
+    },
+    "Klima geöffnet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klima geöffnet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Climate opened"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İklim açılma"
           }
         }
       }
@@ -8216,6 +8818,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quick guide: 0 calm, 3 gentle breeze, 6 strong wind, 8 gale, 12 hurricane force."
+          }
+        }
+      }
+    },
+    "Längste Sitzung" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Längste Sitzung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Longest session"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En uzun oturum"
           }
         }
       }
@@ -9438,6 +10062,50 @@
         }
       }
     },
+    "Mitteilungen geöffnet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mitteilungen geöffnet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications opened"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açılan bildirimler"
+          }
+        }
+      }
+    },
+    "Mitteilungen gesehen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mitteilungen gesehen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications shown"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görülen bildirimler"
+          }
+        }
+      }
+    },
     "Mitteilungen sind auf Systemebene deaktiviert." : {
       "localizations" : {
         "de" : {
@@ -10373,6 +11041,28 @@
         }
       }
     },
+    "Nutzungsbedingungen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nutzungsbedingungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terms of Use"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanım Koşulları"
+          }
+        }
+      }
+    },
     "NW_compass" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10721,6 +11411,9 @@
         }
       }
     },
+    "Öffnungen" : {
+
+    },
     "OK" : {
       "localizations" : {
         "de" : {
@@ -10802,6 +11495,94 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open-Meteo, çeşitli uluslararası hava durumu hizmetlerinden açık hava durumu verilerini toplayan açık kaynaklı bir hava durumu API'sidir. Oscar, ticari olmayan bir uygulama olarak Open-Meteo'nun ücretsiz erişimini kullanır, ancak projeyi aylık beş avroluk bir bağışla destekler."
+          }
+        }
+      }
+    },
+    "Open-Meteo Klimaarchiv" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo Klimaarchiv"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo climate archive"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo iklim arşivi"
+          }
+        }
+      }
+    },
+    "Open-Meteo Luftqualität" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo Luftqualität"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo air quality"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo hava kalitesi"
+          }
+        }
+      }
+    },
+    "Open-Meteo Ortssuche" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo Ortssuche"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo geocoding"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo konum arama"
+          }
+        }
+      }
+    },
+    "Open-Meteo Vorhersage" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo Vorhersage"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo forecast"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo tahmin"
           }
         }
       }
@@ -11161,6 +11942,29 @@
         }
       }
     },
+    "Oscar bleibt kostenlos" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar bleibt kostenlos"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar stays free"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar ücretsiz kalıyor"
+          }
+        }
+      }
+    },
     "Oscar can send beta rain alerts and beta weather alerts for your current location in Central Europe and the United States. Turn each alert type on or off below." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -11229,6 +12033,29 @@
         }
       }
     },
+    "Oscar ist und bleibt kostenlos. Alle Funktionen, für alle, ohne Werbung und ohne Tracking. Das wird sich nicht ändern." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar ist und bleibt kostenlos. Alle Funktionen, für alle, ohne Werbung und ohne Tracking. Das wird sich nicht ändern."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar is free and stays free. Every feature, for everyone, with no ads and no tracking. That will not change."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar ücretsizdir ve ücretsiz kalacak. Tüm özellikler, herkes için, reklamsız ve izlemesiz. Bu değişmeyecek."
+          }
+        }
+      }
+    },
     "Oscar Radar-Daten werden geladen…" : {
       "localizations" : {
         "de" : {
@@ -11251,6 +12078,9 @@
         }
       }
     },
+    "Oscar Server" : {
+
+    },
     "Oscar sticker" : {
       "localizations" : {
         "de" : {
@@ -11269,6 +12099,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oscar çıkartması"
+          }
+        }
+      }
+    },
+    "Oscar unterstützen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar unterstützen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Support Oscar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar'a destek olun"
           }
         }
       }
@@ -12340,6 +13192,28 @@
         }
       }
     },
+    "Regelmäßig unterstützen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regelmäßig unterstützen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Support regularly"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düzenli destek"
+          }
+        }
+      }
+    },
     "Regen" : {
       "localizations" : {
         "de" : {
@@ -13068,6 +13942,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sulu kar"
+          }
+        }
+      }
+    },
+    "Schon vor dem Start im App Store habe ich über 250 € an Open-Source-Projekte wie Open-Meteo gegeben, ohne die es Oscar nicht gäbe. Von allem, was hier zusammenkommt, gebe ich einen Teil an Projekte gegen die Klimakrise weiter." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schon vor dem Start im App Store habe ich über 250 € an Open-Source-Projekte wie Open-Meteo gegeben, ohne die es Oscar nicht gäbe. Von allem, was hier zusammenkommt, gebe ich einen Teil an Projekte gegen die Klimakrise weiter."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before Oscar was even on the App Store, I had already given over 250 € to open source projects like Open-Meteo, without which Oscar would not exist. A share of everything that comes in here goes on to projects fighting the climate crisis."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar App Store'a çıkmadan önce bile, Oscar'ın var olmasını sağlayan Open-Meteo gibi açık kaynak projelere 250 €'dan fazla katkıda bulundum. Burada toplanan her şeyin bir kısmını iklim kriziyle mücadele eden projelere aktarıyorum."
           }
         }
       }
@@ -14087,6 +14984,28 @@
         }
       }
     },
+    "Stärkster Regen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stärkster Regen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heaviest rain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En şiddetli yağmur"
+          }
+        }
+      }
+    },
     "Stärkster Tag" : {
       "localizations" : {
         "de" : {
@@ -14109,6 +15028,28 @@
         }
       }
     },
+    "Stärkster Wind" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stärkster Wind"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strongest wind"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En kuvvetli rüzgar"
+          }
+        }
+      }
+    },
     "Start" : {
       "localizations" : {
         "de" : {
@@ -14127,6 +15068,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Başlangıç"
+          }
+        }
+      }
+    },
+    "Statistik" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistik"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistics"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İstatistikler"
           }
         }
       }
@@ -14332,6 +15295,9 @@
         }
       }
     },
+    "Stunde" : {
+
+    },
     "Stunde für Stunde, bis zu 14 Tage im Voraus – mit den besten Wettermodellen für deinen Ort." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -14351,6 +15317,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saat saat, 14 güne kadar önceden – konumunuz için en iyi hava modelleriyle."
+          }
+        }
+      }
+    },
+    "Stundenansicht geöffnet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stundenansicht geöffnet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hourly view opened"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saatlik görünüm açılma"
           }
         }
       }
@@ -14461,6 +15449,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fırtınamsı rüzgar"
+          }
+        }
+      }
+    },
+    "Such dir den Betrag aus, der sich für dich richtig anfühlt. Als Dankeschön schaltest du alle App-Symbole und Sticker frei, und alles Kosmetische, das noch kommt. Funktionen kosten nie etwas." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Such dir den Betrag aus, der sich für dich richtig anfühlt. Als Dankeschön schaltest du alle App-Symbole und Sticker frei, und alles Kosmetische, das noch kommt. Funktionen kosten nie etwas."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick whatever amount feels right to you. As a thank you, you unlock all app icons and stickers, and every cosmetic that comes later. Features never cost anything."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Size doğru gelen tutarı seçin. Teşekkür olarak tüm uygulama simgelerini, çıkartmaları ve gelecekteki tüm görsel ekstraları açarsınız. Özellikler asla ücretli olmaz."
           }
         }
       }
@@ -14649,6 +15660,28 @@
         }
       }
     },
+    "Symbole mit Schloss schaltest du frei, wenn du Oscar unterstützt. Alle Funktionen bleiben kostenlos." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Symbole mit Schloss schaltest du frei, wenn du Oscar unterstützt. Alle Funktionen bleiben kostenlos."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Icons with a lock unlock when you support Oscar. Every feature stays free."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kilitli simgeler Oscar'a destek olduğunuzda açılır. Tüm özellikler ücretsiz kalır."
+          }
+        }
+      }
+    },
     "System" : {
       "localizations" : {
         "de" : {
@@ -14721,6 +15754,28 @@
     },
     "Tag Start" : {
 
+    },
+    "Tagesansicht geöffnet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tagesansicht geöffnet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily view opened"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günlük görünüm açılma"
+          }
+        }
+      }
     },
     "Tageshöchstwerte" : {
       "localizations" : {
@@ -15506,6 +16561,28 @@
         }
       }
     },
+    "Umwelt geöffnet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Umwelt geöffnet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Environment opened"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çevre açılma"
+          }
+        }
+      }
+    },
     "Umweltdetails" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15636,6 +16713,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sıcaklığın altında"
+          }
+        }
+      }
+    },
+    "Unterwegs in Oscar" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unterwegs in Oscar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Around Oscar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar'da neler yaptınız"
           }
         }
       }
@@ -16227,6 +17326,28 @@
         }
       }
     },
+    "Wann du Oscar öffnest" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wann du Oscar öffnest"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When you open Oscar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar'ı ne zaman açıyorsunuz"
+          }
+        }
+      }
+    },
     "Wärmer als %@ aller %@ seit %@." : {
       "localizations" : {
         "de" : {
@@ -16311,6 +17432,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "En Sıcak Gün"
+          }
+        }
+      }
+    },
+    "Warnungen geöffnet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warnungen geöffnet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alerts opened"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uyarılar açılma"
           }
         }
       }
@@ -17185,6 +18328,9 @@
         }
       }
     },
+    "Wochentag" : {
+
+    },
     "Wolken" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17271,6 +18417,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ayrıntıları gösterir"
+          }
+        }
+      }
+    },
+    "Zeit in Oscar" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeit in Oscar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time in Oscar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar'da geçen süre"
           }
         }
       }
@@ -17558,6 +18726,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saatlik tahminin başına dön"
+          }
+        }
+      }
+    },
+    "Zusammengezählt über %lld Geräte. Alle Zahlen bleiben auf deinen Geräten und in deiner iCloud." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammengezählt über %lld Geräte. Alle Zahlen bleiben auf deinen Geräten und in deiner iCloud."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Added up across %lld devices. All numbers stay on your devices and in your iCloud."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld cihaz üzerinden toplandı. Tüm sayılar cihazlarınızda ve iCloud'unuzda kalır."
           }
         }
       }

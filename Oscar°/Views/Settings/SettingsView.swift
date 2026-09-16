@@ -11,6 +11,7 @@ struct SettingsView: View {
   @Environment(\.dismiss) private var dismiss
   @Environment(\.scenePhase) private var scenePhase
   private let settingsService = SettingService.shared
+  private let supporter = SupporterStore.shared
   @State private var showsMemory = false
 
   var body: some View {
@@ -25,19 +26,36 @@ struct SettingsView: View {
 
         Section {
           NavigationLink {
+            SupportView()
+          } label: {
+            LabeledContent {
+              if supporter.isSupporter {
+                Text("Danke")
+              }
+            } label: {
+              Label {
+                Text("Oscar unterstützen")
+              } icon: {
+                Image(systemName: "heart.fill")
+                  .overlay(alignment: .topTrailing) {
+                    HeartSparkle()
+                      .offset(x: 4, y: -4)
+                  }
+              }
+              .labelStyle(.settingsIcon(.pink))
+            }
+          }
+          .accessibilityIdentifier("settings.support")
+        }
+
+        Section("Wetter") {
+          NavigationLink {
             NotificationSettingsView()
           } label: {
             Label("Alerts", systemImage: "bell.badge.fill")
               .labelStyle(.settingsIcon(.red))
           }
           .accessibilityIdentifier("settings.alerts")
-
-          NavigationLink {
-            UnitSettings()
-          } label: {
-            Label("Einheiten", systemImage: "thermometer.medium")
-              .labelStyle(.settingsIcon(.orange))
-          }
 
           NavigationLink {
             ForecastSettingsView()
@@ -54,6 +72,15 @@ struct SettingsView: View {
           .accessibilityIdentifier("settings.forecast")
 
           NavigationLink {
+            UnitSettings()
+          } label: {
+            Label("Einheiten", systemImage: "thermometer.medium")
+              .labelStyle(.settingsIcon(.orange))
+          }
+        }
+
+        Section("Darstellung") {
+          NavigationLink {
             NowLayoutSettingsView()
           } label: {
             Label("Ansicht anpassen", systemImage: "rectangle.stack")
@@ -66,16 +93,23 @@ struct SettingsView: View {
             Label("App-Symbol", systemImage: "app.grid")
               .labelStyle(.settingsIcon(.blue))
           }
+        }
 
+        Section("Allgemein") {
           NavigationLink {
             PermissionSettingsView()
           } label: {
             Label("Berechtigungen", systemImage: "lock.shield.fill")
               .labelStyle(.settingsIcon(.green))
           }
-        }
 
-        Section {
+          NavigationLink {
+            StatsView()
+          } label: {
+            Label("Statistik", systemImage: "chart.bar.fill")
+              .labelStyle(.settingsIcon(.indigo))
+          }
+
           Button {
             dismiss()
             OnboardingCoordinator.shared.replay()

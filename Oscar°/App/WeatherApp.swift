@@ -111,6 +111,12 @@ struct WeatherApp: App {
             options.swiftAsyncStacktraces = true
         }
 
+        UsageCountingMiddleware.onRequest = { host in
+            Task { @MainActor in
+                UsageStatsStore.shared.record { $0.apiCalls[host, default: 0] += 1 }
+            }
+        }
+
         // Honor the user's launch default (a saved city or "current location")
         // before hydration compares coordinates and before the first refresh
         // resolves a location.
@@ -157,11 +163,16 @@ struct WeatherApp: App {
                     await notificationSettingsManager.configureOnLaunch()
                     await WidgetBasemapRenderer.refreshIfNeeded()
                 }
+                .task {
+                    await SupporterStore.shared.start()
+                }
                 .onChange(of: scenePhase) { _, phase in
                     #if DEBUG
                     ScreenshotMode.scenePhaseDidChange(phase)
                     #endif
+                    if phase == .background { UsageStatsStore.shared.sceneDidEnterBackground() }
                     guard phase == .active else { return }
+                    UsageStatsStore.shared.sceneDidActivate()
                     Task { await notificationSettingsManager.handleForeground() }
                 }
                 .sentryTrace("RootTabView")

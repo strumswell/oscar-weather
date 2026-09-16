@@ -73,6 +73,11 @@ struct NowView: View {
                 page
             }
             .scrollIndicators(.hidden)
+            .onScrollGeometryChange(for: CGFloat.self, of: { $0.contentOffset.y }) { old, new in
+                // Jumps beyond a screen are programmatic (content swap, scroll-to-top).
+                let delta = abs(new - old)
+                if delta < 1500 { UsageStatsStore.shared.addScroll(points: delta) }
+            }
             .padding(.top, Self.scrollTopPadding)
             .refreshable {
                 // Run the refresh in an unstructured task so it doesn't inherit the

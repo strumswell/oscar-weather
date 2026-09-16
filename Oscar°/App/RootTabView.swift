@@ -88,6 +88,9 @@ struct RootTabView: View {
         .onReceive(NotificationCenter.default.publisher(for: .weatherRefreshNeeded, object: nil)) { _ in
             refreshWeatherData()
         }
+        .onChange(of: weather.lastUpdated) { _, updated in
+            if updated != nil { recordUsageConditions() }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .forecastModelFallback)) { _ in
             withAnimation(.spring(duration: 0.4)) {
                 modelFallbackToast = String(localized: "Außerhalb des Modells – Automatik aktiv.")
@@ -99,6 +102,17 @@ struct RootTabView: View {
     /// GPS move, city switch, unit/format/model change). The individual steps are cheap
     /// or self-guarded, so running all of them on every trigger beats five near-identical
     /// handlers that each forget a different step.
+    /// Every successful refresh feeds the usage statistics (places, extremes).
+    private func recordUsageConditions() {
+        UsageStatsStore.shared.recordConditions(
+            temperature: weather.forecast.current?.temperature,
+            wind: weather.forecast.current?.windspeed,
+            precipitation: weather.forecast.current?.precipitation,
+            uv: environmentValue(from: weather.air.hourly?.uv_index, time: weather.air.hourly?.time ?? []),
+            place: location.name
+        )
+    }
+
     private func refreshWeatherData(isForeground: Bool = false) {
         // Clear any stale fallback notice; the refresh re-posts one if it still applies.
         withAnimation(.easeInOut(duration: 0.3)) { modelFallbackToast = nil }

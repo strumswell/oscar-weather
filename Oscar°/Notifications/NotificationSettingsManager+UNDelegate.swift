@@ -7,6 +7,7 @@ extension NotificationSettingsManager: @preconcurrency UNUserNotificationCenterD
     ) async -> UNNotificationPresentationOptions {
         let request = notification.request
         notificationLogger.info("Lifecycle: willPresent notification; identifier=\(request.identifier, privacy: .public) trigger=\(String(describing: request.trigger), privacy: .public)")
+        UsageStatsStore.shared.record { $0.notificationsShown += 1 }
         return UNNotificationPresentationOptions(arrayLiteral: .banner, .sound)
     }
 
@@ -16,6 +17,7 @@ extension NotificationSettingsManager: @preconcurrency UNUserNotificationCenterD
     ) async {
         let request = response.notification.request
         notificationLogger.info("Lifecycle: didReceive notification response; identifier=\(request.identifier, privacy: .public) actionIdentifier=\(response.actionIdentifier, privacy: .public)")
+        UsageStatsStore.shared.record { $0.notificationsOpened += 1 }
     }
 }
 

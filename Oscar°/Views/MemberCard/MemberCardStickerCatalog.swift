@@ -14,6 +14,21 @@ enum MemberCardStickerCatalog {
         "sticker_qourses"
     ]
 
+    /// The rest unlocks by supporting Oscar (see `SupporterStore`).
+    static let freeAssets: Set<String> = [
+        "sticker_sun",
+        "sticker_grumpy_cloud",
+        "sticker_lightning_bolt",
+        "sticker_umbrella",
+        "sticker_oscar"
+    ]
+
+    @MainActor
+    static func isLocked(_ assetName: String) -> Bool {
+        if freeAssets.contains(assetName) { return false }
+        return !SupporterStore.shared.isSupporter
+    }
+
     static let imageBaseSize: CGFloat = 64
     static let touchPadding: CGFloat = 8
     static let minimumHitSize: CGFloat = 56
