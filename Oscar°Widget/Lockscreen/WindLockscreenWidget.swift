@@ -32,46 +32,30 @@ struct WindProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<WindLockScreenEntry>) -> ()) {
-        Task {
-            do {
-                let coordinates = await MainActor.run {
-                    LocationService.shared.update()
-                    return LocationService.shared.getCoordinates()
-                }
+        runWidgetTimeline(refreshMinutes: 30, completion: completion) { coordinates in
+            // windspeed_10m only so the response carries the unit label for the display.
+            let weather = try await client.getForecast(
+                coordinates: coordinates,
+                forecastDays: ._1,
+                hourly: [.windspeed_10m]
+            )
 
-                // windspeed_10m only so the response carries the unit label for the display.
-                let weather = try await client.getForecast(
-                    coordinates: coordinates,
-                    forecastDays: ._1,
-                    hourly: [.windspeed_10m]
-                )
+            let unit = WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit)
+            let rawSpeed = weather.current?.windspeed
+            // Beaufort is displayed locally: the API delivers km/h in that case (see WindSpeedUnit.apiRawValue).
+            let speed = unit.usesBeaufortDisplay ? BeaufortScale.value(forKilometersPerHour: rawSpeed) : rawSpeed
+            let unitLabel = unit.usesBeaufortDisplay
+                ? unit.displayUnit
+                : (weather.hourly_units?.windspeed_10m ?? unit.displayUnit)
+            let direction = weather.current?.wind_direction_10m
 
-                let unit = WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit)
-                let rawSpeed = weather.current?.windspeed
-                // Beaufort is displayed locally: the API delivers km/h in that case (see WindSpeedUnit.apiRawValue).
-                let speed = unit.usesBeaufortDisplay ? BeaufortScale.value(forKilometersPerHour: rawSpeed) : rawSpeed
-                let unitLabel = unit.usesBeaufortDisplay
-                    ? unit.displayUnit
-                    : (weather.hourly_units?.windspeed_10m ?? unit.displayUnit)
-                let direction = weather.current?.wind_direction_10m
-
-                let entry = WindLockScreenEntry(
-                    date: Date(),
-                    speed: speed,
-                    unitLabel: unitLabel,
-                    directionDegrees: direction,
-                    compass: direction.map(Self.compassDirection) ?? ""
-                )
-
-                let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 30, to: Date())!
-                completion(Timeline(entries: [entry], policy: .after(nextUpdateDate)))
-            } catch {
-                // completion must always be called: a dropped timeline request kills the
-                // refresh chain and the widget never updates again. An empty timeline keeps
-                // the last rendered entry on screen and retries once the API is back.
-                let retryDate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
-                completion(Timeline(entries: [], policy: .after(retryDate)))
-            }
+            return WindLockScreenEntry(
+                date: Date(),
+                speed: speed,
+                unitLabel: unitLabel,
+                directionDegrees: direction,
+                compass: direction.map(Self.compassDirection) ?? ""
+            )
         }
     }
 

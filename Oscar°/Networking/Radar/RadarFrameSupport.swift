@@ -90,20 +90,8 @@ func parseFrameDate(_ timestamp: String) -> Date? {
 
 func closestTimestampIndex(in dates: [Date?]) -> Int {
     let now = Date()
-    var bestIndex = 0
-    var bestDiff = TimeInterval.infinity
-
-    for (index, date) in dates.enumerated() {
-        guard let date else { continue }
-
-        let diff = abs(now.timeIntervalSince(date))
-        if diff < bestDiff {
-            bestDiff = diff
-            bestIndex = index
-        }
-    }
-
-    return bestIndex
+    let diffs = dates.map { $0.map { abs(now.timeIntervalSince($0)) } ?? .infinity }
+    return diffs.indices.min { diffs[$0] < diffs[$1] } ?? 0
 }
 
 func prioritizedFrameIndices(count: Int, around center: Int) -> [Int] {

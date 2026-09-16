@@ -160,17 +160,17 @@ extension WeatherMapView.Coordinator {
     }
 
     private func removeStormCellLayers(from style: MLNStyle) {
-        for id in [WeatherMapView.cellHeadLayerID, WeatherMapView.cellTickLabelLayerID,
-                   WeatherMapView.cellCircleLayerID, WeatherMapView.cellTickLayerID,
-                   WeatherMapView.cellTrackLayerID, WeatherMapView.cellFootprintLineLayerID,
-                   WeatherMapView.cellFootprintFillLayerID, WeatherMapView.cellConeLayerID] {
-            if let layer = style.layer(withIdentifier: id) { style.removeLayer(layer) }
-        }
-        for id in [WeatherMapView.cellPointSourceID, WeatherMapView.cellTrackSourceID,
-                   WeatherMapView.cellConeSourceID, WeatherMapView.cellFootprintSourceID,
-                   WeatherMapView.cellTickSourceID, WeatherMapView.cellHeadSourceID] {
-            if let source = style.source(withIdentifier: id) { style.removeSource(source) }
-        }
+        style.removeLayers(withIdentifiers: [
+            WeatherMapView.cellHeadLayerID, WeatherMapView.cellTickLabelLayerID,
+            WeatherMapView.cellCircleLayerID, WeatherMapView.cellTickLayerID,
+            WeatherMapView.cellTrackLayerID, WeatherMapView.cellFootprintLineLayerID,
+            WeatherMapView.cellFootprintFillLayerID, WeatherMapView.cellConeLayerID,
+        ])
+        style.removeSources(withIdentifiers: [
+            WeatherMapView.cellPointSourceID, WeatherMapView.cellTrackSourceID,
+            WeatherMapView.cellConeSourceID, WeatherMapView.cellFootprintSourceID,
+            WeatherMapView.cellTickSourceID, WeatherMapView.cellHeadSourceID,
+        ])
     }
 
     private static func parseStormCells(

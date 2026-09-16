@@ -42,7 +42,6 @@ struct WeatherMapView: UIViewRepresentable {
     var coordinates: CLLocationCoordinate2D
     var cities: [City]
     var overlayOpacity: Double
-    var showWindParticles: Bool
     var oscarRadarState: OscarRadarState?
     var modelGridState: ModelGridLayerState?
     var cloudLayerState: CloudLayerState?
@@ -557,6 +556,37 @@ struct WeatherMapView: UIViewRepresentable {
             // Rough fit: world is 360° at zoom 0; pad by one notch for UI chrome.
             let zoom = max(2.5, log2(360.0 / lonSpan) + 0.5)
             mapView.setCenter(regionCenter, zoomLevel: zoom, animated: animated)
+        }
+    }
+}
+
+extension MLNStyle {
+    func removeLayers(withIdentifiers ids: [String]) {
+        for id in ids {
+            if let layer = layer(withIdentifier: id) { removeLayer(layer) }
+        }
+    }
+
+    func removeSources(withIdentifiers ids: [String]) {
+        for id in ids {
+            if let source = source(withIdentifier: id) { removeSource(source) }
+        }
+    }
+}
+
+extension WeatherMapView.Coordinator {
+    /// Playback ownership (radar, model and cloud layers alike): while playing,
+    /// the layer's display link owns phase + frame advancement; the state's
+    /// Timer would double-advance, so it is cancelled while the layer runs.
+    func syncPlayback(of layer: RadarCustomStyleLayer, state: any TimelinePlayerState,
+                      playing: Bool, interval: TimeInterval, interpolate: Bool) {
+        if playing {
+            state.cancelInternalTimer()
+            layer.startPlayback(interval: interval, interpolate: interpolate) { [weak state] in
+                state?.advanceFrame()
+            }
+        } else if layer.isPlaybackActive {
+            layer.stopPlayback()
         }
     }
 }

@@ -3,26 +3,16 @@ import Foundation
 extension HourlyTimelineModel {
     // MARK: - Derived timeline features
 
+    /// Each night run spans from its first hour to the following day hour
+    /// (or the last hour when the night runs off the end).
     static func nightRanges(times: [Double], isDay: [Double]) -> [ClosedRange<Double>] {
         guard times.count == isDay.count, !times.isEmpty else { return [] }
-        var ranges: [ClosedRange<Double>] = []
-        var start: Double?
-        for (index, flag) in isDay.enumerated() {
-            let isNight = flag < 0.5
-            if isNight, start == nil {
-                start = times[index]
+        return ChapterEngine.runs(count: times.count, allowGap: 0) { isDay[$0] < 0.5 }
+            .compactMap { run in
+                let start = times[run.lowerBound]
+                let end = times[min(run.upperBound + 1, times.count - 1)]
+                return end > start ? start...end : nil
             }
-            if !isNight, let opened = start {
-                if times[index] > opened {
-                    ranges.append(opened...times[index])
-                }
-                start = nil
-            }
-        }
-        if let opened = start, let last = times.last, last > opened {
-            ranges.append(opened...last)
-        }
-        return ranges
     }
 
     static func dayMarks(times: [Double], timeZone: TimeZone) -> [DayMark] {

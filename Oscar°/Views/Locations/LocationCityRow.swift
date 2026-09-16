@@ -24,44 +24,7 @@ struct LocationCityRow: View {
             )
         }
         .buttonStyle(LocationCardButtonStyle())
-        .contextMenu {
-            Button(action: onEdit) {
-                Label("Bearbeiten", systemImage: "pencil")
-            }
-            defaultButton
-            Button(role: .destructive, action: onDelete) {
-                Label("Löschen", systemImage: "trash")
-            }
-            // The destructive role only reds the text — the icon follows the
-            // cascading label tint and stayed white without this.
-            .tint(.red)
-        }
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button(role: .destructive, action: onDelete) {
-                Label("Löschen", systemImage: "trash")
-            }
-            // Explicit red: the role's default is lost to the tab bar's
-            // cascading white tint, same reason the neighbors set theirs.
-            .tint(.red)
-            Button(action: onEdit) {
-                Label("Bearbeiten", systemImage: "pencil")
-            }
-            .tint(.indigo)
-        }
-        .swipeActions(edge: .leading) {
-            defaultButton
-                .tint(.yellow)
-        }
+        .placeRowActions(isDefault: isDefault, onEdit: onEdit, onToggleDefault: onToggleDefault, onDelete: onDelete)
         .listRowStyling()
-    }
-
-    private var defaultButton: some View {
-        Button(action: onToggleDefault) {
-            if isDefault {
-                Label("Standard entfernen", systemImage: "star.slash")
-            } else {
-                Label("Als Standard festlegen", systemImage: "star")
-            }
-        }
     }
 }

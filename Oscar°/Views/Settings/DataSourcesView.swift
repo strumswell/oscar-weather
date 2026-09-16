@@ -33,46 +33,28 @@ struct DataSourcesView: View {
       }
 
       Section("Open Source") {
-        SettingsExternalLink(destination: URL(string: "https://github.com/apple/swift-openapi-generator")!) {
-          Label {
-            Text(verbatim: "swift-openapi-generator")
-          } icon: {
-            Image(systemName: "swift")
+        ForEach(Self.openSourceLinks, id: \.title) { link in
+          SettingsExternalLink(destination: URL(string: link.url)!) {
+            Label {
+              Text(verbatim: link.title)
+            } icon: {
+              Image(systemName: link.icon)
+            }
+            .labelStyle(.settingsIcon(link.tint))
           }
-          .labelStyle(.settingsIcon(.orange))
-        }
-
-        SettingsExternalLink(destination: URL(string: "https://github.com/apple/swift-openapi-runtime")!) {
-          Label {
-            Text(verbatim: "swift-openapi-runtime")
-          } icon: {
-            Image(systemName: "swift")
-          }
-          .labelStyle(.settingsIcon(.orange))
-        }
-
-        SettingsExternalLink(destination: URL(string: "https://github.com/apple/swift-openapi-urlsession")!) {
-          Label {
-            Text(verbatim: "swift-openapi-urlsession")
-          } icon: {
-            Image(systemName: "swift")
-          }
-          .labelStyle(.settingsIcon(.orange))
-        }
-
-        SettingsExternalLink(destination: URL(string: "https://ui8.net/hosein_bagheri/products/3d-weather-icons40")!) {
-          Label {
-            Text(verbatim: "Icons by Hosein Bagheri")
-          } icon: {
-            Image(systemName: "sparkles")
-          }
-          .labelStyle(.settingsIcon(.pink))
         }
       }
     }
     .navigationTitle("Datenquellen & Lizenzen")
     .navigationBarTitleDisplayMode(.inline)
   }
+
+  private static let openSourceLinks: [(title: String, url: String, icon: String, tint: Color)] = [
+    ("swift-openapi-generator", "https://github.com/apple/swift-openapi-generator", "swift", .orange),
+    ("swift-openapi-runtime", "https://github.com/apple/swift-openapi-runtime", "swift", .orange),
+    ("swift-openapi-urlsession", "https://github.com/apple/swift-openapi-urlsession", "swift", .orange),
+    ("Icons by Hosein Bagheri", "https://ui8.net/hosein_bagheri/products/3d-weather-icons40", "sparkles", .pink),
+  ]
 }
 
 #Preview {

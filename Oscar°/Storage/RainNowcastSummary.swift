@@ -1,4 +1,26 @@
-import Foundation
+import SwiftUI
+
+/// One capsule of the nowcast bar chart (lock-screen widget, Live Activity, watch):
+/// a 3 pt stub when dry, otherwise 4 pt plus the bar fraction of the remaining area.
+struct RainNowcastBar: View {
+    let value: Double
+    let reference: Double
+    let areaHeight: CGFloat
+    let fill: AnyShapeStyle
+
+    var body: some View {
+        Capsule(style: .continuous)
+            .fill(fill)
+            .frame(height: height)
+            .frame(maxWidth: .infinity)
+    }
+
+    private var height: CGFloat {
+        guard value > 0 else { return 3 }
+        let fraction = RainNowcastSummary.barFraction(value: value, reference: reference)
+        return 4 + CGFloat(fraction) * max(0, areaHeight - 4)
+    }
+}
 
 /// The radar nowcast as bars plus a one-line headline, shared by the lock-screen
 /// rain timeline and the watch radar page.

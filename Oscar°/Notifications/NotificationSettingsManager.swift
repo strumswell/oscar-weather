@@ -52,7 +52,6 @@ final class NotificationSettingsManager: NSObject {
     let lastSentDeviceTokenKey = "rainAlertLastSentDeviceToken"
     let subscriptionKey = "rainAlertSubscriptionId"
     let apiKeyKey = "rainAlertApiKey"
-    let lastSentAPNsEnvironmentKey = "notificationLastSentAPNsEnvironment"
     let lastSentStateKey = "notificationLastSentState"
     let installationRegistrationCompletedKey = "notificationInstallationRegistrationCompleted"
     let liveActivityPushToStartTokenKey = "notificationLiveActivityPushToStartToken"
@@ -198,7 +197,7 @@ final class NotificationSettingsManager: NSObject {
             return
         }
         Task {
-            await reconcileSubscriptionStateAfterPushRegistration()
+            await syncSubscriptionForCurrentState(forceRegister: false)
         }
     }
 
@@ -280,10 +279,6 @@ final class NotificationSettingsManager: NSObject {
         }
         authorizationStatus = updatedStatus
         notificationLogger.info("Lifecycle: authorization status refreshed -> \(updatedStatus.debugName, privacy: .public)")
-    }
-
-    private func reconcileSubscriptionStateAfterPushRegistration() async {
-        await syncSubscriptionForCurrentState(forceRegister: false)
     }
 
     private func syncSubscriptionForCurrentState(forceRegister: Bool) async {

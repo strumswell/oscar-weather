@@ -114,7 +114,7 @@ enum HourlyForecastBuilder {
   ) -> HourlyForecastItem {
     let radarRate = precipSeries?.currentRate
     let forecastPrecipitation = current.precipitation ?? 0
-    let precipitation = radarRate.map { precipitationValue(fromMillimeters: $0, unit: precipitationUnit) }
+    let precipitation = radarRate.map { HourlyFormatting.displayRate(fromMillimeters: $0, unit: precipitationUnit) }
       ?? forecastPrecipitation
     let isRaining = (radarRate ?? forecastPrecipitation) > 0
 
@@ -143,34 +143,13 @@ enum HourlyForecastBuilder {
     )
   }
 
-  /// Radar rates are always mm/h; the card label follows the user's unit setting.
-  private static func precipitationValue(fromMillimeters value: Double, unit: String) -> Double {
-    unit.lowercased() == "inch" ? value / 25.4 : value
-  }
-
   static func hasHourlyDetailData(forecast: Operations.getForecast.Output.Ok.Body.jsonPayload) -> Bool {
     !(forecast.hourly?.time.isEmpty ?? true)
   }
 
   private static func localizedHourIndex(currentTime: Double?, hours: [Double]) -> Int {
-    guard let currentTime,
-          !hours.isEmpty
-    else {
-      return 0
-    }
-
-    var closestTime = Double.greatestFiniteMagnitude
-    var closestIndex = 0
-
-    for (index, time) in hours.enumerated() {
-      let difference = abs(currentTime - time)
-      if difference < closestTime {
-        closestTime = difference
-        closestIndex = index
-      }
-    }
-
-    return closestIndex
+    guard let currentTime else { return 0 }
+    return hours.indices.min { abs(currentTime - hours[$0]) < abs(currentTime - hours[$1]) } ?? 0
   }
 
   /// Sunrise and sunset per local day, built once per item list so the

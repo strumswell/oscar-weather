@@ -65,19 +65,11 @@ enum ChapterEngine {
         var detail: String? = nil
         var severityRank: Int? = nil
         var severitySource: String? = nil
-        /// Phenomena the copy calls out; the expanded card charts them too.
-        var highlights: [Highlight] = []
+        /// The copy calls out a pressure fall; the expanded card charts it too.
+        var showsPressure = false
     }
 
-    enum Highlight: Equatable {
-        case pressure
-    }
-
-    static func chapters(
-        from input: Input,
-        includingPast: Bool = false,
-        limit: Int? = 16
-    ) -> [Chapter] {
+    static func chapters(from input: Input, includingPast: Bool = false) -> [Chapter] {
         guard input.times.count > 1 else { return [] }
 
         var chapters = precipitationChapters(input)
@@ -104,9 +96,6 @@ enum ChapterEngine {
                 return $0.range.lowerBound < $1.range.lowerBound
             }
             return $0.kind == .day && $1.kind != .day
-        }
-        if let limit, chapters.count > limit {
-            chapters.removeLast(chapters.count - limit)
         }
         return chapters
     }
@@ -263,7 +252,7 @@ enum ChapterEngine {
             guard rates[peakIndex] >= 0.1 else { return nil }
             let start = times[run.lowerBound]
             let end = times[run.upperBound] + step
-            let peak = displayRate(rates[peakIndex], unit: input.precipitationUnit)
+            let peak = HourlyFormatting.displayRate(fromMillimeters: rates[peakIndex], unit: input.precipitationUnit)
             return Chapter(
                 id: "radar-\(Int(start))",
                 kind: .radar,
@@ -278,10 +267,6 @@ enum ChapterEngine {
                 systemImage: "cloud.rain.fill"
             )
         }
-    }
-
-    private static func displayRate(_ value: Double, unit: String) -> Double {
-        unit.lowercased() == "inch" ? value / 25.4 : value
     }
 
     // MARK: - Weather alerts
@@ -393,7 +378,7 @@ enum ChapterEngine {
                 subtitle: subtitle,
                 valueLabel: valueLabel,
                 systemImage: daySymbol(for: dominantCode),
-                highlights: falls ? [.pressure] : []
+                showsPressure: falls
             ))
         }
         return chapters
@@ -434,7 +419,7 @@ enum ChapterEngine {
     /// Contiguous index runs matching a predicate; up to `allowGap` consecutive
     /// non-matching samples inside a run are tolerated (a one-hour pause in the
     /// rain is still the same rain).
-    private static func runs(
+    static func runs(
         count: Int,
         allowGap: Int,
         where predicate: (Int) -> Bool

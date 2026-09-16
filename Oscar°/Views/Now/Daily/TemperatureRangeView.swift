@@ -220,67 +220,8 @@ struct TemperatureRangeView: View {
   }
 
   private func color(for temperature: Double, unit: String) -> Color {
-    switch unit {
-    case "°C":
-      return colorForCelsius(temperature)
-    case "°F":
-      return colorForFahrenheit(temperature)
-    case "K":
-      return colorForKelvin(temperature)
-    default:
-      return colorForCelsius(temperature)
-    }
-  }
-
-  private func colorForCelsius(_ temperature: Double) -> Color {
-    switch temperature {
-    case ..<0:
-      return .blue
-    case 0..<10:
-      return .green
-    case 10..<20:
-      return .yellow
-    case 20..<30:
-      return .orange
-    case 30...:
-      return .red
-    default:
-      return .purple
-    }
-  }
-
-  private func colorForFahrenheit(_ temperature: Double) -> Color {
-    switch temperature {
-    case ..<32:
-      return .blue
-    case 32..<50:
-      return .green
-    case 50..<68:
-      return .yellow
-    case 68..<86:
-      return .orange
-    case 86...:
-      return .red
-    default:
-      return .purple
-    }
-  }
-
-  private func colorForKelvin(_ temperature: Double) -> Color {
-    switch temperature {
-    case ..<273:
-      return .blue
-    case 273..<283:
-      return .green
-    case 283..<293:
-      return .yellow
-    case 293..<303:
-      return .orange
-    case 303...:
-      return .red
-    default:
-      return .purple
-    }
+    let bands: [Color] = [.blue, .green, .yellow, .orange, .red]
+    return bands[temperatureThresholds(for: unit).filter { temperature >= $0 }.count]
   }
 }
 

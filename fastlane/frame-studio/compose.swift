@@ -157,18 +157,23 @@ func withRotation(_ degrees: CGFloat, around center: CGPoint, in cg: CGContext, 
     cg.restoreGState()
 }
 
-/// Draws with a CoreGraphics shadow applied to the whole group when the style
-/// defines one (any of blur/offset non-zero). Positive shadowY means down.
-func withShadow(_ style: Style, in cg: CGContext, draw: () -> Void) {
+/// Shadow the style defines (any of blur/offset non-zero), nil otherwise. Positive
+/// shadowY means down; offsets live in device space, which is unflipped here — so y is negated.
+func shadowParams(_ style: Style) -> (blur: CGFloat, offset: CGSize, color: NSColor)? {
     let blur = style.number("shadowBlur", 0)
     let sx = style.number("shadowX", 0)
     let sy = style.number("shadowY", 0)
-    guard blur > 0 || sx != 0 || sy != 0 else { return draw() }
+    guard blur > 0 || sx != 0 || sy != 0 else { return nil }
     let shadowColor = color(hex: style.string("shadowColor", "#000000"))
         .withAlphaComponent(style.number("shadowOpacity", 0.5))
+    return (blur, CGSize(width: sx, height: -sy), shadowColor)
+}
+
+/// Draws with a CoreGraphics shadow applied to the whole group.
+func withShadow(_ style: Style, in cg: CGContext, draw: () -> Void) {
+    guard let shadow = shadowParams(style) else { return draw() }
     cg.saveGState()
-    // Shadow offsets live in device space, which is unflipped here — negate y.
-    cg.setShadow(offset: CGSize(width: sx, height: -sy), blur: blur, color: shadowColor.cgColor)
+    cg.setShadow(offset: shadow.offset, blur: shadow.blur, color: shadow.color.cgColor)
     cg.beginTransparencyLayer(auxiliaryInfo: nil)
     draw()
     cg.endTransparencyLayer()
@@ -176,15 +181,11 @@ func withShadow(_ style: Style, in cg: CGContext, draw: () -> Void) {
 }
 
 func nsShadow(_ style: Style) -> NSShadow? {
-    let blur = style.number("shadowBlur", 0)
-    let sx = style.number("shadowX", 0)
-    let sy = style.number("shadowY", 0)
-    guard blur > 0 || sx != 0 || sy != 0 else { return nil }
+    guard let params = shadowParams(style) else { return nil }
     let shadow = NSShadow()
-    shadow.shadowColor = color(hex: style.string("shadowColor", "#000000"))
-        .withAlphaComponent(style.number("shadowOpacity", 0.5))
-    shadow.shadowBlurRadius = blur
-    shadow.shadowOffset = NSSize(width: sx, height: -sy)
+    shadow.shadowColor = params.color
+    shadow.shadowBlurRadius = params.blur
+    shadow.shadowOffset = params.offset
     return shadow
 }
 

@@ -17,7 +17,6 @@ extension HourlyTimelineModel {
                 domain: paddedDomain([temperature, apparentTemperature]),
                 showsBars: true,
                 barsAlpha: 0.75,
-                fillsPrimary: false,
                 extremes: extremeMarks(for: temperature),
                 extremeFormat: temperatureFormat,
                 primaryColor: .orange,
@@ -44,7 +43,6 @@ extension HourlyTimelineModel {
                 domain: paddedDomain(heights + [speeds], from: 0),
                 showsBars: false,
                 barsAlpha: 0,
-                fillsPrimary: false,
                 extremes: [],
                 extremeFormat: { "\(Int($0.rounded())) \(windUnit)" },
                 primaryColor: .teal,
@@ -56,7 +54,6 @@ extension HourlyTimelineModel {
                 domain: paddedDomain([pressure], minimumPad: 2),
                 showsBars: false,
                 barsAlpha: 0,
-                fillsPrimary: false,
                 extremes: extremeMarks(for: pressure),
                 extremeFormat: { "\(Int($0.rounded())) hPa" },
                 primaryColor: .purple
@@ -67,7 +64,6 @@ extension HourlyTimelineModel {
                 domain: 0...105,
                 showsBars: false,
                 barsAlpha: 0,
-                fillsPrimary: false,
                 extremes: extremeMarks(for: humidity),
                 extremeFormat: percentFormat,
                 primaryColor: .mint
@@ -78,7 +74,6 @@ extension HourlyTimelineModel {
                 domain: 0...1,
                 showsBars: false,
                 barsAlpha: 0,
-                fillsPrimary: false,
                 extremes: [],
                 extremeFormat: percentFormat,
                 primaryColor: .hourlyCloud,
@@ -95,7 +90,6 @@ extension HourlyTimelineModel {
                 domain: paddedDomain([soilTemperature0, soilTemperature6, soilTemperature18, soilTemperature54]),
                 showsBars: false,
                 barsAlpha: 0,
-                fillsPrimary: false,
                 extremes: [],
                 extremeFormat: temperatureFormat,
                 primaryColor: .brown
@@ -115,7 +109,6 @@ extension HourlyTimelineModel {
                 domain: paddedDomain(depths, minimumPad: 0.02),
                 showsBars: false,
                 barsAlpha: 0,
-                fillsPrimary: false,
                 extremes: [],
                 extremeFormat: { [moistureUnit = compactMoistureUnit] in
                     "\($0.formatted(.number.precision(.fractionLength(2)))) \(moistureUnit)"
@@ -128,7 +121,6 @@ extension HourlyTimelineModel {
                 domain: paddedDomain([et0], from: 0, minimumPad: 0.05),
                 showsBars: false,
                 barsAlpha: 0,
-                fillsPrimary: false,
                 extremes: extremeMarks(for: et0, highsOnly: true, atLeast: 0.05),
                 extremeFormat: { [unit = et0Unit] in
                     "\($0.formatted(.number.precision(.fractionLength(2)))) \(unit)"
@@ -142,13 +134,9 @@ extension HourlyTimelineModel {
         _ values: [Double],
         _ color: Color,
         width: CGFloat = 4,
-        dashed: Bool = false,
-        opacity: Double = 1,
         label: String? = nil
     ) -> HourlyLensLayout.Line {
-        HourlyLensLayout.Line(
-            values: values, color: color, width: width, dashed: dashed, opacity: opacity, label: label
-        )
+        HourlyLensLayout.Line(values: values, color: color, width: width, label: label)
     }
 
     /// Joint min/max over all series, padded so curves don't kiss the edges.

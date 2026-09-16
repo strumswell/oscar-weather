@@ -31,7 +31,7 @@ enum AtmosphereSampler {
     /// flips to a faint white lift so cards separate from a near-black sky.
     static func cardFill(snapshot: AtmosphereSnapshot) -> Color {
         let elevationDegrees = snapshot.sunElevation * 180 / .pi
-        let daylight = smoothstep(3, 14, elevationDegrees)
+        let daylight = AtmosphereWeatherMapper.smoothstep(3, 14, elevationDegrees)
         // High sun samples the lower third of the sky (the zenith overshot
         // into navy); as the sun drops the sample slides UP toward the
         // zenith, away from the warming horizon, so the residual hue stays
@@ -50,7 +50,7 @@ enum AtmosphereSampler {
         // Both ramps meet near zero in twilight, so the flip from the fading
         // day wash to the night lift is invisible.
         let dayOpacity = 0.55 * daylight
-        let lift = 0.12 * (1 - smoothstep(0.02, 0.16, level))
+        let lift = 0.12 * (1 - AtmosphereWeatherMapper.smoothstep(0.02, 0.16, level))
         return dayOpacity >= lift
             ? Color(
                 red: Double(base.x),
@@ -91,7 +91,7 @@ enum AtmosphereSampler {
         let nightZenith = simd_float3(0.022, 0.040, 0.095)
         let nightHorizon = simd_float3(0.042, 0.052, 0.11)
 
-        let h = smoothstep(0, 1, horizonFactor)
+        let h = AtmosphereWeatherMapper.smoothstep(0, 1, horizonFactor)
         let day = mix(dayZenith, dayHorizon, t: h)
         let golden = mix(goldenZenith, goldenHorizon, t: h * 0.92)
         let twilight = mix(twilightZenith, twilightHorizon, t: h * 0.60)
@@ -102,11 +102,11 @@ enum AtmosphereSampler {
         if elevationDegrees >= 6 {
             color = day
         } else if elevationDegrees >= 0 {
-            color = mix(golden, day, t: smoothstep(0, 6, elevationDegrees))
+            color = mix(golden, day, t: AtmosphereWeatherMapper.smoothstep(0, 6, elevationDegrees))
         } else if elevationDegrees >= -6 {
-            color = mix(twilight, golden, t: smoothstep(-4, 0, elevationDegrees))
+            color = mix(twilight, golden, t: AtmosphereWeatherMapper.smoothstep(-4, 0, elevationDegrees))
         } else {
-            color = mix(night, twilight, t: smoothstep(-16, -6, elevationDegrees))
+            color = mix(night, twilight, t: AtmosphereWeatherMapper.smoothstep(-16, -6, elevationDegrees))
         }
 
         let gray = simd_float3(repeating: (color.x + color.y + color.z) / 3)
@@ -175,11 +175,6 @@ enum AtmosphereSampler {
 
     private static func mix(_ lhs: simd_float3, _ rhs: simd_float3, t: Float) -> simd_float3 {
         simd_mix(lhs, rhs, simd_float3(repeating: min(max(t, 0), 1)))
-    }
-
-    private static func smoothstep(_ edge0: Float, _ edge1: Float, _ value: Float) -> Float {
-        let x = min(max((value - edge0) / (edge1 - edge0), 0), 1)
-        return x * x * (3 - 2 * x)
     }
 
     private static func clamp(_ vector: simd_float3) -> simd_float3 {

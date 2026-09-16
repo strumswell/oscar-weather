@@ -68,7 +68,7 @@ extension NotificationSettingsManager {
 
         let lastSentToken = keychain.load(key: lastSentDeviceTokenKey)
         let lastSentState = loadLastSentSubscriptionState()
-        let lastSentAPNsEnvironment = loadLastSentAPNsEnvironment() ?? lastSentState?.apnsEnvironment
+        let lastSentAPNsEnvironment = lastSentState?.apnsEnvironment
         let registrationCompleted = UserDefaults.standard.bool(forKey: installationRegistrationCompletedKey)
         let shouldRegister = forceRegister
             || !registrationCompleted
@@ -188,21 +188,12 @@ extension NotificationSettingsManager {
         return try? JSONDecoder().decode(SentSubscriptionState.self, from: data)
     }
 
-    func loadLastSentAPNsEnvironment() -> APNsEnvironment? {
-        guard let rawValue = UserDefaults.standard.string(forKey: lastSentAPNsEnvironmentKey) else {
-            return nil
-        }
-
-        return APNsEnvironment(rawValue: rawValue)
-    }
-
     func persistLastSentSubscriptionState(_ state: SentSubscriptionState) {
         guard let data = try? JSONEncoder().encode(state) else {
             return
         }
 
         UserDefaults.standard.set(data, forKey: lastSentStateKey)
-        UserDefaults.standard.set(state.apnsEnvironment.rawValue, forKey: lastSentAPNsEnvironmentKey)
     }
 
     func loggablePayload(from body: [String: any Sendable]) -> String {

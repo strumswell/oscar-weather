@@ -67,17 +67,8 @@ extension WeatherMapView.Coordinator {
         }
 
         defer {
-            if cloudIsPlaying, state.currentFrameKeyed != nil {
-                state.cancelInternalTimer()
-                layer.startPlayback(
-                    interval: 0.5,
-                    interpolate: smoothMotion && !UIAccessibility.isReduceMotionEnabled
-                ) { [weak state] in
-                    state?.advanceFrame()
-                }
-            } else if layer.isPlaybackActive {
-                layer.stopPlayback()
-            }
+            syncPlayback(of: layer, state: state, playing: cloudIsPlaying && state.currentFrameKeyed != nil,
+                         interval: 0.5, interpolate: smoothMotion && !UIAccessibility.isReduceMotionEnabled)
         }
         guard let current = state.currentFrameKeyed else { return }
         let next = state.nextFrameKeyed

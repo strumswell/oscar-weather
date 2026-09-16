@@ -38,7 +38,7 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
             coordinates: coordinates,
             forecastDays: ._14,
             hourly: [
-                .weathercode, .cloudcover, .relativehumidity_2m, .pressure_msl,
+                .weathercode, .cloudcover, .relativehumidity_2m,
                 .precipitation, .snowfall, .windspeed_10m, .winddirection_10m,
             ]
         )
@@ -87,15 +87,9 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
         let lows = days.map(\.low)
         let highs = days.map(\.high)
 
-        let dayBegin = weather.hourly?.time.first ?? 0
-        let gradient = await MainActor.run {
-            let weatherForRendering = Weather()
-            weatherForRendering.time = (Date.now.timeIntervalSince1970 - Double(dayBegin)) / 86400.0
-            weatherForRendering.forecast = weather
-            weatherForRendering.precipSeries = precipSeries
-            return WeatherAtmosphericAdapter().getWidgetFullGradient(
-                from: weatherForRendering, at: coordinates)
-        }
+        let gradient = await WeatherAtmosphericAdapter.widgetGradient(
+            weather: weather, precipSeries: precipSeries, coordinates: coordinates
+        )
 
         return DailyForecastEntry(
             date: .now,

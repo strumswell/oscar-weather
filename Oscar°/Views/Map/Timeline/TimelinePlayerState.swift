@@ -20,6 +20,8 @@ protocol TimelinePlayerState: AnyObject, Observable {
     func pause()
     func beginScrubbing()
     func endScrubbing()
+    func advanceFrame()
+    func cancelInternalTimer()
 }
 
 extension OscarRadarState: TimelinePlayerState {}

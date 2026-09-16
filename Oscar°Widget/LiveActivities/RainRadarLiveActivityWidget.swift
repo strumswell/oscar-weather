@@ -279,21 +279,15 @@ private struct RainTimelineChart: View {
         let reference = RainNowcastSummary.reference(for: model.buckets.map(\.v))
         return HStack(alignment: .bottom, spacing: compact ? 2 : 3) {
             ForEach(model.buckets) { bucket in
-                Capsule(style: .continuous)
-                    .fill(bucket.v > 0 ? AnyShapeStyle(RainActivityStyle.wet) : AnyShapeStyle(RainActivityStyle.dry))
-                    .frame(height: height(for: bucket.v, reference: reference))
-                    .frame(maxWidth: .infinity)
-                    .opacity(bucket.t <= model.state.observedAt ? 0.45 : 1)
+                RainNowcastBar(
+                    value: bucket.v, reference: reference, areaHeight: barHeight,
+                    fill: bucket.v > 0 ? AnyShapeStyle(RainActivityStyle.wet) : AnyShapeStyle(RainActivityStyle.dry)
+                )
+                .opacity(bucket.t <= model.state.observedAt ? 0.45 : 1)
             }
         }
         .frame(height: barHeight, alignment: .bottom)
         .opacity(model.isStale ? 0.5 : 1)
-    }
-
-    private func height(for value: Double, reference: Double) -> CGFloat {
-        guard value > 0 else { return 3 }
-        let fraction = RainNowcastSummary.barFraction(value: value, reference: reference)
-        return 4 + CGFloat(fraction) * (barHeight - 4)
     }
 
     private var nowMarker: some View {

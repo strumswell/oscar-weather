@@ -218,44 +218,27 @@ actor CacheStore {
   }
 
   private func removePersistedFiles(fileStem: String) {
-    Self.removePersistedFiles(
-      fileStem: fileStem,
-      cacheDirectory: cacheDirectory,
-      fileManager: fileManager
-    )
-  }
-
-  private static func removePersistedFiles(
-    fileStem: String,
-    cacheDirectory: URL,
-    fileManager: FileManager
-  ) {
-    try? fileManager.removeItem(at: metadataFileURL(forFileStem: fileStem, cacheDirectory: cacheDirectory))
-    try? fileManager.removeItem(at: bodyFileURL(forFileStem: fileStem, cacheDirectory: cacheDirectory))
+    try? fileManager.removeItem(at: metadataFileURL(forFileStem: fileStem))
+    try? fileManager.removeItem(at: bodyFileURL(forFileStem: fileStem))
   }
 
   private func metadataFileURL(forFileStem fileStem: String) -> URL {
-    Self.metadataFileURL(forFileStem: fileStem, cacheDirectory: cacheDirectory)
-  }
-
-  private static func metadataFileURL(forFileStem fileStem: String, cacheDirectory: URL) -> URL {
     cacheDirectory.appendingPathComponent("\(fileStem).json")
   }
 
   private func bodyFileURL(forFileStem fileStem: String) -> URL {
-    Self.bodyFileURL(forFileStem: fileStem, cacheDirectory: cacheDirectory)
-  }
-
-  private static func bodyFileURL(forFileStem fileStem: String, cacheDirectory: URL) -> URL {
     cacheDirectory.appendingPathComponent("\(fileStem).body")
   }
 
   private func fileStem(for key: String) -> String {
-    Self.fileStem(for: key)
+    key.sha256Hex
   }
+}
 
-  private static func fileStem(for key: String) -> String {
-    SHA256.hash(data: Data(key.utf8)).map { String(format: "%02x", $0) }.joined()
+extension String {
+  /// Stable on-disk file stem for a cache key (also used by the ensemble and climate caches).
+  var sha256Hex: String {
+    SHA256.hash(data: Data(utf8)).map { String(format: "%02x", $0) }.joined()
   }
 }
 

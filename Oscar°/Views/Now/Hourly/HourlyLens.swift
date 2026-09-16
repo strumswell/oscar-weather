@@ -48,15 +48,13 @@ extension Color {
 }
 
 /// Everything the strip needs to render one lens: the line stack (the LAST
-/// entry is the primary the playhead rides), a shared y-domain, bar/fill
-/// flags, and the per-day extreme marks.
+/// entry is the primary the playhead rides), a shared y-domain, the bar
+/// flag, and the per-day extreme marks.
 struct HourlyLensLayout {
     struct Line {
         let values: [Double]
         let color: Color
         let width: CGFloat
-        let dashed: Bool
-        let opacity: Double
         /// Row label in the playhead readout box; nil keeps the row
         /// value-only. The box rows double as the legend.
         let label: String?
@@ -74,7 +72,6 @@ struct HourlyLensLayout {
     let domain: ClosedRange<Double>
     let showsBars: Bool
     let barsAlpha: Double
-    let fillsPrimary: Bool
     let extremes: [HourlyTimelineModel.ExtremeMark]
     /// Formats a value with its unit ("12°C", "34 km/h") — used by the
     /// gridline labels, the extreme marks, and the readout box alike.

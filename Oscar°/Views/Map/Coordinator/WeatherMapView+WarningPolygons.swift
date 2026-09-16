@@ -218,15 +218,10 @@ extension WeatherMapView.Coordinator {
 
     private func removeAlertPolygonLayers(from style: MLNStyle) {
         for index in 0..<WeatherMapView.alertSourceCount {
-            if let layer = style.layer(withIdentifier: WeatherMapView.alertFillLayerID(index)) {
-                style.removeLayer(layer)
-            }
-            if let layer = style.layer(withIdentifier: WeatherMapView.alertOutlineLayerID(index)) {
-                style.removeLayer(layer)
-            }
-            if let source = style.source(withIdentifier: WeatherMapView.alertSourceID(index)) {
-                style.removeSource(source)
-            }
+            style.removeLayers(withIdentifiers: [
+                WeatherMapView.alertFillLayerID(index), WeatherMapView.alertOutlineLayerID(index),
+            ])
+            style.removeSources(withIdentifiers: [WeatherMapView.alertSourceID(index)])
         }
     }
 }

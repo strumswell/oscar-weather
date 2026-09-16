@@ -33,8 +33,8 @@ struct OscarPointAlertsResponse {
         urgency: alert.urgency,
         certainty: alert.certainty,
         responseType: alert.responseType,
-        onsetAt: alert.onsetAt.flatMap(OscarAlertDate.parse),
-        expiresAt: alert.expiresAt.flatMap(OscarAlertDate.parse),
+        onsetAt: alert.onsetAt.flatMap(PrecipSeriesDate.parse),
+        expiresAt: alert.expiresAt.flatMap(PrecipSeriesDate.parse),
         headline: alert.headline,
         description: alert.description,
         instruction: alert.instruction)
@@ -44,12 +44,6 @@ struct OscarPointAlertsResponse {
   private init(alertCount: Int, alerts: [OscarPointAlert]) {
     self.alertCount = alertCount
     self.alerts = alerts
-  }
-}
-
-private enum OscarAlertDate {
-  static func parse(_ string: String) -> Date? {
-    PrecipSeriesDate.parse(string)
   }
 }
 

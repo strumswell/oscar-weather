@@ -167,15 +167,12 @@ struct HourlyChapterChart: View {
                     width: width
                 )
             }
-            for highlight in chapter.highlights {
-                switch highlight {
-                case .pressure:
-                    drawLine(
-                        context: &context, values: series(model.pressure), color: .purple,
-                        width: 1.5, band: chartHeight * 0.3, offset: chartHeight * 0.55,
-                        chartHeight: chartHeight, x: x, normalizeToOwnRange: true
-                    )
-                }
+            if chapter.showsPressure {
+                drawLine(
+                    context: &context, values: series(model.pressure), color: .purple,
+                    width: 1.5, band: chartHeight * 0.3, offset: chartHeight * 0.55,
+                    chartHeight: chartHeight, x: x, normalizeToOwnRange: true
+                )
             }
         case .sunEvent, .radar, .alert:
             break
@@ -232,7 +229,7 @@ struct HourlyChapterChart: View {
         )
 
         if let peak = points.max(by: { $0.1 < $1.1 }), peak.1 >= 0.1 {
-            let rate = model.precipitationUnit.lowercased() == "inch" ? peak.1 / 25.4 : peak.1
+            let rate = HourlyFormatting.displayRate(fromMillimeters: peak.1, unit: model.precipitationUnit)
             drawLabel(
                 context: &context,
                 text: "\(rate.formatted(.number.precision(.fractionLength(1)))) \(model.precipitationUnit)/h",

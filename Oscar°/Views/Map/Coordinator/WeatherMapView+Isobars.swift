@@ -218,16 +218,14 @@ extension WeatherMapView.Coordinator {
 
     private func removeIsobarLayers(from style: MLNStyle) {
         for buffer in 0..<WeatherMapView.isobarBufferCount {
-            for id in [WeatherMapView.isobarCenterValueLayerID(buffer),
-                       WeatherMapView.isobarCenterLayerID(buffer),
-                       WeatherMapView.isobarLabelLayerID(buffer),
-                       WeatherMapView.isobarLineLayerID(buffer),
-                       WeatherMapView.isobarCasingLayerID(buffer)] {
-                if let layer = style.layer(withIdentifier: id) { style.removeLayer(layer) }
-            }
-            if let source = style.source(withIdentifier: WeatherMapView.isobarSourceID(buffer)) {
-                style.removeSource(source)
-            }
+            style.removeLayers(withIdentifiers: [
+                WeatherMapView.isobarCenterValueLayerID(buffer),
+                WeatherMapView.isobarCenterLayerID(buffer),
+                WeatherMapView.isobarLabelLayerID(buffer),
+                WeatherMapView.isobarLineLayerID(buffer),
+                WeatherMapView.isobarCasingLayerID(buffer),
+            ])
+            style.removeSources(withIdentifiers: [WeatherMapView.isobarSourceID(buffer)])
         }
         isobarSyncKey = nil
         isobarActiveBuffer = 0

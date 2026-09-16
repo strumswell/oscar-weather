@@ -69,22 +69,10 @@ extension WeatherMapView.Coordinator {
         }
 
         defer {
-            // Same playback ownership rule as the radar layer: while playing,
-            // the layer's display link owns phase + advancement (hourly frames
-            // morph along the model flow — precip — or cross-fade in data
-            // space); the state's 0.8 s Timer would double-advance, so it is
-            // cancelled while the layer runs.
-            if isPlaying, payload != nil {
-                state.cancelInternalTimer()
-                layer.startPlayback(
-                    interval: 0.8,
-                    interpolate: smoothMotion && !UIAccessibility.isReduceMotionEnabled
-                ) { [weak state] in
-                    state?.advanceFrame()
-                }
-            } else if layer.isPlaybackActive {
-                layer.stopPlayback()
-            }
+            // Hourly frames morph along the model flow (precip) or cross-fade in
+            // data space while playing.
+            syncPlayback(of: layer, state: state, playing: isPlaying && payload != nil,
+                         interval: 0.8, interpolate: smoothMotion && !UIAccessibility.isReduceMotionEnabled)
         }
 
         guard let payload, let frameKey else { return }

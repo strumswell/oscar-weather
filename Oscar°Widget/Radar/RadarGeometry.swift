@@ -2,17 +2,15 @@ import CoreLocation
 import Foundation
 import UIKit
 
+extension OscarRadarBounds {
+    func contains(_ coordinate: CLLocationCoordinate2D) -> Bool {
+        coordinate.latitude >= south && coordinate.latitude <= north
+            && coordinate.longitude >= west && coordinate.longitude <= east
+    }
+}
+
 extension RadarSnapshotRenderer {
     // MARK: - Geo helpers
-
-    struct GeoBox {
-        let south, west, north, east: Double
-
-        func contains(_ coordinate: CLLocationCoordinate2D) -> Bool {
-            coordinate.latitude >= south && coordinate.latitude <= north
-                && coordinate.longitude >= west && coordinate.longitude <= east
-        }
-    }
 
     /// Linear Web-Mercator mapping between a coordinate rectangle and composite
     /// points — the CPU analog of the basemap snapshot's point conversion.
@@ -21,7 +19,7 @@ extension RadarSnapshotRenderer {
         let y0, y1: Double // world-fraction Y at north/south
         let size: CGSize
 
-        init(bounds: GeoBox, size: CGSize) {
+        init(bounds: OscarRadarBounds, size: CGSize) {
             x0 = WebMercator.unitX(longitude: bounds.west)
             x1 = WebMercator.unitX(longitude: bounds.east)
             y0 = WebMercator.unitY(latitude: bounds.north)
@@ -47,7 +45,7 @@ extension RadarSnapshotRenderer {
     /// space. Used only when no prerendered basemap exists yet.
     nonisolated static func fittedBounds(
         around center: CLLocationCoordinate2D, spanMeters: Double, size: CGSize
-    ) -> GeoBox {
+    ) -> OscarRadarBounds {
         let box = boundingBox(around: center, spanMeters: spanMeters)
         var west = WebMercator.unitX(longitude: box.west)
         var east = WebMercator.unitX(longitude: box.east)
@@ -64,18 +62,18 @@ extension RadarSnapshotRenderer {
             north -= extra
             south += extra
         }
-        return GeoBox(
-            south: WebMercator.latitude(fromUnitY: south), west: WebMercator.longitude(fromUnitX: west),
-            north: WebMercator.latitude(fromUnitY: north), east: WebMercator.longitude(fromUnitX: east)
+        return OscarRadarBounds(
+            north: WebMercator.latitude(fromUnitY: north), south: WebMercator.latitude(fromUnitY: south),
+            west: WebMercator.longitude(fromUnitX: west), east: WebMercator.longitude(fromUnitX: east)
         )
     }
 
-    nonisolated static func boundingBox(around center: CLLocationCoordinate2D, spanMeters: Double) -> GeoBox {
+    nonisolated static func boundingBox(around center: CLLocationCoordinate2D, spanMeters: Double) -> OscarRadarBounds {
         let halfLat = spanMeters / 2 / 111_320
         let halfLon = spanMeters / 2 / (111_320 * max(0.2, cos(center.latitude * .pi / 180)))
-        return GeoBox(
-            south: center.latitude - halfLat, west: center.longitude - halfLon,
-            north: center.latitude + halfLat, east: center.longitude + halfLon
+        return OscarRadarBounds(
+            north: center.latitude + halfLat, south: center.latitude - halfLat,
+            west: center.longitude - halfLon, east: center.longitude + halfLon
         )
     }
 }

@@ -13,7 +13,7 @@ import SwiftUI
 final class WeatherAtmosphericAdapter {
     private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Atmosphere")
 
-    func generateAtmosphericSkyGradient(
+    func getWidgetFullGradient(
         from weather: Weather,
         at location: CLLocationCoordinate2D
     ) -> LinearGradient {
@@ -24,12 +24,5 @@ final class WeatherAtmosphericAdapter {
         }
 
         return AtmosphereSampler.skyGradient(snapshot: snapshot, sampleCount: 12)
-    }
-
-    func getWidgetFullGradient(
-        from weather: Weather,
-        at location: CLLocationCoordinate2D
-    ) -> LinearGradient {
-        generateAtmosphericSkyGradient(from: weather, at: location)
     }
 }

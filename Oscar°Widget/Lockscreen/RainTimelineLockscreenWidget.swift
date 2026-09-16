@@ -32,27 +32,11 @@ struct RainTimelineProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<RainTimelineEntry>) -> ()) {
-        Task {
-            do {
-                let coordinates = await MainActor.run {
-                    LocationService.shared.update()
-                    return LocationService.shared.getCoordinates()
-                }
-
-                // nil = server successfully reported no radar coverage here.
-                let precipSeries = try await client.getRadarSeries(coordinates: coordinates)
-                let entry = Self.makeEntry(from: precipSeries, now: Date())
-
-                // Radar nowcasts go stale fast, refresh more often than the other widgets.
-                let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
-                completion(Timeline(entries: [entry], policy: .after(nextUpdateDate)))
-            } catch {
-                // completion must always be called: a dropped timeline request kills the
-                // refresh chain and the widget never updates again. An empty timeline keeps
-                // the last rendered entry on screen and retries once the API is back.
-                let retryDate = Calendar.current.date(byAdding: .minute, value: 10, to: Date())!
-                completion(Timeline(entries: [], policy: .after(retryDate)))
-            }
+        // Radar nowcasts go stale fast, refresh more often than the other widgets.
+        runWidgetTimeline(refreshMinutes: 15, retryMinutes: 10, completion: completion) { coordinates in
+            // nil = server successfully reported no radar coverage here.
+            let precipSeries = try await client.getRadarSeries(coordinates: coordinates)
+            return Self.makeEntry(from: precipSeries, now: Date())
         }
     }
 
@@ -208,34 +192,13 @@ private struct RainTimelineBars: View {
     var body: some View {
         HStack(alignment: .bottom, spacing: 2) {
             ForEach(Array(bars.enumerated()), id: \.offset) { _, value in
-                RainTimelineBar(value: value, reference: reference)
+                RainNowcastBar(
+                    value: value, reference: reference, areaHeight: Self.barAreaHeight,
+                    fill: value > 0 ? AnyShapeStyle(Color.primary) : AnyShapeStyle(Color.secondary.opacity(0.35))
+                )
             }
         }
         .frame(height: Self.barAreaHeight, alignment: .bottom)
-    }
-}
-
-private struct RainTimelineBar: View {
-    let value: Double
-    let reference: Double
-
-    private static let barAreaHeight: CGFloat = 24
-
-    private var fillColor: Color {
-        value > 0 ? .primary : .secondary.opacity(0.35)
-    }
-
-    private var height: CGFloat {
-        guard value > 0 else { return 3 }
-        let fraction = RainNowcastSummary.barFraction(value: value, reference: reference)
-        return 4 + CGFloat(fraction) * (Self.barAreaHeight - 4)
-    }
-
-    var body: some View {
-        Capsule(style: .continuous)
-            .fill(fillColor)
-            .frame(height: height)
-            .frame(maxWidth: .infinity)
     }
 }
 

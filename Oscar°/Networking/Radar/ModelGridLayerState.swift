@@ -137,10 +137,6 @@ final class ModelGridLayerState {
         return frameTimestamps[index]
     }
 
-    var hasCurrentFrame: Bool {
-        currentFrame != nil
-    }
-
     var hasAnyLoadedFrame: Bool {
         frames.contains { $0 != nil }
     }
@@ -206,7 +202,6 @@ final class ModelGridLayerState {
     // MARK: - Load
 
     func loadLayer(_ layer: WeatherTileLayer) async {
-        guard layer.imagePath != nil else { return }
         loadTask?.cancel()
         focusedLoadTask?.cancel()
         backgroundPreloadTask?.cancel()
@@ -325,7 +320,7 @@ final class ModelGridLayerState {
         }
 
         focusedLoadTask?.cancel()
-        guard let layer = currentLayer, layer.imagePath != nil else { return }
+        guard let layer = currentLayer else { return }
         let sessionID = loadSessionID
         let focusIndices = focusedFrameIndices(around: currentFrameIndex)
 
@@ -347,7 +342,6 @@ final class ModelGridLayerState {
               interactionState != .scrubbing,
               !isMapInteracting,
               let layer = currentLayer,
-              layer.imagePath != nil,
               !frameInfos.isEmpty else { return }
 
         let sessionID = loadSessionID

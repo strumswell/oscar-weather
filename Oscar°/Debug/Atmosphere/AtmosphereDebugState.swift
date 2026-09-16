@@ -39,11 +39,6 @@ final class AtmosphereDebugState {
 }
 
 extension AtmosphereConditionFamily {
-    static let debugCases: [AtmosphereConditionFamily] = [
-        .clear, .partlyCloudy, .overcast, .fog, .drizzle,
-        .rain, .freezingRain, .snow, .showers, .thunderstorm
-    ]
-
     var debugLabel: String {
         switch self {
         case .clear: return "Clear"

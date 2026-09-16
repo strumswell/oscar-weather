@@ -78,17 +78,8 @@ extension WeatherMapView.Coordinator {
         let interpolate = smoothMotion && !UIAccessibility.isReduceMotionEnabled
 
         defer {
-            // Playback ownership mirrors the old Metal overlay: the layer's display
-            // link owns phase + frame advancement; the state's 0.5 s Timer would
-            // double-advance, so it is cancelled while the layer runs.
-            if isPlaying, frame != nil {
-                state.cancelInternalTimer()
-                layer.startPlayback(interpolate: interpolate) { [weak state] in
-                    state?.advanceFrame()
-                }
-            } else if layer.isPlaybackActive {
-                layer.stopPlayback()
-            }
+            syncPlayback(of: layer, state: state, playing: isPlaying && frame != nil,
+                         interval: 0.5, interpolate: interpolate)
             syncArrowLayer(style: style, state: state, frame: frame, isPlaying: isPlaying,
                            enabled: arrowsEnabled)
         }

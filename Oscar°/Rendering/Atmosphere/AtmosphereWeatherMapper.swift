@@ -44,11 +44,6 @@ enum AtmosphereWeatherMapper {
             Float(value(at: hourlyIndex, in: weather.forecast.hourly?.relativehumidity_2m) ?? 50),
             max: 100
         )
-        let pressure = clamp(
-            Float(value(at: hourlyIndex, in: weather.forecast.hourly?.pressure_msl) ?? 1013.25) / 1013.25,
-            0.86,
-            1.14
-        )
         // Precipitation "now": fresh radar wins in both directions — a measured 0
         // is an answer, only nil (no coverage / stale) falls through to the model's
         // current value, then the hourly slot (which smears mid-hour rain onset).
@@ -89,7 +84,6 @@ enum AtmosphereWeatherMapper {
             condition: condition,
             cloudCoverage: cloudCoverage,
             humidity: humidity,
-            pressure: pressure,
             precipitation: precipitation,
             snowfall: snowfall,
             precipitationIntensity: precipitationIntensity,
@@ -127,11 +121,6 @@ enum AtmosphereWeatherMapper {
             Float(interpolatedValue(at: timestamp, times: times, values: hourly?.relativehumidity_2m) ?? 50),
             max: 100
         )
-        let pressure = clamp(
-            Float(interpolatedValue(at: timestamp, times: times, values: hourly?.pressure_msl) ?? 1013.25) / 1013.25,
-            0.86,
-            1.14
-        )
 
         let radarRate = radarRate(from: weather.precipSeries, at: timestamp)
         let modelPrecipitation = Float(interpolatedValue(at: timestamp, times: times, values: hourly?.precipitation) ?? 0)
@@ -158,7 +147,6 @@ enum AtmosphereWeatherMapper {
             condition: condition,
             cloudCoverage: cloudCoverage,
             humidity: humidity,
-            pressure: pressure,
             precipitation: precipitation,
             snowfall: snowfall,
             precipitationIntensity: precipitationIntensity,
@@ -176,7 +164,6 @@ enum AtmosphereWeatherMapper {
         condition: AtmosphereConditionFamily,
         cloudCoverage: Float,
         humidity: Float,
-        pressure: Float,
         precipitation: Float,
         snowfall: Float,
         precipitationIntensity: Float,
@@ -235,8 +222,6 @@ enum AtmosphereWeatherMapper {
             precipitationIntensity: precipitationIntensity,
             snowfallIntensity: snowfallIntensity,
             thunderIntensity: thunderIntensity,
-            humidity: humidity,
-            pressure: pressure,
             haze: haze,
             turbidity: turbidity,
             windSpeed: clamp(windSpeed / 75, 0, 1),
@@ -283,18 +268,8 @@ enum AtmosphereWeatherMapper {
         if timestamp <= times[0] { return values[0] }
         if timestamp >= times[times.count - 1] { return values[values.count - 1] }
 
-        var low = 0
-        var high = times.count - 1
-        while low < high {
-            let mid = (low + high) / 2
-            if times[mid] < timestamp {
-                low = mid + 1
-            } else {
-                high = mid
-            }
-        }
-        let upper = low
-        let lower = low - 1
+        let upper = insertionIndex(for: timestamp, in: times)
+        let lower = upper - 1
         let span = times[upper] - times[lower]
         guard span > 0 else { return values[upper] }
         let fraction = (timestamp - times[lower]) / span
@@ -324,23 +299,22 @@ enum AtmosphereWeatherMapper {
     /// first stamp at or after now is the current hour, not the nearest one.
     private static func accumulationIndex(for timestamp: Double, in times: [Double]?) -> Int? {
         guard let times, !times.isEmpty else { return nil }
-        var low = 0
-        var high = times.count - 1
-        while low < high {
-            let mid = (low + high) / 2
-            if times[mid] < timestamp {
-                low = mid + 1
-            } else {
-                high = mid
-            }
-        }
-        return low
+        return insertionIndex(for: timestamp, in: times)
     }
 
     private static func nearestIndex(to timestamp: Double, in times: [Double]?) -> Int? {
         guard let times, !times.isEmpty else { return nil }
-        // Hourly times are sorted ascending: binary-search the insertion point and pick the
-        // closer neighbour — O(log n) instead of an O(n) scan on the per-snapshot path.
+        let low = insertionIndex(for: timestamp, in: times)
+        if low > 0, abs(times[low - 1] - timestamp) <= abs(times[low] - timestamp) {
+            return low - 1
+        }
+        return low
+    }
+
+    /// First index whose time is >= `timestamp`, clamped to the last index.
+    /// Hourly times are sorted ascending: a binary search instead of an O(n)
+    /// scan on the per-snapshot path. `times` must be non-empty.
+    private static func insertionIndex(for timestamp: Double, in times: [Double]) -> Int {
         var low = 0
         var high = times.count - 1
         while low < high {
@@ -350,9 +324,6 @@ enum AtmosphereWeatherMapper {
             } else {
                 high = mid
             }
-        }
-        if low > 0, abs(times[low - 1] - timestamp) <= abs(times[low] - timestamp) {
-            return low - 1
         }
         return low
     }

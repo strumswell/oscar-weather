@@ -369,11 +369,7 @@ struct HourlyChaptersView: View {
         case .day:
             [(color: .orange, label: String(localized: "Temperatur")),
              (color: .hourlyRain, label: String(localized: "Regen"))]
-                + chapter.highlights.map { highlight in
-                    switch highlight {
-                    case .pressure: (color: .purple, label: String(localized: "Luftdruck"))
-                    }
-                }
+                + (chapter.showsPressure ? [(color: .purple, label: String(localized: "Luftdruck"))] : [])
         case .radar, .night, .sunEvent, .alert:
             nil
         }
@@ -435,13 +431,10 @@ struct HourlyChaptersView: View {
                     unit: model.precipitationUnit
                 )),
             ]
-            for highlight in chapter.highlights {
-                switch highlight {
-                case .pressure:
-                    let pressures = series(model.pressure)
-                    if let first = pressures.first, let last = pressures.last {
-                        stats.append(("Luftdruck", "\(Int(first.rounded())) → \(Int(last.rounded())) hPa"))
-                    }
+            if chapter.showsPressure {
+                let pressures = series(model.pressure)
+                if let first = pressures.first, let last = pressures.last {
+                    stats.append(("Luftdruck", "\(Int(first.rounded())) → \(Int(last.rounded())) hPa"))
                 }
             }
             return stats

@@ -12,13 +12,9 @@ import UIKit
 struct NotificationSettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
-    private let notificationSettingsManager: NotificationSettingsManager
+    private let notificationSettingsManager = NotificationSettingsManager.shared
     @State private var isUpdating = false
     @State private var showPermissionAlert = false
-
-    init(notificationSettingsManager: NotificationSettingsManager = .shared) {
-        self.notificationSettingsManager = notificationSettingsManager
-    }
 
     var body: some View {
         Form {
@@ -29,7 +25,7 @@ struct NotificationSettingsView: View {
                 let weatherAlertsEnabled = notificationSettingsManager.weatherAlertsEnabled
                 let liveRainStatusEnabled = notificationSettingsManager.liveRainStatusEnabled
 
-                Toggle(isOn: rainAlertsBinding(currentValue: rainAlertsEnabled)) {
+                Toggle(isOn: toggleBinding(currentValue: rainAlertsEnabled, update: notificationSettingsManager.setRainAlertsEnabled)) {
                     HStack(spacing: 8) {
                         Text("Rain alerts")
                         BetaBadge()
@@ -37,7 +33,7 @@ struct NotificationSettingsView: View {
                 }
                 .accessibilityIdentifier("notifications.rainAlerts")
 
-                Toggle(isOn: weatherAlertsBinding(currentValue: weatherAlertsEnabled)) {
+                Toggle(isOn: toggleBinding(currentValue: weatherAlertsEnabled, update: notificationSettingsManager.setWeatherAlertsEnabled)) {
                     HStack(spacing: 8) {
                         Text("Weather alerts")
                         BetaBadge()
@@ -45,7 +41,7 @@ struct NotificationSettingsView: View {
                 }
                 .accessibilityIdentifier("notifications.weatherAlerts")
 
-                Toggle(isOn: liveRainStatusBinding(currentValue: liveRainStatusEnabled)) {
+                Toggle(isOn: toggleBinding(currentValue: liveRainStatusEnabled, update: notificationSettingsManager.setLiveRainStatusEnabled)) {
                     HStack(spacing: 8) {
                         Text("Live-Regenstatus")
                         BetaBadge()
@@ -101,40 +97,15 @@ struct NotificationSettingsView: View {
         }
     }
 
-    private func rainAlertsBinding(currentValue: Bool) -> Binding<Bool> {
+    private func toggleBinding(
+        currentValue: Bool,
+        update: @escaping @MainActor (Bool) async -> Bool
+    ) -> Binding<Bool> {
         Binding(
             get: { currentValue },
             set: { newValue in
                 runUpdate {
-                    let enabled = await notificationSettingsManager.setRainAlertsEnabled(newValue)
-                    if newValue && !enabled {
-                        showPermissionAlert = true
-                    }
-                }
-            }
-        )
-    }
-
-    private func weatherAlertsBinding(currentValue: Bool) -> Binding<Bool> {
-        Binding(
-            get: { currentValue },
-            set: { newValue in
-                runUpdate {
-                    let enabled = await notificationSettingsManager.setWeatherAlertsEnabled(newValue)
-                    if newValue && !enabled {
-                        showPermissionAlert = true
-                    }
-                }
-            }
-        )
-    }
-
-    private func liveRainStatusBinding(currentValue: Bool) -> Binding<Bool> {
-        Binding(
-            get: { currentValue },
-            set: { newValue in
-                runUpdate {
-                    let enabled = await notificationSettingsManager.setLiveRainStatusEnabled(newValue)
+                    let enabled = await update(newValue)
                     if newValue && !enabled {
                         showPermissionAlert = true
                     }

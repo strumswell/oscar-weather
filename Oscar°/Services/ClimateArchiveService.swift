@@ -8,7 +8,6 @@
 //  them in. App target only — the widget/watch targets never touch the climate timeline.
 //
 
-import CryptoKit
 import Foundation
 import OSLog
 
@@ -193,8 +192,7 @@ actor ClimateArchiveStore {
     }
 
     private func fileURL(_ key: String) -> URL {
-        let stem = SHA256.hash(data: Data(key.utf8)).map { String(format: "%02x", $0) }.joined()
-        return cacheDirectory.appendingPathComponent("\(stem).json")
+        cacheDirectory.appendingPathComponent("\(key.sha256Hex).json")
     }
 
     private static func locationKey(latitude: Double, longitude: Double) -> String {

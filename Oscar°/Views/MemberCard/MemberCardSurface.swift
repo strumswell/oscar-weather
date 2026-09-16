@@ -4,7 +4,6 @@ struct MemberCardSurface: View {
     let osName: String
     let osVersion: String
     let placements: [MemberCardStickerPlacement]
-    let selectedStickerID: UUID?
     let activeStickerID: UUID?
     let activeStickerCenter: CGPoint?
     let activeStickerScale: Double?
@@ -12,7 +11,6 @@ struct MemberCardSurface: View {
     let settlingStickerID: UUID?
     let settlingStickerFoldProgress: CGFloat
     let isEditing: Bool
-    let isDropTargeted: Bool
     let onCardTap: () -> Void
     let onApplyChanges: () -> Void
     let onStickerTap: (UUID) -> Void
@@ -168,9 +166,7 @@ struct MemberCardSurface: View {
                     let displayPlacement = displayedPlacement(for: placement, in: proxy.size)
                     MemberCardPlacedStickerView(
                         placement: displayPlacement,
-                        isSelected: selectedStickerID == placement.id,
                         isEditing: isEditing,
-                        isActivelyDragged: activeStickerID == placement.id,
                         isGestureLocked: activeStickerID != nil && activeStickerID != placement.id,
                         foldProgress: foldProgress(for: placement.id),
                         coordinateSpaceName: MemberCard.coordinateSpaceName,

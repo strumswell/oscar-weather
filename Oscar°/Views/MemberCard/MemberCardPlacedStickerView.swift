@@ -2,9 +2,7 @@ import SwiftUI
 
 struct MemberCardPlacedStickerView: View {
     let placement: MemberCardStickerPlacement
-    let isSelected: Bool
     let isEditing: Bool
-    let isActivelyDragged: Bool
     let isGestureLocked: Bool
     let foldProgress: CGFloat
     let coordinateSpaceName: String

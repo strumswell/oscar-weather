@@ -80,8 +80,6 @@ extension AtmosphereWeatherMapper {
             precipitationIntensity: precipitationIntensity,
             snowfallIntensity: snowfallIntensity,
             thunderIntensity: thunderIntensity,
-            humidity: humidity,
-            pressure: 1,
             haze: haze,
             turbidity: turbidity,
             windSpeed: clamp(windSpeed, 0, 1),

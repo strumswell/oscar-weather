@@ -76,10 +76,4 @@ enum AppIconCatalog {
             ]
         )
     ]
-
-    static var alternateIconNames: [String] {
-        sections
-            .flatMap(\.icons)
-            .compactMap(\.alternateIconName)
-    }
 }

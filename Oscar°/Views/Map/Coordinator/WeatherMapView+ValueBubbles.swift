@@ -151,14 +151,8 @@ extension WeatherMapView.Coordinator {
     }
 
     private func removeValueBubbles(from style: MLNStyle) {
-        for rank in Self.bubbleRankMinZooms.indices {
-            if let layer = style.layer(withIdentifier: "\(Self.bubbleSourceID)-r\(rank)") {
-                style.removeLayer(layer)
-            }
-        }
-        if let source = style.source(withIdentifier: Self.bubbleSourceID) {
-            style.removeSource(source)
-        }
+        style.removeLayers(withIdentifiers: Self.bubbleRankMinZooms.indices.map { "\(Self.bubbleSourceID)-r\($0)" })
+        style.removeSources(withIdentifiers: [Self.bubbleSourceID])
         bubbleSyncKey = nil
         lastBubbleSignature = nil
         registeredBubbleIcons.removeAll()

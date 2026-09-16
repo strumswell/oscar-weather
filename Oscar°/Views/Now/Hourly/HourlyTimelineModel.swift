@@ -180,8 +180,7 @@ final class HourlyTimelineModel {
                     )
                 }
             ),
-            includingPast: true,
-            limit: nil
+            includingPast: true
         )
 
         if firstLoad {

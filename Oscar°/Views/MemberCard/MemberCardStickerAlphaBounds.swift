@@ -32,12 +32,7 @@ enum MemberCardStickerAlphaBounds {
 
         guard let image = UIImage(named: assetName),
               let sourceImage = image.cgImage else {
-            let fallback = Metrics(
-                bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
-                bottomTrailingAnchor: CGPoint(x: 1, y: 1)
-            )
-            cache[assetName] = fallback
-            return fallback
+            return fallbackMetrics(for: assetName)
         }
 
         // Normalized metrics only need a coarse scan; the 1024 px sources
@@ -90,27 +85,20 @@ enum MemberCardStickerAlphaBounds {
             }
         }
 
-        let metrics: Metrics
-        if foundOpaquePixel {
-            metrics = Metrics(
-                bounds: CGRect(
-                    x: CGFloat(minX) / CGFloat(width),
-                    y: CGFloat(minY) / CGFloat(height),
-                    width: CGFloat((maxX - minX) + 1) / CGFloat(width),
-                    height: CGFloat((maxY - minY) + 1) / CGFloat(height)
-                ),
-                bottomTrailingAnchor: CGPoint(
-                    x: min(max((anchorPixel.x + 0.5) / CGFloat(width), 0), 1),
-                    y: min(max((anchorPixel.y + 0.5) / CGFloat(height), 0), 1)
-                )
-            )
-        } else {
-            metrics = Metrics(
-                bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
-                bottomTrailingAnchor: CGPoint(x: 1, y: 1)
-            )
-        }
+        guard foundOpaquePixel else { return fallbackMetrics(for: assetName) }
 
+        let metrics = Metrics(
+            bounds: CGRect(
+                x: CGFloat(minX) / CGFloat(width),
+                y: CGFloat(minY) / CGFloat(height),
+                width: CGFloat((maxX - minX) + 1) / CGFloat(width),
+                height: CGFloat((maxY - minY) + 1) / CGFloat(height)
+            ),
+            bottomTrailingAnchor: CGPoint(
+                x: min(max((anchorPixel.x + 0.5) / CGFloat(width), 0), 1),
+                y: min(max((anchorPixel.y + 0.5) / CGFloat(height), 0), 1)
+            )
+        )
         cache[assetName] = metrics
         return metrics
     }

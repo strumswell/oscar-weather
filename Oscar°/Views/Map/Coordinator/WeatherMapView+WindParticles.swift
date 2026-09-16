@@ -11,8 +11,7 @@ import UIKit
 extension WeatherMapView.Coordinator {
     func syncWindParticles(selection: WeatherTileLayer?, state: ModelGridLayerState?) {
         guard let particleView = windParticleView else { return }
-        let isWindLayer = parent.showWindParticles
-            && (selection == .iconWind || selection == .ecmwfWind)
+        let isWindLayer = selection == .iconWind || selection == .ecmwfWind
 
         guard isWindLayer, let state, let frameKey = state.currentFrameKey, let selection else {
             particleView.isHidden = true

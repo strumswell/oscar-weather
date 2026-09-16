@@ -68,28 +68,20 @@ struct WatchRainView: View {
         return GeometryReader { proxy in
             HStack(alignment: .bottom, spacing: 3) {
                 ForEach(bars, id: \.timestamp) { bar in
-                    Capsule(style: .continuous)
-                        .fill(
-                            bar.precipitation > 0
-                                ? AnyShapeStyle(.linearGradient(
-                                    colors: [.cyan, .blue],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                ))
-                                : AnyShapeStyle(.white.opacity(0.25))
-                        )
-                        .frame(height: barHeight(for: bar.precipitation, reference: reference, areaHeight: proxy.size.height))
-                        .frame(maxWidth: .infinity)
+                    RainNowcastBar(
+                        value: bar.precipitation, reference: reference, areaHeight: proxy.size.height,
+                        fill: bar.precipitation > 0
+                            ? AnyShapeStyle(.linearGradient(
+                                colors: [.cyan, .blue],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ))
+                            : AnyShapeStyle(.white.opacity(0.25))
+                    )
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
         }
-    }
-
-    private func barHeight(for value: Double, reference: Double, areaHeight: CGFloat) -> CGFloat {
-        guard value > 0 else { return 3 }
-        let fraction = RainNowcastSummary.barFraction(value: value, reference: reference)
-        return 4 + CGFloat(fraction) * max(0, areaHeight - 4)
     }
 }
 

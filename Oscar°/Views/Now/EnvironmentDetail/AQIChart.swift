@@ -88,20 +88,10 @@ struct AQIChart: View {
                 severityBandMarks
                 seriesMarks
                 selectionMark
-                daySeparatorMarks
+                HourlyChartUtilities.daySeparatorMarks(time: time)
             }
             .chartLegend(.hidden)
-            .chartXAxis {
-                AxisMarks(values: .stride(by: .hour, count: 6)) { value in
-                    AxisValueLabel {
-            if let date = value.as(Date.self) {
-              Text(HourlyChartUtilities.hourString(from: date))
-            }
-          }
-                    AxisGridLine()
-                    AxisTick()
-                }
-            }
+            .chartXAxis { HourlyChartUtilities.sixHourAxisMarks() }
             .chartYAxis {
                 AxisMarks(values: stride(from: 0, through: maxYValue, by: 20).map { $0 }) {
                     AxisGridLine()
@@ -119,7 +109,7 @@ struct AQIChart: View {
             .accessibilityLabel(Text("Luftqualitätsverlauf"))
             .accessibilityValue(accessibilitySummary)
 
-            AQIChartLegendView(items: [
+            ChartLegendView(items: [
                 ("PM2.5", .blue),
                 ("PM10", .cyan),
                 ("NO₂", .orange),
@@ -172,27 +162,6 @@ struct AQIChart: View {
     }
 
     @ChartContentBuilder
-    private var daySeparatorMarks: some ChartContent {
-        ForEach(HourlyChartUtilities.dayChangeIndices(time: time), id: \.self) { index in
-            RuleMark(x: .value("Hour", Date(timeIntervalSince1970: time[index])))
-                .foregroundStyle(.gray.opacity(0.6))
-                .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [8, 4]))
-                .annotation(
-                    position: .topTrailing,
-                    spacing: 8,
-                    overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))
-                ) {
-                    Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: time[index])))
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.primary.opacity(0.7))
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(.ultraThinMaterial, in: .capsule)
-                }
-        }
-    }
-
-    @ChartContentBuilder
     private func seriesLineMarks(
         series: String,
         color: Color,
@@ -224,47 +193,11 @@ struct AQIChart: View {
     @ChartContentBuilder
     private var currentPointMarks: some ChartContent {
         if let currentDataPoint {
-            currentPointMark(
-                series: "PM2.5",
-                value: currentDataPoint.pm25
-            )
-            currentPointMark(
-                series: "PM10",
-                value: currentDataPoint.pm10
-            )
-            currentPointMark(
-                series: "NO₂",
-                value: currentDataPoint.no2
-            )
-            currentPointMark(
-                series: "O₃",
-                value: currentDataPoint.o3
-            )
-            currentPointMark(
-                series: "SO₂",
-                value: currentDataPoint.so2
-            )
-        }
-    }
-
-    @ChartContentBuilder
-    private func currentPointMark(series: String, value: Double) -> some ChartContent {
-        if let currentDataPoint {
-            PointMark(
-                x: .value("Current Hour", currentDataPoint.time),
-                y: .value(series, value)
-            )
-            .symbol(.circle)
-            .symbolSize(90)
-            .foregroundStyle(.black)
-
-            PointMark(
-                x: .value("Current Hour", currentDataPoint.time),
-                y: .value(series, value)
-            )
-            .symbol(.circle)
-            .symbolSize(42)
-            .foregroundStyle(.white)
+            HourlyChartUtilities.currentPointMark(x: currentDataPoint.time, series: "PM2.5", value: currentDataPoint.pm25)
+            HourlyChartUtilities.currentPointMark(x: currentDataPoint.time, series: "PM10", value: currentDataPoint.pm10)
+            HourlyChartUtilities.currentPointMark(x: currentDataPoint.time, series: "NO₂", value: currentDataPoint.no2)
+            HourlyChartUtilities.currentPointMark(x: currentDataPoint.time, series: "O₃", value: currentDataPoint.o3)
+            HourlyChartUtilities.currentPointMark(x: currentDataPoint.time, series: "SO₂", value: currentDataPoint.so2)
         }
     }
 
@@ -339,25 +272,5 @@ private struct AQIChartAnnotationView: View {
         .padding(8)
         .background(.ultraThinMaterial.opacity(0.9), in: .rect(cornerRadius: 8))
         .shadow(radius: 4)
-    }
-}
-
-private struct AQIChartLegendView: View {
-    let items: [(label: String, color: Color)]
-
-    var body: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 74), spacing: 12)], alignment: .leading, spacing: 8) {
-            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(item.color)
-                        .frame(width: 8, height: 8)
-
-                    Text(verbatim: item.label)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
     }
 }

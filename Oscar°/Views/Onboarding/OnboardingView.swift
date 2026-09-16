@@ -104,10 +104,7 @@ struct OnboardingView: View {
     private var stageTransition: AnyTransition {
         guard !reduceMotion else { return .opacity }
         return .asymmetric(
-            insertion: .modifier(
-                active: StageRiseModifier(offsetY: 44, opacity: 0),
-                identity: StageRiseModifier(offsetY: 0, opacity: 1)
-            ),
+            insertion: .offset(y: 44).combined(with: .opacity),
             removal: .opacity
         )
     }
@@ -145,17 +142,6 @@ private struct StepSlideModifier: ViewModifier {
             .offset(x: offsetX)
             .opacity(opacity)
             .blur(radius: blur)
-    }
-}
-
-private struct StageRiseModifier: ViewModifier {
-    let offsetY: CGFloat
-    let opacity: Double
-
-    func body(content: Content) -> some View {
-        content
-            .offset(y: offsetY)
-            .opacity(opacity)
     }
 }
 

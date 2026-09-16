@@ -11,7 +11,7 @@ extension RadarSnapshotRenderer {
     /// instead of the value grid).
     static func arrowFeatures(
         motion: RadarMotionData, fieldIndex: Int, bounds: OscarRadarBounds,
-        cull: GeoBox, gate: PrecipGate?
+        cull: OscarRadarBounds, gate: PrecipGate?
     ) -> [RadarArrow] {
         guard let gate else { return [] }
         let cols = motion.cols, rows = motion.rows
@@ -91,18 +91,7 @@ extension RadarSnapshotRenderer {
 
         /// Decode a 256 px tile and keep only its alpha channel (dry = transparent).
         private static func alphaPlane(from data: Data) -> [UInt8]? {
-            guard let image = UIImage(data: data)?.cgImage else { return nil }
-            var rgba = [UInt8](repeating: 0, count: 256 * 256 * 4)
-            let ok = rgba.withUnsafeMutableBytes { raw -> Bool in
-                guard let ctx = CGContext(
-                    data: raw.baseAddress, width: 256, height: 256, bitsPerComponent: 8,
-                    bytesPerRow: 256 * 4, space: CGColorSpaceCreateDeviceRGB(),
-                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-                ) else { return false }
-                ctx.draw(image, in: CGRect(x: 0, y: 0, width: 256, height: 256))
-                return true
-            }
-            guard ok else { return nil }
+            guard let image = UIImage(data: data), let rgba = rgbaPlane(from: image) else { return nil }
             return (0..<256 * 256).map { rgba[$0 * 4 + 3] }
         }
     }

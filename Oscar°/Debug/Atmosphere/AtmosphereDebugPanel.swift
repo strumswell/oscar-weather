@@ -44,7 +44,7 @@ struct AtmosphereDebugPanel: View {
                     Text("Condition")
                         .frame(width: 64, alignment: .leading)
                     Picker("Condition", selection: $state.condition) {
-                        ForEach(AtmosphereConditionFamily.debugCases, id: \.self) { condition in
+                        ForEach(AtmosphereConditionFamily.allCases, id: \.self) { condition in
                             Text(condition.debugLabel).tag(condition)
                         }
                     }

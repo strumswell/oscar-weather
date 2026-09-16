@@ -63,17 +63,11 @@ struct MemberCard: View {
     private var cardBody: some View {
         GeometryReader { proxy in
             let cardSize = CGSize(width: max(proxy.size.width, 1), height: Self.cardHeight)
-            let currentDragScale = activeDrag.map { clampedScale($0.baseScale * inFlightScaleMultiplier) }
-            let allowedDropFrame = currentDragScale.map { stickerCenterBounds(for: $0, in: cardSize) }
-            let canDropOnCard = activeDrag.map { drag in
-                allowedDropFrame?.contains(drag.center) ?? false
-            } ?? false
 
             MemberCardSurface(
                 osName: os,
                 osVersion: version,
                 placements: placements,
-                selectedStickerID: selectedStickerID,
                 activeStickerID: activeDrag?.existingStickerID,
                 activeStickerCenter: activeExistingStickerCenter,
                 activeStickerScale: activeExistingStickerScale,
@@ -81,7 +75,6 @@ struct MemberCard: View {
                 settlingStickerID: settlingStickerID,
                 settlingStickerFoldProgress: settlingStickerFoldProgress,
                 isEditing: isEditing,
-                isDropTargeted: canDropOnCard,
                 onCardTap: openDock,
                 onApplyChanges: closeDock,
                 onStickerTap: selectSticker,

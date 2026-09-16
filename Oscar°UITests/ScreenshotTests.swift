@@ -235,74 +235,11 @@ final class ScreenshotTests: XCTestCase {
         snapshot("08_now_clear", timeWaitingForIdle: 0)
     }
 
-    // Parked scenes: rename back to test… to re-enable (the "skipped_" prefix
-    // keeps XCTest from discovering them).
-    func skipped_test08Customization() {
-        let app = launch(scene: "customization")
-        waitForNowContent(app)
-        openSettingsTab(app)
-        sleep(3)
-        snapshot("08_customization", timeWaitingForIdle: 0)
-    }
-
     func test09Widgets() {
         let app = launch(scene: "widgets")
         XCTAssertTrue(
             app.descendants(matching: .any)["screenshot.widgetGallery.ready"].waitForExistence(timeout: 30)
         )
         snapshot("09_widgets", timeWaitingForIdle: 0)
-    }
-
-    func skipped_test10Notifications() {
-        let app = launch(scene: "notifications")
-        waitForNowContent(app)
-        openSettingsTab(app)
-
-        let notificationsRow = app.descendants(matching: .any)["settings.alerts"].firstMatch
-        XCTAssertTrue(notificationsRow.waitForExistence(timeout: 10))
-        notificationsRow.tap()
-
-        turnOn(toggle: "notifications.rainAlerts", in: app, allowsPermissionPrompt: true)
-        turnOn(toggle: "notifications.weatherAlerts", in: app)
-        turnOn(toggle: "notifications.liveRainStatus", in: app)
-        sleep(2)
-        snapshot("10_notifications", timeWaitingForIdle: 0)
-    }
-
-    // MARK: - Helpers
-
-    /// Opens Einstellungen via the button at the end of the forecast scroll
-    /// (there is no settings tab; found by identifier since labels are localized).
-    private func openSettingsTab(_ app: XCUIApplication) {
-        let settingsButton = app.descendants(matching: .any)["now.settings"].firstMatch
-        XCTAssertTrue(settingsButton.waitForExistence(timeout: 10), "Settings button not found")
-        scrollTo(settingsButton, in: app, maxSwipes: 15)
-        tapVisible(settingsButton, in: app)
-        XCTAssertTrue(
-            app.descendants(matching: .any)["settings.alerts"].waitForExistence(timeout: 10),
-            "Settings sheet did not open"
-        )
-    }
-
-    private func turnOn(toggle identifier: String, in app: XCUIApplication, allowsPermissionPrompt: Bool = false) {
-        let outer = app.switches[identifier].firstMatch
-        guard outer.waitForExistence(timeout: 10) else {
-            XCTFail("Toggle \(identifier) not found")
-            return
-        }
-        if (outer.value as? String) == "1" { return }
-        // SwiftUI nests the actual switch control inside the labeled row.
-        let control = outer.switches.firstMatch.exists ? outer.switches.firstMatch : outer
-        control.tap()
-
-        if allowsPermissionPrompt {
-            let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-            let alert = springboard.alerts.firstMatch
-            if alert.waitForExistence(timeout: 5) {
-                // Notification permission alert: [Don't Allow, Allow].
-                alert.buttons.element(boundBy: 1).tap()
-            }
-        }
-        sleep(1)
     }
 }

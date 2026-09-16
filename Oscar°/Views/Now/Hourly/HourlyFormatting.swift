@@ -85,6 +85,11 @@ enum HourlyFormatting {
     "\(value.formatted(.number.precision(.fractionLength(1)))) \(unit)"
   }
 
+  /// Radar and model rates are always mm; the display follows the user's unit setting.
+  static func displayRate(fromMillimeters value: Double, unit: String) -> Double {
+    unit.lowercased() == "inch" ? value / 25.4 : value
+  }
+
   static func weatherIconName(weatherCode: Double, isDay: Double) -> String {
     if isDay > 0 {
       switch weatherCode {

@@ -59,6 +59,10 @@ struct PollenChart: View {
         return loads.isEmpty ? String(localized: "Keine Belastung") : loads.joined(separator: ", ")
     }
 
+    private var severityBands: [(lower: Double, upper: Double, color: Color)] {
+        [(0, 0.25, .green), (0.25, 0.5, .yellow), (0.5, 0.75, .orange), (0.75, 1, .red)]
+    }
+
     private var currentSeriesPoints: [(label: String, time: Date, value: Double)] {
         series.compactMap { pollenSeries in
             guard let point = pollenSeries.points.first(where: { $0.time >= referenceDate }) ?? pollenSeries.points.last else {
@@ -76,37 +80,15 @@ struct PollenChart: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Chart {
-                RectangleMark(
-                    xStart: .value("Start", maxTimeRange.lowerBound),
-                    xEnd: .value("End", maxTimeRange.upperBound),
-                    yStart: .value("Min", 0.0),
-                    yEnd: .value("Max", 0.25)
-                )
-                .foregroundStyle(.green.opacity(0.1))
-
-                RectangleMark(
-                    xStart: .value("Start", maxTimeRange.lowerBound),
-                    xEnd: .value("End", maxTimeRange.upperBound),
-                    yStart: .value("Min", 0.25),
-                    yEnd: .value("Max", 0.5)
-                )
-                .foregroundStyle(.yellow.opacity(0.1))
-
-                RectangleMark(
-                    xStart: .value("Start", maxTimeRange.lowerBound),
-                    xEnd: .value("End", maxTimeRange.upperBound),
-                    yStart: .value("Min", 0.5),
-                    yEnd: .value("Max", 0.75)
-                )
-                .foregroundStyle(.orange.opacity(0.1))
-
-                RectangleMark(
-                    xStart: .value("Start", maxTimeRange.lowerBound),
-                    xEnd: .value("End", maxTimeRange.upperBound),
-                    yStart: .value("Min", 0.75),
-                    yEnd: .value("Max", 1.0)
-                )
-                .foregroundStyle(.red.opacity(0.1))
+                ForEach(Array(severityBands.enumerated()), id: \.offset) { _, band in
+                    RectangleMark(
+                        xStart: .value("Start", maxTimeRange.lowerBound),
+                        xEnd: .value("End", maxTimeRange.upperBound),
+                        yStart: .value("Min", band.lower),
+                        yEnd: .value("Max", band.upper)
+                    )
+                    .foregroundStyle(band.color.opacity(0.1))
+                }
 
                 ForEach(series) { pollenSeries in
                     ForEach(pollenSeries.points.filter { $0.time <= referenceDate }) { dataPoint in
@@ -170,36 +152,10 @@ struct PollenChart: View {
                         }
                 }
 
-                ForEach(HourlyChartUtilities.dayChangeIndices(time: time), id: \.self) { index in
-                    RuleMark(x: .value("Hour", Date(timeIntervalSince1970: time[index])))
-                        .foregroundStyle(.gray.opacity(0.6))
-                        .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [8, 4]))
-                        .annotation(
-                            position: .topTrailing,
-                            spacing: 8,
-                            overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))
-                        ) {
-                            Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: time[index])))
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(.primary.opacity(0.7))
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(.ultraThinMaterial, in: .capsule)
-                        }
-                }
+                HourlyChartUtilities.daySeparatorMarks(time: time)
             }
             .chartLegend(.hidden)
-            .chartXAxis {
-                AxisMarks(values: .stride(by: .hour, count: 6)) { value in
-                    AxisValueLabel {
-            if let date = value.as(Date.self) {
-              Text(HourlyChartUtilities.hourString(from: date))
-            }
-          }
-                    AxisGridLine()
-                    AxisTick()
-                }
-            }
+            .chartXAxis { HourlyChartUtilities.sixHourAxisMarks() }
             .chartYAxis {
                 AxisMarks(values: [0.0, 0.25, 0.5, 0.75, 1.0]) { value in
                     AxisGridLine()
@@ -232,28 +188,14 @@ struct PollenChart: View {
             .accessibilityLabel(Text("Pollenverlauf"))
             .accessibilityValue(accessibilitySummary)
 
-            PollenChartLegendView(items: series.map { ($0.label, $0.lineColor) })
+            ChartLegendView(items: series.map { ($0.label, $0.lineColor) }, minimumItemWidth: 82)
         }
     }
 
     @ChartContentBuilder
     private var currentPointMarks: some ChartContent {
         ForEach(Array(currentSeriesPoints.enumerated()), id: \.offset) { _, point in
-            PointMark(
-                x: .value("Current Hour", point.time),
-                y: .value(point.label, point.value)
-            )
-            .symbol(.circle)
-            .symbolSize(90)
-            .foregroundStyle(.black)
-
-            PointMark(
-                x: .value("Current Hour", point.time),
-                y: .value(point.label, point.value)
-            )
-            .symbol(.circle)
-            .symbolSize(42)
-            .foregroundStyle(.white)
+            HourlyChartUtilities.currentPointMark(x: point.time, series: point.label, value: point.value)
         }
     }
 
@@ -302,24 +244,4 @@ struct PollenChart: View {
         "\(label)-\(isPast ? "past" : "future")"
     }
 
-}
-
-private struct PollenChartLegendView: View {
-    let items: [(label: String, color: Color)]
-
-    var body: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 82), spacing: 12)], alignment: .leading, spacing: 8) {
-            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(item.color)
-                        .frame(width: 8, height: 8)
-
-                    Text(verbatim: item.label)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-    }
 }

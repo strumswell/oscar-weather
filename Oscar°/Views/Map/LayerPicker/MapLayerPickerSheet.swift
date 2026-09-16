@@ -69,18 +69,6 @@ struct MapLayerPickerSheet: View {
                 SatelliteInfoView()
             }
         }
-        .task {
-            // Testing hooks: `-autoPresentModelInfo YES` / `-autoPresentRadarInfo
-            // YES` / `-autoPresentSatelliteInfo YES` jump straight to the
-            // explainer pages (screenshot flows without touch input).
-            if UserDefaults.standard.bool(forKey: "autoPresentModelInfo") {
-                showsModelInfo = true
-            } else if UserDefaults.standard.bool(forKey: "autoPresentRadarInfo") {
-                showsRadarInfo = true
-            } else if UserDefaults.standard.bool(forKey: "autoPresentSatelliteInfo") {
-                showsSatelliteInfo = true
-            }
-        }
     }
 
     // MARK: Sections

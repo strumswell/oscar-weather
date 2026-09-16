@@ -64,9 +64,4 @@ extension PrecipSeriesResponse {
     func isRaining() -> Bool {
         currentPrecipitation > 0
     }
-
-    /// Whether any frame in the series (observed or nowcast) shows precipitation.
-    func isExpectingRain() -> Bool {
-        series.contains { $0.precipitation > 0 }
-    }
 }

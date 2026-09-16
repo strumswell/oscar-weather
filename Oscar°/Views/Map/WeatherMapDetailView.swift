@@ -42,7 +42,6 @@ struct WeatherMapDetailView: View {
                 coordinates: location.coordinates,
                 cities: LocationService.shared.city.cities,
                 overlayOpacity: settingsService.mapOverlayOpacity,
-                showWindParticles: true,
                 oscarRadarState: radarState,
                 modelGridState: modelGridState,
                 cloudLayerState: cloudLayerState,
@@ -181,13 +180,6 @@ struct WeatherMapDetailView: View {
             )
         }
         .task {
-            // Testing hook: `-autoPresentLayerPicker YES` opens the layer sheet
-            // once the map is up (screenshot flows without touch input).
-            guard UserDefaults.standard.bool(forKey: "autoPresentLayerPicker") else { return }
-            try? await Task.sleep(for: .seconds(1.5))
-            isLayerPickerPresented = true
-        }
-        .task {
             // Map left open across server updates: re-fetch once metadata expires.
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(5 * 60))
@@ -234,9 +226,9 @@ struct WeatherMapDetailView: View {
         .sheet(isPresented: $isLayerPickerPresented) {
             MapLayerPickerSheet(
                 settingsService: settingsService,
-                onSelectRadar: activateOscarRadar,
-                onSelectTileLayer: activateTileLayer,
-                onSelectClouds: activateCloudLayer
+                onSelectRadar: { activate(radar: $0) },
+                onSelectTileLayer: { activate(model: $0) },
+                onSelectClouds: { activate() }
             )
             // No .presentationBackground override: iOS 26 renders the sheet as
             // Liquid Glass at the medium detent and swaps to an opaque background
@@ -314,34 +306,18 @@ struct WeatherMapDetailView: View {
         cloudLayerState.setActive(settingsService.cloudLayerActive)
     }
 
-    private func activateCloudLayer() {
+    /// Layer-picker selection: radar region, model layer, or (neither) the
+    /// satellite clouds. The layers are mutually exclusive; the deselected
+    /// ones pause, the selected one keeps its playback state.
+    private func activate(radar: RadarRegion? = nil, model: WeatherTileLayer? = nil) {
+        let clouds = radar == nil && model == nil
         settingsService.radarAutoFallbackActive = false
-        settingsService.oscarRadarLayer = false
-        radarState.pause()
-        settingsService.activeTileLayer = nil
-        modelGridState.pause()
-        settingsService.cloudLayerActive = true
-        syncCloudActivation()
-    }
-
-    private func activateOscarRadar(_ region: RadarRegion) {
-        settingsService.radarAutoFallbackActive = false
-        settingsService.activeTileLayer = nil
-        settingsService.cloudLayerActive = false
-        cloudLayerState.pause()
-        settingsService.oscarRadarRegion = region
-        settingsService.oscarRadarLayer = true
-        modelGridState.pause()
-        syncCloudActivation()
-    }
-
-    private func activateTileLayer(_ layer: WeatherTileLayer) {
-        settingsService.radarAutoFallbackActive = false
-        settingsService.oscarRadarLayer = false
-        radarState.pause()
-        settingsService.cloudLayerActive = false
-        cloudLayerState.pause()
-        settingsService.activeTileLayer = layer
+        if let radar { settingsService.oscarRadarRegion = radar } else { radarState.pause() }
+        if model == nil { modelGridState.pause() }
+        if !clouds { cloudLayerState.pause() }
+        settingsService.oscarRadarLayer = radar != nil
+        settingsService.activeTileLayer = model
+        settingsService.cloudLayerActive = clouds
         syncCloudActivation()
     }
 }

@@ -28,25 +28,9 @@ struct UVIndexProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<UVIndexLockScreenEntry>) -> ()) {
-        Task {
-            do {
-                let coordinates = await MainActor.run {
-                    LocationService.shared.update()
-                    return LocationService.shared.getCoordinates()
-                }
-
-                let air = try await client.getAirQuality(coordinates: coordinates)
-                let entry = UVIndexLockScreenEntry(date: Date(), uvIndex: Self.currentUVIndex(from: air, now: Date()))
-
-                let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 30, to: Date())!
-                completion(Timeline(entries: [entry], policy: .after(nextUpdateDate)))
-            } catch {
-                // completion must always be called: a dropped timeline request kills the
-                // refresh chain and the widget never updates again. An empty timeline keeps
-                // the last rendered entry on screen and retries once the API is back.
-                let retryDate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
-                completion(Timeline(entries: [], policy: .after(retryDate)))
-            }
+        runWidgetTimeline(refreshMinutes: 30, completion: completion) { coordinates in
+            let air = try await client.getAirQuality(coordinates: coordinates)
+            return UVIndexLockScreenEntry(date: Date(), uvIndex: Self.currentUVIndex(from: air, now: Date()))
         }
     }
 
@@ -60,15 +44,7 @@ struct UVIndexProvider: TimelineProvider {
         }
 
         let nowUnix = now.timeIntervalSince1970
-        var closestIndex = 0
-        var closestDifference = Double.greatestFiniteMagnitude
-        for (index, time) in times.enumerated() {
-            let difference = abs(time - nowUnix)
-            if difference < closestDifference {
-                closestDifference = difference
-                closestIndex = index
-            }
-        }
+        let closestIndex = times.indices.min { abs(times[$0] - nowUnix) < abs(times[$1] - nowUnix) } ?? 0
 
         // uv_index can be shorter than the time array, so index defensively.
         guard values.indices.contains(closestIndex) else { return nil }

@@ -24,97 +24,69 @@ final class SettingService {
         didSet { unitDidChange(key: Self.precipitationUnitKey, value: precipitationUnit) }
     }
     var oscarRadarLayer: Bool {
-        didSet {
-            UserDefaults.standard.set(oscarRadarLayer, forKey: "oscarRadarLayer")
-        }
+        didSet { UserDefaults.standard.set(oscarRadarLayer, forKey: "oscarRadarLayer") }
     }
     var activeTileLayerRaw: String? {
-        didSet {
-            UserDefaults.standard.set(activeTileLayerRaw, forKey: "activeTileLayer")
-        }
+        didSet { UserDefaults.standard.set(activeTileLayerRaw, forKey: "activeTileLayer") }
     }
+    /// Shared app group so the radar widget reads the same region.
     var oscarRadarRegionRaw: String {
-        didSet {
-            // Shared app group so the radar widget reads the same region.
-            Self.defaults.set(oscarRadarRegionRaw, forKey: "oscarRadarRegion")
-        }
+        didSet { Self.defaults.set(oscarRadarRegionRaw, forKey: "oscarRadarRegion") }
     }
     /// When true (default), radar playback morphs between frames along the server's
     /// motion fields (RainViewer-style smooth motion). False = exact frames only —
     /// also forced by the system Reduce Motion setting at render time.
     var radarSmoothMotion: Bool {
-        didSet {
-            UserDefaults.standard.set(radarSmoothMotion, forKey: "radarSmoothMotion")
-        }
+        didSet { UserDefaults.standard.set(radarSmoothMotion, forKey: "radarSmoothMotion") }
     }
     /// When true (default), map layers render with RainViewer-style soft edges
     /// (bicubic data sampling + smooth palette gradients). False = crisp isobands.
     var radarSoftRendering: Bool {
-        didSet {
-            UserDefaults.standard.set(radarSoftRendering, forKey: "radarSoftRendering")
-        }
+        didSet { UserDefaults.standard.set(radarSoftRendering, forKey: "radarSoftRendering") }
     }
     /// When true (default), the paused radar view overlays motion arrows showing
     /// where precipitation is heading.
     var radarMotionArrows: Bool {
-        didSet {
-            UserDefaults.standard.set(radarMotionArrows, forKey: "radarMotionArrows")
-        }
+        didSet { UserDefaults.standard.set(radarMotionArrows, forKey: "radarMotionArrows") }
     }
     /// When true (default), model temperature/wind layers show sampled city value
     /// bubbles on the map.
     var mapValueBubbles: Bool {
-        didSet {
-            UserDefaults.standard.set(mapValueBubbles, forKey: "mapValueBubbles")
-        }
+        didSet { UserDefaults.standard.set(mapValueBubbles, forKey: "mapValueBubbles") }
     }
     /// When true, active severe-weather warning areas render as a polygon overlay
     /// on top of whichever radar/model layer is showing.
     var showAlertPolygons: Bool {
-        didSet {
-            UserDefaults.standard.set(showAlertPolygons, forKey: "showAlertPolygons")
-        }
+        didSet { UserDefaults.standard.set(showAlertPolygons, forKey: "showAlertPolygons") }
     }
     /// When true, tracked precipitation cells render as markers with their
     /// extrapolated tracks, alongside whichever layer is showing.
     var showStormCells: Bool {
-        didSet {
-            UserDefaults.standard.set(showStormCells, forKey: "showStormCells")
-        }
+        didSet { UserDefaults.standard.set(showStormCells, forKey: "showStormCells") }
     }
     /// When true, MSLP isobars (with H/T centers) overlay the active model layer —
     /// the Großwetterlage view on top of pressure, temperature, or wind.
     var showIsobars: Bool {
-        didSet {
-            UserDefaults.standard.set(showIsobars, forKey: "showIsobars")
-        }
+        didSet { UserDefaults.standard.set(showIsobars, forKey: "showIsobars") }
     }
     /// When true, the satellite cloud layer is the SELECTED map layer with its own
     /// timeline (scrub through the cloud nowcast) — mutually exclusive with
     /// `oscarRadarLayer` and `activeTileLayer`, like those are with each other.
     var cloudLayerActive: Bool {
-        didSet {
-            UserDefaults.standard.set(cloudLayerActive, forKey: "cloudLayerActive")
-        }
+        didSet { UserDefaults.standard.set(cloudLayerActive, forKey: "cloudLayerActive") }
     }
     /// Opacity of the radar/model data overlays (0.3…1).
     var mapOverlayOpacity: Double {
-        didSet {
-            UserDefaults.standard.set(mapOverlayOpacity, forKey: "mapOverlayOpacity")
-        }
+        didSet { UserDefaults.standard.set(mapOverlayOpacity, forKey: "mapOverlayOpacity") }
     }
     /// Which reading the hourly detail sheet opens in: the chapters timeline
     /// (true) or the all-values deck.
     var hourlyDetailShowsChapters: Bool {
-        didSet {
-            UserDefaults.standard.set(hourlyDetailShowsChapters, forKey: "hourlyDetailShowsChapters")
-        }
+        didSet { UserDefaults.standard.set(hourlyDetailShowsChapters, forKey: "hourlyDetailShowsChapters") }
     }
+    /// Shared app group so the widget basemap prerender follows the map style.
     var mapBasemapStyleRaw: String {
-        didSet {
-            // Shared app group so the widget basemap prerender follows the map style.
-            Self.defaults.set(mapBasemapStyleRaw, forKey: "mapBasemapStyle")
-        }
+        didSet { Self.defaults.set(mapBasemapStyleRaw, forKey: "mapBasemapStyle") }
     }
     var mapBasemapStyle: MapBasemapStyle {
         get { MapBasemapStyle(rawValue: mapBasemapStyleRaw) ?? .fiord }
@@ -128,26 +100,17 @@ final class SettingService {
     }
     var dailyForecastDaytimeTemperaturesEnabled: Bool {
         didSet {
-            Self.defaults.set(
-                dailyForecastDaytimeTemperaturesEnabled,
-                forKey: Self.dailyForecastDaytimeTemperaturesEnabledKey
-            )
+            Self.defaults.set(dailyForecastDaytimeTemperaturesEnabled, forKey: Self.dailyForecastDaytimeTemperaturesEnabledKey)
         }
     }
     var dailyForecastDaytimeTemperatureDisplayMode: ForecastDaytimeTemperatureDisplayMode {
         didSet {
-            Self.defaults.set(
-                dailyForecastDaytimeTemperatureDisplayMode.rawValue,
-                forKey: Self.dailyForecastDaytimeTemperatureDisplayModeKey
-            )
+            Self.defaults.set(dailyForecastDaytimeTemperatureDisplayMode.rawValue, forKey: Self.dailyForecastDaytimeTemperatureDisplayModeKey)
         }
     }
     var dailyForecastDaytimeTemperatureRangeMode: ForecastDaytimeTemperatureRangeMode {
         didSet {
-            Self.defaults.set(
-                dailyForecastDaytimeTemperatureRangeMode.rawValue,
-                forKey: Self.dailyForecastDaytimeTemperatureRangeModeKey
-            )
+            Self.defaults.set(dailyForecastDaytimeTemperatureRangeMode.rawValue, forKey: Self.dailyForecastDaytimeTemperatureRangeModeKey)
         }
     }
     var dailyForecastDaytimeCustomStartHour: Int {

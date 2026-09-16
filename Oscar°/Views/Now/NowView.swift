@@ -254,15 +254,6 @@ struct NowView: View {
                 stageSize = size
             }
         }
-        .task {
-            // Testing hook: `-autoPresentMapLibreAfter <seconds>` switches to the map
-            // tab AFTER the NowView exists — reproduces the tap-to-open flow headless,
-            // unlike -autoPresentMap which starts on the map tab at launch.
-            let mapLibreDelay = UserDefaults.standard.double(forKey: "autoPresentMapLibreAfter")
-            guard mapLibreDelay > 0 else { return }
-            try? await Task.sleep(for: .seconds(mapLibreDelay))
-            presentation.selectedTab = .maps
-        }
     }
 
     /// From the top of the scroll content down past the bottom safe area

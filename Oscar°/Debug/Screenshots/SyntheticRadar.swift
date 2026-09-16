@@ -93,12 +93,12 @@ enum SyntheticRadar {
     nonisolated(unsafe) private static var cachedField: Field?
 
     private static func field() -> Field {
-        cacheLock.lock()
-        defer { cacheLock.unlock() }
-        if let cachedField { return cachedField }
-        let resolved = decodeBakedField() ?? Field(values: [0], coverage: [0], width: 1, height: 1)
-        cachedField = resolved
-        return resolved
+        cacheLock.withLock {
+            if let cachedField { return cachedField }
+            let resolved = decodeBakedField() ?? Field(values: [0], coverage: [0], width: 1, height: 1)
+            cachedField = resolved
+            return resolved
+        }
     }
 
     private static func decodeBakedField() -> Field? {
@@ -208,61 +208,56 @@ enum SyntheticRadar {
 
     /// URLProtocol loads on arbitrary threads — guard the render caches.
     private static let cacheLock = NSLock()
-    nonisolated(unsafe) private static var gridCache: [String: Data] = [:]
+    nonisolated(unsafe) private static var renderCache: [String: Data] = [:]
+
+    /// Renders outside the lock: a grid or tile takes long enough that
+    /// serializing them would stall the map's parallel frame loads.
+    private static func cached(_ key: String, _ render: () -> Data?) -> Data {
+        let hit = cacheLock.withLock { renderCache[key] }
+        if let hit { return hit }
+        guard let data = render() else { return Data() }
+        cacheLock.withLock { renderCache[key] = data }
+        return data
+    }
 
     /// Single-channel 8-bit grid in Web Mercator rows (row 0 = north), like the
     /// server's lossless WebP — `UIImage(data:)` decodes PNG just the same.
     /// 0 = dry, values over the plasma dBZ ramp.
     static func gridPNG(frameKey: String) -> Data {
-        let cacheKey = frameKey
-        cacheLock.lock()
-        if let cached = gridCache[cacheKey] { cacheLock.unlock(); return cached }
-        cacheLock.unlock()
-        let t = offsetMinutes(fromKey: frameKey) ?? 0
-        let w = gridWidth, h = gridHeight
-        var pixels = [UInt8](repeating: 0, count: w * h)
-        let mN = mercY(north), mS = mercY(south)
-        for j in 0..<h {
-            let lat = latFromMercY(mN + (mS - mN) * Double(j) / Double(h))
-            for i in 0..<w {
-                let lon = west + (east - west) * Double(i) / Double(w)
-                let v = intensity(lat: lat, lon: lon, minutes: t)
-                guard v >= 0.02 else { continue }
-                pixels[j * w + i] = UInt8(1 + min(219, v * 219))
-            }
+        valueGridPNG(cacheKey: "grid|\(frameKey)", frameKey: frameKey) { lat, lon, t in
+            let v = intensity(lat: lat, lon: lon, minutes: t)
+            return v >= 0.02 ? UInt8(1 + min(219, v * 219)) : 0
         }
-        let png = grayPNG(pixels: pixels, width: w, height: h)
-        cacheLock.lock()
-        gridCache[cacheKey] = png
-        cacheLock.unlock()
-        return png
     }
 
     /// Clouds flavor of the value grid: opacity index 0…255 (the clouds palette
     /// contract), from `cloudOpacity`'s wider deck.
     static func cloudGridPNG(frameKey: String) -> Data {
-        let cacheKey = "\(frameKey)|clouds"
-        cacheLock.lock()
-        if let cached = gridCache[cacheKey] { cacheLock.unlock(); return cached }
-        cacheLock.unlock()
-        let t = offsetMinutes(fromKey: frameKey) ?? 0
-        let w = gridWidth, h = gridHeight
-        var pixels = [UInt8](repeating: 0, count: w * h)
-        let mN = mercY(north), mS = mercY(south)
-        for j in 0..<h {
-            let lat = latFromMercY(mN + (mS - mN) * Double(j) / Double(h))
-            for i in 0..<w {
-                let lon = west + (east - west) * Double(i) / Double(w)
-                let v = cloudOpacity(lat: lat, lon: lon, minutes: t)
-                guard v >= 0.03 else { continue }
-                pixels[j * w + i] = UInt8(min(255, 40 + v * 215))
-            }
+        valueGridPNG(cacheKey: "clouds|\(frameKey)", frameKey: frameKey) { lat, lon, t in
+            let v = cloudOpacity(lat: lat, lon: lon, minutes: t)
+            return v >= 0.03 ? UInt8(min(255, 40 + v * 215)) : 0
         }
-        let png = grayPNG(pixels: pixels, width: w, height: h)
-        cacheLock.lock()
-        gridCache[cacheKey] = png
-        cacheLock.unlock()
-        return png
+    }
+
+    private static func valueGridPNG(
+        cacheKey: String,
+        frameKey: String,
+        pixel: (_ lat: Double, _ lon: Double, _ minutes: Double) -> UInt8
+    ) -> Data {
+        cached(cacheKey) {
+            let t = offsetMinutes(fromKey: frameKey) ?? 0
+            let w = gridWidth, h = gridHeight
+            var pixels = [UInt8](repeating: 0, count: w * h)
+            let mN = mercY(north), mS = mercY(south)
+            for j in 0..<h {
+                let lat = latFromMercY(mN + (mS - mN) * Double(j) / Double(h))
+                for i in 0..<w {
+                    let lon = west + (east - west) * Double(i) / Double(w)
+                    pixels[j * w + i] = pixel(lat, lon, t)
+                }
+            }
+            return grayPNG(pixels: pixels, width: w, height: h)
+        }
     }
 
     private static func grayPNG(pixels: [UInt8], width: Int, height: Int) -> Data {
@@ -282,8 +277,6 @@ enum SyntheticRadar {
 
     // MARK: Raster tiles (widget composite + precip gate)
 
-    nonisolated(unsafe) private static var tileCache: [String: Data] = [:]
-
     /// The widget reverse-maps tile colors to palette indices through the
     /// server colormap (data-space smoothing), so tile pixels must BE palette
     /// entries — hand-approximated colors snap to wrong (purple) indices.
@@ -292,9 +285,7 @@ enum SyntheticRadar {
     /// which makes the widget match the fullscreen map by construction.
     nonisolated(unsafe) private static var cachedPalette: [UInt8]?
     private static func plasmaPalette() -> [UInt8] {
-        cacheLock.lock()
-        if let cached = cachedPalette { cacheLock.unlock(); return cached }
-        cacheLock.unlock()
+        if let cached = cacheLock.withLock({ cachedPalette }) { return cached }
         final class Box: @unchecked Sendable { var data: [UInt8]? }
         let box = Box()
         if let url = URL(string: "\(radarBaseURL)/colormaps/plasma") {
@@ -312,19 +303,17 @@ enum SyntheticRadar {
             let (r, g, b) = plasma(t)
             return [UInt8(r), UInt8(g), UInt8(b), UInt8(min(235, 70 + t * 400))]
         }
-        cacheLock.lock()
-        cachedPalette = resolved
-        cacheLock.unlock()
+        cacheLock.withLock { cachedPalette = resolved }
         return resolved
     }
 
     /// Raster tile like the server's: the value grid's palette index per
     /// pixel, colorized through the shared colormap (premultiplied).
     static func tilePNG(frameKey: String, z: Int, x: Int, y: Int) -> Data {
-        let cacheKey = "\(frameKey)|\(z)/\(x)/\(y)"
-        cacheLock.lock()
-        if let cached = tileCache[cacheKey] { cacheLock.unlock(); return cached }
-        cacheLock.unlock()
+        cached("tile|\(frameKey)|\(z)/\(x)/\(y)") { renderTile(frameKey: frameKey, z: z, x: x, y: y) }
+    }
+
+    private static func renderTile(frameKey: String, z: Int, x: Int, y: Int) -> Data? {
         let t = offsetMinutes(fromKey: frameKey) ?? 0
         let palette = plasmaPalette()
         let size = 256
@@ -358,14 +347,10 @@ enum SyntheticRadar {
                   bytesPerRow: size * 4, space: CGColorSpace(name: CGColorSpace.sRGB)!,
                   bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue),
                   provider: provider, decode: nil, shouldInterpolate: false,
-                  intent: .defaultIntent),
-              let png = pngData(from: image) else {
-            return Data()
+                  intent: .defaultIntent) else {
+            return nil
         }
-        cacheLock.lock()
-        tileCache[cacheKey] = png
-        cacheLock.unlock()
-        return png
+        return pngData(from: image)
     }
 
     private static func pngData(from image: CGImage) -> Data? {

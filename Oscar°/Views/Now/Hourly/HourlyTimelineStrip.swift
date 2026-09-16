@@ -125,34 +125,17 @@ struct HourlyTimelineStrip: View {
 
         // Past hours draw faded; split at the now boundary. (No dash — with
         // stacked series the dashes read as noise.)
-        func splitStroke(_ path: Path, color: Color, opacity: Double, lineWidth: CGFloat, dashed: Bool) {
+        func splitStroke(_ path: Path, color: Color, lineWidth: CGFloat) {
+            let style = StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round)
             if nowX > 0 {
                 var past = context
                 past.clip(to: Path(CGRect(x: 0, y: 0, width: min(nowX, width), height: size.height)))
-                past.stroke(
-                    path,
-                    with: .color(color.opacity(opacity * 0.45)),
-                    style: StrokeStyle(
-                        lineWidth: lineWidth,
-                        lineCap: .round,
-                        lineJoin: .round,
-                        dash: dashed ? [4, 3] : []
-                    )
-                )
+                past.stroke(path, with: .color(color.opacity(0.45)), style: style)
             }
             if nowX < width {
                 var future = context
                 future.clip(to: Path(CGRect(x: max(nowX, 0), y: 0, width: width - max(nowX, 0), height: size.height)))
-                future.stroke(
-                    path,
-                    with: .color(color.opacity(opacity)),
-                    style: StrokeStyle(
-                        lineWidth: lineWidth,
-                        lineCap: .round,
-                        lineJoin: .round,
-                        dash: dashed ? [4, 3] : []
-                    )
-                )
+                future.stroke(path, with: .color(color), style: style)
             }
         }
         func splitFill(_ path: Path, color: Color, opacity: Double) {
@@ -285,30 +268,7 @@ struct HourlyTimelineStrip: View {
                     started = true
                 }
             }
-            splitStroke(path, color: line.color, opacity: line.opacity, lineWidth: line.width, dashed: line.dashed)
-        }
-
-        if layout.fillsPrimary, let primary = layout.primary {
-            var area = Path()
-            var started = false
-            for index in firstIndex...lastIndex where index < primary.values.count {
-                let point = CGPoint(x: x(model.times[index]), y: yOf(primary.values[index]))
-                if started {
-                    area.addLine(to: point)
-                } else {
-                    area.move(to: CGPoint(x: point.x, y: chartHeight))
-                    area.addLine(to: point)
-                    started = true
-                }
-            }
-            if started {
-                area.addLine(to: CGPoint(
-                    x: x(model.times[min(lastIndex, primary.values.count - 1)]),
-                    y: chartHeight
-                ))
-                area.closeSubpath()
-                splitFill(area, color: primary.color, opacity: 0.14)
-            }
+            splitStroke(path, color: line.color, lineWidth: line.width)
         }
 
         if layout.showsDirectionArrows, let primary = layout.primary {

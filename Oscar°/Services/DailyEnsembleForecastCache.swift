@@ -1,4 +1,3 @@
-import CryptoKit
 import Foundation
 import OSLog
 
@@ -38,7 +37,7 @@ actor DailyEnsembleForecastCache {
       return data
     }
 
-    let stem = fileStem(for: key)
+    let stem = key.sha256Hex
     let metadataURL = cacheDirectory.appendingPathComponent("\(stem).json")
     let bodyURL = cacheDirectory.appendingPathComponent("\(stem).body")
 
@@ -65,7 +64,7 @@ actor DailyEnsembleForecastCache {
 
     try? fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
 
-    let stem = fileStem(for: key)
+    let stem = key.sha256Hex
     let metadataURL = cacheDirectory.appendingPathComponent("\(stem).json")
     let bodyURL = cacheDirectory.appendingPathComponent("\(stem).body")
     let metadata = Metadata(key: key, timestamp: timestamp)
@@ -93,9 +92,5 @@ actor DailyEnsembleForecastCache {
       try? fileManager.removeItem(at: metadataURL)
       try? fileManager.removeItem(at: metadataURL.deletingPathExtension().appendingPathExtension("body"))
     }
-  }
-
-  private func fileStem(for key: String) -> String {
-    SHA256.hash(data: Data(key.utf8)).map { String(format: "%02x", $0) }.joined()
   }
 }

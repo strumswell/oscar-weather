@@ -166,7 +166,7 @@ extension RadarSnapshotRenderer {
     }
 
     /// Decode a 256 px tile into premultiplied RGBA bytes.
-    private static func rgbaPlane(from image: UIImage) -> [UInt8]? {
+    nonisolated static func rgbaPlane(from image: UIImage) -> [UInt8]? {
         guard let cgImage = image.cgImage else { return nil }
         var rgba = [UInt8](repeating: 0, count: 256 * 256 * 4)
         let ok = rgba.withUnsafeMutableBytes { raw -> Bool in

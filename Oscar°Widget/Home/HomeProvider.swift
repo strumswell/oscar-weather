@@ -36,72 +36,59 @@ final class HomeProvider: TimelineProvider, Sendable {
     }
     
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<HomeEntry>) -> ()) {
-        Task {
-            do {
-                let coordinates = await MainActor.run {
-                    LocationService.shared.update()
-                    return LocationService.shared.getCoordinates()
-                }
-                let locationName = await LocationService.shared.getLocationName()
+        runWidgetTimeline(refreshMinutes: 30, completion: completion) { coordinates in
+            let locationName = await LocationService.shared.getLocationName()
 
-                async let weatherRequest = client.getForecast(
-                    coordinates: coordinates,
-                    forecastDays: ._1,
-                    hourly: [
-                        .weathercode, .cloudcover, .relativehumidity_2m, .pressure_msl,
-                        .precipitation, .snowfall, .windspeed_10m, .winddirection_10m,
-                    ]
+            async let weatherRequest = self.client.getForecast(
+                coordinates: coordinates,
+                forecastDays: ._1,
+                hourly: [
+                    .weathercode, .cloudcover, .relativehumidity_2m,
+                    .precipitation, .snowfall, .windspeed_10m, .winddirection_10m,
+                ]
+            )
+            async let radarRequest = self.client.getRadarSeries(coordinates: coordinates)
+            let (weather, precipSeries) = try await (weatherRequest, radarRequest)
+
+            let temperatureMin = weather.daily?.temperature_2m_min?.first ?? 0
+            let temperatureMax = weather.daily?.temperature_2m_max?.first ?? 0
+            let temperatureNow = weather.current?.temperature ?? 0
+            let weathercode = weather.current?.weathercode ?? 0
+            let isDay = weather.current?.is_day ?? 0
+            // Radar measures what is falling right now; the model's "current"
+            // value is an interpolated guess (mirrors the lockscreen provider).
+            let precipitation = precipSeries?.currentRate ?? (weather.current?.precipitation ?? 0)
+
+            return HomeEntry(
+                date: Date(),
+                location: locationName,
+                temperatureMin: temperatureMin,
+                temperatureMax: temperatureMax,
+                temperatureNow: temperatureNow,
+                icon: WeatherSymbol.sfSymbol(weathercode: weathercode, isDay: isDay, isRaining: precipSeries?.isRaining() ?? false, precipitation: precipitation),
+                backgroundGradient: await WeatherAtmosphericAdapter.widgetGradient(
+                    weather: weather, precipSeries: precipSeries, coordinates: coordinates
                 )
-                async let radarRequest = client.getRadarSeries(coordinates: coordinates)
-                let (weather, precipSeries) = try await (weatherRequest, radarRequest)
-
-                let dayBegin = weather.hourly?.time.first ?? 0
-                let currentTime = (Date.now.timeIntervalSince1970-Double(dayBegin))/86400.0
-
-                let temperatureMin = weather.daily?.temperature_2m_min?.first ?? 0
-                let temperatureMax = weather.daily?.temperature_2m_max?.first ?? 0
-                let temperatureNow = weather.current?.temperature ?? 0
-                let weathercode = weather.current?.weathercode ?? 0
-                let isDay = weather.current?.is_day ?? 0
-                // Radar measures what is falling right now; the model's "current"
-                // value is an interpolated guess (mirrors the lockscreen provider).
-                let precipitation = precipSeries?.currentRate ?? (weather.current?.precipitation ?? 0)
-
-                // Build the atmospheric gradient on the main actor (Weather + adapter are
-                // @MainActor); only the resulting Sendable gradient crosses back.
-                let backgroundGradient = await MainActor.run {
-                    let weatherForRendering = Weather()
-                    weatherForRendering.time = currentTime
-                    weatherForRendering.forecast = weather
-                    weatherForRendering.precipSeries = precipSeries
-                    return WeatherAtmosphericAdapter().getWidgetFullGradient(
-                        from: weatherForRendering,
-                        at: coordinates
-                    )
-                }
-
-                let entry = HomeEntry(
-                    date: Date(),
-                    location: locationName,
-                    temperatureMin: temperatureMin,
-                    temperatureMax: temperatureMax,
-                    temperatureNow: temperatureNow,
-                    icon: WeatherSymbol.sfSymbol(weathercode: weathercode, isDay: isDay, isRaining: precipSeries?.isRaining() ?? false, precipitation: precipitation),
-                    backgroundGradient: backgroundGradient
-                )
-
-                let currentDate = Date()
-                let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 30, to: currentDate)!
-                let timeline = Timeline(entries:[entry], policy: .after(nextUpdateDate))
-                completion(timeline)
-            } catch {
-                // completion must always be called: a dropped timeline request kills the
-                // refresh chain and the widget never updates again. An empty timeline keeps
-                // the last rendered entry on screen and retries once the API is back.
-                let retryDate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
-                completion(Timeline(entries: [], policy: .after(retryDate)))
-            }
+            )
         }
     }
-    
+}
+
+extension WeatherAtmosphericAdapter {
+    /// Build the atmospheric gradient on the main actor (Weather + adapter are
+    /// @MainActor); only the resulting Sendable gradient crosses back.
+    nonisolated static func widgetGradient(
+        weather: Operations.getForecast.Output.Ok.Body.jsonPayload,
+        precipSeries: PrecipSeriesResponse?,
+        coordinates: CLLocationCoordinate2D
+    ) async -> LinearGradient {
+        let dayBegin = weather.hourly?.time.first ?? 0
+        return await MainActor.run {
+            let weatherForRendering = Weather()
+            weatherForRendering.time = (Date.now.timeIntervalSince1970 - Double(dayBegin)) / 86400.0
+            weatherForRendering.forecast = weather
+            weatherForRendering.precipSeries = precipSeries
+            return WeatherAtmosphericAdapter().getWidgetFullGradient(from: weatherForRendering, at: coordinates)
+        }
+    }
 }

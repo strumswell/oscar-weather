@@ -35,13 +35,7 @@ struct CurrentLocationCard: View {
     let conditions: CityConditions?
     let isSelected: Bool
     let backdropPaused: Bool
-    private var cityService = CityService.shared
-
-    init(conditions: CityConditions?, isSelected: Bool, backdropPaused: Bool) {
-        self.conditions = conditions
-        self.isSelected = isSelected
-        self.backdropPaused = backdropPaused
-    }
+    let cityService = CityService.shared
 
     var body: some View {
         let personalization = cityService.currentLocationPersonalization
@@ -65,5 +59,54 @@ extension View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+    }
+
+    /// Edit and default actions of an Orte row as context menu and swipe
+    /// actions; saved places add delete (full swipe) in front of edit.
+    func placeRowActions(
+        isDefault: Bool,
+        onEdit: @escaping () -> Void,
+        onToggleDefault: @escaping () -> Void,
+        onDelete: (() -> Void)? = nil
+    ) -> some View {
+        let editButton = Button(action: onEdit) {
+            Label("Bearbeiten", systemImage: "pencil")
+        }
+        let defaultButton = Button(action: onToggleDefault) {
+            if isDefault {
+                Label("Standard entfernen", systemImage: "star.slash")
+            } else {
+                Label("Als Standard festlegen", systemImage: "star")
+            }
+        }
+        return self
+            .contextMenu {
+                editButton
+                defaultButton
+                if let onDelete {
+                    Button(role: .destructive, action: onDelete) {
+                        Label("Löschen", systemImage: "trash")
+                    }
+                    // The destructive role only reds the text — the icon follows the
+                    // cascading label tint and stayed white without this.
+                    .tint(.red)
+                }
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: onDelete != nil) {
+                if let onDelete {
+                    Button(role: .destructive, action: onDelete) {
+                        Label("Löschen", systemImage: "trash")
+                    }
+                    // Explicit red: the role's default is lost to the tab bar's
+                    // cascading white tint, same reason the neighbors set theirs.
+                    .tint(.red)
+                }
+                editButton
+                    .tint(.indigo)
+            }
+            .swipeActions(edge: .leading) {
+                defaultButton
+                    .tint(.yellow)
+            }
     }
 }

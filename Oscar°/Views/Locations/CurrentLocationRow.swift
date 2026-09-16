@@ -19,34 +19,9 @@ struct CurrentLocationRow: View {
             )
         }
         .buttonStyle(LocationCardButtonStyle())
-        .contextMenu {
-            Button(action: onEdit) {
-                Label("Bearbeiten", systemImage: "pencil")
-            }
-            defaultButton
-        }
-        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-            Button(action: onEdit) {
-                Label("Bearbeiten", systemImage: "pencil")
-            }
-            .tint(.indigo)
-        }
-        .swipeActions(edge: .leading) {
-            defaultButton
-                .tint(.yellow)
-        }
+        .placeRowActions(isDefault: isDefault, onEdit: onEdit, onToggleDefault: onToggleDefault)
         .listRowStyling()
         .moveDisabled(true)
         .deleteDisabled(true)
-    }
-
-    private var defaultButton: some View {
-        Button(action: onToggleDefault) {
-            if isDefault {
-                Label("Standard entfernen", systemImage: "star.slash")
-            } else {
-                Label("Als Standard festlegen", systemImage: "star")
-            }
-        }
     }
 }

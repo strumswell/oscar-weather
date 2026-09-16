@@ -117,36 +117,10 @@ struct UVChart: View {
                     }
             }
 
-            ForEach(HourlyChartUtilities.dayChangeIndices(time: time), id: \.self) { index in
-                RuleMark(x: .value("Hour", Date(timeIntervalSince1970: time[index])))
-                    .foregroundStyle(.gray.opacity(0.6))
-                    .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [8, 4]))
-                    .annotation(
-                        position: .topTrailing,
-                        spacing: 8,
-                        overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))
-                    ) {
-                        Text(HourlyChartUtilities.dayAbbreviation(from: Date(timeIntervalSince1970: time[index])))
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(.primary.opacity(0.7))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(.ultraThinMaterial, in: .capsule)
-                    }
-            }
+            HourlyChartUtilities.daySeparatorMarks(time: time)
         }
         .chartLegend(.hidden)
-        .chartXAxis {
-            AxisMarks(values: .stride(by: .hour, count: 6)) { value in
-                AxisValueLabel {
-                    if let date = value.as(Date.self) {
-                        Text(HourlyChartUtilities.hourString(from: date))
-                    }
-                }
-                AxisGridLine()
-                AxisTick()
-            }
-        }
+        .chartXAxis { HourlyChartUtilities.sixHourAxisMarks() }
         .chartYAxis {
             AxisMarks(values: [0.0, 3.0, 6.0, 8.0, 11.0]) { value in
                 AxisGridLine()
@@ -172,21 +146,9 @@ struct UVChart: View {
     @ChartContentBuilder
     private var currentPointMarks: some ChartContent {
         if let currentDataPoint {
-            PointMark(
-                x: .value("Current Hour", currentDataPoint.time),
-                y: .value(String(localized: "UV-Index"), currentDataPoint.value)
+            HourlyChartUtilities.currentPointMark(
+                x: currentDataPoint.time, series: String(localized: "UV-Index"), value: currentDataPoint.value
             )
-            .symbol(.circle)
-            .symbolSize(90)
-            .foregroundStyle(.black)
-
-            PointMark(
-                x: .value("Current Hour", currentDataPoint.time),
-                y: .value(String(localized: "UV-Index"), currentDataPoint.value)
-            )
-            .symbol(.circle)
-            .symbolSize(42)
-            .foregroundStyle(.white)
         }
     }
 

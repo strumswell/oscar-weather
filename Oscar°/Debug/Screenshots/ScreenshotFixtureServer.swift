@@ -26,24 +26,14 @@ final class ScreenshotFixtureServer: URLProtocol {
     }
 
     override func startLoading() {
-        guard let url = request.url, let route = Self.route(for: url) else {
+        guard let staged = Self.stagedFetch(request) else {
             client?.urlProtocol(self, didFailWithError: URLError(.unsupportedURL))
             return
         }
-        do {
-            let (body, contentType) = try route.respond(url)
-            let response = HTTPURLResponse(
-                url: url,
-                statusCode: 200,
-                httpVersion: "HTTP/1.1",
-                headerFields: ["Content-Type": contentType]
-            )!
-            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            client?.urlProtocol(self, didLoad: body)
-            client?.urlProtocolDidFinishLoading(self)
-        } catch {
-            client?.urlProtocol(self, didFailWithError: error)
-        }
+        let (body, response) = staged
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: body)
+        client?.urlProtocolDidFinishLoading(self)
     }
 
     override func stopLoading() {}
@@ -55,7 +45,7 @@ final class ScreenshotFixtureServer: URLProtocol {
     /// URLSession loading out of process, so URLProtocol never fires there.
     static func stagedResponse(for url: URL) -> (body: Data, contentType: String)? {
         guard ScreenshotMode.active, let route = route(for: url) else { return nil }
-        return try? route.respond(url)
+        return try? route(url)
     }
 
     static func stagedFetch(_ request: URLRequest) -> (Data, HTTPURLResponse)? {
@@ -69,14 +59,10 @@ final class ScreenshotFixtureServer: URLProtocol {
 
     // MARK: - Routing
 
-    private struct Route {
-        let respond: (URL) throws -> (Data, String)
-    }
+    private typealias Route = (URL) throws -> (Data, String)
 
     private static func json(_ make: @escaping (URL) -> Any) -> Route {
-        Route { url in
-            (try JSONSerialization.data(withJSONObject: make(url)), "application/json")
-        }
+        { url in (try JSONSerialization.data(withJSONObject: make(url)), "application/json") }
     }
 
     /// Binary radar assets. The payload is a PNG (`UIImage(data:)` sniffs the
@@ -85,7 +71,7 @@ final class ScreenshotFixtureServer: URLProtocol {
     /// types the spec lists for these operations, and a mismatch throws instead
     /// of returning the image — which silently emptied the radar map.
     private static func radarImage(_ make: @escaping (URL) -> Data) -> Route {
-        Route { url in (make(url), "image/webp") }
+        { url in (make(url), "image/webp") }
     }
 
     private static func route(for url: URL) -> Route? {

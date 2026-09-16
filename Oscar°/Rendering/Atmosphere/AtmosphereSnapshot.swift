@@ -3,17 +3,8 @@ import Foundation
 import simd
 import SwiftUI
 
-enum AtmosphereConditionFamily: Float {
-    case clear = 0
-    case partlyCloudy = 1
-    case overcast = 2
-    case fog = 3
-    case drizzle = 4
-    case rain = 5
-    case freezingRain = 6
-    case snow = 7
-    case showers = 8
-    case thunderstorm = 9
+enum AtmosphereConditionFamily: CaseIterable {
+    case clear, partlyCloudy, overcast, fog, drizzle, rain, freezingRain, snow, showers, thunderstorm
 }
 
 struct AtmosphereSnapshot: Equatable {
@@ -30,8 +21,6 @@ struct AtmosphereSnapshot: Equatable {
     let precipitationIntensity: Float
     let snowfallIntensity: Float
     let thunderIntensity: Float
-    let humidity: Float
-    let pressure: Float
     let haze: Float
     let turbidity: Float
     let windSpeed: Float
@@ -52,8 +41,6 @@ struct AtmosphereSnapshot: Equatable {
         precipitationIntensity: 0,
         snowfallIntensity: 0,
         thunderIntensity: 0,
-        humidity: 0.5,
-        pressure: 1,
         haze: 0.08,
         turbidity: 0.22,
         windSpeed: 0,
@@ -79,8 +66,6 @@ struct AtmosphereSnapshot: Equatable {
         precipitationIntensity: 0,
         snowfallIntensity: 0,
         thunderIntensity: 0,
-        humidity: 0.45,
-        pressure: 1,
         haze: 0.05,
         turbidity: 0.18,
         windSpeed: 0,

@@ -150,9 +150,9 @@ enum RadarSnapshotRenderer {
 
     private static func loadBasemap(
         center: CLLocationCoordinate2D, size: CGSize, style: String
-    ) -> (image: UIImage, bounds: GeoBox)? {
+    ) -> (image: UIImage, bounds: OscarRadarBounds)? {
         guard let (record, image) = WidgetBasemapStore.load(size: size, style: style) else { return nil }
-        let bounds = GeoBox(south: record.south, west: record.west, north: record.north, east: record.east)
+        let bounds = OscarRadarBounds(north: record.north, south: record.south, west: record.west, east: record.east)
         // A basemap rendered for a different location is still geographically exact
         // (overlays project through its stored bounds) — but once the marker would
         // leave the frame, treat it as missing and let the app re-render.

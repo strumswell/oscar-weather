@@ -19,16 +19,14 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
     case ecmwfWind = "ecmwf_wind"
     case ecmwfPressure = "ecmwf_pressure"
 
+    /// Frames-path prefix for grid requests. Combined with the frame key and
+    /// variable: `{framesEndpoint}/{frameKey}/{variableSegment}/grid`.
     var framesEndpoint: String {
         switch self {
         case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "models/icon/frames"
         case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: return "models/ecmwf/frames"
         }
     }
-
-    /// Frames-path prefix for grid requests. Combined with the frame key and
-    /// variable: `{imagePath}/{frameKey}/{variableSegment}/grid`.
-    var imagePath: String? { framesEndpoint }
 
     /// Variable path segment in oscar-server model URLs.
     var variableSegment: String {
