@@ -44,11 +44,11 @@ override_status_bar_arguments("--time '9:41' --dataNetwork wifi --wifiMode activ
 # the simulator just renders it flatter/brighter than a physical device.
 dark_mode(true)
 
-# No uninstall/reinstall between language runs: scenes are stateless fixture
-# data, onboarding is skipped via launch argument, and xcodebuild installs the
-# built app itself when running tests. Flip back to true if the parked
-# notifications scene returns — its permission prompt needs a fresh install.
-reinstall_app(false)
+# Fresh install per language run: the lock-screen scenes answer the
+# notification permission prompt and ActivityKit's Live Activity consent by
+# position, and both questions only exist on a fresh install (their answers
+# stick otherwise, and the consent tap would then open the app instead).
+reinstall_app(true)
 app_identifier("cloud.bolte.Oscar")
 
 # Map scenes stream live tiles; serial runs keep them stable.

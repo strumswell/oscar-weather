@@ -29,6 +29,14 @@ struct OnboardingStage: View {
                 .frame(height: Self.featherHeight)
 
                 Color(.systemBackground)
+                    // The stage as a whole measures ABOVE the keyboard (see
+                    // below), but the canvas still has to paint all the way to
+                    // the screen edge: the keyboard is translucent, and over a
+                    // gap it samples the animated sky instead of solid ground.
+                    // Both regions, not just the keyboard: with only that one
+                    // ignored, the home-indicator strip beneath the keyboard
+                    // stayed uncovered and showed the sky.
+                    .ignoresSafeArea(.all, edges: .bottom)
             }
         }
         // Container edges are ignored but the keyboard is not: when it comes

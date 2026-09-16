@@ -117,6 +117,9 @@ private struct PrecipitationSeriesChart: View {
                         startPoint: .top, endPoint: .bottom
                     )
                 )
+                // Gradients are scaled per mark by default, so the fade restarts
+                // on every segment instead of running down the whole plot.
+                .alignsMarkStylesWithPlotArea()
             }
 
             if let rawSelectedDate {

@@ -113,6 +113,7 @@ struct HourlyDetailView: View {
             }
             .padding(.bottom, 10)
         }
+        .accessibilityIdentifier("hourly.detail")
         .environment(\.cardTint, AtmosphereSampler.cardFill(snapshot: snapshot))
         .environment(\.cardBorderOpacity, AtmosphereSampler.cardBorderOpacity(snapshot: snapshot))
         .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial.opacity(0.6)))

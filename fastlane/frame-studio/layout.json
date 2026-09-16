@@ -202,6 +202,57 @@
         "x": 60,
         "y": 134
       }
+    },
+    "20_hourly_detail": {
+      "hidden": true
+    },
+    "21_map_layers": {
+      "hidden": true
+    },
+    "22_map_layer_settings": {
+      "hidden": true
+    },
+    "23_alert_detail": {
+      "hidden": true
+    },
+    "24_settings": {
+      "hidden": true
+    },
+    "25_settings_notifications": {
+      "hidden": true
+    },
+    "26_settings_forecast": {
+      "hidden": true
+    },
+    "27_member_card_dock": {
+      "hidden": true
+    },
+    "28_onboarding_welcome": {
+      "hidden": true
+    },
+    "29_onboarding_features": {
+      "hidden": true
+    },
+    "30_onboarding_location": {
+      "hidden": true
+    },
+    "31_onboarding_city": {
+      "hidden": true
+    },
+    "32_onboarding_notifications": {
+      "hidden": true
+    },
+    "33_onboarding_finale": {
+      "hidden": true
+    },
+    "34_places": {
+      "hidden": true
+    },
+    "37_lock_notifications": {
+      "hidden": true
+    },
+    "38_lock_live_activity": {
+      "hidden": true
     }
   }
 }

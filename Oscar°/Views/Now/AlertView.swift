@@ -39,6 +39,7 @@ struct AlertView: View {
         .cardBorder(Capsule())
         .frame(minWidth: 44, minHeight: 44)
         .contentShape(.rect)
+        .accessibilityIdentifier("now.alert")
         .onTapGesture {
             Haptics.impact()
             presentation.present(.alerts)

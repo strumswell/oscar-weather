@@ -12,7 +12,9 @@ import SwiftUI
 /// the lower two thirds so text never sits on the animated backdrop.
 struct OnboardingView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var step: OnboardingStep = .welcome
+    // ScreenshotMode is nil outside a staged run, so this is `.welcome` in
+    // every normal launch.
+    @State private var step: OnboardingStep = ScreenshotMode.onboardingStep ?? .welcome
     private let locationService = LocationService.shared
 
     var body: some View {

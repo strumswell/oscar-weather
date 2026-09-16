@@ -29,6 +29,7 @@ struct ForecastSettingsView: View {
           Toggle(isOn: $settingsService.dailyForecastDaytimeTemperaturesEnabled) {
             Text("Tageswerte begrenzen")
           }
+          .accessibilityIdentifier("forecast.daytimeTemperatures")
         } footer: {
           Text("Begrenzt Hoch/Tief auf einen Zeitraum, z. B. für relevantere Tiefstwerte nach Sonnenaufgang.")
         }

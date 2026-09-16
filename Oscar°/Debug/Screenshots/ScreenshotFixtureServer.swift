@@ -3,9 +3,10 @@
 //  ScreenshotFixtureServer.swift
 //  Oscar°
 //
-//  URLProtocol fake server behind `-screenshotScene`: intercepts the forecast,
-//  air-quality, alert, ensemble, archive, and notification endpoints on
-//  URLSession.shared and answers from ScreenshotFixtures. oscar-server's radar
+//  URLProtocol fake server behind `-screenshotScene`: intercepts the forecast
+//  (single and batched), geocoding, air-quality, alert, ensemble, archive and
+//  notification endpoints on URLSession.shared and answers from
+//  ScreenshotFixtures. oscar-server's radar
 //  endpoints (frames, value grids, raster tiles, motion, cells, series) are
 //  answered from SyntheticRadar so the map and widget scenes are deterministic.
 //  Everything else (basemap tiles, colormaps) passes through untouched.
@@ -74,13 +75,28 @@ final class ScreenshotFixtureServer: URLProtocol {
         { url in (make(url), "image/webp") }
     }
 
+    private static func isBatchForecast(_ url: URL) -> Bool {
+        URLComponents(url: url, resolvingAgainstBaseURL: false)?
+            .queryItems?.first { $0.name == "latitude" }?.value?.contains(",") == true
+    }
+
     private static func route(for url: URL) -> Route? {
         guard let host = url.host() else { return nil }
         let path = url.path()
 
         switch host {
         case "api.open-meteo.com" where path.hasPrefix("/v1/forecast"):
-            return json { _ in ScreenshotFixtures.forecastJSON() }
+            // A comma-separated latitude list is the Orte list's batch form,
+            // and Open-Meteo answers THAT with an array — the single-location
+            // object would not decode there.
+            return json { url in
+                if isBatchForecast(url) {
+                    return ScreenshotFixtures.conditionsBatchJSON(for: url)
+                }
+                return ScreenshotFixtures.forecastJSON()
+            }
+        case "geocoding-api.open-meteo.com":
+            return json { _ in ScreenshotFixtures.geocodeSearchJSON() }
         case "air-quality-api.open-meteo.com":
             return json { _ in ScreenshotFixtures.airQualityJSON() }
         case "ensemble-api.open-meteo.com":
@@ -94,7 +110,8 @@ final class ScreenshotFixtureServer: URLProtocol {
         guard url.absoluteString.hasPrefix(radarBaseURL) else { return nil }
 
         if path.hasPrefix("/radar/series") {
-            return json { _ in ScreenshotFixtures.precipSeriesJSON() }
+            // Per coordinate: the Orte list asks one series per saved place.
+            return json { url in ScreenshotFixtures.precipSeriesJSON(for: url) }
         }
         if path.hasPrefix("/weather-alerts/point") {
             return json { _ in ScreenshotFixtures.alertsJSON() }

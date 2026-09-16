@@ -33,6 +33,7 @@ struct MemberCardSurface: View {
                 .contentShape(RoundedRectangle(cornerRadius: MemberCard.cornerRadius))
                 .accessibilityLabel("Customize member card")
                 .accessibilityHint("Opens the sticker dock below the member card.")
+                .accessibilityIdentifier("settings.memberCard")
             }
         }
         .overlay(alignment: .topTrailing) {

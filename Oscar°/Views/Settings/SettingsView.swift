@@ -51,6 +51,7 @@ struct SettingsView: View {
                 .labelStyle(.settingsIcon(.teal))
             }
           }
+          .accessibilityIdentifier("settings.forecast")
 
           NavigationLink {
             AppIconSettingsView()

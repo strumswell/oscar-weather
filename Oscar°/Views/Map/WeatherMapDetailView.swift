@@ -270,6 +270,7 @@ struct WeatherMapDetailView: View {
                     .contentShape(.rect)
             }
             .accessibilityLabel(Text("Kartenebenen"))
+            .accessibilityIdentifier("map.layerPicker")
             Divider()
                 .frame(width: 26)
             Button {

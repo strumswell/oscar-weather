@@ -183,6 +183,7 @@ struct MapLayerPickerSheet: View {
     private var displaySection: some View {
         VStack(alignment: .leading, spacing: 10) {
             LayerPickerSectionHeader(title: "Darstellung", detail: nil)
+                .accessibilityIdentifier("map.layers.display")
             VStack(spacing: 0) {
                 LayerToggleRow(title: "Flüssige Bewegungen",
                                subtitle: "Sanfte Übergänge zwischen den Bildern",

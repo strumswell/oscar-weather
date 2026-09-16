@@ -222,6 +222,18 @@ final class NotificationSettingsManager: NSObject {
         await refreshAuthorizationStatus()
     }
 
+    #if DEBUG
+    /// Screenshot staging for the alerts settings scene: every alert type on
+    /// and authorized, without touching UNUserNotificationCenter or the server.
+    func stageForScreenshots() {
+        rainAlertsEnabled = true
+        weatherAlertsEnabled = true
+        liveRainStatusEnabled = true
+        enabled = true
+        authorizationStatus = .authorized
+    }
+    #endif
+
     private var hasNotificationAuthorization: Bool {
         authorizationStatus == .authorized || authorizationStatus == .provisional || authorizationStatus == .ephemeral
     }
@@ -272,6 +284,12 @@ final class NotificationSettingsManager: NSObject {
     }
 
     private func refreshAuthorizationStatus() async {
+        #if DEBUG
+        // Screenshot runs stage the status: the fixture sandbox never holds a
+        // real grant, and a re-read would flip the settings scene back to the
+        // "not determined" footer while the shot is being taken.
+        if ScreenshotMode.active { return }
+        #endif
         let updatedStatus = await withCheckedContinuation { continuation in
             UNUserNotificationCenter.current().getNotificationSettings { settings in
                 continuation.resume(returning: settings.authorizationStatus)

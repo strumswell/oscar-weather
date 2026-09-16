@@ -102,13 +102,17 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
     }
 
     func updateGPSCoordinates() {
-        if let newGPSCoordinates = getGPSCoordinates() {
-            gpsLocation = newGPSCoordinates
-        }
+        guard let newGPSCoordinates = getGPSCoordinates() else { return }
+        // CLLocationCoordinate2D isn't Equatable, so @Observable can't drop a
+        // no-op write: re-assigning the same fix (every refresh calls this)
+        // invalidates every view that reads the location.
+        guard newGPSCoordinates.latitude != gpsLocation.latitude
+            || newGPSCoordinates.longitude != gpsLocation.longitude else { return }
+        gpsLocation = newGPSCoordinates
     }
 
     func getGPSCoordinates() -> CLLocationCoordinate2D? {
-        authStatus = manager.authorizationStatus
+        applyManagerAuthorizationStatus()
         
         if (manager.authorizationStatus == CLAuthorizationStatus.authorizedAlways || manager.authorizationStatus == CLAuthorizationStatus.authorizedWhenInUse) {
             return manager.location?.coordinate
@@ -220,9 +224,22 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         return location
     }
     
+    /// The manager's status is the truth everywhere except a screenshot run:
+    /// the Orte scene stages an authorized status (its list only shows the GPS
+    /// row with access) and the fixture sandbox never holds a real grant, so a
+    /// re-read here would drop that row mid-capture. The launch argument is
+    /// read directly rather than through ScreenshotMode — this file also
+    /// compiles into the widget extensions, which don't carry that type.
+    private func applyManagerAuthorizationStatus() {
+        #if DEBUG
+        if UserDefaults.standard.string(forKey: "screenshotScene") != nil { return }
+        #endif
+        authStatus = manager.authorizationStatus
+    }
+
     internal func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         let status = manager.authorizationStatus
-        authStatus = status
+        applyManagerAuthorizationStatus()
         if status == .authorizedWhenInUse || status == .authorizedAlways {
             // Deferred at init on a fresh install (see init): the onboarding
             // location step's grant lands here and is where updates actually start.

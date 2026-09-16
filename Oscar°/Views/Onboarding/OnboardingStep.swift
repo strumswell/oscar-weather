@@ -7,7 +7,8 @@ import Foundation
 
 /// The ordered screens of the onboarding flow. Permission steps are skipped
 /// when their decision has already been made (replays, updating users).
-enum OnboardingStep: Equatable {
+/// String-backed so the screenshot run can name one with `-onboardingStep`.
+enum OnboardingStep: String, Equatable {
     case welcome
     case features
     case location

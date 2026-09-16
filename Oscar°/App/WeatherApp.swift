@@ -144,6 +144,9 @@ struct WeatherApp: App {
                 .environment(location)
                 .preferredColorScheme(.dark)
                 .task {
+                    #if DEBUG
+                    await ScreenshotMode.stageOnAppear()
+                    #endif
                     // Second chance for the init-time hydration: a prewarmed
                     // launch can run `init` before first unlock, while the
                     // app-group snapshot is still data-protected and unreadable.
@@ -155,6 +158,9 @@ struct WeatherApp: App {
                     await WidgetBasemapRenderer.refreshIfNeeded()
                 }
                 .onChange(of: scenePhase) { _, phase in
+                    #if DEBUG
+                    ScreenshotMode.scenePhaseDidChange(phase)
+                    #endif
                     guard phase == .active else { return }
                     Task { await notificationSettingsManager.handleForeground() }
                 }
