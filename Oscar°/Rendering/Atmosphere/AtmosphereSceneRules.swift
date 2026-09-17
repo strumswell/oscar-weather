@@ -3,7 +3,11 @@ import SwiftUI
 /// Scene decisions every simulation shares (phone, watch, location cards).
 extension AtmosphereSnapshot {
     var cloudThickness: Cloud.Thickness {
-        switch cloudCoverage {
+        Self.cloudThickness(coverage: cloudCoverage)
+    }
+
+    static func cloudThickness(coverage: Float) -> Cloud.Thickness {
+        switch coverage {
         case ..<0.08: .none
         case ..<0.25: .thin
         case ..<0.45: .light

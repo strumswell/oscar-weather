@@ -68,7 +68,7 @@ struct HourlyTimelineStrip: View {
                     .allowsHitTesting(false)
             }
         }
-        .sensoryFeedback(.selection, trigger: model.hourTick)
+        .sensoryFeedback(.impact(weight: .light, intensity: 0.3), trigger: model.hourTick)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Zeitleiste"))
         .accessibilityValue(Text(verbatim: model.accessibilityValue))

@@ -89,7 +89,6 @@ struct ClimateView: View {
     }
 
     private func presentDetail(_ summary: ClimateSummary) {
-        Haptics.impact()
         presentation.present(.climate(summary))
     }
 }

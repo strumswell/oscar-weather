@@ -5,7 +5,6 @@ struct DailyView: View {
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @Environment(NowPresentationCoordinator.self) private var presentation
   private let settingsService = SettingService.shared
-  @State private var detailPresentationCount = 0
 
   // Column widths scale with Dynamic Type so the weekday and temperature labels keep their
   // alignment without truncating at larger accessibility text sizes.
@@ -94,7 +93,6 @@ struct DailyView: View {
         .opacity(phase.isIdentity ? 1 : 0.8)
         .scaleEffect(reduceMotion || phase.isIdentity ? 1 : 0.99)
     }
-    .sensoryFeedback(.impact, trigger: detailPresentationCount)
   }
 }
 
@@ -246,7 +244,6 @@ extension DailyView {
 
   private func presentDetails() {
     guard hasDailyDetailData else { return }
-    detailPresentationCount += 1
     presentation.present(.daily)
   }
 }

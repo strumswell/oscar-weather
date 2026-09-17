@@ -247,7 +247,6 @@ struct WeatherMapDetailView: View {
             Divider()
                 .frame(width: 26)
             Button {
-                Haptics.impact()
                 NotificationCenter.default.post(name: .mapCenterOnUser, object: nil)
             } label: {
                 Image(systemName: "location")
@@ -262,7 +261,6 @@ struct WeatherMapDetailView: View {
     }
 
     private func presentLayerPicker() {
-        Haptics.impact()
         isLayerPickerPresented = true
     }
 

@@ -61,9 +61,6 @@
             ReferencedContainer = "container:Oscar&#xb0;.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <StoreKitConfigurationFileReference
-         identifier = "../../Oscar.storekit">
-      </StoreKitConfigurationFileReference>
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-radarBaseURL http://192.168.178.136:3000"
@@ -74,6 +71,9 @@
             isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
+      <StoreKitConfigurationFileReference
+         identifier = "../../Oscar.storekit">
+      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

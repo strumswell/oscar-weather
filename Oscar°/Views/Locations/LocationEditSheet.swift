@@ -115,7 +115,6 @@ struct LocationEditSheet: View {
                                             mark = .emoji(suggestion.emoji)
                                         }
                                     }
-                                    Haptics.impact()
                                 } label: {
                                     Text("\(suggestion.emoji) \(suggestion.label)")
                                         .font(.subheadline)
@@ -190,7 +189,6 @@ struct LocationEditSheet: View {
         let isSelected = mark == value
         return Button {
             withAnimation(.snappy) { mark = value }
-            Haptics.impact()
         } label: {
             Group {
                 if let symbol {
@@ -251,7 +249,6 @@ struct LocationEditSheet: View {
             }
             EmojiKeyboardField(isFocused: $emojiFieldFocused) { picked in
                 withAnimation(.snappy) { mark = .emoji(picked) }
-                Haptics.impact()
                 emojiFieldFocused = false
             }
         }

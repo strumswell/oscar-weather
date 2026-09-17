@@ -164,7 +164,6 @@ struct MemberCard: View {
 
     private func openDock() {
         guard !isEditing else { return }
-        Haptics.impact()
         // Discrete row height: an animated List row height jitters against the cell resize.
         var instant = Transaction()
         instant.disablesAnimations = true
@@ -220,7 +219,6 @@ struct MemberCard: View {
     private func selectSticker(_ stickerID: UUID) {
         selectedStickerID = stickerID
         bringStickerToFront(stickerID)
-        Haptics.impact()
     }
 
     private var activeExistingStickerCenter: CGPoint? {
@@ -311,7 +309,6 @@ struct MemberCard: View {
         updatedPlacements.append(sticker)
         persist(updatedPlacements)
         selectedStickerID = sticker.id
-        Haptics.impact()
     }
 
     private func updateExistingStickerPress(placement: MemberCardStickerPlacement, isPressed: Bool, in cardSize: CGSize) {
@@ -395,7 +392,6 @@ struct MemberCard: View {
         selectedStickerID = nil
         inFlightScaleMultiplier = 1.0
         inFlightRotationDelta = .zero
-        Haptics.impact()
     }
 
     private func removeSelectedSticker() {

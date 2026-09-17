@@ -116,7 +116,6 @@ struct TimelineControlsChip: View {
     private var playButton: some View {
         Button {
             if state.isPlaying { state.pause() } else { state.play() }
-            Haptics.impact()
         } label: {
             ZStack {
                 Image(systemName: state.isPlaying ? "pause.fill" : "play.fill")
@@ -211,7 +210,6 @@ struct TimelineControlsChip: View {
         guard let index = closestIndexToNow(state.frameTimestamps),
               index != state.currentFrameIndex else { return }
         state.currentFrameIndex = index
-        Haptics.impact()
     }
 
     // MARK: Source badge

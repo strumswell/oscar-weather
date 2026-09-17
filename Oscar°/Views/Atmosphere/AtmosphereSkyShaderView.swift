@@ -16,7 +16,11 @@ struct AtmosphereSkyShaderView: View {
                 sky(time: shaderTime(timeline.date.timeIntervalSinceReferenceDate))
             }
         } else {
-            sky(time: shaderTime(snapshot.timestamp))
+            // A fixed clock: `time` only drives lightning and the mottle
+            // drift. Feeding the timestamp here made the mottle slide under
+            // the clouds while the hourly stage tweens between hours — a
+            // faint brightness shimmer on otherwise unchanged cloud decks.
+            sky(time: 0)
         }
     }
 

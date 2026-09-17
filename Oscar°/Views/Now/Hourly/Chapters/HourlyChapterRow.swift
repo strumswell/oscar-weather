@@ -7,19 +7,27 @@ struct HourlyChapterRow: View {
     let chapter: ChapterEngine.Chapter
     let model: HourlyTimelineModel
     let isExpanded: Bool
+    /// The scrubbed hour lies inside this chapter: its dot swells and lights up.
+    let isActive: Bool
     let isPast: Bool
     let onTap: () -> Void
 
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
+            // A tinted halo ring instead of a shadow: no offscreen pass per row.
             ZStack {
                 Circle()
-                    .fill(.white.opacity(0.22))
+                    .fill(tint(for: chapter).opacity(isActive ? 0.35 : 0))
+                    .frame(width: 24, height: 24)
+                Circle()
+                    .fill(.white.opacity(isActive ? 0.4 : 0.22))
                     .frame(width: 16, height: 16)
                 Circle()
                     .fill(tint(for: chapter))
                     .frame(width: 10, height: 10)
             }
+            .scaleEffect(isActive ? 1.15 : 1)
+            .animation(.smooth(duration: 0.4), value: isActive)
             .frame(width: 22, alignment: .center)
             .padding(.top, 21)
 
@@ -170,14 +178,12 @@ struct HourlyChapterRow: View {
             .orange
         case .alert:
             AlertSeverityStyle.color(rank: chapter.severityRank ?? 1, source: chapter.severitySource)
-        case .day:
-            switch chapter.systemImage {
-            case "sun.max.fill", "cloud.sun.fill": .yellow
-            case "cloud.rain.fill", "cloud.heavyrain.fill", "cloud.drizzle.fill",
-                 "cloud.bolt.rain.fill": .hourlyRain
-            case "cloud.snow.fill": .cyan
-            default: .hourlyCloud
-            }
+        case .high:
+            .orange
+        case .low:
+            .cyan
+        case .pressure:
+            .purple
         }
     }
 
@@ -206,11 +212,10 @@ struct HourlyChapterRow: View {
         case .wind:
             [(color: .teal, label: String(localized: "Böen") + " \(model.windUnitString)"),
              (color: Color.teal.mix(with: .black, by: 0.35), label: String(localized: "Wind"))]
-        case .day:
+        case .high, .low:
             [(color: .orange, label: String(localized: "Temperatur")),
              (color: .hourlyRain, label: String(localized: "Regen"))]
-                + (chapter.showsPressure ? [(color: .purple, label: String(localized: "Luftdruck"))] : [])
-        case .radar, .night, .sunEvent, .alert:
+        case .radar, .night, .sunEvent, .alert, .pressure:
             nil
         }
     }
@@ -264,20 +269,23 @@ struct HourlyChapterRow: View {
             }
             stats.append(("Dauer", durationString(chapter.range)))
             return stats
-        case .day:
-            var stats: [(label: LocalizedStringKey, value: String)] = [
-                (label: "Regen", value: HourlyFormatting.precipitationString(
-                    value: series(model.precipitation).reduce(0, +),
-                    unit: model.precipitationUnit
-                )),
-            ]
-            if chapter.showsPressure {
-                let pressures = series(model.pressure)
-                if let first = pressures.first, let last = pressures.last {
-                    stats.append(("Luftdruck", "\(Int(first.rounded())) → \(Int(last.rounded())) hPa"))
-                }
+        case .high, .low:
+            var stats: [(label: LocalizedStringKey, value: String)] = []
+            if let felt = indices.first, felt < model.apparentTemperature.count {
+                stats.append(("Gefühlt", HourlyFormatting.temperatureString(model.apparentTemperature[felt])))
             }
+            // The chart spans the whole day; so does the rain total.
+            let day = model.dayRange(containing: chapter.range.lowerBound)
+            let dayRain = (model.hourIndices(from: day.lowerBound, until: day.upperBound) ?? [])
+                .compactMap { $0 < model.precipitation.count ? model.precipitation[$0] : nil }
+                .reduce(0, +)
+            stats.append(("Regen", HourlyFormatting.precipitationString(value: dayRain, unit: model.precipitationUnit)))
             return stats
+        case .pressure:
+            let pressures = series(model.pressure)
+            guard let first = pressures.first, let last = pressures.last else { return [] }
+            return [("Luftdruck", "\(Int(first.rounded())) → \(Int(last.rounded())) hPa"),
+                    ("Dauer", durationString(chapter.range))]
         case .radar, .sunEvent, .alert:
             return []
         }
@@ -308,7 +316,7 @@ extension ChapterEngine.Chapter {
         switch kind {
         case .sunEvent: false
         case .alert: detail != nil
-        case .precipitation, .radar, .wind, .night, .day: true
+        case .precipitation, .radar, .wind, .night, .high, .low, .pressure: true
         }
     }
 }

@@ -153,12 +153,16 @@ enum AtmosphereSampler {
         let tintFactor = 0.28 + snapshot.nightAmount * 0.4 + sunsetProximity * 0.12
         var result = mix(cloud, base, t: tintFactor)
 
-        // Never let the cloud melt into the sky behind it.
+        // Never let the cloud melt into the sky behind it. The push direction
+        // is fixed per layer (tops lift, undersides sink): deriving it from
+        // the sign of the difference flipped the tint by 2× separation the
+        // instant a tweened deck crossed the sky's luminance — a visible
+        // bright/dark flicker on otherwise unchanged clouds.
         let sky = skyVector(for: snapshot, horizonFactor: 0.45)
         let separation: Float = 0.06
         let difference = luminance(result) - luminance(sky)
         if abs(difference) < separation {
-            let direction: Float = difference >= 0 ? 1 : -1
+            let direction: Float = top ? 1 : -1
             result += simd_float3(repeating: direction * (separation - abs(difference)))
         }
 

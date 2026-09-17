@@ -39,6 +39,7 @@ struct HourlyChaptersView: View {
                                 chapter: chapter,
                                 model: model,
                                 isExpanded: expandedID == chapter.id,
+                                isActive: activeID == chapter.id,
                                 isPast: chapter.range.upperBound < now,
                                 onTap: { toggle(chapter) }
                             )
@@ -85,17 +86,15 @@ struct HourlyChaptersView: View {
         .onChange(of: model.chapters, initial: true) { _, _ in
             items = makeItems()
             guard centerItemID == nil else { return }
-            let timeline = model.chapters.filter { $0.kind != .day }
-            centerItemID = (timeline.last(where: { $0.range.lowerBound <= model.scrubTime })
-                ?? timeline.first)?.id
+            centerItemID = (model.chapters.last(where: { $0.range.lowerBound <= model.scrubTime })
+                ?? model.chapters.first)?.id
         }
         .onChange(of: centerItemID) { _, id in
             let userIsScrolling = scrollPhase == .tracking
                 || scrollPhase == .interacting
                 || scrollPhase == .decelerating
             guard userIsScrolling,
-                  let chapter = model.chapters.first(where: { $0.id == id }),
-                  chapter.kind != .day else { return }
+                  let chapter = model.chapters.first(where: { $0.id == id }) else { return }
             // Scrolling should feel like scrubbing: a short ease-out follows the
             // finger instead of the slow-in glide that a tap deserves.
             model.glide(to: chapter.jumpTime, easeOut: true)
@@ -141,11 +140,15 @@ struct HourlyChaptersView: View {
 
     private func dayDivider(_ label: String) -> some View {
         HStack(spacing: 10) {
+            // A flat scrim instead of a text shadow: shadows cost an
+            // offscreen pass per divider over the live sim.
             Text(verbatim: label)
                 .font(.footnote.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.85))
-                .shadow(color: .black.opacity(0.35), radius: 2, y: 1)
+                .foregroundStyle(.white.opacity(0.9))
                 .fixedSize()
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(.black.opacity(0.22), in: Capsule())
 
             Rectangle()
                 .fill(.white.opacity(0.25))

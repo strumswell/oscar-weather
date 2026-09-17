@@ -99,7 +99,6 @@ struct NowLayoutSettingsView: View {
     }
 
     private func restoreDefault() {
-        Haptics.impact()
         withAnimation(.snappy) {
             settingsService.nowSectionOrderRaw = nil
             settingsService.hiddenNowSectionsRaw = nil
@@ -120,7 +119,6 @@ private struct CheckRow<Content: View>: View {
 
     var body: some View {
         Button {
-            Haptics.impact()
             withAnimation(.snappy, toggle)
         } label: {
             HStack(spacing: 12) {

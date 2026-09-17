@@ -8,7 +8,6 @@ struct DailyDetailView: View {
 
   @State private var detailModel = DetailModel()
   @State private var selectedSection: DailyDetailSection = .temperature
-  @State private var dismissalFeedback = false
 
   private var points: [DailyEnsembleDayPoint] {
     detailModel.response?.dayPoints ?? []
@@ -78,7 +77,6 @@ struct DailyDetailView: View {
           Button(role: .close, action: finish)
         }
       }
-      .sensoryFeedback(.success, trigger: dismissalFeedback)
       .task(id: detailModel.selectedModel) {
         await detailModel.load(coordinates: currentCoordinate)
       }
@@ -110,7 +108,6 @@ struct DailyDetailView: View {
   }
 
   private func finish() {
-    dismissalFeedback.toggle()
     dismiss()
   }
 }

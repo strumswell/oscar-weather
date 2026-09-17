@@ -8,7 +8,7 @@
 import CoreLocation
 import SwiftUI
 
-struct WeatherSimulationView: View {
+struct WeatherSimulationView: View, Animatable {
     /// Another tab is in front, so the sim is fully hidden and animated layers
     /// drop to the background frame rate. Sheets deliberately don't count:
     /// iOS keeps the dimmed base view visible behind them, and the throttled
@@ -17,7 +17,23 @@ struct WeatherSimulationView: View {
     /// Renders this snapshot instead of deriving one for "now" — the hourly detail
     /// stage drives the sim with scrubbed hours through this. Same mechanism as
     /// the debug override (which still wins while debugging).
-    var snapshotOverride: AtmosphereSnapshot? = nil
+    nonisolated var snapshotOverride: AtmosphereSnapshot? = nil
+    /// Cloud deck bucket to render instead of the snapshot's own. Not part of
+    /// the animatable vector, so a tweened coverage crossing a bucket edge
+    /// can't swap decks mid-frame; the hourly stage feeds it with hysteresis.
+    var deckThicknessOverride: Cloud.Thickness? = nil
+    /// Under an override the sim tweens between scrubbed hours: the parent's
+    /// `.animation` drives this vector, so sky, sun, moon, and drops glide
+    /// instead of cutting at every stage push. Inert without an override.
+    /// `nonisolated`: `Animatable` is a nonisolated protocol while `View`
+    /// runs on the main actor; a plain value property may opt out (SE-0434).
+    nonisolated var animatableData: AtmosphereSnapshot.Vector {
+        get { snapshotOverride?.vector ?? .zero }
+        set {
+            guard let current = snapshotOverride else { return }
+            snapshotOverride = AtmosphereSnapshot(vector: newValue, condition: current.condition)
+        }
+    }
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
     @Environment(AtmosphereDebugState.self) private var debugState: AtmosphereDebugState?
@@ -44,9 +60,12 @@ struct WeatherSimulationView: View {
             ?? (weather.forecast.hourly != nil
                 ? snapshotCache.snapshot(from: weather, at: location.coordinates)
                 : .twilight)
+        // Phase in 1/512-cycle steps (~1.4 h): while the stage tweens the
+        // timestamp per frame, the moon's blurred layers keep their content
+        // and only move, instead of re-rendering four blur passes a frame.
         let moonPhase = overrides?.moonPhase
-            ?? MoonPhase.phaseFraction(for: Date(timeIntervalSince1970: snapshot.timestamp))
-        let cloudThickness = snapshot.cloudThickness
+            ?? (MoonPhase.phaseFraction(for: Date(timeIntervalSince1970: snapshot.timestamp)) * 512).rounded() / 512
+        let cloudThickness = deckThicknessOverride ?? snapshot.cloudThickness
         let cloudsVisible = snapshot.cloudDensity + snapshot.cloudCoverage > 0.02
         let pacing: SimulationPacing = reduceMotion || isOffTab ? .still : (powerThrottled ? .background : .active)
 
@@ -80,56 +99,63 @@ struct WeatherSimulationView: View {
 
                     let starOpacity = Double(snapshot.nightAmount)
                         * Double(1 - snapshot.cloudCoverage * 0.85)
-                    if starOpacity > 0.02 {
-                        // StarsView's internal fade follows the wall clock;
-                        // under a scrub override the snapshot's night drives
-                        // the outer opacity instead.
-                        StarsView(
-                            pacing: pacing,
-                            occlusionCenter: moonLayout.map {
-                                CGPoint(
-                                    x: proxy.size.width * $0.x,
-                                    y: proxy.size.height * $0.y
-                                )
-                            },
-                            occlusionRadius: MoonView.diameter / 2 + 8,
-                            opacityOverride: snapshotOverride != nil ? 1 : nil
-                        )
-                        .opacity(starOpacity)
+                    // Celestial layers fade in and out at their thresholds;
+                    // a scrub across sunrise or moonset must never pop them.
+                    let presenceFade: Animation = .easeInOut(duration: 0.4)
+                    ZStack {
+                        if starOpacity > 0.02 {
+                            // StarsView's internal fade follows the wall clock;
+                            // under a scrub override the snapshot's night drives
+                            // the outer opacity instead.
+                            StarsView(
+                                pacing: pacing,
+                                occlusionCenter: moonLayout.map {
+                                    CGPoint(
+                                        x: proxy.size.width * $0.x,
+                                        y: proxy.size.height * $0.y
+                                    )
+                                },
+                                occlusionRadius: MoonView.diameter / 2 + 8,
+                                opacityOverride: snapshotOverride != nil ? 1 : nil
+                            )
+                            .opacity(starOpacity)
+                            .transition(.opacity)
+                        }
                     }
+                    .animation(presenceFade, value: starOpacity > 0.02)
 
-                    // Scrub steps land ~10 Hz; a matching linear tween turns
-                    // the stepped sun/moon positions into continuous motion.
-                    let celestialTween: Animation? = snapshotOverride != nil
-                        ? .linear(duration: 0.15)
-                        : nil
-
-                    if let moonProgress, let moonLayout {
-                        MoonView(
-                            phase: moonPhase,
-                            altitudeProgress: moonProgress,
-                            xFraction: moonLayout.x,
-                            yFraction: moonLayout.y,
-                            isSouthernHemisphere: location.coordinates.latitude < 0,
-                            skyDarkness: Double(snapshot.nightAmount)
-                        )
-                        // Realistic daytime visibility: a moon far enough from the sun with
-                        // enough lit surface shows as a pale disc; a thin crescent near the sun
-                        // fades to nothing, matching what's actually out the window. Full strength
-                        // at night. Clouds dim and blur it (below) but never hide it outright.
-                        .opacity(
-                            MoonPhase.skyVisibility(phase: moonPhase, nightAmount: Double(snapshot.nightAmount))
-                                * Double(1 - snapshot.cloudDensity * 0.4)
-                        )
-                        .blur(radius: CGFloat(snapshot.cloudDensity) * 2.5)
-                        .animation(celestialTween, value: snapshot.timestamp)
+                    ZStack {
+                        if let moonProgress, let moonLayout {
+                            MoonView(
+                                phase: moonPhase,
+                                altitudeProgress: moonProgress,
+                                xFraction: moonLayout.x,
+                                yFraction: moonLayout.y,
+                                isSouthernHemisphere: location.coordinates.latitude < 0,
+                                skyDarkness: Double(snapshot.nightAmount)
+                            )
+                            // Realistic daytime visibility: a moon far enough from the sun with
+                            // enough lit surface shows as a pale disc; a thin crescent near the sun
+                            // fades to nothing, matching what's actually out the window. Full strength
+                            // at night. Clouds dim and blur it (below) but never hide it outright.
+                            .opacity(
+                                MoonPhase.skyVisibility(phase: moonPhase, nightAmount: Double(snapshot.nightAmount))
+                                    * Double(1 - snapshot.cloudDensity * 0.4)
+                            )
+                            .blur(radius: (CGFloat(snapshot.cloudDensity) * 10).rounded() / 4)
+                            .transition(.opacity)
+                        }
                     }
+                    .animation(presenceFade, value: moonProgress != nil)
 
-                    if snapshot.showsSunDisc {
-                        SunView(progress: Double(snapshot.timeOfDay))
-                            .opacity(Double((1 - snapshot.cloudDensity * 0.45) * snapshot.phase * snapshot.sunDiscVisibility))
-                            .animation(celestialTween, value: snapshot.timestamp)
+                    ZStack {
+                        if snapshot.showsSunDisc {
+                            SunView(progress: Double(snapshot.timeOfDay))
+                                .opacity(Double((1 - snapshot.cloudDensity * 0.45) * snapshot.phase * snapshot.sunDiscVisibility))
+                                .transition(.opacity)
+                        }
                     }
+                    .animation(presenceFade, value: snapshot.showsSunDisc)
 
                     // Under scrub the fade must stay short: long cross-fades
                     // overlap two translucent cloud decks during fast pans,
@@ -203,7 +229,6 @@ struct WeatherSimulationView: View {
             }
             .preferredColorScheme(.dark)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(AtmosphereSampler.skyGradient(snapshot: snapshot))
         }
         .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange).receive(on: DispatchQueue.main)) { _ in
             powerThrottled = Self.isPowerThrottled

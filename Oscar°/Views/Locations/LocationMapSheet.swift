@@ -89,7 +89,6 @@ struct LocationMapSheet: View {
                 HStack {
                     Spacer()
                     Button {
-                        Haptics.impact()
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")

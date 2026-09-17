@@ -13,7 +13,7 @@ enum SimulationPacing: Equatable {
     case background
     case still
 
-    static let backgroundFPS: Double = 8
+    static let backgroundFPS: Double = 60
 
     func minimumInterval(base: Double?) -> Double? {
         self == .background ? 1.0 / Self.backgroundFPS : base

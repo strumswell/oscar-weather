@@ -114,36 +114,48 @@ struct ChapterEngineTests {
         #expect(!cloudy.contains { $0.kind == .night && $0.systemImage == "moon.stars.fill" })
     }
 
+    /// A diurnal curve: low at 03:00, high at 15:00 on both days.
+    private var diurnal: [Double] {
+        (0..<Self.hours).map { 12 + 8 * sin(Double($0 % 24 - 9) / 24 * 2 * .pi) }
+    }
+
     @Test
-    func everyDayGetsASummaryChapterAndPastChaptersDrop() {
-        // now sits mid-day-one: day one still present (its range ends later),
-        // and both days carry summaries.
-        let chapters = ChapterEngine.chapters(from: makeInput(now: Self.start + 12 * 3_600))
-        let days = chapters.filter { $0.kind == .day }
-        #expect(days.count == 2)
-        #expect(chapters.allSatisfy { $0.range.upperBound > Self.start + 12 * 3_600 })
-        // Sorted by range start.
+    func everyDayGetsHighAndLowInHourOrderAndPastChaptersDrop() {
+        // now sits mid-day-one: only chapters ending later survive.
+        let now = Self.start + 12 * 3_600
+        let chapters = ChapterEngine.chapters(from: makeInput(temperature: diurnal, now: now))
+        #expect(chapters.filter { $0.kind == .high }.count == 2)
+        // Day one's 04:00 low is past; day two's remains.
+        #expect(chapters.filter { $0.kind == .low }.count == 1)
+        #expect(chapters.allSatisfy { $0.range.upperBound > now })
         let starts = chapters.map(\.range.lowerBound)
         #expect(starts == starts.sorted())
     }
 
     @Test
-    func pressureFallAnnotatesTheDay() {
+    func pressureFallBecomesItsOwnChapter() {
         var pressure = Array(repeating: 1015.0, count: Self.hours)
         for hour in 6...18 {
             pressure[hour] = 1015 - Double(hour - 6)  // 12 hPa over 12 h
         }
         let chapters = ChapterEngine.chapters(from: makeInput(pressure: pressure))
-        let day = chapters.first { $0.kind == .day }
-        #expect(day?.subtitle.contains(String(localized: "Druck fällt")) == true)
+        let fall = chapters.first { $0.kind == .pressure }
+        #expect(fall?.valueLabel == "−12 hPa")
+        #expect(fall?.range.lowerBound == Self.start + 6 * 3_600)
+        #expect(!ChapterEngine.chapters(from: makeInput()).contains { $0.kind == .pressure })
     }
 
     @Test
-    func daySummaryCarriesDominantConditionAndHigh() {
-        var temps = Array(repeating: 15.0, count: Self.hours)
+    func highAndLowCardsSitAtTheirHours() {
+        var temps = diurnal
         temps[14] = 27.4
         let chapters = ChapterEngine.chapters(from: makeInput(temperature: temps))
-        let day = chapters.first { $0.kind == .day }
-        #expect(day?.valueLabel.contains("27°") == true)
+        let high = chapters.first { $0.kind == .high }
+        #expect(high?.valueLabel == "27°")
+        #expect(high?.jumpTime == Self.start + 14 * 3_600)
+        #expect(chapters.first { $0.kind == .low }?.range.lowerBound == Self.start + 3 * 3_600)
+
+        // A flat day has no extremes worth a card.
+        #expect(!ChapterEngine.chapters(from: makeInput()).contains { $0.kind == .high || $0.kind == .low })
     }
 }

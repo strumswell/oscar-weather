@@ -75,6 +75,33 @@ struct AtmosphereSnapshot: Equatable {
 }
 
 extension AtmosphereSnapshot {
+    typealias Vector = AnimatableValues<
+        Double, Float, Float, Float, Float, Float, Float, Float, Float,
+        Float, Float, Float, Float, Float, Float, Float, Float
+    >
+
+    /// Every continuous field as one animatable vector, so the sim can tween
+    /// between scrubbed hours instead of cutting; `condition` stays discrete.
+    var vector: Vector {
+        AnimatableValues(
+            timestamp, timeOfDay, sunElevation, phase, nightAmount,
+            cloudCoverage, cloudDensity, precipitationAmount, snowfallAmount,
+            precipitationIntensity, snowfallIntensity, thunderIntensity,
+            haze, turbidity, windSpeed, windDirection, aqiHaze
+        )
+    }
+
+    init(vector: Vector, condition: AtmosphereConditionFamily) {
+        let v = vector.value
+        self.init(
+            timestamp: v.0, timeOfDay: v.1, sunElevation: v.2, phase: v.3, nightAmount: v.4,
+            condition: condition,
+            cloudCoverage: v.5, cloudDensity: v.6, precipitationAmount: v.7, snowfallAmount: v.8,
+            precipitationIntensity: v.9, snowfallIntensity: v.10, thunderIntensity: v.11,
+            haze: v.12, turbidity: v.13, windSpeed: v.14, windDirection: v.15, aqiHaze: v.16
+        )
+    }
+
     /// Visibility of the drawn sun DISC: 1 in daylight, fading out as the sun
     /// approaches the horizon, 0 once it dips below. Distinct from `phase`,
     /// which deliberately keeps ambient light through twilight — gating the

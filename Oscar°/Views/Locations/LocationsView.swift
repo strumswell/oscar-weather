@@ -91,7 +91,6 @@ struct LocationsView: View {
                     }
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            Haptics.impact()
                             isSearchPresented = true
                         } label: {
                             Image(systemName: "plus")
@@ -317,7 +316,6 @@ struct LocationsView: View {
     }
 
     private func presentMapPicker() {
-        Haptics.impact()
         isMapPresented = true
     }
 
@@ -328,7 +326,6 @@ struct LocationsView: View {
 
     private func preview(_ result: Components.Schemas.Location) {
         guard let lat = result.latitude, let lon = result.longitude else { return }
-        Haptics.impact()
         candidate = LocationCandidate(
             name: result.displayName,
             detail: result.detailLine,

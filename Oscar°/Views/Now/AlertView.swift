@@ -41,14 +41,12 @@ struct AlertView: View {
         .contentShape(.rect)
         .accessibilityIdentifier("now.alert")
         .onTapGesture {
-            Haptics.impact()
             presentation.present(.alerts)
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
         .accessibilityHint(Text("Öffnet die Wetterwarnungen"))
         .accessibilityAction {
-            Haptics.impact()
             presentation.present(.alerts)
         }
     }

@@ -74,9 +74,18 @@ struct CloudsView: View {
 /// tints (or the set of cloud images) change, not every frame. Held via `@State` — mutating its
 /// contents inside the draw closure is reference mutation, not view-state mutation.
 private final class CloudImageCache {
-    private var topTint: Color?
-    private var bottomTint: Color?
+    /// Tints compared at 8-bit precision: while the hourly stage tweens the
+    /// sky, the exact colors differ every frame but the shaded bitmaps don't.
+    private var tintKey: (SIMD4<Int32>, SIMD4<Int32>)?
     private var images: [Int: GraphicsContext.ResolvedImage] = [:]
+
+    private static func key(_ color: Color, in environment: EnvironmentValues) -> SIMD4<Int32> {
+        let resolved = color.resolve(in: environment)
+        return SIMD4(
+            Int32((resolved.red * 255).rounded()), Int32((resolved.green * 255).rounded()),
+            Int32((resolved.blue * 255).rounded()), Int32((resolved.opacity * 255).rounded())
+        )
+    }
 
     func resolvedImages(
         for imageNumbers: [Int],
@@ -85,14 +94,12 @@ private final class CloudImageCache {
         in context: GraphicsContext
     ) -> [Int: GraphicsContext.ResolvedImage] {
         let needed = Set(imageNumbers)
-        if self.topTint == topTint,
-           self.bottomTint == bottomTint,
-           needed.isSubset(of: Set(images.keys)) {
+        let key = (Self.key(topTint, in: context.environment), Self.key(bottomTint, in: context.environment))
+        if let tintKey, tintKey == key, needed.isSubset(of: Set(images.keys)) {
             return images
         }
 
-        self.topTint = topTint
-        self.bottomTint = bottomTint
+        tintKey = key
         images = Dictionary(uniqueKeysWithValues: needed.map { i -> (Int, GraphicsContext.ResolvedImage) in
             var resolved = context.resolve(Image("cloud\(i)"))
             resolved.shading = .linearGradient(

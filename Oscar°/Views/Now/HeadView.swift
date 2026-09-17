@@ -119,13 +119,11 @@ struct HeadView: View {
 
   private func switchTo(_ city: City) {
     guard !city.selected else { return }
-    Haptics.impact()
     cityService.toggleActiveCity(city: city)
   }
 
   private func switchToCurrentLocation() {
     guard cityService.getSelectedCity() != nil else { return }
-    Haptics.impact()
     cityService.disableAllCities()
   }
 
@@ -172,7 +170,6 @@ struct HeadView: View {
       .shadow(radius: 5)
       .contentShape(Rectangle())
       .onTapGesture {
-        Haptics.impact()
         presentation.selectedTab = .places
       }
       // Long-press shortcut for switching places without leaving the
@@ -181,7 +178,6 @@ struct HeadView: View {
         locationSwitchPicker
         Divider()
         Button {
-          Haptics.impact()
           presentation.selectedTab = .places
         } label: {
           Label("Orte verwalten", systemImage: "list.bullet")
@@ -193,7 +189,6 @@ struct HeadView: View {
         Text("Ort ändern, aktuell \([eyebrowDescription, location.name].compactMap { $0 }.joined(separator: ", "))")
       )
       .accessibilityAction {
-        Haptics.impact()
         presentation.selectedTab = .places
       }
       .padding(.bottom, 10)

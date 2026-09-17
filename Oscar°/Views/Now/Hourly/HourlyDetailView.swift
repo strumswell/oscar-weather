@@ -17,12 +17,14 @@ struct HourlyDetailView: View {
 
     @State private var model = HourlyTimelineModel()
     @State private var expandedLens: HourlyLens? = .overview
-    @State private var dismissalFeedback = false
-    @State private var dragStartTime: Double?
 
     private var showsChapters: Bool { settingsService.hourlyDetailShowsChapters }
 
-    private static let secondsPerPoint: Double = 240
+    /// Stage pushes land ~10 Hz in 2-minute steps; this spring carries the
+    /// sim and the card wash between them. Retargeted every push, it also
+    /// low-passes fast scrubs across days into one continuous sweep instead
+    /// of a strobe. Knob: shorter tracks tighter, longer smooths more.
+    private static let stageTween: Animation = .smooth(duration: 0.3)
 
     var body: some View {
         NavigationStack {
@@ -57,9 +59,6 @@ struct HourlyDetailView: View {
                     Button(role: .close, action: finish)
                 }
             }
-            .sensoryFeedback(.success, trigger: dismissalFeedback)
-            .sensoryFeedback(.selection, trigger: expandedLens)
-            .sensoryFeedback(.selection, trigger: showsChapters)
             .onAppear {
                 model.update(from: weather)
                 if let initialTarget {
@@ -81,17 +80,11 @@ struct HourlyDetailView: View {
             at: location.coordinates,
             for: model.stageDate
         )
+        // Only the stage clock is read here: everything that follows the raw
+        // scrub time lives in child views, so the mapper above runs at the
+        // stage's 10 Hz instead of every drag frame.
         return ZStack {
-            WeatherSimulationView(snapshotOverride: snapshot)
-                .ignoresSafeArea()
-                .contentShape(.rect)
-                .gesture(skyDrag)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(Text("Himmel"))
-                .accessibilityValue(Text(verbatim: model.accessibilityValue))
-                .accessibilityAdjustableAction { direction in
-                    model.nudge(hours: direction == .increment ? 1 : -1)
-                }
+            HourlyStage(model: model, snapshot: snapshot)
 
             VStack(spacing: 0) {
                 if showsChapters {
@@ -99,7 +92,7 @@ struct HourlyDetailView: View {
                 } else {
                     Spacer(minLength: 0)
 
-                    captionRow
+                    HourlyCaption(model: model)
                         .padding(.horizontal, 18)
                         .padding(.bottom, 14)
 
@@ -114,31 +107,50 @@ struct HourlyDetailView: View {
             .padding(.bottom, 10)
         }
         .accessibilityIdentifier("hourly.detail")
+        .animation(Self.stageTween, value: snapshot)
         .environment(\.cardTint, AtmosphereSampler.cardFill(snapshot: snapshot))
         .environment(\.cardBorderOpacity, AtmosphereSampler.cardBorderOpacity(snapshot: snapshot))
         .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial.opacity(0.6)))
     }
 
-    private var captionRow: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(verbatim: model.eyebrowLabel)
-                .font(.footnote.weight(.semibold))
-                .textCase(.uppercase)
-                .tracking(1.2)
-                .monospacedDigit()
-                .foregroundStyle(.white.opacity(0.72))
-                .shadow(color: .black.opacity(0.35), radius: 1.5, y: 1)
-
-            Text(verbatim: model.titleLabel)
-                .font(.title.weight(.bold))
-                .foregroundStyle(.white)
-                .shadow(color: .black.opacity(0.3), radius: 2.5, y: 1)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
+    private func finish() {
+        dismiss()
     }
+}
 
-    // MARK: - Gestures
+/// The sim with the sky drag and its VoiceOver readout. Reads the raw scrub
+/// time (for the readout) in its own body, so those per-frame updates stop here.
+private struct HourlyStage: View {
+    let model: HourlyTimelineModel
+    let snapshot: AtmosphereSnapshot
+
+    @State private var dragStartTime: Double?
+    @State private var deckThickness: Cloud.Thickness?
+
+    private static let secondsPerPoint: Double = 240
+
+    var body: some View {
+        WeatherSimulationView(snapshotOverride: snapshot, deckThicknessOverride: deckThickness)
+            .ignoresSafeArea()
+            .onChange(of: snapshot.cloudCoverage, initial: true) { _, coverage in
+                // Hysteresis: adopt a new cloud deck only once the coverage
+                // sits clearly inside its bucket, so hours hovering around
+                // an edge don't cross-fade decks back and forth.
+                let below = AtmosphereSnapshot.cloudThickness(coverage: coverage - 0.04)
+                let above = AtmosphereSnapshot.cloudThickness(coverage: coverage + 0.04)
+                if deckThickness == nil || below == above {
+                    deckThickness = above
+                }
+            }
+            .contentShape(.rect)
+            .gesture(skyDrag)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("Himmel"))
+            .accessibilityValue(Text(verbatim: model.accessibilityValue))
+            .accessibilityAdjustableAction { direction in
+                model.nudge(hours: direction == .increment ? 1 : -1)
+            }
+    }
 
     private var skyDrag: some Gesture {
         DragGesture(minimumDistance: 12)
@@ -154,10 +166,34 @@ struct HourlyDetailView: View {
                 dragStartTime = nil
             }
     }
+}
 
-    private func finish() {
-        dismissalFeedback.toggle()
-        dismiss()
+/// Eyebrow + title for the scrubbed day; a child so its per-frame label
+/// reads don't re-evaluate the sheet.
+private struct HourlyCaption: View {
+    let model: HourlyTimelineModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(verbatim: model.eyebrowLabel)
+                .font(.footnote.weight(.semibold))
+                .textCase(.uppercase)
+                .tracking(1.2)
+                .monospacedDigit()
+                .foregroundStyle(.white.opacity(0.72))
+                .shadow(color: .black.opacity(0.35), radius: 1.5, y: 1)
+                .contentTransition(.numericText())
+                .animation(.snappy, value: model.eyebrowLabel)
+
+            Text(verbatim: model.titleLabel)
+                .font(.title.weight(.bold))
+                .foregroundStyle(.white)
+                .shadow(color: .black.opacity(0.3), radius: 2.5, y: 1)
+                .contentTransition(.numericText())
+                .animation(.snappy, value: model.titleLabel)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
     }
 }
 

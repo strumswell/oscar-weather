@@ -26,6 +26,8 @@ struct HourlyChapterChart: View {
                 upper += missing / 2
             }
             return lower...upper
+        case .high, .low:
+            return model.dayRange(containing: chapter.range.lowerBound)
         default:
             return chapter.range
         }
@@ -65,9 +67,12 @@ struct HourlyChapterChart: View {
                 context: &context, rates: rates, snow: snow,
                 maxValue: maxRate, band: barBand, chartHeight: chartHeight, slot: slot, x: x
             )
+            // Rain is the chapter's subject: its labels place first, gust
+            // labels only where a spot is still free.
+            var placed: [CGRect] = []
             if rates.count <= 12 {
                 for (position, rate) in rates.enumerated() where rate > 0 {
-                    drawLabel(
+                    placed.append(drawLabel(
                         context: &context,
                         text: rate.formatted(.number.precision(.fractionLength(1))),
                         at: CGPoint(
@@ -75,7 +80,7 @@ struct HourlyChapterChart: View {
                             y: max(6, chartHeight - max(3, barBand * CGFloat(rate / maxRate)) - 8)
                         ),
                         width: width
-                    )
+                    ))
                 }
             }
             let gusts = series(model.windgusts)
@@ -90,7 +95,7 @@ struct HourlyChapterChart: View {
                 )
                 let gustStep = gusts.count <= 8 ? 1 : gusts.count <= 16 ? 2 : 3
                 for position in stride(from: 0, to: gusts.count, by: gustStep) {
-                    drawLabel(
+                    placed.append(drawLabel(
                         context: &context,
                         text: "\(Int(gusts[position].rounded()))",
                         at: CGPoint(
@@ -98,8 +103,9 @@ struct HourlyChapterChart: View {
                             y: max(6, chartHeight - gustOffset - gustBand * CGFloat(gusts[position] / gustTop) - 9)
                         ),
                         width: width,
-                        color: Color.teal.mix(with: .white, by: 0.45)
-                    )
+                        color: Color.teal.mix(with: .white, by: 0.45),
+                        avoiding: placed
+                    ))
                 }
             }
         case .wind:
@@ -138,7 +144,7 @@ struct HourlyChapterChart: View {
                     width: width
                 )
             }
-        case .day:
+        case .high, .low:
             let rates = series(model.precipitation)
             drawBars(
                 context: &context, rates: rates, snow: series(model.snowfall),
@@ -167,11 +173,19 @@ struct HourlyChapterChart: View {
                     width: width
                 )
             }
-            if chapter.showsPressure {
-                drawLine(
-                    context: &context, values: series(model.pressure), color: .purple,
-                    width: 1.5, band: chartHeight * 0.3, offset: chartHeight * 0.55,
-                    chartHeight: chartHeight, x: x, normalizeToOwnRange: true
+        case .pressure:
+            let pressures = series(model.pressure)
+            drawLine(
+                context: &context, values: pressures, color: .purple,
+                width: 2, band: chartHeight * 0.6, offset: chartHeight * 0.12,
+                chartHeight: chartHeight, x: x, normalizeToOwnRange: true
+            )
+            for position in Set([0, pressures.count - 1]) where pressures.count > 1 {
+                drawLabel(
+                    context: &context,
+                    text: "\(Int(pressures[position].rounded()))",
+                    at: CGPoint(x: x(position), y: chartHeight - 10),
+                    width: width
                 )
             }
         case .sunEvent, .radar, .alert:
@@ -324,13 +338,17 @@ struct HourlyChapterChart: View {
         )
     }
 
+    /// Draws a centered label and returns its rect; with `avoiding`, a label
+    /// that would overlap an earlier one is skipped (returns `.null`).
+    @discardableResult
     private func drawLabel(
         context: inout GraphicsContext,
         text: String,
         at point: CGPoint,
         width: CGFloat,
-        color: Color = .white
-    ) {
+        color: Color = .white,
+        avoiding placed: [CGRect] = []
+    ) -> CGRect {
         let resolved = context.resolve(
             Text(verbatim: text)
                 .font(.system(size: 10, weight: .semibold))
@@ -338,7 +356,10 @@ struct HourlyChapterChart: View {
         )
         let size = resolved.measure(in: CGSize(width: 200, height: 20))
         let clampedX = min(max(point.x, size.width / 2 + 2), width - size.width / 2 - 2)
+        let rect = CGRect(x: clampedX - size.width / 2, y: point.y - size.height / 2, width: size.width, height: size.height)
+        guard !placed.contains(where: { $0.insetBy(dx: -2, dy: -1).intersects(rect) }) else { return .null }
         context.draw(resolved, at: CGPoint(x: clampedX, y: point.y), anchor: .center)
+        return rect
     }
 
     private func drawAxis(

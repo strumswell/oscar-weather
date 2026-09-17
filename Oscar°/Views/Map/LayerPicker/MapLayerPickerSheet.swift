@@ -272,7 +272,6 @@ struct MapLayerPickerSheet: View {
     }
 
     private func select(_ activate: () -> Void) {
-        Haptics.impact()
         activate()
         // Picking a layer is the sheet's terminal action — close it so the map
         // is immediately visible; the display toggles keep the sheet open.

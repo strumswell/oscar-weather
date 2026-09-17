@@ -74,7 +74,8 @@ final class HourlyTimelineModel {
     /// steps at a steady cadence read as continuous sky/sun motion, while the
     /// deck cross-fades stay short enough not to overlap.
     private(set) var stageTime: Double = Date.now.timeIntervalSince1970
-    /// Increments when the scrub crosses an hour boundary (haptic trigger).
+    /// Increments when the scrub crosses a six-hour mark, the cadence of the
+    /// strip's axis labels (haptic trigger; every hour was a buzz on fast pans).
     private(set) var hourTick = 0
 
     /// The playhead is pinned to the strip's center: the window is derived
@@ -285,9 +286,9 @@ final class HourlyTimelineModel {
     private func setScrub(_ time: Double) {
         guard hasData else { return }
         let clamped = min(max(time, domain.lowerBound), domain.upperBound)
-        let previousHour = Int(scrubTime / 3_600)
+        let previousMark = Int(scrubTime / 21_600)
         scrubTime = clamped
-        if Int(clamped / 3_600) != previousHour {
+        if Int(clamped / 21_600) != previousMark {
             hourTick &+= 1
         }
         pushStage(quantized(clamped))

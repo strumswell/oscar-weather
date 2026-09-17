@@ -38,7 +38,6 @@ struct OnboardingView: View {
             stepContent
                 .zIndex(3)
         }
-        .sensoryFeedback(.impact(weight: .light), trigger: step)
     }
 
     @ViewBuilder private var stepContent: some View {

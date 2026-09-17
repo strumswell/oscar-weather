@@ -1,9 +1,9 @@
 import Foundation
 
 /// Segments the forecast into the timeline's chapters: rain events (radar
-/// where it has coverage), gust windows, nights, sun events, warnings, and a
-/// summary per day. Pure and synchronous, unit-tested against synthetic
-/// series.
+/// where it has coverage), gust windows, nights, sun events, warnings,
+/// pressure falls, and each day's high and low at the hour they happen. Pure
+/// and synchronous, unit-tested against synthetic series.
 enum ChapterEngine {
     struct Input {
         let times: [Double]
@@ -46,7 +46,9 @@ enum ChapterEngine {
             case night
             case sunEvent
             case alert
-            case day
+            case high
+            case low
+            case pressure
         }
 
         let id: String
@@ -65,8 +67,6 @@ enum ChapterEngine {
         var detail: String? = nil
         var severityRank: Int? = nil
         var severitySource: String? = nil
-        /// The copy calls out a pressure fall; the expanded card charts it too.
-        var showsPressure = false
     }
 
     static func chapters(from input: Input, includingPast: Bool = false) -> [Chapter] {
@@ -78,7 +78,8 @@ enum ChapterEngine {
             + nightChapters(input)
             + sunEventChapters(input)
             + alertChapters(input)
-            + dayChapters(input)
+            + pressureChapters(input)
+            + extremeChapters(input)
         if let radarStart = input.radarTimes.first,
            let radarEnd = input.radarTimes.last,
            input.radarTimes.count > 2 {
@@ -91,12 +92,7 @@ enum ChapterEngine {
         if !includingPast {
             chapters.removeAll { $0.range.upperBound <= input.now }
         }
-        chapters.sort {
-            if $0.range.lowerBound != $1.range.lowerBound {
-                return $0.range.lowerBound < $1.range.lowerBound
-            }
-            return $0.kind == .day && $1.kind != .day
-        }
+        chapters.sort { $0.range.lowerBound < $1.range.lowerBound }
         return chapters
     }
 
@@ -326,91 +322,74 @@ enum ChapterEngine {
         }
     }
 
-    // MARK: - Day summaries
+    // MARK: - Daily extremes
 
-    private static func dayChapters(_ input: Input) -> [Chapter] {
+    /// The day's high and low as their own cards, each at the hour it
+    /// happens, so the timeline reads chronologically instead of opening
+    /// every day with a summary.
+    private static func extremeChapters(_ input: Input) -> [Chapter] {
         var calendar = Calendar.current
         calendar.timeZone = input.timeZone
+        let count = min(input.times.count, input.temperature.count)
 
         var chapters: [Chapter] = []
         var index = 0
-        while index < input.times.count {
+        while index < count {
             let dayStart = calendar.startOfDay(for: Date(timeIntervalSince1970: input.times[index]))
             var next = index
-            while next < input.times.count,
+            while next < count,
                   calendar.isDate(Date(timeIntervalSince1970: input.times[next]), inSameDayAs: dayStart) {
                 next += 1
             }
             defer { index = next }
-            let dayIndices = index..<next
-            guard dayIndices.count >= 6 else { continue }
+            let day = index..<next
+            // Partial edge days would pin both marks on a couple of hours.
+            guard day.count >= 6,
+                  let high = day.max(by: { input.temperature[$0] < input.temperature[$1] }),
+                  let low = day.min(by: { input.temperature[$0] < input.temperature[$1] }),
+                  high != low else { continue }
 
-            // Condition from the most frequent daytime code (fall back to all
-            // hours on the polar-night edge case of no daytime slots).
-            var daytime = dayIndices.filter { (value(input.isDay, at: $0) ?? 1) > 0.5 }
-            if daytime.isEmpty { daytime = Array(dayIndices) }
-            let codes = daytime.compactMap { value(input.weathercode, at: $0).map(Int.init) }
-            let dominantCode = codes.reduce(into: [:]) { $0[$1, default: 0] += 1 }
-                .max { $0.value < $1.value }?.key ?? 0
-
-            let temps = dayIndices.compactMap { value(input.temperature, at: $0) }
-            let valueLabel: String
-            if let high = temps.max(), let low = temps.min() {
-                valueLabel = String(localized: "H:\(HourlyFormatting.temperatureString(high)) T:\(HourlyFormatting.temperatureString(low))")
-            } else {
-                valueLabel = ""
+            for (hour, isHigh) in [(high, true), (low, false)] {
+                let start = input.times[hour]
+                chapters.append(Chapter(
+                    id: "\(isHigh ? "high" : "low")-\(Int(start))",
+                    kind: isHigh ? .high : .low,
+                    range: start...(start + 3_600),
+                    jumpTime: start,
+                    title: isHigh ? String(localized: "Hoch") : String(localized: "Tief"),
+                    subtitle: HourlyFormatting.hourString(timestamp: start, timeZone: input.timeZone),
+                    valueLabel: HourlyFormatting.temperatureString(input.temperature[hour]),
+                    systemImage: isHigh ? "thermometer.high" : "thermometer.low"
+                ))
             }
-            let falls = pressureFalls(input, over: dayIndices)
-            let subtitle = falls ? String(localized: "Druck fällt") : ""
-
-            // Jump into the afternoon (or the next full hour when the
-            // afternoon has already passed today).
-            let afternoon = dayStart.addingTimeInterval(14 * 3_600).timeIntervalSince1970
-            let jump = min(max(afternoon, input.now, input.times[dayIndices.lowerBound]),
-                           input.times[dayIndices.upperBound - 1])
-
-            chapters.append(Chapter(
-                id: "day-\(Int(dayStart.timeIntervalSince1970))",
-                kind: .day,
-                range: input.times[dayIndices.lowerBound]...(input.times[dayIndices.upperBound - 1] + 3_600),
-                jumpTime: jump,
-                title: WeatherConditionLabel.text(for: dominantCode),
-                subtitle: subtitle,
-                valueLabel: valueLabel,
-                systemImage: daySymbol(for: dominantCode),
-                showsPressure: falls
-            ))
         }
         return chapters
     }
 
-    /// ≥ 6 hPa loss inside 12 h anywhere in the day — the classic "weather is
-    /// coming" signal.
-    private static func pressureFalls(_ input: Input, over indices: Range<Int>) -> Bool {
-        for start in indices {
-            let end = start + 12
-            guard end < input.pressure.count, end < input.times.count else { break }
-            if let from = value(input.pressure, at: start),
-               let to = value(input.pressure, at: end),
-               from - to >= 6 {
-                return true
-            }
-        }
-        return false
-    }
+    // MARK: - Pressure falls
 
-    private static func daySymbol(for code: Int) -> String {
-        switch code {
-        case 0, 1: "sun.max.fill"
-        case 2: "cloud.sun.fill"
-        case 3: "cloud.fill"
-        case 45, 48: "cloud.fog.fill"
-        case 51...57: "cloud.drizzle.fill"
-        case 61...67: "cloud.rain.fill"
-        case 71...77, 85, 86: "cloud.snow.fill"
-        case 80...82: "cloud.heavyrain.fill"
-        case 95...99: "cloud.bolt.rain.fill"
-        default: "cloud.fill"
+    /// ≥ 6 hPa loss inside 12 h — the classic "weather is coming" signal.
+    /// Consecutive falling windows merge into one event spanning the drop.
+    private static func pressureChapters(_ input: Input) -> [Chapter] {
+        let pressure = input.pressure
+        let count = min(input.times.count, pressure.count) - 12
+        guard count > 0 else { return [] }
+        func drop(_ index: Int) -> Double { pressure[index] - pressure[index + 12] }
+
+        return runs(count: count, allowGap: 2, where: { drop($0) >= 6 }).map { run in
+            let steepest = run.max { drop($0) < drop($1) } ?? run.lowerBound
+            let start = input.times[run.lowerBound]
+            let end = input.times[run.upperBound + 12]
+            return Chapter(
+                id: "pressure-\(Int(start))",
+                kind: .pressure,
+                range: start...end,
+                jumpTime: input.times[steepest + 6],
+                title: String(localized: "Druck fällt"),
+                subtitle: HourlyFormatting.hourRangeString(start: start, end: end, timeZone: input.timeZone),
+                valueLabel: "−\(Int(drop(steepest).rounded())) hPa",
+                systemImage: "barometer"
+            )
         }
     }
 

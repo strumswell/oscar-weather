@@ -10,15 +10,17 @@ struct HourlyTimelineMinimap: View {
 
     @State private var grabOffset: Double?
 
-    private static let chartHeight: CGFloat = 40
+    static let chartHeight: CGFloat = 40
     private static let labelHeight: CGFloat = 13
 
     var body: some View {
-        let scrubTime = model.scrubTime
         GeometryReader { geometry in
             let width = max(geometry.size.width, 1)
-            Canvas { context, size in
-                draw(context: &context, size: size, scrubTime: scrubTime)
+            // Two layers: the series only redraw when the data changes, the
+            // viewport box alone follows the scrub every frame.
+            ZStack {
+                MinimapSeries(model: model)
+                MinimapViewport(model: model)
             }
             .contentShape(.rect)
             .gesture(
@@ -50,15 +52,23 @@ struct HourlyTimelineMinimap: View {
             model.nudge(hours: direction == .increment ? 24 : -24)
         }
     }
+}
 
-    private func draw(
-        context: inout GraphicsContext,
-        size: CGSize,
-        scrubTime: Double
-    ) {
+/// Everything static in the rail: nights, rain ticks, temperature line, day
+/// rules and labels, the now line. Reads no scrub state.
+private struct MinimapSeries: View {
+    let model: HourlyTimelineModel
+
+    var body: some View {
+        Canvas { context, size in
+            draw(context: &context, size: size)
+        }
+    }
+
+    private func draw(context: inout GraphicsContext, size: CGSize) {
         guard model.hasData else { return }
         let width = size.width
-        let height = Self.chartHeight
+        let height = HourlyTimelineMinimap.chartHeight
         let domain = model.domain
         let seconds = max(domain.upperBound - domain.lowerBound, 1)
 
@@ -135,6 +145,30 @@ struct HourlyTimelineMinimap: View {
                 Path(CGRect(x: nowX - 0.5, y: 0, width: 1, height: height)),
                 with: .color(.white.opacity(0.4))
             )
+        }
+    }
+}
+
+/// The 48-hour viewport box around the playhead.
+private struct MinimapViewport: View {
+    let model: HourlyTimelineModel
+
+    var body: some View {
+        let scrubTime = model.scrubTime
+        Canvas { context, size in
+            guard model.hasData else { return }
+            draw(context: &context, size: size, scrubTime: scrubTime)
+        }
+    }
+
+    private func draw(context: inout GraphicsContext, size: CGSize, scrubTime: Double) {
+        let width = size.width
+        let height = HourlyTimelineMinimap.chartHeight
+        let domain = model.domain
+        let seconds = max(domain.upperBound - domain.lowerBound, 1)
+
+        func x(_ time: Double) -> CGFloat {
+            CGFloat((time - domain.lowerBound) / seconds) * width
         }
 
         let viewportRect = CGRect(

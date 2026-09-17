@@ -11,7 +11,6 @@ struct HourlyView: View {
   @Environment(Weather.self) private var weather: Weather
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @Environment(NowPresentationCoordinator.self) private var presentation
-  @State private var detailPresentationCount = 0
   @State private var leadingItemID: String?
 
   private var items: [HourlyTimelineItem] {
@@ -112,7 +111,6 @@ struct HourlyView: View {
         .opacity(phase.isIdentity ? 1 : 0.8)
         .scaleEffect(shouldReduceMotion || phase.isIdentity ? 1 : 0.99)
     }
-    .sensoryFeedback(.impact, trigger: detailPresentationCount)
     .accessibilityIdentifier("now.hourly")
   }
 
@@ -138,7 +136,6 @@ struct HourlyView: View {
       return
     }
 
-    detailPresentationCount += 1
     presentation.present(.hourly(target))
   }
 
@@ -148,7 +145,6 @@ struct HourlyView: View {
       return
     }
 
-    Haptics.impact()
     withAnimation(.snappy) { leadingItemID = firstID }
   }
 }

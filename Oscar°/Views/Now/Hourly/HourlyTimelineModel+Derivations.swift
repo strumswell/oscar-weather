@@ -3,6 +3,17 @@ import Foundation
 extension HourlyTimelineModel {
     // MARK: - Derived timeline features
 
+    /// The local calendar day around `time`, clipped to the loaded data.
+    func dayRange(containing time: Double) -> ClosedRange<Double> {
+        var calendar = Calendar.current
+        calendar.timeZone = timeZone
+        let start = calendar.startOfDay(for: Date(timeIntervalSince1970: time))
+        let end = calendar.date(byAdding: .day, value: 1, to: start) ?? start.addingTimeInterval(86_400)
+        let lower = max(start.timeIntervalSince1970, domain.lowerBound)
+        let upper = min(end.timeIntervalSince1970, domain.upperBound + 3_600)
+        return lower...max(upper, lower)
+    }
+
     /// Each night run spans from its first hour to the following day hour
     /// (or the last hour when the night runs off the end).
     static func nightRanges(times: [Double], isDay: [Double]) -> [ClosedRange<Double>] {
