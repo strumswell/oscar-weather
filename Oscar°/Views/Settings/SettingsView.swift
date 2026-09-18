@@ -10,7 +10,7 @@ import SwiftUI
 struct SettingsView: View {
   @Environment(\.dismiss) private var dismiss
   @Environment(\.scenePhase) private var scenePhase
-  private let settingsService = SettingService.shared
+  @Bindable private var settingsService = SettingService.shared
   private let supporter = SupporterStore.shared
   @State private var showsMemory = false
 
@@ -93,6 +93,25 @@ struct SettingsView: View {
             Label("App-Symbol", systemImage: "app.grid")
               .labelStyle(.settingsIcon(.blue))
           }
+
+          // Locked until supported, but never locks anyone out of a theme
+          // that is already on.
+          if supporter.isSupporter || settingsService.classicTheme {
+            Toggle(isOn: $settingsService.classicTheme) {
+              classicThemeLabel
+            }
+          } else {
+            NavigationLink {
+              SupportView()
+            } label: {
+              LabeledContent {
+                Image(systemName: "lock.fill")
+              } label: {
+                classicThemeLabel
+              }
+            }
+            .accessibilityValue(Text("Für Unterstützer:innen"))
+          }
         }
 
         Section("Allgemein") {
@@ -162,6 +181,11 @@ struct SettingsView: View {
         Task { await NotificationSettingsManager.shared.reloadNotificationStatus() }
       }
     }
+  }
+
+  private var classicThemeLabel: some View {
+    Label("Klassisch", systemImage: "clock.arrow.circlepath")
+      .labelStyle(.settingsIcon(.gray))
   }
 
   private var aboutFooter: some View {

@@ -84,6 +84,10 @@ final class SettingService {
     var hourlyDetailShowsChapters: Bool {
         didSet { UserDefaults.standard.set(hourlyDetailShowsChapters, forKey: "hourlyDetailShowsChapters") }
     }
+    /// Supporter theme: the iOS 6 weather card replaces the tab bar (see RootTabView).
+    var classicTheme: Bool {
+        didSet { UserDefaults.standard.set(classicTheme, forKey: "classicTheme") }
+    }
     /// Raw ids of the forecast page's sections and head values: the user's
     /// order of all of them, and the hidden ones. The app's typed accessors
     /// (`nowSectionOrder`, `hiddenNowSections`, ...) live next to the enums;
@@ -201,6 +205,7 @@ final class SettingService {
         let storedOpacity = UserDefaults.standard.object(forKey: "mapOverlayOpacity") as? Double
         mapOverlayOpacity = min(max(storedOpacity ?? 0.7, 0.3), 1)
         hourlyDetailShowsChapters = UserDefaults.standard.bool(forKey: "hourlyDetailShowsChapters")
+        classicTheme = UserDefaults.standard.bool(forKey: "classicTheme")
         nowSectionOrderRaw = UserDefaults.standard.stringArray(forKey: "nowSectionOrder")
         hiddenNowSectionsRaw = UserDefaults.standard.stringArray(forKey: "hiddenNowSections")
         headMetricOrderRaw = UserDefaults.standard.stringArray(forKey: "headMetricOrder")

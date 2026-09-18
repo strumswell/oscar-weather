@@ -35,29 +35,33 @@ struct RootTabView: View {
             }
         )
         ZStack(alignment: .top) {
-            TabView(selection: selection) {
-                Tab("Orte", systemImage: "location.fill", value: AppTab.places) {
-                    LocationsView()
-                        .tint(.primary)
+            if settingsService.classicTheme {
+                ClassicWeatherView()
+            } else {
+                TabView(selection: selection) {
+                    Tab("Orte", systemImage: "location.fill", value: AppTab.places) {
+                        LocationsView()
+                            .tint(.primary)
+                    }
+                    Tab("Wetter", systemImage: "cloud.sun", value: AppTab.forecast) {
+                        NowView()
+                    }
+                    Tab("Karten", systemImage: "globe.europe.africa", value: AppTab.maps) {
+                        WeatherMapDetailView(settingsService: settingsService)
+                            .tint(.primary)
+                    }
                 }
-                Tab("Wetter", systemImage: "cloud.sun", value: AppTab.forecast) {
-                    NowView()
-                }
-                Tab("Karten", systemImage: "globe.europe.africa", value: AppTab.maps) {
-                    WeatherMapDetailView(settingsService: settingsService)
-                        .tint(.primary)
-                }
+                // On Karten the bar stays full-size: map pans read as scroll-downs
+                // and would collapse it mid-interaction.
+                .tabBarMinimizeBehavior(presentation.selectedTab == .maps ? .never : .onScrollDown)
+                // Monochrome bar like Apple Weather's bottom controls — the accent
+                // tint on the selected item is unreadable on glass over a bright
+                // sky. Tint cascades into tab content, so the tabs above swap in a
+                // label tint for their own controls — the app has no color accent
+                // (the AccentColor asset is empty, so .accentColor would mean
+                // system blue). NowView stays monochrome.
+                .tint(.white)
             }
-            // On Karten the bar stays full-size: map pans read as scroll-downs
-            // and would collapse it mid-interaction.
-            .tabBarMinimizeBehavior(presentation.selectedTab == .maps ? .never : .onScrollDown)
-            // Monochrome bar like Apple Weather's bottom controls — the accent
-            // tint on the selected item is unreadable on glass over a bright
-            // sky. Tint cascades into tab content, so the tabs above swap in a
-            // label tint for their own controls — the app has no color accent
-            // (the AccentColor asset is empty, so .accentColor would mean
-            // system blue). NowView stays monochrome.
-            .tint(.white)
 
             if let message = modelFallbackToast, presentation.sheet == nil {
                 ToastBanner(message: message)

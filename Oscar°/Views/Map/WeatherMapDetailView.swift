@@ -18,6 +18,10 @@ import UIKit
 /// playback pauses when the tab disappears.
 struct WeatherMapDetailView: View {
     let settingsService: SettingService
+    /// iOS 6 bars instead of the glass chrome (the classic theme's map),
+    /// closed through `onDone`. Loading and layer switching are the same.
+    var classicChrome = false
+    var onDone: () -> Void = {}
     @Environment(Location.self) private var location: Location
     @Environment(\.scenePhase) private var scenePhase
     @State private var radarState = OscarRadarState()
@@ -54,6 +58,18 @@ struct WeatherMapDetailView: View {
             )
             .ignoresSafeArea()
 
+            if classicChrome {
+                ClassicMapChrome(
+                    settingsService: settingsService,
+                    radarState: radarState,
+                    modelGridState: modelGridState,
+                    cloudLayerState: cloudLayerState,
+                    onSelectRadar: { activate(radar: $0) },
+                    onSelectTileLayer: { activate(model: $0) },
+                    onSelectClouds: { activate() },
+                    onDone: onDone
+                )
+            } else {
             // Timestamp badge + legend — top-left. The badge doubles as the
             // scrub readout: eyes travel up from the scrubber to read the time
             // here, so it stays even though the chip header shows it too.
@@ -93,6 +109,7 @@ struct WeatherMapDetailView: View {
                     .padding(.leading, 18)
                     .padding(.top, 5)
                     .padding(.bottom, 2)
+            }
             }
         }
         // Declared BEFORE the load task so the source pick lands first (both run
