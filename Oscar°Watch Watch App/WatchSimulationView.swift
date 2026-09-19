@@ -97,9 +97,9 @@ struct WatchSimulationView: View {
                     )
                     .opacity(
                         MoonPhase.skyVisibility(phase: moonPhase, nightAmount: Double(snapshot.nightAmount))
-                            * Double(1 - snapshot.cloudDensity * 0.4)
+                            * Double(1 - snapshot.moonVeil * 0.4)
                     )
-                    .blur(radius: CGFloat(snapshot.cloudDensity) * 2)
+                    .blur(radius: CGFloat(snapshot.moonVeil) * 2)
                 }
 
                 if snapshot.showsSunDisc {
@@ -109,7 +109,9 @@ struct WatchSimulationView: View {
 
                 if cloudsVisible {
                     CloudsView(
-                        thickness: snapshot.cloudThickness,
+                        deck: snapshot.cloudDeck,
+                        drift: snapshot.cloudDrift,
+                        lightDirection: snapshot.cloudLightDirection,
                         topTint: AtmosphereSampler.cloudTopTint(snapshot: snapshot, moonGlow: moonGlow),
                         bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snapshot, moonGlow: moonGlow),
                         pacing: pacing

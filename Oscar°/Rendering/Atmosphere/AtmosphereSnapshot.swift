@@ -26,6 +26,11 @@ struct AtmosphereSnapshot: Equatable {
     let windSpeed: Float
     let windDirection: Float
     let aqiHaze: Float
+    /// Cover per altitude band (Open-Meteo: low < 3 km, mid 3–8 km, high > 8 km).
+    /// Hand-built snapshots leave these zero; `cloudDeck` then splits the total.
+    var cloudLow: Float = 0
+    var cloudMid: Float = 0
+    var cloudHigh: Float = 0
 
     static let fallback = AtmosphereSnapshot(
         timestamp: Date.now.timeIntervalSince1970,
@@ -77,7 +82,7 @@ struct AtmosphereSnapshot: Equatable {
 extension AtmosphereSnapshot {
     typealias Vector = AnimatableValues<
         Double, Float, Float, Float, Float, Float, Float, Float, Float,
-        Float, Float, Float, Float, Float, Float, Float, Float
+        Float, Float, Float, Float, Float, Float, Float, Float, Float, Float, Float
     >
 
     /// Every continuous field as one animatable vector, so the sim can tween
@@ -87,7 +92,8 @@ extension AtmosphereSnapshot {
             timestamp, timeOfDay, sunElevation, phase, nightAmount,
             cloudCoverage, cloudDensity, precipitationAmount, snowfallAmount,
             precipitationIntensity, snowfallIntensity, thunderIntensity,
-            haze, turbidity, windSpeed, windDirection, aqiHaze
+            haze, turbidity, windSpeed, windDirection, aqiHaze,
+            cloudLow, cloudMid, cloudHigh
         )
     }
 
@@ -98,7 +104,8 @@ extension AtmosphereSnapshot {
             condition: condition,
             cloudCoverage: v.5, cloudDensity: v.6, precipitationAmount: v.7, snowfallAmount: v.8,
             precipitationIntensity: v.9, snowfallIntensity: v.10, thunderIntensity: v.11,
-            haze: v.12, turbidity: v.13, windSpeed: v.14, windDirection: v.15, aqiHaze: v.16
+            haze: v.12, turbidity: v.13, windSpeed: v.14, windDirection: v.15, aqiHaze: v.16,
+            cloudLow: v.17, cloudMid: v.18, cloudHigh: v.19
         )
     }
 

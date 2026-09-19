@@ -125,23 +125,12 @@ private struct HourlyStage: View {
     let snapshot: AtmosphereSnapshot
 
     @State private var dragStartTime: Double?
-    @State private var deckThickness: Cloud.Thickness?
 
     private static let secondsPerPoint: Double = 240
 
     var body: some View {
-        WeatherSimulationView(snapshotOverride: snapshot, deckThicknessOverride: deckThickness)
+        WeatherSimulationView(snapshotOverride: snapshot)
             .ignoresSafeArea()
-            .onChange(of: snapshot.cloudCoverage, initial: true) { _, coverage in
-                // Hysteresis: adopt a new cloud deck only once the coverage
-                // sits clearly inside its bucket, so hours hovering around
-                // an edge don't cross-fade decks back and forth.
-                let below = AtmosphereSnapshot.cloudThickness(coverage: coverage - 0.04)
-                let above = AtmosphereSnapshot.cloudThickness(coverage: coverage + 0.04)
-                if deckThickness == nil || below == above {
-                    deckThickness = above
-                }
-            }
             .contentShape(.rect)
             .gesture(skyDrag)
             .accessibilityElement(children: .ignore)

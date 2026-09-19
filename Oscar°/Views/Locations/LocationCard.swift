@@ -177,7 +177,8 @@ struct LocationSimBackdrop: View {
 
                 if snap.cloudDensity + snap.cloudCoverage > 0.02 {
                     CloudsView(
-                        thickness: snap.cloudThickness,
+                        deck: snap.cloudDeck,
+                        lightDirection: snap.cloudLightDirection,
                         topTint: AtmosphereSampler.cloudTopTint(snapshot: snap),
                         bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snap),
                         pacing: .still

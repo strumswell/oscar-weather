@@ -62,7 +62,9 @@ struct OnboardingSceneView: View {
                 // A clear night stays cloudless — the stars are the show.
                 if scene != .night {
                     CloudsView(
-                        thickness: scene == .storm ? .ultra : .thin,
+                        deck: CloudDeck(total: scene == .storm ? 1 : 0.2),
+                        drift: scene == .storm ? -10 : -3,
+                        lightDirection: snapshot.cloudLightDirection,
                         topTint: AtmosphereSampler.cloudTopTint(snapshot: snapshot),
                         bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snapshot),
                         pacing: pacing

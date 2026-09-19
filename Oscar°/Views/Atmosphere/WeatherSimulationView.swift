@@ -18,10 +18,6 @@ struct WeatherSimulationView: View, Animatable {
     /// stage drives the sim with scrubbed hours through this. Same mechanism as
     /// the debug override (which still wins while debugging).
     nonisolated var snapshotOverride: AtmosphereSnapshot? = nil
-    /// Cloud deck bucket to render instead of the snapshot's own. Not part of
-    /// the animatable vector, so a tweened coverage crossing a bucket edge
-    /// can't swap decks mid-frame; the hourly stage feeds it with hysteresis.
-    var deckThicknessOverride: Cloud.Thickness? = nil
     /// Under an override the sim tweens between scrubbed hours: the parent's
     /// `.animation` drives this vector, so sky, sun, moon, and drops glide
     /// instead of cutting at every stage push. Inert without an override.
@@ -65,7 +61,6 @@ struct WeatherSimulationView: View, Animatable {
         // and only move, instead of re-rendering four blur passes a frame.
         let moonPhase = overrides?.moonPhase
             ?? (MoonPhase.phaseFraction(for: Date(timeIntervalSince1970: snapshot.timestamp)) * 512).rounded() / 512
-        let cloudThickness = deckThicknessOverride ?? snapshot.cloudThickness
         let cloudsVisible = snapshot.cloudDensity + snapshot.cloudCoverage > 0.02
         let pacing: SimulationPacing = reduceMotion || isOffTab ? .still : (powerThrottled ? .background : .active)
 
@@ -140,9 +135,9 @@ struct WeatherSimulationView: View, Animatable {
                             // at night. Clouds dim and blur it (below) but never hide it outright.
                             .opacity(
                                 MoonPhase.skyVisibility(phase: moonPhase, nightAmount: Double(snapshot.nightAmount))
-                                    * Double(1 - snapshot.cloudDensity * 0.4)
+                                    * Double(1 - snapshot.moonVeil * 0.4)
                             )
-                            .blur(radius: (CGFloat(snapshot.cloudDensity) * 10).rounded() / 4)
+                            .blur(radius: (CGFloat(snapshot.moonVeil) * 10).rounded() / 4)
                             .transition(.opacity)
                         }
                     }
@@ -157,26 +152,26 @@ struct WeatherSimulationView: View, Animatable {
                     }
                     .animation(presenceFade, value: snapshot.showsSunDisc)
 
-                    // Under scrub the fade must stay short: long cross-fades
-                    // overlap two translucent cloud decks during fast pans,
-                    // which reads as shadowy flicker.
+                    // One persistent deck: cover per band fades sprites in and
+                    // out, so tweened hours never swap decks. Under scrub the
+                    // presence fade stays short so fast pans don't smear.
                     let deckTransition: Animation = snapshotOverride == nil
                         ? .easeInOut(duration: 0.8)
                         : .easeInOut(duration: 0.18)
                     ZStack {
                         if cloudsVisible {
                             CloudsView(
-                                thickness: cloudThickness,
+                                deck: snapshot.cloudDeck,
+                                drift: snapshot.cloudDrift,
+                                lightDirection: snapshot.cloudLightDirection,
                                 topTint: AtmosphereSampler.cloudTopTint(snapshot: snapshot, moonGlow: moonGlow),
                                 bottomTint: AtmosphereSampler.cloudBottomTint(snapshot: snapshot, moonGlow: moonGlow),
                                 pacing: pacing
                             )
-                            .id(cloudThickness)
                             .transition(.opacity)
                             .opacity(Double(min(1, snapshot.cloudDensity + snapshot.cloudCoverage * 0.25)))
                         }
                     }
-                    .animation(deckTransition, value: cloudThickness)
                     .animation(deckTransition, value: cloudsVisible)
 
                     // Fog banks sit in front of the clouds, near the ground.

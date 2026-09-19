@@ -2,19 +2,37 @@ import SwiftUI
 
 /// Scene decisions every simulation shares (phone, watch, location cards).
 extension AtmosphereSnapshot {
-    var cloudThickness: Cloud.Thickness {
-        Self.cloudThickness(coverage: cloudCoverage)
+    var cloudDeck: CloudDeck {
+        cloudLow + cloudMid + cloudHigh > 0
+            ? CloudDeck(low: cloudLow, mid: cloudMid, high: cloudHigh)
+            : CloudDeck(total: cloudCoverage)
     }
 
-    static func cloudThickness(coverage: Float) -> Cloud.Thickness {
-        switch coverage {
-        case ..<0.08: .none
-        case ..<0.25: .thin
-        case ..<0.45: .light
-        case ..<0.68: .regular
-        case ..<0.92: .thick
-        default: .ultra
-        }
+    /// Screen drift of the low deck in points per second at sprite scale 1,
+    /// signed like the storm slant (wind from the east blows left). Calm air
+    /// still drifts a little so the sky never freezes.
+    var cloudDrift: Double {
+        let along = Double(sin(windDirection))
+        let speed = 3 + 9 * Double(windSpeed)
+        return (along >= 0 ? -1 : 1) * speed * (0.5 + 0.5 * abs(along))
+    }
+
+    /// Unit vector from the sun (SunView's x mapping, y ≈ 0.08 of the screen)
+    /// toward the deck centre, in screen fractions: the lit edge of every
+    /// sprite faces the sun. nil below the horizon — plain top-down shading.
+    var cloudLightDirection: CGVector? {
+        guard sunDiscVisibility > 0.01 else { return nil }
+        let dx = 0.5 - (Double(timeOfDay) - 0.3) * 1.8
+        let dy = 0.35 - 0.08
+        let length = (dx * dx + dy * dy).squareRoot()
+        return CGVector(dx: dx / length, dy: dy / length)
+    }
+
+    /// Cloud between viewer and moon, weighted by optical thickness per band:
+    /// a cirrus veil barely dims the disc, a low deck hides it.
+    var moonVeil: Float {
+        let deck = cloudDeck
+        return min(1, deck.high * 0.35 + deck.mid * 0.6 + deck.low)
     }
 
     var showsSunDisc: Bool {

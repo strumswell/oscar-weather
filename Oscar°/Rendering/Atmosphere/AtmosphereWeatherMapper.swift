@@ -44,6 +44,14 @@ enum AtmosphereWeatherMapper {
             Float(value(at: hourlyIndex, in: weather.forecast.hourly?.relativehumidity_2m) ?? 50),
             max: 100
         )
+        let lowCover: Double = value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover_low) ?? 0
+        let midCover: Double = value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover_mid) ?? 0
+        let highCover: Double = value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover_high) ?? 0
+        var deck = CloudDeck(
+            low: normalized(Float(lowCover), max: 100),
+            mid: normalized(Float(midCover), max: 100),
+            high: normalized(Float(highCover), max: 100)
+        )
         // Precipitation "now": fresh radar wins in both directions — a measured 0
         // is an answer, only nil (no coverage / stale) falls through to the model's
         // current value, then the hourly slot (which smears mid-hour rain onset).
@@ -70,6 +78,7 @@ enum AtmosphereWeatherMapper {
             condition = .rain
             cloudCoverage = max(cloudCoverage, clamp(0.55 + precipitationIntensity * 0.45, 0, 1))
         }
+        reconcile(&deck, total: cloudCoverage)
         let windSpeed = Float(weather.forecast.current?.windspeed
             ?? value(at: hourlyIndex, in: weather.forecast.hourly?.windspeed_10m)
             ?? 0)
@@ -88,7 +97,8 @@ enum AtmosphereWeatherMapper {
             snowfall: snowfall,
             precipitationIntensity: precipitationIntensity,
             windSpeed: windSpeed,
-            windDirection: windDirection
+            windDirection: windDirection,
+            deck: deck
         )
     }
 
@@ -121,6 +131,14 @@ enum AtmosphereWeatherMapper {
             Float(interpolatedValue(at: timestamp, times: times, values: hourly?.relativehumidity_2m) ?? 50),
             max: 100
         )
+        let lowCover: Double = interpolatedValue(at: timestamp, times: times, values: hourly?.cloudcover_low) ?? 0
+        let midCover: Double = interpolatedValue(at: timestamp, times: times, values: hourly?.cloudcover_mid) ?? 0
+        let highCover: Double = interpolatedValue(at: timestamp, times: times, values: hourly?.cloudcover_high) ?? 0
+        var deck = CloudDeck(
+            low: normalized(Float(lowCover), max: 100),
+            mid: normalized(Float(midCover), max: 100),
+            high: normalized(Float(highCover), max: 100)
+        )
 
         let radarRate = radarRate(from: weather.precipSeries, at: timestamp)
         let modelPrecipitation = Float(interpolatedValue(at: timestamp, times: times, values: hourly?.precipitation) ?? 0)
@@ -135,6 +153,7 @@ enum AtmosphereWeatherMapper {
             condition = .rain
             cloudCoverage = max(cloudCoverage, clamp(0.55 + precipitationIntensity * 0.45, 0, 1))
         }
+        reconcile(&deck, total: cloudCoverage)
         let windSpeed = Float(interpolatedValue(at: timestamp, times: times, values: hourly?.windspeed_10m) ?? 0)
         // Direction is circular: interpolating across the 360° wrap would swing
         // the drops through the whole rose, so it snaps to the nearest hour.
@@ -151,8 +170,23 @@ enum AtmosphereWeatherMapper {
             snowfall: snowfall,
             precipitationIntensity: precipitationIntensity,
             windSpeed: windSpeed,
-            windDirection: windDirection
+            windDirection: windDirection,
+            deck: deck
         )
+    }
+
+    /// The total (current observation, radar lift) is what the sky shader and
+    /// sun follow; the bands come from the nearest model hour and may sit
+    /// below it. Lift them so the densest band matches the total, and split
+    /// a band-less total the way hand-built snapshots do.
+    private static func reconcile(_ deck: inout CloudDeck, total: Float) {
+        let peak = max(deck.low, max(deck.mid, deck.high))
+        if peak <= 0 {
+            deck = CloudDeck(total: total)
+        } else if peak < total {
+            let factor = total / peak
+            deck = CloudDeck(low: min(1, deck.low * factor), mid: min(1, deck.mid * factor), high: min(1, deck.high * factor))
+        }
     }
 
     /// Shared tail of both mapper paths: everything derived once condition,
@@ -168,7 +202,8 @@ enum AtmosphereWeatherMapper {
         snowfall: Float,
         precipitationIntensity: Float,
         windSpeed: Float,
-        windDirection: Float
+        windDirection: Float,
+        deck: CloudDeck
     ) -> AtmosphereSnapshot {
         let snowfallIntensity = condition == .snow ? max(clamp(snowfall / 6, 0, 1), precipitationIntensity * 0.6) : 0
         let thunderIntensity = condition == .thunderstorm ? max(0.55, precipitationIntensity) : 0
@@ -226,7 +261,10 @@ enum AtmosphereWeatherMapper {
             turbidity: turbidity,
             windSpeed: clamp(windSpeed / 75, 0, 1),
             windDirection: windDirection,
-            aqiHaze: aqiHaze
+            aqiHaze: aqiHaze,
+            cloudLow: deck.low,
+            cloudMid: deck.mid,
+            cloudHigh: deck.high
         )
     }
 
