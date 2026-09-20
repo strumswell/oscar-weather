@@ -149,8 +149,8 @@ final class APIClient: Sendable {
         .temperature_2m_min, .weathercode,
       ],
       current: [
-        .cloudcover, .temperature, .wind_direction_10m, .weathercode, .windspeed, .precipitation,
-        .is_day,
+        .cloudcover, .cloudcover_low, .cloudcover_mid, .cloudcover_high, .temperature,
+        .wind_direction_10m, .weathercode, .windspeed, .precipitation, .is_day,
       ],
       temperature_unit: Operations.getForecast.Input.Query.temperature_unitPayload(
         rawValue: temperatureUnit),

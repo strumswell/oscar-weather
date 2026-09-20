@@ -216,6 +216,9 @@ paths:
               type: string
               enum:
                 - cloudcover
+                - cloudcover_low
+                - cloudcover_mid
+                - cloudcover_high
                 - temperature
                 - windspeed
                 - wind_direction_10m
@@ -1602,6 +1605,12 @@ components:
       type: object
       properties:
         cloudcover:
+          type: number
+        cloudcover_low:
+          type: number
+        cloudcover_mid:
+          type: number
+        cloudcover_high:
           type: number
         time:
           type: number

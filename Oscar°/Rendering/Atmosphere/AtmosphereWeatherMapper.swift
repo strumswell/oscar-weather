@@ -44,9 +44,10 @@ enum AtmosphereWeatherMapper {
             Float(value(at: hourlyIndex, in: weather.forecast.hourly?.relativehumidity_2m) ?? 50),
             max: 100
         )
-        let lowCover: Double = value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover_low) ?? 0
-        let midCover: Double = value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover_mid) ?? 0
-        let highCover: Double = value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover_high) ?? 0
+        let current = weather.forecast.current
+        let lowCover: Double = current?.cloudcover_low ?? value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover_low) ?? 0
+        let midCover: Double = current?.cloudcover_mid ?? value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover_mid) ?? 0
+        let highCover: Double = current?.cloudcover_high ?? value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover_high) ?? 0
         var deck = CloudDeck(
             low: normalized(Float(lowCover), max: 100),
             mid: normalized(Float(midCover), max: 100),
@@ -78,7 +79,7 @@ enum AtmosphereWeatherMapper {
             condition = .rain
             cloudCoverage = max(cloudCoverage, clamp(0.55 + precipitationIntensity * 0.45, 0, 1))
         }
-        reconcile(&deck, total: cloudCoverage)
+        reconcile(&deck, total: cloudCoverage, condition: condition)
         let windSpeed = Float(weather.forecast.current?.windspeed
             ?? value(at: hourlyIndex, in: weather.forecast.hourly?.windspeed_10m)
             ?? 0)
@@ -153,7 +154,7 @@ enum AtmosphereWeatherMapper {
             condition = .rain
             cloudCoverage = max(cloudCoverage, clamp(0.55 + precipitationIntensity * 0.45, 0, 1))
         }
-        reconcile(&deck, total: cloudCoverage)
+        reconcile(&deck, total: cloudCoverage, condition: condition)
         let windSpeed = Float(interpolatedValue(at: timestamp, times: times, values: hourly?.windspeed_10m) ?? 0)
         // Direction is circular: interpolating across the 360° wrap would swing
         // the drops through the whole rose, so it snaps to the nearest hour.
@@ -178,8 +179,17 @@ enum AtmosphereWeatherMapper {
     /// The total (current observation, radar lift) is what the sky shader and
     /// sun follow; the bands come from the nearest model hour and may sit
     /// below it. Lift them so the densest band matches the total, and split
-    /// a band-less total the way hand-built snapshots do.
-    private static func reconcile(_ deck: inout CloudDeck, total: Float) {
+    /// a band-less total the way hand-built snapshots do. Precipitation
+    /// reaches the ground from a low-based deck: the model's low share under
+    /// rain is layer accounting (48 % low under a raining 100 % sky), not
+    /// what the sky looks like, so the low band takes the whole total.
+    private static func reconcile(_ deck: inout CloudDeck, total: Float, condition: AtmosphereConditionFamily) {
+        switch condition {
+        case .drizzle, .rain, .freezingRain, .showers, .snow, .thunderstorm:
+            deck.low = max(deck.low, total)
+        case .clear, .partlyCloudy, .overcast, .fog:
+            break
+        }
         let peak = max(deck.low, max(deck.mid, deck.high))
         if peak <= 0 {
             deck = CloudDeck(total: total)

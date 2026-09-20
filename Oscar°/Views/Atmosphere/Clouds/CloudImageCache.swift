@@ -15,10 +15,13 @@ struct CloudSpriteKey: Hashable {
 /// `@State` — mutating its contents inside the draw closure is reference
 /// mutation, not view-state mutation.
 final class CloudImageCache {
-    /// Tints compared at 8-bit precision, the light angle in 10° steps: while
-    /// the hourly stage tweens the sky, the exact values differ every frame
-    /// but the shaded bitmaps don't.
-    private var key: (SIMD4<Int32>, SIMD4<Int32>, Int)?
+    /// How dark a full lid overhead makes what hangs under it.
+    static let lidShadow = 0.18
+
+    /// Tints compared at 8-bit precision, the light angle in 10° steps, the
+    /// per-band lid shadow in 1/16 steps: while the hourly stage tweens the
+    /// sky, the exact values differ every frame but the shaded bitmaps don't.
+    private var key: (SIMD4<Int32>, SIMD4<Int32>, Int, SIMD3<Int32>)?
     private var images: [CloudSpriteKey: GraphicsContext.ResolvedImage] = [:]
 
     /// The deck's sprite set is fixed, so a cache hit needs no membership check.
@@ -27,11 +30,13 @@ final class CloudImageCache {
         topTint: Color,
         bottomTint: Color,
         lightDirection: CGVector?,
+        shadows: [Cloud.Band: Double],
         in context: GraphicsContext
     ) -> [CloudSpriteKey: GraphicsContext.ResolvedImage] {
         let light = lightDirection ?? CGVector(dx: 0, dy: 1)
         let angleStep = Int((atan2(light.dy, light.dx) / (.pi / 18)).rounded())
-        let key = (Self.key(topTint, in: context.environment), Self.key(bottomTint, in: context.environment), angleStep)
+        let shadowSteps = SIMD3<Int32>(Cloud.Band.allCases.map { Int32(((shadows[$0] ?? 0) * 16).rounded()) })
+        let key = (Self.key(topTint, in: context.environment), Self.key(bottomTint, in: context.environment), angleStep, shadowSteps)
         if let cached = self.key, cached == key {
             return images
         }
@@ -44,11 +49,13 @@ final class CloudImageCache {
             var resolved = context.resolve(Image("cloud\(sprite.image)"))
             // Lit edge (top tint) faces the sun, shadow edge faces away; the
             // gradient spans the sprite's extent along the light direction and
-            // only goes as dark as the band's shading allows.
+            // only goes as dark as the band's shading allows. A lid overhead
+            // darkens the whole sprite so it stays visible against the veil.
             let center = CGPoint(x: resolved.size.width / 2, y: resolved.size.height / 2)
             let reach = (abs(light.dx) * resolved.size.width + abs(light.dy) * resolved.size.height) / 2
+            let lit = topTint.mix(with: .black, by: Self.lidShadow * (shadows[sprite.band] ?? 0))
             resolved.shading = .linearGradient(
-                Gradient(colors: [topTint, topTint.mix(with: bottomTint, by: sprite.band.profile.shading)]),
+                Gradient(colors: [lit, lit.mix(with: bottomTint, by: sprite.band.profile.shading)]),
                 startPoint: CGPoint(x: center.x - light.dx * reach, y: center.y - light.dy * reach),
                 endPoint: CGPoint(x: center.x + light.dx * reach, y: center.y + light.dy * reach)
             )

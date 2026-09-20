@@ -32,9 +32,10 @@ final class Cloud {
     }
 
     /// 0…1 presence for a band cover; sprites appear in threshold order so the
-    /// visible count grows with cover, small ones first.
+    /// visible count grows with cover, small ones first. The ramp never starts
+    /// below zero: a clear sky (cover 0) shows no sprite at all.
     func visibility(coverage: Float) -> Float {
-        AtmosphereWeatherMapper.smoothstep(threshold - 0.15, threshold + 0.02, coverage)
+        AtmosphereWeatherMapper.smoothstep(max(0, threshold - 0.15), threshold + 0.02, coverage)
     }
 }
 

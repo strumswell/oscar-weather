@@ -150,7 +150,10 @@ enum AtmosphereSampler {
         }
 
         // Less sky-mixing at sunset than before, so the warm light survives.
-        let tintFactor = 0.28 + snapshot.nightAmount * 0.4 + sunsetProximity * 0.12
+        // Atmospheric perspective needs sky behind the cloud: under a closed
+        // deck there is no blue to scatter, so the daytime share fades with
+        // cover and an overcast lid stays neutral grey instead of going blue.
+        let tintFactor = 0.28 * (1 - 0.6 * snapshot.cloudCoverage) + snapshot.nightAmount * 0.4 + sunsetProximity * 0.12
         var result = mix(cloud, base, t: tintFactor)
 
         // Never let the cloud melt into the sky behind it. The push direction
