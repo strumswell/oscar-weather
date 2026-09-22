@@ -10,10 +10,11 @@ import UIKit
 
 extension WeatherMapView.Coordinator {
     func syncModelLayer(
-        style: MLNStyle, selection: WeatherTileLayer?, state: ModelGridLayerState?,
+        style: MLNStyle, selection: WeatherTileLayer?, visible: Bool, state: ModelGridLayerState?,
         bounds: OscarRadarBounds?, payload: RadarGridPayload?, frameKey: String?,
         next: (key: String, payload: RadarGridPayload)?, isPlaying: Bool,
-        motion: RadarMotionData?, smoothMotion: Bool, softRendering: Bool
+        motion: RadarMotionData?, smoothMotion: Bool, softRendering: Bool,
+        player: (any TimelinePlayerState)?
     ) {
         guard let selection, let state else {
             removeModelLayer(from: style)
@@ -29,7 +30,7 @@ extension WeatherMapView.Coordinator {
             insertOverlayLayer(layer, in: style)
             modelLayer = layer
         }
-        layer.configure(bounds: bounds, opacity: Float(parent.overlayOpacity))
+        layer.configure(bounds: bounds, opacity: visible ? Float(parent.overlayOpacity) : 0)
         layer.setSampling(softRendering ? .soft : .hard)
         layer.setMotion(motion)
 
@@ -71,7 +72,7 @@ extension WeatherMapView.Coordinator {
         defer {
             // Hourly frames morph along the model flow (precip) or cross-fade in
             // data space while playing.
-            syncPlayback(of: layer, state: state, playing: isPlaying && payload != nil,
+            syncPlayback(of: layer, state: player ?? state, playing: isPlaying && payload != nil,
                          interval: 0.8, interpolate: smoothMotion && !UIAccessibility.isReduceMotionEnabled)
         }
 

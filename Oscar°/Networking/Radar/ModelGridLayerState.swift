@@ -38,6 +38,9 @@ final class ModelGridLayerState {
     var isPlaying: Bool = false
     var error: String?
     private(set) var currentLayer: WeatherTileLayer?
+    /// Set when loaded as the radar's continuation: only frames after this time
+    /// are kept, so the timeline starts where the nowcast ends.
+    private(set) var startsAfter: Date?
     private(set) var loadingFrameIndices: Set<Int> = []
     // Stored (not derived from `frames`) — it's read in the per-frame-load hot path
     // and rebuilding a Set per read made every load O(frame count).
@@ -59,6 +62,10 @@ final class ModelGridLayerState {
     /// reload re-decodes every grid, so this is deliberately coarser than the
     /// server's 60 s frames max-age. Mirrors the radar metadata cache window.
     private static let metadataStaleAfter: TimeInterval = 10 * 60
+
+    // Same memory-headroom budget and window as the radar (see OscarRadarState).
+    private static let gridResidencyBudget = adaptiveCacheBudget(
+        fraction: 0.16, floor: 64 * 1024 * 1024, cap: 512 * 1024 * 1024)
 
     // Shared across instances — survives layer switches. Grids are 1 byte/px, so the
     // budget is ~4× the frame count the old RGBA cache could hold.
@@ -201,7 +208,7 @@ final class ModelGridLayerState {
 
     // MARK: - Load
 
-    func loadLayer(_ layer: WeatherTileLayer) async {
+    func loadLayer(_ layer: WeatherTileLayer, after cutoff: Date? = nil) async {
         loadTask?.cancel()
         focusedLoadTask?.cancel()
         backgroundPreloadTask?.cancel()
@@ -210,6 +217,7 @@ final class ModelGridLayerState {
         loadSessionID = sessionID
 
         currentLayer = layer
+        startsAfter = cutoff
         isLoading = true
         error = nil
         frames = []
@@ -232,7 +240,10 @@ final class ModelGridLayerState {
                 let decoded = try await APIClient.shared.modelFrames(model: layer.windFieldPrefix)
                 guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
 
-                let fetchedFrameInfos = decoded.frames
+                let fetchedFrameInfos = decoded.frames.filter { info in
+                    guard let cutoff else { return true }
+                    return parseFrameDate(info.validTime).map { $0 > cutoff } ?? false
+                }
                 let fetchedBounds = decoded.image_bounds?.asDomain ?? decoded.bounds?.asDomain
                     ?? OscarRadarBounds(north: 85.051, south: -85.051, west: -180, east: 180)
 
@@ -296,7 +307,7 @@ final class ModelGridLayerState {
            Date().timeIntervalSince(lastMetadataLoad) < Self.metadataStaleAfter {
             return
         }
-        await loadLayer(layer)
+        await loadLayer(layer, after: startsAfter)
     }
 
     // MARK: - Helpers
@@ -318,6 +329,8 @@ final class ModelGridLayerState {
         if isSelectedFrameReady {
             renderFrameIndex = currentFrameIndex
         }
+
+        evictFrames(outside: residentFrameIndices(around: currentFrameIndex))
 
         focusedLoadTask?.cancel()
         guard let layer = currentLayer else { return }
@@ -346,8 +359,9 @@ final class ModelGridLayerState {
 
         let sessionID = loadSessionID
         let focused = Set(focusedFrameIndices(around: currentFrameIndex))
+        let resident = residentFrameIndices(around: currentFrameIndex)
         let ordered = prioritizedFrameIndices(count: frameInfos.count, around: currentFrameIndex)
-            .filter { !focused.contains($0) }
+            .filter { resident.contains($0) && !focused.contains($0) }
 
         backgroundPreloadTask = Task { [weak self] in
             guard let self else { return }
@@ -356,6 +370,23 @@ final class ModelGridLayerState {
                 sessionID: sessionID,
                 layer: layer
             )
+        }
+    }
+
+    private func residentFrameIndices(around center: Int) -> Set<Int> {
+        let bytesPerFrame = frames.lazy.compactMap { $0 }.map { $0.width * $0.height }.max() ?? 4_000_000
+        var resident = residencyWindow(count: frames.count, center: center,
+                                       bytesPerFrame: bytesPerFrame, budget: Self.gridResidencyBudget)
+        if let renderFrameIndex {
+            resident.insert(renderFrameIndex)
+        }
+        return resident
+    }
+
+    private func evictFrames(outside resident: Set<Int>) {
+        for index in frames.indices where frames[index] != nil && !resident.contains(index) {
+            frames[index] = nil
+            loadedFrameIndices.remove(index)
         }
     }
 

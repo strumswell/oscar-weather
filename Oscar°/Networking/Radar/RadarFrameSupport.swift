@@ -78,6 +78,14 @@ func adaptiveCacheBudget(fraction: Double, floor floorBytes: Int, cap: Int) -> I
     return min(cap, max(floorBytes, Int(Double(available) * fraction)))
 }
 
+/// Frame indices to keep decoded around `center`: a ±radius window whose frames fit
+/// `budget`, wrapping so playback's loop (last frame → first) stays warm.
+func residencyWindow(count: Int, center: Int, bytesPerFrame: Int, budget: Int) -> Set<Int> {
+    let radius = max(8, budget / max(1, bytesPerFrame) / 2)
+    guard count > 2 * radius + 1 else { return Set(0..<count) }
+    return Set((center - radius...center + radius).map { (($0 % count) + count) % count })
+}
+
 enum MapInteractionState {
     case idle
     case scrubbing

@@ -1,16 +1,20 @@
 import SwiftUI
 
 struct OscarRadarTimelineControls: View {
-    let radarState: OscarRadarState
+    let timeline: CombinedTimelineState
     /// Tapping the source badge (e.g. "DWD Radar") opens the layer picker.
     var onBadgeTap: (() -> Void)?
 
     var body: some View {
+        // Past the nowcast the badge names the model that took over.
+        let model = timeline.isShowingModel ? timeline.model.currentLayer : nil
         TimelineControlsChip(
-            state: radarState,
-            sourceLabel: radarState.region.sourceLabel,
-            shortSourceLabel: radarState.region.shortSourceLabel,
-            isLive: radarState.isCurrentFrameLive,
+            state: timeline,
+            sourceLabel: model?.sourceLabel ?? timeline.radar.region.sourceLabel,
+            shortSourceLabel: model?.shortSourceLabel ?? timeline.radar.region.shortSourceLabel,
+            isLive: timeline.isCurrentFrameLive,
+            isForecast: false,
+            forecastStartIndex: timeline.modelStartIndex,
             loadingLabel: "Oscar Radar-Daten werden geladen…",
             onBadgeTap: onBadgeTap
         )
@@ -28,6 +32,7 @@ struct CloudTimelineControls: View {
             sourceLabel: "Meteosat",
             shortSourceLabel: "Meteosat",
             isLive: cloudState.isCurrentFrameLive,
+            isForecast: false,
             loadingLabel: "Satellitenbilder werden geladen…",
             onBadgeTap: onBadgeTap
         )
@@ -43,18 +48,11 @@ struct WeatherTileTimelineControls: View {
         TimelineControlsChip(
             state: imageState,
             sourceLabel: imageState.currentLayer?.sourceLabel ?? "",
-            shortSourceLabel: shortSourceLabel,
+            shortSourceLabel: imageState.currentLayer?.shortSourceLabel ?? "",
             isLive: false,
+            isForecast: true,
             loadingLabel: "Wetterdaten werden geladen…",
             onBadgeTap: onBadgeTap
         )
-    }
-
-    private var shortSourceLabel: String {
-        switch imageState.currentLayer {
-        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: "ICON-D2"
-        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: "ECMWF"
-        case nil: ""
-        }
     }
 }

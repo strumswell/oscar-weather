@@ -7,6 +7,10 @@ struct TimelineScrubber: View {
     let timestamps: [String]
     let selectedIndex: Int
     let loadedIndices: Set<Int>
+    /// Model timelines are forecast end to end, so they get no nowcast zone.
+    let isForecast: Bool
+    /// Radar continued by a model: the nowcast zone ends here and the model hours follow.
+    var forecastStartIndex: Int? = nil
     let onSelectionChanged: (Int) -> Void
     let onInteractionChanged: (Bool) -> Void
 
@@ -91,14 +95,31 @@ struct TimelineScrubber: View {
             .padding(.leading, thumbRadius)
             .animation(.smooth(duration: 0.55), value: loadedIndices)
 
-            // Nowcast/forecast zone right of the now marker.
-            if nowIndex < frameCount - 1 {
+            // Nowcast zone right of the now marker: extrapolated, not
+            // measured, hence the hatching.
+            if !isForecast, nowIndex < frameCount - 1 {
                 let nowX = xOffset(for: nowIndex, width: trackWidth)
-                UnevenRoundedRectangle(bottomTrailingRadius: trackHeight / 2,
-                                       topTrailingRadius: trackHeight / 2)
+                let endX = forecastStartIndex.map { xOffset(for: $0, width: trackWidth) } ?? trackWidth
+                let endRadius = forecastStartIndex == nil ? trackHeight / 2 : 0
+                let zone = UnevenRoundedRectangle(bottomTrailingRadius: endRadius,
+                                                  topTrailingRadius: endRadius)
+                zone
                     .fill(.orange.opacity(0.14))
-                    .frame(width: max(trackWidth - nowX, 0), height: trackHeight)
+                    .overlay {
+                        DiagonalHatch()
+                            .stroke(.orange.opacity(0.45), lineWidth: 1)
+                            .clipShape(zone)
+                    }
+                    .frame(width: max(endX - nowX, 0), height: trackHeight)
                     .offset(x: thumbRadius + nowX)
+            }
+
+            // Where the model takes over from the radar.
+            if let forecastStartIndex {
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(.white.opacity(0.5))
+                    .frame(width: 1.5, height: trackHeight + 4)
+                    .offset(x: thumbRadius + xOffset(for: forecastStartIndex, width: trackWidth) - 0.75)
             }
 
             Capsule()
@@ -268,27 +289,37 @@ struct TimelineScrubber: View {
     private func midAxisLabels(
         dates: [Date?], trackWidth: CGFloat
     ) -> [(x: CGFloat, text: String, width: CGFloat)] {
-        guard let first = dates.first ?? nil, let last = dates.last ?? nil,
+        let times = dates.compactMap { $0?.timeIntervalSince1970 }
+        guard times.count == dates.count, let first = times.first, let last = times.last,
               last > first else { return [] }
-        let span = last.timeIntervalSince(first)
         let steps: [TimeInterval] = [15, 30, 60, 120, 180, 360, 720, 1440].map { $0 * 60 }
         for step in steps {
-            let spacing = CGFloat(step / span) * trackWidth
             var marks: [(x: CGFloat, text: String, width: CGFloat)] = []
             var widest: CGFloat = 0
-            var tick = (first.timeIntervalSince1970 / step).rounded(.up) * step
-            while tick < last.timeIntervalSince1970 - 1 {
+            var tick = (first / step).rounded(.up) * step
+            while tick < last - 1 {
                 let text = axisTime(Date(timeIntervalSince1970: tick))
                 widest = max(widest, labelWidth(text))
-                let fraction = CGFloat((tick - first.timeIntervalSince1970) / span)
-                marks.append((x: thumbRadius + fraction * trackWidth, text: text, width: 0))
+                marks.append((x: thumbRadius + trackFraction(of: tick, in: times) * trackWidth,
+                              text: text, width: 0))
                 tick += step
             }
-            if spacing >= widest + 12 {
+            // Frames sit at even spacing whatever their cadence, so the marks
+            // don't: the tightest pair decides.
+            let tightest = zip(marks.dropFirst(), marks).map { $0.x - $1.x }.min() ?? .infinity
+            if tightest >= widest + 12 {
                 return marks.map { (x: $0.x, text: $0.text, width: widest) }
             }
         }
         return []
+    }
+
+    /// Track position of a time, interpolated between its neighboring frames.
+    private func trackFraction(of time: TimeInterval, in times: [TimeInterval]) -> CGFloat {
+        guard let upper = times.firstIndex(where: { $0 >= time }) else { return 1 }
+        guard upper > 0 else { return 0 }
+        let local = (time - times[upper - 1]) / (times[upper] - times[upper - 1])
+        return (CGFloat(upper - 1) + CGFloat(local)) / CGFloat(times.count - 1)
     }
 
     // MARK: Geometry & segments

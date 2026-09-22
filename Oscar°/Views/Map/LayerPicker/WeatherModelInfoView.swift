@@ -16,7 +16,7 @@ struct WeatherModelInfoView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Was sind Wettermodelle?")
                     .font(.headline)
-                Text("Ein Wettermodell ist eine Computersimulation der Atmosphäre: Aus Millionen Messwerten berechnet es, wie das Wetter in den nächsten Stunden und Tagen wird.")
+                Text("Ein Wettermodell berechnet aus Millionen Messungen, wie sich die Atmosphäre entwickelt. Die Karte zeigt, was das Modell erwartet, nicht was gemessen wurde.")
                     .font(.subheadline)
                     .fixedSize(horizontal: false, vertical: true)
                 Text("Wettermodelle in Oscar°")
@@ -27,13 +27,13 @@ struct WeatherModelInfoView: View {
                     provider: "Deutscher Wetterdienst",
                     grid: "≈ 2 km Raster",
                     imageName: "layer-icon-precip",
-                    summary: "Sehr feines Raster über Zentraleuropa — erkennt auch kleine Schauer und Gewitter. Ideal für die nächsten 48 Stunden.")
+                    summary: "Feines Raster über Zentraleuropa, das auch einzelne Schauer und Gewitter abbilden kann. Stündlich bis 36 Stunden voraus, alle 3 Stunden ein neuer Lauf.")
                 WeatherModelCard(
                     name: "ECMWF IFS",
                     provider: "Europäisches Zentrum für mittelfristige Wettervorhersagen",
                     grid: "≈ 9 km Raster",
                     imageName: "layer-gfs-precip",
-                    summary: "Globales Modell für den mittelfristigen Überblick mit Temperatur, Regen, Wind und Luftdruck in Drei-Stunden-Schritten.")
+                    summary: "Weltweites Modell. Stündlich bis 36 Stunden, danach in 4-Stunden-Schritten bis 3,5 Tage voraus. Alle 6 Stunden ein neuer Lauf.")
             }
             .padding(.horizontal, 20)
             .padding(.top, 4)

@@ -45,6 +45,8 @@ struct WeatherMapView: UIViewRepresentable {
     var oscarRadarState: OscarRadarState?
     var modelGridState: ModelGridLayerState?
     var cloudLayerState: CloudLayerState?
+    /// Radar continued by the model; nil in the classic theme's map.
+    var combinedTimeline: CombinedTimelineState? = nil
     /// Tap on warning polygon(s) → all warnings under the finger, most severe first.
     var onAlertsTapped: (([WeatherAlertInfo]) -> Void)? = nil
     /// Tap on a storm-cell marker/footprint → that cell's details.
@@ -134,13 +136,12 @@ struct WeatherMapView: UIViewRepresentable {
         mapView.logoView.isHidden = true
         mapView.attributionButton.isHidden = true
         // Compass: adaptive — appears only while the map is rotated off north,
-        // tap resets. Seated below the SwiftUI control capsule that owns the
-        // top-right corner (16pt top padding + two 46pt buttons + divider) and
-        // centered on its 46pt width (the compass image is 40pt). Margins are
-        // safe-area-relative, matching the SwiftUI overlay's frame.
+        // tap resets. Seated below the SwiftUI control capsules that own the
+        // top-right corner (see compassMargins) and centered on their 46pt
+        // width (the compass image is 40pt).
         mapView.compassView.compassVisibility = .adaptive
         mapView.compassViewPosition = .topRight
-        mapView.compassViewMargins = CGPoint(x: 19, y: 121)
+        mapView.compassViewMargins = Self.compassMargins(radarControls: false)
 
         // Feature tap-through: warnings + storm cells. The map's own tap
         // recognizers must fail first (annotation selection, double-tap zoom) —
@@ -165,6 +166,13 @@ struct WeatherMapView: UIViewRepresentable {
         context.coordinator.mapView = mapView
         context.coordinator.startObservingAppState()
         return mapView
+    }
+
+    /// Safe-area-relative, matching the SwiftUI overlay's frame: 16pt top padding
+    /// + a capsule of two 46pt buttons and a divider + 12pt gap, twice while the
+    /// radar's control capsule shows.
+    static func compassMargins(radarControls: Bool) -> CGPoint {
+        CGPoint(x: 19, y: radarControls ? 226 : 121)
     }
 
     /// True only when location access has already been granted — never triggers a
@@ -210,6 +218,9 @@ struct WeatherMapView: UIViewRepresentable {
         private var lastBlockReason: String?
 
         var arrowSourceID: String?
+
+        let handoverSweep = MapHandoverSweep()
+        var lastShowsModelPart: Bool?
 
         var modelLayer: RadarCustomStyleLayer?
         var modelPaletteId: String?
@@ -309,6 +320,7 @@ struct WeatherMapView: UIViewRepresentable {
             modelLayer?.stopPlayback()
             modelLayer?.purgeTextures()
             cloudsLayer?.purgeTextures()
+            handoverSweep.stop()
             userDotPulseTimer?.invalidate()
             userDotPulseTimer = nil
         }
@@ -435,12 +447,23 @@ struct WeatherMapView: UIViewRepresentable {
             let radarState = parent.oscarRadarState
             let radarBounds = radarState?.bounds
             let radarFrame = radarState?.currentFrame
-            let radarNext = radarState?.nextFrame
             let radarRenderedIndex = radarState?.renderFrameIndex ?? radarState?.currentFrameIndex ?? 0
             let radarLoadedCount = radarState?.loadedFrameIndices.count ?? 0
             let radarFrameCount = radarState?.frames.count ?? 0
             let radarIsPlaying = radarState?.isPlaying ?? false
             let radarMotion = radarState?.motion
+
+            // Radar continued by the model: past the nowcast the model layer
+            // shows and the radar (with its arrows and cells) steps aside.
+            let continuation = parent.combinedTimeline
+            let continuationActive = radarActive && (continuation?.includesModel ?? false)
+            let showsModelPart = radarActive && (continuation?.isShowingModel ?? false)
+            // Playback then advances the combined timeline and runs on across the
+            // seam, so each part's last frame holds instead of morphing back to
+            // the start of its own loop.
+            let radarPlayer: (any TimelinePlayerState)? = continuation != nil ? continuation : radarState
+            let radarAtEnd = radarRenderedIndex == radarFrameCount - 1
+            let radarNext = continuationActive && radarAtEnd ? nil : radarState?.nextFrame
 
             let cloudsActive = settings.cloudLayerActive
             let cloudState = parent.cloudLayerState
@@ -458,7 +481,11 @@ struct WeatherMapView: UIViewRepresentable {
             let modelBounds = modelState?.bounds
             let modelFrame = modelState?.currentFrame
             let modelFrameKey = modelState?.currentFrameKey
-            let modelNext = modelState?.nextFrameKeyed
+            let modelAtEnd = modelState.map {
+                ($0.renderFrameIndex ?? $0.currentFrameIndex) == $0.frameTimestamps.count - 1
+            } ?? false
+            let modelNext = continuationActive && modelAtEnd ? nil : modelState?.nextFrameKeyed
+            let modelPlayer: (any TimelinePlayerState)? = continuationActive ? continuation : modelState
             let modelIsPlaying = modelState?.isPlaying ?? false
             let modelMotion = modelState?.motion
             // Observation re-arm reads (not passed anywhere): currentLayer and the
@@ -479,6 +506,16 @@ struct WeatherMapView: UIViewRepresentable {
             guard let style = mapView?.style else { return blocked("style not loaded") }
             blocked(nil)
 
+            let compassMargins = WeatherMapView.compassMargins(radarControls: radarActive && continuation != nil)
+            if let mapView, mapView.compassViewMargins != compassMargins {
+                mapView.compassViewMargins = compassMargins
+            }
+
+            syncHandover(radarActive: radarActive, showsModelPart: showsModelPart,
+                         isPlaying: continuation?.isPlaying ?? false)
+            // Mid-sweep both layers draw, each clipped to its side of the line.
+            let sweeping = handoverSweep.isRunning
+
             syncClouds(style: style, active: cloudsActive, state: cloudState,
                        bounds: cloudBounds, motion: cloudMotion,
                        cloudIsPlaying: cloudIsPlaying, smoothMotion: smoothMotion)
@@ -487,11 +524,14 @@ struct WeatherMapView: UIViewRepresentable {
                       frame: radarFrame, next: radarNext, renderedIndex: radarRenderedIndex,
                       loadedCount: radarLoadedCount, frameCount: radarFrameCount,
                       isPlaying: radarIsPlaying, motion: radarMotion, smoothMotion: smoothMotion,
-                      softRendering: softRendering, arrowsEnabled: motionArrows)
-            syncModelLayer(style: style, selection: activeTileLayer, state: modelState,
+                      softRendering: softRendering, arrowsEnabled: motionArrows && !showsModelPart,
+                      visible: !showsModelPart || sweeping, player: radarPlayer)
+            syncModelLayer(style: style,
+                           selection: activeTileLayer ?? (continuationActive ? modelState?.currentLayer : nil),
+                           visible: activeTileLayer != nil || showsModelPart || sweeping, state: modelState,
                            bounds: modelBounds, payload: modelFrame, frameKey: modelFrameKey,
                            next: modelNext, isPlaying: modelIsPlaying, motion: modelMotion,
-                           smoothMotion: smoothMotion, softRendering: softRendering)
+                           smoothMotion: smoothMotion, softRendering: softRendering, player: modelPlayer)
             syncValueBubbles(style: style, selection: activeTileLayer, enabled: valueBubbles,
                              payload: modelFrame, frameKey: modelFrameKey)
             // Isobars ride the hourly model frame keys, so they need a model layer —
@@ -501,7 +541,8 @@ struct WeatherMapView: UIViewRepresentable {
             syncAlertPolygons(style: style, active: alertPolygons)
             // Cell tracks are radar-scale nowcasts — they'd be misleading floating
             // over a model forecast layer, so they require the radar to be active.
-            syncStormCells(style: style, active: stormCells && radarActive, region: radarRegion)
+            syncStormCells(style: style, active: stormCells && radarActive && !showsModelPart,
+                           region: radarRegion)
             syncWindParticles(selection: activeTileLayer, state: modelState)
             syncUserLocationDot(style: style)
             // Last: chips and the selected-city marker re-assert themselves as

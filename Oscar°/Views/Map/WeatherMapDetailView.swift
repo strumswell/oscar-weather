@@ -24,8 +24,7 @@ struct WeatherMapDetailView: View {
     var onDone: () -> Void = {}
     @Environment(Location.self) private var location: Location
     @Environment(\.scenePhase) private var scenePhase
-    @State private var radarState = OscarRadarState()
-    @State private var modelGridState = ModelGridLayerState()
+    @State private var timeline = CombinedTimelineState()
     @State private var cloudLayerState = CloudLayerState()
     @State private var isLayerPickerPresented = false
     // sheet(item:), not sheet(isPresented:) + separate array state: the isPresented
@@ -33,6 +32,10 @@ struct WeatherMapDetailView: View {
     // presentation — the classic stale-state sheet bug.
     @State private var tappedAlerts: TappedAlerts?
     @State private var tappedCell: StormCellInfo?
+    @Namespace private var controlsNamespace
+
+    private var radarState: OscarRadarState { timeline.radar }
+    private var modelGridState: ModelGridLayerState { timeline.model }
 
     private struct TappedAlerts: Identifiable {
         let id = UUID()
@@ -49,6 +52,7 @@ struct WeatherMapDetailView: View {
                 oscarRadarState: radarState,
                 modelGridState: modelGridState,
                 cloudLayerState: cloudLayerState,
+                combinedTimeline: classicChrome ? nil : timeline,
                 onAlertsTapped: { alerts in
                     tappedAlerts = TappedAlerts(alerts: alerts)
                 },
@@ -76,7 +80,7 @@ struct WeatherMapDetailView: View {
             VStack {
                 HStack(alignment: .top) {
                     MapLegendStack(settingsService: settingsService,
-                                   radarState: radarState,
+                                   timeline: timeline,
                                    cloudLayerState: cloudLayerState,
                                    modelGridState: modelGridState)
                     .padding(12)
@@ -92,7 +96,7 @@ struct WeatherMapDetailView: View {
             VStack(spacing: 0) {
                 Spacer()
                 if settingsService.oscarRadarLayer {
-                    OscarRadarTimelineControls(radarState: radarState,
+                    OscarRadarTimelineControls(timeline: timeline,
                                                onBadgeTap: presentLayerPicker)
                         .padding(.horizontal, 16)
                 } else if settingsService.cloudLayerActive {
@@ -151,12 +155,21 @@ struct WeatherMapDetailView: View {
                     radarState.play()
                 }
             } else if let layer = settingsService.activeTileLayer {
-                if modelGridState.currentLayer == layer, modelGridState.hasAnyLoadedFrame {
+                if modelGridState.currentLayer == layer, modelGridState.startsAfter == nil,
+                   modelGridState.hasAnyLoadedFrame {
                     await modelGridState.refreshIfStale()
                 } else {
                     await modelGridState.loadLayer(layer)
                 }
             }
+        }
+        .task(id: continuation) {
+            // Radar continued by the model: its hours after the nowcast. The
+            // cutoff moves per hour, so radar refreshes within it load nothing.
+            guard let continuation,
+                  modelGridState.currentLayer != continuation.layer
+                    || modelGridState.startsAfter != continuation.cutoff else { return }
+            await modelGridState.loadLayer(continuation.layer, after: continuation.cutoff)
         }
         .task {
             // The saved-city chips need the batch conditions even when the tab
@@ -186,6 +199,7 @@ struct WeatherMapDetailView: View {
         .onChange(of: settingsService.oscarRadarLayer) { _, isEnabled in
             if isEnabled {
                 modelGridState.pause()
+                timeline.currentFrameIndex = radarState.currentFrameIndex
                 radarState.setRegion(settingsService.oscarRadarRegion)
                 if radarState.frames.isEmpty {
                     Task { await radarState.loadAllFrames() }
@@ -193,6 +207,9 @@ struct WeatherMapDetailView: View {
             } else {
                 radarState.pause()
             }
+        }
+        .onChange(of: settingsService.radarModelContinuation) { _, isOn in
+            if !isOn { modelGridState.pause() }
         }
         .onChange(of: settingsService.oscarRadarRegion) { _, newRegion in
             guard settingsService.oscarRadarLayer else { return }
@@ -245,13 +262,43 @@ struct WeatherMapDetailView: View {
         }
     }
 
+    private struct Continuation: Equatable {
+        let layer: WeatherTileLayer
+        let cutoff: Date
+    }
+
+    /// The region's model, cut at the start of the last radar frame's hour: its
+    /// frames after that continue the radar. nil while the continuation is off
+    /// or the radar hasn't loaded.
+    private var continuation: Continuation? {
+        guard !classicChrome, settingsService.oscarRadarLayer, settingsService.radarModelContinuation,
+              let last = radarState.frameTimestamps.last.flatMap(parseFrameDate),
+              let cutoff = Calendar.current.dateInterval(of: .hour, for: last)?.start else { return nil }
+        return Continuation(layer: settingsService.oscarRadarRegion.continuationLayer, cutoff: cutoff)
+    }
+
     // MARK: - Map controls
 
     /// Apple-Maps-style control stack: the layer-picker entry point and the
     /// locate button share ONE glass capsule (user request — no separate
     /// floating circles). Locate flies the camera to the user's position
-    /// (no-op without a fix/permission).
+    /// (no-op without a fix/permission). The radar's own toggles sit in a second
+    /// capsule below, which melts out of the first when radar is picked.
     private var mapControlStack: some View {
+        GlassEffectContainer(spacing: 12) {
+            VStack(spacing: 12) {
+                mainControls
+                    .glassEffectID("main", in: controlsNamespace)
+                if settingsService.oscarRadarLayer {
+                    radarControls
+                        .glassEffectID("radar", in: controlsNamespace)
+                }
+            }
+        }
+        .animation(.smooth(duration: 0.35), value: settingsService.oscarRadarLayer)
+    }
+
+    private var mainControls: some View {
         VStack(spacing: 0) {
             Button(action: presentLayerPicker) {
                 Image(systemName: "map.fill")
@@ -274,6 +321,30 @@ struct WeatherMapDetailView: View {
             .accessibilityLabel(Text("Auf meinen Standort zentrieren"))
         }
         .buttonStyle(.plain)
+        .glassEffect(.regular, in: Capsule())
+    }
+
+    /// On/off reads as a slash through the control, like the system's `.slash` symbols.
+    private var radarControls: some View {
+        @Bindable var settings = settingsService
+        let model = settingsService.oscarRadarRegion.continuationLayer
+        return VStack(spacing: 0) {
+            Toggle(isOn: $settings.radarMotionArrows) {
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 17, weight: .semibold))
+                    .modifier(SlashedWhenOff(isOn: settingsService.radarMotionArrows))
+            }
+            .accessibilityLabel(Text("Bewegungspfeile"))
+            Divider()
+                .frame(width: 26)
+            Toggle(isOn: $settings.radarModelContinuation) {
+                Text("+\(model.horizonHours)h")
+                    .font(.system(size: 13, weight: .semibold).monospacedDigit())
+                    .modifier(SlashedWhenOff(isOn: settingsService.radarModelContinuation))
+            }
+            .accessibilityLabel(Text("Mit \(model.shortSourceLabel) fortsetzen"))
+        }
+        .toggleStyle(MapControlToggleStyle())
         .glassEffect(.regular, in: Capsule())
     }
 
@@ -311,24 +382,74 @@ struct WeatherMapDetailView: View {
     }
 }
 
+// MARK: - Radar control toggles
+
+/// A bare 46 pt tap target for the control capsule; state shows in the label.
+private struct MapControlToggleStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Button {
+            configuration.isOn.toggle()
+        } label: {
+            configuration.label
+                .frame(width: 46, height: 46)
+                .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(configuration.isOn ? .isSelected : [])
+    }
+}
+
+/// The system `.slash` look for glyphs that have no slash variant: a thin
+/// glyph-sized stroke with a knockout gap cut into the content around it.
+private struct SlashedWhenOff: ViewModifier {
+    let isOn: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .mask {
+                Rectangle()
+                    .overlay { slash(lineWidth: 5).blendMode(.destinationOut) }
+                    .compositingGroup()
+            }
+            .overlay { slash(lineWidth: 1.7) }
+            .animation(.smooth(duration: 0.25), value: isOn)
+    }
+
+    private func slash(lineWidth: CGFloat) -> some View {
+        SlashLine()
+            .trim(from: 0, to: isOn ? 0 : 1)
+            .stroke(.primary, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+            .frame(width: 18, height: 18)
+    }
+}
+
+private struct SlashLine: Shape {
+    func path(in rect: CGRect) -> Path {
+        Path { path in
+            path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        }
+    }
+}
+
 // MARK: - Legend stack
 
 /// Own view so the per-tick `currentFrameTimestamp` reads invalidate only this
 /// stack, not the whole fullscreen map body.
 private struct MapLegendStack: View {
     let settingsService: SettingService
-    let radarState: OscarRadarState
+    let timeline: CombinedTimelineState
     let cloudLayerState: CloudLayerState
     let modelGridState: ModelGridLayerState
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             if settingsService.oscarRadarLayer {
-                if radarState.hasAnyLoadedFrame,
-                   let timestamp = radarState.currentFrameTimestamp {
+                if timeline.hasAnyLoadedFrame,
+                   let timestamp = timeline.currentFrameTimestamp {
                     RadarTimestampBadge(
                         timestamp: timestamp,
-                        isLive: radarState.isCurrentFrameLive
+                        isLive: timeline.isCurrentFrameLive
                     )
                     ColormapVerticalLegend(colormap: .radar)
                 }

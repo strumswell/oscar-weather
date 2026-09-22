@@ -64,6 +64,16 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
         }
     }
 
+    var shortSourceLabel: String {
+        switch self {
+        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "ICON-D2"
+        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: return "ECMWF"
+        }
+    }
+
+    /// Nominal forecast length, for the map's continuation button label.
+    var horizonHours: Int { isGlobalModel ? 84 : 36 }
+
     var isGlobalModel: Bool {
         switch self {
         case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure:
@@ -84,4 +94,12 @@ extension WeatherTileLayer {
     }
 
     var windFieldSamples: Int { isGlobalModel ? 24 : 32 }
+}
+
+extension RadarRegion {
+    /// Model precipitation that continues this radar past its nowcast. ICON-D2
+    /// only covers central Europe, so every radar but DWD's hands over to ECMWF.
+    var continuationLayer: WeatherTileLayer {
+        self == .germany ? .iconPrecip : .ecmwfPrecip
+    }
 }

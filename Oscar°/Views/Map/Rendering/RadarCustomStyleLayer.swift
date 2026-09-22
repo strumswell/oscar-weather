@@ -27,8 +27,10 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     private static let shaderSource = """
     #include <metal_stdlib>
     using namespace metal;
-    struct RadarVOut { float4 position [[position]]; float2 uv; };
-    struct RadarParams { float4 p; };   // x: phase, y: opacity, z: flow scale (per-gap), w: sampling mode (0 hard / 1 soft)
+    struct RadarVOut { float4 position [[position]]; float2 uv; float ndcX [[center_no_perspective]]; };
+    // p — x: phase, y: opacity, z: flow scale (per-gap), w: sampling mode (0 hard / 1 soft)
+    // wipe — x: edge (NDC x), y: kept side (+1 left of the edge, -1 right, 0 no clip), z: feather
+    struct RadarParams { float4 p; float4 wipe; };
 
     vertex RadarVOut radar_style_vs(uint vid [[vertex_id]],
                                     constant float4* clip [[buffer(0)]],
@@ -36,6 +38,7 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         RadarVOut out;
         out.position = clip[vid];
         out.uv = uv[vid];
+        out.ndcX = clip[vid].x / clip[vid].w;
         return out;
     }
 
@@ -90,6 +93,10 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         float v = mix(a, b, t);                                // blend in data (dBZ) space
         float2 lut = float2(v * (255.0 / 256.0) + (0.5 / 256.0), 0.5);
         half4 c = soft ? palette.sample(lutLinear, lut) : palette.sample(lutNearest, lut);
+        if (p.wipe.y != 0.0) {                                 // radar ↔ model handover sweep
+            float kept = (p.wipe.x - in.ndcX) * p.wipe.y;
+            c *= half(smoothstep(-p.wipe.z, p.wipe.z, kept));
+        }
         return c * half(p.p.y);                                // palette is premultiplied
     }
     """
@@ -111,6 +118,7 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     nonisolated(unsafe) private var flowScale: Float = 0
     nonisolated(unsafe) private var phase: Float = 0
     nonisolated(unsafe) private var samplingMode: Float = SamplingMode.soft.rawValue
+    nonisolated(unsafe) private var wipe = SIMD4<Float>.zero
     nonisolated(unsafe) private var paletteTexture: MTLTexture?
     nonisolated(unsafe) private var zeroFlowTexture: MTLTexture?
 
@@ -156,10 +164,14 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     }
 
     @MainActor func configure(bounds: OscarRadarBounds?, opacity: Float) {
-        stateLock.withLock {
+        let opacityChanged = stateLock.withLock { () -> Bool in
             overlayBounds = bounds
+            let changed = self.opacity != opacity
             self.opacity = opacity
+            return changed
         }
+        // Showing/hiding (radar ↔ model handover) must repaint even when no new frame is displayed.
+        if opacityChanged { setNeedsDisplay() }
     }
 
     /// Data/palette sampling: `.soft` = RainViewer look, `.hard` = crisp isobands.
@@ -170,6 +182,15 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
             return true
         }
         if changed { setNeedsDisplay() }
+    }
+
+    /// Handover sweep clip: draw only on one screen side of `edge` (NDC x, -1…1).
+    /// nil = no clip.
+    @MainActor func setWipe(edge: Float?, keepsLeft: Bool) {
+        stateLock.withLock {
+            wipe = edge.map { SIMD4($0, keepsLeft ? 1 : -1, 0.03, 0) } ?? .zero
+        }
+        setNeedsDisplay()
     }
 
     // MARK: Lifecycle
@@ -521,7 +542,7 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
              texA: self.textureA, texB: self.textureB, palette: self.paletteTexture,
              flow: self.flowTexture ?? self.zeroFlowTexture, flowScale: self.flowScale,
              bounds: self.overlayBounds, phase: self.phase, opacity: self.opacity,
-             sampling: self.samplingMode)
+             sampling: self.samplingMode, wipe: self.wipe)
         }
         let shouldLogFirstDraw = stateLock.withLock {
             guard !didLogFirstDraw else { return false }
@@ -542,7 +563,8 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
               let textureA = snapshot.texA,
               let paletteTexture = snapshot.palette,
               let flowTexture = snapshot.flow,
-              let bounds = snapshot.bounds else { return }
+              let bounds = snapshot.bounds,
+              snapshot.opacity > 0 else { return }
         let textureB = snapshot.texB
 
         // Corners → Web-Mercator [0,1] → tile coordinates (× worldSize) → clip space.
@@ -573,13 +595,14 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         let uvs: [SIMD2<Float>] = [
             SIMD2(0, 0), SIMD2(1, 0), SIMD2(0, 1), SIMD2(1, 1),
         ]
-        var params = SIMD4<Float>(snapshot.phase, snapshot.opacity, snapshot.flowScale, snapshot.sampling)
+        let params = [SIMD4<Float>(snapshot.phase, snapshot.opacity, snapshot.flowScale, snapshot.sampling),
+                      snapshot.wipe]
 
         renderEncoder.setRenderPipelineState(pipelineState)
         renderEncoder.setDepthStencilState(depthStencilState)
         renderEncoder.setVertexBytes(clipPositions, length: MemoryLayout<SIMD4<Float>>.stride * 4, index: 0)
         renderEncoder.setVertexBytes(uvs, length: MemoryLayout<SIMD2<Float>>.stride * 4, index: 1)
-        renderEncoder.setFragmentBytes(&params, length: MemoryLayout<SIMD4<Float>>.stride, index: 0)
+        renderEncoder.setFragmentBytes(params, length: MemoryLayout<SIMD4<Float>>.stride * 2, index: 0)
         renderEncoder.setFragmentTexture(textureA, index: 0)
         renderEncoder.setFragmentTexture(textureB ?? textureA, index: 1)
         renderEncoder.setFragmentTexture(paletteTexture, index: 2)

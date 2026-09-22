@@ -99,3 +99,19 @@ struct GhostTrack: View {
         .frame(height: 46)
     }
 }
+
+/// Diagonal lines across the rect, one every `spacing` points.
+struct DiagonalHatch: Shape {
+    var spacing: CGFloat = 5
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        var x = rect.minX - rect.height
+        while x < rect.maxX {
+            path.move(to: CGPoint(x: x, y: rect.maxY))
+            path.addLine(to: CGPoint(x: x + rect.height, y: rect.minY))
+            x += spacing
+        }
+        return path
+    }
+}

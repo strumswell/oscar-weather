@@ -586,6 +586,28 @@
         }
       }
     },
+    "+%lldh" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lldh"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lldh"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lldsa"
+          }
+        }
+      }
+    },
     "+10 °C" : {
 
     },
@@ -612,28 +634,6 @@
     },
     "−40 °C" : {
 
-    },
-    "≈ 1 km · 2 Min." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "≈ 1 km · 2 Min."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "≈ 1 km · 2 min"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "≈ 1 km · 2 dk"
-          }
-        }
-      }
     },
     "≈ 1 km · 5 Min." : {
       "localizations" : {
@@ -698,6 +698,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "≈ 1,4 km · 10 dk"
+          }
+        }
+      }
+    },
+    "≈ 2 km · 2 Min." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 2 km · 2 Min."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 2 km · 2 min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 2 km · 2 dk."
           }
         }
       }
@@ -785,7 +807,7 @@
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "≈ 5 km · 10 dk"
+            "value" : "≈ 5 km · 10 dk."
           }
         }
       }
@@ -1028,6 +1050,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "16:00"
+          }
+        }
+      }
+    },
+    "17 Radare über Deutschland und den Grenzregionen. Die Kurzprognose für knapp 2 Stunden liefert der DWD selbst." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "17 Radare über Deutschland und den Grenzregionen. Die Kurzprognose für knapp 2 Stunden liefert der DWD selbst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "17 radars covering Germany and its border regions. The short-term forecast of almost 2 hours comes from DWD itself."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almanya ve sınır bölgelerini kapsayan 17 radar. Yaklaşık 2 saatlik kısa vadeli tahmini doğrudan DWD sağlar."
           }
         }
       }
@@ -1339,6 +1383,28 @@
         }
       }
     },
+    "Abspielen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abspielen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynat"
+          }
+        }
+      }
+    },
     "ACCESS-G - Australian Bureau of Meteorology (BOM)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1518,28 +1584,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yaklaşan yağmur hakkında bildirim almak için Orta Avrupa yağmur uyarılarını (Beta) etkinleştirin. Bunun için yaklaşık konumunuz bir Oscar sunucusunda saklanır."
-          }
-        }
-      }
-    },
-    "Abspielen" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abspielen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Play"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oynat"
           }
         }
       }
@@ -3007,6 +3051,28 @@
         }
       }
     },
+    "Berechnet von Wettermodellen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berechnet von Wettermodellen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Computed by weather models"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava modelleriyle hesaplanır"
+          }
+        }
+      }
+    },
     "Berechtigungen" : {
       "localizations" : {
         "de" : {
@@ -4451,6 +4517,28 @@
         }
       }
     },
+    "Der Wettersatellit Meteosat beobachtet Europa, Afrika und den Atlantik aus 36.000 km Höhe. Alle 10 Minuten berechnet EUMETSAT daraus, wie dick die Wolken sind. Oscar zeigt dünne Schleier zart und dicke Wolken deckend, auch Nebel und tiefe Bewölkung, bei Tag und Nacht. Aus der Zugbewegung rechnet Oscar knapp 2 Stunden voraus." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Wettersatellit Meteosat beobachtet Europa, Afrika und den Atlantik aus 36.000 km Höhe. Alle 10 Minuten berechnet EUMETSAT daraus, wie dick die Wolken sind. Oscar zeigt dünne Schleier zart und dicke Wolken deckend, auch Nebel und tiefe Bewölkung, bei Tag und Nacht. Aus der Zugbewegung rechnet Oscar knapp 2 Stunden voraus."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Meteosat weather satellite watches Europe, Africa and the Atlantic from 36,000 km up. Every 10 minutes, EUMETSAT uses its images to compute how thick the clouds are. Oscar shows thin veils faintly and thick clouds as solid, including fog and low cloud, day and night. From how the clouds move, Oscar projects almost 2 hours ahead."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meteosat hava uydusu Avrupa, Afrika ve Atlantik'i 36.000 km yükseklikten izler. EUMETSAT, 10 dakikada bir bu görüntülerden bulutların ne kadar kalın olduğunu hesaplar. Oscar ince bulutları silik, kalın bulutları yoğun gösterir; sis ve alçak bulutlar da dahil, gece ve gündüz. Oscar, bulutların hareketinden yaklaşık 2 saat ileriyi hesaplar."
+          }
+        }
+      }
+    },
     "Deutscher Wetterdienst" : {
       "localizations" : {
         "de" : {
@@ -4896,6 +4984,28 @@
         }
       }
     },
+    "DWD ICON-D2 · ≈ 2 km" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DWD ICON-D2 · ≈ 2 km"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DWD ICON-D2 · ≈ 2 km"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DWD ICON-D2 · ≈ 2 km"
+          }
+        }
+      }
+    },
     "E_compass" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4919,30 +5029,30 @@
         }
       }
     },
-    "Die Wolken-Ebene beruht auf Messungen des Wettersatelliten Meteosat, der die Erde geostationär aus rund 36.000 km Höhe beobachtet. Alle 10 Minuten wertet EUMETSAT die Aufnahmen aus und berechnet für jeden Bildpunkt, wie dicht die Wolke dort ist. Genau das zeigt Oscar: dünne Schleier erscheinen zart, dicke Wolken deckend. Das funktioniert bei Tag und bei Nacht. Aus der Zugbewegung berechnet Oscar die Zwischenschritte und eine Kurzprognose. Alles hinter der LIVE-Markierung ist berechnet." : {
+    "ECMWF" : {
+
+    },
+    "ECMWF IFS · ≈ 9 km" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Wolken-Ebene beruht auf Messungen des Wettersatelliten Meteosat, der die Erde geostationär aus rund 36.000 km Höhe beobachtet. Alle 10 Minuten wertet EUMETSAT die Aufnahmen aus und berechnet für jeden Bildpunkt, wie dicht die Wolke dort ist. Genau das zeigt Oscar: dünne Schleier erscheinen zart, dicke Wolken deckend. Das funktioniert bei Tag und bei Nacht. Aus der Zugbewegung berechnet Oscar die Zwischenschritte und eine Kurzprognose. Alles hinter der LIVE-Markierung ist berechnet."
+            "value" : "ECMWF IFS · ≈ 9 km"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The cloud layer is based on measurements from the Meteosat weather satellite, which watches Earth from a fixed position about 36,000 km up. Every 10 minutes EUMETSAT analyses the images and works out how thick the cloud is at each point. That is what Oscar shows: thin veils look faint, thick clouds look solid. It works by day and by night. From the clouds' motion, Oscar calculates the steps in between and a short-term forecast. Everything past the LIVE marker is calculated."
+            "value" : "ECMWF IFS · ≈ 9 km"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bulut katmanı, Dünya'yı yaklaşık 36.000 km yükseklikten jeostasyoner konumda gözlemleyen Meteosat hava durumu uydusunun ölçümlerine dayanır. EUMETSAT her 10 dakikada bir görüntüleri değerlendirir ve her nokta için bulutun ne kadar yoğun olduğunu hesaplar. Oscar tam olarak bunu gösterir: ince bulutlar soluk, kalın bulutlar opak görünür. Bu, gündüz de gece de çalışır. Oscar, bulutların hareketinden aradaki adımları ve kısa vadeli bir tahmin hesaplar. LIVE işaretinden sonrası hesaplamadır."
+            "value" : "ECMWF IFS · ≈ 9 km"
           }
         }
       }
-    },
-    "ECMWF" : {
-
     },
     "Eigener Name" : {
       "localizations" : {
@@ -5078,24 +5188,24 @@
         }
       }
     },
-    "Ein Wettermodell ist eine Computersimulation der Atmosphäre: Aus Millionen Messwerten berechnet es, wie das Wetter in den nächsten Stunden und Tagen wird." : {
+    "Ein Wettermodell berechnet aus Millionen Messungen, wie sich die Atmosphäre entwickelt. Die Karte zeigt, was das Modell erwartet, nicht was gemessen wurde." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ein Wettermodell ist eine Computersimulation der Atmosphäre: Aus Millionen Messwerten berechnet es, wie das Wetter in den nächsten Stunden und Tagen wird."
+            "value" : "Ein Wettermodell berechnet aus Millionen Messungen, wie sich die Atmosphäre entwickelt. Die Karte zeigt, was das Modell erwartet, nicht was gemessen wurde."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A weather model is a computer simulation of the atmosphere: from millions of measurements it calculates the weather for the coming hours and days."
+            "value" : "A weather model uses millions of measurements to compute how the atmosphere will develop. The map shows what the model expects, not what was measured."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hava modeli, atmosferin bilgisayar simülasyonudur: Milyonlarca ölçümden önümüzdeki saat ve günlerin havasını hesaplar."
+            "value" : "Bir hava modeli, milyonlarca ölçümden atmosferin nasıl gelişeceğini hesaplar. Harita, ölçülen değil modelin beklediği durumu gösterir."
           }
         }
       }
@@ -5717,28 +5827,6 @@
         }
       }
     },
-    "Europaweites Komposit (OPERA-Programm) aus den Radaren von über 30 Ländern. Neue Messung alle 15 Minuten; die Zwischenschritte berechnet Oscar aus der Zugbewegung." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Europaweites Komposit (OPERA-Programm) aus den Radaren von über 30 Ländern. Neue Messung alle 15 Minuten; die Zwischenschritte berechnet Oscar aus der Zugbewegung."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Europe-wide composite (OPERA programme) from the radars of more than 30 countries. A new measurement every 15 minutes; Oscar fills in the steps between from the motion of the rain."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "30'dan fazla ülkenin radarlarından oluşan Avrupa geneli kompozit (OPERA programı). Her 15 dakikada bir yeni ölçüm; aradaki adımları Oscar yağışın hareketinden hesaplar."
-          }
-        }
-      }
-    },
     "Extrem" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5981,6 +6069,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yükleme başarısız: %@"
+          }
+        }
+      }
+    },
+    "Feines Raster über Zentraleuropa, das auch einzelne Schauer und Gewitter abbilden kann. Stündlich bis 36 Stunden voraus, alle 3 Stunden ein neuer Lauf." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feines Raster über Zentraleuropa, das auch einzelne Schauer und Gewitter abbilden kann. Stündlich bis 36 Stunden voraus, alle 3 Stunden ein neuer Lauf."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fine grid over Central Europe that can depict individual showers and thunderstorms. Hourly up to 36 hours ahead, with a new run every 3 hours."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orta Avrupa üzerinde, tek tek sağanakları ve gök gürültülü fırtınaları da gösterebilen ince ızgara. 36 saate kadar saatlik, her 3 saatte bir yeni çalıştırma."
           }
         }
       }
@@ -6570,6 +6680,28 @@
       },
       "shouldTranslate" : false
     },
+    "Gemeinsames Radarbild der europäischen Wetterdienste. Gemessen wird alle 15 Minuten, die Bilder dazwischen berechnet Oscar." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemeinsames Radarbild der europäischen Wetterdienste. Gemessen wird alle 15 Minuten, die Bilder dazwischen berechnet Oscar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joint radar image of Europe's national weather services. It is measured every 15 minutes; Oscar computes the images in between."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avrupa ulusal meteoroloji servislerinin ortak radar görüntüsü. Ölçüm 15 dakikada bir yapılır, aradaki görüntüleri Oscar hesaplar."
+          }
+        }
+      }
+    },
     "Geöffnet" : {
       "localizations" : {
         "de" : {
@@ -6931,29 +7063,6 @@
         }
       }
     },
-    "Globales Modell für den mittelfristigen Überblick mit Temperatur, Regen, Wind und Luftdruck in Drei-Stunden-Schritten." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Globales Modell für den mittelfristigen Überblick mit Temperatur, Regen, Wind und Luftdruck in Drei-Stunden-Schritten."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Global model for medium-range outlooks with temperature, rain, wind, and pressure in three-hour steps."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Orta vadeli genel görünüm için sıcaklık, yağış, rüzgâr ve basıncı üç saatlik adımlarla sunan küresel model."
-          }
-        }
-      }
-    },
     "Gräser" : {
       "comment" : "Pollen type name",
       "localizations" : {
@@ -6977,28 +7086,6 @@
         }
       }
     },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Größere Zweige und kleine Bäume bewegen sich."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Larger branches and small trees move."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
-          }
-        }
-      }
-    },
     "Großbritannien" : {
       "localizations" : {
         "de" : {
@@ -7017,6 +7104,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Birleşik Krallık"
+          }
+        }
+      }
+    },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Größere Zweige und kleine Bäume bewegen sich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Larger branches and small trees move."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
           }
         }
       }
@@ -8908,29 +9017,6 @@
     "kn" : {
       "shouldTranslate" : false
     },
-    "Komposit der beiden AEMET-Radare auf Gran Canaria und Teneriffa über den Kanarischen Inseln. In Tallagen kann der Teide einzelne Sektoren abschatten." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Komposit der beiden AEMET-Radare auf Gran Canaria und Teneriffa über den Kanarischen Inseln. In Tallagen kann der Teide einzelne Sektoren abschatten."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Composite of the two AEMET radars on Gran Canaria and Tenerife, covering the Canary Islands. At low levels Mount Teide can block individual sectors."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gran Canaria ve Tenerife'deki iki AEMET radarının Kanarya Adaları'nı kapsayan kompoziti. Alçak seviyelerde Teide bazı sektörleri gölgeleyebilir."
-          }
-        }
-      }
-    },
     "Korea" : {
       "localizations" : {
         "de" : {
@@ -9011,6 +9097,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quick guide: 0 calm, 3 gentle breeze, 6 strong wind, 8 gale, 12 hurricane force."
+          }
+        }
+      }
+    },
+    "Kurzprognose" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurzprognose"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nowcast"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kısa vadeli tahmin"
           }
         }
       }
@@ -9261,6 +9369,7 @@
       "shouldTranslate" : false
     },
     "Live + Kurzprognose" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -9278,6 +9387,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Canlı + kısa vadeli tahmin"
+          }
+        }
+      }
+    },
+    "Live gemessen, mit Kurzprognose" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live gemessen, mit Kurzprognose"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Measured live, with a short-term forecast"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canlı ölçüm, kısa vadeli tahminle"
           }
         }
       }
@@ -10026,6 +10157,28 @@
         }
       }
     },
+    "Messung" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Messung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Measured"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ölçüm"
+          }
+        }
+      }
+    },
     "MET Nordic - MET Norway" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -10076,24 +10229,24 @@
     "Meteosat" : {
 
     },
-    "Meteosat der dritten Generation (MTG) auf 0° Länge, Instrument FCI. Oscar nutzt das Produkt Optimal Cloud Analysis und daraus die optische Dicke der Wolken. Volle Erdscheibe alle 10 Minuten mit etwa 2 km Auflösung im Bildzentrum. Zum Rand der Scheibe wird das Bild flacher und gröber. Contains modified EUMETSAT Meteosat data." : {
+    "Meteosat der dritten Generation über 0° Länge, Produkt Optimal Cloud Analysis. Zum Rand der Erdscheibe hin wird das Bild gröber. Contains modified EUMETSAT Meteosat data." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meteosat der dritten Generation (MTG) auf 0° Länge, Instrument FCI. Oscar nutzt das Produkt Optimal Cloud Analysis und daraus die optische Dicke der Wolken. Volle Erdscheibe alle 10 Minuten mit etwa 2 km Auflösung im Bildzentrum. Zum Rand der Scheibe wird das Bild flacher und gröber. Contains modified EUMETSAT Meteosat data."
+            "value" : "Meteosat der dritten Generation über 0° Länge, Produkt Optimal Cloud Analysis. Zum Rand der Erdscheibe hin wird das Bild gröber. Contains modified EUMETSAT Meteosat data."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meteosat Third Generation (MTG) at 0° longitude, FCI instrument. Oscar uses the Optimal Cloud Analysis product and takes the clouds' optical thickness from it. Full Earth disk every 10 minutes at about 2 km resolution in the image centre. Towards the edge of the disk the view gets flatter and coarser. Contains modified EUMETSAT Meteosat data."
+            "value" : "Meteosat Third Generation at 0° longitude, Optimal Cloud Analysis product. The image gets coarser toward the edge of the Earth's disk. Contains modified EUMETSAT Meteosat data."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "0° boylamındaki üçüncü nesil Meteosat (MTG), FCI cihazı. Oscar, Optimal Cloud Analysis ürününü ve buradan bulutların optik kalınlığını kullanır. Tam Dünya diski her 10 dakikada bir, görüntü merkezinde yaklaşık 2 km çözünürlükle. Diskin kenarına doğru görüntü yataylaşır ve kabalaşır. Contains modified EUMETSAT Meteosat data."
+            "value" : "0° boylamındaki üçüncü nesil Meteosat, Optimal Cloud Analysis ürünü. Dünya diskinin kenarına doğru görüntü kabalaşır. Contains modified EUMETSAT Meteosat data."
           }
         }
       }
@@ -10226,6 +10379,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Konumunuz için dakikası dakikasına"
+          }
+        }
+      }
+    },
+    "Mit %@ fortsetzen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit %@ fortsetzen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue with %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ile devam"
           }
         }
       }
@@ -10526,28 +10701,6 @@
         }
       }
     },
-    "Mosaik aus rund 29 Radarstandorten des brasilianischen Flugwetterdienstes. Einzelne Standorte melden unregelmäßig, Lücken sind möglich." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mosaik aus rund 29 Radarstandorten des brasilianischen Flugwetterdienstes. Einzelne Standorte melden unregelmäßig, Lücken sind möglich."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mosaic of about 29 radar sites run by Brazil's aviation weather service. Individual sites report irregularly, so gaps are possible."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brezilya havacılık meteoroloji servisinin yaklaşık 29 radar istasyonundan oluşan mozaik. Bazı istasyonlar düzensiz veri gönderir; boşluklar olabilir."
-          }
-        }
-      }
-    },
     "mph" : {
       "localizations" : {
         "de" : {
@@ -10594,28 +10747,6 @@
         }
       },
       "shouldTranslate" : false
-    },
-    "Multi-Radar-Komposit über den zusammenhängenden USA mit sehr dichter Aktualisierung aus rund 180 Radaren." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Multi-Radar-Komposit über den zusammenhängenden USA mit sehr dichter Aktualisierung aus rund 180 Radaren."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Multi-radar composite over the contiguous US, updated at a very high rate from about 180 radars."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yaklaşık 180 radardan çok sık güncellenen, kıtasal ABD üzerinde çoklu radar kompoziti."
-          }
-        }
-      }
     },
     "N_compass" : {
       "extractionState" : "manual",
@@ -13042,28 +13173,6 @@
         }
       }
     },
-    "QPESUMS-Komposit der taiwanischen Wetterbehörde über Taiwan und seinen Inselgruppen." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "QPESUMS-Komposit der taiwanischen Wetterbehörde über Taiwan und seinen Inselgruppen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "QPESUMS composite by Taiwan's weather agency, covering Taiwan and its island groups."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tayvan meteoroloji kurumunun Tayvan ve adalarını kapsayan QPESUMS kompoziti."
-          }
-        }
-      }
-    },
     "Quelle: %@" : {
       "localizations" : {
         "de" : {
@@ -13130,24 +13239,46 @@
         }
       }
     },
-    "Radarkomposit über Deutschland und den Nachbarländern. Neue Messung alle 5 Minuten, Kurzprognose für die nächsten 2 Stunden." : {
+    "Radarbild der 48 zusammenhängenden US-Bundesstaaten, alle 2 Minuten neu." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Radarkomposit über Deutschland und den Nachbarländern. Neue Messung alle 5 Minuten, Kurzprognose für die nächsten 2 Stunden."
+            "value" : "Radarbild der 48 zusammenhängenden US-Bundesstaaten, alle 2 Minuten neu."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Radar composite over Germany and its neighbors. A new measurement every 5 minutes, with a nowcast for the next 2 hours."
+            "value" : "Radar image of the 48 contiguous US states, updated every 2 minutes."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Almanya ve komşu ülkeler üzerinde radar kompoziti. Her 5 dakikada bir yeni ölçüm, sonraki 2 saat için kısa vadeli tahmin."
+            "value" : "ABD'nin bitişik 48 eyaletinin radar görüntüsü, 2 dakikada bir yenilenir."
+          }
+        }
+      }
+    },
+    "Radarbild über Taiwan und den umliegenden Inseln. Die Bilder zwischen den Messungen berechnet Oscar." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radarbild über Taiwan und den umliegenden Inseln. Die Bilder zwischen den Messungen berechnet Oscar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar image of Taiwan and its surrounding islands. Oscar computes the images between measurements."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tayvan ve çevresindeki adaların radar görüntüsü. Ölçümler arasındaki görüntüleri Oscar hesaplar."
           }
         }
       }
@@ -13864,6 +13995,28 @@
         }
       }
     },
+    "Rund 29 Radarstandorte, die nicht gleichzeitig melden. Deshalb kann das Bild Lücken haben." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rund 29 Radarstandorte, die nicht gleichzeitig melden. Deshalb kann das Bild Lücken haben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About 29 radar sites that don't report at the same time, so the image can have gaps."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aynı anda veri göndermeyen yaklaşık 29 radar noktası. Bu yüzden görüntüde boşluklar olabilir."
+          }
+        }
+      }
+    },
     "S_compass" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14339,28 +14492,6 @@
     },
     "Segment" : {
 
-    },
-    "Sehr feines Raster über Zentraleuropa — erkennt auch kleine Schauer und Gewitter. Ideal für die nächsten 48 Stunden." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sehr feines Raster über Zentraleuropa — erkennt auch kleine Schauer und Gewitter. Ideal für die nächsten 48 Stunden."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Very fine grid over Central Europe — picks up even small showers and thunderstorms. Ideal for the next 48 hours."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Orta Avrupa üzerinde çok ince ağ — küçük sağanakları ve fırtınaları bile yakalar. Önümüzdeki 48 saat için idealdir."
-          }
-        }
-      }
     },
     "Sehr hoch" : {
       "extractionState" : "stale",
@@ -17981,6 +18112,28 @@
         }
       }
     },
+    "Weltweites Modell. Stündlich bis 36 Stunden, danach in 4-Stunden-Schritten bis 3,5 Tage voraus. Alle 6 Stunden ein neuer Lauf." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weltweites Modell. Stündlich bis 36 Stunden, danach in 4-Stunden-Schritten bis 3,5 Tage voraus. Alle 6 Stunden ein neuer Lauf."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Global model. Hourly up to 36 hours, then in 4-hour steps up to 3.5 days ahead. A new run every 6 hours."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Küresel model. 36 saate kadar saatlik, ardından 3,5 güne kadar 4 saatlik adımlarla. Her 6 saatte bir yeni çalıştırma."
+          }
+        }
+      }
+    },
     "Wert" : {
 
     },
@@ -18226,24 +18379,24 @@
         }
       }
     },
-    "Wetterradare messen, wo es gerade regnet oder schneit. Oscar verbindet die Messung mit einer Kurzprognose: Aus der Zugbewegung des Niederschlags werden die nächsten ein bis zwei Stunden berechnet. Alles hinter der LIVE-Markierung ist berechnet — je weiter voraus, desto unsicherer." : {
+    "Wetterradare messen, wo es gerade regnet oder schneit. Aus der Bewegung der letzten Bilder rechnet Oscar die nächsten 1,5 bis 2 Stunden voraus. Alles nach der LIVE-Markierung ist diese Kurzprognose. Schauer, die in der Zeit neu entstehen oder sich auflösen, erfasst sie nicht." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wetterradare messen, wo es gerade regnet oder schneit. Oscar verbindet die Messung mit einer Kurzprognose: Aus der Zugbewegung des Niederschlags werden die nächsten ein bis zwei Stunden berechnet. Alles hinter der LIVE-Markierung ist berechnet — je weiter voraus, desto unsicherer."
+            "value" : "Wetterradare messen, wo es gerade regnet oder schneit. Aus der Bewegung der letzten Bilder rechnet Oscar die nächsten 1,5 bis 2 Stunden voraus. Alles nach der LIVE-Markierung ist diese Kurzprognose. Schauer, die in der Zeit neu entstehen oder sich auflösen, erfasst sie nicht."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weather radars measure where it is raining or snowing right now. Oscar combines the measurement with a nowcast: the next one to two hours are calculated from how the precipitation is moving. Everything past the LIVE marker is calculated, and the further ahead, the less certain it gets."
+            "value" : "Weather radars measure where it is raining or snowing right now. From how the latest images move, Oscar projects the next 1.5 to 2 hours. Everything after the LIVE mark is this short-term forecast. It does not capture showers that form or fade in the meantime."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hava radarları şu anda nerede yağmur veya kar yağdığını ölçer. Oscar bu ölçümü kısa vadeli bir tahminle birleştirir: Yağışın hareketinden sonraki bir-iki saat hesaplanır. LIVE işaretinden sonrası hesaplamadır; ne kadar ileriye bakılırsa belirsizlik o kadar artar."
+            "value" : "Hava radarları şu anda nerede yağmur ya da kar yağdığını ölçer. Oscar, son görüntülerin hareketinden sonraki 1,5 ila 2 saati hesaplar. LIVE işaretinden sonraki her şey bu kısa vadeli tahmindir. Bu sürede yeni oluşan ya da dağılan sağanakları içermez."
           }
         }
       }
@@ -18855,6 +19008,7 @@
       }
     },
     "Zugrichtung im Regenradar" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -18982,6 +19136,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld cihaz üzerinden toplandı. Tüm sayılar cihazlarınızda ve iCloud'unuzda kalır."
+          }
+        }
+      }
+    },
+    "Zwei Radare auf Gran Canaria und Teneriffa. Berge wie der Teide können einzelne Bereiche verdecken." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zwei Radare auf Gran Canaria und Teneriffa. Berge wie der Teide können einzelne Bereiche verdecken."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Two radars on Gran Canaria and Tenerife. Mountains such as Teide can block parts of the view."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gran Canaria ve Tenerife'de iki radar. Teide gibi dağlar bazı bölgeleri gizleyebilir."
           }
         }
       }

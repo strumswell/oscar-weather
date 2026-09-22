@@ -13,6 +13,11 @@ struct TimelineControlsChip: View {
     let sourceLabel: String
     let shortSourceLabel: String
     let isLive: Bool
+    /// Model layer: every frame is computed, none measured. Radar and clouds
+    /// are measurements up to now and a nowcast after it.
+    let isForecast: Bool
+    /// Radar continued by a model: frames from this index on are model hours.
+    var forecastStartIndex: Int? = nil
     let loadingLabel: LocalizedStringKey
     var onBadgeTap: (() -> Void)?
 
@@ -31,6 +36,8 @@ struct TimelineControlsChip: View {
                     timestamps: state.frameTimestamps,
                     selectedIndex: state.currentFrameIndex,
                     loadedIndices: state.loadedFrameIndices,
+                    isForecast: isForecast,
+                    forecastStartIndex: forecastStartIndex,
                     onSelectionChanged: { index in
                         guard index != state.currentFrameIndex else { return }
                         state.currentFrameIndex = index
@@ -190,7 +197,9 @@ struct TimelineControlsChip: View {
                             .lineLimit(1)
                             .fixedSize()
                     }
-                    .foregroundStyle(delta > 0 ? AnyShapeStyle(.orange) : AnyShapeStyle(.secondary))
+                    // Orange marks the nowcast only, matching the track's zone.
+                    .foregroundStyle(delta > 0 && !isForecast && !isModelFrame
+                                     ? AnyShapeStyle(.orange) : AnyShapeStyle(.secondary))
                     .padding(.horizontal, 9)
                     .padding(.vertical, 5)
                     .glassEffect(in: Capsule())
@@ -199,6 +208,10 @@ struct TimelineControlsChip: View {
                 .accessibilityLabel(Text("Zur aktuellen Zeit springen"))
             }
         }
+    }
+
+    private var isModelFrame: Bool {
+        forecastStartIndex.map { state.currentFrameIndex >= $0 } ?? false
     }
 
     private func deltaLabel(_ delta: TimeInterval) -> String {

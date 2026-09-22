@@ -110,20 +110,12 @@ final class OscarRadarState {
     private static let gridResidencyBudget = adaptiveCacheBudget(
         fraction: 0.16, floor: 64 * 1024 * 1024, cap: 512 * 1024 * 1024)
 
-    private var residencyRadius: Int {
-        let bytesPerFrame = frames.lazy.compactMap { $0 }
-            .map { max(1, $0.gridPayload.width * $0.gridPayload.height) }
-            .max() ?? 4_000_000
-        return max(8, Self.gridResidencyBudget / bytesPerFrame / 2)
-    }
-
     private func residentFrameIndices(around center: Int) -> Set<Int> {
-        let count = frames.count
-        let radius = residencyRadius
-        guard count > 2 * radius + 1 else { return Set(frames.indices) }
-        // Modulo window so playback wrap-around (last frame → first) stays warm.
-        var resident = Set((center - radius...center + radius)
-            .map { (($0 % count) + count) % count })
+        let bytesPerFrame = frames.lazy.compactMap { $0 }
+            .map { $0.gridPayload.width * $0.gridPayload.height }
+            .max() ?? 4_000_000
+        var resident = residencyWindow(count: frames.count, center: center,
+                                       bytesPerFrame: bytesPerFrame, budget: Self.gridResidencyBudget)
         if !frameDates.isEmpty {
             resident.insert(closestTimestampIndex(in: frameDates))
         }

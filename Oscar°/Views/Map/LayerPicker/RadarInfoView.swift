@@ -16,7 +16,7 @@ struct RadarInfoView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Was zeigt das Regenradar?")
                     .font(.headline)
-                Text("Wetterradare messen, wo es gerade regnet oder schneit. Oscar verbindet die Messung mit einer Kurzprognose: Aus der Zugbewegung des Niederschlags werden die nächsten ein bis zwei Stunden berechnet. Alles hinter der LIVE-Markierung ist berechnet — je weiter voraus, desto unsicherer.")
+                Text("Wetterradare messen, wo es gerade regnet oder schneit. Aus der Bewegung der letzten Bilder rechnet Oscar die nächsten 1,5 bis 2 Stunden voraus. Alles nach der LIVE-Markierung ist diese Kurzprognose. Schauer, die in der Zeit neu entstehen oder sich auflösen, erfasst sie nicht.")
                     .font(.subheadline)
                     .fixedSize(horizontal: false, vertical: true)
                 Text("Radarquellen in Oscar°")
@@ -27,37 +27,37 @@ struct RadarInfoView: View {
                     provider: "Deutscher Wetterdienst",
                     grid: "≈ 1 km · 5 Min.",
                     imageName: "layer-radar-germany",
-                    summary: "Radarkomposit über Deutschland und den Nachbarländern. Neue Messung alle 5 Minuten, Kurzprognose für die nächsten 2 Stunden.")
+                    summary: "17 Radare über Deutschland und den Grenzregionen. Die Kurzprognose für knapp 2 Stunden liefert der DWD selbst.")
                 WeatherModelCard(
                     name: "EUMETNET",
                     provider: "Verbund der europäischen Wetterdienste",
                     grid: "≈ 2 km · 15 Min.",
                     imageName: "layer-radar-europe",
-                    summary: "Europaweites Komposit (OPERA-Programm) aus den Radaren von über 30 Ländern. Neue Messung alle 15 Minuten; die Zwischenschritte berechnet Oscar aus der Zugbewegung.")
+                    summary: "Gemeinsames Radarbild der europäischen Wetterdienste. Gemessen wird alle 15 Minuten, die Bilder dazwischen berechnet Oscar.")
                 WeatherModelCard(
                     name: "NOAA MRMS",
                     provider: "US-Wetterbehörde NOAA",
-                    grid: "≈ 1 km · 2 Min.",
+                    grid: "≈ 2 km · 2 Min.",
                     imageName: "layer-radar-usa",
-                    summary: "Multi-Radar-Komposit über den zusammenhängenden USA mit sehr dichter Aktualisierung aus rund 180 Radaren.")
+                    summary: "Radarbild der 48 zusammenhängenden US-Bundesstaaten, alle 2 Minuten neu.")
                 WeatherModelCard(
                     name: "CWA",
                     provider: "Wetterbehörde Taiwans",
                     grid: "≈ 1,4 km · 10 Min.",
                     imageName: "layer-radar-taiwan",
-                    summary: "QPESUMS-Komposit der taiwanischen Wetterbehörde über Taiwan und seinen Inselgruppen.")
+                    summary: "Radarbild über Taiwan und den umliegenden Inseln. Die Bilder zwischen den Messungen berechnet Oscar.")
                 WeatherModelCard(
                     name: "REDEMET",
                     provider: "Flugwetterdienst Brasiliens (DECEA)",
                     grid: "≈ 2 km · 20 Min.",
                     imageName: "layer-radar-brasil",
-                    summary: "Mosaik aus rund 29 Radarstandorten des brasilianischen Flugwetterdienstes. Einzelne Standorte melden unregelmäßig, Lücken sind möglich.")
+                    summary: "Rund 29 Radarstandorte, die nicht gleichzeitig melden. Deshalb kann das Bild Lücken haben.")
                 WeatherModelCard(
                     name: "AEMET",
                     provider: "Spanischer Wetterdienst (AEMET)",
                     grid: "≈ 1 km · 10 Min.",
                     imageName: "layer-radar-canarias",
-                    summary: "Komposit der beiden AEMET-Radare auf Gran Canaria und Teneriffa über den Kanarischen Inseln. In Tallagen kann der Teide einzelne Sektoren abschatten.")
+                    summary: "Zwei Radare auf Gran Canaria und Teneriffa. Berge wie der Teide können einzelne Bereiche verdecken.")
             }
             .padding(.horizontal, 20)
             .padding(.top, 4)

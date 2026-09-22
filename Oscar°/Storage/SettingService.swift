@@ -49,6 +49,11 @@ final class SettingService {
     var radarMotionArrows: Bool {
         didSet { UserDefaults.standard.set(radarMotionArrows, forKey: "radarMotionArrows") }
     }
+    /// When true, the radar timeline continues past the nowcast with the model
+    /// precipitation forecast (ICON-D2 for DWD, ECMWF elsewhere).
+    var radarModelContinuation: Bool {
+        didSet { UserDefaults.standard.set(radarModelContinuation, forKey: "radarModelContinuation") }
+    }
     /// When true (default), model temperature/wind layers show sampled city value
     /// bubbles on the map.
     var mapValueBubbles: Bool {
@@ -197,6 +202,7 @@ final class SettingService {
         radarSmoothMotion = (UserDefaults.standard.object(forKey: "radarSmoothMotion") as? Bool) ?? true
         radarSoftRendering = (UserDefaults.standard.object(forKey: "radarSoftRendering") as? Bool) ?? true
         radarMotionArrows = (UserDefaults.standard.object(forKey: "radarMotionArrows") as? Bool) ?? true
+        radarModelContinuation = UserDefaults.standard.bool(forKey: "radarModelContinuation")
         mapValueBubbles = (UserDefaults.standard.object(forKey: "mapValueBubbles") as? Bool) ?? true
         showAlertPolygons = UserDefaults.standard.bool(forKey: "showAlertPolygons")
         showStormCells = UserDefaults.standard.bool(forKey: "showStormCells")

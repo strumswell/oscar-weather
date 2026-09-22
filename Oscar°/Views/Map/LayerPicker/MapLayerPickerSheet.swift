@@ -11,8 +11,9 @@ import UIKit
 
 // MARK: - Layer picker sheet
 
-/// Apple-Maps-style "Kartenmodi" sheet: square screenshot tiles per layer, grouped
-/// by kind (live radar vs. model forecast) and region, plus display toggles.
+/// Apple-Maps-style "Kartenmodi" sheet: square screenshot tiles per layer in two
+/// groups by what the data is — measured (radar, satellite; live + nowcast) or
+/// computed (model forecast, one row per model) — plus display toggles.
 /// Selection state reads straight from the observable SettingService, so tiles
 /// re-ring live while the sheet stays open and the map swaps behind it.
 struct MapLayerPickerSheet: View {
@@ -35,13 +36,23 @@ struct MapLayerPickerSheet: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    radarSection
-                    satelliteSection
-                    productSection(title: "Regen", layers: [.iconPrecip, .ecmwfPrecip])
-                    productSection(title: "Temperatur", layers: [.iconTemp, .ecmwfTemp])
-                    productSection(title: "Wind", layers: [.iconWind, .ecmwfWind])
-                    productSection(title: "Luftdruck", layers: [.iconPressure, .ecmwfPressure])
+                VStack(alignment: .leading, spacing: 32) {
+                    VStack(alignment: .leading, spacing: 16) {
+                        LayerPickerGroupHeader(title: "Messung",
+                                               caption: "Live gemessen, mit Kurzprognose",
+                                               showsLiveDot: true)
+                        radarSection
+                        satelliteSection
+                    }
+                    VStack(alignment: .leading, spacing: 16) {
+                        LayerPickerGroupHeader(title: "Vorhersage",
+                                               caption: "Berechnet von Wettermodellen",
+                                               onInfoTap: { showsModelInfo = true })
+                        modelRow(title: "Zentraleuropa", detail: "DWD ICON-D2 · ≈ 2 km",
+                                 layers: [.iconPrecip, .iconTemp, .iconWind, .iconPressure])
+                        modelRow(title: "Weltweit", detail: "ECMWF IFS · ≈ 9 km",
+                                 layers: [.ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure])
+                    }
                     displaySection
                     attributionFooter
                 }
@@ -75,9 +86,8 @@ struct MapLayerPickerSheet: View {
 
     private var radarSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            LayerPickerSectionHeader(title: "Radar", detail: "Live + Kurzprognose",
+            LayerPickerSectionHeader(title: "Radar", detail: nil,
                                      infoSymbol: "info.circle",
-                                     showsLiveDot: true,
                                      infoHint: "Öffnet Details zu den Radarquellen",
                                      onInfoTap: { showsRadarInfo = true })
             ScrollViewReader { proxy in
@@ -121,9 +131,8 @@ struct MapLayerPickerSheet: View {
 
     private var satelliteSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            LayerPickerSectionHeader(title: "Satellit", detail: "Live + Kurzprognose",
+            LayerPickerSectionHeader(title: "Satellit", detail: nil,
                                      infoSymbol: "info.circle",
-                                     showsLiveDot: true,
                                      infoHint: "Öffnet Details zur Satellitenquelle",
                                      onInfoTap: { showsSatelliteInfo = true })
             LazyVGrid(columns: Self.tileColumns, spacing: 14) {
@@ -135,16 +144,14 @@ struct MapLayerPickerSheet: View {
         }
     }
 
-    private func productSection(title: LocalizedStringKey,
-                                layers: [WeatherTileLayer]) -> some View {
+    /// One model: region + source line over its four products.
+    private func modelRow(title: LocalizedStringKey, detail: LocalizedStringKey,
+                          layers: [WeatherTileLayer]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            LayerPickerSectionHeader(title: title, detail: nil,
-                                     infoSymbol: "questionmark.circle",
-                                     onInfoTap: { showsModelInfo = true })
+            LayerPickerSectionHeader(title: title, detail: detail)
             LazyVGrid(columns: Self.tileColumns, spacing: 14) {
                 ForEach(layers, id: \.self) { layer in
-                    LayerTile(title: layer.pickerRegion,
-                              subtitle: LocalizedStringKey(layer.sourceLabel),
+                    LayerTile(title: layer.productTitle, subtitle: nil,
                               imageName: layer.previewImageName,
                               isSelected: settingsService.activeTileLayer == layer,
                               action: { select { onSelectTileLayer(layer) } })
@@ -193,10 +200,6 @@ struct MapLayerPickerSheet: View {
                 LayerToggleRow(title: "Weichzeichnen",
                                subtitle: "Weiche Kanten statt harter Farbstufen",
                                isOn: $settingsService.radarSoftRendering)
-                Divider().padding(.leading, 16)
-                LayerToggleRow(title: "Bewegungspfeile",
-                               subtitle: "Zugrichtung im Regenradar",
-                               isOn: $settingsService.radarMotionArrows)
                 Divider().padding(.leading, 16)
                 LayerToggleRow(title: "Ortswerte",
                                subtitle: "Temperatur & Wind an Städten",
@@ -280,11 +283,13 @@ struct MapLayerPickerSheet: View {
 }
 
 private extension WeatherTileLayer {
-    /// Tile label in the layer picker (the product lives in the section header).
-    var pickerRegion: LocalizedStringKey {
+    /// Tile label in the layer picker (the model lives in the row header).
+    var productTitle: LocalizedStringKey {
         switch self {
-        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "Zentraleuropa"
-        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: return "Weltweit"
+        case .iconPrecip, .ecmwfPrecip: "Regen"
+        case .iconTemp, .ecmwfTemp: "Temperatur"
+        case .iconWind, .ecmwfWind: "Wind"
+        case .iconPressure, .ecmwfPressure: "Luftdruck"
         }
     }
 
