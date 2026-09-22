@@ -18,7 +18,6 @@ cd "$(dirname "$0")/.."
 export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app}"
 
 WATCH_NAME="Apple Watch Series 11 (46mm)"
-WATCH_OS="watchOS 26.5"
 APP="fastlane/derived_data/Build/Products/Debug-watchsimulator/Oscar°Watch Watch App.app"
 BUNDLE_ID="cloud.bolte.Oscar.watchkitapp"
 PAGES=(now radar hourly daily)
@@ -36,11 +35,13 @@ if [ ! -d "$APP" ]; then
     -destination "platform=iOS Simulator,name=iPhone 17 Pro Max,OS=26.5" -quiet
 fi
 
-udid=$(xcrun simctl list devices available | awk -v os="-- $WATCH_OS --" -v name="$WATCH_NAME" '
-  $0 ~ os {f=1; next} /^--/ {f=0}
-  f && index($0, name) {match($0, /[0-9A-F-]{36}/); print substr($0, RSTART, RLENGTH); exit}')
+# Newest installed watchOS runtime (simctl lists its sections in ascending
+# version order); the watch app deploys back to watchOS 26.0.
+udid=$(xcrun simctl list devices available | awk -v name="$WATCH_NAME" '
+  /^-- watchOS/ {f=1; next} /^--/ {f=0}
+  f && index($0, name) {match($0, /[0-9A-F-]{36}/); print substr($0, RSTART, RLENGTH)}' | tail -1)
 if [ -z "$udid" ]; then
-  echo "No '$WATCH_NAME' simulator on $WATCH_OS found." >&2
+  echo "No '$WATCH_NAME' simulator found on any installed watchOS runtime." >&2
   exit 1
 fi
 

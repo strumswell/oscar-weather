@@ -243,3 +243,33 @@ change the list.
 - CI: Xcode Cloud is a poor fit for simulator-fleet screenshot jobs; a GitHub
   Actions macOS job running `bin/screenshots.sh` + `upload_screenshots` is the
   suggested route.
+
+## Social media shots (Social Studio)
+
+`bin/social-studio.sh` opens a local tool (http://127.0.0.1:8766, stdlib Python
+plus one HTML file in `fastlane/social-studio/`) for one-off posts. It needs a
+Debug build of Oscar° on the simulator; nothing is built or installed for you.
+
+- **Stage**: launch any `ScreenshotScene` (or the live app) with fixture
+  overrides passed as launch arguments: `-screenshotStory rain|sunny|showers`,
+  `-screenshotHour`, `-screenshotTemperature`, `-screenshotWeathercode`,
+  `-screenshotPlace`, `-screenshotLiveActivityPhase`. Status bar (time, Wi-Fi /
+  5G, bars, carrier, battery), appearance, push notifications, Lock and Home
+  (Lock/Home send ⌘L and ⇧⌘H to the simulator window (DeviceHub in Xcode 27), which needs the Accessibility
+  permission). Navigation is by hand in the Simulator; widgets are arranged on
+  the home screen by hand.
+- **Capture**: screenshots (optionally with transparent rounded corners) and
+  screen recordings land in `fastlane/social-studio/out/` (gitignored).
+- **Compose**: several captures, App Store captures, dropped files and text on
+  one canvas; device frames from Frame Studio, brand gradient / solid /
+  transparent background, Row and Fan auto-layouts, fit-canvas-to-content.
+- **Save**: compositions are JSON files in `fastlane/social-studio/compositions/`
+  (media referenced by URL, so they need their captures in `out/`); imports
+  from disk are copied into `out/` too.
+- **Export**: PNG / JPEG / WebP with a live size estimate and a size budget
+  (Bluesky 1 MB preset) that picks the best quality that fits, lowering the
+  resolution only when it must. A canvas holding a recording exports as MP4
+  through ffmpeg, constant quality or two-pass to a target size.
+
+`index.html` also opens straight from disk as a plain editor (no simulator
+panel, library or video export).

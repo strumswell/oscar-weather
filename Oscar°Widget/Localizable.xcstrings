@@ -711,6 +711,29 @@
         }
       }
     },
+    "jetzt" : {
+      "comment" : "Live Activity: unit line under the current rain rate, e.g. \"mm/h jetzt\"",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "jetzt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "now"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "şimdi"
+          }
+        }
+      }
+    },
     "Kartenstil" : {
       "localizations" : {
         "de" : {
@@ -859,6 +882,29 @@
     },
     "Leiser Zug" : {
 
+    },
+    "max." : {
+      "comment" : "Live Activity: unit line under the peak rain rate still to come, e.g. \"mm/h max.\"",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "max."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "max"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "maks."
+          }
+        }
+      }
     },
     "Mäßig" : {
       "comment" : "UV-Kategorie 3-5",

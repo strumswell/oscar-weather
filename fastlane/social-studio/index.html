@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Social Studio</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: light-dark(#f4f5f7, #111316);
+    --panel: light-dark(#ffffff, #191c20);
+    --field: light-dark(#f0f1f4, #23272d);
+    --line: light-dark(#e2e4e9, #2b3037);
+    --text: light-dark(#16181d, #e8eaee);
+    --dim: light-dark(#6a7180, #8a92a0);
+    --accent: #2f8cff;
+    --bad: #e5484d;
+    --good: #30a46c;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: grid; grid-template-columns: 300px minmax(0, 1fr) 300px;
+    background: var(--bg); color: var(--text);
+    font: 13px/1.4 -apple-system, system-ui, sans-serif;
+  }
+  body.offline { grid-template-columns: minmax(0, 1fr) 300px; }
+  body.offline #sim, body.offline #comps { display: none; }
+  #comps { display: contents; }
+  aside { background: var(--panel); overflow-y: auto; border: 0 solid var(--line); }
+  #sim { border-right-width: 1px; } #side { border-left-width: 1px; }
+  h1 { font-size: 13px; margin: 0; padding: 14px 16px; letter-spacing: .02em; }
+  h1 small { color: var(--dim); font-weight: 400; margin-left: 6px; }
+  details { border-top: 1px solid var(--line); padding: 0 16px; }
+  summary {
+    cursor: default; padding: 10px 0; font-weight: 600; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--dim); list-style: none;
+  }
+  summary::after { content: "+"; float: right; font-weight: 400; }
+  details[open] summary::after { content: "–"; }
+  details > div { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-bottom: 14px; }
+  label { display: grid; gap: 3px; color: var(--dim); font-size: 11px; min-width: 0; }
+  label.wide, .wide { grid-column: 1 / -1; }
+  label.check { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text); }
+  input, select, button, textarea {
+    font: inherit; color: var(--text); background: var(--field);
+    border: 1px solid transparent; border-radius: 7px; padding: 6px 8px; min-width: 0; width: 100%;
+  }
+  input[type=checkbox] { width: auto; }
+  input[type=range] { padding: 0; accent-color: var(--accent); }
+  input[type=color] { padding: 2px; height: 30px; }
+  input:focus-visible, select:focus-visible, button:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 1px;
+  }
+  button { cursor: pointer; font-weight: 500; border-color: var(--line); }
+  button:hover { border-color: var(--dim); }
+  button.primary { background: var(--accent); color: #fff; border-color: transparent; }
+  button.rec { background: var(--bad); color: #fff; border-color: transparent; }
+  button[disabled] { opacity: .5; cursor: progress; }
+  .hint { color: var(--dim); font-size: 11px; margin: 0; }
+
+  main { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; min-height: 0; height: 100vh; }
+  #bar { display: flex; gap: 8px; align-items: center; padding: 10px 14px; flex-wrap: wrap; }
+  #bar select, #bar input, #bar button { width: auto; }
+  #bar input[type=number] { width: 72px; }
+  #bar .gap { flex: 1; }
+  #stage { display: grid; place-items: center; padding: 8px 24px; min-height: 0; position: relative; }
+  #canvas {
+    max-width: 100%; max-height: 100%; border-radius: 4px; box-shadow: 0 0 0 1px var(--line), 0 8px 30px #0003;
+    background: repeating-conic-gradient(#8883 0 25%, #0000 0 50%) 0 0 / 20px 20px; touch-action: none;
+  }
+  #inline {
+    position: absolute; translate: -50% -50%; width: auto; padding: 0; border-radius: 2px; background: none; resize: none;
+    overflow: hidden; white-space: pre; outline: 1px dashed var(--accent); outline-offset: 4px;
+  }
+  #empty { position: absolute; color: var(--dim); text-align: center; pointer-events: none; }
+  #library { border-top: 1px solid var(--line); background: var(--panel); }
+  #tabs { display: flex; gap: 4px; padding: 8px 14px 0; align-items: center; }
+  #tabs button { width: auto; border: 0; background: none; color: var(--dim); padding: 4px 8px; }
+  #tabs button.on { color: var(--text); background: var(--field); }
+  #strip { display: flex; gap: 8px; overflow-x: auto; padding: 8px 14px 12px; height: 132px; }
+  .thumb { position: relative; flex: none; height: 100%; border-radius: 6px; overflow: hidden; cursor: pointer; background: var(--field); }
+  .thumb img, .thumb video { height: 100%; display: block; }
+  .thumb:hover { outline: 2px solid var(--accent); }
+  .thumb b { position: absolute; left: 4px; bottom: 4px; font-size: 10px; background: #000a; color: #fff; padding: 1px 5px; border-radius: 4px; }
+  .thumb i {
+    position: absolute; right: 3px; top: 3px; width: 18px; height: 18px; border-radius: 9px; background: #000a; color: #fff;
+    font-style: normal; text-align: center; line-height: 17px; opacity: 0;
+  }
+  .thumb:hover i { opacity: 1; }
+  #live { width: 100%; max-height: 52vh; object-fit: contain; border-radius: 10px; background: #000; }
+  #layers { display: grid; gap: 2px; }
+  #layers div { display: flex; align-items: center; gap: 4px; padding: 3px 6px; border-radius: 6px; cursor: default; }
+  #layers div.on { background: var(--field); }
+  #layers span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #layers button { width: 22px; padding: 0; border: 0; background: none; color: var(--dim); }
+  #estimate { font-variant-numeric: tabular-nums; font-weight: 600; }
+  #estimate.over { color: var(--bad); } #estimate.fits { color: var(--good); }
+  #toast {
+    position: fixed; left: 50%; bottom: 160px; translate: -50% 0; background: var(--text); color: var(--bg);
+    padding: 8px 14px; border-radius: 8px; white-space: pre-line; max-width: 520px; display: none; z-index: 9;
+  }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<aside id="sim">
+  <h1>Social Studio <small>Oscar°</small></h1>
+  <details open><summary>Live preview</summary><div>
+    <video id="live" class="wide" autoplay muted playsinline hidden></video>
+    <button class="wide" id="livego">Mirror the simulator window</button>
+    <p class="hint wide" id="livehint">Pick the simulator window once in the browser's share dialog.</p>
+  </div></details>
+
+  <details open><summary>Simulator</summary><div>
+    <label class="wide">Device<select id="udid" name="udid"></select></label>
+    <button data-act="boot">Boot</button>
+    <button data-act="terminate">Quit app</button>
+    <button data-act="menu" data-body='{"item":"home"}'>Home</button>
+    <button data-act="menu" data-body='{"item":"lock"}' title="Press twice for a lit lock screen: the first press darkens the display.">Lock</button>
+    <label class="wide">Appearance<select id="appearance"><option>dark</option><option>light</option></select></label>
+  </div></details>
+
+  <details open><summary>Scene &amp; data</summary><div id="launch">
+    <label class="wide">Scene<select name="scene"></select></label>
+    <label>Story<select name="screenshotStory">
+      <option value="">scene default</option><option>rain</option><option>sunny</option><option>showers</option></select></label>
+    <label>Hour of day<input name="screenshotHour" type="number" min="0" max="23" placeholder="14"></label>
+    <label>Temperature now °C<input name="screenshotTemperature" type="number" step="0.1" placeholder="story"></label>
+    <label>Weather now<select name="screenshotWeathercode">
+      <option value="">story</option><option value="0">Clear</option><option value="1">Mainly clear</option>
+      <option value="2">Partly cloudy</option><option value="3">Overcast</option><option value="45">Fog</option>
+      <option value="53">Drizzle</option><option value="61">Light rain</option><option value="63">Rain</option>
+      <option value="65">Heavy rain</option><option value="67">Freezing rain</option><option value="71">Light snow</option>
+      <option value="75">Heavy snow</option><option value="80">Showers</option><option value="82">Violent showers</option>
+      <option value="95">Thunderstorm</option><option value="99">Thunderstorm, hail</option></select></label>
+    <label>Place name<input name="screenshotPlace" placeholder="Leipzig"></label>
+    <label>Language<select name="language">
+      <option value="">simulator</option><option>de-DE</option><option>en-US</option><option>tr</option></select></label>
+    <label data-for="lockLiveActivity">Live Activity<select name="screenshotLiveActivityPhase">
+      <option>raining</option><option>upcoming</option><option>ending</option><option>ended</option></select></label>
+    <label data-for="onboarding">Onboarding step<select name="onboardingStep">
+      <option>welcome</option><option>features</option><option>location</option><option>manualLocation</option>
+      <option>notifications</option><option>finale</option></select></label>
+    <label class="wide">Extra launch arguments<input name="extra" placeholder="-classicTheme YES"></label>
+    <button class="primary wide" data-act="launch" data-form="launch">Launch</button>
+    <p class="hint wide">Scenes load fixture data; navigate by hand in the Simulator. “live” runs the app on real data.
+      Widgets: arrange them on the home screen, then capture. Lock-screen scenes: launch, then Lock twice.</p>
+  </div></details>
+
+  <details open><summary>Status bar</summary><div id="statusbar">
+    <label>Time<input name="time" value="9:41"></label>
+    <label>Network<select name="network">
+      <option>wifi</option><option>5g</option><option>5g+</option><option>5g-uc</option><option>5g-uwb</option>
+      <option>lte</option><option>lte+</option><option>4g</option><option>3g</option><option>hide</option></select></label>
+    <label>Wi-Fi bars<input name="wifiBars" type="number" min="0" max="3" value="3"></label>
+    <label>Cell bars<input name="cellularBars" type="number" min="0" max="4" value="4"></label>
+    <label>Carrier<input name="operator" placeholder="none"></label>
+    <label>Battery<select name="batteryState"><option>discharging</option><option>charging</option><option>charged</option></select></label>
+    <label class="wide">Battery level <output></output><input name="batteryLevel" type="range" min="0" max="100" value="100"></label>
+    <button data-act="statusbar" data-form="statusbar">Apply</button>
+    <button data-act="statusbar" data-body='{"clear":true}'>Reset</button>
+  </div></details>
+
+  <details><summary>Notification</summary><div id="push">
+    <label class="wide">Title<input name="title" value="Regen in 15 Minuten"></label>
+    <label class="wide">Body<textarea name="body" rows="2">Kräftiger Schauer bis etwa 15:10 Uhr.</textarea></label>
+    <button class="wide" data-act="push" data-form="push">Send</button>
+    <p class="hint wide">Needs notification permission in the app. Lock first to get it on the lock screen.</p>
+  </div></details>
+
+  <details open><summary>Capture</summary><div>
+    <label class="wide">Device frame for new captures<select id="newframe"></select></label>
+    <label class="check wide"><input id="alpha" type="checkbox" checked>Transparent rounded corners</label>
+    <label class="check wide"><input id="autoadd" type="checkbox" checked>Add captures to the canvas</label>
+    <button class="primary" id="shoot">Screenshot</button>
+    <button id="record">● Record</button>
+  </div></details>
+</aside>
+
+<main>
+  <div id="bar">
+    <span id="comps"><select id="comp" title="Saved compositions"></select>
+      <button id="comp-save">Save</button><button id="comp-as">Save as…</button><button id="comp-del" title="Delete this saved composition">Delete</button></span>
+    <select id="preset" title="Canvas size">
+      <option value="2400x1350">16:9 landscape</option><option value="2000x2000">1:1 square</option>
+      <option value="1600x2000">4:5 portrait</option><option value="1350x2400">9:16 story</option>
+      <option value="">custom</option></select>
+    <input id="cw" type="number" min="100" max="8000" step="10"> × <input id="ch" type="number" min="100" max="8000" step="10">
+    <label class="check" title="Changing one side adjusts the other"><input id="clock" type="checkbox">Keep ratio</label>
+    <button id="fit" title="Shrink the canvas to the content plus padding">Fit to content</button>
+    <span class="gap"></span>
+    <button id="row">Row</button><button id="fan">Fan</button>
+    <button id="addtext">+ Text</button>
+    <button id="addfile" title="Or drop files anywhere on the page">Import image / video…</button><input id="file" type="file" accept="image/*,video/*" multiple hidden>
+  </div>
+  <div id="stage"><canvas id="canvas"></canvas><textarea id="inline" hidden spellcheck="false"></textarea>
+    <div id="empty">Capture a screenshot, pick one from the library,<br>or drop images and videos here.</div></div>
+  <div id="library">
+    <div id="tabs"><button data-tab="captures" class="on">Captures</button><button data-tab="appStore">App Store set</button>
+      <span style="flex:1"></span><button id="reveal">Show in Finder</button></div>
+    <div id="strip"></div>
+  </div>
+</main>
+
+<aside id="side">
+  <details open><summary>Background</summary><div>
+    <label class="wide">Fill<select id="bgtype"><option value="gradient">Gradient</option><option value="solid">Solid</option>
+      <option value="none">None (transparent)</option></select></label>
+    <label>Color<input id="bg0" type="color"></label>
+    <label id="bg1l">To<input id="bg1" type="color"></label>
+    <label class="wide" id="bgal">Angle<input id="bga" type="range" min="0" max="360"></label>
+  </div></details>
+
+  <details open><summary>Layers</summary><div><div id="layers" class="wide"></div></div></details>
+
+  <details open id="inspector" hidden><summary>Selection</summary><div>
+    <label class="wide" data-kind="image video">Device frame<select id="i-frame"></select></label>
+    <label class="wide" data-kind="text">Text<textarea id="i-text" rows="2"></textarea></label>
+    <label data-kind="text">Font<select id="i-font"></select></label>
+    <label data-kind="text">Weight<select id="i-weight"><option>400</option><option>500</option><option selected>700</option><option>900</option></select></label>
+    <label data-kind="text">Color<input id="i-color" type="color"></label>
+    <label data-kind="text">Align<select id="i-align"><option>center</option><option>left</option><option>right</option></select></label>
+    <label class="wide" data-kind="text">Line height <output></output><input id="i-lh" type="range" min="0.7" max="2.5" step="0.05"></label>
+    <label class="wide" data-kind="text">Letter spacing <output></output><input id="i-ls" type="range" min="-10" max="60" step="0.5"></label>
+    <label class="wide" data-kind="text">Box width, % of canvas (0 = as typed) <output></output><input id="i-width" type="range" min="0" max="100"></label>
+    <label class="wide" data-kind="text">Font size, px <output></output><input id="i-size" type="range" min="8" step="1"></label>
+    <label data-kind="image video">Width, px<input id="i-w" type="number" min="10" step="1"></label>
+    <label data-kind="image video">Height, px<input id="i-h" type="number" min="10" step="1"></label>
+    <label class="wide" data-kind="image video">Size<input id="i-scale" type="range" min="2" max="200"></label>
+    <label class="wide" data-kind="image text">Rotation<input id="i-rot" type="range" min="-45" max="45" step="0.5"></label>
+    <label class="wide" data-kind="image video">Corner radius<input id="i-radius" type="range" min="0" max="25" step="0.1"></label>
+    <label class="wide">Shadow<input id="i-shadow" type="range" min="0" max="200"></label>
+    <label class="wide" data-kind="image text">Opacity <output></output><input id="i-opacity" type="range" min="0" max="100"></label>
+    <button id="i-dup">Duplicate</button><button id="i-del">Delete</button>
+    <p class="hint wide">Drag to move, scroll to resize, arrows nudge, ⌘Z undoes. Shift-click or drag a box over empty canvas to select several, ⌘A for all; they move, resize, duplicate and delete together. Double-click text to edit it in place, or empty canvas for new text.</p>
+  </div></details>
+
+  <details open id="imgexport"><summary>Export image</summary><div>
+    <label>Format<select id="fmt"><option value="image/jpeg">JPEG</option><option value="image/webp">WebP</option>
+      <option value="image/png">PNG</option></select></label>
+    <label>Size budget<select id="budget"><option value="0">none</option><option value="976">Bluesky · 1 MB</option>
+      <option value="2000">2 MB</option><option value="5000">X · 5 MB</option><option value="16000">Mastodon · 16 MB</option>
+      <option value="-1">custom</option></select></label>
+    <label class="wide" id="budgetkbl" hidden>Budget in KB<input id="budgetkb" type="number" min="20" value="500"></label>
+    <label class="wide" id="ql">Quality <output></output><input id="q" type="range" min="30" max="100" value="90"></label>
+    <label class="wide">Resolution <output></output><input id="scale" type="range" min="20" max="100" value="100"></label>
+    <p class="wide" style="margin:0"><span id="estimate">–</span><br><span class="hint" id="estimatenote"></span></p>
+    <button class="primary wide" id="download">Download</button>
+  </div></details>
+
+  <details open id="videxport" hidden><summary>Export video</summary><div>
+    <label>Width<select id="v-width"><option>720</option><option selected>1080</option><option>1440</option><option>2160</option></select></label>
+    <label>Frame rate<select id="v-fps"><option>30</option><option>60</option><option>24</option></select></label>
+    <label>Trim from (s)<input id="v-start" type="number" min="0" step="0.1" value="0"></label>
+    <label>to (s)<input id="v-end" type="number" min="0" step="0.1" placeholder="end"></label>
+    <label class="wide">Compression<select id="v-mode"><option value="crf">Constant quality</option><option value="size">Fit a file size</option></select></label>
+    <label class="wide" id="v-crfl">Quality <output></output><input id="v-crf" type="range" min="16" max="36" value="23"></label>
+    <label class="wide" id="v-mbl" hidden>Target MB<input id="v-mb" type="number" min="0.2" step="0.1" value="10"></label>
+    <button class="primary wide" id="v-go">Encode MP4</button>
+    <p class="wide hint" id="v-result"></p>
+  </div></details>
+</aside>
+
+<div id="toast"></div>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const BRAND = { type: 'gradient', c0: '#3aa0ff', c1: '#0067df', angle: 180 };
+const store = {
+  get(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } },
+  set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} },
+};
+
+let server = null;            // /api/state, null when opened from disk
+let doc = store.get('doc', { w: 2400, h: 1350, bg: { ...BRAND }, items: [] });
+let selected = null;          // item id: the one the inspector edits
+const also = new Set();       // further selected ids; they move, scale and delete along
+let editing = null;           // text item being edited on the stage
+let undoStack = [];
+const assets = new Map();     // src -> { el, w, h }
+const sprites = new WeakMap();
+
+// ---------------------------------------------------------------- plumbing
+
+function toast(message, ms = 4000) {
+  const t = $('#toast');
+  t.textContent = message; t.style.display = 'block';
+  clearTimeout(toast.timer); toast.timer = setTimeout(() => t.style.display = 'none', ms);
+}
+
+async function api(action, body = {}) {
+  const response = await fetch('/api/' + action, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ udid: $('#udid').value, ...body }),
+  });
+  const json = await response.json();
+  if (!response.ok) throw new Error(json.error || response.statusText);
+  return json;
+}
+
+const formValues = id => Object.fromEntries($$(`#${id} [name]`)
+  .filter(f => !f.disabled && !f.closest('[hidden]')).map(f => [f.name, f.value]));
+
+async function busy(button, work) {
+  button.disabled = true;
+  try { return await work(); } catch (error) { toast(error.message, 8000); } finally { button.disabled = false; }
+}
+
+function load(src, kind) {
+  if (assets.has(src)) return Promise.resolve(assets.get(src));
+  return new Promise((resolve, reject) => {
+    const done = (el, w, h) => { const a = { el, w, h }; assets.set(src, a); resolve(a); };
+    if (kind === 'video') {
+      const v = Object.assign(document.createElement('video'), { muted: true, playsInline: true, preload: 'auto', src });
+      v.onloadeddata = () => { v.currentTime = Math.min(0.1, v.duration / 2); };
+      v.onseeked = () => { assets.has(src) ? draw() : done(v, v.videoWidth, v.videoHeight); };
+      v.onerror = () => reject(new Error('This browser cannot play ' + src.split('/').pop()));
+    } else {
+      const img = new Image();
+      img.onload = () => done(img, img.naturalWidth, img.naturalHeight);
+      img.onerror = () => reject(new Error('Cannot load ' + src));
+      img.src = src;
+    }
+  });
+}
+
+// ---------------------------------------------------------------- document
+
+const item = () => doc.items.find(i => i.id === selected);
+const group = () => doc.items.filter(i => i.id === selected || also.has(i.id));
+function select(id, extend = false) {
+  if (!extend) { also.clear(); selected = id; return; }
+  if (id === selected) { selected = [...also][0] ?? null; also.delete(selected); }
+  else if (!also.delete(id)) { if (selected) also.add(selected); selected = id; }
+}
+const frameSrc = name => '/frames/' + encodeURIComponent(name);
+
+function commit(save = true) {
+  if (save) {
+    undoStack.push(commit.last); if (undoStack.length > 60) undoStack.shift();
+    commit.last = JSON.stringify(doc);
+    // Dropped files live behind blob: URLs that die with the page.
+    store.set('doc', { ...doc, items: doc.items.filter(i => !i.src?.startsWith('blob:')) });
+  }
+  syncUI(); draw(); estimateSoon();
+}
+
+function undo() {
+  const previous = undoStack.pop();
+  if (!previous) return;
+  doc = JSON.parse(previous); commit.last = previous;
+  commit(false); store.set('doc', doc);
+}
+
+async function addMedia(src, kind, name) {
+  const a = await load(src, kind);
+  // The frame art is the Pro Max; every current iPhone shares its 2.17 aspect.
+  const phone = a.h / a.w > 1.8, fits = Math.abs(a.h / a.w - 2.173) < 0.03;
+  const frame = fits && server ? $('#newframe').value : '';
+  if (frame) await load(frameSrc(frame));
+  const it = {
+    id: crypto.randomUUID(), kind, src, name, x: doc.w / 2, y: doc.h / 2, scale: 1, rot: 0,
+    frame, radius: phone ? 13.6 : 0, shadow: 40,
+  };
+  it.scale = Math.min(doc.h * 0.86 / box(it).h, doc.w * 0.86 / box(it).w);
+  doc.items.push(it); selected = it.id;
+  commit();
+}
+
+function addText(x = doc.w / 2, y = doc.h * 0.12) {
+  const it = {
+    id: crypto.randomUUID(), kind: 'text', text: 'Oscar°', x, y, scale: 1, rot: 0,
+    size: Math.round(doc.h * 0.07), font: $('#i-font').options[0].value, weight: '700', color: '#ffffff', align: 'center', shadow: 0,
+  };
+  doc.items.push(it); selected = it.id;
+  commit();
+  return it;
+}
+
+// Local box of an item in its own pixels; for media also the screen rect inside it.
+function box(it) {
+  if (it.kind === 'text') {
+    const ctx = box.ctx ??= document.createElement('canvas').getContext('2d');
+    ctx.font = fontOf(it); ctx.letterSpacing = (it.ls ?? 0) + 'px';
+    // A set width wraps greedily at spaces; without one the text runs as typed.
+    const lines = it.text.split('\n').flatMap(paragraph => {
+      if (!it.width) return [paragraph];
+      const wrapped = [''];
+      for (const word of paragraph.split(' ')) {
+        const attempt = wrapped.at(-1) ? wrapped.at(-1) + ' ' + word : word;
+        if (wrapped.at(-1) && ctx.measureText(attempt).width > it.width) wrapped.push(word); else wrapped[wrapped.length - 1] = attempt;
+      }
+      return wrapped;
+    });
+    const w = it.width || Math.max(10, ...lines.map(l => ctx.measureText(l).width));
+    return { w, h: lines.length * it.size * lh(it), lines };
+  }
+  const a = assets.get(it.src) ?? { w: 100, h: 100 };
+  const f = it.frame && assets.get(frameSrc(it.frame));
+  if (!f) return { w: a.w, h: a.h, sx: 0, sy: 0, sw: a.w, sh: a.h, r: a.w * it.radius / 100 };
+  const g = server.frameGeometry, sw = g.screenWidth;
+  return { w: f.w, h: f.h, sx: g.screenOffsetX, sy: g.screenOffsetY, sw, sh: sw * a.h / a.w, r: g.screenCornerRadius, f };
+}
+
+const fontOf = it => `${it.weight} ${it.size}px ${it.font}`;
+const lh = it => it.lh ?? 1.1;
+
+// Screen clipped to its rounded rect plus the bezel, so one drawImage casts one shadow.
+function sprite(it) {
+  const a = assets.get(it.src), b = box(it), key = [it.src, it.frame, it.radius].join('|');
+  const cached = sprites.get(it);
+  if (cached?.key === key && it.kind !== 'video') return cached.canvas;
+  const canvas = cached?.key === key ? cached.canvas : Object.assign(document.createElement('canvas'), { width: b.w, height: b.h });
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, b.w, b.h);
+  ctx.save(); ctx.beginPath(); ctx.roundRect(b.sx, b.sy, b.sw, b.sh, b.r); ctx.clip();
+  ctx.drawImage(a.el, b.sx, b.sy, b.sw, b.sh); ctx.restore();
+  if (b.f) ctx.drawImage(b.f.el, 0, 0);
+  sprites.set(it, { key, canvas });
+  return canvas;
+}
+
+function transform(ctx, it, k) {
+  ctx.translate(it.x * k, it.y * k); ctx.rotate(it.rot * Math.PI / 180); ctx.scale(it.scale * k, it.scale * k);
+}
+
+function drawItem(ctx, it, k) {
+  if (it.kind !== 'text' && !assets.has(it.src)) return;
+  const b = box(it);
+  ctx.save();
+  transform(ctx, it, k);
+  if (it.kind !== 'video') ctx.globalAlpha = it.opacity ?? 1;  // ffmpeg overlays the recording opaque
+  if (it.shadow) {
+    ctx.shadowColor = '#0007'; ctx.shadowBlur = it.shadow * k; ctx.shadowOffsetY = it.shadow * k * 0.35;
+  }
+  if (it.kind === 'text') {
+    if (it.id === editing) { ctx.restore(); return; }
+    ctx.font = fontOf(it); ctx.letterSpacing = (it.ls ?? 0) + 'px'; ctx.fillStyle = it.color; ctx.textAlign = it.align; ctx.textBaseline = 'middle';
+    const x = it.align === 'left' ? -b.w / 2 : it.align === 'right' ? b.w / 2 : 0;
+    b.lines.forEach((line, i) => ctx.fillText(line, x, (i + 0.5) * it.size * lh(it) - b.h / 2));
+  } else {
+    ctx.drawImage(sprite(it), -b.w / 2, -b.h / 2);
+  }
+  ctx.restore();
+}
+
+function paintBackground(ctx, W, H, opaque) {
+  const bg = doc.bg;
+  if (bg.type === 'none') { if (opaque) { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); } return; }
+  if (bg.type === 'gradient') {
+    const a = bg.angle * Math.PI / 180, dx = Math.sin(a), dy = -Math.cos(a);
+    const half = (Math.abs(dx) * W + Math.abs(dy) * H) / 2;
+    const gradient = ctx.createLinearGradient(W / 2 - dx * half, H / 2 - dy * half, W / 2 + dx * half, H / 2 + dy * half);
+    gradient.addColorStop(0, bg.c0); gradient.addColorStop(1, bg.c1);
+    ctx.fillStyle = gradient;
+  } else ctx.fillStyle = bg.c0;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function paint(canvas, items = doc.items, opaque = false) {
+  const ctx = canvas.getContext('2d'), k = canvas.width / doc.w;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  paintBackground(ctx, canvas.width, canvas.height, opaque);
+  for (const it of items) drawItem(ctx, it, k);
+  return ctx;
+}
+
+const canvasOf = (width, height) => Object.assign(document.createElement('canvas'), { width, height });
+
+// ---------------------------------------------------------------- stage
+
+const view = $('#canvas');
+let guides = {}, marquee = null;
+
+function draw() {
+  const stage = $('#stage').getBoundingClientRect(), dpr = devicePixelRatio || 1;
+  const fit = Math.min((stage.width - 48) / doc.w, (stage.height - 16) / doc.h);
+  view.style.width = doc.w * fit + 'px'; view.style.height = doc.h * fit + 'px';
+  view.width = Math.round(doc.w * fit * dpr); view.height = Math.round(doc.h * fit * dpr);
+  const ctx = paint(view), k = view.width / doc.w;
+  ctx.strokeStyle = '#ff3b81'; ctx.lineWidth = dpr;
+  if (guides.x) { ctx.beginPath(); ctx.moveTo(view.width / 2, 0); ctx.lineTo(view.width / 2, view.height); ctx.stroke(); }
+  if (guides.y) { ctx.beginPath(); ctx.moveTo(0, view.height / 2); ctx.lineTo(view.width, view.height / 2); ctx.stroke(); }
+  for (const it of group()) {
+    const b = box(it);
+    ctx.save(); transform(ctx, it, k);
+    ctx.strokeStyle = '#2f8cff'; ctx.lineWidth = 2 * dpr / (it.scale * k);
+    ctx.strokeRect(-b.w / 2, -b.h / 2, b.w, b.h); ctx.restore();
+  }
+  if (marquee) {
+    ctx.strokeStyle = '#2f8cff'; ctx.fillStyle = '#2f8cff22'; ctx.lineWidth = dpr;
+    const r = marquee.map(v => v * k);
+    ctx.fillRect(r[0], r[1], r[2] - r[0], r[3] - r[1]); ctx.strokeRect(r[0], r[1], r[2] - r[0], r[3] - r[1]);
+  }
+  $('#empty').hidden = doc.items.length > 0;
+}
+
+function hit(px, py) {
+  return doc.items.findLast(it => {
+    const a = -it.rot * Math.PI / 180, dx = px - it.x, dy = py - it.y, b = box(it);
+    const lx = (dx * Math.cos(a) - dy * Math.sin(a)) / it.scale, ly = (dx * Math.sin(a) + dy * Math.cos(a)) / it.scale;
+    return Math.abs(lx) <= b.w / 2 && Math.abs(ly) <= b.h / 2;
+  });
+}
+
+const toDoc = e => {
+  const r = view.getBoundingClientRect();
+  return [(e.clientX - r.left) * doc.w / r.width, (e.clientY - r.top) * doc.h / r.height];
+};
+
+view.onpointerdown = e => {
+  const [px, py] = toDoc(e), it = hit(px, py), extend = e.shiftKey || e.metaKey;
+  view.setPointerCapture(e.pointerId);
+  const finish = after => { view.onpointerup = () => { view.onpointermove = view.onpointerup = null; after(); }; };
+
+  if (!it) {
+    // Rubber band over empty canvas: everything whose centre it covers.
+    if (!extend) select(null);
+    const before = new Set(group().map(i => i.id));
+    view.onpointermove = m => {
+      const [mx, my] = toDoc(m);
+      marquee = [Math.min(px, mx), Math.min(py, my), Math.max(px, mx), Math.max(py, my)];
+      const inside = doc.items.filter(i => before.has(i.id)
+        || (i.x >= marquee[0] && i.x <= marquee[2] && i.y >= marquee[1] && i.y <= marquee[3]));
+      also.clear(); selected = inside.at(-1)?.id ?? null;
+      inside.slice(0, -1).forEach(i => also.add(i.id));
+      draw();
+    };
+    finish(() => { marquee = null; syncUI(); draw(); });
+    syncUI(); draw();
+    return;
+  }
+
+  if (extend) { select(it.id, true); syncUI(); draw(); return finish(() => {}); }
+  if (also.has(it.id)) { also.add(selected); also.delete(it.id); selected = it.id; } else if (it.id !== selected) select(it.id);
+  syncUI(); draw();
+
+  const starts = group().map(i => [i, i.x, i.y]), ox = it.x - px, oy = it.y - py, snap = doc.w / 120;
+  const [x0, y0] = [it.x, it.y];
+  let moved = false;
+  view.onpointermove = m => {
+    const [mx, my] = toDoc(m);
+    let x = mx + ox, y = my + oy; moved = true;
+    guides = { x: Math.abs(x - doc.w / 2) < snap, y: Math.abs(y - doc.h / 2) < snap };
+    if (guides.x) x = doc.w / 2;
+    if (guides.y) y = doc.h / 2;
+    for (const [other, sx, sy] of starts) { other.x = sx + x - x0; other.y = sy + y - y0; }
+    draw();
+  };
+  finish(() => { guides = {}; moved ? commit() : draw(); });
+};
+
+// In-place text editing: a textarea laid exactly over the item, which the
+// canvas skips drawing meanwhile.
+function editInPlace(it) {
+  editing = it.id; draw();
+  const r = view.getBoundingClientRect(), stage = $('#stage').getBoundingClientRect(), k = r.width / doc.w * it.scale;
+  const area = $('#inline');
+  const place = () => {
+    const b = box(it);
+    Object.assign(area.style, {
+      width: b.w * k + (it.width ? 0 : it.size * k) + 'px', height: b.h * k + 'px', whiteSpace: it.width ? 'pre-wrap' : 'pre',
+      left: r.left - stage.left + it.x * r.width / doc.w + 'px', top: r.top - stage.top + it.y * r.height / doc.h + 'px',
+    });
+  };
+  Object.assign(area.style, {
+    font: `${it.weight} ${it.size * k}px ${it.font}`, lineHeight: lh(it), letterSpacing: (it.ls ?? 0) * k + 'px',
+    color: it.color, textAlign: it.align, rotate: it.rot + 'deg',
+  });
+  area.value = it.text; area.hidden = false; place();
+  area.focus(); area.select();
+  area.oninput = () => { it.text = area.value; place(); };
+  area.onkeydown = e => { if (e.key === 'Escape') area.blur(); };
+  area.onblur = () => {
+    area.hidden = true; editing = null;
+    if (!it.text.trim()) doc.items = doc.items.filter(i => i !== it);
+    commit();
+  };
+}
+
+view.ondblclick = e => {
+  const [px, py] = toDoc(e), it = hit(px, py);
+  if (it?.kind === 'text') editInPlace(it);
+  else if (!it) editInPlace(addText(px, py));
+};
+
+view.addEventListener('wheel', e => {
+  const it = item();
+  if (!it) return;
+  e.preventDefault();
+  const items = group(), f = Math.exp(-e.deltaY / 600);
+  const cx = items.reduce((a, i) => a + i.x, 0) / items.length, cy = items.reduce((a, i) => a + i.y, 0) / items.length;
+  for (const i of items) { i.scale = Math.max(0.02, i.scale * f); i.x = cx + (i.x - cx) * f; i.y = cy + (i.y - cy) * f; }
+  syncUI(); draw();
+  clearTimeout(view.wheelTimer); view.wheelTimer = setTimeout(commit, 300);
+}, { passive: false });
+
+addEventListener('keydown', e => {
+  if (e.target.matches('input, textarea, select')) return;
+  const it = item(), step = e.shiftKey ? 50 : 5;
+  if ((e.metaKey || e.ctrlKey) && e.key === 'z') { e.preventDefault(); return undo(); }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+    e.preventDefault(); also.clear(); doc.items.forEach(i => also.add(i.id));
+    selected = doc.items.at(-1)?.id ?? null; also.delete(selected); syncUI(); return draw();
+  }
+  if (!it) return;
+  if ((e.metaKey || e.ctrlKey) && e.key === 'd') { e.preventDefault(); return $('#i-dup').click(); }
+  const move = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+  if (move) { e.preventDefault(); for (const i of group()) { i.x += move[0]; i.y += move[1]; } commit(); }
+  if (e.key === 'Backspace' || e.key === 'Delete') $('#i-del').click();
+  if (e.key === 'Escape') { select(null); syncUI(); draw(); }
+});
+
+addEventListener('resize', draw);
+
+// Drop files anywhere.
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('drop', e => { e.preventDefault(); addFiles(e.dataTransfer.files); });
+$('#addfile').onclick = () => $('#file').click();
+$('#file').onchange = e => addFiles(e.target.files);
+// With the server, imports are copied into out/: they survive a reload, show
+// up in the library and (videos) can be encoded. From disk they stay blob: URLs.
+async function addFiles(files) {
+  for (const file of files) {
+    const kind = file.type.startsWith('video') ? 'video' : 'image';
+    try {
+      let src = URL.createObjectURL(file), name = file.name;
+      if (server) {
+        const response = await fetch('/api/upload?name=' + encodeURIComponent(file.name), { method: 'PUT', body: file });
+        if (response.status === 501) {
+          // A server started before imports existed: keep the file in memory instead.
+          toast('Restart bin/social-studio.sh to keep imports across reloads.');
+        } else {
+          const json = await response.json();
+          if (!response.ok) throw new Error(json.error);
+          name = json.name; src = '/out/' + encodeURIComponent(name);
+          await refresh();
+        }
+      }
+      await addMedia(src, kind, name);
+    } catch (error) { toast(error.message); }
+  }
+}
+
+// ---------------------------------------------------------------- layout helpers
+
+const media = () => doc.items.filter(i => i.kind !== 'text').sort((a, b) => a.x - b.x);
+
+function arrange(fan) {
+  const items = media(), n = items.length;
+  if (!n) return;
+  const overlap = fan ? 0.72 : 1.06, mid = (n - 1) / 2;
+  const height = doc.h * (fan ? 0.74 : 0.84);
+  let widths = items.map(it => box(it).w * height / box(it).h);
+  const total = widths.reduce((a, b) => a + b, 0) * overlap;
+  const shrink = Math.min(1, doc.w * 0.92 / total);
+  let x = (doc.w - total * shrink) / 2;
+  items.forEach((it, i) => {
+    const w = widths[i] * shrink;
+    it.scale = w / box(it).w;
+    it.x = x + w * overlap / 2; x += w * overlap;
+    it.y = doc.h / 2 + (fan ? (Math.abs(i - mid) ** 2) * doc.h * 0.025 : 0);
+    it.rot = fan && it.kind !== 'video' ? (i - mid) * 7 : 0;
+  });
+  if (fan) {
+    // Centre device on top, the outer ones tucked behind it.
+    const rank = it => -Math.abs(items.indexOf(it) - mid);
+    doc.items.sort((a, b) => (a.kind === 'text') - (b.kind === 'text') || rank(a) - rank(b));
+  }
+  commit();
+}
+$('#row').onclick = () => arrange(false);
+$('#fan').onclick = () => arrange(true);
+
+$('#fit').onclick = () => {
+  if (!doc.items.length) return;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const it of doc.items) {
+    const b = box(it), a = it.rot * Math.PI / 180, pad = it.shadow * 1.6;
+    for (const [cx, cy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      const lx = cx * b.w / 2 * it.scale, ly = cy * b.h / 2 * it.scale;
+      const x = it.x + lx * Math.cos(a) - ly * Math.sin(a), y = it.y + lx * Math.sin(a) + ly * Math.cos(a);
+      x0 = Math.min(x0, x - pad); x1 = Math.max(x1, x + pad); y0 = Math.min(y0, y - pad); y1 = Math.max(y1, y + pad * 1.4);
+    }
+  }
+  const pad = Math.round((x1 - x0) * 0.04);
+  for (const it of doc.items) { it.x += pad - x0; it.y += pad - y0; }
+  doc.w = Math.round(x1 - x0 + pad * 2); doc.h = Math.round(y1 - y0 + pad * 2);
+  commit();
+};
+
+// ---------------------------------------------------------------- side panel
+
+function syncUI() {
+  const size = `${doc.w}x${doc.h}`;
+  $('#preset').value = [...$('#preset').options].some(o => o.value === size) ? size : '';
+  $('#cw').value = doc.w; $('#ch').value = doc.h;
+  $('#bgtype').value = doc.bg.type; $('#bg0').value = doc.bg.c0; $('#bg1').value = doc.bg.c1; $('#bga').value = doc.bg.angle;
+  $('#bg1l').hidden = $('#bgal').hidden = doc.bg.type !== 'gradient';
+  $('#bg0').parentElement.hidden = doc.bg.type === 'none';
+
+  const it = item();
+  $('#inspector').hidden = !it;
+  if (it) {
+    for (const el of $$('#inspector [data-kind]')) el.hidden = !el.dataset.kind.includes(it.kind);
+    if (it.kind === 'text') {
+      $('#i-text').value = it.text; $('#i-font').value = it.font; $('#i-weight').value = it.weight;
+      $('#i-color').value = it.color; $('#i-align').value = it.align; $('#i-lh').value = lh(it); $('#i-ls').value = it.ls ?? 0;
+      $('#i-size').max = Math.round(doc.h / 2); $('#i-size').value = Math.round(it.size * it.scale);
+      $('#i-width').value = Math.round((it.width || 0) * it.scale / doc.w * 100);
+    } else {
+      $('#i-frame').value = it.frame; $('#i-radius').value = it.radius;
+      $('#i-radius').parentElement.hidden = !!it.frame;
+    }
+    // Size slider: share of the canvas height the item covers.
+    $('#i-scale').value = Math.round(box(it).h * it.scale / doc.h * 100);
+    if (it.kind !== 'text') syncSize(it);
+    $('#i-rot').value = it.rot; $('#i-shadow').value = it.shadow; $('#i-opacity').value = Math.round((it.opacity ?? 1) * 100);
+  }
+
+  $('#layers').replaceChildren(...doc.items.toReversed().map(layer => {
+    const row = document.createElement('div');
+    row.className = layer.id === selected || also.has(layer.id) ? 'on' : '';
+    const label = layer.kind === 'text' ? '“' + layer.text.split('\n')[0] + '”' : layer.name || layer.src.split('/').pop();
+    row.innerHTML = '<span></span><button title="Forward">↑</button><button title="Backward">↓</button>';
+    row.firstChild.textContent = (layer.kind === 'video' ? '▶ ' : '') + decodeURIComponent(label);
+    row.onclick = e => { select(layer.id, e.shiftKey || e.metaKey); syncUI(); draw(); };
+    const shift = by => e => {
+      e.stopPropagation();
+      const i = doc.items.indexOf(layer), j = i + by;
+      if (j < 0 || j >= doc.items.length) return;
+      [doc.items[i], doc.items[j]] = [doc.items[j], doc.items[i]];
+      commit();
+    };
+    row.children[1].onclick = shift(1); row.children[2].onclick = shift(-1);
+    return row;
+  }));
+  if (!doc.items.length) $('#layers').innerHTML = '<p class="hint">Nothing on the canvas yet.</p>';
+
+  const video = doc.items.find(i => i.kind === 'video');
+  $('#videxport').hidden = !video || !server?.ffmpeg || video.src.startsWith('blob:');
+  for (const output of $$('label output')) output.textContent = output.parentElement.querySelector('input').value;
+}
+
+function bind(id, apply, event = 'input') {
+  $(id).addEventListener(event, e => { apply(e.target.value); draw(); syncOutputs(); estimateSoon(); });
+  $(id).addEventListener('change', () => commit());
+}
+const syncOutputs = () => { for (const o of $$('label output')) o.textContent = o.parentElement.querySelector('input').value; };
+
+$('#preset').onchange = e => { if (e.target.value) { [doc.w, doc.h] = e.target.value.split('x').map(Number); commit(); } };
+const clamp = v => Math.min(8000, Math.max(100, Math.round(+v) || 100));
+bind('#cw', v => { const ratio = doc.h / doc.w; doc.w = clamp(v); if ($('#clock').checked) doc.h = clamp(doc.w * ratio); }, 'change');
+bind('#ch', v => { const ratio = doc.w / doc.h; doc.h = clamp(v); if ($('#clock').checked) doc.w = clamp(doc.h * ratio); }, 'change');
+bind('#bgtype', v => doc.bg.type = v, 'change');
+bind('#bg0', v => doc.bg.c0 = v); bind('#bg1', v => doc.bg.c1 = v); bind('#bga', v => doc.bg.angle = +v);
+bind('#i-text', v => item().text = v);
+bind('#i-font', v => item().font = v, 'change'); bind('#i-weight', v => item().weight = v, 'change');
+bind('#i-width', v => item().width = v / 100 * doc.w / item().scale);
+bind('#i-size', v => item().size = v / item().scale);  // the box width stays, the text reflows
+bind('#i-lh', v => item().lh = +v || 1.1); bind('#i-ls', v => item().ls = +v || 0);
+bind('#i-color', v => item().color = v); bind('#i-align', v => item().align = v, 'change');
+bind('#i-scale', v => { const it = item(); it.scale = v / 100 * doc.h / box(it).h; syncSize(it); });
+// Width and height in canvas pixels (frame included); either one drives the scale, the other follows.
+function syncSize(it, except) {
+  const b = box(it);
+  if (except !== 'i-w') $('#i-w').value = Math.round(b.w * it.scale);
+  if (except !== 'i-h') $('#i-h').value = Math.round(b.h * it.scale);
+}
+for (const [id, side] of [['i-w', 'w'], ['i-h', 'h']]) bind('#' + id, v => {
+  const it = item();
+  if (!(+v >= 10)) return;
+  it.scale = v / box(it)[side]; syncSize(it, id);
+  $('#i-scale').value = Math.round(box(it).h * it.scale / doc.h * 100);
+});
+bind('#i-rot', v => item().rot = +v); bind('#i-radius', v => item().radius = +v); bind('#i-shadow', v => item().shadow = +v);
+bind('#i-opacity', v => item().opacity = v / 100);
+$('#i-frame').onchange = async e => {
+  const it = item(), before = box(it).h * it.scale;
+  if (e.target.value) await load(frameSrc(e.target.value));
+  it.frame = e.target.value;
+  it.scale = before / box(it).h;  // keep the on-canvas height
+  commit();
+};
+$('#i-del').onclick = () => { const gone = group(); doc.items = doc.items.filter(i => !gone.includes(i)); select(null); commit(); };
+$('#i-dup').onclick = () => {
+  const copies = group().map(i => ({ ...i, id: crypto.randomUUID(), x: i.x + doc.w * 0.04, y: i.y + doc.h * 0.04 }));
+  const primary = copies.find((c, n) => group()[n].id === selected);
+  doc.items.push(...copies);
+  also.clear(); copies.forEach(c => also.add(c.id)); selected = primary.id; also.delete(selected);
+  commit();
+};
+$('#addtext').onclick = () => editInPlace(addText());
+
+// ---------------------------------------------------------------- image export
+
+const encodeBlob = (canvas, type, quality) => new Promise(resolve => canvas.toBlob(resolve, type, quality));
+const kb = bytes => bytes < 1e6 ? Math.round(bytes / 1000) + ' KB' : (bytes / 1e6).toFixed(2) + ' MB';
+const budgetBytes = () => 1000 * ($('#budget').value === '-1' ? +$('#budgetkb').value : +$('#budget').value);
+
+function renderFull(scale) {
+  const canvas = canvasOf(Math.round(doc.w * scale), Math.round(doc.h * scale));
+  paint(canvas, doc.items, $('#fmt').value === 'image/jpeg');
+  return canvas;
+}
+
+// With a budget: the best quality that fits at the chosen resolution, stepping
+// the resolution down only when even the lowest quality is too big.
+async function exportImage() {
+  const type = $('#fmt').value, budget = budgetBytes(), lossy = type !== 'image/png';
+  let scale = $('#scale').value / 100, quality = $('#q').value / 100;
+  for (;;) {
+    const canvas = renderFull(scale);
+    let blob = await encodeBlob(canvas, type, quality);
+    if (!budget || blob.size <= budget) return { blob, scale, quality, canvas };
+    if (lossy) {
+      let low = 0.4, high = quality, best = null;
+      for (let i = 0; i < 6; i++) {
+        const mid = (low + high) / 2, attempt = await encodeBlob(canvas, type, mid);
+        if (attempt.size <= budget) { best = { blob: attempt, scale, quality: mid, canvas }; low = mid; } else high = mid;
+      }
+      if (best) return best;
+    }
+    if (scale <= 0.15) return { blob, scale, quality, canvas };
+    scale *= 0.88;
+  }
+}
+
+let estimateRun = 0;
+function estimateSoon() {
+  clearTimeout(estimateSoon.timer);
+  estimateSoon.timer = setTimeout(async () => {
+    const run = ++estimateRun;
+    if (!doc.items.length) { $('#estimate').textContent = '–'; $('#estimatenote').textContent = ''; return; }
+    $('#estimate').textContent = '…';
+    const { blob, scale, quality, canvas } = await exportImage();
+    if (run !== estimateRun) return;
+    const budget = budgetBytes(), lossy = $('#fmt').value !== 'image/png';
+    $('#estimate').textContent = `${kb(blob.size)} · ${canvas.width} × ${canvas.height}`;
+    $('#estimate').className = !budget ? '' : blob.size <= budget ? 'fits' : 'over';
+    const notes = [];
+    if (budget && lossy) notes.push(`quality ${Math.round(quality * 100)}`);
+    if (budget && scale < $('#scale').value / 100 - 0.001) notes.push(`resolution lowered to ${Math.round(scale * 100)} %`);
+    if (budget && blob.size > budget) notes.push('does not fit, try JPEG or WebP');
+    if (blob.type !== $('#fmt').value) notes.push(`this browser wrote ${blob.type.split('/')[1].toUpperCase()} instead`);
+    if ($('#fmt').value === 'image/jpeg' && doc.bg.type === 'none') notes.push('JPEG has no transparency: black background');
+    $('#estimatenote').textContent = notes.join(' · ');
+  }, 350);
+}
+
+for (const id of ['#fmt', '#budget', '#budgetkb', '#q', '#scale']) $(id).addEventListener('input', () => {
+  $('#budgetkbl').hidden = $('#budget').value !== '-1';
+  $('#ql').hidden = $('#fmt').value === 'image/png';
+  store.set('export', Object.fromEntries(['fmt', 'budget', 'budgetkb', 'q', 'scale'].map(k => [k, $('#' + k).value])));
+  syncOutputs(); estimateSoon();
+});
+
+$('#download').onclick = e => busy(e.target, async () => {
+  const { blob } = await exportImage();
+  const link = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(blob),
+    download: `oscar-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '')}.${blob.type.split('/')[1].replace('jpeg', 'jpg')}`,
+  });
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+});
+
+// ---------------------------------------------------------------- video export
+
+// The recording is composited by ffmpeg between two stills rendered here:
+// `under` (background, layers below, the device with its shadow) and `over`
+// (bezel, layers above, and the corner pixels the rounded screen must not cover).
+// ponytail: one moving video per post; further videos render as stills. Chain
+// more overlay inputs in server.py's encode() if a post ever needs two.
+$('#v-go').onclick = e => busy(e.target, async () => {
+  const index = doc.items.findIndex(i => i.kind === 'video'), video = doc.items[index];
+  const even = v => Math.max(2, Math.round(v / 2) * 2);
+  const W = even(+$('#v-width').value), H = even(W * doc.h / doc.w), k = W / doc.w;
+  const b = box(video), s = video.scale * k;
+  const rect = { x: video.x * k + (b.sx - b.w / 2) * s, y: video.y * k + (b.sy - b.h / 2) * s, w: b.sw * s, h: b.sh * s };
+
+  const under = canvasOf(W, H);
+  paint(under, doc.items.slice(0, index + 1), true);
+  const over = canvasOf(W, H), ctx = over.getContext('2d');
+  ctx.save(); ctx.beginPath();
+  ctx.rect(rect.x - 1, rect.y - 1, rect.w + 2, rect.h + 2); ctx.roundRect(rect.x, rect.y, rect.w, rect.h, b.r * s);
+  ctx.clip('evenodd'); ctx.drawImage(under, 0, 0); ctx.restore();
+  if (b.f) { ctx.save(); transform(ctx, video, k); ctx.drawImage(b.f.el, -b.w / 2, -b.h / 2); ctx.restore(); }
+  for (const it of doc.items.slice(index + 1)) drawItem(ctx, it, k);
+
+  $('#v-result').textContent = 'Encoding…';
+  const size = $('#v-mode').value === 'size';
+  const result = await api('encode', {
+    name: decodeURIComponent(video.src.split('/').pop()), width: W, height: H, ...rect,
+    under: under.toDataURL('image/png'), over: over.toDataURL('image/png'),
+    fps: +$('#v-fps').value, start: +$('#v-start').value, end: +$('#v-end').value,
+    crf: size ? null : +$('#v-crf').value, targetMB: size ? +$('#v-mb').value : null,
+  }).catch(error => { $('#v-result').textContent = ''; throw error; });
+  $('#v-result').innerHTML = `<a href="/out/${result.name}" download>${result.name}</a> · ${kb(result.bytes)} · ${W} × ${H}`;
+  refresh();
+});
+$('#v-mode').onchange = e => { $('#v-mbl').hidden = e.target.value !== 'size'; $('#v-crfl').hidden = !$('#v-mbl').hidden; };
+
+// ---------------------------------------------------------------- saved compositions
+
+// Files in fastlane/social-studio/compositions/. Media is referenced by URL,
+// so a composition needs its captures to still be in out/.
+let compName = store.get('comp', '');
+
+function syncComps() {
+  $('#comp').replaceChildren(new Option('Unsaved composition', ''), ...server.compositions.map(n => new Option(n, n)));
+  $('#comp').value = server.compositions.includes(compName) ? compName : '';
+  $('#comp-del').hidden = !$('#comp').value;
+}
+
+async function saveComp(name) {
+  if (!name) return;
+  const kept = doc.items.filter(i => !i.src?.startsWith('blob:'));
+  if (kept.length < doc.items.length) toast('In-memory imports are not saved. Restart the server and import them again.');
+  compName = (await api('comp_save', { name, doc: { ...doc, items: kept } })).name;
+  store.set('comp', compName);
+  await refresh();
+  toast(`Saved “${compName}”`, 1500);
+}
+
+async function openComp(name) {
+  compName = name; store.set('comp', name);
+  doc = name ? await (await fetch('/compositions/' + encodeURIComponent(name) + '.json')).json()
+             : { w: doc.w, h: doc.h, bg: { ...BRAND }, items: [] };
+  await loadAssets();
+  select(null); syncComps(); commit();
+}
+
+$('#comp').onchange = e => openComp(e.target.value).catch(error => toast(error.message));
+$('#comp-save').onclick = e => busy(e.target, () => saveComp(compName || prompt('Name this composition')));
+$('#comp-as').onclick = e => busy(e.target, () => saveComp(prompt('Save as', compName)));
+$('#comp-del').onclick = e => busy(e.target, async () => {
+  if (!confirm(`Delete the saved composition “${compName}”? The canvas stays as it is.`)) return;
+  await api('comp_delete', { name: compName });
+  compName = ''; store.set('comp', '');
+  await refresh();
+});
+
+// ---------------------------------------------------------------- simulator + library
+
+let tab = 'captures';
+
+function renderLibrary() {
+  const names = server?.[tab] ?? [];
+  $('#strip').replaceChildren(...names.map(name => {
+    const video = /\.(mov|mp4|m4v)$/i.test(name);
+    const src = (tab === 'captures' ? '/out/' : '/shots/') + name.split('/').map(encodeURIComponent).join('/');
+    const tile = document.createElement('div');
+    tile.className = 'thumb'; tile.title = name;
+    tile.innerHTML = video ? '<video preload="metadata" muted></video><b>video</b>' : '<img loading="lazy">';
+    tile.firstChild.src = video ? src + '#t=0.1' : src;
+    if (tab === 'appStore') tile.insertAdjacentHTML('beforeend', `<b>${name.split('/')[0]}</b>`);
+    tile.onclick = () => addMedia(src, video ? 'video' : 'image', name).catch(error => toast(error.message));
+    if (tab === 'captures') {
+      const remove = document.createElement('i');
+      remove.textContent = '×'; remove.title = 'Delete file';
+      remove.onclick = async event => {
+        event.stopPropagation();
+        if (!confirm(`Delete ${name}?`)) return;
+        await api('delete', { name }).catch(error => toast(error.message));
+        refresh();
+      };
+      tile.append(remove);
+    }
+    return tile;
+  }));
+  if (!names.length) $('#strip').innerHTML = '<p class="hint">No captures yet.</p>';
+}
+
+async function refresh() {
+  server = await (await fetch('/api/state')).json();
+  renderLibrary(); syncComps();
+}
+
+for (const button of $$('#tabs [data-tab]')) button.onclick = () => {
+  tab = button.dataset.tab;
+  $$('#tabs [data-tab]').forEach(b => b.classList.toggle('on', b === button));
+  renderLibrary();
+};
+$('#reveal').onclick = () => api('reveal').catch(error => toast(error.message));
+
+for (const button of $$('[data-act]')) button.onclick = () => busy(button, async () => {
+  const body = { ...(button.dataset.form ? formValues(button.dataset.form) : {}), ...JSON.parse(button.dataset.body || '{}') };
+  if (button.dataset.form) store.set('form-' + button.dataset.form, body);
+  const result = await api(button.dataset.act, body);
+  if (button.dataset.act === 'launch') toast(result.stale
+    ? 'The installed build is older than the fixture sources, so newer overrides are ignored.\nRun the app from Xcode onto this simulator, then launch again.'
+    : 'Launched with ' + result.args.join(' '), result.stale ? 12000 : 4000);
+  if (button.dataset.act === 'boot') refresh();
+});
+$('#appearance').onchange = e => api('appearance', { mode: e.target.value }).catch(error => toast(error.message));
+
+function syncScene() {
+  const scene = $('[name=scene]').value;
+  for (const el of $$('#launch [data-for]')) el.hidden = el.dataset.for !== scene;
+  for (const el of $$('#launch [name^=screenshot]')) el.disabled = !scene;
+}
+
+$('#shoot').onclick = e => busy(e.target, async () => {
+  const { name } = await api('shot', { mask: $('#alpha').checked ? 'alpha' : 'ignored' });
+  await refresh();
+  if ($('#autoadd').checked) await addMedia('/out/' + name, 'image', name);
+});
+
+let recordTimer;
+$('#record').onclick = e => busy(e.target, async () => {
+  const button = e.target;
+  if (!button.classList.contains('rec')) {
+    await api('record_start');
+    const started = Date.now();
+    button.classList.add('rec');
+    recordTimer = setInterval(() => button.textContent = `■ Stop · ${((Date.now() - started) / 1000).toFixed(0)} s`, 250);
+    return;
+  }
+  clearInterval(recordTimer); button.classList.remove('rec'); button.textContent = '● Record';
+  const { name } = await api('record_stop');
+  await refresh();
+  if ($('#autoadd').checked) await addMedia('/out/' + name, 'video', name);
+});
+
+// Live preview: the browser's own window capture. Full frame rate at no cost to
+// the simulator, where polling `simctl io screenshot` manages about 1 fps.
+$('#livego').onclick = async e => {
+  const live = $('#live'), button = e.target;
+  const show = stream => {
+    live.srcObject = stream;
+    live.hidden = !stream; $('#livehint').hidden = !!stream;
+    button.textContent = stream ? 'Stop mirroring' : 'Mirror the simulator window';
+  };
+  if (live.srcObject) { live.srcObject.getTracks().forEach(t => t.stop()); return show(null); }
+  const stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 60 }, audio: false }).catch(() => null);
+  if (!stream) return;
+  show(stream);
+  stream.getVideoTracks()[0].onended = () => show(null);  // stopped from the browser's own bar
+};
+
+// ---------------------------------------------------------------- start
+
+// Items whose media is gone (deleted capture) are dropped instead of breaking the canvas.
+async function loadAssets() {
+  const loads = doc.items.flatMap(it => it.kind === 'text' ? [] : [load(it.src, it.kind), it.frame ? load(frameSrc(it.frame)) : null]);
+  const missing = (await Promise.allSettled(loads)).some(r => r.status === 'rejected');
+  if (!missing) return;
+  doc.items = doc.items.filter(it => it.kind === 'text' || assets.has(it.src));
+  toast('Some media of this composition no longer exists and was left out.');
+}
+
+async function start() {
+  const fonts = [['System', '-apple-system, system-ui, sans-serif'], ['Rounded', 'ui-rounded, system-ui'],
+                 ['Serif', 'ui-serif, Georgia, serif'], ['Mono', 'ui-monospace, monospace']];
+  try {
+    await refresh();
+    $('#udid').replaceChildren(...server.devices.map(d => new Option((d.booted ? '● ' : '') + d.name, d.udid)));
+    $('[name=scene]').replaceChildren(new Option('live (no fixtures)', ''), ...server.scenes.map(s => new Option(s, s)));
+    $('[name=scene]').value = 'nowRain';
+    for (const file of server.fonts) {
+      const family = file.replace(/\.[ot]tf$/, '');
+      await new FontFace(family, `url(/fonts/${encodeURIComponent(file)})`).load().then(f => document.fonts.add(f));
+      fonts.unshift([family, `"${family}"`]);
+    }
+    if (server.recording) await api('record_stop').catch(() => {});
+  } catch {
+    document.body.classList.add('offline');
+    toast('Editor only. Run bin/social-studio.sh for simulator control, the library and video export.', 9000);
+  }
+  $('#i-font').replaceChildren(...fonts.map(([label, value]) => new Option(label, value)));
+  for (const id of ['#i-frame', '#newframe']) $(id).replaceChildren(new Option('none', ''), ...(server?.frames ?? []).map(f =>
+    new Option(f.replace(/^Apple |\.png$/g, ''), f)));
+  $('#newframe').value = store.get('newframe', server?.frames[0] ?? '');
+  $('#newframe').onchange = e => store.set('newframe', e.target.value);
+
+  for (const form of ['launch', 'statusbar', 'push']) {
+    for (const [name, value] of Object.entries(store.get('form-' + form, {}))) {
+      const field = $(`#${form} [name="${name}"]`);
+      if (field) field.value = value;
+    }
+  }
+  for (const [id, value] of Object.entries(store.get('export', {}))) $('#' + id).value = value;
+  $('#fmt').dispatchEvent(new Event('input'));
+  $('[name=scene]').onchange = syncScene; syncScene();
+
+  // Encoders the browser lacks fall back to PNG silently; hide those formats.
+  const probe = await encodeBlob(canvasOf(2, 2), 'image/webp', 0.8);
+  if (probe.type !== 'image/webp') { $('#fmt option[value="image/webp"]').remove(); }
+
+  await loadAssets();
+  commit.last = JSON.stringify(doc);
+  commit(false);
+}
+start();
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@
 # followed by Frame Studio framing.
 #
 # Usage:
-#   bin/screenshots.sh                     # all locales (de-DE, en-US) + frame
+#   bin/screenshots.sh                     # all locales (de-DE, en-US) + watch + frame
 #   bin/screenshots.sh de-DE               # one locale + frame (keeps other locales' captures)
 #   bin/screenshots.sh de-DE --skip-build  # skip even the incremental build check
 #   bin/screenshots.sh frame               # re-frame existing captures only    (~1 min)
@@ -109,6 +109,9 @@ case "$arg" in
     for lang in $(grep -E '^languages' fastlane/Snapfile | grep -oE '[a-z]{2}-[A-Z]{2}'); do
       capture_locale "$lang"
     done
+    # The wipe above also clears the watch captures (same locale folders), so
+    # they are retaken here; the compositor skips them (delivered raw).
+    bin/watch-screenshots.sh
     bin/frame-compose.sh
     ;;
   frame)
@@ -121,6 +124,7 @@ case "$arg" in
     # the one being rerun; same-named scenes overwrite anyway.
     if [ "$build" = 1 ]; then build_for_testing; fi
     capture_locale "$arg"
+    bin/watch-screenshots.sh "$arg"
     bin/frame-compose.sh
     ;;
 esac

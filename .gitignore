@@ -26,3 +26,7 @@ fastlane/frame-studio/.build/
 fastlane/frame-studio/__pycache__/
 fastlane/metadata/
 fastlane/Preview.html
+
+# Social Studio captures
+fastlane/social-studio/out/
+fastlane/social-studio/compositions/

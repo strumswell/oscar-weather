@@ -35,7 +35,21 @@ enum ScreenshotFixtures {
     static var storyNow: Date {
         let calendar = Calendar.current
         let tomorrow = calendar.date(byAdding: .day, value: 1, to: .now) ?? .now
-        return calendar.date(bySettingHour: 14, minute: 0, second: 0, of: tomorrow) ?? tomorrow
+        let hour = override("screenshotHour").flatMap(Int.init) ?? 14
+        return calendar.date(bySettingHour: hour, minute: 0, second: 0, of: tomorrow) ?? tomorrow
+    }
+
+    /// Social Studio (bin/social-studio.sh) stages single captures by hand and
+    /// overrides parts of the story through launch arguments, like the scene
+    /// itself: `-screenshotStory rain|sunny|showers`, `-screenshotHour 0…23`,
+    /// `-screenshotTemperature <°C now>`, `-screenshotWeathercode <WMO now>`,
+    /// `-screenshotPlace <name>`. The App Store pipeline passes none of them.
+    private static func override(_ key: String) -> String? {
+        UserDefaults.standard.string(forKey: key)
+    }
+
+    private static var isDayNow: Double {
+        (5...20).contains(Calendar.current.component(.hour, from: storyNow)) ? 1 : 0
     }
 
     static var storyDayStart: Date { Calendar.current.startOfDay(for: storyNow) }
@@ -43,14 +57,18 @@ enum ScreenshotFixtures {
     /// Two scenes tell a different story than the rain set: a sunny summer day
     /// with no precipitation and no alert.
     private static var sunnyStory: Bool {
-        ScreenshotMode.scene == .nowForecast || ScreenshotMode.scene == .nowClear
+        if let story = override("screenshotStory") { return story == "sunny" }
+        return ScreenshotMode.scene == .nowForecast || ScreenshotMode.scene == .nowClear
     }
 
     /// A third story for the hourly detail deck: a mild, part-cloudy day with a
     /// shower block in the late afternoon. The downpour flattens every lens row
     /// to "rain" and the summer day flattens them to "nothing happens" — the
     /// deck only reads as a deck with something in between.
-    private static var showersStory: Bool { ScreenshotMode.scene == .hourlyDetail }
+    private static var showersStory: Bool {
+        if let story = override("screenshotStory") { return story == "showers" }
+        return ScreenshotMode.scene == .hourlyDetail
+    }
 
     /// Picks a value per story. Rain is the default set; every arm is a plain
     /// value, so eager evaluation costs nothing.
@@ -158,14 +176,23 @@ enum ScreenshotFixtures {
             return 14.0 + clearing * 0.5 + swing * 5 * exp(-pow((hour - 15) / 5, 2))
         }
 
+        // Overrides pin the "now" values; temperatures shift the whole curve
+        // along so the charts still agree with the headline number.
+        let temperatureNow = byStory(
+            rain: 14.3, sunny: (temperature(0) * 10).rounded() / 10, showers: 21.4
+        )
+        let temperatureShift =
+            (override("screenshotTemperature").flatMap(Double.init) ?? temperatureNow) - temperatureNow
+        let weathercodeNow = override("screenshotWeathercode").flatMap(Double.init)
+
         let dts = (0..<hourCount).map { $0 - hourIndex }
         let hourly: [String: Any] = [
             "time": times,
-            "temperature_2m": dts.map(temperature),
+            "temperature_2m": dts.map { temperature($0) + temperatureShift },
             "relativehumidity_2m": dts.map { dt -> Double in
                 byStory(rain: 94 - min(max(Double(dt) - 4, 0), 20) * 1.8, sunny: 52, showers: 66)
             },
-            "apparent_temperature": dts.map { temperature($0) - (sunnyStory ? 0.6 : 1.4) },
+            "apparent_temperature": dts.map { temperature($0) + temperatureShift - (sunnyStory ? 0.6 : 1.4) },
             "pressure_msl": dts.map { dt -> Double in
                 byStory(rain: 1004 + min(max(Double(dt), -6), 30) * 0.4, sunny: 1022, showers: 1013)
             },
@@ -191,7 +218,9 @@ enum ScreenshotFixtures {
                 default: 8
                 }
             },
-            "weathercode": dts.map(weathercode),
+            "weathercode": dts.map { dt in
+                (-1...1).contains(dt) ? weathercodeNow ?? weathercode(dt) : weathercode(dt)
+            },
             "snowfall": Array(repeating: 0.0, count: hourCount),
             "soil_temperature_0cm": dts.map { 15 + min(max(Double($0) - 6, 0), 20) * 0.2 },
             "soil_temperature_6cm": Array(repeating: 15.5, count: hourCount),
@@ -221,12 +250,12 @@ enum ScreenshotFixtures {
                 rain: [24, 19, 22, 24, 26, 25, 21, 24, 27, 25, 23, 26],
                 sunny: [27, 28, 26, 27, 29, 28, 26, 25, 27, 28, 26, 27],
                 showers: [21, 22, 20, 23, 24, 22, 21, 23, 25, 24, 22, 23]
-            ),
+            ).map { Double($0) + temperatureShift },
             "temperature_2m_min": byStory(
                 rain: [13, 12, 13, 14, 15, 16, 14, 13, 15, 16, 14, 15],
                 sunny: [16, 17, 16, 15, 17, 18, 16, 15, 16, 17, 16, 16],
                 showers: [14, 13, 12, 14, 15, 14, 13, 14, 15, 15, 13, 14]
-            ),
+            ).map { Double($0) + temperatureShift },
             "precipitation_sum": byStory(
                 rain: [38.4, 11.2, 0.4, 0, 0, 0.2, 6.8, 0, 0, 0.6, 0, 0.2],
                 sunny: Array(repeating: 0.0, count: dayCount),
@@ -279,14 +308,12 @@ enum ScreenshotFixtures {
             "current": [
                 "cloudcover": byStory(rain: 100, sunny: 20, showers: 45),
                 "time": dayStart.timeIntervalSince1970 + Double(hourIndex) * 3600,
-                "temperature": byStory(
-                    rain: 14.3, sunny: (temperature(0) * 10).rounded() / 10, showers: 21.4
-                ),
+                "temperature": temperatureNow + temperatureShift,
                 "windspeed": byStory(rain: 32, sunny: 11, showers: 15),
                 "wind_direction_10m": 245,
-                "weathercode": byStory(rain: 65, sunny: weathercode(0), showers: 2),
+                "weathercode": weathercodeNow ?? byStory(rain: 65, sunny: weathercode(0), showers: 2),
                 "precipitation": byStory(rain: 8.6, sunny: 0, showers: 0),
-                "is_day": 1,
+                "is_day": isDayNow,
             ],
         ]
     }
@@ -397,7 +424,16 @@ enum ScreenshotFixtures {
 
     static func precipSeriesJSON(for url: URL? = nil) -> [String: Any] {
         let formatter = ISO8601DateFormatter()
+        // The watch radar page runs the series through RainNowcastSummary,
+        // which keeps only points inside the REAL now ± 90 min — anchored to
+        // the story clock (a day ahead) that page is always empty. Nothing on
+        // the watch couples this series to the staged sky, so it reads the
+        // same curve around its own clock.
+        #if os(watchOS)
+        let now = Date()
+        #else
         let now = storyNow
+        #endif
         // Peak of the main cell in mm/h. The Orte list asks for ONE series per
         // saved place, so the scene answers per coordinate: only Essen rains,
         // and its card is the one with the animated precipitation backdrop.
@@ -536,7 +572,9 @@ enum ScreenshotFixtures {
         let longitude: Double
     }
 
-    static let leipzig = Place(name: "Leipzig", latitude: latitude, longitude: longitude)
+    static var leipzig: Place {
+        Place(name: override("screenshotPlace") ?? "Leipzig", latitude: latitude, longitude: longitude)
+    }
     static let essen = Place(name: "Essen", latitude: 51.4556, longitude: 7.0116)
 
     /// The GPS row's pinned coordinate. Berlin, not Leipzig, so the "Mein
@@ -573,7 +611,7 @@ enum ScreenshotFixtures {
                     "windspeed": pinned.windspeed,
                     "wind_direction_10m": 245,
                     "precipitation": pinned.precipitation,
-                    "is_day": 1,
+                    "is_day": isDayNow,
                     "relativehumidity_2m": pinned.humidity,
                     "pressure_msl": pinned.pressure,
                 ] as [String: Any],

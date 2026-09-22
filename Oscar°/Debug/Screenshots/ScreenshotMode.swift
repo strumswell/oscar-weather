@@ -87,6 +87,14 @@ enum ScreenshotMode {
         if scene == .customization || scene.isSettings {
             MemberCardStickerStore().save(ScreenshotFixtures.stickerPlacements)
         }
+        #else
+        // No CityService on the watch: the GPS coordinate IS its place, and the
+        // first refresh relabels the app's pinned name by reverse-geocoding it.
+        // Left on the placeholder, every watch capture reads "Berlin".
+        LocationService.shared.gpsLocation = CLLocationCoordinate2D(
+            latitude: ScreenshotFixtures.latitude,
+            longitude: ScreenshotFixtures.longitude
+        )
         #endif
         return true
         #else
@@ -145,7 +153,10 @@ enum ScreenshotMode {
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
         switch scene {
         case .lockLiveActivity:
-            try? RainRadarLiveActivityManager.shared.startPreview(phase: .raining)
+            // `-screenshotLiveActivityPhase` is Social Studio's; the pipeline shows rain.
+            let phase = UserDefaults.standard.string(forKey: "screenshotLiveActivityPhase")
+                .flatMap(RainRadarActivityAttributes.ContentState.Phase.init) ?? .raining
+            try? RainRadarLiveActivityManager.shared.startPreview(phase: phase)
         case .lockNotifications:
             await ScreenshotLockScreenNotifications.schedule()
         default:

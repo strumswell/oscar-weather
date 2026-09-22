@@ -768,8 +768,27 @@
         }
       }
     },
-    "≈ 5 km · 15 Min." : {
-
+    "≈ 5 km · 10 Min." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 5 km · 10 Min."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 5 km · 10 min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ 5 km · 10 dk"
+          }
+        }
+      }
     },
     "≈ 9 km Raster" : {
       "localizations" : {
@@ -4900,24 +4919,24 @@
         }
       }
     },
-    "Echte Aufnahmen des Wettersatelliten Meteosat, der die Erde geostationär aus rund 36.000 km Höhe beobachtet. Alle 15 Minuten kommt ein neues Bild, aufgenommen im Infrarot und damit auch nachts: je höher und dichter die Bewölkung, desto heller erscheint sie. Aus der Zugbewegung berechnet Oscar die Zwischenschritte und eine Kurzprognose; alles hinter der LIVE-Markierung ist berechnet." : {
+    "Die Wolken-Ebene beruht auf Messungen des Wettersatelliten Meteosat, der die Erde geostationär aus rund 36.000 km Höhe beobachtet. Alle 10 Minuten wertet EUMETSAT die Aufnahmen aus und berechnet für jeden Bildpunkt, wie dicht die Wolke dort ist. Genau das zeigt Oscar: dünne Schleier erscheinen zart, dicke Wolken deckend. Das funktioniert bei Tag und bei Nacht. Aus der Zugbewegung berechnet Oscar die Zwischenschritte und eine Kurzprognose. Alles hinter der LIVE-Markierung ist berechnet." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Echte Aufnahmen des Wettersatelliten Meteosat, der die Erde geostationär aus rund 36.000 km Höhe beobachtet. Alle 15 Minuten kommt ein neues Bild, aufgenommen im Infrarot und damit auch nachts: je höher und dichter die Bewölkung, desto heller erscheint sie. Aus der Zugbewegung berechnet Oscar die Zwischenschritte und eine Kurzprognose; alles hinter der LIVE-Markierung ist berechnet."
+            "value" : "Die Wolken-Ebene beruht auf Messungen des Wettersatelliten Meteosat, der die Erde geostationär aus rund 36.000 km Höhe beobachtet. Alle 10 Minuten wertet EUMETSAT die Aufnahmen aus und berechnet für jeden Bildpunkt, wie dicht die Wolke dort ist. Genau das zeigt Oscar: dünne Schleier erscheinen zart, dicke Wolken deckend. Das funktioniert bei Tag und bei Nacht. Aus der Zugbewegung berechnet Oscar die Zwischenschritte und eine Kurzprognose. Alles hinter der LIVE-Markierung ist berechnet."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Real footage from the Meteosat weather satellite, which observes Earth geostationarily from about 36,000 km up. A new image arrives every 15 minutes, captured in infrared so it also works at night: the higher and denser the clouds, the brighter they appear. From the motion, Oscar calculates the steps in between and a short-term forecast; everything past the LIVE marker is calculated."
+            "value" : "The cloud layer is based on measurements from the Meteosat weather satellite, which watches Earth from a fixed position about 36,000 km up. Every 10 minutes EUMETSAT analyses the images and works out how thick the cloud is at each point. That is what Oscar shows: thin veils look faint, thick clouds look solid. It works by day and by night. From the clouds' motion, Oscar calculates the steps in between and a short-term forecast. Everything past the LIVE marker is calculated."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dünyayı yaklaşık 36.000 km yükseklikten jeostasyoner konumda gözlemleyen Meteosat hava durumu uydusundan gerçek görüntüler. Her 15 dakikada bir kızılötesinde çekilen ve bu sayede geceleri de çalışan yeni bir görüntü gelir: bulutlar ne kadar yüksek ve yoğunsa o kadar parlak görünür. Oscar, bu hareketten aradaki adımları ve kısa vadeli bir tahmin hesaplar; LIVE işaretinden sonrası hesaplamadır."
+            "value" : "Bulut katmanı, Dünya'yı yaklaşık 36.000 km yükseklikten jeostasyoner konumda gözlemleyen Meteosat hava durumu uydusunun ölçümlerine dayanır. EUMETSAT her 10 dakikada bir görüntüleri değerlendirir ve her nokta için bulutun ne kadar yoğun olduğunu hesaplar. Oscar tam olarak bunu gösterir: ince bulutlar soluk, kalın bulutlar opak görünür. Bu, gündüz de gece de çalışır. Oscar, bulutların hareketinden aradaki adımları ve kısa vadeli bir tahmin hesaplar. LIVE işaretinden sonrası hesaplamadır."
           }
         }
       }
@@ -5654,7 +5673,26 @@
       }
     },
     "Europäische Organisation für Wettersatelliten" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Europäische Organisation für Wettersatelliten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "European organisation for weather satellites"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avrupa Meteoroloji Uyduları İşletme Teşkilatı"
+          }
+        }
+      }
     },
     "Europäisches Zentrum für mittelfristige Wettervorhersagen" : {
       "extractionState" : "manual",
@@ -10038,8 +10076,27 @@
     "Meteosat" : {
 
     },
-    "Meteosat (MSG) auf 0° Länge, Instrument SEVIRI, Infrarot 10,8 μm. Volle Erdscheibe alle 15 Minuten mit etwa 3 km Auflösung im Bildzentrum; zum Rand der Scheibe wird das Bild flacher und gröber. Contains modified EUMETSAT Meteosat data." : {
-
+    "Meteosat der dritten Generation (MTG) auf 0° Länge, Instrument FCI. Oscar nutzt das Produkt Optimal Cloud Analysis und daraus die optische Dicke der Wolken. Volle Erdscheibe alle 10 Minuten mit etwa 2 km Auflösung im Bildzentrum. Zum Rand der Scheibe wird das Bild flacher und gröber. Contains modified EUMETSAT Meteosat data." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meteosat der dritten Generation (MTG) auf 0° Länge, Instrument FCI. Oscar nutzt das Produkt Optimal Cloud Analysis und daraus die optische Dicke der Wolken. Volle Erdscheibe alle 10 Minuten mit etwa 2 km Auflösung im Bildzentrum. Zum Rand der Scheibe wird das Bild flacher und gröber. Contains modified EUMETSAT Meteosat data."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meteosat Third Generation (MTG) at 0° longitude, FCI instrument. Oscar uses the Optimal Cloud Analysis product and takes the clouds' optical thickness from it. Full Earth disk every 10 minutes at about 2 km resolution in the image centre. Towards the edge of the disk the view gets flatter and coarser. Contains modified EUMETSAT Meteosat data."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "0° boylamındaki üçüncü nesil Meteosat (MTG), FCI cihazı. Oscar, Optimal Cloud Analysis ürününü ve buradan bulutların optik kalınlığını kullanır. Tam Dünya diski her 10 dakikada bir, görüntü merkezinde yaklaşık 2 km çözünürlükle. Diskin kenarına doğru görüntü yataylaşır ve kabalaşır. Contains modified EUMETSAT Meteosat data."
+          }
+        }
+      }
     },
     "Min" : {
       "localizations" : {

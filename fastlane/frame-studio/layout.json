@@ -99,6 +99,9 @@
         "y": 731
       }
     },
+    "08_now_clear": {
+      "hidden": true
+    },
     "90_map_wind": {
       "hidden": true
     },
