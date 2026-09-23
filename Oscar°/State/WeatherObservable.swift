@@ -63,6 +63,8 @@ final class Weather {
     var precipSeries: PrecipSeriesResponse?
     /// Satellite cloudiness at the location (not persisted — only meaningful fresh).
     var cloudSeries: CloudSeriesResponse?
+    /// Nearest weather stations with fresh readings (not persisted, Europe only).
+    var stations: [WeatherStation] = []
     var error: String = ""
     var lastUpdated: Date?
     var debug = false
@@ -277,6 +279,15 @@ extension Weather {
                 alerts = .oscar(.empty)
             }
             markFinished(.alerts)
+
+            do {
+                stations = try await client.getNearbyStations(coordinates: coordinates)
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                // Supplementary like alerts: hide the section rather than show another place's stations.
+                stations = []
+            }
         } catch is CancellationError {
             // A cancelled refresh is not a failure: nothing was actually
             // attempted and rejected, so leave content, `error`, and

@@ -7,6 +7,29 @@
     "--°" : {
 
     },
+    "Gemessen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemessen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Measured"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ölçülen"
+          }
+        }
+      }
+    },
     "–" : {
 
     },
@@ -228,6 +251,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ ile %@ arası"
+          }
+        }
+      }
+    },
+    "%@ hPa in 3h" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ hPa in 3h"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ hPa in 3h"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 saatte %@ hPa"
+          }
+        }
+      }
+    },
+    "%@ in 24h" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ in 24h"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ in 24h"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 saatte %@"
           }
         }
       }
@@ -1767,6 +1834,9 @@
           }
         }
       }
+    },
+    "alle %lld Min." : {
+
     },
     "alle %lld Std." : {
       "localizations" : {
@@ -6702,6 +6772,32 @@
         }
       }
     },
+    "Gemessene Werte der nächstgelegenen Wetterstationen, keine Vorhersage." : {
+
+    },
+    "Gemessene Werte der nächstgelegenen Wetterstationen, keine Vorhersage. Viele Stationen melden stündlich, manche alle 10 Minuten. Daten: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemessene Werte der nächstgelegenen Wetterstationen, keine Vorhersage. Viele Stationen melden stündlich, manche alle 10 Minuten. Daten: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Measured values from the nearest weather stations, not a forecast. Many stations report hourly, some every 10 minutes. Data: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En yakın meteoroloji istasyonlarında ölçülen değerler, tahmin değil. Birçok istasyon saatlik, bazıları 10 dakikada bir ölçüm gönderir. Veriler: %@"
+          }
+        }
+      }
+    },
     "Geöffnet" : {
       "localizations" : {
         "de" : {
@@ -6720,6 +6816,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Açılma"
+          }
+        }
+      }
+    },
+    "Gerade keine Messwerte in der Nähe." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gerade keine Messwerte in der Nähe."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No measurements nearby right now."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu anda yakında ölçüm yok."
           }
         }
       }
@@ -7108,28 +7226,6 @@
         }
       }
     },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Größere Zweige und kleine Bäume bewegen sich."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Larger branches and small trees move."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
-          }
-        }
-      }
-    },
     "Große Bäume bewegen sich, Zweige können brechen." : {
       "localizations" : {
         "de" : {
@@ -7148,6 +7244,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
+          }
+        }
+      }
+    },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Größere Zweige und kleine Bäume bewegen sich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Larger branches and small trees move."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
           }
         }
       }
@@ -10157,6 +10275,50 @@
         }
       }
     },
+    "Messstationen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Messstationen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather stations"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meteoroloji istasyonları"
+          }
+        }
+      }
+    },
+    "Messstationen geöffnet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Messstationen geöffnet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather stations opened"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meteoroloji istasyonları açılma"
+          }
+        }
+      }
+    },
     "Messung" : {
       "localizations" : {
         "de" : {
@@ -11731,6 +11893,28 @@
         }
       }
     },
+    "Öffnet Stationsdetails" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet Stationsdetails"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens station details"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İstasyon ayrıntılarını açar"
+          }
+        }
+      }
+    },
     "Öffnet stündliche Umweltdiagramme" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12510,6 +12694,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oscar, Orta Avrupa dışındaki Avrupa'da yağmur radarı için Avrupa meteoroloji servisleri birliği EUMETNET'in OPERA programının Avrupa radar kompozitini ve Avrupa uyarı platformu Meteoalarm'ın resmi uyarılarını kullanır. Kullanım, EUMETNET ile bir destek veya resmi bağlantı anlamına gelmez."
+          }
+        }
+      }
+    },
+    "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas, amtliche Warnmeldungen der europäischen Warnplattform Meteoalarm sowie Messwerte europäischer Wetterstationen aus dem Datenhub E-SOH. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas, amtliche Warnmeldungen der europäischen Warnplattform Meteoalarm sowie Messwerte europäischer Wetterstationen aus dem Datenhub E-SOH. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses the European radar composite from EUMETNET's OPERA program, the network of European meteorological services, for the rain radar in Europe outside Central Europe, official warnings from the European alerting platform Meteoalarm, and readings from European weather stations via the E-SOH data hub. Use does not imply endorsement by or official affiliation with EUMETNET."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, Orta Avrupa dışındaki Avrupa'da yağmur radarı için Avrupa meteoroloji servisleri birliği EUMETNET'in OPERA programının Avrupa radar kompozitini, Avrupa uyarı platformu Meteoalarm'ın resmi uyarılarını ve E-SOH veri merkezindeki Avrupa meteoroloji istasyonlarının ölçümlerini kullanır. Kullanım, EUMETNET ile bir destek veya resmi bağlantı anlamına gelmez."
           }
         }
       }
@@ -13860,6 +14067,9 @@
           }
         }
       }
+    },
+    "Reihe" : {
+
     },
     "Reist automatisch mit" : {
       "localizations" : {
@@ -16255,6 +16465,28 @@
     "Taiwan" : {
 
     },
+    "Taupunkt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taupunkt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dew point"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çiy noktası"
+          }
+        }
+      }
+    },
     "Teils bewölkt" : {
       "localizations" : {
         "de" : {
@@ -16408,6 +16640,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sıcaklık ve yağış"
+          }
+        }
+      }
+    },
+    "Temperatur und Taupunkt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatur und Taupunkt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature and dew point"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıcaklık ve çiy noktası"
           }
         }
       }
@@ -16993,6 +17247,9 @@
         }
       }
     },
+    "unregelmäßig" : {
+
+    },
     "Unsicherheit & Modell" : {
       "localizations" : {
         "de" : {
@@ -17418,6 +17675,9 @@
           }
         }
       }
+    },
+    "Verlauf der letzten 24 Stunden" : {
+
     },
     "Verlauf der Tageshöchstwerte" : {
       "localizations" : {
@@ -18807,6 +19067,9 @@
           }
         }
       }
+    },
+    "Zeit" : {
+
     },
     "Zeit in Oscar" : {
       "localizations" : {

@@ -4,11 +4,11 @@ import SwiftUI
 /// Current-conditions values come straight from `current`; the rest sample
 /// the hourly series at the present hour.
 enum HeadMetric: String, CaseIterable, Identifiable {
-    case cloudCover, wind, windDirection, feelsLike, humidity, uvIndex, pressure, precipitationChance, gusts
+    case cloudCover, wind, windDirection, feelsLike, humidity, uvIndex, pressure, precipitationChance, gusts, measured
 
     static let maxShown = 4
     /// Out of the box only cloud cover, wind and wind direction are shown.
-    static let defaultHidden: Set<HeadMetric> = [.feelsLike, .humidity, .uvIndex, .pressure, .precipitationChance, .gusts]
+    static let defaultHidden: Set<HeadMetric> = [.feelsLike, .humidity, .uvIndex, .pressure, .precipitationChance, .gusts, .measured]
 
     var id: String { rawValue }
 
@@ -23,6 +23,7 @@ enum HeadMetric: String, CaseIterable, Identifiable {
         case .pressure: "Luftdruck"
         case .precipitationChance: "Regenwahrscheinlichkeit"
         case .gusts: "Böen"
+        case .measured: "Gemessen"
         }
     }
 
@@ -37,6 +38,7 @@ enum HeadMetric: String, CaseIterable, Identifiable {
         case .pressure: "barometer"
         case .precipitationChance: "umbrella"
         case .gusts: "wind.snow"
+        case .measured: "sensor"
         }
     }
 
@@ -52,6 +54,7 @@ enum HeadMetric: String, CaseIterable, Identifiable {
         case .pressure: .indigo
         case .precipitationChance: .blue
         case .gusts: .green
+        case .measured: .brown
         }
     }
 
@@ -86,6 +89,9 @@ enum HeadMetric: String, CaseIterable, Identifiable {
         case .gusts:
             return environmentValue(from: hourly?.windgusts_10m, time: time)
                 .map { Self.windString($0, weather: weather) }
+        case .measured:
+            // The nearest station's reading, next to (never instead of) the forecast temperature.
+            return weather.stations.first?.current.temperature.map { StationUnits().temperatureString($0) }
         }
     }
 

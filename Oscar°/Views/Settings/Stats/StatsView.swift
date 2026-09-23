@@ -72,6 +72,7 @@ struct StatsView: View {
         case "hourly": "Stundenansicht geöffnet"
         case "daily": "Tagesansicht geöffnet"
         case "climate": "Klima geöffnet"
+        case "stations": "Messstationen geöffnet"
         case "alerts": "Warnungen geöffnet"
         case "settings": "Einstellungen geöffnet"
         case "layout": "Ansicht angepasst"

@@ -157,6 +157,7 @@ private extension NowSection {
         case .daily: 220
         case .environment: 140
         case .climate: 130
+        case .stations: 215
         }
     }
 }
@@ -173,6 +174,25 @@ private struct MiniPage: View {
             date: Date(timeIntervalSinceReferenceDate: Double(step) * 300),
             value: 2.4 * exp(-pow((progress - 0.4) / 0.18, 2))
         )
+    }
+
+    /// Three stations around a mild day: cool night, warm afternoon.
+    private static let sampleStations: [WeatherStation] = [
+        ("Berlin Tempelhof", 5.8, 182.0, 0.0),
+        ("Berlin Dahlem", 10.2, 224.0, -2.4),
+        ("Potsdam", 27.9, 237.0, -1.3),
+    ].map { name, distance, bearing, offset in
+        let end = Date(timeIntervalSinceReferenceDate: 24 * 3600)
+        let history = (0...24).map { hour in
+            StationReading(
+                time: end.addingTimeInterval(Double(hour - 24) * 3600),
+                temperature: 13 + offset - 6 * cos(Double(hour + 3) / 24 * 2 * .pi),
+                humidity: nil, dewPoint: nil, windSpeed: nil, windDirection: nil,
+                windGust: nil, pressure: nil, precipitation: nil, precipitationMinutes: nil)
+        }
+        return WeatherStation(
+            id: name, name: name, source: "esoh", distanceKm: distance, bearing: bearing,
+            lastReportAt: end, current: history[24], precipitation24h: nil, history: history)
     }
 
     var body: some View {
@@ -229,6 +249,9 @@ private struct MiniPage: View {
             .padding(.horizontal)
         case .climate:
             CollageClimateCard()
+                .padding(.horizontal)
+        case .stations:
+            StationsCard(stations: Self.sampleStations, timeZone: .gmt) { _ in }
                 .padding(.horizontal)
         }
     }

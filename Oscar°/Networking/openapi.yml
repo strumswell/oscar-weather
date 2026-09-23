@@ -1258,6 +1258,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OscarPointAlertsResponse"
+  /stations/nearby:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getNearbyStations
+      tags:
+        - Oscar Server
+      summary: The nearest weather stations with fresh readings (Europe)
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: lon
+          in: query
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Up to 5 stations within 40 km, nearest first
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NearbyStationsResponse"
   /notifications/register:
     servers:
       - url: https://server.oscars.love
@@ -2080,6 +2106,70 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/OscarPointAlert"
+    NearbyStationsResponse:
+      type: object
+      required: [generated_at, stations]
+      properties:
+        generated_at:
+          type: string
+        stations:
+          type: array
+          items:
+            $ref: "#/components/schemas/NearbyStation"
+    NearbyStation:
+      type: object
+      required: [id, name, source, latitude, longitude, distance_km, bearing_deg, last_report_at, current, history]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        source:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        distance_km:
+          type: number
+        bearing_deg:
+          type: number
+        last_report_at:
+          type: string
+        current:
+          $ref: "#/components/schemas/StationReading"
+        precipitation_24h_mm:
+          type: number
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/StationReading"
+    StationReading:
+      type: object
+      required: [time]
+      properties:
+        time:
+          type: string
+        temperature_c:
+          type: number
+        humidity_pct:
+          type: number
+        dew_point_c:
+          type: number
+        wind_speed_ms:
+          type: number
+        wind_direction_deg:
+          type: number
+        wind_gust_ms:
+          type: number
+        pressure_hpa:
+          type: number
+        precipitation_mm:
+          type: number
+        precipitation_period_min:
+          type: integer
+        weather_code:
+          type: integer
     NotificationRegisterResponse:
       type: object
       required: [subscriptionId, apiKey]

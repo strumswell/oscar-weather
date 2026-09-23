@@ -13,6 +13,8 @@ struct NowSheetView: View {
             EnvironmentDetailView(scrollTo: section)
         case .climate(let summary):
             ClimateDetailView(summary: summary)
+        case .stations(let id):
+            StationDetailView(initialID: id)
         case .alerts:
             // Matches the map's polygon tap sheet; no .presentationBackground
             // override — an explicit background would kill the glass.

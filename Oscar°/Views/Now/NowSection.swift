@@ -3,7 +3,7 @@ import SwiftUI
 /// The blocks of the forecast page below the head, shown in the order the
 /// user keeps them (`SettingService.nowSections`; absent = hidden).
 enum NowSection: String, CaseIterable, Identifiable {
-    case radar, hourly, daily, environment, climate
+    case radar, hourly, daily, stations, environment, climate
 
     var id: String { rawValue }
 
@@ -14,6 +14,7 @@ enum NowSection: String, CaseIterable, Identifiable {
         case .daily: "Täglich"
         case .environment: "Umwelt"
         case .climate: "Klima"
+        case .stations: "Messstationen"
         }
     }
 
@@ -24,6 +25,7 @@ enum NowSection: String, CaseIterable, Identifiable {
         case .daily: "calendar"
         case .environment: "leaf"
         case .climate: "chart.bar.xaxis"
+        case .stations: "sensor"
         }
     }
 
@@ -35,6 +37,7 @@ enum NowSection: String, CaseIterable, Identifiable {
         case .daily: .indigo
         case .environment: .green
         case .climate: .red
+        case .stations: .teal
         }
     }
 
@@ -47,17 +50,22 @@ enum NowSection: String, CaseIterable, Identifiable {
         case .daily: DailyView()
         case .environment: EnvironmentGaugesView()
         case .climate: ClimateView()
+        case .stations: StationsView()
         }
     }
 }
 
 extension SettingService {
     /// Every section in the user's order. Sections missing from the stored
-    /// order (new ones) fall in at the end.
+    /// order (new ones) fall in right after their default predecessor.
     var nowSectionOrder: [NowSection] {
         get {
-            let stored = (nowSectionOrderRaw ?? []).compactMap(NowSection.init(rawValue:))
-            return stored + NowSection.allCases.filter { !stored.contains($0) }
+            var order = (nowSectionOrderRaw ?? []).compactMap(NowSection.init(rawValue:))
+            for section in NowSection.allCases where !order.contains(section) {
+                let predecessor = NowSection.allCases.prefix { $0 != section }.last { order.contains($0) }
+                order.insert(section, at: predecessor.flatMap { order.firstIndex(of: $0) }.map { $0 + 1 } ?? 0)
+            }
+            return order
         }
         set { nowSectionOrderRaw = newValue.map(\.rawValue) }
     }

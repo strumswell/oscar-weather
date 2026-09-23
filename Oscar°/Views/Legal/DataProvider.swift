@@ -60,13 +60,15 @@ extension DataProvider {
             ]
         ),
         DataProvider(
-            id: "eumetnet", name: "EUMETNET (OPERA & Meteoalarm)", title: "EUMETNET",
+            id: "eumetnet", name: "EUMETNET (OPERA, Meteoalarm & E-SOH)", title: "EUMETNET",
             systemImage: "globe.europe.africa.fill", tint: .green,
-            about: "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas sowie amtliche Warnmeldungen der europäischen Warnplattform Meteoalarm. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar.",
+            about: "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas, amtliche Warnmeldungen der europäischen Warnplattform Meteoalarm sowie Messwerte europäischer Wetterstationen aus dem Datenhub E-SOH. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar.",
+            license: "Attribution 4.0 International (CC BY 4.0)",
             links: [
                 DataProviderLink(title: "eumetnet.eu", url: URL(string: "https://www.eumetnet.eu/")!),
                 DataProviderLink(title: "OPERA-Programm", url: URL(string: "https://www.eumetnet.eu/activities/observations-programme/current-activities/opera/")!),
                 DataProviderLink(title: "meteoalarm.org", url: URL(string: "https://meteoalarm.org/")!),
+                DataProviderLink(title: "E-SOH (MeteoGate)", url: URL(string: "https://observations.meteogate.eu/")!),
             ]
         ),
         DataProvider(
