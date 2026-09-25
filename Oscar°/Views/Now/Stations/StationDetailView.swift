@@ -18,22 +18,22 @@ struct StationDetailView: View {
         NavigationStack {
             ScrollView {
                 if let station {
-                    let frame = StationChartFrame(end: station.lastReportAt, weather: weather)
+                    let frame = StationChartFrame(end: station.last_report_at, weather: weather)
                     VStack(alignment: .leading, spacing: 16) {
                         if stations.count > 1 {
                             StationChips(stations: stations, selectedID: $selectedID)
                         }
                         StationHeader(
                             name: station.name,
-                            subtitle: [station.current.weatherCode.map(WeatherConditionLabel.text(for:)),
+                            subtitle: [station.current.weather_code.map(WeatherConditionLabel.text(for:)),
                                        stationSubtitle(station, timeZone: weather.forecast.locationTimeZone),
                                        reportingInterval(station.history)].compactMap(\.self).joined(separator: " · "))
                         StationValueGrid(station: station)
                         StationTemperatureChart(history: station.history, frame: frame)
                         StationWindChart(history: station.history, frame: frame)
-                        if station.precipitation24h != nil {
+                        if station.precipitation_24h_mm != nil {
                             StationPrecipitationChart(
-                                history: station.history, frame: frame, total: station.precipitation24h)
+                                history: station.history, frame: frame, total: station.precipitation_24h_mm)
                         }
                         StationPressureChart(history: station.history, frame: frame)
                         StationFooter()
@@ -61,8 +61,8 @@ struct StationDetailView: View {
 /// How often the station reports, from the typical gap between its temperature readings:
 /// "alle 10 Min.", "stündlich", "alle 3 Std.", or "unregelmäßig" when fewer than three in
 /// four gaps match it (some secondary stations report in bursts). Nil with too few readings.
-private func reportingInterval(_ history: [StationReading]) -> String? {
-    let times = history.filter { $0.temperature != nil }.map(\.time)
+private func reportingInterval(_ history: [Components.Schemas.StationReading]) -> String? {
+    let times = history.filter { $0.temperature_c != nil }.map(\.time)
     guard times.count > 2 else { return nil }
     let gaps = zip(times.dropFirst(), times).map { $0.timeIntervalSince($1) }.sorted()
     let typical = gaps[gaps.count / 2]
@@ -77,7 +77,7 @@ private func reportingInterval(_ history: [StationReading]) -> String? {
 }
 
 private struct StationChips: View {
-    let stations: [WeatherStation]
+    let stations: [Components.Schemas.NearbyStation]
     @Binding var selectedID: String
 
     var body: some View {
@@ -88,7 +88,7 @@ private struct StationChips: View {
                     Button {
                         selectedID = station.id
                     } label: {
-                        Text(verbatim: "\(station.name) · \(station.distanceKm.formatted(.number.precision(.fractionLength(1)))) km")
+                        Text(verbatim: "\(station.name) · \(station.distance_km.formatted(.number.precision(.fractionLength(1)))) km")
                             .font(.subheadline.weight(.semibold))
                             .monospacedDigit()
                             .padding(.horizontal, 12)
@@ -122,20 +122,20 @@ private struct StationHeader: View {
 }
 
 private struct StationValueGrid: View {
-    let station: WeatherStation
+    let station: Components.Schemas.NearbyStation
 
     var body: some View {
         let units = StationUnits()
         let current = station.current
-        let direction = current.windDirection.map { " \(compassDirection($0))" } ?? ""
+        let direction = current.wind_direction_deg.map { " \(compassDirection($0))" } ?? ""
         DetailCard {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), alignment: .leading), count: 3), alignment: .leading, spacing: 14) {
-                StationValue(label: "Temperatur", value: units.temperatureString(current.temperature))
-                StationValue(label: "Taupunkt", value: units.temperatureString(current.dewPoint))
-                StationValue(label: "Luftfeuchtigkeit", value: current.humidity.map { "\(Int($0.rounded())) %" } ?? "–")
-                StationValue(label: "Wind", value: units.windString(current.windSpeed) + direction)
-                StationValue(label: "Böen", value: units.windString(current.windGust))
-                StationValue(label: "Luftdruck", value: current.pressure.map { "\(Int($0.rounded())) hPa" } ?? "–")
+                StationValue(label: "Temperatur", value: units.temperatureString(current.temperature_c))
+                StationValue(label: "Taupunkt", value: units.temperatureString(current.dew_point_c))
+                StationValue(label: "Luftfeuchtigkeit", value: current.humidity_pct.map { "\(Int($0.rounded())) %" } ?? "–")
+                StationValue(label: "Wind", value: units.windString(current.wind_speed_ms) + direction)
+                StationValue(label: "Böen", value: units.windString(current.wind_gust_ms))
+                StationValue(label: "Luftdruck", value: current.pressure_hpa.map { "\(Int($0.rounded())) hPa" } ?? "–")
             }
         }
     }
@@ -232,7 +232,7 @@ private struct StationChartCard<Content: View>: View {
     }
 }
 
-private func points(_ history: [StationReading], _ value: (StationReading) -> Double?) -> [StationChart.Point] {
+private func points(_ history: [Components.Schemas.StationReading], _ value: (Components.Schemas.StationReading) -> Double?) -> [StationChart.Point] {
     history.compactMap { reading in value(reading).map { .init(time: reading.time, value: $0) } }
 }
 
@@ -247,16 +247,16 @@ private func paddedDomain(_ lines: [StationChart.Line], from lowerPin: Double? =
 }
 
 private struct StationTemperatureChart: View {
-    let history: [StationReading]
+    let history: [Components.Schemas.StationReading]
     let frame: StationChartFrame
 
     var body: some View {
         let units = StationUnits()
         let symbol = units.temperatureUnit.symbol
         let lines = [
-            StationChart.Line(points: points(history) { $0.dewPoint.map(units.temperature) }, color: .mint, width: 1.5,
+            StationChart.Line(points: points(history) { $0.dew_point_c.map(units.temperature) }, color: .mint, width: 1.5,
                               label: String(localized: "Taupunkt")),
-            StationChart.Line(points: points(history) { $0.temperature.map(units.temperature) }, color: .orange,
+            StationChart.Line(points: points(history) { $0.temperature_c.map(units.temperature) }, color: .orange,
                               label: String(localized: "Temperatur")),
         ]
         StationChartCard(title: "Temperatur und Taupunkt", legend: lines) {
@@ -269,7 +269,7 @@ private struct StationTemperatureChart: View {
 }
 
 private struct StationWindChart: View {
-    let history: [StationReading]
+    let history: [Components.Schemas.StationReading]
     let frame: StationChartFrame
 
     var body: some View {
@@ -277,14 +277,14 @@ private struct StationWindChart: View {
         let unit = units.windUnit.displayUnit
         // Gusts sit behind the mean like the hourly lens' higher-altitude lines.
         let lines = [
-            StationChart.Line(points: points(history) { $0.windGust.map(units.wind) }, color: .teal.mix(with: .black, by: 0.4),
+            StationChart.Line(points: points(history) { $0.wind_gust_ms.map(units.wind) }, color: .teal.mix(with: .black, by: 0.4),
                               width: 1.5, label: String(localized: "Böen")),
-            StationChart.Line(points: points(history) { $0.windSpeed.map(units.wind) }, color: .teal,
+            StationChart.Line(points: points(history) { $0.wind_speed_ms.map(units.wind) }, color: .teal,
                               label: String(localized: "Wind")),
         ]
         // One arrow per 3 h keeps the direction readable at hourly and 10-min cadence.
         let arrows = history.compactMap { reading -> StationChart.Point? in
-            guard let direction = reading.windDirection,
+            guard let direction = reading.wind_direction_deg,
                   Int(reading.time.timeIntervalSince1970) % (3 * 3600) == 0 else { return nil }
             return .init(time: reading.time, value: direction)
         }
@@ -299,7 +299,7 @@ private struct StationWindChart: View {
 }
 
 private struct StationPrecipitationChart: View {
-    let history: [StationReading]
+    let history: [Components.Schemas.StationReading]
     let frame: StationChartFrame
     let total: Double?
 
@@ -320,9 +320,9 @@ private struct StationPrecipitationChart: View {
     private func hourlyBars(_ units: StationUnits) -> [StationChart.Bar] {
         var bars: [StationChart.Bar] = []
         for reading in history {
-            guard let mm = reading.precipitation else { continue }
+            guard let mm = reading.precipitation_mm else { continue }
             let value = units.precipitation(mm)
-            let minutes = reading.precipitationMinutes ?? 60
+            let minutes = reading.precipitation_period_min ?? 60
             guard minutes < 60 else {
                 bars.append(.init(start: reading.time.addingTimeInterval(-TimeInterval(minutes * 60)), end: reading.time,
                                   value: value, minutes: minutes))
@@ -340,11 +340,11 @@ private struct StationPrecipitationChart: View {
 }
 
 private struct StationPressureChart: View {
-    let history: [StationReading]
+    let history: [Components.Schemas.StationReading]
     let frame: StationChartFrame
 
     var body: some View {
-        let lines = [StationChart.Line(points: points(history) { $0.pressure }, color: .purple, label: String(localized: "Luftdruck"))]
+        let lines = [StationChart.Line(points: points(history) { $0.pressure_hpa }, color: .purple, label: String(localized: "Luftdruck"))]
         if !lines[0].points.isEmpty {
             StationChartCard(title: "Luftdruck", summary: threeHourTrend(lines[0].points)) {
                 StationChart(

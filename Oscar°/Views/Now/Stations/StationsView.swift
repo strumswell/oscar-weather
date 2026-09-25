@@ -34,7 +34,7 @@ struct StationsView: View {
 
 /// Also staged in the layout preview, hence the injected tap action.
 struct StationsCard: View {
-    let stations: [WeatherStation]
+    let stations: [Components.Schemas.NearbyStation]
     let timeZone: TimeZone
     var isDay = true
     let onSelect: (String) -> Void
@@ -54,7 +54,7 @@ struct StationsCard: View {
 }
 
 private struct StationRow: View {
-    let station: WeatherStation
+    let station: Components.Schemas.NearbyStation
     let timeZone: TimeZone
     let isDay: Bool
     let isFirst: Bool
@@ -63,9 +63,9 @@ private struct StationRow: View {
     var body: some View {
         let units = StationUnits()
         // Rain only when there was some; rounded to 0,0 it says nothing.
-        let rain = station.precipitation24h.flatMap { $0 >= 0.05 ? units.precipitationString($0) : nil }
+        let rain = station.precipitation_24h_mm.flatMap { $0 >= 0.05 ? units.precipitationString($0) : nil }
         let detail = [stationSubtitle(station, timeZone: timeZone), rain].compactMap(\.self).joined(separator: " · ")
-        let condition = station.current.weatherCode.map(WeatherConditionLabel.text(for:))
+        let condition = station.current.weather_code.map(WeatherConditionLabel.text(for:))
         Button(action: onSelect) {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
@@ -73,7 +73,7 @@ private struct StationRow: View {
                         Text(verbatim: station.name)
                             .font(.body.weight(.semibold))
                             .lineLimit(1)
-                        if let code = station.current.weatherCode {
+                        if let code = station.current.weather_code {
                             Image(decorative: HourlyFormatting.weatherIconName(weatherCode: Double(code), isDay: isDay ? 1 : 0))
                                 .resizable()
                                 .scaledToFit()
@@ -91,7 +91,7 @@ private struct StationRow: View {
                 StationSparkline(history: station.history)
                     .frame(width: 76, height: 42)
 
-                Text(verbatim: units.temperatureString(station.current.temperature))
+                Text(verbatim: units.temperatureString(station.current.temperature_c))
                     .font(.title3.weight(.medium))
                     .monospacedDigit()
                     .frame(minWidth: 58, alignment: .trailing)
@@ -105,7 +105,7 @@ private struct StationRow: View {
             if !isFirst { Divider().padding(.horizontal, 14) }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text(verbatim: [station.name, condition, detail, units.temperatureString(station.current.temperature)]
+        .accessibilityLabel(Text(verbatim: [station.name, condition, detail, units.temperatureString(station.current.temperature_c)]
             .compactMap(\.self).joined(separator: ", ")))
         .accessibilityHint(Text("Öffnet Stationsdetails"))
     }
@@ -114,7 +114,7 @@ private struct StationRow: View {
 /// Temperature over the last 24 h, scaled to its own range; the dot marks the newest reading and
 /// quiet labels mark the high and the low.
 private struct StationSparkline: View {
-    let history: [StationReading]
+    let history: [Components.Schemas.StationReading]
 
     /// Room above and below the line for the high/low labels.
     private static let labelBand: CGFloat = 11
@@ -123,7 +123,7 @@ private struct StationSparkline: View {
         let units = StationUnits()
         Canvas { context, size in
             let points = history.compactMap { reading in
-                reading.temperature.map { (reading.time.timeIntervalSince1970, $0) }
+                reading.temperature_c.map { (reading.time.timeIntervalSince1970, $0) }
             }
             guard points.count > 1, let last = points.last,
                   let lowPoint = points.min(by: { $0.1 < $1.1 }), let highPoint = points.max(by: { $0.1 < $1.1 }) else { return }
@@ -166,10 +166,10 @@ private struct StationSparkline: View {
 
 /// "5,8 km S · 22:00": distance and direction from the place, then the reading's time
 /// (a clock time rather than "44 min ago", which would need a ticking timer).
-func stationSubtitle(_ station: WeatherStation, timeZone: TimeZone) -> String {
-    let distance = station.distanceKm.formatted(.number.precision(.fractionLength(1)))
-    let time = station.lastReportAt.formatted(Date.FormatStyle(date: .omitted, time: .shortened, timeZone: timeZone))
-    return "\(distance) km \(compassDirection(station.bearing)) · \(time)"
+func stationSubtitle(_ station: Components.Schemas.NearbyStation, timeZone: TimeZone) -> String {
+    let distance = station.distance_km.formatted(.number.precision(.fractionLength(1)))
+    let time = station.last_report_at.formatted(Date.FormatStyle(date: .omitted, time: .shortened, timeZone: timeZone))
+    return "\(distance) km \(compassDirection(station.bearing_deg)) · \(time)"
 }
 
 /// Station values arrive in SI; the display follows the unit settings.

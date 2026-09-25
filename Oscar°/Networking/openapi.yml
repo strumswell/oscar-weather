@@ -2112,6 +2112,7 @@ components:
       properties:
         generated_at:
           type: string
+          format: date-time
         stations:
           type: array
           items:
@@ -2126,6 +2127,7 @@ components:
           type: string
         source:
           type: string
+          description: "`esoh` (EUMETNET E-SOH) or `dwd` (DWD Open Data)"
         latitude:
           type: number
         longitude:
@@ -2134,22 +2136,27 @@ components:
           type: number
         bearing_deg:
           type: number
+          description: Direction from the requested point to the station, clockwise from north
         last_report_at:
           type: string
+          format: date-time
         current:
           $ref: "#/components/schemas/StationReading"
         precipitation_24h_mm:
           type: number
         history:
           type: array
+          description: The last 24 h, oldest first
           items:
             $ref: "#/components/schemas/StationReading"
     StationReading:
       type: object
+      description: SI units as served (°C, %, m/s, degrees from, hPa, mm)
       required: [time]
       properties:
         time:
           type: string
+          format: date-time
         temperature_c:
           type: number
         humidity_pct:
@@ -2168,8 +2175,10 @@ components:
           type: number
         precipitation_period_min:
           type: integer
+          description: Length of the `precipitation_mm` sum, ending at `time`
         weather_code:
           type: integer
+          description: "`current` only. WMO weather code as in the forecast; absent where the station reports no weather or clouds"
     NotificationRegisterResponse:
       type: object
       required: [subscriptionId, apiKey]

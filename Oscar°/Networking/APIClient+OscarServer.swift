@@ -15,6 +15,11 @@ extension APIClient {
   /// Upper bound for collected asset bodies (largest today: ~1.5 MB cloud grids).
   private static let assetByteLimit = 64 * 1024 * 1024
 
+  /// oscar-server stamps `date-time` fields with millisecond fractions
+  /// (`2026-06-17T12:05:00.000Z`), which the runtime's default `.iso8601`
+  /// transcoder rejects.
+  static let oscarServerConfiguration = Configuration(dateTranscoder: OscarServerDateTranscoder())
+
   /// Which oscar-server client serves a call: `.standard` retries with backoff
   /// (in-app, a late answer still helps); `.snapshot` caps every request at 20 s
   /// with no retries, for renderers on a WidgetKit refresh budget.
@@ -177,5 +182,19 @@ extension APIClient {
     case .ok(let ok): return try ok.body.json
     case .undocumented: throw URLError(.badServerResponse)
     }
+  }
+}
+
+/// `PrecipSeriesDate` as the generated client's date transcoder: fractional
+/// seconds first, plain ISO-8601 accepted too.
+struct OscarServerDateTranscoder: DateTranscoder {
+  func encode(_ date: Date) throws -> String { PrecipSeriesDate.string(from: date) }
+
+  func decode(_ string: String) throws -> Date {
+    guard let date = PrecipSeriesDate.parse(string) else {
+      throw DecodingError.dataCorrupted(
+        .init(codingPath: [], debugDescription: "Unparseable oscar-server date: \(string)"))
+    }
+    return date
   }
 }

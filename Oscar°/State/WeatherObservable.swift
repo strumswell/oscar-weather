@@ -64,7 +64,7 @@ final class Weather {
     /// Satellite cloudiness at the location (not persisted — only meaningful fresh).
     var cloudSeries: CloudSeriesResponse?
     /// Nearest weather stations with fresh readings (not persisted, Europe only).
-    var stations: [WeatherStation] = []
+    var stations: [Components.Schemas.NearbyStation] = []
     var error: String = ""
     var lastUpdated: Date?
     var debug = false

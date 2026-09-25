@@ -59,6 +59,7 @@ final class APIClient: Sendable {
     canadaWeather = APIClient.get(url: Self.serverURL(Servers.server4))
     oscarServer = Client(
       serverURL: URL(string: radarBaseURL) ?? Self.serverURL(Servers.server6),
+      configuration: Self.oscarServerConfiguration,
       transport: URLSessionTransport(),
       middlewares: Self.stagingMiddlewares + [
         UsageCountingMiddleware(),
@@ -74,6 +75,7 @@ final class APIClient: Sendable {
     snapshotConfiguration.timeoutIntervalForRequest = 20
     oscarServerSnapshot = Client(
       serverURL: URL(string: radarBaseURL) ?? Self.serverURL(Servers.server6),
+      configuration: Self.oscarServerConfiguration,
       transport: URLSessionTransport(
         configuration: .init(session: URLSession(configuration: snapshotConfiguration))),
       middlewares: Self.stagingMiddlewares + [ContactIdentityMiddleware()]

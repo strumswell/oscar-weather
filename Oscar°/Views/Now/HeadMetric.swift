@@ -91,7 +91,7 @@ enum HeadMetric: String, CaseIterable, Identifiable {
                 .map { Self.windString($0, weather: weather) }
         case .measured:
             // The nearest station's reading, next to (never instead of) the forecast temperature.
-            return weather.stations.first?.current.temperature.map { StationUnits().temperatureString($0) }
+            return weather.stations.first?.current.temperature_c.map { StationUnits().temperatureString($0) }
         }
     }
 

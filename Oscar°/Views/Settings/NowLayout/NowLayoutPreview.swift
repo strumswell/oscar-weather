@@ -177,22 +177,20 @@ private struct MiniPage: View {
     }
 
     /// Three stations around a mild day: cool night, warm afternoon.
-    private static let sampleStations: [WeatherStation] = [
+    private static let sampleStations: [Components.Schemas.NearbyStation] = [
         ("Berlin Tempelhof", 5.8, 182.0, 0.0),
         ("Berlin Dahlem", 10.2, 224.0, -2.4),
         ("Potsdam", 27.9, 237.0, -1.3),
     ].map { name, distance, bearing, offset in
         let end = Date(timeIntervalSinceReferenceDate: 24 * 3600)
         let history = (0...24).map { hour in
-            StationReading(
+            Components.Schemas.StationReading(
                 time: end.addingTimeInterval(Double(hour - 24) * 3600),
-                temperature: 13 + offset - 6 * cos(Double(hour + 3) / 24 * 2 * .pi),
-                humidity: nil, dewPoint: nil, windSpeed: nil, windDirection: nil,
-                windGust: nil, pressure: nil, precipitation: nil, precipitationMinutes: nil)
+                temperature_c: 13 + offset - 6 * cos(Double(hour + 3) / 24 * 2 * .pi))
         }
-        return WeatherStation(
-            id: name, name: name, source: "esoh", distanceKm: distance, bearing: bearing,
-            lastReportAt: end, current: history[24], precipitation24h: nil, history: history)
+        return Components.Schemas.NearbyStation(
+            id: name, name: name, source: "esoh", latitude: 52.5, longitude: 13.4,
+            distance_km: distance, bearing_deg: bearing, last_report_at: end, current: history[24], history: history)
     }
 
     var body: some View {
