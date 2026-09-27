@@ -9,12 +9,13 @@ import OpenAPIRuntime
 /// This middleware cleans `getForecast` responses before decoding: series that are missing from
 /// the start are dropped, every block is truncated to the range free of `null`s (so a short-range
 /// model shows only the days it covers), and required `current` scalars that came back `null` are
-/// filled with a neutral default. For `best_match` — which never returns `null` — it is a no-op.
+/// filled with a neutral default. `best_match` series are left alone; the few it can null past a
+/// model's horizon (e.g. gusts in western Germany) are declared nullable instead.
 nonisolated final class ForecastSanitizingMiddleware: ClientMiddleware {
   /// Series the schema already declares nullable; their generated type tolerates `null`.
   private static let nullableHourly: Set<String> = [
     "precipitation_probability",
-    "windspeed_180m", "winddirection_180m",
+    "windspeed_80m", "windspeed_180m", "winddirection_180m", "windgusts_10m",
     "soil_temperature_0cm", "soil_temperature_6cm", "soil_temperature_18cm", "soil_temperature_54cm",
     "soil_moisture_0_1cm", "soil_moisture_1_3cm", "soil_moisture_3_9cm",
     "soil_moisture_9_27cm", "soil_moisture_27_81cm",

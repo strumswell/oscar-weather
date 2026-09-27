@@ -87,7 +87,7 @@ enum HeadMetric: String, CaseIterable, Identifiable {
             return (environmentValue(from: hourly?.precipitation_probability, time: time) ?? nil)
                 .map { "\(Int($0.rounded())) %" }
         case .gusts:
-            return environmentValue(from: hourly?.windgusts_10m, time: time)
+            return (environmentValue(from: hourly?.windgusts_10m, time: time) ?? nil)
                 .map { Self.windString($0, weather: weather) }
         case .measured:
             // A station's reading, next to (never instead of) the forecast temperature.

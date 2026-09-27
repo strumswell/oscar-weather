@@ -112,9 +112,9 @@ final class HourlyTimelineModel {
         snowfall = hourly?.snowfall ?? []
         weathercode = hourly?.weathercode ?? []
         windspeed = hourly?.windspeed_10m ?? []
-        windgusts = hourly?.windgusts_10m ?? []
+        windgusts = Self.leading(hourly?.windgusts_10m)
         winddirection = hourly?.winddirection_10m ?? []
-        windspeed80 = hourly?.windspeed_80m ?? []
+        windspeed80 = Self.leading(hourly?.windspeed_80m)
         windspeed120 = hourly?.windspeed_120m ?? []
         windspeed180 = Self.filled(hourly?.windspeed_180m)
         pressure = hourly?.pressure_msl ?? []
@@ -191,6 +191,11 @@ final class HourlyTimelineModel {
             scrubTime = min(max(scrubTime, domain.lowerBound), domain.upperBound)
         }
         stageTime = quantized(scrubTime)
+    }
+
+    /// Values up to the first gap: best_match leaves some series null past their model's horizon.
+    private static func leading(_ values: [Double?]?) -> [Double] {
+        (values ?? []).prefix { $0 != nil }.compactMap { $0 }
     }
 
     /// Optional-element Open-Meteo arrays ([Double?]) forward-filled into plain

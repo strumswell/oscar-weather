@@ -389,7 +389,9 @@ paths:
                           type: number
                       windspeed_80m:
                         type: array
+                        nullable: true
                         items:
+                          nullable: true
                           type: number
                       windspeed_120m:
                         type: array
@@ -421,7 +423,9 @@ paths:
                           type: number
                       windgusts_10m:
                         type: array
+                        nullable: true
                         items:
+                          nullable: true
                           type: number
                       shortwave_radiation:
                         type: array
