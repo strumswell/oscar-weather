@@ -1,6 +1,28 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "Favorit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favorit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favorite"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favori"
+          }
+        }
+      }
+    },
     "" : {
 
     },
@@ -1836,7 +1858,26 @@
       }
     },
     "alle %lld Min." : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "alle %lld Min."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "every %lld min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld dakikada bir"
+          }
+        }
+      }
     },
     "alle %lld Std." : {
       "localizations" : {
@@ -6773,7 +6814,26 @@
       }
     },
     "Gemessene Werte der nächstgelegenen Wetterstationen, keine Vorhersage." : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemessene Werte der nächstgelegenen Wetterstationen, keine Vorhersage."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Measured values from the nearest weather stations, not a forecast."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En yakın meteoroloji istasyonlarında ölçülen değerler, tahmin değil."
+          }
+        }
+      }
     },
     "Gemessene Werte der nächstgelegenen Wetterstationen, keine Vorhersage. Viele Stationen melden stündlich, manche alle 10 Minuten. Daten: %@" : {
       "extractionState" : "stale",
@@ -10286,7 +10346,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Weather stations"
+            "value" : "Weather Stations"
           }
         },
         "tr" : {
@@ -17248,7 +17308,26 @@
       }
     },
     "unregelmäßig" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "unregelmäßig"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "irregular"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "düzensiz"
+          }
+        }
+      }
     },
     "Unsicherheit & Modell" : {
       "localizations" : {
@@ -17677,7 +17756,26 @@
       }
     },
     "Verlauf der letzten 24 Stunden" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verlauf der letzten 24 Stunden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last 24 hours"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son 24 saat"
+          }
+        }
+      }
     },
     "Verlauf der Tageshöchstwerte" : {
       "localizations" : {

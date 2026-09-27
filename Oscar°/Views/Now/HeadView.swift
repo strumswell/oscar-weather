@@ -212,7 +212,7 @@ struct HeadView: View {
         HStack(spacing: 18) {
           ForEach(settingsService.headMetrics) { metric in
             if let value = metric.value(in: weather) {
-              HStack(spacing: 6) {
+              let item = HStack(spacing: 6) {
                 Image(systemName: metric.systemImage)
                 Text(value)
                 if metric == .cloudCover, let annotation = cloudTrendAnnotation {
@@ -227,6 +227,12 @@ struct HeadView: View {
                   .foregroundStyle(Color(uiColor: .label).opacity(0.55))
                 }
               }
+              if metric == .measured, let id = weather.headStation?.id {
+                Button { presentation.present(.stations(id)) } label: { item }
+                  .buttonStyle(.plain)
+              } else {
+                item
+              }
             }
           }
         }
@@ -236,6 +242,11 @@ struct HeadView: View {
         .frame(maxWidth: .infinity, minHeight: 20)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(metricsDescription))
+        .accessibilityActions {
+          if settingsService.headMetrics.contains(.measured), let id = weather.headStation?.id {
+            Button("Messstationen") { presentation.present(.stations(id)) }
+          }
+        }
 
         if hasWeatherAlerts() {
           AlertView()

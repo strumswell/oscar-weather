@@ -164,6 +164,15 @@ private struct StationSparkline: View {
     }
 }
 
+extension Weather {
+    /// The head's "Gemessen" station: the nearest starred one in range, else the nearest.
+    var headStation: Components.Schemas.NearbyStation? {
+        let favorites = SettingService.shared.favoriteStationIDs
+        let reporting = stations.filter { $0.current.temperature_c != nil }
+        return reporting.first { favorites.contains($0.id) } ?? reporting.first
+    }
+}
+
 /// "5,8 km S · 22:00": distance and direction from the place, then the reading's time
 /// (a clock time rather than "44 min ago", which would need a ticking timer).
 func stationSubtitle(_ station: Components.Schemas.NearbyStation, timeZone: TimeZone) -> String {

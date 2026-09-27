@@ -90,8 +90,8 @@ enum HeadMetric: String, CaseIterable, Identifiable {
             return environmentValue(from: hourly?.windgusts_10m, time: time)
                 .map { Self.windString($0, weather: weather) }
         case .measured:
-            // The nearest station's reading, next to (never instead of) the forecast temperature.
-            return weather.stations.first?.current.temperature_c.map { StationUnits().temperatureString($0) }
+            // A station's reading, next to (never instead of) the forecast temperature.
+            return weather.headStation?.current.temperature_c.map { StationUnits().temperatureString($0) }
         }
     }
 

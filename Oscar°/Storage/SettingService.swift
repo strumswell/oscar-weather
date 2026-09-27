@@ -109,6 +109,10 @@ final class SettingService {
     var hiddenHeadMetricsRaw: [String]? {
         didSet { UserDefaults.standard.set(hiddenHeadMetricsRaw, forKey: "hiddenHeadMetrics") }
     }
+    /// Stations starred in the station sheet; the head's "Gemessen" prefers one in range.
+    var favoriteStationIDs: [String] {
+        didSet { UserDefaults.standard.set(favoriteStationIDs, forKey: "favoriteStationIDs") }
+    }
     /// Shared app group so the widget basemap prerender follows the map style.
     var mapBasemapStyleRaw: String {
         didSet { Self.defaults.set(mapBasemapStyleRaw, forKey: "mapBasemapStyle") }
@@ -216,6 +220,7 @@ final class SettingService {
         hiddenNowSectionsRaw = UserDefaults.standard.stringArray(forKey: "hiddenNowSections")
         headMetricOrderRaw = UserDefaults.standard.stringArray(forKey: "headMetricOrder")
         hiddenHeadMetricsRaw = UserDefaults.standard.stringArray(forKey: "hiddenHeadMetrics")
+        favoriteStationIDs = UserDefaults.standard.stringArray(forKey: "favoriteStationIDs") ?? []
         mapBasemapStyleRaw = Self.defaults.string(forKey: "mapBasemapStyle") ?? MapBasemapStyle.fiord.rawValue
         timeFormatPreference = TimeFormatPreference(
             rawValue: Self.defaults.string(forKey: Self.timeFormatPreferenceKey) ?? ""
