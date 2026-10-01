@@ -105,34 +105,17 @@ enum OnboardingSampleData {
 
     static let dailyTemperatureBounds = (min: 10.0, max: 30.0)
 
-    static let ensemblePoints: [DailyEnsembleDayPoint] = {
-        let base = Date(timeIntervalSince1970: 1_752_192_000)
-        let mins: [Double] = [14, 15, 13, 12, 13, 15, 16]
-        let maxs: [Double] = [27, 28, 22, 19, 24, 26, 29]
+    struct EnsembleSample {
+        let low: Double
+        let high: Double
+        let spread: Double
+    }
+
+    static let ensembleSamples: [EnsembleSample] = {
+        let lows: [Double] = [14, 15, 13, 12, 13, 15, 16]
+        let highs: [Double] = [27, 28, 22, 19, 24, 26, 29]
         return (0..<7).map { day in
-            let spread = 0.6 + Double(day) * 0.55
-            return DailyEnsembleDayPoint(
-                id: day,
-                date: base.addingTimeInterval(Double(day) * 86_400),
-                temperatureMin: mins[day],
-                temperatureMax: maxs[day],
-                temperatureMinMemberLow: mins[day] - spread,
-                temperatureMinMemberHigh: mins[day] + spread * 0.8,
-                temperatureMaxMemberLow: maxs[day] - spread * 0.9,
-                temperatureMaxMemberHigh: maxs[day] + spread,
-                precipitationSum: nil,
-                precipitationSumMemberLow: nil,
-                precipitationSumMemberHigh: nil,
-                windSpeedMin: nil,
-                windSpeedMax: nil,
-                windSpeedMinMemberLow: nil,
-                windSpeedMinMemberHigh: nil,
-                windSpeedMaxMemberLow: nil,
-                windSpeedMaxMemberHigh: nil,
-                windDirection: nil,
-                windDirectionMemberLow: nil,
-                windDirectionMemberHigh: nil
-            )
+            EnsembleSample(low: lows[day], high: highs[day], spread: 0.6 + Double(day) * 0.55)
         }
     }()
 

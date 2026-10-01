@@ -24,14 +24,9 @@ struct RainView: View {
         let hasRain = points.contains(where: { $0.value > 0 })
         if hasRain {
             VStack(alignment: .leading) {
-                Button(action: openRadarMap) {
+                NowSectionHeader(showMore: openRadarMap) {
                     Text("Radar")
-                        .font(.title3)
-                        .bold()
-                        .foregroundStyle(Color(uiColor: .label))
                 }
-                .buttonStyle(.plain)
-                .padding(.leading)
 
                 PrecipitationSeriesChart(points: points, timeZone: weather.forecast.locationTimeZone)
                     .padding(.horizontal, 20)

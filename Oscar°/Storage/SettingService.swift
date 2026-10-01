@@ -84,11 +84,6 @@ final class SettingService {
     var mapOverlayOpacity: Double {
         didSet { UserDefaults.standard.set(mapOverlayOpacity, forKey: "mapOverlayOpacity") }
     }
-    /// Which reading the hourly detail sheet opens in: the chapters timeline
-    /// (true) or the all-values deck.
-    var hourlyDetailShowsChapters: Bool {
-        didSet { UserDefaults.standard.set(hourlyDetailShowsChapters, forKey: "hourlyDetailShowsChapters") }
-    }
     /// Supporter theme: the iOS 6 weather card replaces the tab bar (see RootTabView).
     var classicTheme: Bool {
         didSet { UserDefaults.standard.set(classicTheme, forKey: "classicTheme") }
@@ -214,7 +209,6 @@ final class SettingService {
         cloudLayerActive = UserDefaults.standard.bool(forKey: "cloudLayerActive")
         let storedOpacity = UserDefaults.standard.object(forKey: "mapOverlayOpacity") as? Double
         mapOverlayOpacity = min(max(storedOpacity ?? 0.7, 0.3), 1)
-        hourlyDetailShowsChapters = UserDefaults.standard.bool(forKey: "hourlyDetailShowsChapters")
         classicTheme = UserDefaults.standard.bool(forKey: "classicTheme")
         nowSectionOrderRaw = UserDefaults.standard.stringArray(forKey: "nowSectionOrder")
         hiddenNowSectionsRaw = UserDefaults.standard.stringArray(forKey: "hiddenNowSections")

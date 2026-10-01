@@ -188,6 +188,7 @@ struct WeatherMapView: UIViewRepresentable {
     func updateUIView(_ mapView: MLNMapView, context: Context) {
         context.coordinator.parent = self
         context.coordinator.syncAll()
+        context.coordinator.recenterIfPlaceChanged()
 
         // Enable the user-location dot once access is granted (e.g. after the
         // onboarding location step), without recreating the map.
@@ -271,9 +272,11 @@ struct WeatherMapView: UIViewRepresentable {
         nonisolated(unsafe) private var interactionEndWorkItem: DispatchWorkItem?
         nonisolated(unsafe) var userDotPulseTimer: Timer?
         private var isMapInteractionActive = false
+        private var centeredCoordinates: CLLocationCoordinate2D
 
         init(_ parent: WeatherMapView) {
             self.parent = parent
+            centeredCoordinates = parent.coordinates
             super.init()
             reduceMotionObserver = NotificationCenter.default.addObserver(
                 forName: UIAccessibility.reduceMotionStatusDidChangeNotification,
@@ -311,6 +314,16 @@ struct WeatherMapView: UIViewRepresentable {
                   let coordinate = LocationService.shared.getGPSCoordinates(),
                   CLLocationCoordinate2DIsValid(coordinate) else { return }
             mapView.setCenter(coordinate, zoomLevel: max(mapView.zoomLevel, 9), animated: true)
+        }
+
+        /// Centers on a newly picked place; the 2 km floor ignores GPS drift of the current location.
+        func recenterIfPlaceChanged() {
+            let target = parent.coordinates
+            let moved = CLLocation(latitude: target.latitude, longitude: target.longitude)
+                .distance(from: CLLocation(latitude: centeredCoordinates.latitude, longitude: centeredCoordinates.longitude))
+            guard moved > 2_000, WeatherMapView.initialCenterOverride == nil, let mapView else { return }
+            centeredCoordinates = target
+            mapView.setCenter(target, animated: false)
         }
 
         func tearDown() {

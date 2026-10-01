@@ -10,11 +10,10 @@ struct StationsView: View {
         let stations = Array(weather.stations.prefix(3))
         if !stations.isEmpty {
             VStack(alignment: .leading) {
-                Text("Messstationen")
-                    .font(.title3)
-                    .bold()
-                    .foregroundStyle(.primary)
-                    .padding([.leading, .bottom])
+                NowSectionHeader(showMore: { presentation.present(.stations(stations[0].id)) }) {
+                    Text("Messstationen")
+                }
+                .padding(.bottom)
 
                 StationsCard(stations: stations, timeZone: weather.forecast.locationTimeZone,
                              isDay: (weather.forecast.current?.is_day ?? 1) > 0) { id in

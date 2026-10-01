@@ -208,6 +208,9 @@ final class ScreenshotTests: XCTestCase {
         let daily = app.descendants(matching: .any)["now.daily"].firstMatch
         scrollTo(daily, in: app)
         tapVisible(daily, in: app)
+        let ensemble = app.buttons["hourly.ensemble"].firstMatch
+        _ = ensemble.waitForExistence(timeout: 10)
+        ensemble.tap()
         sleep(5)
         snapshot("05_ensemble", timeWaitingForIdle: 0)
     }

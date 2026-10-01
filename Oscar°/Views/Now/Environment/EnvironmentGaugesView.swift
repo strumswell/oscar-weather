@@ -51,11 +51,10 @@ struct EnvironmentGaugesView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Umwelt")
-                .font(.title3)
-                .bold()
-                .foregroundStyle(.primary)
-                .padding([.leading, .bottom])
+            NowSectionHeader(showMore: showDetail) {
+                Text("Umwelt")
+            }
+            .padding(.bottom)
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 14) {
                     ForEach(metrics) { metric in
@@ -92,6 +91,11 @@ struct EnvironmentGaugesView: View {
                 .opacity(phase.isIdentity ? 1 : 0.8)
                 .scaleEffect(phase.isIdentity ? 1 : 0.99)
         }
+    }
+
+    /// Opens on the most pressing metric, the one leading the strip.
+    private func showDetail() {
+        presentation.present(.environment(metrics.first.map { detailSection(for: $0) } ?? .aqi))
     }
 
     private func presentDetail(for metric: EnvironmentMetric) {

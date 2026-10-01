@@ -13,24 +13,27 @@ extension HourlyTimelineModel {
 
     var dateLabel: String {
         guard hasData else { return "" }
-        let day = HourlyFormatting.dayLabel(timestamp: scrubTime, timeZone: timeZone, now: .now)
-        return day + " " + SettingService.formattedDayMonth(Date(timeIntervalSince1970: scrubTime), timeZone: timeZone)
+        return dayLabel + " " + SettingService.formattedDayMonth(Date(timeIntervalSince1970: scrubTime), timeZone: timeZone)
     }
 
     var titleLabel: String {
         guard hasData else { return "" }
-        return HourlyFormatting.dayLabel(timestamp: scrubTime, timeZone: timeZone, now: .now)
+        return dayLabel + ", " + clockLabel
     }
 
-    /// The small-caps line above the title: weekday and date while the title
-    /// is relative ("Samstag · 29. Aug."), the date alone once the title IS
-    /// the weekday.
+    private var dayLabel: String {
+        HourlyFormatting.dayLabel(timestamp: scrubTime, timeZone: timeZone, now: .now)
+    }
+
+    /// The small-caps line above the title: weekday and date while the day
+    /// is relative ("Samstag · 29. Aug."), the date alone once it IS the
+    /// weekday.
     var eyebrowLabel: String {
         guard hasData else { return "" }
         let date = Date(timeIntervalSince1970: scrubTime)
         let dayMonth = SettingService.formattedDayMonth(date, timeZone: timeZone)
         let weekday = SettingService.formattedWeekday(date, timeZone: timeZone)
-        guard titleLabel != weekday else { return dayMonth }
+        guard dayLabel != weekday else { return dayMonth }
         return weekday + " · " + dayMonth
     }
 

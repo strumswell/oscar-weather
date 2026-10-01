@@ -39,29 +39,7 @@ struct HourlyView: View {
     let showDayBadge = leadingItemID != nil && leadingItemID != firstID && dayLabel != nil
 
     VStack(alignment: .leading) {
-      HStack {
-        Text("Stündlich")
-          .font(.title3)
-          .bold()
-          .foregroundStyle(.primary)
-          .contentShape(.rect)
-          .onTapGesture { scrollToStart() }
-          .accessibilityAddTraits(.isButton)
-          .accessibilityHint(Text("Zurück zum Anfang der stündlichen Vorhersage"))
-
-        Spacer()
-
-        if showDayBadge, let dayLabel {
-          Text(dayLabel)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(.primary.opacity(0.8))
-            .contentTransition(.numericText())
-            .transition(.opacity)
-        }
-      }
-      .padding(.horizontal)
-      .animation(.snappy, value: dayLabel)
-      .animation(.snappy, value: showDayBadge)
+      header(dayLabel: showDayBadge ? dayLabel : nil)
 
       ScrollView(.horizontal) {
         LazyHStack(spacing: 12) {
@@ -112,6 +90,27 @@ struct HourlyView: View {
         .scaleEffect(shouldReduceMotion || phase.isIdentity ? 1 : 0.99)
     }
     .accessibilityIdentifier("now.hourly")
+  }
+
+  private func header(dayLabel: String?) -> some View {
+    NowSectionHeader(showMore: hasHourlyDetailData ? { presentDetails(at: nil) } : nil) {
+      HStack(spacing: 6) {
+        Text("Stündlich")
+          .contentShape(.rect)
+          .onTapGesture { scrollToStart() }
+          .accessibilityAddTraits(.isButton)
+          .accessibilityHint(Text("Zurück zum Anfang der stündlichen Vorhersage"))
+
+        if let dayLabel {
+          Text(verbatim: "· \(dayLabel)")
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .contentTransition(.numericText())
+            .transition(.opacity)
+        }
+      }
+      .animation(.snappy, value: dayLabel)
+    }
   }
 
   /// Single-root container keeps the lazy row unary, so the stack can template

@@ -30,29 +30,6 @@ enum DailyEnsembleModel: String, CaseIterable, Identifiable {
     }
   }
 
-  /// Catalog key; the view localizes it where it is shown.
-  var region: String {
-    switch self {
-    case .iconEUEPS:
-      return "Europa"
-    default:
-      return "Global"
-    }
-  }
-
-  var members: Int {
-    switch self {
-    case .ecmwfAIFS025Ensemble, .ecmwfIFS025Ensemble:
-      return 51
-    case .googleWeatherNext2Ensemble:
-      return 35
-    case .ncepAIGFS025, .ncepGEFS05:
-      return 31
-    case .iconGlobalEPS, .iconEUEPS:
-      return 40
-    }
-  }
-
   var menuSubtitle: String {
     switch self {
     case .ecmwfAIFS025Ensemble: return String(localized: "25 km · 15 Tage")

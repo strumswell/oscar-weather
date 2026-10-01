@@ -534,15 +534,18 @@ enum ScreenshotFixtures {
                 zip(tmax, offsets(spread)).map { $0 + $1 }
             daily["temperature_2m_min_\(suffix)"] =
                 zip(tmin, offsets { spread($0) * 0.8 }).map { $0 + $1 }
-            daily["precipitation_sum_\(suffix)"] =
-                zip(precip, offsets { 0.4 + Double($0) * 0.9 })
-                    .map { max(0, $0 * (1 + sin(phase) * 0.25) + $1) }
+            let memberPrecip = zip(precip, offsets { 0.4 + Double($0) * 0.9 })
+                .map { max(0, $0 * (1 + sin(phase) * 0.25) + $1) }
+            daily["precipitation_sum_\(suffix)"] = memberPrecip
+            daily["snowfall_sum_\(suffix)"] = Array(repeating: 0.0, count: dayCount)
+            daily["weather_code_\(suffix)"] = memberPrecip.enumerated().map { day, mm -> Int in
+                mm >= 5 ? 63 : mm >= 1 ? 61 : mm >= 0.2 ? 51 : [0, 2, 3][(member + day) % 3]
+            }
+            daily["cloud_cover_mean_\(suffix)"] = memberPrecip.enumerated().map { day, mm in
+                min(100, 20 + Double((member + day) % 3) * 25 + mm * 12)
+            }
             daily["wind_speed_10m_max_\(suffix)"] =
                 zip(windMax, offsets { 1.2 + Double($0) * 0.35 }).map { max(4, $0 + $1) }
-            daily["wind_speed_10m_min_\(suffix)"] =
-                zip(windMax, offsets { 0.8 + Double($0) * 0.25 }).map { max(2, $0 * 0.45 + $1) }
-            daily["wind_direction_10m_dominant_\(suffix)"] =
-                (0..<dayCount).map { day in 240 + sin(phase + Double(day)) * 25 }
         }
 
         return [
@@ -556,9 +559,10 @@ enum ScreenshotFixtures {
                 "temperature_2m_min": "°C",
                 "temperature_2m_max": "°C",
                 "precipitation_sum": "mm",
-                "wind_speed_10m_min": "km/h",
+                "snowfall_sum": "cm",
                 "wind_speed_10m_max": "km/h",
-                "wind_direction_10m_dominant": "°",
+                "weather_code": "wmo code",
+                "cloud_cover_mean": "%",
             ],
             "daily": daily,
         ]

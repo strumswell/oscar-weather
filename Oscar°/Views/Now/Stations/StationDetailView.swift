@@ -402,7 +402,7 @@ struct StationChartFrame {
     }
 }
 
-/// Title and trailing summary over a chart, legend below, like the ensemble cards.
+/// Title and trailing summary over a chart, legend below.
 private struct StationChartCard<Content: View>: View {
     let title: LocalizedStringResource
     var summary: String?
@@ -426,7 +426,7 @@ private struct StationChartCard<Content: View>: View {
             if legend.count > 1 {
                 HStack(spacing: 12) {
                     ForEach(legend.reversed(), id: \.label) { line in
-                        DailyEnsembleLegendItem(color: line.color, label: LocalizedStringKey(line.label))
+                        StationLegendItem(color: line.color, label: LocalizedStringKey(line.label))
                     }
                 }
             }
@@ -568,8 +568,8 @@ private struct StationPressureChart: View {
     }
 }
 
-/// A station's last 24 h in the hourly palette, with the ensemble charts' axis and
-/// selection: default y axis, and a rule plus tooltip only while the chart is touched.
+/// A station's last 24 h in the hourly palette: default y axis, and a rule plus
+/// tooltip only while the chart is touched.
 struct StationChart: View {
     struct Point {
         let time: Date
@@ -638,7 +638,7 @@ struct StationChart: View {
                 AxisTick()
             }
         }
-        // The ensemble charts' default axis, minus the thousands separator ("1020", not "1.020").
+        // Default axis minus the thousands separator ("1020", not "1.020").
         .chartYAxis {
             AxisMarks { _ in
                 AxisGridLine()
@@ -742,20 +742,20 @@ struct StationChart: View {
         }
     }
 
-    /// The tooltip reads the readings at the finger, like the ensemble charts' day readout.
+    /// The tooltip reads the readings at the finger.
     private func tooltip(at date: Date) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(date, format: .dateTime.hour().minute())
                 .font(.caption)
                 .foregroundStyle(.secondary)
             ForEach(Array(lines.reversed().enumerated()), id: \.offset) { _, line in
-                DailyEnsembleValueRow(color: line.color, label: LocalizedStringKey(line.label),
-                                      text: Self.sample(line.points, at: date).map(valueFormat) ?? "--")
+                StationValueRow(color: line.color, label: LocalizedStringKey(line.label),
+                                text: Self.sample(line.points, at: date).map(valueFormat) ?? "--")
             }
             if !bars.isEmpty {
                 let bar = bars.last { $0.start < date && date <= $0.end }
-                DailyEnsembleValueRow(color: .hourlyRain, label: "Regen",
-                                      text: bar.map { "\(valueFormat($0.value)) / \($0.minutes / 60) h" } ?? "--")
+                StationValueRow(color: .hourlyRain, label: "Regen",
+                                text: bar.map { "\(valueFormat($0.value)) / \($0.minutes / 60) h" } ?? "--")
             }
         }
         .padding(8)
@@ -815,5 +815,38 @@ struct StationChart: View {
         let span = next.time.timeIntervalSince(lower.time)
         guard span <= maxGap else { return nil }
         return lower.value + (next.value - lower.value) * date.timeIntervalSince(lower.time) / span
+    }
+}
+
+private struct StationLegendItem: View {
+    let color: Color
+    let label: LocalizedStringKey
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(color)
+                .frame(width: 7, height: 7)
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+private struct StationValueRow: View {
+    let color: Color
+    let label: LocalizedStringKey
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(color)
+                .frame(width: 6, height: 6)
+            Text("\(Text(label)): \(text)")
+                .font(.caption2)
+                .foregroundStyle(.white)
+        }
     }
 }

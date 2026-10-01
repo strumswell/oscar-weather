@@ -3,27 +3,23 @@ import Foundation
 extension HourlyTimelineModel {
     // MARK: - Derived timeline features
 
-    /// The local calendar day around `time`, clipped to the loaded data.
-    func dayRange(containing time: Double) -> ClosedRange<Double> {
-        var calendar = Calendar.current
-        calendar.timeZone = timeZone
-        let start = calendar.startOfDay(for: Date(timeIntervalSince1970: time))
-        let end = calendar.date(byAdding: .day, value: 1, to: start) ?? start.addingTimeInterval(86_400)
-        let lower = max(start.timeIntervalSince1970, domain.lowerBound)
-        let upper = min(end.timeIntervalSince1970, domain.upperBound + 3_600)
-        return lower...max(upper, lower)
-    }
-
     /// Each night run spans from its first hour to the following day hour
     /// (or the last hour when the night runs off the end).
     static func nightRanges(times: [Double], isDay: [Double]) -> [ClosedRange<Double>] {
         guard times.count == isDay.count, !times.isEmpty else { return [] }
-        return ChapterEngine.runs(count: times.count, allowGap: 0) { isDay[$0] < 0.5 }
-            .compactMap { run in
-                let start = times[run.lowerBound]
-                let end = times[min(run.upperBound + 1, times.count - 1)]
-                return end > start ? start...end : nil
+        var ranges: [ClosedRange<Double>] = []
+        var nightStart: Double?
+        for index in times.indices {
+            let isNight = isDay[index] < 0.5
+            if isNight, nightStart == nil {
+                nightStart = times[index]
             }
+            if let start = nightStart, !isNight || index == times.count - 1 {
+                if times[index] > start { ranges.append(start...times[index]) }
+                nightStart = nil
+            }
+        }
+        return ranges
     }
 
     static func dayMarks(times: [Double], timeZone: TimeZone) -> [DayMark] {

@@ -1,53 +1,30 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
-    "Favorit" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Favorit"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Favorite"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Favori"
-          }
-        }
-      }
-    },
     "" : {
 
     },
     "--°" : {
 
     },
-    "Gemessen" : {
-      "extractionState" : "manual",
+    "Ziemlich unsicher" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gemessen"
+            "value" : "Ziemlich unsicher"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Measured"
+            "value" : "Fairly uncertain"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ölçülen"
+            "value" : "Oldukça belirsiz"
           }
         }
       }
@@ -155,6 +132,7 @@
       }
     },
     "%@ · %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -256,6 +234,7 @@
       "shouldTranslate" : false
     },
     "%@ bis %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -467,6 +446,7 @@
       }
     },
     "%@: %@ - %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -536,10 +516,30 @@
     "%lld %%" : {
 
     },
-    "%lld Bft" : {
-
+    "%lld Läufe, leicht verschieden gestartet. Je breiter das Band, desto unsicherer." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Läufe, leicht verschieden gestartet. Je breiter das Band, desto unsicherer."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld runs, each started slightly differently. The wider the band, the less certain."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld çalıştırma, her biri biraz farklı başlatıldı. Bant ne kadar genişse, tahmin o kadar belirsiz."
+          }
+        }
+      }
     },
     "%lld Mitglieder" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -562,6 +562,7 @@
       }
     },
     "%lld Tage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1028,6 +1029,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "7 günlük topluluk"
+          }
+        }
+      }
+    },
+    "8 von 10" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8 von 10"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8 in 10"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10'da 8"
           }
         }
       }
@@ -1522,6 +1545,7 @@
 
     },
     "AI GEFS ist ein guter Kompromiss für die nächsten ein bis zwei Wochen." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1544,6 +1568,7 @@
       }
     },
     "AIFS eignet sich gut für mittelfristige Unsicherheit, lokale Details können geglättet wirken." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1857,6 +1882,28 @@
         }
       }
     },
+    "Alle" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tümü"
+          }
+        }
+      }
+    },
     "alle %lld Min." : {
       "localizations" : {
         "de" : {
@@ -1947,6 +1994,7 @@
       }
     },
     "Alle Werte anzeigen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2830,6 +2878,7 @@
       }
     },
     "Band" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2918,6 +2967,7 @@
       }
     },
     "Beaufort-Skala" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3584,6 +3634,7 @@
       }
     },
     "Böiger Wind" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4342,6 +4393,7 @@
       }
     },
     "Dauer" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4940,6 +4992,7 @@
       }
     },
     "Druck fällt" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5569,10 +5622,30 @@
         }
       }
     },
-    "Ensemble %@" : {
-
+    "Ensemble" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ensemble"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ensemble"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Topluluk"
+          }
+        }
+      }
     },
     "Ensemble-Details" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5595,6 +5668,7 @@
       }
     },
     "Ensemble-Vorhersage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6162,6 +6236,28 @@
         }
       }
     },
+    "Favorit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favorit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favorite"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favori"
+          }
+        }
+      }
+    },
     "Fehler beim Laden: %@" : {
       "localizations" : {
         "de" : {
@@ -6678,6 +6774,7 @@
       }
     },
     "GEFS zeigt lange Trends, ist aber wegen des groben Gitters weniger lokal." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6809,6 +6906,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avrupa ulusal meteoroloji servislerinin ortak radar görüntüsü. Ölçüm 15 dakikada bir yapılır, aradaki görüntüleri Oscar hesaplar."
+          }
+        }
+      }
+    },
+    "Gemessen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemessen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Measured"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ölçülen"
           }
         }
       }
@@ -6949,6 +7069,7 @@
       }
     },
     "Gesamt %@, stärkster Tag %@ am %@, %lld Tage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6971,6 +7092,7 @@
       }
     },
     "Gesamtniederschlag" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7286,28 +7408,6 @@
         }
       }
     },
-    "Große Bäume bewegen sich, Zweige können brechen." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Große Bäume bewegen sich, Zweige können brechen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Large trees move and branches can break."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
-          }
-        }
-      }
-    },
     "Größere Zweige und kleine Bäume bewegen sich." : {
       "localizations" : {
         "de" : {
@@ -7326,6 +7426,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
+          }
+        }
+      }
+    },
+    "Große Bäume bewegen sich, Zweige können brechen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Große Bäume bewegen sich, Zweige können brechen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Large trees move and branches can break."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
           }
         }
       }
@@ -7848,7 +7970,30 @@
         }
       }
     },
+    "Höchstwert" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Höchstwert"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "High"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En yüksek"
+          }
+        }
+      }
+    },
     "Höchstwerte %@, Tiefstwerte %@, %lld Tage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7871,6 +8016,7 @@
       }
     },
     "Höchstwind bis %@, Tiefstwind ab %@, %lld Tage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -8033,6 +8179,7 @@
       "shouldTranslate" : false
     },
     "ICON EU EPS ist für Europa feiner aufgelöst, reicht aber nur wenige Tage." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -8055,6 +8202,7 @@
       }
     },
     "ICON Global EPS passt für kurze bis mittlere Trends weltweit." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -8101,6 +8249,7 @@
       "shouldTranslate" : false
     },
     "IFS ENS liefert eine breit gestreute Unsicherheit für die mittlere Frist." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -8414,6 +8563,7 @@
       }
     },
     "Kältester Tag" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -9013,6 +9163,7 @@
       }
     },
     "Klappt die Details ein" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -9057,6 +9208,7 @@
       }
     },
     "Klare Nacht" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -10044,25 +10196,8 @@
         }
       }
     },
-    "Max Obergrenze" : {
-
-    },
-    "Max Unsicherheit oben" : {
-
-    },
-    "Max Unsicherheit unten" : {
-
-    },
-    "Max Untergrenze" : {
-
-    },
-    "Max Wind Obergrenze" : {
-
-    },
-    "Max Wind Untergrenze" : {
-
-    },
     "Max-Band" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -10106,9 +10241,6 @@
           }
         }
       }
-    },
-    "Maximum (%@)" : {
-
     },
     "Maximum heute" : {
       "extractionState" : "manual",
@@ -10156,6 +10288,28 @@
         }
       }
     },
+    "Median" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Median"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Median"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medyan"
+          }
+        }
+      }
+    },
     "Meeresspiegel-Luftdruck" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -10175,6 +10329,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Deniz seviyesi hava basıncı"
+          }
+        }
+      }
+    },
+    "Mehr" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehr"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha fazla"
           }
         }
       }
@@ -10202,6 +10378,7 @@
       }
     },
     "Mehrere Modellläufe zeigen, wie stabil die Vorhersage ist. %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -10495,25 +10672,8 @@
         }
       }
     },
-    "Min Obergrenze" : {
-
-    },
-    "Min Unsicherheit oben" : {
-
-    },
-    "Min Unsicherheit unten" : {
-
-    },
-    "Min Untergrenze" : {
-
-    },
-    "Min Wind Obergrenze" : {
-
-    },
-    "Min Wind Untergrenze" : {
-
-    },
     "Min-Band" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -10557,9 +10717,6 @@
           }
         }
       }
-    },
-    "Minimum (%@)" : {
-
     },
     "Minor" : {
       "localizations" : {
@@ -10994,6 +11151,7 @@
       }
     },
     "Nächsten Tage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -11216,13 +11374,8 @@
         }
       }
     },
-    "Niederschlag (%@)" : {
-
-    },
-    "Niederschlag Start" : {
-
-    },
     "Niederschlagssumme" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -11245,6 +11398,7 @@
       }
     },
     "Niederschlagssummen Ensemble" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -11676,6 +11830,7 @@
       }
     },
     "Ø Bandbreite" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -11698,6 +11853,7 @@
       }
     },
     "Ø Ensemble-Unsicherheit" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -11718,15 +11874,6 @@
           }
         }
       }
-    },
-    "Ø Max" : {
-
-    },
-    "Ø Min" : {
-
-    },
-    "Ø Summe" : {
-
     },
     "Offene Daten. Für immer kostenlos." : {
       "localizations" : {
@@ -11860,6 +12007,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Harita katmanlarını açar"
+          }
+        }
+      }
+    },
+    "Öffnet die stündliche Vorhersage für diesen Tag" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet die stündliche Vorhersage für diesen Tag"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the hourly forecast for this day"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu günün saatlik tahminini açar"
           }
         }
       }
@@ -14244,6 +14413,7 @@
       }
     },
     "Ruhigster Tag" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -14928,6 +15098,28 @@
         }
       }
     },
+    "Sicher" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sicher"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Certain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kesin"
+          }
+        }
+      }
+    },
     "Sinkender Luftdruck deutet auf schlechtes Wetter oder Stürme hin, steigender Luftdruck auf gutes Wetter oder Hochdruckgebiete." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -15174,6 +15366,7 @@
       }
     },
     "Sonnenaufgang" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -15218,6 +15411,7 @@
       }
     },
     "Sonnenuntergang" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -15355,6 +15549,7 @@
       }
     },
     "Spitze" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -15642,6 +15837,7 @@
       }
     },
     "Stärkster Tag" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -16179,6 +16375,7 @@
       }
     },
     "Summe" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -16199,12 +16396,6 @@
           }
         }
       }
-    },
-    "Summen-Band oben" : {
-
-    },
-    "Summen-Band unten" : {
-
     },
     "Sun sticker" : {
       "localizations" : {
@@ -16384,12 +16575,6 @@
         }
       }
     },
-    "Tag Ende" : {
-
-    },
-    "Tag Start" : {
-
-    },
     "Tagesansicht geöffnet" : {
       "localizations" : {
         "de" : {
@@ -16413,6 +16598,7 @@
       }
     },
     "Tageshöchstwerte" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -16435,6 +16621,7 @@
       }
     },
     "Tagestiefwerte" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -16501,6 +16688,7 @@
       }
     },
     "Tägliche Details" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -16749,6 +16937,7 @@
       }
     },
     "Temperaturverlauf Ensemble" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -16794,6 +16983,7 @@
       }
     },
     "Tief" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -16833,6 +17023,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alçak bulutlar"
+          }
+        }
+      }
+    },
+    "Tiefstwert" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiefstwert"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Low"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En düşük"
           }
         }
       }
@@ -16950,6 +17162,7 @@
       }
     },
     "Trockenster Tag" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -17329,7 +17542,30 @@
         }
       }
     },
+    "Unsicher" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unsicher"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uncertain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belirsiz"
+          }
+        }
+      }
+    },
     "Unsicherheit & Modell" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -17375,6 +17611,7 @@
       }
     },
     "Unsicherster Tag" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -17734,6 +17971,7 @@
       }
     },
     "Verlauf anzeigen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -18138,6 +18376,7 @@
       }
     },
     "Wärmster Tag" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -18316,6 +18555,7 @@
       }
     },
     "WeatherNext 2 ist ein KI-Modell und gut für mittelfristige Trends geeignet." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -18491,9 +18731,6 @@
           }
         }
       }
-    },
-    "Wert" : {
-
     },
     "Werte ersetzen" : {
       "localizations" : {
@@ -18869,9 +19106,6 @@
         }
       }
     },
-    "Wind (%@)" : {
-
-    },
     "Wind & Druck" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -18896,6 +19130,7 @@
       }
     },
     "Windböen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -18964,6 +19199,7 @@
       }
     },
     "Windigster Tag" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -19030,6 +19266,7 @@
       }
     },
     "Windstillen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -19052,6 +19289,7 @@
       }
     },
     "Windverlauf Ensemble" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -19145,6 +19383,7 @@
       }
     },
     "Zeigt die Details" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -19162,6 +19401,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ayrıntıları gösterir"
+          }
+        }
+      }
+    },
+    "Zeigt, wie sicher die Vorhersage der nächsten Wochen ist" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigt, wie sicher die Vorhersage der nächsten Wochen ist"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows how certain the forecast for the coming weeks is"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önümüzdeki haftaların tahmininin ne kadar kesin olduğunu gösterir"
           }
         }
       }
@@ -19320,6 +19581,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Muhtemelen %@ yakınından geçecek."
+          }
+        }
+      }
+    },
+    "Ziemlich sicher" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziemlich sicher"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fairly certain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oldukça kesin"
           }
         }
       }

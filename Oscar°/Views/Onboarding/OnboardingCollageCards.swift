@@ -82,16 +82,14 @@ struct CollageClimateCard: View {
     }
 }
 
-/// Ensemble temperature card. Drawn with a single Canvas rather than the live
-/// Swift Charts view: the collage stamps many of these, and a static bitmap of
-/// bands + mean lines composites far cheaper than a full chart with axes,
-/// gestures, and scroll state — matching its red/blue look.
+/// Ensemble temperature card. One Canvas: the collage stamps many of these,
+/// and a static bitmap of bands + mean lines composites cheaply.
 struct CollageEnsembleCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("7-Tage-Ensemble")
                 .font(.footnote.weight(.semibold))
-            CollageEnsembleChart(points: OnboardingSampleData.ensemblePoints)
+            CollageEnsembleChart(samples: OnboardingSampleData.ensembleSamples)
                 .frame(height: 130)
         }
         .padding(14)
@@ -105,50 +103,38 @@ struct CollageEnsembleCard: View {
 }
 
 private struct CollageEnsembleChart: View {
-    let points: [DailyEnsembleDayPoint]
+    let samples: [OnboardingSampleData.EnsembleSample]
 
     var body: some View {
         Canvas { context, size in
-            guard points.count > 1 else { return }
+            guard samples.count > 1 else { return }
 
-            let highs = points.compactMap(\.temperatureMaxMemberHigh)
-            let lows = points.compactMap(\.temperatureMinMemberLow)
-            let upper = (highs.max() ?? 30) + 1.5
-            let lower = (lows.min() ?? 10) - 1.5
+            let upper = (samples.map { $0.high + $0.spread }.max() ?? 30) + 1.5
+            let lower = (samples.map { $0.low - $0.spread }.min() ?? 10) - 1.5
             let span = max(upper - lower, 1)
 
             func point(_ index: Int, _ value: Double) -> CGPoint {
-                let x = size.width * CGFloat(index) / CGFloat(points.count - 1)
-                let y = size.height * (1 - CGFloat((value - lower) / span))
-                return CGPoint(x: x, y: y)
+                CGPoint(
+                    x: size.width * CGFloat(index) / CGFloat(samples.count - 1),
+                    y: size.height * (1 - CGFloat((value - lower) / span))
+                )
             }
 
-            func band(_ low: KeyPath<DailyEnsembleDayPoint, Double?>,
-                      _ high: KeyPath<DailyEnsembleDayPoint, Double?>,
+            func band(_ bottom: (OnboardingSampleData.EnsembleSample) -> Double,
+                      _ top: (OnboardingSampleData.EnsembleSample) -> Double,
                       _ color: Color) {
                 var path = Path()
-                var started = false
-                for (index, item) in points.enumerated() {
-                    guard let value = item[keyPath: high] else { continue }
-                    let p = point(index, value)
-                    if started { path.addLine(to: p) } else { path.move(to: p); started = true }
-                }
-                for (index, item) in points.enumerated().reversed() {
-                    guard let value = item[keyPath: low] else { continue }
-                    path.addLine(to: point(index, value))
+                path.addLines(samples.indices.map { point($0, top(samples[$0])) })
+                for index in samples.indices.reversed() {
+                    path.addLine(to: point(index, bottom(samples[index])))
                 }
                 path.closeSubpath()
                 context.fill(path, with: .color(color.opacity(0.16)))
             }
 
-            func line(_ keyPath: KeyPath<DailyEnsembleDayPoint, Double?>, _ color: Color) {
+            func line(_ value: (OnboardingSampleData.EnsembleSample) -> Double, _ color: Color) {
                 var path = Path()
-                var started = false
-                for (index, item) in points.enumerated() {
-                    guard let value = item[keyPath: keyPath] else { continue }
-                    let p = point(index, value)
-                    if started { path.addLine(to: p) } else { path.move(to: p); started = true }
-                }
+                path.addLines(samples.indices.map { point($0, value(samples[$0])) })
                 context.stroke(
                     path,
                     with: .color(color),
@@ -156,10 +142,10 @@ private struct CollageEnsembleChart: View {
                 )
             }
 
-            band(\.temperatureMaxMemberLow, \.temperatureMaxMemberHigh, .red)
-            band(\.temperatureMinMemberLow, \.temperatureMinMemberHigh, .blue)
-            line(\.temperatureMax, .red)
-            line(\.temperatureMin, .blue)
+            band({ $0.high - $0.spread * 0.9 }, { $0.high + $0.spread }, .red)
+            band({ $0.low - $0.spread }, { $0.low + $0.spread * 0.8 }, .blue)
+            line(\.high, .red)
+            line(\.low, .blue)
         }
     }
 }

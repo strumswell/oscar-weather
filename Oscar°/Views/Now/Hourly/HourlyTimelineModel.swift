@@ -50,9 +50,6 @@ final class HourlyTimelineModel {
     private(set) var precipitationMax: Double = 2.5
     private(set) var nightRanges: [ClosedRange<Double>] = []
     private(set) var dayMarks: [DayMark] = []
-    private(set) var chapters: [ChapterEngine.Chapter] = []
-    private(set) var radarTimes: [Double] = []
-    private(set) var radarRates: [Double] = []
     private(set) var timeZone: TimeZone = .current
     private(set) var precipitationUnit = "mm"
     private(set) var windUnitString = "km/h"
@@ -146,43 +143,6 @@ final class HourlyTimelineModel {
         precipitationMax = max(precipitation.max() ?? 0, 2.5)
         nightRanges = Self.nightRanges(times: newTimes, isDay: hourly?.is_day ?? [])
         dayMarks = Self.dayMarks(times: newTimes, timeZone: timeZone)
-        let radarPoints = (weather.precipSeries?.series ?? []).sorted { $0.timestamp < $1.timestamp }
-        radarTimes = radarPoints.map { $0.timestamp.timeIntervalSince1970 }
-        radarRates = radarPoints.map(\.precipitation)
-        chapters = ChapterEngine.chapters(
-            from: ChapterEngine.Input(
-                times: newTimes,
-                temperature: temperature,
-                precipitation: precipitation,
-                snowfall: snowfall,
-                weathercode: weathercode,
-                windgusts: windgusts,
-                cloudcover: cloudcover,
-                pressure: pressure,
-                isDay: hourly?.is_day ?? [],
-                timeZone: timeZone,
-                now: Date.now.timeIntervalSince1970,
-                precipitationUnit: precipitationUnit,
-                windUnitString: windUnitString,
-                windSpeedUnit: WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit),
-                sunrises: weather.forecast.daily?.sunrise ?? [],
-                sunsets: weather.forecast.daily?.sunset ?? [],
-                radarTimes: radarTimes,
-                radarRates: radarRates,
-                alertEvents: weather.alerts.displayInfos.map { info in
-                    ChapterEngine.AlertEvent(
-                        id: info.id,
-                        title: info.event,
-                        detail: info.details ?? info.headline,
-                        onset: info.onset?.timeIntervalSince1970,
-                        expires: info.expires?.timeIntervalSince1970,
-                        severityRank: info.severityRank,
-                        source: info.source
-                    )
-                }
-            ),
-            includingPast: true
-        )
 
         if firstLoad {
             let now = Date.now.timeIntervalSince1970
@@ -213,13 +173,6 @@ final class HourlyTimelineModel {
     func sample(_ values: [Double]) -> Double? {
         guard hasData else { return nil }
         return AtmosphereWeatherMapper.interpolatedValue(at: scrubTime, times: times, values: values)
-    }
-
-    /// Half-open: hours with `start <= time < end`.
-    func hourIndices(from start: Double, until end: Double) -> [Int]? {
-        guard hasData else { return nil }
-        let indices = times.indices.filter { times[$0] >= start && times[$0] < end }
-        return indices.isEmpty ? nil : indices
     }
 
     // MARK: - Lens layouts

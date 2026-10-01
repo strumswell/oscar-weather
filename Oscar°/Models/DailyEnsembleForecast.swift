@@ -1,136 +1,157 @@
 import Foundation
 
+/// The Open-Meteo ensemble response. Every variable arrives once per run under
+/// dynamic keys (`temperature_2m_max`, `temperature_2m_max_member01`, …).
 struct DailyEnsembleForecastResponse: Decodable {
-  let latitude: Double?
-  let longitude: Double?
-  let utcOffsetSeconds: Int?
+  let utcOffsetSeconds: Int
   let timezone: String?
-  let timezoneAbbreviation: String?
   let dailyUnits: [String: String]
   let daily: DailyEnsembleForecastDaily
 
   enum CodingKeys: String, CodingKey {
-    case latitude
-    case longitude
     case utcOffsetSeconds = "utc_offset_seconds"
     case timezone
-    case timezoneAbbreviation = "timezone_abbreviation"
     case dailyUnits = "daily_units"
     case daily
   }
+
+  var timeZone: TimeZone {
+    timezone.flatMap(TimeZone.init(identifier:)) ?? TimeZone(secondsFromGMT: utcOffsetSeconds) ?? .current
+  }
 }
 
+/// Per variable, one series per run: the control run first, then the members.
 struct DailyEnsembleForecastDaily: Decodable {
   let time: [String]
-  let temperature2mMin: [Double?]
-  let temperature2mMax: [Double?]
-  let precipitationSum: [Double?]
-  let windSpeed10mMin: [Double?]
-  let windSpeed10mMax: [Double?]
-  let windDirection10mDominant: [Double?]
-  let temperature2mMinMembers: [[Double?]]
-  let temperature2mMaxMembers: [[Double?]]
-  let precipitationSumMembers: [[Double?]]
-  let windSpeed10mMinMembers: [[Double?]]
-  let windSpeed10mMaxMembers: [[Double?]]
-  let windDirection10mDominantMembers: [[Double?]]
+  let highs: [[Double?]]
+  let lows: [[Double?]]
+  let precipitation: [[Double?]]
+  let snowfall: [[Double?]]
+  let wind: [[Double?]]
+  let weatherCodes: [[Double?]]
+  let cloudCover: [[Double?]]
 
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: DynamicCodingKey.self)
+    time = try container.decode([String].self, forKey: DynamicCodingKey(stringValue: "time"))
+    highs = container.runs(of: "temperature_2m_max")
+    lows = container.runs(of: "temperature_2m_min")
+    precipitation = container.runs(of: "precipitation_sum")
+    snowfall = container.runs(of: "snowfall_sum")
+    wind = container.runs(of: "wind_speed_10m_max")
+    weatherCodes = container.runs(of: "weather_code")
+    cloudCover = container.runs(of: "cloud_cover_mean")
+  }
+}
 
-    time = try container.decodeStringArray(forKey: "time")
-    temperature2mMin = container.decodeOptionalDoubleArray(forKey: "temperature_2m_min")
-    temperature2mMax = container.decodeOptionalDoubleArray(forKey: "temperature_2m_max")
-    precipitationSum = container.decodeOptionalDoubleArray(forKey: "precipitation_sum")
-    windSpeed10mMin = container.decodeOptionalDoubleArray(forKey: "wind_speed_10m_min")
-    windSpeed10mMax = container.decodeOptionalDoubleArray(forKey: "wind_speed_10m_max")
-    windDirection10mDominant = container.decodeOptionalDoubleArray(
-      forKey: "wind_direction_10m_dominant"
-    )
+/// One day across all runs of an ensemble.
+struct EnsembleDay: Identifiable {
+  let id: Int
+  let noon: Double
+  let runs: Int
+  let high: EnsembleSpread?
+  let low: EnsembleSpread?
+  let precipitation: EnsembleSpread?
+  let wind: EnsembleSpread?
+  let snowfall: Double?
+  let cloudCover: Double?
+  let sky: EnsembleSkyMix
+}
 
-    temperature2mMinMembers = container.decodeMemberArrays(prefix: "temperature_2m_min_member")
-    temperature2mMaxMembers = container.decodeMemberArrays(prefix: "temperature_2m_max_member")
-    precipitationSumMembers = container.decodeMemberArrays(prefix: "precipitation_sum_member")
-    windSpeed10mMinMembers = container.decodeMemberArrays(prefix: "wind_speed_10m_min_member")
-    windSpeed10mMaxMembers = container.decodeMemberArrays(prefix: "wind_speed_10m_max_member")
-    windDirection10mDominantMembers = container.decodeMemberArrays(
-      prefix: "wind_direction_10m_dominant_member"
+/// Where a day's runs land: the extremes, the middle eight in ten, the median.
+struct EnsembleSpread {
+  let lowest: Double
+  let low: Double
+  let median: Double
+  let high: Double
+  let highest: Double
+
+  init?(_ values: [Double]) {
+    guard !values.isEmpty else { return nil }
+    let sorted = values.sorted()
+    func quantile(_ q: Double) -> Double {
+      let position = q * Double(sorted.count - 1)
+      let lower = Int(position)
+      let upper = min(lower + 1, sorted.count - 1)
+      return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - Double(lower))
+    }
+    self.init(lowest: sorted[0], low: quantile(0.1), median: quantile(0.5), high: quantile(0.9), highest: sorted[sorted.count - 1])
+  }
+
+  private init(lowest: Double, low: Double, median: Double, high: Double, highest: Double) {
+    self.lowest = lowest
+    self.low = low
+    self.median = median
+    self.high = high
+    self.highest = highest
+  }
+
+  func map(_ transform: (Double) -> Double) -> EnsembleSpread {
+    EnsembleSpread(
+      lowest: transform(lowest), low: transform(low), median: transform(median),
+      high: transform(high), highest: transform(highest)
     )
   }
 }
 
-struct DailyEnsembleDayPoint: Identifiable {
-  let id: Int
-  let date: Date
-  let temperatureMin: Double?
-  let temperatureMax: Double?
-  let temperatureMinMemberLow: Double?
-  let temperatureMinMemberHigh: Double?
-  let temperatureMaxMemberLow: Double?
-  let temperatureMaxMemberHigh: Double?
-  let precipitationSum: Double?
-  let precipitationSumMemberLow: Double?
-  let precipitationSumMemberHigh: Double?
-  let windSpeedMin: Double?
-  let windSpeedMax: Double?
-  let windSpeedMinMemberLow: Double?
-  let windSpeedMinMemberHigh: Double?
-  let windSpeedMaxMemberLow: Double?
-  let windSpeedMaxMemberHigh: Double?
-  let windDirection: Double?
-  let windDirectionMemberLow: Double?
-  let windDirectionMemberHigh: Double?
+/// The weather a day's runs settle on, coarsened to what a sky can show.
+enum EnsembleSky: CaseIterable {
+  case sun, clouds, rain, snow
 
-  var hasChartData: Bool {
-    [
-      temperatureMin,
-      temperatureMax,
-      temperatureMinMemberLow,
-      temperatureMinMemberHigh,
-      temperatureMaxMemberLow,
-      temperatureMaxMemberHigh,
-      precipitationSum,
-      precipitationSumMemberLow,
-      precipitationSumMemberHigh,
-      windSpeedMin,
-      windSpeedMax,
-      windSpeedMinMemberLow,
-      windSpeedMinMemberHigh,
-      windSpeedMaxMemberLow,
-      windSpeedMaxMemberHigh,
-    ].contains { $0 != nil }
+  init(weatherCode code: Int) {
+    switch code {
+    case 0...2: self = .sun
+    case 71...77, 85, 86: self = .snow
+    case 51...67, 80...82, 95...99: self = .rain
+    default: self = .clouds
+    }
+  }
+}
+
+struct EnsembleSkyMix {
+  let counts: [EnsembleSky: Int]
+  let total: Int
+  let dominant: EnsembleSky?
+  /// The most common weather code among the dominant runs; what the sim renders.
+  let dominantCode: Int?
+
+  init(codes: [Int]) {
+    let counts = Dictionary(grouping: codes, by: EnsembleSky.init(weatherCode:)).mapValues(\.count)
+    let dominant = EnsembleSky.allCases
+      .filter { counts[$0] != nil }
+      .max { counts[$0, default: 0] < counts[$1, default: 0] }
+    let codeCounts = Dictionary(grouping: codes.filter { EnsembleSky(weatherCode: $0) == dominant }, by: { $0 })
+      .mapValues(\.count)
+    self.counts = counts
+    self.total = codes.count
+    self.dominant = dominant
+    self.dominantCode = codeCounts.keys.sorted().max { codeCounts[$0, default: 0] < codeCounts[$1, default: 0] }
+  }
+
+  func share(of sky: EnsembleSky) -> Double {
+    total > 0 ? Double(counts[sky, default: 0]) / Double(total) : 0
   }
 }
 
 extension DailyEnsembleForecastResponse {
-  var dayPoints: [DailyEnsembleDayPoint] {
-    (0..<daily.time.count).compactMap { index in
-      let dayString = daily.time[index]
-      guard let date = Self.dayFormatter.date(from: dayString) else { return nil }
-      let point = DailyEnsembleDayPoint(
+  var days: [EnsembleDay] {
+    daily.time.indices.compactMap { index in
+      guard let midnight = Self.dayFormatter.date(from: daily.time[index]) else { return nil }
+      let highs = daily.highs.values(at: index)
+      guard !highs.isEmpty else { return nil }
+      let codes = daily.weatherCodes.values(at: index).map { Int($0) }
+      return EnsembleDay(
         id: index,
-        date: date,
-        temperatureMin: daily.temperature2mMinMembers.mean(at: index),
-        temperatureMax: daily.temperature2mMaxMembers.mean(at: index),
-        temperatureMinMemberLow: daily.temperature2mMinMembers.extreme(at: index, using: <),
-        temperatureMinMemberHigh: daily.temperature2mMinMembers.extreme(at: index, using: >),
-        temperatureMaxMemberLow: daily.temperature2mMaxMembers.extreme(at: index, using: <),
-        temperatureMaxMemberHigh: daily.temperature2mMaxMembers.extreme(at: index, using: >),
-        precipitationSum: daily.precipitationSumMembers.mean(at: index),
-        precipitationSumMemberLow: daily.precipitationSumMembers.extreme(at: index, using: <),
-        precipitationSumMemberHigh: daily.precipitationSumMembers.extreme(at: index, using: >),
-        windSpeedMin: daily.windSpeed10mMinMembers.mean(at: index),
-        windSpeedMax: daily.windSpeed10mMaxMembers.mean(at: index),
-        windSpeedMinMemberLow: daily.windSpeed10mMinMembers.extreme(at: index, using: <),
-        windSpeedMinMemberHigh: daily.windSpeed10mMinMembers.extreme(at: index, using: >),
-        windSpeedMaxMemberLow: daily.windSpeed10mMaxMembers.extreme(at: index, using: <),
-        windSpeedMaxMemberHigh: daily.windSpeed10mMaxMembers.extreme(at: index, using: >),
-        windDirection: daily.windDirection10mDominantMembers.mean(at: index),
-        windDirectionMemberLow: daily.windDirection10mDominantMembers.extreme(at: index, using: <),
-        windDirectionMemberHigh: daily.windDirection10mDominantMembers.extreme(at: index, using: >)
+        noon: midnight.timeIntervalSince1970 + 43_200 - Double(utcOffsetSeconds),
+        runs: highs.count,
+        high: EnsembleSpread(highs),
+        low: EnsembleSpread(daily.lows.values(at: index)),
+        precipitation: EnsembleSpread(daily.precipitation.values(at: index).map { max(0, $0) }),
+        wind: EnsembleSpread(daily.wind.values(at: index)),
+        snowfall: EnsembleSpread(daily.snowfall.values(at: index))?.median,
+        cloudCover: EnsembleSpread(daily.cloudCover.values(at: index))?.median,
+        sky: EnsembleSkyMix(codes: codes)
       )
-
-      return point.hasChartData ? point : nil
     }
   }
 
@@ -146,53 +167,29 @@ extension DailyEnsembleForecastResponse {
 
 private struct DynamicCodingKey: CodingKey {
   let stringValue: String
-  let intValue: Int?
+  let intValue: Int? = nil
 
-  init?(stringValue: String) {
+  init(stringValue: String) {
     self.stringValue = stringValue
-    self.intValue = nil
   }
 
   init?(intValue: Int) {
-    self.stringValue = String(intValue)
-    self.intValue = intValue
+    return nil
   }
 }
 
 private extension KeyedDecodingContainer where Key == DynamicCodingKey {
-  func decodeStringArray(forKey key: String) throws -> [String] {
-    guard let codingKey = DynamicCodingKey(stringValue: key) else { return [] }
-    return try decode([String].self, forKey: codingKey)
-  }
-
-  func decodeOptionalDoubleArray(forKey key: String) -> [Double?] {
-    guard let codingKey = DynamicCodingKey(stringValue: key) else { return [] }
-    return (try? decodeIfPresent([Double?].self, forKey: codingKey)) ?? []
-  }
-
-  func decodeMemberArrays(prefix: String) -> [[Double?]] {
+  /// The control run (`name`) sorts ahead of its members (`name_member01…`).
+  func runs(of name: String) -> [[Double?]] {
     allKeys
-      .filter { $0.stringValue.hasPrefix(prefix) }
+      .filter { $0.stringValue == name || $0.stringValue.hasPrefix(name + "_member") }
       .sorted { $0.stringValue < $1.stringValue }
       .compactMap { try? decodeIfPresent([Double?].self, forKey: $0) }
   }
 }
 
-private extension Array where Element == Double? {
-  func value(at index: Int) -> Double? {
-    guard indices.contains(index) else { return nil }
-    return self[index]
-  }
-}
-
 private extension Array where Element == [Double?] {
-  func extreme(at index: Int, using areInIncreasingOrder: (Double, Double) -> Bool) -> Double? {
-    compactMap { $0.value(at: index) }.min(by: areInIncreasingOrder)
-  }
-
-  func mean(at index: Int) -> Double? {
-    let values = compactMap { $0.value(at: index) }
-    guard !values.isEmpty else { return nil }
-    return values.reduce(0, +) / Double(values.count)
+  func values(at index: Int) -> [Double] {
+    compactMap { $0.indices.contains(index) ? $0[index] : nil }
   }
 }

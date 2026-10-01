@@ -133,7 +133,6 @@ enum ScreenshotMode {
         let settings = SettingService.shared
         settings.forecastModelPreference = scene == .settingsForecast ? .dwdICON : .bestMatch
         settings.dailyForecastDaytimeTemperaturesEnabled = scene == .settingsForecast
-        settings.hourlyDetailShowsChapters = false
         if scene == .settingsNotifications {
             NotificationSettingsManager.shared.stageForScreenshots()
         }

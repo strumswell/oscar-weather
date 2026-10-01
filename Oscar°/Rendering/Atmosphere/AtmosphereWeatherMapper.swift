@@ -88,7 +88,8 @@ enum AtmosphereWeatherMapper {
             ?? 0) * .pi / 180
 
         return finalize(
-            weather: weather,
+            utcOffsetSeconds: weather.forecast.utc_offset_seconds ?? 0,
+            aqiHaze: airQualityHaze(weather: weather, timestamp: currentTimestamp),
             location: location,
             timestamp: currentTimestamp,
             condition: condition,
@@ -161,7 +162,8 @@ enum AtmosphereWeatherMapper {
         let windDirection = Float(value(at: nearest, in: hourly?.winddirection_10m) ?? 0) * .pi / 180
 
         return finalize(
-            weather: weather,
+            utcOffsetSeconds: weather.forecast.utc_offset_seconds ?? 0,
+            aqiHaze: airQualityHaze(weather: weather, timestamp: timestamp),
             location: location,
             timestamp: timestamp,
             condition: condition,
@@ -183,7 +185,7 @@ enum AtmosphereWeatherMapper {
     /// reaches the ground from a low-based deck: the model's low share under
     /// rain is layer accounting (48 % low under a raining 100 % sky), not
     /// what the sky looks like, so the low band takes the whole total.
-    private static func reconcile(_ deck: inout CloudDeck, total: Float, condition: AtmosphereConditionFamily) {
+    static func reconcile(_ deck: inout CloudDeck, total: Float, condition: AtmosphereConditionFamily) {
         switch condition {
         case .drizzle, .rain, .freezingRain, .showers, .snow, .thunderstorm:
             deck.low = max(deck.low, total)
@@ -199,10 +201,11 @@ enum AtmosphereWeatherMapper {
         }
     }
 
-    /// Shared tail of both mapper paths: everything derived once condition,
+    /// Shared tail of every mapper path: everything derived once condition,
     /// coverage, moisture, and precipitation are settled.
-    @MainActor private static func finalize(
-        weather: Weather,
+    static func finalize(
+        utcOffsetSeconds: Int,
+        aqiHaze: Float,
         location: CLLocationCoordinate2D,
         timestamp: Double,
         condition: AtmosphereConditionFamily,
@@ -217,13 +220,12 @@ enum AtmosphereWeatherMapper {
     ) -> AtmosphereSnapshot {
         let snowfallIntensity = condition == .snow ? max(clamp(snowfall / 6, 0, 1), precipitationIntensity * 0.6) : 0
         let thunderIntensity = condition == .thunderstorm ? max(0.55, precipitationIntensity) : 0
-        let aqiHaze = airQualityHaze(weather: weather, timestamp: timestamp)
         let sunElevation = solarElevation(
             date: Date(timeIntervalSince1970: timestamp),
             location: location,
-            utcOffsetSeconds: weather.forecast.utc_offset_seconds ?? 0
+            utcOffsetSeconds: utcOffsetSeconds
         )
-        let localTimestamp = timestamp + Double(weather.forecast.utc_offset_seconds ?? 0)
+        let localTimestamp = timestamp + Double(utcOffsetSeconds)
         let timeOfDay = Float(((localTimestamp.truncatingRemainder(dividingBy: 86_400)) + 86_400)
             .truncatingRemainder(dividingBy: 86_400) / 86_400)
         let phase = daylightPhase(sunElevation: sunElevation)
@@ -278,7 +280,7 @@ enum AtmosphereWeatherMapper {
         )
     }
 
-    private static func conditionFamily(for code: Int) -> AtmosphereConditionFamily {
+    static func conditionFamily(for code: Int) -> AtmosphereConditionFamily {
         switch code {
         case 0:
             return .clear

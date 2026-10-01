@@ -23,58 +23,39 @@ struct DailyView: View {
     let precipitationUnit = weather.forecast.daily_units?.precipitation_sum ?? "mm"
 
     VStack(alignment: .leading) {
-      Text(heading)
-        .font(.title3)
-        .bold()
-        .foregroundStyle(Color(uiColor: .label))
-        .padding([.leading, .bottom])
+      NowSectionHeader(showMore: hasDays ? { presentDetails(day: 0) } : nil) {
+        Text(heading)
+      }
+      .padding(.bottom)
 
-      VStack {
+      VStack(spacing: 0) {
         if showsPlaceholders {
-          ForEach(0..<placeholderDayCount, id: \.self) { _ in
+          ForEach(0..<placeholderDayCount, id: \.self) { dayPos in
+            if dayPos > 0 { Divider() }
             DailyPlaceholderRow()
               .redacted(reason: .placeholder)
           }
         } else {
           ForEach(0..<dayNumber, id: \.self) { dayPos in
-            let rowTemperatures = temperatureRow(for: dayPos)
-            HStack {
-              Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0))
-                .foregroundStyle(Color(uiColor: .label))
-                .bold()
-                .frame(width: weekdayColumnWidth, alignment: .leading)
-              Image(decorative: getWeatherIcon(pos: dayPos))
-                .resizable()
-                .scaledToFit()
-                .frame(width: dayIconSize, height: dayIconSize)
-              VStack {
-                Text(
-                  "\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") \(precipitationUnit)"
-                )
-                .font(.caption)
-                .foregroundStyle(Color(uiColor: .label))
-              }
-              .frame(width: precipitationColumnWidth)
-              Text(roundTemperatureString(temperature: rowTemperatures.labelLow))
-                .frame(width: temperatureColumnWidth, alignment: .trailing)
-              TemperatureRangeView(
-                low: rowTemperatures.barLow, high: rowTemperatures.barHigh,
-                focusLow: rowTemperatures.focusLow,
-                focusHigh: rowTemperatures.focusHigh,
-                minTemp: temperatureScale.min, maxTemp: temperatureScale.max,
-                unit: temperatureUnit
+            if dayPos > 0 { Divider() }
+            Button {
+              presentDetails(day: dayPos)
+            } label: {
+              dayRow(
+                dayPos,
+                scale: temperatureScale,
+                temperatureUnit: temperatureUnit,
+                precipitationUnit: precipitationUnit
               )
-              .frame(height: rowTemperatures.focusLow == nil ? 5 : 28)
-              Text(roundTemperatureString(temperature: rowTemperatures.labelHigh))
-                .frame(width: temperatureColumnWidth, alignment: .leading)
             }
-            .padding(.vertical, 4)
+            .buttonStyle(.plain)
             .accessibilityElement(children: .combine)
+            .accessibilityHint(Text("Öffnet die stündliche Vorhersage für diesen Tag"))
           }
         }
       }
       .padding(.horizontal, 20)
-      .padding(.vertical, 10)
+      .padding(.vertical, 6)
       .cardBackground()
       .clipShape(.rect(cornerRadius: 10))
       .cardBorder()
@@ -83,10 +64,6 @@ struct DailyView: View {
       .padding(.bottom, 20)
 
     }
-    .contentShape(.rect)
-    .onTapGesture(perform: presentDetails)
-    .disabled(!hasDailyDetailData)
-    .accessibilityAction(named: Text("Tägliche Details"), presentDetails)
     .accessibilityIdentifier("now.daily")
     .scrollTransition { [reduceMotion] content, phase in
       content
@@ -97,6 +74,43 @@ struct DailyView: View {
 }
 
 extension DailyView {
+  private func dayRow(
+    _ dayPos: Int,
+    scale: (min: Double, max: Double),
+    temperatureUnit: String,
+    precipitationUnit: String
+  ) -> some View {
+    let rowTemperatures = temperatureRow(for: dayPos)
+    return HStack {
+      Text(getWeekDay(timestamp: weather.forecast.daily?.time[dayPos] ?? 0.0))
+        .foregroundStyle(Color(uiColor: .label))
+        .bold()
+        .frame(width: weekdayColumnWidth, alignment: .leading)
+      Image(decorative: getWeatherIcon(pos: dayPos))
+        .resizable()
+        .scaledToFit()
+        .frame(width: dayIconSize, height: dayIconSize)
+      Text("\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") \(precipitationUnit)")
+        .font(.caption)
+        .foregroundStyle(Color(uiColor: .label))
+        .frame(width: precipitationColumnWidth)
+      Text(roundTemperatureString(temperature: rowTemperatures.labelLow))
+        .frame(width: temperatureColumnWidth, alignment: .trailing)
+      TemperatureRangeView(
+        low: rowTemperatures.barLow, high: rowTemperatures.barHigh,
+        focusLow: rowTemperatures.focusLow,
+        focusHigh: rowTemperatures.focusHigh,
+        minTemp: scale.min, maxTemp: scale.max,
+        unit: temperatureUnit
+      )
+      .frame(height: rowTemperatures.focusLow == nil ? 5 : 28)
+      Text(roundTemperatureString(temperature: rowTemperatures.labelHigh))
+        .frame(width: temperatureColumnWidth, alignment: .leading)
+    }
+    .padding(.vertical, 8)
+    .contentShape(.rect)
+  }
+
   private var placeholderDayCount: Int {
     12
   }
@@ -121,7 +135,7 @@ extension DailyView {
     return min(availableCount, 12)
   }
 
-  private var hasDailyDetailData: Bool {
+  private var hasDays: Bool {
     dailyDisplayCount > 0
   }
 
@@ -242,9 +256,13 @@ extension DailyView {
     HourlyFormatting.weatherIconName(weatherCode: weather.forecast.daily?.weathercode?[pos] ?? 0, isDay: 1)
   }
 
-  private func presentDetails() {
-    guard hasDailyDetailData else { return }
-    presentation.present(.daily)
+  /// Today opens at the current hour, later days at noon.
+  private func presentDetails(day: Int) {
+    guard hasDays else { return }
+    let noon = day == 0 ? nil : dailyTemperature(weather.forecast.daily?.time, at: day).map {
+      Date(timeIntervalSince1970: $0 + 12 * 3_600)
+    }
+    presentation.present(.hourly(noon))
   }
 }
 
@@ -269,7 +287,7 @@ private struct DailyPlaceholderRow: View {
         .frame(width: 37, alignment: .leading)
     }
     .foregroundStyle(.secondary.opacity(0.28))
-    .padding(.vertical, 4)
+    .padding(.vertical, 8)
     .accessibilityHidden(true)
   }
 }

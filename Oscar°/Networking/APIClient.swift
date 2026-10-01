@@ -339,19 +339,19 @@ final class APIClient: Sendable {
       URLQueryItem(
         name: "daily",
         value: [
-          "temperature_2m_min",
           "temperature_2m_max",
+          "temperature_2m_min",
           "precipitation_sum",
-          "wind_speed_10m_min",
+          "snowfall_sum",
           "wind_speed_10m_max",
-          "wind_direction_10m_dominant",
+          "weather_code",
+          "cloud_cover_mean",
         ].joined(separator: ",")
       ),
       URLQueryItem(name: "models", value: model.rawValue),
-      URLQueryItem(
-        name: "wind_speed_unit",
-        value: windSpeedUnit.apiRawValue
-      ),
+      URLQueryItem(name: "temperature_unit", value: SettingService.resolvedTemperatureUnit),
+      URLQueryItem(name: "wind_speed_unit", value: windSpeedUnit.apiRawValue),
+      URLQueryItem(name: "precipitation_unit", value: SettingService.resolvedPrecipitationUnit),
       URLQueryItem(name: "timezone", value: "auto"),
       URLQueryItem(name: "forecast_days", value: "35"),
     ]

@@ -37,11 +37,10 @@ struct ClimateView: View {
                 EmptyView()
             } else {
                 VStack(alignment: .leading) {
-                    Text("Klima")
-                        .font(.title3)
-                        .bold()
-                        .foregroundStyle(.primary)
-                        .padding([.leading, .bottom])
+                    NowSectionHeader(showMore: showDetail) {
+                        Text("Klima")
+                    }
+                    .padding(.bottom)
 
                     content
                         .padding(.horizontal)
@@ -86,6 +85,11 @@ struct ClimateView: View {
         } else {
             ClimatePlaceholder(isThrottled: model.phase == .throttled)
         }
+    }
+
+    private var showDetail: (() -> Void)? {
+        guard let summary = model.summary, model.phase == .loaded else { return nil }
+        return { presentDetail(summary) }
     }
 
     private func presentDetail(_ summary: ClimateSummary) {

@@ -7,8 +7,6 @@ struct NowSheetView: View {
         switch sheet {
         case .hourly(let target):
             HourlyDetailView(initialTarget: target)
-        case .daily:
-            DailyDetailView()
         case .environment(let section):
             EnvironmentDetailView(scrollTo: section)
         case .climate(let summary):
