@@ -30,6 +30,10 @@ struct StationDetailView: View {
                                        stationSubtitle(station, timeZone: weather.forecast.locationTimeZone),
                                        reportingInterval(station.history)].compactMap(\.self).joined(separator: " · "))
                         StationValueGrid(station: station)
+                        Text("Letzte 24h")
+                            .font(.title3.bold())
+                            .accessibilityAddTraits(.isHeader)
+                            .padding(.top, 8)
                         StationTemperatureChart(history: station.history, frame: frame)
                         StationWindChart(history: station.history, frame: frame)
                         if station.precipitation_24h_mm != nil {

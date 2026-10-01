@@ -62,6 +62,10 @@ struct EnsembleChart: View {
                     .foregroundStyle(.white.opacity(label.index == selected ? 0.95 : 0.6))
             )
             let x = (CGFloat(label.index) + 0.5) * column
+            context.fill(
+                Path(CGRect(x: x - 0.375, y: 0, width: 0.75, height: chartHeight)),
+                with: .color(.white.opacity(0.1))
+            )
             let anchor: UnitPoint = label.index == 0 && column < 22 ? .leading : .center
             context.draw(text, at: CGPoint(x: anchor == .leading ? 0 : x, y: chartHeight + Self.axisHeight / 2 + 2), anchor: anchor)
         }
@@ -167,17 +171,15 @@ struct EnsembleChart: View {
             func band(_ bottom: KeyPath<EnsembleSpread, Double>, _ top: KeyPath<EnsembleSpread, Double>) -> Path {
                 let points = spreads.enumerated().compactMap { index, spread in spread.map { (index, $0) } }
                 var path = Path()
-                path.addLines(
-                    points.map { CGPoint(x: x($0.0), y: y($0.1[keyPath: top])) }
-                        + points.reversed().map { CGPoint(x: x($0.0), y: y($0.1[keyPath: bottom])) }
-                )
+                path.addMonotoneCurve(through: points.map { CGPoint(x: x($0.0), y: y($0.1[keyPath: top])) })
+                path.addMonotoneCurve(through: points.reversed().map { CGPoint(x: x($0.0), y: y($0.1[keyPath: bottom])) })
                 path.closeSubpath()
                 return path
             }
             layer(band(\.lowest, \.highest), opacity: 0.3, in: &context)
             layer(band(\.low, \.high), opacity: 0.75, in: &context)
             var median = Path()
-            median.addLines(spreads.enumerated().compactMap { index, spread in
+            median.addMonotoneCurve(through: spreads.enumerated().compactMap { index, spread in
                 spread.map { CGPoint(x: x(index), y: y($0.median)) }
             })
             context.stroke(median, with: .color(.white), style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round))
@@ -208,8 +210,8 @@ struct EnsembleChart: View {
                     .foregroundStyle(.white)
             )
             let labelSize = label.measure(in: CGSize(width: 200, height: 20))
-            let above = y(spread.high) - 3 - labelSize.height
-            let top = above > 2 ? above : min(y(spread.low) + 3, chartHeight - labelSize.height)
+            let above = y(spread.median) - 5 - labelSize.height
+            let top = above > 2 ? above : min(y(spread.median) + 5, chartHeight - labelSize.height)
             let rect = CGRect(
                 x: min(max(x(index) - labelSize.width / 2, 0), size.width - labelSize.width),
                 y: top,
@@ -289,6 +291,41 @@ private struct EnsembleReadout: View {
                 .foregroundStyle(.white.opacity(0.75))
             Text(verbatim: value)
                 .foregroundStyle(.white)
+        }
+    }
+}
+
+extension Path {
+    /// Monotone cubic (Fritsch–Carlson) through points ordered along x: smooth
+    /// like the hourly lines, but never overshoots past the data between days.
+    mutating func addMonotoneCurve(through points: [CGPoint]) {
+        guard let first = points.first else { return }
+        if isEmpty { move(to: first) } else { addLine(to: first) }
+        let count = points.count
+        guard count > 1 else { return }
+        let slopes: [CGFloat] = (0..<count - 1).map { (points[$0 + 1].y - points[$0].y) / (points[$0 + 1].x - points[$0].x) }
+        var tangents: [CGFloat] = [slopes[0]] + (1..<count - 1).map { slopes[$0 - 1] * slopes[$0] <= 0 ? 0 : (slopes[$0 - 1] + slopes[$0]) / 2 } + [slopes[count - 2]]
+        for i in 0..<count - 1 {
+            guard slopes[i] != 0 else {
+                tangents[i] = 0
+                tangents[i + 1] = 0
+                continue
+            }
+            let a = tangents[i] / slopes[i], b = tangents[i + 1] / slopes[i]
+            let length = a * a + b * b
+            if length > 9 {
+                let scale = 3 / length.squareRoot()
+                tangents[i] = scale * a * slopes[i]
+                tangents[i + 1] = scale * b * slopes[i]
+            }
+        }
+        for i in 0..<count - 1 {
+            let third = (points[i + 1].x - points[i].x) / 3
+            addCurve(
+                to: points[i + 1],
+                control1: CGPoint(x: points[i].x + third, y: points[i].y + tangents[i] * third),
+                control2: CGPoint(x: points[i + 1].x - third, y: points[i + 1].y - tangents[i + 1] * third)
+            )
         }
     }
 }

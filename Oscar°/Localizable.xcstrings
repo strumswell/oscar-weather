@@ -516,28 +516,6 @@
     "%lld %%" : {
 
     },
-    "%lld Läufe, leicht verschieden gestartet. Je breiter das Band, desto unsicherer." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld Läufe, leicht verschieden gestartet. Je breiter das Band, desto unsicherer."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld runs, each started slightly differently. The wider the band, the less certain."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld çalıştırma, her biri biraz farklı başlatıldı. Bant ne kadar genişse, tahmin o kadar belirsiz."
-          }
-        }
-      }
-    },
     "%lld Mitglieder" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -9118,6 +9096,22 @@
         }
       }
     },
+    "Kennzahlen anpassen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Customize Metrics"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Göstergeleri düzenle"
+          }
+        }
+      }
+    },
     "KI-basiertes Wettermodell von ECMWF." : {
       "localizations" : {
         "de" : {
@@ -9582,6 +9576,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Çok hafif rüzgar"
+          }
+        }
+      }
+    },
+    "Letzte 24h" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last 24h"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son 24 saat"
           }
         }
       }
@@ -15207,6 +15217,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "SO"
+          }
+        }
+      }
+    },
+    "So einig ist sich die Vorhersage. Bei schmalem Band sagen fast alle Berechnungen dasselbe, bei breitem kann der Tag noch so oder so ausgehen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How much the forecast agrees with itself. With a narrow band almost every calculation says the same, with a wide one the day can still go either way."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tahminin kendi içinde ne kadar tutarlı olduğu. Bant darsa hesaplamaların neredeyse hepsi aynı sonucu verir, genişse gün hâlâ her iki yöne de gidebilir."
           }
         }
       }

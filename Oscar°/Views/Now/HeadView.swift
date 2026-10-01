@@ -240,12 +240,18 @@ struct HeadView: View {
         .foregroundStyle(Color(uiColor: .label).opacity(0.85))
         .shadow(radius: 3)
         .frame(maxWidth: .infinity, minHeight: 20)
+        .contentShape(.rect)
+        .onLongPressGesture {
+          Haptics.impact()
+          presentation.present(.layout)
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(metricsDescription))
         .accessibilityActions {
           if settingsService.headMetrics.contains(.measured), let id = weather.headStation?.id {
             Button("Messstationen") { presentation.present(.stations(id)) }
           }
+          Button("Kennzahlen anpassen") { presentation.present(.layout) }
         }
 
         if hasWeatherAlerts() {

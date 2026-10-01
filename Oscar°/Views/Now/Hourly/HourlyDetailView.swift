@@ -13,14 +13,13 @@ struct HourlyDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var model = HourlyTimelineModel()
-    @State private var expandedLens: HourlyLens? = .overview
     @State private var ensembleDate: Date?
 
     var body: some View {
         NavigationStack {
             Group {
                 if model.hasData {
-                    HourlyContent(model: model, isCovered: ensembleDate != nil, expandedLens: $expandedLens)
+                    HourlyContent(model: model, isCovered: ensembleDate != nil)
                 } else {
                     ContentUnavailableView(
                         "Keine stündlichen Daten",
@@ -72,7 +71,8 @@ struct HourlyDetailView: View {
 private struct HourlyContent: View {
     let model: HourlyTimelineModel
     let isCovered: Bool
-    @Binding var expandedLens: HourlyLens?
+
+    @State private var expandedLens: HourlyLens? = .overview
 
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location

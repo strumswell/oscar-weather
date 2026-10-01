@@ -131,7 +131,7 @@ final class EnsembleState {
 
     var footnote: String {
         guard let day = selectedDay else { return "" }
-        return String(localized: "\(day.runs) Läufe, leicht verschieden gestartet. Je breiter das Band, desto unsicherer.")
+        return String(localized: "So einig ist sich die Vorhersage. Bei schmalem Band sagen fast alle Berechnungen dasselbe, bei breitem kann der Tag noch so oder so ausgehen.")
     }
 
     func shortDateLabel(_ day: EnsembleDay) -> String {
