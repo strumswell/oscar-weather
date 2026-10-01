@@ -22,12 +22,16 @@ struct SunView: View {
                 ZStack {
                     Image("halo")
                         .blur(radius: 3)
-                        .scaleEffect(haloScale)
+                        .animation(.easeInOut(duration: 7).repeatForever(autoreverses: true)) {
+                            $0.scaleEffect(haloScale)
+                        }
                         .opacity(sin(progress * .pi) * 3 - 2)
                     
                     Image("sun")
                         .blur(radius: 2)
-                        .rotationEffect(.degrees(sunRotation))
+                        .animation(.easeInOut(duration: 8).repeatForever(autoreverses: true)) {
+                            $0.rotationEffect(.degrees(sunRotation))
+                        }
                     
                     VStack {
                         Spacer()
@@ -37,7 +41,9 @@ struct SunView: View {
                             Circle()
                                 .fill(.white.opacity(0.2))
                                 .frame(width: 16 + Double(i * 10), height: 16 + Double(i * 10))
-                                .padding(.top, 40 + (sin(Double(i) / 2) * flareDistance))
+                                .animation(.easeInOut(duration: 30).repeatForever(autoreverses: true)) {
+                                    $0.padding(.top, 40 + (sin(Double(i) / 2) * flareDistance))
+                                }
                                 .blur(radius: 1)
                                 .opacity(sin(progress * .pi) - 0.7)
                         }
@@ -49,25 +55,16 @@ struct SunView: View {
                 .rotationEffect(.degrees((progress - 0.5) * 180))
                 .onAppear {
                     guard !reduceMotion else { return }
-                    withAnimation(.easeInOut(duration: 7).repeatForever(autoreverses: true)) {
-                        haloScale = 1.3
-                    }
-                    
-                    withAnimation(.easeInOut(duration: 8).repeatForever(autoreverses: true)) {
-                        sunRotation = 20
-                    }
-                    
-                    withAnimation(.easeInOut(duration: 30).repeatForever(autoreverses: true)) {
-                        flareDistance = -70
-                    }
+                    haloScale = 1.3
+                    sunRotation = 20
+                    flareDistance = -70
                 }
             }
         }
         .ignoresSafeArea()
+        .animation(.easeInOut(duration: 1.0), value: isShown)
         .onAppear {
-            withAnimation(.easeInOut(duration: 1.0)) {
-                self.isShown = true
-            }
+            isShown = true
         }
     }
 
