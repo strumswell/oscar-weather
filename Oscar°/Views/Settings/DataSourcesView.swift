@@ -30,6 +30,15 @@ struct DataSourcesView: View {
           }
           .labelStyle(.settingsIcon(.cyan))
         }
+
+        SettingsExternalLink(destination: URL(string: "https://www.windy.com/webcams")!) {
+          Label {
+            Text(verbatim: "Webcams provided by windy.com")
+          } icon: {
+            Image(systemName: "web.camera.fill")
+          }
+          .labelStyle(.settingsIcon(.blue))
+        }
       }
 
       Section("Open Source") {

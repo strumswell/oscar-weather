@@ -32,6 +32,7 @@ struct WeatherMapDetailView: View {
     // presentation — the classic stale-state sheet bug.
     @State private var tappedAlerts: TappedAlerts?
     @State private var tappedCell: StormCellInfo?
+    @State private var tappedWebcam: Components.Schemas.Webcam?
     @Namespace private var controlsNamespace
 
     private var timeline: CombinedTimelineState { layers.timeline }
@@ -60,6 +61,9 @@ struct WeatherMapDetailView: View {
                 },
                 onCellTapped: { cell in
                     tappedCell = cell
+                },
+                onWebcamTapped: { webcam in
+                    tappedWebcam = webcam
                 }
             )
             .ignoresSafeArea()
@@ -222,6 +226,10 @@ struct WeatherMapDetailView: View {
             .presentationBackgroundInteraction(.enabled(upThrough: .medium))
             .presentationDragIndicator(.hidden)
         }
+        .sheet(item: $tappedWebcam) { webcam in
+            WebcamSheet(webcam: webcam, timeZone: .current)
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+        }
     }
 
     /// The classic map has no continuation chip, so it never loads one.
@@ -231,8 +239,8 @@ struct WeatherMapDetailView: View {
 
     // MARK: - Map controls
 
-    /// Apple-Maps-style control stack: the layer-picker entry point and the
-    /// locate button share ONE glass capsule (user request — no separate
+    /// Apple-Maps-style control stack: the layer-picker entry point, the
+    /// locate button and the webcam toggle share ONE glass capsule (user request — no separate
     /// floating circles). Locate flies the camera to the user's position
     /// (no-op without a fix/permission). The radar's own toggles sit in a second
     /// capsule below, which melts out of the first when radar is picked.
@@ -251,7 +259,8 @@ struct WeatherMapDetailView: View {
     }
 
     private var mainControls: some View {
-        VStack(spacing: 0) {
+        @Bindable var settings = settingsService
+        return VStack(spacing: 0) {
             Button(action: presentLayerPicker) {
                 Image(systemName: "map.fill")
                     .font(.title3.weight(.semibold))
@@ -271,6 +280,15 @@ struct WeatherMapDetailView: View {
                     .contentShape(.rect)
             }
             .accessibilityLabel(Text("Auf meinen Standort zentrieren"))
+            Divider()
+                .frame(width: 26)
+            Toggle(isOn: $settings.mapWebcams) {
+                Image(systemName: "web.camera")
+                    .font(.system(size: 17, weight: .semibold))
+                    .modifier(SlashedWhenOff(isOn: settingsService.mapWebcams))
+            }
+            .toggleStyle(MapControlToggleStyle())
+            .accessibilityLabel(Text("Webcams"))
         }
         .buttonStyle(.plain)
         .glassEffect(.regular, in: Capsule())

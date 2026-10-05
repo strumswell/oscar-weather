@@ -113,6 +113,10 @@ final class ScreenshotFixtureServer: URLProtocol {
             // Per coordinate: the Orte list asks one series per saved place.
             return json { url in ScreenshotFixtures.precipSeriesJSON(for: url) }
         }
+        // Windy's terms forbid webcam images in anything published.
+        if path.hasPrefix("/webcams") {
+            return json { _ in ["webcams": [Any]()] }
+        }
         if path.hasPrefix("/weather-alerts/point") {
             return json { _ in ScreenshotFixtures.alertsJSON() }
         }

@@ -59,6 +59,10 @@ final class SettingService {
     var mapValueBubbles: Bool {
         didSet { UserDefaults.standard.set(mapValueBubbles, forKey: "mapValueBubbles") }
     }
+    /// Webcam markers on the map (off by default).
+    var mapWebcams: Bool {
+        didSet { UserDefaults.standard.set(mapWebcams, forKey: "mapWebcams") }
+    }
     /// When true, active severe-weather warning areas render as a polygon overlay
     /// on top of whichever radar/model layer is showing.
     var showAlertPolygons: Bool {
@@ -203,6 +207,7 @@ final class SettingService {
         radarMotionArrows = (UserDefaults.standard.object(forKey: "radarMotionArrows") as? Bool) ?? true
         radarModelContinuation = UserDefaults.standard.bool(forKey: "radarModelContinuation")
         mapValueBubbles = (UserDefaults.standard.object(forKey: "mapValueBubbles") as? Bool) ?? true
+        mapWebcams = UserDefaults.standard.bool(forKey: "mapWebcams")
         showAlertPolygons = UserDefaults.standard.bool(forKey: "showAlertPolygons")
         showStormCells = UserDefaults.standard.bool(forKey: "showStormCells")
         showIsobars = UserDefaults.standard.bool(forKey: "showIsobars")

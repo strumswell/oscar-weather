@@ -6,11 +6,11 @@ import Observation
 import SwiftUI
 import UIKit
 
-// MARK: Feature tap-through (warnings + storm cells)
+// MARK: Feature tap-through (webcams, warnings, storm cells)
 
 extension WeatherMapView.Coordinator {
-    /// Query the tapped point's rendered features: cells win (small targets, padded
-    /// hit box), then every warning polygon under the finger — deduped by alert id
+    /// Query the tapped point's rendered features: webcams, then cells win (small targets,
+    /// padded hit box), then every warning polygon under the finger — deduped by alert id
     /// (MultiPolygon parts return one feature each) and sorted active-first.
     @objc func handleMapTap(_ gesture: UITapGestureRecognizer) {
         guard gesture.state == .ended, let mapView else { return }
@@ -18,6 +18,15 @@ extension WeatherMapView.Coordinator {
 
         let pad: CGFloat = 22
         let hitBox = CGRect(x: point.x - pad, y: point.y - pad, width: pad * 2, height: pad * 2)
+        let webcamHit = mapView
+            .visibleFeatures(in: hitBox, styleLayerIdentifiers: [WeatherMapView.webcamLayerID])
+            .compactMap { feature in webcams.first { $0.id == feature.attributes["webcam_id"] as? Int } }
+            .first
+        if let webcamHit, let onWebcamTapped = parent.onWebcamTapped {
+            Haptics.impact()
+            onWebcamTapped(webcamHit)
+            return
+        }
         let cellHit = mapView
             .visibleFeatures(in: hitBox, styleLayerIdentifiers: [
                 WeatherMapView.cellCircleLayerID, WeatherMapView.cellFootprintFillLayerID,

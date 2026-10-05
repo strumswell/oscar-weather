@@ -1288,6 +1288,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NearbyStationsResponse"
+  /webcams:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getWebcams
+      tags:
+        - Oscar Server
+      summary: Live webcams in a box (Windy), most popular first
+      parameters:
+        - name: north
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: south
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: east
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: west
+          in: query
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Up to 50 active webcams; the box grows to a 0.5° grid, at most 15° each way
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebcamsResponse"
   /notifications/register:
     servers:
       - url: https://server.oscars.love
@@ -2110,6 +2146,40 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/OscarPointAlert"
+    WebcamsResponse:
+      type: object
+      required: [webcams]
+      properties:
+        webcams:
+          type: array
+          items:
+            $ref: "#/components/schemas/Webcam"
+    Webcam:
+      type: object
+      required: [id, title, latitude, longitude, updated_at, thumbnail_url, preview_url, detail_url]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        updated_at:
+          type: string
+          format: date-time
+        thumbnail_url:
+          type: string
+          description: 200×112 px.
+        preview_url:
+          type: string
+          description: 400×224 px, the largest image on Windy's free tier.
+        player_url:
+          type: string
+          description: Today's timelapse player (web page).
+        detail_url:
+          type: string
     NearbyStationsResponse:
       type: object
       required: [generated_at, stations]

@@ -3,7 +3,7 @@ import SwiftUI
 /// The blocks of the forecast page below the head, shown in the order the
 /// user keeps them (`SettingService.nowSections`; absent = hidden).
 enum NowSection: String, CaseIterable, Identifiable {
-    case radar, hourly, daily, stations, environment, climate
+    case radar, hourly, daily, stations, webcams, environment, climate
 
     var id: String { rawValue }
 
@@ -15,6 +15,7 @@ enum NowSection: String, CaseIterable, Identifiable {
         case .environment: "Umwelt"
         case .climate: "Klima"
         case .stations: "Messstationen"
+        case .webcams: "Webcams"
         }
     }
 
@@ -26,6 +27,7 @@ enum NowSection: String, CaseIterable, Identifiable {
         case .environment: "leaf"
         case .climate: "chart.bar.xaxis"
         case .stations: "sensor"
+        case .webcams: "web.camera"
         }
     }
 
@@ -38,6 +40,7 @@ enum NowSection: String, CaseIterable, Identifiable {
         case .environment: .green
         case .climate: .red
         case .stations: .teal
+        case .webcams: .cyan
         }
     }
 
@@ -52,6 +55,7 @@ enum NowSection: String, CaseIterable, Identifiable {
         case .environment: EnvironmentGaugesView()
         case .climate: ClimateView()
         case .stations: StationsView()
+        case .webcams: WebcamsView()
         }
     }
 }

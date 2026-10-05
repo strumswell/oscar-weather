@@ -51,6 +51,7 @@ struct WeatherMapView: UIViewRepresentable {
     var onAlertsTapped: (([WeatherAlertInfo]) -> Void)? = nil
     /// Tap on a storm-cell marker/footprint → that cell's details.
     var onCellTapped: ((StormCellInfo) -> Void)? = nil
+    var onWebcamTapped: ((Components.Schemas.Webcam) -> Void)? = nil
 
     static let radarLayerID = "oscar-radar-layer"
     static let modelLayerID = "oscar-model-image"
@@ -93,6 +94,9 @@ struct WeatherMapView: UIViewRepresentable {
     static let cellTickLabelLayerID = "oscar-cells-tick-label"
     static let cellHeadLayerID = "oscar-cells-head"
     static let cellArrowImageName = "oscar-cell-arrow"
+    static let webcamSourceID = "oscar-webcams"
+    static let webcamLayerID = "oscar-webcams-layer"
+    static let webcamImageName = "oscar-webcam-pin"
 
     /// Initial camera zoom, overridable via `-mapInitialZoom <z>` (UserDefaults
     /// argument domain or persisted default) — a dev/staging knob like
@@ -169,10 +173,10 @@ struct WeatherMapView: UIViewRepresentable {
     }
 
     /// Safe-area-relative, matching the SwiftUI overlay's frame: 16pt top padding
-    /// + a capsule of two 46pt buttons and a divider + 12pt gap, twice while the
+    /// + a capsule of three 46pt buttons and two dividers + 12pt gap, twice while the
     /// radar's control capsule shows.
     static func compassMargins(radarControls: Bool) -> CGPoint {
-        CGPoint(x: 19, y: radarControls ? 226 : 121)
+        CGPoint(x: 19, y: radarControls ? 273 : 168)
     }
 
     /// True only when location access has already been granted — never triggers a
@@ -249,6 +253,11 @@ struct WeatherMapView: UIViewRepresentable {
         var stormCellsFetchedAt: Date?
         var stormCellsRegion: RadarRegion?
         var isLoadingStormCells = false
+
+        var webcams: [Components.Schemas.Webcam] = []
+        var webcamBox: WebcamBox?
+        var webcamsFetchedAt: Date?
+        var isLoadingWebcams = false
 
         // Per-frame isobar GeoJSON, keyed "framesEndpoint/frameKey" (see syncIsobars).
         var isobarShapes: [String: MLNShape] = [:]
@@ -452,6 +461,7 @@ struct WeatherMapView: UIViewRepresentable {
             let stormCells = settings.showStormCells
             let isobars = settings.showIsobars || activeTileLayer?.isPressureLayer == true
             let radarRegion = settings.oscarRadarRegion
+            let webcamsOn = settings.mapWebcams
             // Registers the observation dependency; the value itself reaches the
             // layers via `parent.overlayOpacity` on the next updateUIView pass.
             _ = settings.mapOverlayOpacity
@@ -557,6 +567,8 @@ struct WeatherMapView: UIViewRepresentable {
             syncStormCells(style: style, active: stormCells && radarActive && !showsModelPart,
                            region: radarRegion)
             syncWindParticles(selection: activeTileLayer, state: modelState)
+            // Only the map that can open a webcam shows them (not the forecast preview).
+            syncWebcams(style: style, active: webcamsOn && parent.onWebcamTapped != nil)
             syncUserLocationDot(style: style)
             // Last: chips and the selected-city marker re-assert themselves as
             // the topmost layers, so they must run after every sync that may

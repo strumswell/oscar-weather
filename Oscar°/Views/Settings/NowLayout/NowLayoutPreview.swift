@@ -158,6 +158,7 @@ private extension NowSection {
         case .environment: 140
         case .climate: 130
         case .stations: 215
+        case .webcams: 200
         }
     }
 }
@@ -251,6 +252,20 @@ private struct MiniPage: View {
         case .stations:
             StationsCard(stations: Self.sampleStations, timeZone: .gmt) { _ in }
                 .padding(.horizontal)
+        case .webcams:
+            // Blank frames: webcam images may not appear in anything published.
+            HStack(spacing: 12) {
+                ForEach(0..<3, id: \.self) { _ in
+                    Color.clear
+                        .frame(width: 200, height: 112)
+                        .cardBackground()
+                        .clipShape(.rect(cornerRadius: 12))
+                        .cardBorder(RoundedRectangle(cornerRadius: 12))
+                }
+            }
+            .padding(.leading)
+            .frame(width: PageMap.width, alignment: .leading)
+            .clipped()
         }
     }
 }
