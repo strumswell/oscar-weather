@@ -86,6 +86,8 @@ struct RootTabView: View {
         // environment set inside a .sheet modifier does not reach its
         // presented content.
         .environment(presentation)
+        // The menu bar commands act on whichever window has focus.
+        .focusedSceneValue(presentation)
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             refreshWeatherData(isForeground: true)
         }
@@ -127,6 +129,36 @@ struct RootTabView: View {
             if isForeground {
                 WidgetCenter.shared.reloadAllTimelines()
             }
+        }
+    }
+}
+
+/// Menu bar commands for iPad and Mac: tabs on ⌘1–3, refresh, settings.
+struct OscarCommands: Commands {
+    @FocusedValue(NowPresentationCoordinator.self) private var presentation
+
+    var body: some Commands {
+        CommandMenu("Wetter") {
+            Group {
+                Button("Orte") { presentation?.selectedTab = .places }
+                    .keyboardShortcut("1")
+                Button("Wetter") { presentation?.selectedTab = .forecast }
+                    .keyboardShortcut("2")
+                Button("Karten") { presentation?.selectedTab = .maps }
+                    .keyboardShortcut("3")
+                Divider()
+                // Pull-to-refresh is awkward with a mouse.
+                Button("Aktualisieren") {
+                    NotificationCenter.default.post(name: .weatherRefreshNeeded, object: nil)
+                }
+                .keyboardShortcut("r")
+            }
+            .disabled(presentation == nil)
+        }
+        CommandGroup(replacing: .appSettings) {
+            Button("Einstellungen") { presentation?.present(.settings) }
+                .keyboardShortcut(",")
+                .disabled(presentation == nil)
         }
     }
 }

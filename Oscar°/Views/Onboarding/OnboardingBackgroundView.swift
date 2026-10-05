@@ -38,6 +38,15 @@ struct OnboardingBackgroundView: View {
                     .transition(.identity)
             }
         }
+        .onAppear {
+            // A flow that opens past welcome starts on its own scene, not a
+            // crossfade from noon.
+            var instant = Transaction()
+            instant.disablesAnimations = true
+            withTransaction(instant) {
+                if let first = backdrop(for: step) { backdrop = first }
+            }
+        }
         .onChange(of: step) { _, next in
             // The finale maps to nil: it keeps the previous backdrop while
             // the whole layer dissolves.

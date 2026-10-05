@@ -1,33 +1,139 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
-    "" : {
-
-    },
-    "--°" : {
-
-    },
-    "Ziemlich unsicher" : {
+    "Mitteilungen sind in den iOS-Einstellungen ausgeschaltet." : {
       "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ziemlich unsicher"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fairly uncertain"
+            "value" : "Notifications are turned off in iOS Settings."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oldukça belirsiz"
+            "value" : "Bildirimler iOS Ayarları'nda kapalı."
           }
         }
       }
+    },
+    "Bis zu 30 Minuten vorher." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to 30 minutes ahead."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 dakikaya kadar önceden."
+          }
+        }
+      }
+    },
+    "Auf Sperrbildschirm und Dynamic Island." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On the Lock Screen and in the Dynamic Island."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kilit ekranında ve Dynamic Island'da."
+          }
+        }
+      }
+    },
+    "Per Radar in Europa, den USA, Taiwan, Brasilien und auf den Kanaren." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar-based, in Europe, the US, Taiwan, Brazil and the Canary Islands."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radara dayalı; Avrupa, ABD, Tayvan, Brezilya ve Kanarya Adaları'nda."
+          }
+        }
+      }
+    },
+    "Von DWD, MeteoAlarm, NWS und CWA." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From DWD, MeteoAlarm, NWS and CWA."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DWD, MeteoAlarm, NWS ve CWA'dan."
+          }
+        }
+      }
+    },
+    "Gilt für deinen aktuellen Standort, auf etwa 100 m gerundet. Schaltest du alles aus, wird er gelöscht." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uses your current location, rounded to about 100 m. Turn everything off and it's deleted."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mevcut konumunuz yaklaşık 100 m'ye yuvarlanarak kullanılır. Hepsini kapatırsanız silinir."
+          }
+        }
+      }
+    },
+    "Erlaube Mitteilungen in den iOS-Einstellungen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow notifications in iOS Settings."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS Ayarları'nda bildirimlere izin verin."
+          }
+        }
+      }
+    },
+    "Erlaube Live-Aktivitäten in den iOS-Einstellungen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow Live Activities in iOS Settings."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS Ayarları'nda Canlı Etkinliklere izin verin."
+          }
+        }
+      }
+    },
+    "" : {
+
+    },
+    "--°" : {
+
     },
     "–" : {
 
@@ -1495,6 +1601,28 @@
         }
       }
     },
+    "Absturzberichte senden" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Absturzberichte senden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send crash reports"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Çökme raporlarını gönder"
+          }
+        }
+      }
+    },
     "ACCESS-G - Australian Bureau of Meteorology (BOM)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1680,6 +1808,28 @@
         }
       }
     },
+    "Aktualisieren" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktualisieren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yenile"
+          }
+        }
+      }
+    },
     "Aktualisiert" : {
       "localizations" : {
         "de" : {
@@ -1839,6 +1989,7 @@
       }
     },
     "Alerts" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2084,6 +2235,7 @@
       }
     },
     "Allow notifications in iOS Settings to receive rain alerts and weather alerts." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3124,6 +3276,22 @@
         }
       }
     },
+    "Benachrichtigungen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirimler"
+          }
+        }
+      }
+    },
     "Benachrichtigungen deaktiviert" : {
       "localizations" : {
         "de" : {
@@ -3147,6 +3315,7 @@
       }
     },
     "Benachrichtigungsstatus unbekannt." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3681,6 +3850,7 @@
       }
     },
     "Both beta alert types are currently turned off. They are available in Europe, the United States, Taiwan, and Brazil (rain alerts only)." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4593,6 +4763,7 @@
       }
     },
     "Der Live-Regenstatus zeigt aufziehenden Regen als Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island. Er benötigt aktive Regen-Warnungen." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -7364,28 +7535,6 @@
         }
       }
     },
-    "Großbritannien" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Großbritannien"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "United Kingdom"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Birleşik Krallık"
-          }
-        }
-      }
-    },
     "Größere Zweige und kleine Bäume bewegen sich." : {
       "localizations" : {
         "de" : {
@@ -7404,6 +7553,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
+          }
+        }
+      }
+    },
+    "Großbritannien" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Großbritannien"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "United Kingdom"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birleşik Krallık"
           }
         }
       }
@@ -7788,6 +7959,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bugün %@ · Normal %@ · Rekor %@ (%@)"
+          }
+        }
+      }
+    },
+    "Hilft mir, Fehler zu finden. Berichte gehen an Sentry (gespeichert in der EU) und können einen Screenshot des Moments enthalten, in dem etwas schiefging." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hilft mir, Fehler zu finden. Berichte gehen an Sentry (gespeichert in der EU) und können einen Screenshot des Moments enthalten, in dem etwas schiefging."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Helps me find bugs. Reports go to Sentry (stored in the EU) and can include a screenshot of the moment something went wrong."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Hataları bulmama yardımcı olur. Raporlar Sentry’ye gönderilir (AB’de saklanır) ve bir şeylerin ters gittiği ana ait bir ekran görüntüsü içerebilir."
           }
         }
       }
@@ -9753,6 +9946,22 @@
         }
       }
     },
+    "Live-Aktivitäten ausgeschaltet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live Activities Turned Off"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canlı Etkinlikler kapalı"
+          }
+        }
+      }
+    },
     "Live-Regenstatus" : {
       "localizations" : {
         "de" : {
@@ -10883,6 +11092,7 @@
       }
     },
     "Mitteilungen sind auf Systemebene deaktiviert." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -12110,6 +12320,28 @@
         }
       }
     },
+    "Öffnet Karten" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet Karten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens Maps"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haritaları açar"
+          }
+        }
+      }
+    },
     "Öffnet Klimadetails" : {
       "localizations" : {
         "de" : {
@@ -12755,6 +12987,7 @@
       }
     },
     "Oscar can send beta rain alerts and beta weather alerts for your current location. Rain alerts cover the radar regions in Europe, the United States, Taiwan, and Brazil; weather alerts cover Europe, the United States, and Taiwan. Turn each alert type on or off below." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -13752,6 +13985,7 @@
       }
     },
     "Rain alerts" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -14190,6 +14424,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yağmur olasılığı"
+          }
+        }
+      }
+    },
+    "Regenwarnungen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain Alerts"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur Uyarıları"
           }
         }
       }
@@ -17234,6 +17484,7 @@
       }
     },
     "Turn on rain alerts or weather alerts to receive beta notifications in Europe, the United States, Taiwan, and Brazil. Your approximate location will be stored on an Oscar server for this." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -18536,6 +18787,7 @@
       }
     },
     "Weather alerts" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -19629,6 +19881,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oldukça kesin"
+          }
+        }
+      }
+    },
+    "Ziemlich unsicher" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziemlich unsicher"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fairly uncertain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oldukça belirsiz"
           }
         }
       }

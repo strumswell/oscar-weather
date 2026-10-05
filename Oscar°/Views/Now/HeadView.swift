@@ -8,6 +8,9 @@ import CoreLocation
 import SwiftUI
 
 struct HeadView: View {
+  /// Tight sky gaps for the wide forecast's stage, where the map below takes
+  /// the spare height instead.
+  var compact = false
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @Environment(Weather.self) private var weather: Weather
   @Environment(Location.self) private var location: Location
@@ -195,7 +198,7 @@ struct HeadView: View {
       .padding(.top)
 
       VStack(spacing: 0) {
-        Spacer(minLength: Self.temperatureGapMinHeight)
+        Spacer(minLength: compact ? 8 : Self.temperatureGapMinHeight)
 
         Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
           .foregroundStyle(Color(uiColor: .label))
@@ -207,7 +210,7 @@ struct HeadView: View {
           .animation(.default, value: weather.forecast.current?.temperature)
           .accessibilityLabel(Text("Temperatur \(roundTemperatureString(temperature: weather.forecast.current?.temperature))"))
 
-        Spacer(minLength: Self.metricsGapMinHeight)
+        Spacer(minLength: compact ? 16 : Self.metricsGapMinHeight)
 
         HStack(spacing: 18) {
           ForEach(settingsService.headMetrics) { metric in

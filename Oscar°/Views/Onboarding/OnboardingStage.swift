@@ -10,8 +10,15 @@ import SwiftUI
 /// and feather into this surface, so titles, copy, and controls always sit
 /// on solid ground instead of the busy backdrop.
 struct OnboardingStage: View {
-    /// Fraction of the screen height at which the canvas becomes fully solid.
-    static let heroFraction: CGFloat = 0.3
+    /// Where the canvas becomes fully solid: 30 % down on phones. Taller
+    /// screens (iPad) keep a phone-sized canvas and give the rest to the hero
+    /// window, so the content doesn't float above an empty slab.
+    static func canvasTop(screenHeight: CGFloat) -> CGFloat {
+        max(screenHeight * 0.3, screenHeight - 700)
+    }
+
+    /// Phone width on iPad and Mac, centered.
+    static let contentMaxWidth: CGFloat = 520
     /// Height of the gradient that dissolves the hero window into the canvas.
     static let featherHeight: CGFloat = 120
 
@@ -19,7 +26,7 @@ struct OnboardingStage: View {
         GeometryReader { proxy in
             VStack(spacing: 0) {
                 Color.clear
-                    .frame(height: max(proxy.size.height * Self.heroFraction - Self.featherHeight, 0))
+                    .frame(height: max(Self.canvasTop(screenHeight: proxy.size.height) - Self.featherHeight, 0))
 
                 LinearGradient(
                     colors: [Color(uiColor: .systemBackground).opacity(0), Color(uiColor: .systemBackground)],
@@ -61,14 +68,15 @@ struct OnboardingStageLayout<Content: View>: View {
             let bottomInset = proxy.safeAreaInsets.bottom
             let keyboardlessBottom = bottomInset > 100 ? 0 : bottomInset
             let screenHeight = proxy.size.height + proxy.safeAreaInsets.top + keyboardlessBottom
-            let canvasTop = screenHeight * OnboardingStage.heroFraction - proxy.safeAreaInsets.top
+            let canvasTop = OnboardingStage.canvasTop(screenHeight: screenHeight) - proxy.safeAreaInsets.top
 
             VStack(spacing: 0) {
                 Color.clear
                     .frame(height: max(canvasTop, 0))
 
                 content
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .frame(maxWidth: OnboardingStage.contentMaxWidth, maxHeight: .infinity, alignment: .top)
+                    .frame(maxWidth: .infinity)
             }
         }
     }

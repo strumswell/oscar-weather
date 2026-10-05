@@ -29,6 +29,7 @@ final class HourlyTimelineModel {
     private(set) var precipitation: [Double] = []
     private(set) var snowfall: [Double] = []
     private(set) var weathercode: [Double] = []
+    private(set) var isDay: [Double] = []
     private(set) var windspeed: [Double] = []
     private(set) var windgusts: [Double] = []
     private(set) var winddirection: [Double] = []
@@ -65,7 +66,23 @@ final class HourlyTimelineModel {
 
     // MARK: - Scrub state
 
-    let windowSeconds: Double = 48 * 3_600
+    /// Set, the strip shows exactly this range (one day in the wide daily
+    /// list) and the playhead moves across it; nil, it shows a 48-hour
+    /// window that pans under a centered playhead (the hourly sheet).
+    private(set) var dayWindow: ClosedRange<Double>?
+
+    var windowSeconds: Double {
+        guard let dayWindow else { return 48 * 3_600 }
+        return dayWindow.upperBound - dayWindow.lowerBound
+    }
+
+    /// Where the scrub may go: the day window when set, else all the data.
+    private var scrubRange: ClosedRange<Double> {
+        guard let dayWindow,
+              dayWindow.lowerBound < domain.upperBound,
+              dayWindow.upperBound > domain.lowerBound else { return domain }
+        return max(dayWindow.lowerBound, domain.lowerBound)...min(dayWindow.upperBound, domain.upperBound)
+    }
     private(set) var scrubTime: Double = Date.now.timeIntervalSince1970
     /// Coarse (2-min) scrub time for the stage, throttled to ~10 Hz: small
     /// steps at a steady cadence read as continuous sky/sun motion, while the
@@ -78,7 +95,8 @@ final class HourlyTimelineModel {
     /// The playhead is pinned to the strip's center: the window is derived
     /// from the scrub, so panning the strip IS scrubbing. Near the data edges
     /// the window simply extends into empty space, keeping the bar centered.
-    var windowStart: Double { scrubTime - windowSeconds / 2 }
+    /// A day window stays put instead.
+    var windowStart: Double { dayWindow?.lowerBound ?? scrubTime - windowSeconds / 2 }
 
     var stageDate: Date { Date(timeIntervalSince1970: stageTime) }
     var isGliding: Bool { glide != nil }
@@ -108,6 +126,7 @@ final class HourlyTimelineModel {
         precipitation = hourly?.precipitation ?? []
         snowfall = hourly?.snowfall ?? []
         weathercode = hourly?.weathercode ?? []
+        isDay = hourly?.is_day ?? []
         windspeed = hourly?.windspeed_10m ?? []
         windgusts = Self.leading(hourly?.windgusts_10m)
         winddirection = hourly?.winddirection_10m ?? []
@@ -144,13 +163,16 @@ final class HourlyTimelineModel {
         nightRanges = Self.nightRanges(times: newTimes, isDay: hourly?.is_day ?? [])
         dayMarks = Self.dayMarks(times: newTimes, timeZone: timeZone)
 
-        if firstLoad {
-            let now = Date.now.timeIntervalSince1970
-            scrubTime = min(max(now, domain.lowerBound), domain.upperBound)
-        } else {
-            scrubTime = min(max(scrubTime, domain.lowerBound), domain.upperBound)
-        }
+        scrubTime = clamped(firstLoad ? Date.now.timeIntervalSince1970 : scrubTime)
         stageTime = quantized(scrubTime)
+    }
+
+    /// Pins the strip to one day and puts the playhead at `time`.
+    func show(day: ClosedRange<Double>, at time: Double) {
+        glide = nil
+        panStartTime = nil
+        dayWindow = day
+        setScrub(time)
     }
 
     /// Values up to the first gap: best_match leaves some series null past their model's horizon.
@@ -228,7 +250,7 @@ final class HourlyTimelineModel {
     func glide(to time: Double, easeOut: Bool = false) {
         panStartTime = nil
         guard hasData else { return }
-        let target = min(max(time, domain.lowerBound), domain.upperBound)
+        let target = clamped(time)
         guard !UIAccessibility.isReduceMotionEnabled else {
             setScrub(target)
             return
@@ -243,13 +265,17 @@ final class HourlyTimelineModel {
 
     private func setScrub(_ time: Double) {
         guard hasData else { return }
-        let clamped = min(max(time, domain.lowerBound), domain.upperBound)
+        let newTime = clamped(time)
         let previousMark = Int(scrubTime / 21_600)
-        scrubTime = clamped
-        if Int(clamped / 21_600) != previousMark {
+        scrubTime = newTime
+        if Int(newTime / 21_600) != previousMark {
             hourTick &+= 1
         }
-        pushStage(quantized(clamped))
+        pushStage(quantized(newTime))
+    }
+
+    private func clamped(_ time: Double) -> Double {
+        min(max(time, scrubRange.lowerBound), scrubRange.upperBound)
     }
 
     private func pushStage(_ quantizedTime: Double) {

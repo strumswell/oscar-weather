@@ -258,7 +258,8 @@ for locale in localeDirs {
 
     for png in pngs {
         let stem = String(png.dropLast(4))
-        guard let dash = stem.firstIndex(of: "-") else { continue }
+        // Last dash: device names can contain one ("iPad Pro 13-inch (M5)").
+        guard let dash = stem.lastIndex(of: "-") else { continue }
         let scene = String(stem[stem.index(after: dash)...])
         if let sceneFilter, scene != sceneFilter { continue }
         // Hidden scenes are composition sources (extra device shots) only; an
@@ -269,6 +270,13 @@ for locale in localeDirs {
             FileHandle.standardError.write("warning: unreadable \(dir)/\(png)\n".data(using: .utf8)!)
             continue
         }
+
+        // iPad captures have no frame art: the screenshot itself, rounded and
+        // lifted off the gradient under the scene's caption, on a canvas of
+        // the capture's own App Store size (2752×2064 in landscape).
+        let isPad = png.contains("iPad")
+        let canvasW = isPad ? screenshot.pixelWidth : canvasW
+        let canvasH = isPad ? screenshot.pixelHeight : canvasH
 
         guard let cg = CGContext(data: nil, width: Int(canvasW), height: Int(canvasH),
                                  bitsPerComponent: 8, bytesPerRow: 0,
@@ -290,9 +298,10 @@ for locale in localeDirs {
             .draw(in: CGRect(x: 0, y: 0, width: canvasW, height: canvasH), angle: 90)
 
         let sceneConfig = scenes[scene] as? [String: Any]
-        let extras = sceneConfig?["extraTexts"] as? [[String: Any]] ?? []
-        let sceneImages = sceneConfig?["images"] as? [[String: Any]] ?? []
-        let extraDevices = sceneConfig?["devices"] as? [[String: Any]] ?? []
+        // Extra texts, images and devices are placed for the iPhone canvas.
+        let extras = isPad ? [] : sceneConfig?["extraTexts"] as? [[String: Any]] ?? []
+        let sceneImages = isPad ? [] : sceneConfig?["images"] as? [[String: Any]] ?? []
+        let extraDevices = isPad ? [] : sceneConfig?["devices"] as? [[String: Any]] ?? []
         var painters: [String: () -> Void] = [:]
 
         // A device instance: screenshot underneath, frame art on top, rotated
@@ -329,10 +338,27 @@ for locale in localeDirs {
             }
         }
 
-        let deviceStyle = Style(section: "device", scene: scene, locale: locale, block: nil)
-        painters["device"] = devicePainter(
-            shot: screenshot, style: deviceStyle,
-            defaultX: (canvasW - deviceStyle.number("width", 1200)) / 2)
+        if isPad {
+            let shotH = canvasH * 0.76
+            let shotW = shotH * screenshot.pixelWidth / screenshot.pixelHeight
+            let rect = CGRect(x: (canvasW - shotW) / 2, y: canvasH - shotH - canvasH * 0.04,
+                              width: shotW, height: shotH)
+            let shadow = Style(section: "device", scene: scene, locale: locale,
+                               block: ["shadowBlur": 60, "shadowOpacity": 0.45, "shadowY": 24])
+            painters["device"] = {
+                withShadow(shadow, in: cg) {
+                    NSGraphicsContext.saveGraphicsState()
+                    NSBezierPath(roundedRect: rect, xRadius: 40, yRadius: 40).addClip()
+                    screenshot.image.draw(in: rect)
+                    NSGraphicsContext.restoreGraphicsState()
+                }
+            }
+        } else {
+            let deviceStyle = Style(section: "device", scene: scene, locale: locale, block: nil)
+            painters["device"] = devicePainter(
+                shot: screenshot, style: deviceStyle,
+                defaultX: (canvasW - deviceStyle.number("width", 1200)) / 2)
+        }
 
         // Extra device instances show another capture from the same locale
         // (e.g. the wind and pressure map layers fanned next to temperature).
@@ -347,10 +373,15 @@ for locale in localeDirs {
             painters["device\(i + 1)"] = devicePainter(shot: shot, style: style, defaultX: 200)
         }
 
-        // Caption from title.strings.
+        // Caption from title.strings; on iPad one line across the top band,
+        // keeping the scene's font and color.
+        let padTitle: [String: Any]? = isPad
+            ? ["x": 120, "y": canvasH * 0.045, "width": canvasW - 240, "size": 130]
+            : nil
         painters["title"] = {
             if let caption = titles[scene], !caption.isEmpty {
-                drawText(caption, style: Style(section: "title", scene: scene, locale: locale, block: nil))
+                let text = isPad ? caption.replacingOccurrences(of: "\n", with: " ") : caption
+                drawText(text, style: Style(section: "title", scene: scene, locale: locale, block: padTitle))
             }
         }
 

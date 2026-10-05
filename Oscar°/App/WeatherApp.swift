@@ -71,6 +71,34 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
+/// Sentry crash and performance reports. On by default; the person can turn them off in
+/// Settings, which stops the SDK right away and keeps it off on later launches.
+enum CrashReporting {
+    static let enabledKey = "crashReportsEnabled"
+
+    static var isEnabled: Bool {
+        UserDefaults.standard.object(forKey: enabledKey) as? Bool ?? true
+    }
+
+    static func start() {
+        SentrySDK.start { options in
+            options.dsn = "https://f6b7fe82cd8cd8bb11dc0dc38db42255@o4507143648772096.ingest.de.sentry.io/4507143650148432"
+            options.debug = false
+            options.tracesSampleRate = 0.5
+
+            options.attachScreenshot = true
+            options.attachViewHierarchy = true
+            options.enableMetricKit = true
+            options.enableTimeToFullDisplayTracing = true
+            options.swiftAsyncStacktraces = true
+        }
+    }
+
+    static func stop() {
+        SentrySDK.close()
+    }
+}
+
 @main
 struct WeatherApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
@@ -99,16 +127,8 @@ struct WeatherApp: App {
         }
         #endif
 
-        SentrySDK.start { options in
-            options.dsn = "https://f6b7fe82cd8cd8bb11dc0dc38db42255@o4507143648772096.ingest.de.sentry.io/4507143650148432"
-            options.debug = false
-            options.tracesSampleRate = 0.5
-
-            options.attachScreenshot = true
-            options.attachViewHierarchy = true
-            options.enableMetricKit = true
-            options.enableTimeToFullDisplayTracing = true
-            options.swiftAsyncStacktraces = true
+        if CrashReporting.isEnabled {
+            CrashReporting.start()
         }
 
         UsageCountingMiddleware.onRequest = { host in
@@ -177,6 +197,7 @@ struct WeatherApp: App {
                 }
                 .sentryTrace("RootTabView")
         }
+        .commands { OscarCommands() }
     }
 
     /// Bridges the launch gap with the last session's weather so the sim opens

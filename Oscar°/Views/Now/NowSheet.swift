@@ -2,6 +2,7 @@ import Foundation
 
 enum NowSheet: Identifiable {
     case hourly(Date?)
+    case ensemble
     case environment(EnvironmentDetailSection)
     case climate(ClimateSummary)
     case stations(String)
@@ -13,6 +14,8 @@ enum NowSheet: Identifiable {
         switch self {
         case .hourly:
             "hourly"
+        case .ensemble:
+            "ensemble"
         case .environment(let section):
             "environment-\(section.rawValue)"
         case .climate:

@@ -47,13 +47,13 @@
 		<true/>
 	</dict>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
+	<string>Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
+	<string>Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy.</string>
 	<key>NSLocationUsageDescription</key>
-	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
+	<string>Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.</string>
+	<string>Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSSupportsLiveActivitiesFrequentUpdates</key>

@@ -13,16 +13,17 @@ scheme("Oscar°Screenshots")
 derived_data_path("./fastlane/derived_data")
 test_without_building(true)
 
-# 6.9" is the only required iPhone size; App Store Connect scales the rest.
-# iPad Pro 13-inch is the planned follow-up device.
-devices(["iPhone 17 Pro Max"])
+# 6.9" is the only required iPhone size and 13" the only required iPad size;
+# App Store Connect scales the rest. The iPad runs the scenes that show the
+# wide layouts, in landscape (ScreenshotTests skips the iPhone-only ones).
+devices(["iPhone 17 Pro Max", "iPad Pro 13-inch (M5)"])
 
 # Pin to the STABLE runtime. snapshot shuts down all simulators before every
 # language run (hardcoded in prepare_simulators_for_launch), and each cold boot
 # of a BETA runtime pays 10-20 min of silent device preparation before the app
 # can install — that was ~50 min of a 3-locale run. Stable boots take ~1 min.
 # Bump this when a new stable iOS runtime is installed.
-ios_version("26.5")
+ios_version("27.0")
 
 # App Store Connect locale codes, so deliver can consume the folders directly.
 # tr is parked for now — its title.strings and layout font override stay in

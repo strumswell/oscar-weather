@@ -59,6 +59,9 @@ struct OnboardingWelcomeStep: View {
 
             OnboardingButtonStack(primaryTitle: "Los geht's", primaryAction: continueTapped)
         }
+        // Taller than any phone (iPad, Mac): the group centers instead of
+        // pinning the button to the bottom edge far below the note.
+        .frame(maxHeight: 880)
         .sensoryFeedback(.impact(weight: .medium), trigger: letterFlownAway)
         .onAppear(perform: animateIn)
     }

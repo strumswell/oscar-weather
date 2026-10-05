@@ -100,10 +100,11 @@ class Handler(SimpleHTTPRequestHandler):
             layout = json.loads((STUDIO / "layout.json").read_text())
             first = SCREENSHOTS / locales()[0]
             scenes = sorted(
-                p.name[: -len(".png")].split("-", 1)
+                p.name[: -len(".png")].rsplit("-", 1)
                 for p in first.glob("*.png")
                 if "-" in p.name and "_framed" not in p.name
-                and "watch" not in p.name.lower()
+                # Watch shots ship raw; iPad shots are framed automatically.
+                and "watch" not in p.name.lower() and "ipad" not in p.name.lower()
             )
             self.send_json({
                 "locales": locales(),

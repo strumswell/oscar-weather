@@ -84,8 +84,10 @@ struct ClassicWeatherView: View {
     private var front: some View {
         GeometryReader { geometry in
             // The iOS 6 card was laid out for a 320pt screen with 16pt gutters;
-            // everything in the card scales with that width.
-            let scale = (geometry.size.width - 32) / 288
+            // everything in the card scales with that width, up to a
+            // Pro Max sized card on iPad and Mac.
+            let cardWidth = min(geometry.size.width, 460)
+            let scale = (cardWidth - 32) / 288
 
             VStack(spacing: 12 * scale) {
                 if store.places.isEmpty {
@@ -102,6 +104,7 @@ struct ClassicWeatherView: View {
                                 onMap: { showsMap = true }
                             )
                             .padding(.horizontal, 16)
+                            .frame(maxWidth: cardWidth)
                             // Into the safe area a bit; only the halo's soft rim ends up under the status bar.
                             .padding(.top, geometry.safeAreaInsets.top - 16 * scale)
                             .tag(place.id)

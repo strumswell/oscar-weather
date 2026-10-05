@@ -41,13 +41,14 @@ enum NowSection: String, CaseIterable, Identifiable {
         }
     }
 
-    /// The live section. Only the radar teaser needs a way onto the map.
+    /// The live section. Only the radar teaser needs a way onto the map;
+    /// `isWide` lets the daily list open days in place.
     @MainActor @ViewBuilder
-    func view(openRadarMap: @escaping () -> Void = {}) -> some View {
+    func view(openRadarMap: @escaping () -> Void = {}, isWide: Bool = false) -> some View {
         switch self {
         case .radar: RainView(openRadarMap: openRadarMap)
         case .hourly: HourlyView()
-        case .daily: DailyView()
+        case .daily: DailyView(expandsDays: isWide)
         case .environment: EnvironmentGaugesView()
         case .climate: ClimateView()
         case .stations: StationsView()

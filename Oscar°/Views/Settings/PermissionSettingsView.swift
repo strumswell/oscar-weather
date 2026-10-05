@@ -9,11 +9,13 @@ import UIKit
 import UserNotifications
 
 /// The two system permissions as switches: while undetermined the switch
-/// triggers the real prompt, afterwards it deep-links into Settings.
+/// triggers the real prompt, afterwards it deep-links into Settings. Below
+/// them the one thing Oscar itself asks to send: crash reports.
 struct PermissionSettingsView: View {
   @Environment(\.openURL) private var openURL
   private let locationService = LocationService.shared
   private let notificationManager = NotificationSettingsManager.shared
+  @AppStorage(CrashReporting.enabledKey) private var crashReportsEnabled = true
 
   var body: some View {
     Form {
@@ -47,6 +49,18 @@ struct PermissionSettingsView: View {
         }
       } footer: {
         Text("Berechtigungen verwaltet iOS: Beim ersten Aktivieren fragt Oscar direkt an, danach öffnet der Schalter die passende Stelle in den iOS-Einstellungen.")
+      }
+
+      Section {
+        Toggle(isOn: $crashReportsEnabled) {
+          Label("Absturzberichte senden", systemImage: "ladybug.fill")
+            .labelStyle(.settingsIcon(.orange))
+        }
+        .onChange(of: crashReportsEnabled) { _, enabled in
+          enabled ? CrashReporting.start() : CrashReporting.stop()
+        }
+      } footer: {
+        Text("Hilft mir, Fehler zu finden. Berichte gehen an Sentry (gespeichert in der EU) und können einen Screenshot des Moments enthalten, in dem etwas schiefging.")
       }
     }
     .navigationTitle("Berechtigungen")

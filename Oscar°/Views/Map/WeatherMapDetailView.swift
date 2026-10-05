@@ -24,8 +24,8 @@ struct WeatherMapDetailView: View {
     var onDone: () -> Void = {}
     @Environment(Location.self) private var location: Location
     @Environment(\.scenePhase) private var scenePhase
-    @State private var timeline = CombinedTimelineState()
-    @State private var cloudLayerState = CloudLayerState()
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @State private var layers = MapLayers()
     @State private var isLayerPickerPresented = false
     // sheet(item:), not sheet(isPresented:) + separate array state: the isPresented
     // variant renders its content once with the PRE-tap (empty) array on the first
@@ -34,8 +34,10 @@ struct WeatherMapDetailView: View {
     @State private var tappedCell: StormCellInfo?
     @Namespace private var controlsNamespace
 
-    private var radarState: OscarRadarState { timeline.radar }
-    private var modelGridState: ModelGridLayerState { timeline.model }
+    private var timeline: CombinedTimelineState { layers.timeline }
+    private var cloudLayerState: CloudLayerState { layers.clouds }
+    private var radarState: OscarRadarState { layers.radar }
+    private var modelGridState: ModelGridLayerState { layers.model }
 
     private struct TappedAlerts: Identifiable {
         let id = UUID()
@@ -95,19 +97,21 @@ struct WeatherMapDetailView: View {
             // Timeline chip — bottom, with the basemap credit tucked underneath
             VStack(spacing: 0) {
                 Spacer()
-                if settingsService.oscarRadarLayer {
-                    OscarRadarTimelineControls(timeline: timeline,
-                                               onBadgeTap: presentLayerPicker)
-                        .padding(.horizontal, 16)
-                } else if settingsService.cloudLayerActive {
-                    CloudTimelineControls(cloudState: cloudLayerState,
-                                          onBadgeTap: presentLayerPicker)
-                        .padding(.horizontal, 16)
-                } else if settingsService.activeTileLayer != nil {
-                    WeatherTileTimelineControls(imageState: modelGridState,
-                                                onBadgeTap: presentLayerPicker)
-                        .padding(.horizontal, 16)
+                Group {
+                    if settingsService.oscarRadarLayer {
+                        OscarRadarTimelineControls(timeline: timeline,
+                                                   onBadgeTap: presentLayerPicker)
+                    } else if settingsService.cloudLayerActive {
+                        CloudTimelineControls(cloudState: cloudLayerState,
+                                              onBadgeTap: presentLayerPicker)
+                    } else if settingsService.activeTileLayer != nil {
+                        WeatherTileTimelineControls(imageState: modelGridState,
+                                                    onBadgeTap: presentLayerPicker)
+                    }
                 }
+                .padding(.horizontal, 16)
+                // Phone width on iPad and Mac: a window-wide scrubber is a long reach.
+                .frame(maxWidth: 640)
                 MapAttributionLabel()
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 18)
@@ -119,82 +123,37 @@ struct WeatherMapDetailView: View {
         // Declared BEFORE the load task so the source pick lands first (both run
         // on the main actor and the pick has no suspension points).
         .task(id: "\(location.coordinates.latitude)|\(location.coordinates.longitude)") {
-            // Capture knob: `-radarRegionLock brasil` pins the radar coverage
-            // (used with `-mapInitialCenter` to screenshot the layer-picker
-            // preview tiles), overriding the location-based pick.
-            if let raw = UserDefaults.standard.string(forKey: "radarRegionLock"),
-               let region = RadarRegion(rawValue: raw) {
-                settingsService.activeTileLayer = nil
-                settingsService.oscarRadarRegion = region
-                settingsService.oscarRadarLayer = true
-                return
-            }
-            settingsService.autoSelectRadarSource(
-                latitude: location.coordinates.latitude,
-                longitude: location.coordinates.longitude)
+            layers.pickRadarSource(for: location.coordinates)
         }
         .task {
             // Cloud layer activation is settings-derived (not sync-derived: the
             // map coordinator's observation pass must stay read-only). Re-runs on
-            // every return to the tab; setActive no-ops when unchanged.
-            syncCloudActivation()
+            // every return to the tab.
+            layers.syncCloudActivation()
         }
         .task {
-            // Re-runs on every return to the tab: full loads only the first time,
-            // cheap staleness checks after that.
-            if settingsService.oscarRadarLayer {
-                radarState.setRegion(settingsService.oscarRadarRegion)
-                if radarState.frames.isEmpty {
-                    await radarState.loadAllFrames()
-                } else {
-                    await radarState.refreshIfStale()
-                }
-                // Testing hook: `-radarAutoPlay YES` starts playback immediately
-                // (exercises sustained frame swaps without touch input).
-                if UserDefaults.standard.bool(forKey: "radarAutoPlay") {
-                    radarState.play()
-                }
-            } else if let layer = settingsService.activeTileLayer {
-                if modelGridState.currentLayer == layer, modelGridState.startsAfter == nil,
-                   modelGridState.hasAnyLoadedFrame {
-                    await modelGridState.refreshIfStale()
-                } else {
-                    await modelGridState.loadLayer(layer)
-                }
+            // Re-runs on every return to the tab.
+            await layers.loadActiveLayer()
+            // Testing hook: `-radarAutoPlay YES` starts playback immediately
+            // (exercises sustained frame swaps without touch input).
+            if settingsService.oscarRadarLayer, UserDefaults.standard.bool(forKey: "radarAutoPlay") {
+                radarState.play()
             }
         }
         .task(id: continuation) {
-            // Radar continued by the model: its hours after the nowcast. The
-            // cutoff moves per hour, so radar refreshes within it load nothing.
-            guard let continuation,
-                  modelGridState.currentLayer != continuation.layer
-                    || modelGridState.startsAfter != continuation.cutoff else { return }
-            await modelGridState.loadLayer(continuation.layer, after: continuation.cutoff)
+            await layers.loadContinuation(continuation)
         }
         .task {
-            // The saved-city chips need the batch conditions even when the tab
-            // opens before the locations list ever fetched them. Re-runs on
-            // every return to the tab; the store throttles to one fetch per
-            // 5 minutes.
-            await CityConditionsStore.shared.refresh(
-                coordinates: LocationService.shared.city.cities.map {
-                    CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon)
-                }
-            )
+            await layers.refreshCityChips()
         }
         .task {
-            // Map left open across server updates: re-fetch once metadata expires.
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(5 * 60))
-                guard !Task.isCancelled else { break }
-                await refreshActiveLayerIfStale()
-            }
+            await layers.keepFresh()
         }
         .onChange(of: scenePhase) { _, phase in
             // Coming back from background: the timeline may be minutes to hours
             // old. refreshIfStale keeps a quick app switch free.
             guard phase == .active else { return }
-            Task { await refreshActiveLayerIfStale() }
+            Task { await layers.refreshIfStale() }
         }
         .onChange(of: settingsService.oscarRadarLayer) { _, isEnabled in
             if isEnabled {
@@ -225,12 +184,10 @@ struct WeatherMapDetailView: View {
             }
         }
         .onDisappear {
-            // Leaving the tab: stop playback; frames stay cached for the next visit.
-            radarState.pause()
-            modelGridState.pause()
-            cloudLayerState.pause()
+            layers.pause()
         }
-        .sheet(isPresented: $isLayerPickerPresented) {
+        // A sheet on iPhone, a trailing column next to the map on wider windows.
+        .inspector(isPresented: $isLayerPickerPresented) {
             MapLayerPickerSheet(
                 settingsService: settingsService,
                 onSelectRadar: { activate(radar: $0) },
@@ -243,7 +200,12 @@ struct WeatherMapDetailView: View {
             .presentationDetents([.medium, .large])
             .presentationBackgroundInteraction(.enabled(upThrough: .medium))
             .presentationDragIndicator(.hidden)
+            .inspectorColumnWidth(min: 320, ideal: 360, max: 420)
         }
+        // In a regular-width window the inspector wraps the map in a column
+        // container that stops below the status bar (a black strip); let that
+        // container reach the top. Compact widths get a sheet, no container.
+        .ignoresSafeArea(edges: horizontalSizeClass == .regular ? .top : [])
         .sheet(item: $tappedAlerts) { tapped in
             AlertInfoSheet(alerts: tapped.alerts)
                 .presentationDetents([.medium, .large])
@@ -262,19 +224,9 @@ struct WeatherMapDetailView: View {
         }
     }
 
-    private struct Continuation: Equatable {
-        let layer: WeatherTileLayer
-        let cutoff: Date
-    }
-
-    /// The region's model, cut at the start of the last radar frame's hour: its
-    /// frames after that continue the radar. nil while the continuation is off
-    /// or the radar hasn't loaded.
-    private var continuation: Continuation? {
-        guard !classicChrome, settingsService.oscarRadarLayer, settingsService.radarModelContinuation,
-              let last = radarState.frameTimestamps.last.flatMap(parseFrameDate),
-              let cutoff = Calendar.current.dateInterval(of: .hour, for: last)?.start else { return nil }
-        return Continuation(layer: settingsService.oscarRadarRegion.continuationLayer, cutoff: cutoff)
+    /// The classic map has no continuation chip, so it never loads one.
+    private var continuation: MapLayers.Continuation? {
+        classicChrome ? nil : layers.continuation
     }
 
     // MARK: - Map controls
@@ -351,21 +303,6 @@ struct WeatherMapDetailView: View {
     private func presentLayerPicker() {
         isLayerPickerPresented = true
     }
-
-    private func refreshActiveLayerIfStale() async {
-        if settingsService.oscarRadarLayer {
-            await radarState.refreshIfStale()
-        } else if settingsService.cloudLayerActive {
-            cloudLayerState.refreshIfStale()
-        } else if settingsService.activeTileLayer != nil {
-            await modelGridState.refreshIfStale()
-        }
-    }
-
-    private func syncCloudActivation() {
-        cloudLayerState.setActive(settingsService.cloudLayerActive)
-    }
-
     /// Layer-picker selection: radar region, model layer, or (neither) the
     /// satellite clouds. The layers are mutually exclusive; the deselected
     /// ones pause, the selected one keeps its playback state.
@@ -378,7 +315,7 @@ struct WeatherMapDetailView: View {
         settingsService.oscarRadarLayer = radar != nil
         settingsService.activeTileLayer = model
         settingsService.cloudLayerActive = clouds
-        syncCloudActivation()
+        layers.syncCloudActivation()
     }
 }
 
@@ -435,8 +372,9 @@ private struct SlashLine: Shape {
 // MARK: - Legend stack
 
 /// Own view so the per-tick `currentFrameTimestamp` reads invalidate only this
-/// stack, not the whole fullscreen map body.
-private struct MapLegendStack: View {
+/// stack, not the whole map body. Shared by the Karten tab and the forecast's
+/// map preview.
+struct MapLegendStack: View {
     let settingsService: SettingService
     let timeline: CombinedTimelineState
     let cloudLayerState: CloudLayerState

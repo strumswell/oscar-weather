@@ -50,96 +50,92 @@
     },
     "NSLocationAlwaysAndWhenInUseUsageDescription" : {
       "comment" : "Privacy - Location Always and When In Use Usage Description",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Lediglich benötigt, um den Regenradar am aktuellen Standort anzuzeigen."
+            "state" : "translated",
+            "value" : "Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy."
           }
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Only needed to display the rain radar at the current location."
+            "state" : "translated",
+            "value" : "Oscar uses it to show the weather where you are. For forecasts and radar, your location is sent to Open-Meteo and Oscar’s server, rounded to about 100 m; Apple determines the place name. More at oscars.love/privacy."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "Yalnızca geçerli konumdaki yağmur radarını görüntülemek için gereklidir."
+            "value" : "Oscar bunu bulunduğun yerin hava durumunu göstermek için kullanır. Tahmin ve radar için konumun yaklaşık 100 m’ye yuvarlanarak Open-Meteo’ya ve Oscar’ın sunucusuna gönderilir; yer adını Apple belirler. Daha fazlası: oscars.love/privacy."
           }
         }
       }
     },
     "NSLocationAlwaysUsageDescription" : {
       "comment" : "Privacy - Location Always Usage Description",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Lediglich benötigt, um den Regenradar am aktuellen Standort anzuzeigen."
+            "state" : "translated",
+            "value" : "Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy."
           }
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Only needed to display the rain radar at the current location."
+            "state" : "translated",
+            "value" : "Oscar uses it to show the weather where you are. For forecasts and radar, your location is sent to Open-Meteo and Oscar’s server, rounded to about 100 m; Apple determines the place name. More at oscars.love/privacy."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "Yalnızca geçerli konumdaki yağmur radarını görüntülemek için gereklidir."
+            "value" : "Oscar bunu bulunduğun yerin hava durumunu göstermek için kullanır. Tahmin ve radar için konumun yaklaşık 100 m’ye yuvarlanarak Open-Meteo’ya ve Oscar’ın sunucusuna gönderilir; yer adını Apple belirler. Daha fazlası: oscars.love/privacy."
           }
         }
       }
     },
     "NSLocationUsageDescription" : {
       "comment" : "Privacy - Location Usage Description",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Lediglich benötigt, um den Regenradar am aktuellen Standort anzuzeigen."
+            "state" : "translated",
+            "value" : "Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy."
           }
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Only needed to display the rain radar at the current location."
+            "state" : "translated",
+            "value" : "Oscar uses it to show the weather where you are. For forecasts and radar, your location is sent to Open-Meteo and Oscar’s server, rounded to about 100 m; Apple determines the place name. More at oscars.love/privacy."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "Yalnızca geçerli konumdaki yağmur radarını görüntülemek için gereklidir."
+            "value" : "Oscar bunu bulunduğun yerin hava durumunu göstermek için kullanır. Tahmin ve radar için konumun yaklaşık 100 m’ye yuvarlanarak Open-Meteo’ya ve Oscar’ın sunucusuna gönderilir; yer adını Apple belirler. Daha fazlası: oscars.love/privacy."
           }
         }
       }
     },
     "NSLocationWhenInUseUsageDescription" : {
       "comment" : "Privacy - Location When In Use Usage Description",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Lediglich benötigt, um den Regenradar am aktuellen Standort anzuzeigen."
+            "state" : "translated",
+            "value" : "Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy."
           }
         },
         "en" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Only needed to display the rain radar at the current location."
+            "state" : "translated",
+            "value" : "Oscar uses it to show the weather where you are. For forecasts and radar, your location is sent to Open-Meteo and Oscar’s server, rounded to about 100 m; Apple determines the place name. More at oscars.love/privacy."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "Yalnızca geçerli konumdaki yağmur radarını görüntülemek için gereklidir."
+            "value" : "Oscar bunu bulunduğun yerin hava durumunu göstermek için kullanır. Tahmin ve radar için konumun yaklaşık 100 m’ye yuvarlanarak Open-Meteo’ya ve Oscar’ın sunucusuna gönderilir; yer adını Apple belirler. Daha fazlası: oscars.love/privacy."
           }
         }
       }

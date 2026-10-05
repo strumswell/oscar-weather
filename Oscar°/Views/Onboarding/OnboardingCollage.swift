@@ -21,7 +21,7 @@ struct OnboardingCollage: View {
             let size = proxy.size
             // Only the hero window band is ever visible — everything below it
             // sits under the opaque stage canvas, so never composite it.
-            let bandHeight = size.height * OnboardingStage.heroFraction
+            let bandHeight = OnboardingStage.canvasTop(screenHeight: size.height)
 
             HStack(alignment: .top, spacing: 14) {
                 OnboardingMarqueeColumn(speed: 24, initialOffset: -60) {

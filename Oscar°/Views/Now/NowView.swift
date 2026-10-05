@@ -27,9 +27,9 @@ struct NowView: View {
     @State private var showRefreshIndicator = false
     @State private var spinnerShownAt: Date?
     /// Screen size above the tab bar, latched at launch and re-measured only
-    /// when the width changes (rotation): the bottom safe area shrinks when
-    /// the bar minimizes on scroll-down, and tracking that live would
-    /// re-stretch the first page mid-scroll.
+    /// when the window really changes (rotation, fold, split, resize): the
+    /// bottom safe area shrinks when the bar minimizes on scroll-down, and
+    /// tracking that live would re-stretch the first page mid-scroll.
     @State private var stageSize: CGSize?
 
     private static let scrollTopPadding: CGFloat = 40
@@ -57,6 +57,31 @@ struct NowView: View {
     /// one when the first is the short, optional radar teaser.
     private var firstPageCount: Int { sections.first == .radar ? 2 : 1 }
 
+    /// From this width the forecast splits into the stage (now) and the feed
+    /// (later): iPad, the Duo's inner display in landscape, Mac windows.
+    private static let twoColumnMinWidth: CGFloat = 760
+
+    private var isTwoColumn: Bool { (stageSize?.width ?? 0) >= Self.twoColumnMinWidth }
+
+    /// Phone-sized cards: half the window, between 380 and 640 pt.
+    private var feedWidth: CGFloat { min(640, max(380, (stageSize?.width ?? 0) / 2)) }
+
+    /// The sections about right now (nowcast, measured readings) sit on the
+    /// stage under the map, in the user's order; the feed keeps the rest.
+    private static let stageSectionKinds: Set<NowSection> = [.radar, .stations]
+
+    private var stageSections: [NowSection] {
+        sections.filter { Self.stageSectionKinds.contains($0) }
+    }
+
+    /// The open day in the daily list carries the hours, so the hourly
+    /// strip only stays when the daily list is hidden.
+    private var feedSections: [NowSection] {
+        sections.filter { section in
+            !Self.stageSectionKinds.contains(section) && !(section == .hourly && sections.contains(.daily))
+        }
+    }
+
     var body: some View {
         // Cards share the sky's hue instead of a fixed dark material (same
         // snapshot the sim renders; twilight before any data).
@@ -69,56 +94,49 @@ struct NowView: View {
             WeatherSimulationView(isOffTab: presentation.selectedTab != .forecast)
                 .ignoresSafeArea()
             if weather.hasContent {
-            ScrollView(.vertical) {
-                page
-            }
-            .scrollIndicators(.hidden)
-            .onScrollGeometryChange(for: CGFloat.self, of: { $0.contentOffset.y }) { old, new in
-                // Jumps beyond a screen are programmatic (content swap, scroll-to-top).
-                let delta = abs(new - old)
-                if delta < 1500 { UsageStatsStore.shared.addScroll(points: delta) }
-            }
-            .padding(.top, Self.scrollTopPadding)
-            .refreshable {
-                // Run the refresh in an unstructured task so it doesn't inherit the
-                // pull-to-refresh gesture's cancellation. SwiftUI cancels the
-                // `.refreshable` action task when the refresh control resolves, which
-                // would otherwise abort the still-in-flight radar/alerts requests
-                // (forecast/air usually survive as cache hits) and discard good data.
-                manualRefreshInFlight = true
-                await Task { await weather.refresh(location: location) }.value
-                manualRefreshInFlight = false
-            }
-            .task(id: spinnerPending) {
-                guard spinnerPending else {
-                    // Loading finished, or the scene left `.active`. If the spinner is
-                    // showing, hold it for a minimum on-screen time before hiding, so a
-                    // slow refresh that finishes just after the debounce reads as a clean
-                    // spinner rather than a brief flash. `try?` lets the hide run even if
-                    // this task is cancelled mid-hold, so the indicator can never get
-                    // stranded on.
-                    if showRefreshIndicator, let shownAt = spinnerShownAt {
-                        let remaining = 0.6 - Date.now.timeIntervalSince(shownAt)
-                        if remaining > 0 { try? await Task.sleep(for: .seconds(remaining)) }
+                Group {
+                    if isTwoColumn {
+                        HStack(spacing: 0) {
+                            forecastScroll { stage }
+                                .scrollBounceBehavior(.basedOnSize)
+                            forecastScroll { feed }
+                                .frame(width: feedWidth)
+                        }
+                    } else {
+                        forecastScroll { page }
+                            .padding(.top, Self.scrollTopPadding)
                     }
-                    showRefreshIndicator = false
-                    spinnerShownAt = nil
-                    return
                 }
-                // Debounce: only show the spinner if loading lingers past 500ms of
-                // on-screen time, so quick (cache-hit) refreshes don't flash it.
-                guard (try? await Task.sleep(for: .milliseconds(500))) != nil else { return }
-                // If loading finishes right at the debounce boundary, the sleep's timer
-                // can win the race against cancellation and resume normally even though
-                // the id already flipped to `false` and the replacement (hide) task has
-                // already run. Showing the spinner then would strand it on screen — the
-                // id won't change again, so nothing would ever hide it. `spinnerPending`
-                // is captured at body time (always `true` here) and can't catch this;
-                // the cancellation flag is set either way, so check it explicitly.
-                guard !Task.isCancelled else { return }
-                spinnerShownAt = .now
-                showRefreshIndicator = true
-            }
+                .task(id: spinnerPending) {
+                    guard spinnerPending else {
+                        // Loading finished, or the scene left `.active`. If the spinner is
+                        // showing, hold it for a minimum on-screen time before hiding, so a
+                        // slow refresh that finishes just after the debounce reads as a clean
+                        // spinner rather than a brief flash. `try?` lets the hide run even if
+                        // this task is cancelled mid-hold, so the indicator can never get
+                        // stranded on.
+                        if showRefreshIndicator, let shownAt = spinnerShownAt {
+                            let remaining = 0.6 - Date.now.timeIntervalSince(shownAt)
+                            if remaining > 0 { try? await Task.sleep(for: .seconds(remaining)) }
+                        }
+                        showRefreshIndicator = false
+                        spinnerShownAt = nil
+                        return
+                    }
+                    // Debounce: only show the spinner if loading lingers past 500ms of
+                    // on-screen time, so quick (cache-hit) refreshes don't flash it.
+                    guard (try? await Task.sleep(for: .milliseconds(500))) != nil else { return }
+                    // If loading finishes right at the debounce boundary, the sleep's timer
+                    // can win the race against cancellation and resume normally even though
+                    // the id already flipped to `false` and the replacement (hide) task has
+                    // already run. Showing the spinner then would strand it on screen — the
+                    // id won't change again, so nothing would ever hide it. `spinnerPending`
+                    // is captured at body time (always `true` here) and can't catch this;
+                    // the cancellation flag is set either way, so check it explicitly.
+                    guard !Task.isCancelled else { return }
+                    spinnerShownAt = .now
+                    showRefreshIndicator = true
+                }
             } else if weather.loadState == .failed {
                 // Cold start with no cached forecast and a failed fetch: offer a retry over the
                 // twilight backdrop instead of an empty screen (the all-zero forecast used to
@@ -147,11 +165,15 @@ struct NowView: View {
         // blur too, so this trades a bit more desaturation (compensated in
         // cardFill's saturation push) for a visibly frosted card.
         .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial.opacity(0.6)))
-        .ignoresSafeArea(edges: .top)
+        // One column runs under the status bar like the sky; two columns sit
+        // below the top tab bar of iPad and Mac.
+        .ignoresSafeArea(edges: isTwoColumn ? [] : .top)
         .onGeometryChange(for: CGSize.self, of: { $0.size }) { size in
-            if stageSize?.width != size.width {
-                stageSize = size
+            // The bar minimizing moves the height by well under 100 pt.
+            if let old = stageSize, old.width == size.width, abs(old.height - size.height) < 100 {
+                return
             }
+            stageSize = size
         }
     }
 
@@ -166,14 +188,7 @@ struct NowView: View {
             // across display sizes; when the content genuinely doesn't fit,
             // the page overflows past the minimum and scrolls like before.
             VStack(alignment: .leading, spacing: 0) {
-                if showRefreshIndicator {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .tint(Color(uiColor: .label))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                }
+                refreshIndicator
                 HeadView()
                     .padding(.top, 35)
                     .debugConsoleTap {
@@ -188,58 +203,129 @@ struct NowView: View {
             }
             .frame(minHeight: firstPageMinHeight, alignment: .topLeading)
             sectionList(sections.dropFirst(firstPageCount))
-            if sections.isEmpty {
-                // Everything hidden: offer the way back in.
-                Button("Abschnitte hinzufügen", systemImage: "plus") {
-                    Haptics.impact()
-                    presentation.present(.layout)
-                }
-                    .buttonStyle(.glass)
-                    .buttonBorderShape(.capsule)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 28)
-            }
-            footer
-                .padding(.top, 28)
-            #if DEBUG
-            if weather.debug {
-                VStack {
-                    DebugPermissionControls()
-                    Text(weather.isLoading.description)
-                    Text("spinner=\(showRefreshIndicator.description) pending=\(spinnerPending.description)")
-                    Text(weather.error)
-                    Text("Air")
-                        .padding(.top, 20)
-                    Text(String(reflecting: weather.air))
-                    Text("Radar")
-                        .padding(.top, 20)
-                    Text(String(reflecting: weather.precipSeries))
-                    Text("Alerts")
-                        .padding(.top, 20)
-                    Text(String(reflecting: weather.alerts))
-                    Text("Time")
-                        .padding(.top, 20)
-                    Text(String(reflecting: weather.time))
-                    Text("Location")
-                        .padding(.top, 20)
-                    Text(String(reflecting: location.coordinates))
-                    Text(String(reflecting: location.name))
-                    Text("Forecast")
-                        .padding(.top, 20)
-                    Text(String(reflecting: weather.forecast))
-                }
-            }
-            #endif
+            pageEnd
         }
         .animation(.easeInOut(duration: 0.3), value: showRefreshIndicator)
         .animation(.snappy, value: sections)
     }
 
+    /// The wide layout's left column, right now: the head, a live map that
+    /// takes the spare height, then the stage sections. Too short to hold
+    /// them all (Duo, small iPad with rain), the map bottoms out and the
+    /// column scrolls.
+    private var stage: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HeadView(compact: true)
+                .fixedSize(horizontal: false, vertical: true)
+            MapPreview()
+                .frame(minHeight: 240, maxHeight: .infinity)
+            sectionList(stageSections[...])
+        }
+        .padding(.bottom)
+        .frame(minHeight: stageSize?.height, alignment: .top)
+        .animation(.snappy, value: sections)
+    }
+
+    /// The wide layout's right column: the forecast sections.
+    private var feed: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            refreshIndicator
+            sectionList(feedSections[...], isWide: true)
+            pageEnd
+        }
+        .animation(.easeInOut(duration: 0.3), value: showRefreshIndicator)
+        .animation(.snappy, value: sections)
+    }
+
+    @ViewBuilder
+    private var refreshIndicator: some View {
+        if showRefreshIndicator {
+            ProgressView()
+                .progressViewStyle(.circular)
+                .tint(Color(uiColor: .label))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+                .transition(.move(edge: .top).combined(with: .opacity))
+        }
+    }
+
+    /// Below the last section: the way back in when all are hidden, the
+    /// attribution footer and the debug dump.
+    @ViewBuilder
+    private var pageEnd: some View {
+        if sections.isEmpty {
+            // Everything hidden: offer the way back in.
+            Button("Abschnitte hinzufügen", systemImage: "plus") {
+                Haptics.impact()
+                presentation.present(.layout)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.capsule)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 28)
+        }
+        footer
+            .padding(.top, 28)
+        #if DEBUG
+        if weather.debug {
+            VStack {
+                DebugPermissionControls()
+                Text(weather.isLoading.description)
+                Text("spinner=\(showRefreshIndicator.description) pending=\(spinnerPending.description)")
+                Text(weather.error)
+                Text("Air")
+                    .padding(.top, 20)
+                Text(String(reflecting: weather.air))
+                Text("Radar")
+                    .padding(.top, 20)
+                Text(String(reflecting: weather.precipSeries))
+                Text("Alerts")
+                    .padding(.top, 20)
+                Text(String(reflecting: weather.alerts))
+                Text("Time")
+                    .padding(.top, 20)
+                Text(String(reflecting: weather.time))
+                Text("Location")
+                    .padding(.top, 20)
+                Text(String(reflecting: location.coordinates))
+                Text(String(reflecting: location.name))
+                Text("Forecast")
+                    .padding(.top, 20)
+                Text(String(reflecting: weather.forecast))
+            }
+        }
+        #endif
+    }
+
+    /// The vertical forecast scroll with its pull-to-refresh, shared by the
+    /// one-column page and the wide layout's feed.
+    private func forecastScroll(@ViewBuilder content: () -> some View) -> some View {
+        ScrollView(.vertical) {
+            content()
+        }
+        .scrollIndicators(.hidden)
+        .onScrollGeometryChange(for: CGFloat.self, of: { $0.contentOffset.y }) { old, new in
+            // Jumps beyond a screen are programmatic (content swap, scroll-to-top).
+            let delta = abs(new - old)
+            if delta < 1500 { UsageStatsStore.shared.addScroll(points: delta) }
+        }
+        .refreshable {
+            // Run the refresh in an unstructured task so it doesn't inherit the
+            // pull-to-refresh gesture's cancellation. SwiftUI cancels the
+            // `.refreshable` action task when the refresh control resolves, which
+            // would otherwise abort the still-in-flight radar/alerts requests
+            // (forecast/air usually survive as cache hits) and discard good data.
+            manualRefreshInFlight = true
+            await Task { await weather.refresh(location: location) }.value
+            manualRefreshInFlight = false
+        }
+    }
+
     /// One run of sections in the user's order (the first page holds the
     /// leading one or two, the rest follow below the stretch).
-    private func sectionList(_ sections: ArraySlice<NowSection>) -> some View {
+    private func sectionList(_ sections: ArraySlice<NowSection>, isWide: Bool = false) -> some View {
         ForEach(sections) { section in
-            section.view(openRadarMap: openRadarMap)
+            section.view(openRadarMap: openRadarMap, isWide: isWide)
                 // Horizontal strips are greedy in height and would swallow
                 // the first page's stretch — pin every section to its content.
                 .fixedSize(horizontal: false, vertical: true)

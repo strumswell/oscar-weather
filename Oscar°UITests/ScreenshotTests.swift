@@ -20,6 +20,27 @@ import XCTest
 final class ScreenshotTests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false
+        // iPad captures run in landscape, where the forecast splits into the
+        // stage (map, nowcast) and the feed.
+        if isPad { XCUIDevice.shared.orientation = .landscapeLeft }
+    }
+
+    private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+
+    /// The iPad set: the scenes that show the wide layouts. Lock screen,
+    /// widgets, settings and onboarding are iPhone-only App Store shots.
+    private func skipOnPad() throws {
+        try XCTSkipIf(isPad, "iPhone-only scene")
+    }
+
+    /// One upward swipe. On iPad the forecast scrolls in the right-hand feed;
+    /// the stage on the left holds a map that doesn't scroll.
+    private func swipeUp(_ app: XCUIApplication) {
+        guard isPad else { return app.swipeUp(velocity: .fast) }
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.8))
+            .press(forDuration: 0.05,
+                   thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.3)),
+                   withVelocity: .fast, thenHoldForDuration: 0)
     }
 
     private func launch(scene: String, extraArguments: [String] = []) -> XCUIApplication {
@@ -31,6 +52,10 @@ final class ScreenshotTests: XCTestCase {
             "-hasCompletedOnboarding", scene == "onboarding" ? "NO" : "YES",
         ]
         app.launchArguments += extraArguments
+        // The iPad forecast's stage map shows radar unless a scene picks a layer.
+        if isPad && !extraArguments.contains("-oscarRadarLayer") {
+            app.launchArguments += ["-oscarRadarLayer", "YES"]
+        }
         app.launch()
         return app
     }
@@ -64,7 +89,7 @@ final class ScreenshotTests: XCTestCase {
     private func scrollTo(_ element: XCUIElement, in app: XCUIApplication, maxSwipes: Int = 8) -> Bool {
         for _ in 0..<maxSwipes {
             if isSufficientlyVisible(element, in: app) { return true }
-            app.swipeUp(velocity: .fast)
+            swipeUp(app)
             usleep(400_000)  // let the scroll settle before re-reading frames
         }
         let visible = isSufficientlyVisible(element, in: app)
@@ -127,7 +152,12 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func test02Forecast() {
-        let app = launch(scene: "nowForecast")
+        // The sunny story's stage map shows the (fixture) satellite clouds,
+        // not radar rain.
+        let app = launch(scene: "nowForecast", extraArguments: isPad ? [
+            "-oscarRadarLayer", "NO",
+            "-cloudLayerActive", "YES",
+        ] : [])
         waitForNowContent(app)
         // Composition: hourly strip near the top, the daily list filling the
         // rest. Scroll to the hourly section, then drag by the exact distance
@@ -177,7 +207,8 @@ final class ScreenshotTests: XCTestCase {
     // Wind and pressure layer captures: composition sources for the combined
     // "Temperatur, Wind und Druck" App Store shot (scenes are marked hidden in
     // frame-studio/layout.json, so they get no framed export of their own).
-    func test04bMapWind() {
+    func test04bMapWind() throws {
+        try skipOnPad()
         let app = launch(scene: "mapWind", extraArguments: [
             "-autoPresentMap", "YES",
             "-oscarRadarLayer", "NO",
@@ -189,7 +220,8 @@ final class ScreenshotTests: XCTestCase {
         snapshot("90_map_wind", timeWaitingForIdle: 0)
     }
 
-    func test04cMapPressure() {
+    func test04cMapPressure() throws {
+        try skipOnPad()
         // Isobars turn on automatically for pressure layers.
         let app = launch(scene: "mapPressure", extraArguments: [
             "-autoPresentMap", "YES",
@@ -207,7 +239,9 @@ final class ScreenshotTests: XCTestCase {
         waitForNowContent(app)
         let daily = app.descendants(matching: .any)["now.daily"].firstMatch
         scrollTo(daily, in: app)
-        tapVisible(daily, in: app)
+        // The first match is the section title, which isn't a button; its
+        // "Mehr" opens the same first day.
+        tapVisible(app.buttons["now.daily"].firstMatch, in: app)
         let ensemble = app.buttons["hourly.ensemble"].firstMatch
         _ = ensemble.waitForExistence(timeout: 10)
         ensemble.tap()
@@ -259,14 +293,16 @@ final class ScreenshotTests: XCTestCase {
 
     /// The calm counterpart to scene 01: same hero, clear summer sky, no rain
     /// animation and no alert banner.
-    func test08NowClear() {
+    func test08NowClear() throws {
+        try skipOnPad()
         let app = launch(scene: "nowClear")
         waitForNowContent(app)
         sleep(4)
         snapshot("08_now_clear", timeWaitingForIdle: 0)
     }
 
-    func test09Widgets() {
+    func test09Widgets() throws {
+        try skipOnPad()
         let app = launch(scene: "widgets")
         XCTAssertTrue(
             app.descendants(matching: .any)["screenshot.widgetGallery.ready"].waitForExistence(timeout: 30)
@@ -290,10 +326,9 @@ final class ScreenshotTests: XCTestCase {
         // on a Group, which surfaces no element of its own.)
         let header = app.descendants(matching: .any)["now.hourly"].firstMatch
         scrollTo(header, in: app)
+        let x = isPad ? header.frame.midX : app.windows.firstMatch.frame.midX
         app.coordinate(withNormalizedOffset: .zero)
-            .withOffset(CGVector(
-                dx: app.windows.firstMatch.frame.midX, dy: header.frame.maxY + 80
-            ))
+            .withOffset(CGVector(dx: x, dy: header.frame.maxY + 80))
             .tap()
         XCTAssertTrue(
             app.descendants(matching: .any)["hourly.detail"].waitForExistence(timeout: 10),
@@ -314,23 +349,48 @@ final class ScreenshotTests: XCTestCase {
         app.descendants(matching: .any)["map.layerPicker"].firstMatch.tap()
         sleep(3)
         snapshot("21_map_layers", timeWaitingForIdle: 0)
+        // On iPad the picker is a full-height inspector column, so the
+        // second half is already on screen.
+        guard !isPad else { return }
 
-        // Same sheet, second half. One deliberate drag inside the sheet pulls
-        // the medium detent up to .large (a plain swipe from the app's center
-        // starts on the map behind it and pans that instead), then the usual
-        // scroll walks down to the display toggles.
-        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.75))
+        // Same sheet, second half. One drag on the sheet's title bar (just
+        // below the medium detent's top edge) pulls it up to .large; a drag
+        // that starts on the content also scrolls it, and on iOS 27 that
+        // combined gesture dismisses the sheet on lift. Then drags walk down
+        // to the display toggles. Not `scrollTo`: its swipe from the center
+        // starts on a radar tile and selects it, closing the picker. These
+        // drags start in the 20 pt margin left of the tile grids.
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.52))
             .press(forDuration: 0.1,
-                   thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.15)),
+                   thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.05)),
                    withVelocity: .slow, thenHoldForDuration: 0.3)
         sleep(2)
         let display = app.descendants(matching: .any)["map.layers.display"].firstMatch
-        scrollTo(display, in: app, maxSwipes: 10)
+        for _ in 0..<10 where !isSufficientlyVisible(display, in: app) {
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.8))
+                .press(forDuration: 0.05,
+                       thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.35)),
+                       withVelocity: .slow, thenHoldForDuration: 0.2)
+            usleep(400_000)
+        }
+        XCTAssertTrue(isSufficientlyVisible(display, in: app), "Display toggles never scrolled into view")
+        // Park the section header near the top so every toggle fits; the hold
+        // before lift kills momentum, so the drag distance is the scroll.
+        let startY = display.frame.minY
+        let targetY: CGFloat = 190
+        if startY > targetY {
+            let origin = app.coordinate(withNormalizedOffset: .zero)
+            origin.withOffset(CGVector(dx: 13, dy: startY + 40))
+                .press(forDuration: 0.05,
+                       thenDragTo: origin.withOffset(CGVector(dx: 13, dy: targetY + 40)),
+                       withVelocity: .slow, thenHoldForDuration: 0.5)
+        }
         sleep(2)
         snapshot("22_map_layer_settings", timeWaitingForIdle: 0)
     }
 
-    func test23AlertDetail() {
+    func test23AlertDetail() throws {
+        try skipOnPad()
         let app = launch(scene: "nowRain")
         waitForNowContent(app)
         let badge = app.descendants(matching: .any)["now.alert"].firstMatch
@@ -340,14 +400,16 @@ final class ScreenshotTests: XCTestCase {
         snapshot("23_alert_detail", timeWaitingForIdle: 0)
     }
 
-    func test24Settings() {
+    func test24Settings() throws {
+        try skipOnPad()
         let app = launch(scene: "customization")
         openSettings(app)
         sleep(2)
         snapshot("24_settings", timeWaitingForIdle: 0)
     }
 
-    func test25SettingsNotifications() {
+    func test25SettingsNotifications() throws {
+        try skipOnPad()
         let app = launch(scene: "settingsNotifications")
         openSettings(app)
         let alerts = app.descendants(matching: .any)["settings.alerts"].firstMatch
@@ -360,7 +422,8 @@ final class ScreenshotTests: XCTestCase {
         snapshot("25_settings_notifications", timeWaitingForIdle: 0)
     }
 
-    func test26SettingsForecast() {
+    func test26SettingsForecast() throws {
+        try skipOnPad()
         let app = launch(scene: "settingsForecast")
         openSettings(app)
         let entry = app.descendants(matching: .any)["settings.forecast"].firstMatch
@@ -374,7 +437,8 @@ final class ScreenshotTests: XCTestCase {
         snapshot("26_settings_forecast", timeWaitingForIdle: 0)
     }
 
-    func test27MemberCardDock() {
+    func test27MemberCardDock() throws {
+        try skipOnPad()
         let app = launch(scene: "customization")
         let card = openSettings(app)
         tapVisible(card, in: app)
@@ -383,7 +447,8 @@ final class ScreenshotTests: XCTestCase {
         snapshot("27_member_card_dock", timeWaitingForIdle: 0)
     }
 
-    func test28Onboarding() {
+    func test28Onboarding() throws {
+        try skipOnPad()
         // One launch per step: the flow's own transitions are permission-gated,
         // and `-onboardingStep` drops straight onto each screen instead.
         let steps = [
@@ -416,7 +481,8 @@ final class ScreenshotTests: XCTestCase {
         snapshot("31_onboarding_city", timeWaitingForIdle: 0)
     }
 
-    func test34Places() {
+    func test34Places() throws {
+        try skipOnPad()
         let app = launch(scene: "places")
         waitForNowContent(app)
         // Orte is the first tab; its title is localized, so index it.
@@ -441,7 +507,8 @@ final class ScreenshotTests: XCTestCase {
     // is off, and on the simulator neither a notification nor a touch lights
     // it — only the lock button does.
 
-    func test80LockNotifications() {
+    func test80LockNotifications() throws {
+        try skipOnPad()
         let app = launch(scene: "lockNotifications")
         _ = app.wait(for: .runningForeground, timeout: 30)
         allowNotificationsIfAsked()
@@ -458,7 +525,8 @@ final class ScreenshotTests: XCTestCase {
         unlock()
     }
 
-    func test81LockLiveActivity() {
+    func test81LockLiveActivity() throws {
+        try skipOnPad()
         let app = launch(scene: "lockLiveActivity")
         _ = app.wait(for: .runningForeground, timeout: 30)
         sleep(6)

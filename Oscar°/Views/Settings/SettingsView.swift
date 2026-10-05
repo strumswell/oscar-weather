@@ -52,7 +52,7 @@ struct SettingsView: View {
           NavigationLink {
             NotificationSettingsView()
           } label: {
-            Label("Alerts", systemImage: "bell.badge.fill")
+            Label("Benachrichtigungen", systemImage: "bell.badge.fill")
               .labelStyle(.settingsIcon(.red))
           }
           .accessibilityIdentifier("settings.alerts")
@@ -87,11 +87,14 @@ struct SettingsView: View {
               .labelStyle(.settingsIcon(.pink))
           }
 
-          NavigationLink {
-            AppIconSettingsView()
-          } label: {
-            Label("App-Symbol", systemImage: "app.grid")
-              .labelStyle(.settingsIcon(.blue))
+          // A Mac running the iPad app can't swap its icon.
+          if UIApplication.shared.supportsAlternateIcons {
+            NavigationLink {
+              AppIconSettingsView()
+            } label: {
+              Label("App-Symbol", systemImage: "app.grid")
+                .labelStyle(.settingsIcon(.blue))
+            }
           }
 
           // Locked until supported, but never locks anyone out of a theme
@@ -139,12 +142,12 @@ struct SettingsView: View {
         }
 
         Section {
-          SettingsExternalLink(destination: URL(string: "https://oscars.love/")!) {
+          SettingsExternalLink(destination: URL(string: "https://oscars.love/privacy")!) {
             Label("Datenschutz", systemImage: "hand.raised.fill")
               .labelStyle(.settingsIcon(.blue))
           }
 
-          SettingsExternalLink(destination: URL(string: "https://oscars.love/")!) {
+          SettingsExternalLink(destination: URL(string: "https://oscars.love/impressum")!) {
             Label("Impressum", systemImage: "figure.wave")
               .labelStyle(.settingsIcon(.gray))
           }

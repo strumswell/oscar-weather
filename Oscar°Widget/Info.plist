@@ -28,13 +28,13 @@
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Lediglich benötigt, um den Regenradar am aktuellen Standort anzuzeigen.</string>
+	<string>Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Lediglich benötigt, um den Regenradar am aktuellen Standort anzuzeigen.</string>
+	<string>Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy.</string>
 	<key>NSLocationUsageDescription</key>
-	<string>Lediglich benötigt, um den Regenradar am aktuellen Standort anzuzeigen.</string>
+	<string>Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Lediglich benötigt, um den Regenradar am aktuellen Standort anzuzeigen.</string>
+	<string>Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy.</string>
 	<key>NSWidgetWantsLocation</key>
 	<true/>
 </dict>

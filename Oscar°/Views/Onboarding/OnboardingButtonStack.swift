@@ -41,6 +41,8 @@ struct OnboardingButtonStack: View {
             }
         }
         .padding(.horizontal, 24)
+        // Phone width on iPad and Mac instead of a full-window bar.
+        .frame(maxWidth: 480)
         .padding(.top, 12)
         .padding(.bottom, 6)
     }

@@ -30,8 +30,9 @@ command -v fastlane >/dev/null 2>&1 || {
 }
 
 # Keep in sync with ios_version / devices in fastlane/Snapfile (stable runtime, not beta).
-IOS_VERSION="26.5"
+IOS_VERSION="27.0"
 SIM_NAME="iPhone 17 Pro Max"
+PAD_NAME="iPad Pro 13-inch (M5)"
 
 arg=""
 build=1
@@ -78,9 +79,7 @@ reset_live_activity_consent() {
 # and city-search captures show. Set it to match; snapshot reboots the
 # simulator before the pass, which is when SpringBoard picks it up.
 set_simulator_language() {
-  local udid lang locale keyboard
-  udid=$(xcrun simctl list devices "iOS $IOS_VERSION" | grep "$SIM_NAME (" | grep -oE '[0-9A-F-]{36}' | head -1)
-  [ -n "$udid" ] || return 0
+  local udid lang locale keyboard name
   lang="$1"                      # de-DE
   locale="${lang/-/_}"           # de_DE
   case "$lang" in
@@ -88,10 +87,17 @@ set_simulator_language() {
     tr*)  keyboard="tr_TR@sw=Turkish-QWERTY;hw=Automatic" ;;
     *)    keyboard="en_US@sw=QWERTY;hw=Automatic" ;;
   esac
-  xcrun simctl bootstatus "$udid" -b >/dev/null
-  xcrun simctl spawn "$udid" defaults write .GlobalPreferences AppleLanguages -array "$lang"
-  xcrun simctl spawn "$udid" defaults write .GlobalPreferences AppleLocale -string "$locale"
-  xcrun simctl spawn "$udid" defaults write .GlobalPreferences AppleKeyboards -array "$keyboard" "emoji@sw=Emoji"
+  # Both devices: the iPad's status bar shows the localized date.
+  for name in "$SIM_NAME" "$PAD_NAME"; do
+    udid=$(xcrun simctl list devices "iOS $IOS_VERSION" | grep "$name (" | grep -oE '[0-9A-F-]{36}' | head -1)
+    [ -n "$udid" ] || continue
+    xcrun simctl bootstatus "$udid" -b >/dev/null
+    xcrun simctl spawn "$udid" defaults write .GlobalPreferences AppleLanguages -array "$lang"
+    xcrun simctl spawn "$udid" defaults write .GlobalPreferences AppleLocale -string "$locale"
+    xcrun simctl spawn "$udid" defaults write .GlobalPreferences AppleKeyboards -array "$keyboard" "emoji@sw=Emoji"
+    # One booted simulator at a time; snapshot boots them again per pass.
+    xcrun simctl shutdown "$udid" >/dev/null 2>&1 || true
+  done
 }
 
 capture_locale() {

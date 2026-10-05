@@ -10,6 +10,11 @@ import SwiftUI
 /// playhead, and a fast pan coasts on with the gesture's momentum. Past hours
 /// render faded.
 ///
+/// With a day window on the model the strip shows just that day: the
+/// playhead moves instead, the y scale fits the day, and the overview lens
+/// carries an icon per hour with the current hour marked. The owner then
+/// supplies the scrub gesture (see `DayDetailView`).
+///
 /// Canvas, not Charts: at this height features are a few points tall and the
 /// whole strip redraws per pan/scrub frame.
 struct HourlyTimelineStrip: View {
@@ -58,14 +63,19 @@ struct HourlyTimelineStrip: View {
                             let coast = (value.predictedEndTranslation.width - value.translation.width) / width
                             model.endPan(coastFraction: coast)
                         }
-                    }
+                    },
+                isEnabled: model.dayWindow == nil
             )
             .overlay(alignment: .topLeading) {
-                // Below the day-label row along the chart's top edge.
-                HourlyReadoutBox(model: model, layout: layout)
-                    .onGeometryChange(for: CGSize.self, of: { $0.size }) { readoutSize = $0 }
-                    .offset(x: readoutX(width: width, layout: layout), y: 22)
-                    .allowsHitTesting(false)
+                // Below the day-label row along the chart's top edge. The day
+                // view leaves it out: it would hide the coming hours, and its
+                // lens tiles carry the values.
+                if model.dayWindow == nil {
+                    HourlyReadoutBox(model: model, layout: layout)
+                        .onGeometryChange(for: CGSize.self, of: { $0.size }) { readoutSize = $0 }
+                        .offset(x: readoutX(width: width, layout: layout), y: 22)
+                        .allowsHitTesting(false)
+                }
             }
         }
         .sensoryFeedback(.impact(weight: .light, intensity: 0.3), trigger: model.hourTick)
@@ -112,8 +122,14 @@ struct HourlyTimelineStrip: View {
         }
 
         let nowX = x(nowTime)
+        let showsDay = model.dayWindow != nil
 
-        let domain = layout.domain
+        let firstTime = model.domain.lowerBound
+        let firstIndex = max(0, Int((windowStart - firstTime) / 3_600) - 1)
+        let lastIndex = min(model.times.count - 1, firstIndex + Int(windowSeconds / 3_600) + 2)
+        guard firstIndex <= lastIndex else { return }
+
+        let domain = showsDay ? Self.dayDomain(layout, indices: firstIndex...lastIndex) : layout.domain
         let span = max(domain.upperBound - domain.lowerBound, 0.0001)
         func yOf(_ value: Double) -> CGFloat {
             let fraction = (value - domain.lowerBound) / span
@@ -161,6 +177,17 @@ struct HourlyTimelineStrip: View {
             )
         }
 
+        // The day view marks the hour we're in with a soft column.
+        let hourWidth = width * CGFloat(3_600 / windowSeconds)
+        let currentHour = Int((nowTime - firstTime) / 3_600)
+        if showsDay, model.times.indices.contains(currentHour) {
+            let columnX = x(model.times[currentHour]) - hourWidth / 2
+            context.fill(
+                Path(roundedRect: CGRect(x: columnX, y: 0, width: hourWidth, height: chartHeight), cornerRadius: 4),
+                with: .color(.white.opacity(0.1))
+            )
+        }
+
         // Text placed on the chart registers here so later labels can dodge
         // it; whatever cannot find a free spot skips drawing.
         var labelRects: [CGRect] = []
@@ -198,11 +225,6 @@ struct HourlyTimelineStrip: View {
                 value += step
             }
         }
-
-        let firstTime = model.domain.lowerBound
-        let firstIndex = max(0, Int((windowStart - firstTime) / 3_600) - 1)
-        let lastIndex = min(model.times.count - 1, firstIndex + Int(windowSeconds / 3_600) + 2)
-        guard firstIndex <= lastIndex else { return }
 
         for band in layout.bands {
             let centerY = chartHeight * band.centerFraction
@@ -306,36 +328,62 @@ struct HourlyTimelineStrip: View {
             }
         }
 
-        let dayFont = Font.system(size: 11, weight: .semibold)
-        for (index, mark) in model.dayMarks.enumerated() {
-            let startX = x(mark.start)
-            let nextStart = index + 1 < model.dayMarks.count
-                ? model.dayMarks[index + 1].start
-                : model.domain.upperBound
-            let endX = x(nextStart)
-
-            if index > 0, startX > -1, startX < width + 1 {
-                var rule = Path()
-                rule.move(to: CGPoint(x: startX, y: 0))
-                rule.addLine(to: CGPoint(x: startX, y: chartHeight))
-                context.stroke(
-                    rule,
-                    with: .color(.white.opacity(0.18)),
-                    style: StrokeStyle(lineWidth: 1, dash: [3, 3])
-                )
+        // One weather icon per hour, just above the highest line.
+        if showsDay, lens == .overview {
+            let iconSize = min(20, hourWidth - 3)
+            var icons: [String: GraphicsContext.ResolvedImage] = [:]
+            for index in firstIndex...lastIndex where index < model.weathercode.count {
+                let iconX = x(model.times[index])
+                guard iconX - iconSize / 2 >= 0, iconX + iconSize / 2 <= width else { continue }
+                let lineTop = layout.lines
+                    .filter { index < $0.values.count }
+                    .map { yOf($0.values[index]) }
+                    .min() ?? chartHeight / 2
+                let isDay = index < model.isDay.count ? model.isDay[index] : 1
+                let name = HourlyFormatting.weatherIconName(weatherCode: model.weathercode[index], isDay: isDay)
+                let icon = icons[name] ?? context.resolve(Image(name))
+                icons[name] = icon
+                let rect = CGRect(x: iconX - iconSize / 2, y: max(lineTop - 6 - iconSize, 2), width: iconSize, height: iconSize)
+                var iconContext = context
+                iconContext.opacity = index < currentHour ? 0.45 : 1
+                iconContext.draw(icon, in: rect)
+                labelRects.append(rect)
             }
+        }
 
-            guard endX > 30, startX < width - 10 else { continue }
-            let resolved = context.resolve(
-                Text(verbatim: mark.label)
-                    .font(dayFont)
-                    .foregroundStyle(.white.opacity(0.85))
-            )
-            let textSize = resolved.measure(in: CGSize(width: 200, height: 20))
-            let labelX = min(max(startX + 6, 6), endX - textSize.width - 6)
-            guard labelX + textSize.width < width - 40 else { continue }
-            labelRects.append(CGRect(x: labelX, y: 5, width: textSize.width, height: textSize.height))
-            context.draw(resolved, at: CGPoint(x: labelX, y: 5), anchor: .topLeading)
+        // The day view's header already names the day.
+        if !showsDay {
+            let dayFont = Font.system(size: 11, weight: .semibold)
+            for (index, mark) in model.dayMarks.enumerated() {
+                let startX = x(mark.start)
+                let nextStart = index + 1 < model.dayMarks.count
+                    ? model.dayMarks[index + 1].start
+                    : model.domain.upperBound
+                let endX = x(nextStart)
+
+                if index > 0, startX > -1, startX < width + 1 {
+                    var rule = Path()
+                    rule.move(to: CGPoint(x: startX, y: 0))
+                    rule.addLine(to: CGPoint(x: startX, y: chartHeight))
+                    context.stroke(
+                        rule,
+                        with: .color(.white.opacity(0.18)),
+                        style: StrokeStyle(lineWidth: 1, dash: [3, 3])
+                    )
+                }
+
+                guard endX > 30, startX < width - 10 else { continue }
+                let resolved = context.resolve(
+                    Text(verbatim: mark.label)
+                        .font(dayFont)
+                        .foregroundStyle(.white.opacity(0.85))
+                )
+                let textSize = resolved.measure(in: CGSize(width: 200, height: 20))
+                let labelX = min(max(startX + 6, 6), endX - textSize.width - 6)
+                guard labelX + textSize.width < width - 40 else { continue }
+                labelRects.append(CGRect(x: labelX, y: 5, width: textSize.width, height: textSize.height))
+                context.draw(resolved, at: CGPoint(x: labelX, y: 5), anchor: .topLeading)
+            }
         }
 
         let valueFont = Font.system(size: 10.5, weight: .semibold)
@@ -383,7 +431,9 @@ struct HourlyTimelineStrip: View {
             [.year, .month, .day, .hour],
             from: Date(timeIntervalSince1970: windowStart)
         )
-        components.hour = ((components.hour ?? 0) / 6) * 6
+        // A single day gets 3-hour labels, six hours would leave three.
+        let tickHours = showsDay ? 3 : 6
+        components.hour = ((components.hour ?? 0) / tickHours) * tickHours
         components.minute = 0
         var tickDate = calendar.date(from: components) ?? Date(timeIntervalSince1970: windowStart)
         var guardCounter = 0
@@ -414,7 +464,7 @@ struct HourlyTimelineStrip: View {
                     context.draw(label, at: CGPoint(x: tickX, y: chartHeight + Self.axisHeight / 2 + 2))
                 }
             }
-            guard let next = calendar.date(byAdding: .hour, value: 6, to: tickDate) else { break }
+            guard let next = calendar.date(byAdding: .hour, value: tickHours, to: tickDate) else { break }
             tickDate = next
         }
 
@@ -448,6 +498,19 @@ struct HourlyTimelineStrip: View {
                 context.stroke(dot, with: .color(isSnow ? .cyan : .hourlyRain), lineWidth: 2)
             }
         }
+    }
+
+    /// The y range of one day's lines, so a single day isn't flattened by
+    /// the fortnight's extremes. Pinned at zero where the lens is (wind, ET₀).
+    private static func dayDomain(_ layout: HourlyLensLayout, indices: ClosedRange<Int>) -> ClosedRange<Double> {
+        let values = layout.lines.flatMap { line in
+            indices.filter { $0 < line.values.count }.map { line.values[$0] }
+        }
+        guard let low = values.min(), let high = values.max() else { return layout.domain }
+        // A floor on the padding keeps a flat pressure day from zooming into noise.
+        let pad = max((high - low) * 0.1, (layout.domain.upperBound - layout.domain.lowerBound) * 0.05)
+        let lower = layout.domain.lowerBound == 0 ? 0 : low - pad
+        return lower...(high + pad)
     }
 
     private static func niceStep(_ raw: Double) -> Double {

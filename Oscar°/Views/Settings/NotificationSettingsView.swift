@@ -8,117 +8,173 @@
 import SwiftUI
 import UIKit
 
+/// Rain alerts, the rain Live Activity and official weather warnings, each
+/// with one short line. Copy mirrors oscar-server: rain up to 30 min ahead
+/// from radar; warnings from DWD, MeteoAlarm, NWS and CWA; one rounded
+/// location, deleted when everything is off.
 @MainActor
 struct NotificationSettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
-    private let notificationSettingsManager = NotificationSettingsManager.shared
+    private let manager = NotificationSettingsManager.shared
     @State private var isUpdating = false
-    @State private var showPermissionAlert = false
+    @State private var refusal: Refusal?
 
     var body: some View {
-        Form {
-            Section {
-                // Read in body so @Observable tracks these; the toggles then reflect external
-                // and async changes instead of going stale until the view is recreated.
-                let rainAlertsEnabled = notificationSettingsManager.rainAlertsEnabled
-                let weatherAlertsEnabled = notificationSettingsManager.weatherAlertsEnabled
-                let liveRainStatusEnabled = notificationSettingsManager.liveRainStatusEnabled
+        // Read in body so @Observable tracks these; the toggles then reflect external
+        // and async changes instead of going stale until the view is recreated.
+        let rainAlertsEnabled = manager.rainAlertsEnabled
+        let weatherAlertsEnabled = manager.weatherAlertsEnabled
+        let liveRainStatusEnabled = manager.liveRainStatusEnabled
 
-                Toggle(isOn: toggleBinding(currentValue: rainAlertsEnabled, update: notificationSettingsManager.setRainAlertsEnabled)) {
-                    HStack(spacing: 8) {
-                        Text("Rain alerts")
-                        BetaBadge()
-                    }
+        Form {
+            if manager.authorizationStatus == .denied {
+                Section {
+                    Button("Systemeinstellungen öffnen") { openSettings(for: .notifications) }
+                } footer: {
+                    Text("Mitteilungen sind in den iOS-Einstellungen ausgeschaltet.")
                 }
+            }
+
+            Section {
+                AlertToggle(
+                    title: "Regenwarnungen",
+                    detail: "Bis zu 30 Minuten vorher.",
+                    systemImage: "cloud.rain.fill",
+                    tint: .blue,
+                    isOn: toggle(rainAlertsEnabled, refusal: .notifications, update: manager.setRainAlertsEnabled)
+                )
                 .accessibilityIdentifier("notifications.rainAlerts")
 
-                Toggle(isOn: toggleBinding(currentValue: weatherAlertsEnabled, update: notificationSettingsManager.setWeatherAlertsEnabled)) {
-                    HStack(spacing: 8) {
-                        Text("Weather alerts")
-                        BetaBadge()
-                    }
+                if RainRadarLiveActivityManager.isSupported {
+                    AlertToggle(
+                        title: "Live-Regenstatus",
+                        detail: "Auf Sperrbildschirm und Dynamic Island.",
+                        systemImage: "lock.iphone",
+                        tint: .indigo,
+                        isOn: toggle(liveRainStatusEnabled, refusal: .liveActivities, update: manager.setLiveRainStatusEnabled)
+                    )
+                    .disabled(!rainAlertsEnabled)
+                    .accessibilityIdentifier("notifications.liveRainStatus")
                 }
-                .accessibilityIdentifier("notifications.weatherAlerts")
-
-                Toggle(isOn: toggleBinding(currentValue: liveRainStatusEnabled, update: notificationSettingsManager.setLiveRainStatusEnabled)) {
-                    HStack(spacing: 8) {
-                        Text("Live-Regenstatus")
-                        BetaBadge()
-                    }
-                }
-                .disabled(!rainAlertsEnabled)
-                .accessibilityIdentifier("notifications.liveRainStatus")
             } footer: {
-                Text("Der Live-Regenstatus zeigt aufziehenden Regen als Live-Aktivität auf dem Sperrbildschirm und in der Dynamic Island. Er benötigt aktive Regen-Warnungen.")
+                Text("Per Radar in Europa, den USA, Taiwan, Brasilien und auf den Kanaren.")
             }
             .disabled(isUpdating)
 
             Section {
-                if notificationSettingsManager.authorizationStatus == .denied {
-                    Button("Systemeinstellungen öffnen") {
-                        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-                        openURL(url)
-                    }
+                AlertToggle(
+                    title: "Wetterwarnungen",
+                    detail: "Von DWD, MeteoAlarm, NWS und CWA.",
+                    systemImage: "exclamationmark.triangle.fill",
+                    tint: .orange,
+                    isOn: toggle(weatherAlertsEnabled, refusal: .notifications, update: manager.setWeatherAlertsEnabled)
+                )
+                .accessibilityIdentifier("notifications.weatherAlerts")
+            }
+            .disabled(isUpdating)
+
+            Section {
+                SettingsExternalLink(destination: URL(string: "https://oscars.love/privacy")!) {
+                    Label("Datenschutz", systemImage: "hand.raised.fill")
+                        .labelStyle(.settingsIcon(.blue))
                 }
             } footer: {
-                Text(statusText)
+                Text("Gilt für deinen aktuellen Standort, auf etwa 100 m gerundet. Schaltest du alles aus, wird er gelöscht.")
             }
         }
-        .navigationTitle("Alerts")
+        .navigationTitle("Benachrichtigungen")
         .navigationBarTitleDisplayMode(.inline)
-        .alert(String(localized: "Benachrichtigungen deaktiviert"), isPresented: $showPermissionAlert) {
-            Button(String(localized: "OK"), role: .cancel) {}
-        } message: {
-            Text("Allow notifications in iOS Settings to receive rain alerts and weather alerts.")
+        .alert(refusalTitle, isPresented: isRefusalPresented, presenting: refusal) { refusal in
+            Button("Systemeinstellungen öffnen") { openSettings(for: refusal) }
+            Button("Abbrechen", role: .cancel) {}
+        } message: { refusal in
+            switch refusal {
+            case .notifications:
+                Text("Erlaube Mitteilungen in den iOS-Einstellungen.")
+            case .liveActivities:
+                Text("Erlaube Live-Aktivitäten in den iOS-Einstellungen.")
+            }
         }
         .task {
-            await notificationSettingsManager.reloadNotificationStatus()
+            await manager.reloadNotificationStatus()
         }
         .onChange(of: scenePhase) { _, newPhase in
             guard newPhase == .active else { return }
-            Task { await notificationSettingsManager.reloadNotificationStatus() }
+            Task { await manager.reloadNotificationStatus() }
         }
     }
 
-    private var statusText: String {
-        switch notificationSettingsManager.authorizationStatus {
-        case .authorized, .provisional, .ephemeral:
-            if !notificationSettingsManager.rainAlertsEnabled && !notificationSettingsManager.weatherAlertsEnabled {
-                return String(localized: "Both beta alert types are currently turned off. They are available in Europe, the United States, Taiwan, and Brazil (rain alerts only).")
-            }
-            return String(localized: "Oscar can send beta rain alerts and beta weather alerts for your current location. Rain alerts cover the radar regions in Europe, the United States, Taiwan, and Brazil; weather alerts cover Europe, the United States, and Taiwan. Turn each alert type on or off below.")
-        case .denied:
-            return String(localized: "Mitteilungen sind auf Systemebene deaktiviert.")
-        case .notDetermined:
-            return String(localized: "Turn on rain alerts or weather alerts to receive beta notifications in Europe, the United States, Taiwan, and Brazil. Your approximate location will be stored on an Oscar server for this.")
-        @unknown default:
-            return String(localized: "Benachrichtigungsstatus unbekannt.")
+    /// Why switching something on didn't stick.
+    private enum Refusal {
+        case notifications
+        case liveActivities
+    }
+
+    private var refusalTitle: Text {
+        switch refusal {
+        case .liveActivities: Text("Live-Aktivitäten ausgeschaltet")
+        default: Text("Benachrichtigungen deaktiviert")
         }
     }
 
-    private func toggleBinding(
-        currentValue: Bool,
+    private var isRefusalPresented: Binding<Bool> {
+        Binding(get: { refusal != nil }, set: { if !$0 { refusal = nil } })
+    }
+
+    private func openSettings(for refusal: Refusal) {
+        let target = refusal == .notifications
+            ? UIApplication.openNotificationSettingsURLString
+            : UIApplication.openSettingsURLString
+        guard let url = URL(string: target) else { return }
+        openURL(url)
+    }
+
+    private func toggle(
+        _ currentValue: Bool,
+        refusal: Refusal,
         update: @escaping @MainActor (Bool) async -> Bool
     ) -> Binding<Bool> {
         Binding(
             get: { currentValue },
             set: { newValue in
-                runUpdate {
+                isUpdating = true
+                Task { @MainActor in
                     let enabled = await update(newValue)
                     if newValue && !enabled {
-                        showPermissionAlert = true
+                        self.refusal = refusal
                     }
+                    isUpdating = false
                 }
             }
         )
     }
+}
 
-    private func runUpdate(_ action: @escaping @MainActor () async -> Void) {
-        isUpdating = true
-        Task { @MainActor in
-            await action()
-            isUpdating = false
+/// A switch with its settings tile, a Beta tag and one line on what it does.
+private struct AlertToggle: View {
+    let title: LocalizedStringKey
+    let detail: LocalizedStringKey
+    let systemImage: String
+    let tint: Color
+    @Binding var isOn: Bool
+
+    var body: some View {
+        Toggle(isOn: $isOn) {
+            Label {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 8) {
+                        Text(title)
+                        BetaBadge()
+                    }
+                    Text(detail)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            } icon: {
+                Image(systemName: systemImage)
+            }
+            .labelStyle(.settingsIcon(tint))
         }
     }
 }

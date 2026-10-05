@@ -6,6 +6,7 @@
 import ActivityKit
 import Foundation
 import OSLog
+import UIKit
 
 /// Keeps the server able to reach the rain card and cleans up what it can't.
 /// Started from the app delegate on every launch, including the background wake
@@ -31,8 +32,12 @@ final class RainRadarLiveActivityManager {
 
     private init() {}
 
+    /// Lock Screen cards exist only on iPhone (the Duo included), not on iPad
+    /// or on a Mac running the iPad app.
+    static var isSupported: Bool { UIDevice.current.userInterfaceIdiom == .phone }
+
     func startMonitoring() {
-        guard !Self.isPreviewHost, !isMonitoring else { return }
+        guard Self.isSupported, !Self.isPreviewHost, !isMonitoring else { return }
         isMonitoring = true
         Task { await observePushToStartTokens() }
         Task { await observeActivities() }

@@ -1,10 +1,15 @@
 import SwiftUI
 
 struct DailyView: View {
+  /// Wide layouts open a day in place (today to start) instead of opening
+  /// the hourly sheet.
+  var expandsDays = false
+
   @Environment(Weather.self) private var weather: Weather
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @Environment(NowPresentationCoordinator.self) private var presentation
   private let settingsService = SettingService.shared
+  @State private var expandedDay: Int? = 0
 
   // Column widths scale with Dynamic Type so the weekday and temperature labels keep their
   // alignment without truncating at larger accessibility text sizes.
@@ -23,7 +28,8 @@ struct DailyView: View {
     let precipitationUnit = weather.forecast.daily_units?.precipitation_sum ?? "mm"
 
     VStack(alignment: .leading) {
-      NowSectionHeader(showMore: hasDays ? { presentDetails(day: 0) } : nil) {
+      // Wide layouts show the hours in the open day, so "Mehr" goes a level further.
+      NowSectionHeader(showMore: hasDays ? { expandsDays ? presentation.present(.ensemble) : presentDetails(day: 0) } : nil) {
         Text(heading)
       }
       .padding(.bottom)
@@ -37,20 +43,32 @@ struct DailyView: View {
           }
         } else {
           ForEach(0..<dayNumber, id: \.self) { dayPos in
+            let isExpanded = expandsDays && expandedDay == dayPos
             if dayPos > 0 { Divider() }
             Button {
-              presentDetails(day: dayPos)
+              if expandsDays {
+                withAnimation(.snappy) { expandedDay = isExpanded ? nil : dayPos }
+              } else {
+                presentDetails(day: dayPos)
+              }
             } label: {
               dayRow(
                 dayPos,
                 scale: temperatureScale,
                 temperatureUnit: temperatureUnit,
-                precipitationUnit: precipitationUnit
+                precipitationUnit: precipitationUnit,
+                isExpanded: expandsDays ? isExpanded : nil
               )
             }
             .buttonStyle(.plain)
             .accessibilityElement(children: .combine)
-            .accessibilityHint(Text("Öffnet die stündliche Vorhersage für diesen Tag"))
+            .accessibilityHint(rowHint(isExpanded: isExpanded))
+
+            if isExpanded, let day = dayRange(dayPos) {
+              DayDetailView(day: day, startTime: dayPos == 0 ? Date.now.timeIntervalSince1970 : day.lowerBound + 12 * 3_600)
+                .padding(.bottom, 12)
+                .transition(.opacity)
+            }
           }
         }
       }
@@ -78,7 +96,8 @@ extension DailyView {
     _ dayPos: Int,
     scale: (min: Double, max: Double),
     temperatureUnit: String,
-    precipitationUnit: String
+    precipitationUnit: String,
+    isExpanded: Bool? = nil
   ) -> some View {
     let rowTemperatures = temperatureRow(for: dayPos)
     return HStack {
@@ -106,6 +125,14 @@ extension DailyView {
       .frame(height: rowTemperatures.focusLow == nil ? 5 : 28)
       Text(roundTemperatureString(temperature: rowTemperatures.labelHigh))
         .frame(width: temperatureColumnWidth, alignment: .leading)
+      // Only where rows fold open (nil: they open the sheet).
+      if let isExpanded {
+        Image(systemName: "chevron.down")
+          .font(.caption2.weight(.bold))
+          .foregroundStyle(.secondary)
+          .rotationEffect(.degrees(isExpanded ? 180 : 0))
+          .accessibilityHidden(true)
+      }
     }
     .padding(.vertical, 8)
     .contentShape(.rect)
@@ -254,6 +281,18 @@ extension DailyView {
 
   func getWeatherIcon(pos: Int) -> String {
     HourlyFormatting.weatherIconName(weatherCode: weather.forecast.daily?.weathercode?[pos] ?? 0, isDay: 1)
+  }
+
+  private func rowHint(isExpanded: Bool) -> Text {
+    guard expandsDays else { return Text("Öffnet die stündliche Vorhersage für diesen Tag") }
+    return isExpanded ? Text("Klappt das Diagramm ein") : Text("Zeigt das Diagramm")
+  }
+
+  /// Midnight to midnight; the next day's start keeps DST days right.
+  private func dayRange(_ day: Int) -> ClosedRange<Double>? {
+    guard let times = weather.forecast.daily?.time, times.indices.contains(day) else { return nil }
+    let end = times.indices.contains(day + 1) ? times[day + 1] : times[day] + 86_400
+    return times[day]...end
   }
 
   /// Today opens at the current hour, later days at noon.

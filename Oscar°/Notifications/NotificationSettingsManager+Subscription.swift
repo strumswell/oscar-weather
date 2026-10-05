@@ -22,6 +22,14 @@ extension NotificationSettingsManager {
     }
 
     func performSubscriptionSync(forceRegister: Bool) async {
+        // Everything off: delete the server-side subscription instead of syncing it, so
+        // nothing (location included) reaches the server while notifications are off.
+        // A failed delete keeps the credentials, and the launch path retries it.
+        guard enabled else {
+            await deleteServerSubscription()
+            return
+        }
+
         guard let token = keychain.load(key: cachedDeviceTokenKey), !token.isEmpty else {
             notificationLogger.info("Lifecycle: subscription sync skipped; missing cached device token")
             return
@@ -178,6 +186,40 @@ extension NotificationSettingsManager {
             notificationLogger.error("Lifecycle: subscription patch request threw error=\(error.localizedDescription, privacy: .public)")
             return .failure
         }
+    }
+
+    func deleteServerSubscription() async {
+        guard let subscriptionId = keychain.load(key: subscriptionKey), keychain.load(key: apiKeyKey) != nil else {
+            notificationLogger.info("Lifecycle: subscription delete skipped; no stored credentials")
+            return
+        }
+
+        notificationLogger.info("Lifecycle: subscription delete request started")
+        do {
+            let output = try await oscarNotifications.deleteNotificationSubscription(
+                .init(path: .init(subscriptionId: subscriptionId)))
+            switch output {
+            case .noContent:
+                notificationLogger.info("Lifecycle: subscription delete request succeeded")
+            case .undocumented(let statusCode, _) where statusCode == 404:
+                notificationLogger.info("Lifecycle: subscription delete returned 404; already gone")
+            case .undocumented(let statusCode, _):
+                notificationLogger.error("Lifecycle: subscription delete failed; status=\(statusCode, privacy: .public); keeping credentials for a retry")
+                return
+            }
+        } catch {
+            notificationLogger.error("Lifecycle: subscription delete threw error=\(error.localizedDescription, privacy: .public); keeping credentials for a retry")
+            return
+        }
+
+        keychain.delete(key: subscriptionKey)
+        keychain.delete(key: apiKeyKey)
+        keychain.delete(key: lastSentDeviceTokenKey)
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: lastSentStateKey)
+        defaults.removeObject(forKey: installationRegistrationCompletedKey)
+        defaults.removeObject(forKey: syncedLiveActivityPushToStartTokenKey)
+        defaults.removeObject(forKey: pendingLiveActivityReportsKey)
     }
 
     func loadLastSentSubscriptionState() -> SentSubscriptionState? {

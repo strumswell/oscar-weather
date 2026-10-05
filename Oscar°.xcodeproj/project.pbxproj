@@ -213,6 +213,7 @@
 		4946F40C22A236F7F62FE95F /* WeatherMapView+Isobars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D5F6C2083DA338FF9144E7D /* WeatherMapView+Isobars.swift */; };
 		49F578730F83B9D6D1EB47BB /* RainNowcastSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D114760B8E04C6F19057AA7 /* RainNowcastSummary.swift */; };
 		49FD3C7516C8FF9B1424E620 /* DetailSectionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C2E66F33D2EFB1C63EC8E62 /* DetailSectionPicker.swift */; };
+		4A9A9959147DC17E57428A42 /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F92EBD3E78723267B8CB320D /* DayDetailView.swift */; };
 		4B4E15F949F086B08D199500 /* ClimateLegend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 191E4670953352CAC7163496 /* ClimateLegend.swift */; };
 		4C982A2D300C5BB113B7A160 /* ForecastModelPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 697D0F5BCF98DEEB0A6995BC /* ForecastModelPreference.swift */; };
 		4C9E74252DEA421794BB70D9 /* ForecastDaytimeTemperatureDisplayMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9953BF9546B89C8BE1C9CB /* ForecastDaytimeTemperatureDisplayMode.swift */; };
@@ -236,6 +237,7 @@
 		58AEFE07112BEBE451B70801 /* WeatherMapView+WindParticles.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0CD721621248DEE0954BB6A /* WeatherMapView+WindParticles.swift */; };
 		58E12D892FBEE022285213A1 /* MapChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DC759B87BFA81E0FA0D50A1 /* MapChip.swift */; };
 		5909F14C655BA260F3FB3E4F /* MapBasemapStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE12882FD6C05983FAB7B72E /* MapBasemapStyle.swift */; };
+		5963D578F5114FEF89A46D6F /* MapPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F9A905265CC26BE4A20D3B2 /* MapPreview.swift */; };
 		59D359903F1C1A567F5FCF9B /* WeatherConditionLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D90BBA893FDDB4C05CA8F86E /* WeatherConditionLabel.swift */; };
 		5A25D0F1F5D835F472D2FD70 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7156BD80C9CD4988F25DC6C /* LocationService.swift */; };
 		5A547CCC9E1179EA68B5ED61 /* HourlyTimelineModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F620E4FC72EA88C2CD46977F /* HourlyTimelineModel.swift */; };
@@ -326,6 +328,7 @@
 		7BF721B81146A616EBFDE500 /* AtmosphereSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAD26D350AA55C1BB802AC7F /* AtmosphereSnapshot.swift */; };
 		7CDAFF0F229AB1E8F9AB5BDA /* MapValueBubbles.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4EF57A0D34E166816E3F89D /* MapValueBubbles.swift */; };
 		7E626B2CE637458CDD94B360 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 6E1153402B59C98B004D3273 /* Localizable.xcstrings */; };
+		7EDA1CE233E86EA87354A9AD /* MapLayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 636C11D3045FE297230C1F8E /* MapLayers.swift */; };
 		7FA7BAE01F040E8392B6AD04 /* WidgetBasemapRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7837F3AC5A923261F6D5BBB /* WidgetBasemapRenderer.swift */; };
 		801837BFB65D578373E412A4 /* HourlyReadoutBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A65836037B9FFB962C6AF9 /* HourlyReadoutBox.swift */; };
 		806916FEBBC4A76840AC07D7 /* InteractiveClimateRibbon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B11CFEE49780EF6E7E7683 /* InteractiveClimateRibbon.swift */; };
@@ -835,6 +838,7 @@
 		61A9B239ECE548BBA9F7076C /* HourlyForecastBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlyForecastBuilder.swift; sourceTree = "<group>"; };
 		6226FEA87F7D9E094D78BA65 /* MemberCardStickerCatalog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MemberCardStickerCatalog.swift; sourceTree = "<group>"; };
 		62B1E62E89AF491CD4267327 /* StormCellInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StormCellInfo.swift; sourceTree = "<group>"; };
+		636C11D3045FE297230C1F8E /* MapLayers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MapLayers.swift; sourceTree = "<group>"; };
 		63EBCF4245EE60F2112296F8 /* ClimateSummary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClimateSummary.swift; sourceTree = "<group>"; };
 		647A9C3CC5680107F7E1D8B6 /* DailyEnsembleForecastCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyEnsembleForecastCache.swift; sourceTree = "<group>"; };
 		6627BD63D37937CD38D68C6C /* ClimateTimeAxis.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClimateTimeAxis.swift; sourceTree = "<group>"; };
@@ -901,6 +905,7 @@
 		9C2E66F33D2EFB1C63EC8E62 /* DetailSectionPicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DetailSectionPicker.swift; sourceTree = "<group>"; };
 		9E3435A8AE6E3B3DE7525C95 /* CloudGroup.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CloudGroup.swift; sourceTree = "<group>"; };
 		9F129B08D73DA7BB83502C83 /* UserLocationDot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UserLocationDot.swift; sourceTree = "<group>"; };
+		9F9A905265CC26BE4A20D3B2 /* MapPreview.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MapPreview.swift; sourceTree = "<group>"; };
 		A0A65836037B9FFB962C6AF9 /* HourlyReadoutBox.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HourlyReadoutBox.swift; sourceTree = "<group>"; };
 		A218C9FDEC43506CA8478AC7 /* WindParticleView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WindParticleView.swift; sourceTree = "<group>"; };
 		A4CB4995C60DA37F323A85B1 /* WindSpeedUnit.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WindSpeedUnit.swift; sourceTree = "<group>"; };
@@ -1053,6 +1058,7 @@
 		F51BD4DD369C06E0105C6DF9 /* StatsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		F620E4FC72EA88C2CD46977F /* HourlyTimelineModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HourlyTimelineModel.swift; sourceTree = "<group>"; };
 		F8F8C66E4A33FA2762F146E3 /* StatsOverviewGrid.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatsOverviewGrid.swift; sourceTree = "<group>"; };
+		F92EBD3E78723267B8CB320D /* DayDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
 		F9A49972EE3A7B87882B5DA9 /* TimelineControlsWrappers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimelineControlsWrappers.swift; sourceTree = "<group>"; };
 		F9AF814501D594895BE39838 /* RainNowcastSummaryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RainNowcastSummaryTests.swift; sourceTree = "<group>"; };
 		FC05344B0CC1CE7B5D1334AA /* ClassicForecastStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClassicForecastStore.swift; sourceTree = "<group>"; };
@@ -1270,6 +1276,7 @@
 				2512E9792F70B000004670E4 /* DailyTemperatureRow.swift */,
 				2512E97B2F70B000004670E4 /* TemperatureRangeView.swift */,
 				3E61170B2544B2D300B68120 /* DailyView.swift */,
+				F92EBD3E78723267B8CB320D /* DayDetailView.swift */,
 			);
 			path = Daily;
 			sourceTree = "<group>";
@@ -1627,6 +1634,7 @@
 				C4758BFD10655DDFA3A3C190 /* WeatherAlertInfo.swift */,
 				62B1E62E89AF491CD4267327 /* StormCellInfo.swift */,
 				90AFEC539EF5A457060B60E4 /* AlertSeverityStyle.swift */,
+				636C11D3045FE297230C1F8E /* MapLayers.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1744,6 +1752,7 @@
 				B7B72A7AC2F08DC6B8C6ED3A /* Rendering */,
 				FDB7513D424FB8AEB953510F /* Timeline */,
 				1EBB5BA88C10CAFE5DA98CA4 /* LayerPicker */,
+				9F9A905265CC26BE4A20D3B2 /* MapPreview.swift */,
 			);
 			path = Map;
 			sourceTree = "<group>";
@@ -2782,6 +2791,9 @@
 				05D59E20BEB89A614E27DF33 /* EnsembleView.swift in Sources */,
 				11AB7657FC61D815E6DC1A03 /* EnsembleChart.swift in Sources */,
 				9F370DC8D76C9238B2C11F86 /* EnsembleRail.swift in Sources */,
+				7EDA1CE233E86EA87354A9AD /* MapLayers.swift in Sources */,
+				5963D578F5114FEF89A46D6F /* MapPreview.swift in Sources */,
+				4A9A9959147DC17E57428A42 /* DayDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2975,8 +2987,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Oscar;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = cloud.bolte.Oscar;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -3007,8 +3019,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Oscar;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Ihr ungefährer Standort wird verwendet, um Wetter am aktuellen Standort anzuzeigen und wird dazu an open-meteo.com übermittelt. Mehr Infos unter oscars.love/privacy.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = cloud.bolte.Oscar;
 				LD_RUNPATH_SEARCH_PATHS = (

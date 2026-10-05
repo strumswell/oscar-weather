@@ -217,6 +217,23 @@ is unsupported on watchOS simulators, and a TZ override shifts the app's
 internal clock without touching the system-rendered corner clock (verified
 both) — there is currently no way to pin it to 9:41.
 
+## iPad
+
+The Snapfile also runs the suite on the iPad Pro 13-inch (M5) simulator, in
+landscape (`ScreenshotTests.setUp`), where the forecast splits into the stage
+(conditions, live map, nowcast) and the feed. Scenes that don't show a wide
+layout skip themselves there (`skipOnPad()`): lock screen, widgets, settings,
+onboarding, places, the clear-sky twin and the 90/91 composition sources. The
+stage map shows radar unless a scene picks a layer (02 uses the fixture
+clouds), and on iPad `scrollTo` swipes in the right-hand feed, since the stage
+doesn't scroll.
+
+There is no iPad frame art: the compositor draws an iPad capture rounded and
+shadowed under the scene's caption, on a canvas of the capture's own size
+(2752×2064, the ASC 13" landscape size), and leaves out the iPhone-placed
+extras. The Frame Studio editor ignores iPad captures. deliver assigns the
+framed files by resolution.
+
 ## Upload (manual for now)
 
 ```sh
@@ -236,8 +253,6 @@ change the list.
 
 ## Follow-ups
 
-- iPad Pro 13" device pass (required size for iPad-capable apps; ASC currently
-  scales the iPhone set).
 - tr locale is parked (title.strings + the Georgia Bold layout override stay);
   re-add it to the Snapfile `languages` to re-enable.
 - CI: Xcode Cloud is a poor fit for simulator-fleet screenshot jobs; a GitHub
