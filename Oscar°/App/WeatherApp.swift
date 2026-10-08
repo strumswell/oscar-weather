@@ -71,16 +71,32 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
-/// Sentry crash and performance reports. On by default; the person can turn them off in
-/// Settings, which stops the SDK right away and keeps it off on later launches.
+/// Sentry crash and performance reports. The onboarding asks before anything is sent; the
+/// person can change it in Settings, which starts or stops the SDK right away.
 enum CrashReporting {
     static let enabledKey = "crashReportsEnabled"
 
+    /// Fresh installs stay off until the onboarding asks. People who finished the
+    /// onboarding before it asked keep the old on-by-default.
     static var isEnabled: Bool {
-        UserDefaults.standard.object(forKey: enabledKey) as? Bool ?? true
+        UserDefaults.standard.object(forKey: enabledKey) as? Bool ?? OnboardingCoordinator.hasCompleted
+    }
+
+    static var hasAnswered: Bool {
+        UserDefaults.standard.object(forKey: enabledKey) != nil
+    }
+
+    static func answer(_ enabled: Bool) {
+        UserDefaults.standard.set(enabled, forKey: enabledKey)
+        if enabled {
+            start()
+        } else {
+            stop()
+        }
     }
 
     static func start() {
+        guard !SentrySDK.isEnabled else { return }
         SentrySDK.start { options in
             options.dsn = "https://f6b7fe82cd8cd8bb11dc0dc38db42255@o4507143648772096.ingest.de.sentry.io/4507143650148432"
             options.debug = false

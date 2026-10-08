@@ -47,8 +47,6 @@ struct PermissionSettingsView: View {
           Label("Mitteilungen", systemImage: "app.badge.fill")
             .labelStyle(.settingsIcon(.red))
         }
-      } footer: {
-        Text("Berechtigungen verwaltet iOS: Beim ersten Aktivieren fragt Oscar direkt an, danach öffnet der Schalter die passende Stelle in den iOS-Einstellungen.")
       }
 
       Section {

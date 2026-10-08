@@ -6,27 +6,58 @@
 import SwiftUI
 
 /// The solid canvas behind the middle onboarding steps. Animated scenes
-/// (sky, simulation, collage) stay inside a window at the top of the screen
-/// and feather into this surface, so titles, copy, and controls always sit
-/// on solid ground instead of the busy backdrop.
+/// (sky, simulation, feature visuals) stay inside a window at the top of the
+/// screen and feather into this surface, so titles, copy, and controls always
+/// sit on solid ground instead of the busy backdrop.
 struct OnboardingStage: View {
-    /// Where the canvas becomes fully solid: 30 % down on phones. Taller
-    /// screens (iPad) keep a phone-sized canvas and give the rest to the hero
-    /// window, so the content doesn't float above an empty slab.
-    static func canvasTop(screenHeight: CGFloat) -> CGFloat {
-        max(screenHeight * 0.3, screenHeight - 700)
+    /// How the screen splits between the scene and the canvas. The canvas
+    /// takes a share of the screen, clamped so iPad keeps a phone-sized
+    /// canvas and gives the rest to the scene.
+    enum Layout {
+        /// One question, a short explanation and the buttons.
+        case question
+        /// Toggles with previews: almost all canvas, a strip of scene.
+        case list
+        /// The feature tour: mostly picture, a headline, two lines, a button.
+        case tour
+
+        func canvasTop(screenHeight h: CGFloat) -> CGFloat {
+            let (share, lowest, highest): (CGFloat, CGFloat, CGFloat) = switch self {
+            case .question: (0.52, 400, 560)
+            case .list: (0.84, 0, 780)
+            case .tour: (0.36, 300, 420)
+            }
+            return h - min(max(h * share, lowest), highest)
+        }
     }
 
-    /// Phone width on iPad and Mac, centered.
-    static let contentMaxWidth: CGFloat = 520
+    var layout = Layout.question
+
+    /// Phone width on iPad and Mac, centered. Text and buttons share it.
+    static let contentMaxWidth: CGFloat = 480
+    /// Distance from the screen edge to text and buttons.
+    static let edgePadding: CGFloat = 24
+    /// Distance from the solid canvas edge down to the first line of a step.
+    static let canvasInset: CGFloat = 28
     /// Height of the gradient that dissolves the hero window into the canvas.
     static let featherHeight: CGFloat = 120
+
+    /// The night-blue page Oscar's cards are designed for, also the Lock
+    /// Screen sky of the rain Live Activity.
+    static let navy = LinearGradient(
+        colors: [
+            Color(hue: 0.60, saturation: 0.58, brightness: 0.36),
+            Color(hue: 0.64, saturation: 0.78, brightness: 0.14),
+        ],
+        startPoint: .top,
+        endPoint: .bottom
+    )
 
     var body: some View {
         GeometryReader { proxy in
             VStack(spacing: 0) {
                 Color.clear
-                    .frame(height: max(Self.canvasTop(screenHeight: proxy.size.height) - Self.featherHeight, 0))
+                    .frame(height: max(layout.canvasTop(screenHeight: proxy.size.height) - Self.featherHeight, 0))
 
                 LinearGradient(
                     colors: [Color(uiColor: .systemBackground).opacity(0), Color(uiColor: .systemBackground)],
@@ -36,43 +67,40 @@ struct OnboardingStage: View {
                 .frame(height: Self.featherHeight)
 
                 Color(uiColor: .systemBackground)
-                    // The stage as a whole measures ABOVE the keyboard (see
-                    // below), but the canvas still has to paint all the way to
-                    // the screen edge: the keyboard is translucent, and over a
-                    // gap it samples the animated sky instead of solid ground.
-                    // Both regions, not just the keyboard: with only that one
-                    // ignored, the home-indicator strip beneath the keyboard
-                    // stayed uncovered and showed the sky.
+                    // Paints under the translucent keyboard and the home
+                    // indicator, which would otherwise sample the sky.
                     .ignoresSafeArea(.all, edges: .bottom)
             }
         }
-        // Container edges are ignored but the keyboard is not: when it comes
-        // up (manual city search), the whole stage measures against the space
-        // above it, shrinking the hero window so the content keeps room.
+        // The keyboard is not ignored: the stage measures above it, so the
+        // hero window shrinks and the content keeps its room.
         .ignoresSafeArea(.container)
         .allowsHitTesting(false)
     }
 }
 
-/// Lays a step out against the stage: the hero window stays clear for the
-/// scene behind it, `content` starts where the canvas is fully solid.
-struct OnboardingStageLayout<Content: View>: View {
+/// Lays a step out against the stage: `hero` sits centered in the window
+/// above the canvas (empty for most steps, so the scene behind shows),
+/// `content` starts where the canvas is fully solid.
+struct OnboardingStageLayout<Hero: View, Content: View>: View {
+    var layout = OnboardingStage.Layout.question
     @ViewBuilder var content: Content
+    @ViewBuilder var hero: Hero
 
     var body: some View {
         GeometryReader { proxy in
             // The stage paints edge to edge, so the canvas position derives
-            // from the full screen height — except the keyboard: it reports
-            // as an oversized bottom inset, and the stage shrinks above it,
-            // so it must not count as screen (the home indicator does).
+            // from the full screen height. The keyboard reports as an
+            // oversized bottom inset and must not count as screen.
             let bottomInset = proxy.safeAreaInsets.bottom
             let keyboardlessBottom = bottomInset > 100 ? 0 : bottomInset
             let screenHeight = proxy.size.height + proxy.safeAreaInsets.top + keyboardlessBottom
-            let canvasTop = OnboardingStage.canvasTop(screenHeight: screenHeight) - proxy.safeAreaInsets.top
+            let canvasTop = layout.canvasTop(screenHeight: screenHeight) - proxy.safeAreaInsets.top
 
             VStack(spacing: 0) {
                 Color.clear
                     .frame(height: max(canvasTop, 0))
+                    .overlay { hero }
 
                 content
                     .frame(maxWidth: OnboardingStage.contentMaxWidth, maxHeight: .infinity, alignment: .top)
@@ -82,12 +110,67 @@ struct OnboardingStageLayout<Content: View>: View {
     }
 }
 
+extension OnboardingStageLayout where Hero == EmptyView {
+    init(layout: OnboardingStage.Layout = .question, @ViewBuilder content: () -> Content) {
+        self.init(layout: layout, content: content, hero: { EmptyView() })
+    }
+}
+
+/// Title, copy and an optional third line, centered at the top of the canvas.
+/// The head of every canvas step.
+struct OnboardingHeadline<Footer: View>: View {
+    var icon: OnboardingStepIcon?
+    let title: LocalizedStringKey
+    let copy: LocalizedStringKey
+    @ViewBuilder var footer: Footer
+
+    var body: some View {
+        VStack(spacing: 8) {
+            if let icon {
+                icon.padding(.bottom, 8)
+            }
+            Text(title)
+                .font(.onboardingTitle)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(copy)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            footer
+                .padding(.top, 4)
+        }
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+    }
+}
+
+extension OnboardingHeadline where Footer == EmptyView {
+    init(icon: OnboardingStepIcon? = nil, title: LocalizedStringKey, copy: LocalizedStringKey) {
+        self.init(icon: icon, title: title, copy: copy, footer: { EmptyView() })
+    }
+}
+
+extension Font {
+    static let onboardingTitle = Font.system(.title, design: .rounded, weight: .bold)
+}
+
+extension AnyTransition {
+    /// The flow's push: in from the right, out to the left. A crossfade
+    /// when motion is reduced.
+    static func onboardingSlide(reduceMotion: Bool) -> AnyTransition {
+        guard !reduceMotion else { return .opacity }
+        return .asymmetric(
+            insertion: .offset(x: 80).combined(with: .opacity),
+            removal: .offset(x: -80).combined(with: .opacity)
+        )
+    }
+}
+
 /// Standard entrance for canvas content: a fade with a small rise, staggered
-/// per element by `delay` — the shared micro-choreography of every step.
+/// per element by `delay`.
 struct OnboardingEntranceModifier: ViewModifier {
     let appeared: Bool
     let delay: Double
-    var scale: CGFloat = 1
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -95,14 +178,13 @@ struct OnboardingEntranceModifier: ViewModifier {
         content
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared || reduceMotion ? 0 : 14)
-            .scaleEffect(appeared || reduceMotion ? 1 : scale)
             .animation(.spring(duration: 0.7, bounce: 0.2).delay(delay), value: appeared)
     }
 }
 
 extension View {
-    func onboardingEntrance(_ appeared: Bool, delay: Double, scale: CGFloat = 1) -> some View {
-        modifier(OnboardingEntranceModifier(appeared: appeared, delay: delay, scale: scale))
+    func onboardingEntrance(_ appeared: Bool, delay: Double) -> some View {
+        modifier(OnboardingEntranceModifier(appeared: appeared, delay: delay))
     }
 }
 

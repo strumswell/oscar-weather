@@ -1,11 +1,11 @@
-#if DEBUG
 import Foundation
 import ImageIO
 import UIKit
 
 // MARK: - Synthetic radar (oscar-server frames/grid/tiles/motion/cells)
 
-/// Deterministic fake precipitation for the map and widget scenes: one real
+/// Deterministic fake precipitation for the screenshot map and widget scenes
+/// and the onboarding's radar page (the one part compiled into release): one real
 /// radar composite (see `bakedFieldBase64`), replayed over the German box and
 /// advected SW→NE per frame so the timeline animates. Value noise stood in
 /// here before and never looked like weather — real echoes have the cores,
@@ -31,6 +31,7 @@ enum SyntheticRadar {
 
     // MARK: JSON endpoints
 
+    #if DEBUG
     static func framesJSON() -> [String: Any] {
         let formatter = ISO8601DateFormatter()
         // Same story clock as the forecast fixtures, so the scrubber's labels
@@ -53,6 +54,7 @@ enum SyntheticRadar {
             "image_bounds": bounds,
         ]
     }
+    #endif
 
     static func cellsJSON() -> [String: Any] {
         ["type": "FeatureCollection", "features": [] as [Any]]
@@ -224,9 +226,9 @@ enum SyntheticRadar {
     /// server's lossless WebP — `UIImage(data:)` decodes PNG just the same.
     /// 0 = dry, values over the plasma dBZ ramp.
     static func gridPNG(frameKey: String) -> Data {
-        valueGridPNG(cacheKey: "grid|\(frameKey)", frameKey: frameKey) { lat, lon, t in
-            let v = intensity(lat: lat, lon: lon, minutes: t)
-            return v >= 0.02 ? UInt8(1 + min(219, v * 219)) : 0
+        cached("grid|\(frameKey)") {
+            let grid = radarGrid(minutes: offsetMinutes(fromKey: frameKey) ?? 0)
+            return grayPNG(pixels: grid, width: gridWidth, height: gridHeight)
         }
     }
 
@@ -246,18 +248,76 @@ enum SyntheticRadar {
     ) -> Data {
         cached(cacheKey) {
             let t = offsetMinutes(fromKey: frameKey) ?? 0
-            let w = gridWidth, h = gridHeight
-            var pixels = [UInt8](repeating: 0, count: w * h)
-            let mN = mercY(north), mS = mercY(south)
-            for j in 0..<h {
-                let lat = latFromMercY(mN + (mS - mN) * Double(j) / Double(h))
-                for i in 0..<w {
-                    let lon = west + (east - west) * Double(i) / Double(w)
-                    pixels[j * w + i] = pixel(lat, lon, t)
+            return grayPNG(pixels: valueGrid(minutes: t, pixel: pixel), width: gridWidth, height: gridHeight)
+        }
+    }
+
+    /// The radar value grid as raw palette indices, ready for `OscarRadarFrame`
+    /// without a PNG round-trip. Same result as sampling `intensity` per pixel,
+    /// but the field is looked up once and every row's and column's position is
+    /// computed once, so a frame is a tight loop over one buffer (the
+    /// onboarding builds all 25 while the person reads the first page).
+    static func radarGrid(minutes t: Double) -> [UInt8] {
+        let field = field()
+        let w = gridWidth, h = gridHeight
+        var pixels = [UInt8](repeating: 0, count: w * h)
+        guard field.width > 1 else { return pixels }
+
+        let fieldWest = west - fieldMarginLon, fieldEast = east + fieldMarginLon
+        let fieldSouth = south - fieldMarginLat, fieldNorth = north + fieldMarginLat
+        let maxX = Double(field.width - 1), maxY = Double(field.height - 1)
+        let mN = mercY(north), mS = mercY(south)
+        // Field-pixel position of every grid column and row, advected by t
+        // exactly like `sample`.
+        let xs = (0..<w).map { i in
+            (west + (east - west) * Double(i) / Double(w) - t * 0.011 - fieldWest) / (fieldEast - fieldWest) * maxX
+        }
+        let ys = (0..<h).map { j in
+            (fieldNorth - (latFromMercY(mN + (mS - mN) * Double(j) / Double(h)) - t * 0.006)) / (fieldNorth - fieldSouth) * maxY
+        }
+
+        field.values.withUnsafeBufferPointer { values in
+            pixels.withUnsafeMutableBufferPointer { out in
+                for j in 0..<h {
+                    let fy = ys[j]
+                    guard fy >= 0, fy <= maxY else { continue }
+                    let y0 = Int(fy), y1 = min(y0 + 1, field.height - 1)
+                    let ty = fy - Double(y0)
+                    let row0 = y0 * field.width, row1 = y1 * field.width
+                    for i in 0..<w {
+                        let fx = xs[i]
+                        guard fx >= 0, fx <= maxX else { continue }
+                        let x0 = Int(fx), x1 = min(x0 + 1, field.width - 1)
+                        let tx = fx - Double(x0)
+                        let a = Double(values[row0 + x0]), b = Double(values[row0 + x1])
+                        let c = Double(values[row1 + x0]), d = Double(values[row1 + x1])
+                        let index = (a + (b - a) * tx) * (1 - ty) + (c + (d - c) * tx) * ty
+                        let v = min(1, max(0, (index - 1) / 219))
+                        if v >= 0.02 {
+                            out[j * w + i] = UInt8(1 + min(219, v * 219))
+                        }
+                    }
                 }
             }
-            return grayPNG(pixels: pixels, width: w, height: h)
         }
+        return pixels
+    }
+
+    static func valueGrid(
+        minutes t: Double,
+        pixel: (_ lat: Double, _ lon: Double, _ minutes: Double) -> UInt8
+    ) -> [UInt8] {
+        let w = gridWidth, h = gridHeight
+        var pixels = [UInt8](repeating: 0, count: w * h)
+        let mN = mercY(north), mS = mercY(south)
+        for j in 0..<h {
+            let lat = latFromMercY(mN + (mS - mN) * Double(j) / Double(h))
+            for i in 0..<w {
+                let lon = west + (east - west) * Double(i) / Double(w)
+                pixels[j * w + i] = pixel(lat, lon, t)
+            }
+        }
+        return pixels
     }
 
     private static func grayPNG(pixels: [UInt8], width: Int, height: Int) -> Data {
@@ -396,4 +456,3 @@ enum SyntheticRadar {
         return (240, 249, 33)
     }
 }
-#endif

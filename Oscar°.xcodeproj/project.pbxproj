@@ -41,7 +41,7 @@
 		19FC7A4E079FE61E119881FC /* Color-Custom.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91533016F01F5E16D887773 /* Color-Custom.swift */; };
 		1A9549C284CE56F4073EA801 /* ScreenshotFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8E13CE76082B4E17FA53BE /* ScreenshotFixtures.swift */; };
 		1C7CB7C571034CB8B433A801 /* HourlyPlaceholderCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 734BBABC1E39450CA3239943 /* HourlyPlaceholderCard.swift */; };
-		1DB2E5F4430BD9756BDD2DDB /* WebcamsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6FB747B80DB45D5A8F22D1F /* WebcamsView.swift */; };
+		1DB2E5F4430BD9756BDD2DDB /* WebcamSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6FB747B80DB45D5A8F22D1F /* WebcamSheet.swift */; };
 		1DCEC99D203DB296B36DA9C0 /* ScreenshotFixtureServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404E75F3EC4155C91693B717 /* ScreenshotFixtureServer.swift */; };
 		1E5631EE85DB09EF0B432959 /* LocationRowCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CD0EA009038B2D15726784F /* LocationRowCards.swift */; };
 		1F3D092FC77DF680585D3721 /* MemberCardStickerStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16300FD19847496626408D3A /* MemberCardStickerStoreTests.swift */; };
@@ -168,6 +168,7 @@
 		2EE6AED1A722665C1A848634 /* TimeFormatPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112C51735660563451F20167 /* TimeFormatPreference.swift */; };
 		2F0834155898DD017557475B /* DailyForecastEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A88ABA983C050FAB0B0E026 /* DailyForecastEntry.swift */; };
 		31D2C15CC44C15FD52D75191 /* TimelineControlsChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E958C65373675E632761958 /* TimelineControlsChip.swift */; };
+		31D5207492CFA2DC67625E78 /* SupportThanks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488DE64AEE50FBBD34C23B39 /* SupportThanks.swift */; };
 		325AD5ADC691585F66D9DDDB /* NotificationSettingsManager+LegacyMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AEFB87AE4B3000B4A770806 /* NotificationSettingsManager+LegacyMigration.swift */; };
 		328D4E6EDCD8C3B93B3071A0 /* WidgetBasemapStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070D305CBB8781E45931B2F4 /* WidgetBasemapStore.swift */; };
 		354AAE545555419318B76616 /* SupportTileStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1BF6BCDB76F0E581652A14 /* SupportTileStyle.swift */; };
@@ -326,6 +327,7 @@
 		77BB76C73EBA384790CE72F4 /* UVIndexCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF8FE7C08958860478BCD838 /* UVIndexCategory.swift */; };
 		781773960C77DB83646CA732 /* AtmosphereDebugSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 878DD1E2BC98E5D3D1A45491 /* AtmosphereDebugSnapshot.swift */; };
 		7830584D26C6E5F85CDDB384 /* RainNowcastSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D114760B8E04C6F19057AA7 /* RainNowcastSummary.swift */; };
+		786594A49761EA756BFFFE7B /* SupportTreatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE1F786B3291F8A9DE85DBF /* SupportTreatTests.swift */; };
 		78A540B4C5D0121AEC5497C3 /* RadarPalettes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45732058AA9033ED7D07A0F /* RadarPalettes.swift */; };
 		7A2710AFDEF064A3009BB228 /* WeatherSeriesDTOs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206C73393513CE08B65A4655 /* WeatherSeriesDTOs.swift */; };
 		7A5707F9905EF0E344649240 /* WeatherMapView+ModelLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2019F20EF227A6874F0CB6FC /* WeatherMapView+ModelLayer.swift */; };
@@ -458,11 +460,14 @@
 		B0AD00063007000000000002 /* OnboardingBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00063007000000000001 /* OnboardingBackgroundView.swift */; };
 		B0AD00073007000000000002 /* OnboardingSceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00073007000000000001 /* OnboardingSceneView.swift */; };
 		B0AD00083007000000000002 /* OnboardingButtonStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00083007000000000001 /* OnboardingButtonStack.swift */; };
-		B0AD00093007000000000002 /* OnboardingBenefitRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00093007000000000001 /* OnboardingBenefitRow.swift */; };
 		B0AD000A3007000000000002 /* OnboardingStepIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000A3007000000000001 /* OnboardingStepIcon.swift */; };
+		B0AD00143007000000000002 /* OnboardingQuestionStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00143007000000000001 /* OnboardingQuestionStep.swift */; };
+		B0AD00153007000000000002 /* OnboardingExtrasStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00153007000000000001 /* OnboardingExtrasStage.swift */; };
+		B0AD000A3100000000000002 /* OnboardingCrashReportsStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000A3100000000000001 /* OnboardingCrashReportsStep.swift */; };
+		B0AD000A3101000000000002 /* OnboardingMapStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000A3101000000000001 /* OnboardingMapStage.swift */; };
 		B0AD000B3007000000000002 /* OnboardingWelcomeStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000B3007000000000001 /* OnboardingWelcomeStep.swift */; };
 		B0AD000C3007000000000002 /* OnboardingFeaturesStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000C3007000000000001 /* OnboardingFeaturesStep.swift */; };
-		B0AD000D3007000000000002 /* OnboardingCollage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000D3007000000000001 /* OnboardingCollage.swift */; };
+		B0AD000D3007000000000002 /* OnboardingFeatureStages.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000D3007000000000001 /* OnboardingFeatureStages.swift */; };
 		B0AD000E3007000000000002 /* OnboardingSampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000E3007000000000001 /* OnboardingSampleData.swift */; };
 		B0AD000F3007000000000002 /* OnboardingLocationStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000F3007000000000001 /* OnboardingLocationStep.swift */; };
 		B0AD00103007000000000002 /* OnboardingManualLocationStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00103007000000000001 /* OnboardingManualLocationStep.swift */; };
@@ -542,6 +547,7 @@
 		D6EFDD1928C0D59FF0C1767E /* AtmosphereSceneRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FE8A3F552884DBA49329C66 /* AtmosphereSceneRules.swift */; };
 		D83DD5C3DED880FBC407B273 /* MapBasemapStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE12882FD6C05983FAB7B72E /* MapBasemapStyle.swift */; };
 		D85A822EBA39CFB28CAD51B4 /* AtmosphereShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 80CB57C79CFBEB56F92CE6AA /* AtmosphereShaders.metal */; };
+		D85E50C3559AC71536C82BBA /* TreatReel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8613D5A11E935C4519531315 /* TreatReel.swift */; };
 		DA15950413166D5A0CBEA52B /* TopPlacesChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44EDE85AFD8AB2C965E3DD40 /* TopPlacesChart.swift */; };
 		DA238FB86DE39939D4C24C99 /* ClassicCardBack.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4EB81676AD61F09BD49A24 /* ClassicCardBack.swift */; };
 		DC97F740AA7FB132AA8ED031 /* StarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00933209D1ABC44CD26DB82 /* StarsView.swift */; };
@@ -590,6 +596,7 @@
 		F81E483A9A8D051674ED4615 /* APIClient+Alerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65665CD6DE39D7E223632D3 /* APIClient+Alerts.swift */; };
 		F9B93908FC769585A76BA0EC /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26FA0E293F3FCD2D01A9E546 /* Location.swift */; };
 		FAD9604638865F53FE6BF8AA /* OpensByWeekdayChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C117B7BC6ACF9673667A0D /* OpensByWeekdayChart.swift */; };
+		FAFA2CCB29FE1E9152E7160F /* SupportTreat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833F09CDE588DF9A35B4F520 /* SupportTreat.swift */; };
 		FBBEEAD32E9766F4B446FD64 /* AtmosphereDebugPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5773194CAF5D2B7FFB5B4726 /* AtmosphereDebugPanel.swift */; };
 		FBC165D4D3A78339A2046FBA /* HourlyTimelineStrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 901A5741FEEFE914C03CE367 /* HourlyTimelineStrip.swift */; };
 		FC17200DE11D33A63A1C0A4E /* Color-Custom.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91533016F01F5E16D887773 /* Color-Custom.swift */; };
@@ -807,6 +814,7 @@
 		43998CE31C3C5FEEE5B0F5C0 /* NowSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NowSection.swift; sourceTree = "<group>"; };
 		443B0BCEAF65489F8D23049A /* HourlySunEventCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourlySunEventCard.swift; sourceTree = "<group>"; };
 		44EDE85AFD8AB2C965E3DD40 /* TopPlacesChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TopPlacesChart.swift; sourceTree = "<group>"; };
+		488DE64AEE50FBBD34C23B39 /* SupportThanks.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SupportThanks.swift; sourceTree = "<group>"; };
 		48E1521A5B0316B2D24B6643 /* AtmosphereSampler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AtmosphereSampler.swift; sourceTree = "<group>"; };
 		48E2F7814AB06B653C3CA9AD /* Oscar.storekit */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = Oscar.storekit; sourceTree = "<group>"; };
 		48F34C28B80E28F154E9DC3E /* WeatherMapView+StormCells.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "WeatherMapView+StormCells.swift"; sourceTree = "<group>"; };
@@ -885,10 +893,12 @@
 		80CB57C79CFBEB56F92CE6AA /* AtmosphereShaders.metal */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.metal; path = AtmosphereShaders.metal; sourceTree = "<group>"; };
 		80E521DA71004CB0499DC597 /* DailyEnsembleForecast.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyEnsembleForecast.swift; sourceTree = "<group>"; };
 		81F17374D6B0EC7BD79E03EC /* AtmosphereSkyShaderView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AtmosphereSkyShaderView.swift; sourceTree = "<group>"; };
+		833F09CDE588DF9A35B4F520 /* SupportTreat.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SupportTreat.swift; sourceTree = "<group>"; };
 		84F0C15D4BA1355A646C9632 /* DailyEnsembleModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyEnsembleModel.swift; sourceTree = "<group>"; };
 		8519959D1787636A6E5C6203 /* NowLayoutSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NowLayoutSheet.swift; sourceTree = "<group>"; };
 		85290A27784F20F3E0949FF7 /* EUAirQualityBand.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EUAirQualityBand.swift; sourceTree = "<group>"; };
 		85FD88C466F6971FB6BFB065 /* LocationMapSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationMapSheet.swift; sourceTree = "<group>"; };
+		8613D5A11E935C4519531315 /* TreatReel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TreatReel.swift; sourceTree = "<group>"; };
 		878DD1E2BC98E5D3D1A45491 /* AtmosphereDebugSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AtmosphereDebugSnapshot.swift; sourceTree = "<group>"; };
 		8826B7F9387594FA9E0DCFE0 /* NowLayoutPreview.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NowLayoutPreview.swift; sourceTree = "<group>"; };
 		8983EEA846496807C76363AF /* WidgetCity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetCity.swift; sourceTree = "<group>"; };
@@ -901,6 +911,7 @@
 		8D6DE9FA86983DE79F43055C /* NotificationSettingsManager+Subscription.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "NotificationSettingsManager+Subscription.swift"; sourceTree = "<group>"; };
 		8DF79A3FE894A170028ACC0E /* BearerAuthMiddleware.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BearerAuthMiddleware.swift; sourceTree = "<group>"; };
 		8F05FCB7CC167793B314E675 /* WeatherModelCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeatherModelCard.swift; sourceTree = "<group>"; };
+		8FE1F786B3291F8A9DE85DBF /* SupportTreatTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SupportTreatTests.swift; sourceTree = "<group>"; };
 		8FE8A3F552884DBA49329C66 /* AtmosphereSceneRules.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AtmosphereSceneRules.swift; sourceTree = "<group>"; };
 		901A5741FEEFE914C03CE367 /* HourlyTimelineStrip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HourlyTimelineStrip.swift; sourceTree = "<group>"; };
 		9049FE626D24C7166A39BF63 /* SupportView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SupportView.swift; sourceTree = "<group>"; };
@@ -918,7 +929,7 @@
 		A4CB4995C60DA37F323A85B1 /* WindSpeedUnit.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WindSpeedUnit.swift; sourceTree = "<group>"; };
 		A4EF57A0D34E166816E3F89D /* MapValueBubbles.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MapValueBubbles.swift; sourceTree = "<group>"; };
 		A67E5B5A05E55B6D1B047791 /* EnsembleView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EnsembleView.swift; sourceTree = "<group>"; };
-		A6FB747B80DB45D5A8F22D1F /* WebcamsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WebcamsView.swift; sourceTree = "<group>"; };
+		A6FB747B80DB45D5A8F22D1F /* WebcamSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WebcamSheet.swift; sourceTree = "<group>"; };
 		A91533016F01F5E16D887773 /* Color-Custom.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Color-Custom.swift"; sourceTree = "<group>"; };
 		AA00000A2F9A00000000001A /* PollenSeverity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PollenSeverity.swift; sourceTree = "<group>"; };
 		AA00000C2F9A00000000001A /* EnvironmentMetric.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentMetric.swift; sourceTree = "<group>"; };
@@ -981,11 +992,14 @@
 		B0AD00063007000000000001 /* OnboardingBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingBackgroundView.swift; sourceTree = "<group>"; };
 		B0AD00073007000000000001 /* OnboardingSceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSceneView.swift; sourceTree = "<group>"; };
 		B0AD00083007000000000001 /* OnboardingButtonStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingButtonStack.swift; sourceTree = "<group>"; };
-		B0AD00093007000000000001 /* OnboardingBenefitRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingBenefitRow.swift; sourceTree = "<group>"; };
 		B0AD000A3007000000000001 /* OnboardingStepIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStepIcon.swift; sourceTree = "<group>"; };
+		B0AD00143007000000000001 /* OnboardingQuestionStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingQuestionStep.swift; sourceTree = "<group>"; };
+		B0AD00153007000000000001 /* OnboardingExtrasStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingExtrasStage.swift; sourceTree = "<group>"; };
+		B0AD000A3100000000000001 /* OnboardingCrashReportsStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCrashReportsStep.swift; sourceTree = "<group>"; };
+		B0AD000A3101000000000001 /* OnboardingMapStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingMapStage.swift; sourceTree = "<group>"; };
 		B0AD000B3007000000000001 /* OnboardingWelcomeStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWelcomeStep.swift; sourceTree = "<group>"; };
 		B0AD000C3007000000000001 /* OnboardingFeaturesStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFeaturesStep.swift; sourceTree = "<group>"; };
-		B0AD000D3007000000000001 /* OnboardingCollage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCollage.swift; sourceTree = "<group>"; };
+		B0AD000D3007000000000001 /* OnboardingFeatureStages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFeatureStages.swift; sourceTree = "<group>"; };
 		B0AD000E3007000000000001 /* OnboardingSampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSampleData.swift; sourceTree = "<group>"; };
 		B0AD000F3007000000000001 /* OnboardingLocationStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLocationStep.swift; sourceTree = "<group>"; };
 		B0AD00103007000000000001 /* OnboardingManualLocationStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingManualLocationStep.swift; sourceTree = "<group>"; };
@@ -1275,7 +1289,6 @@
 				0B948936847368B11C4D44DA /* NowSectionHeader.swift */,
 				75B66618499C4444A18ED06F /* DetailDeck.swift */,
 				E3A01117113F3A79EF71C31A /* Ensemble */,
-				FC142D92A66B2367EA3B2946 /* Webcams */,
 			);
 			path = Now;
 			sourceTree = "<group>";
@@ -1548,6 +1561,9 @@
 				FCDF1ADC2D0F63BEA660FDB9 /* IconWall.swift */,
 				0323A0AFCBA473F245FB8CF1 /* IconWallColumn.swift */,
 				5C5BBE8488917E73B0F1A8D3 /* ShineModifier.swift */,
+				833F09CDE588DF9A35B4F520 /* SupportTreat.swift */,
+				8613D5A11E935C4519531315 /* TreatReel.swift */,
+				488DE64AEE50FBBD34C23B39 /* SupportThanks.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -1605,6 +1621,7 @@
 				9C1498F7B4AD0D84555016A4 /* ForecastSanitizingMiddlewareTests.swift */,
 				7D9054D0693AC368088A15E0 /* UsageStatsTests.swift */,
 				5CD494DA6C24661B10C8FCE1 /* StoreKitConfigTests.swift */,
+				8FE1F786B3291F8A9DE85DBF /* SupportTreatTests.swift */,
 			);
 			path = "Oscar°Tests";
 			sourceTree = "<group>";
@@ -1765,6 +1782,7 @@
 				FDB7513D424FB8AEB953510F /* Timeline */,
 				1EBB5BA88C10CAFE5DA98CA4 /* LayerPicker */,
 				9F9A905265CC26BE4A20D3B2 /* MapPreview.swift */,
+				A6FB747B80DB45D5A8F22D1F /* WebcamSheet.swift */,
 			);
 			path = Map;
 			sourceTree = "<group>";
@@ -1893,11 +1911,14 @@
 				B0AD00063007000000000001 /* OnboardingBackgroundView.swift */,
 				B0AD00073007000000000001 /* OnboardingSceneView.swift */,
 				B0AD00083007000000000001 /* OnboardingButtonStack.swift */,
-				B0AD00093007000000000001 /* OnboardingBenefitRow.swift */,
 				B0AD000A3007000000000001 /* OnboardingStepIcon.swift */,
+				B0AD00143007000000000001 /* OnboardingQuestionStep.swift */,
+				B0AD00153007000000000001 /* OnboardingExtrasStage.swift */,
+				B0AD000A3100000000000001 /* OnboardingCrashReportsStep.swift */,
+				B0AD000A3101000000000001 /* OnboardingMapStage.swift */,
 				B0AD000B3007000000000001 /* OnboardingWelcomeStep.swift */,
 				B0AD000C3007000000000001 /* OnboardingFeaturesStep.swift */,
-				B0AD000D3007000000000001 /* OnboardingCollage.swift */,
+				B0AD000D3007000000000001 /* OnboardingFeatureStages.swift */,
 				B0AD000E3007000000000001 /* OnboardingSampleData.swift */,
 				B0AD000F3007000000000001 /* OnboardingLocationStep.swift */,
 				B0AD00103007000000000001 /* OnboardingManualLocationStep.swift */,
@@ -2040,15 +2061,6 @@
 				A4CB4995C60DA37F323A85B1 /* WindSpeedUnit.swift */,
 			);
 			path = Models;
-			sourceTree = "<group>";
-		};
-		FC142D92A66B2367EA3B2946 /* Webcams */ = {
-			isa = PBXGroup;
-			children = (
-				A6FB747B80DB45D5A8F22D1F /* WebcamsView.swift */,
-			);
-			name = Webcams;
-			path = Webcams;
 			sourceTree = "<group>";
 		};
 		FDB7513D424FB8AEB953510F /* Timeline */ = {
@@ -2502,11 +2514,14 @@
 				B0AD00063007000000000002 /* OnboardingBackgroundView.swift in Sources */,
 				B0AD00073007000000000002 /* OnboardingSceneView.swift in Sources */,
 				B0AD00083007000000000002 /* OnboardingButtonStack.swift in Sources */,
-				B0AD00093007000000000002 /* OnboardingBenefitRow.swift in Sources */,
 				B0AD000A3007000000000002 /* OnboardingStepIcon.swift in Sources */,
+				B0AD00143007000000000002 /* OnboardingQuestionStep.swift in Sources */,
+				B0AD00153007000000000002 /* OnboardingExtrasStage.swift in Sources */,
+				B0AD000A3100000000000002 /* OnboardingCrashReportsStep.swift in Sources */,
+				B0AD000A3101000000000002 /* OnboardingMapStage.swift in Sources */,
 				B0AD000B3007000000000002 /* OnboardingWelcomeStep.swift in Sources */,
 				B0AD000C3007000000000002 /* OnboardingFeaturesStep.swift in Sources */,
-				B0AD000D3007000000000002 /* OnboardingCollage.swift in Sources */,
+				B0AD000D3007000000000002 /* OnboardingFeatureStages.swift in Sources */,
 				B0AD000E3007000000000002 /* OnboardingSampleData.swift in Sources */,
 				B0AD000F3007000000000002 /* OnboardingLocationStep.swift in Sources */,
 				B0AD00103007000000000002 /* OnboardingManualLocationStep.swift in Sources */,
@@ -2818,8 +2833,11 @@
 				5963D578F5114FEF89A46D6F /* MapPreview.swift in Sources */,
 				4A9A9959147DC17E57428A42 /* DayDetailView.swift in Sources */,
 				E84C39D581EAB6DFE85E26E4 /* APIClient+Webcams.swift in Sources */,
-				1DB2E5F4430BD9756BDD2DDB /* WebcamsView.swift in Sources */,
+				1DB2E5F4430BD9756BDD2DDB /* WebcamSheet.swift in Sources */,
 				5C6414B45D294D3FB27809D1 /* WeatherMapView+Webcams.swift in Sources */,
+				FAFA2CCB29FE1E9152E7160F /* SupportTreat.swift in Sources */,
+				D85E50C3559AC71536C82BBA /* TreatReel.swift in Sources */,
+				31D5207492CFA2DC67625E78 /* SupportThanks.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2943,6 +2961,7 @@
 				686CE124FA8633933D38338A /* ForecastSanitizingMiddlewareTests.swift in Sources */,
 				40BA709E1CBCAA34AC9E4FD6 /* UsageStatsTests.swift in Sources */,
 				5FC4E9A025C32B4B21F6EE66 /* StoreKitConfigTests.swift in Sources */,
+				786594A49761EA756BFFFE7B /* SupportTreatTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

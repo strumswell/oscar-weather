@@ -6,10 +6,9 @@
 import SwiftUI
 
 /// Shared backdrop behind the onboarding steps: dioramas that walk through a
-/// day — noon behind welcome and features, a starry night behind the location
-/// ask, a thunderstorm behind notifications — while the manual-city step shows
-/// the real simulation crossfading to every place the search picks. The finale
-/// keeps whatever is on screen and dissolves it over the frosted NowView.
+/// day (noon, starry night, thunderstorm), while the manual-city step shows
+/// the real simulation crossfading to every place the search picks. The
+/// finale keeps whatever is on screen and dissolves it over the frosted NowView.
 struct OnboardingBackgroundView: View {
     let step: OnboardingStep
     @Environment(Location.self) private var location
@@ -22,16 +21,13 @@ struct OnboardingBackgroundView: View {
 
     var body: some View {
         ZStack {
-            // The weather backdrop is opaque for every step; at the finale it
-            // dissolves to reveal the NowView living beneath the whole flow.
+            // At the finale the backdrop dissolves to reveal NowView beneath.
             content
                 .opacity(isFinale ? 0 : 1)
                 .animation(.easeInOut(duration: 0.9), value: isFinale)
 
             if isFinale {
-                // Full frost, present the very instant the finale begins (no
-                // fade-in) so raw NowView is never exposed while the backdrop
-                // above dissolves through it.
+                // Instant frost, so raw NowView never shows through the dissolve.
                 Rectangle()
                     .fill(.ultraThinMaterial)
                     .ignoresSafeArea()
@@ -65,23 +61,20 @@ struct OnboardingBackgroundView: View {
 
     @ViewBuilder private var content: some View {
         ZStack {
-            // Opaque backing: scene crossfades dip below full opacity halfway
-            // through, and without this NowView's big temperature grins
-            // through the hero window for a beat.
+            // Scene crossfades dip below full opacity halfway; this keeps
+            // NowView from showing through for a beat.
             Color.black
                 .ignoresSafeArea()
 
             switch backdrop {
             case .scene(let scene):
                 OnboardingSceneView(scene: scene)
-                    // Re-created per scene so a step change crossfades between
-                    // two finished dioramas instead of hard-swapping snapshots.
+                    // One view per scene, so a step change crossfades.
                     .id(scene)
                     .transition(.opacity)
             case .live:
                 WeatherSimulationView()
-                    // Re-created per place so a city switch crossfades between
-                    // two finished scenes instead of hard-swapping shader input.
+                    // One view per place, so a city switch crossfades.
                     .id(placeKey)
                     .transition(.opacity)
             }
@@ -101,7 +94,7 @@ struct OnboardingBackgroundView: View {
         case .welcome, .features: .scene(.day)
         case .location: .scene(.night)
         case .manualLocation: hasChosenCity ? .live : .scene(.night)
-        case .notifications: .scene(.storm)
+        case .notifications, .crashReports: .scene(.storm)
         case .finale: nil
         }
     }

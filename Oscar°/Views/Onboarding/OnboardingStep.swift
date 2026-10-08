@@ -14,11 +14,12 @@ enum OnboardingStep: String, Equatable {
     case location
     case manualLocation
     case notifications
+    case crashReports
     case finale
 }
 
 extension OnboardingStep {
-    /// The step after the feature tour: ask for location only while the system
+    /// The step after the feature pages: ask for location only while the system
     /// prompt can still appear; a denied status routes to manual city selection
     /// unless a city is already picked.
     @MainActor
@@ -49,6 +50,11 @@ extension OnboardingStep {
            OnboardingRegion.hasAlertCoverage(locationService.knownCoordinates() ?? locationService.getCoordinates()) {
             return .notifications
         }
-        return .finale
+        return afterNotifications
+    }
+
+    /// Crash reports are asked once; a replay skips the question.
+    static var afterNotifications: OnboardingStep {
+        CrashReporting.hasAnswered ? .finale : .crashReports
     }
 }

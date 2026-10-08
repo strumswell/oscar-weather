@@ -167,6 +167,32 @@ enum MapChip {
         }
     }
 
+    /// A webcam's picture as a small framed photo. 64×36 pt stays within the 200×112 px
+    /// thumbnail on 3x screens: Windy's terms forbid upscaling.
+    static func webcam(_ photo: UIImage) -> UIImage {
+        let margin: CGFloat = 3
+        let photoRect = CGRect(x: margin, y: margin, width: 64, height: 36)
+        let size = CGSize(width: photoRect.maxX + margin, height: photoRect.maxY + margin)
+        return UIGraphicsImageRenderer(size: size).image { context in
+            let frame = UIBezierPath(roundedRect: photoRect, cornerRadius: 6)
+            context.cgContext.setShadow(
+                offset: CGSize(width: 0, height: 1),
+                blur: 3,
+                color: UIColor.black.withAlphaComponent(0.35).cgColor
+            )
+            fill.setFill()
+            frame.fill()
+            context.cgContext.setShadow(offset: .zero, blur: 0, color: nil)
+            context.cgContext.saveGState()
+            frame.addClip()
+            photo.draw(in: photoRect)
+            context.cgContext.restoreGState()
+            UIColor.white.setStroke()
+            frame.lineWidth = 1.5
+            frame.stroke()
+        }
+    }
+
     /// The shared chrome: dark capsule, hairline stroke, soft drop shadow.
     /// Content draws on top inside the closure.
     private static func capsule(width: CGFloat, content: (UIGraphicsImageRendererContext) -> Void) -> UIImage {

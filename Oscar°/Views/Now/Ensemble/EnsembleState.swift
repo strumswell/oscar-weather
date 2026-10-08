@@ -44,6 +44,15 @@ final class EnsembleState {
         isLoading = false
     }
 
+    /// Days built in code instead of loaded (the onboarding's sample), in the
+    /// default units.
+    func stage(_ days: [EnsembleDay], selectedIndex: Int = 0) {
+        loadGeneration += 1
+        self.days = days
+        self.selectedIndex = selectedIndex
+        isLoading = false
+    }
+
     private func apply(_ response: DailyEnsembleForecastResponse, anchorTime: Double) {
         let windSetting = WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit)
         timeZone = response.timeZone

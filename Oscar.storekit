@@ -21,17 +21,17 @@
       "localizations" : [
         {
           "description" : "Ein kleines Dankeschön für Oscar.",
-          "displayName" : "Kleines Dankeschön",
+          "displayName" : "Kleines Care-Paket",
           "locale" : "de"
         },
         {
           "description" : "A small thank you for Oscar.",
-          "displayName" : "Small thank you",
+          "displayName" : "Small Care Package",
           "locale" : "en_US"
         }
       ],
       "productID" : "cloud.bolte.Oscar.tip.small",
-      "referenceName" : "Tip small",
+      "referenceName" : "Kleines Care-Paket",
       "type" : "Consumable"
     },
     {
@@ -41,17 +41,17 @@
       "localizations" : [
         {
           "description" : "Ein Dankeschön für Oscar.",
-          "displayName" : "Dankeschön",
+          "displayName" : "Care-Paket",
           "locale" : "de"
         },
         {
           "description" : "A thank you for Oscar.",
-          "displayName" : "Thank you",
+          "displayName" : "Care Package",
           "locale" : "en_US"
         }
       ],
       "productID" : "cloud.bolte.Oscar.tip.medium",
-      "referenceName" : "Tip medium",
+      "referenceName" : "Care-Paket",
       "type" : "Consumable"
     },
     {
@@ -61,17 +61,17 @@
       "localizations" : [
         {
           "description" : "Ein großes Dankeschön für Oscar.",
-          "displayName" : "Großes Dankeschön",
+          "displayName" : "Großes Care-Paket",
           "locale" : "de"
         },
         {
           "description" : "A big thank you for Oscar.",
-          "displayName" : "Big thank you",
+          "displayName" : "Big Care Package",
           "locale" : "en_US"
         }
       ],
       "productID" : "cloud.bolte.Oscar.tip.large",
-      "referenceName" : "Tip large",
+      "referenceName" : "Großes Care-Paket",
       "type" : "Consumable"
     }
   ],
@@ -98,7 +98,7 @@
       "localizations" : [
 
       ],
-      "name" : "Unterstützer",
+      "name" : "Care-Pakete",
       "subscriptions" : [
         {
           "adHocOffers" : [
@@ -126,18 +126,18 @@
           "localizations" : [
             {
               "description" : "Oscar jeden Monat unterstützen.",
-              "displayName" : "Monatlich",
+              "displayName" : "Monatliches Care-Paket",
               "locale" : "de"
             },
             {
               "description" : "Support Oscar every month.",
-              "displayName" : "Monthly",
+              "displayName" : "Monthly Care Package",
               "locale" : "en_US"
             }
           ],
           "productID" : "cloud.bolte.Oscar.supporter.monthly",
           "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Supporter monthly",
+          "referenceName" : "Monatliches Care-Paket",
           "subscriptionGroupID" : "A1B2C3D4",
           "type" : "RecurringSubscription",
           "winbackOffers" : [
@@ -170,18 +170,18 @@
           "localizations" : [
             {
               "description" : "Oscar jedes Jahr unterstützen.",
-              "displayName" : "Jährlich",
+              "displayName" : "Jährliches Care-Paket",
               "locale" : "de"
             },
             {
               "description" : "Support Oscar every year.",
-              "displayName" : "Yearly",
+              "displayName" : "Yearly Care Package",
               "locale" : "en_US"
             }
           ],
           "productID" : "cloud.bolte.Oscar.supporter.yearly",
           "recurringSubscriptionPeriod" : "P1Y",
-          "referenceName" : "Supporter yearly",
+          "referenceName" : "Jährliches Care-Paket",
           "subscriptionGroupID" : "A1B2C3D4",
           "type" : "RecurringSubscription",
           "winbackOffers" : [

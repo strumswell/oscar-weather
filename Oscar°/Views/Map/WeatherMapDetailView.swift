@@ -227,7 +227,7 @@ struct WeatherMapDetailView: View {
             .presentationDragIndicator(.hidden)
         }
         .sheet(item: $tappedWebcam) { webcam in
-            WebcamSheet(webcam: webcam, timeZone: .current)
+            WebcamSheet(webcam: webcam)
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
         }
     }

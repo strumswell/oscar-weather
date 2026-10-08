@@ -22,8 +22,9 @@ extension WeatherMapView.Coordinator {
         }
     }
 
-    /// Up to 50 of the most popular webcams in view, refetched when the view leaves the
-    /// fetched box and at most every 5 minutes otherwise. Zoomed out too far, the markers hide.
+    /// Up to 50 of the most popular webcams in view as small live pictures, refetched when the
+    /// view leaves the fetched box and at most every 5 minutes otherwise. Zoomed out too far,
+    /// they hide.
     func syncWebcams(style: MLNStyle, active: Bool) {
         guard active, let bounds = mapView?.visibleCoordinateBounds, let box = WebcamBox(bounds) else {
             style.removeLayers(withIdentifiers: [WeatherMapView.webcamLayerID])
@@ -42,10 +43,19 @@ extension WeatherMapView.Coordinator {
                 do {
                     let webcams = try await APIClient.shared.getWebcams(
                         north: box.north, south: box.south, east: box.east, west: box.west)
+                    let photos = await Self.webcamPhotos(webcams)
                     guard let self, !self.isTornDown else { return }
-                    self.webcams = webcams
-                    (self.mapView?.style?.source(withIdentifier: WeatherMapView.webcamSourceID) as? MLNShapeSource)?
-                        .shape = Self.webcamShape(webcams)
+                    let markers = photos.mapValues(MapChip.webcam)
+                    let gone = self.webcamMarkers.keys.filter { markers[$0] == nil }
+                    self.webcams = webcams.filter { markers[$0.id] != nil }
+                    self.webcamMarkers = markers
+                    guard let style = self.mapView?.style else { return }
+                    for id in gone {
+                        style.removeImage(forName: Self.webcamImageName(id))
+                    }
+                    guard let source = style.source(withIdentifier: WeatherMapView.webcamSourceID) as? MLNShapeSource else { return }
+                    self.registerWebcamMarkers(in: style)
+                    source.shape = Self.webcamShape(self.webcams)
                 } catch {
                     weatherMapLogger.error("Webcam fetch failed: \(error.localizedDescription, privacy: .public)")
                 }
@@ -53,22 +63,51 @@ extension WeatherMapView.Coordinator {
         }
 
         guard style.source(withIdentifier: WeatherMapView.webcamSourceID) == nil else { return }
+        registerWebcamMarkers(in: style)
         let source = MLNShapeSource(identifier: WeatherMapView.webcamSourceID, shape: Self.webcamShape(webcams))
         style.addSource(source)
-        style.setImage(MapChip.pin(emoji: "📷"), forName: WeatherMapView.webcamImageName)
         let layer = MLNSymbolStyleLayer(identifier: WeatherMapView.webcamLayerID, source: source)
-        layer.iconImageName = NSExpression(forConstantValue: WeatherMapView.webcamImageName)
-        layer.iconAllowsOverlap = NSExpression(forConstantValue: true)
-        layer.iconIgnoresPlacement = NSExpression(forConstantValue: true)
+        layer.iconImageName = NSExpression(forKeyPath: "icon")
+        // Overlapping pictures hide the less popular ones (the server sorts by popularity).
+        layer.symbolSortKey = NSExpression(forKeyPath: "rank")
+        layer.iconAllowsOverlap = NSExpression(forConstantValue: false)
         style.addLayer(layer)
     }
 
+    private func registerWebcamMarkers(in style: MLNStyle) {
+        for (id, marker) in webcamMarkers {
+            style.setImage(marker, forName: Self.webcamImageName(id))
+        }
+    }
+
+    private static func webcamImageName(_ id: Int) -> String { "oscar-webcam-\(id)" }
+
     private static func webcamShape(_ webcams: [Components.Schemas.Webcam]) -> MLNShape {
-        MLNShapeCollectionFeature(shapes: webcams.map { webcam in
+        MLNShapeCollectionFeature(shapes: webcams.enumerated().map { rank, webcam in
             let feature = MLNPointFeature()
             feature.coordinate = CLLocationCoordinate2D(latitude: webcam.latitude, longitude: webcam.longitude)
-            feature.attributes = ["webcam_id": webcam.id]
+            feature.attributes = ["webcam_id": webcam.id, "icon": webcamImageName(webcam.id), "rank": rank]
             return feature
         })
+    }
+
+    /// Each webcam's latest thumbnail. Revalidated, since Windy keeps the URL while the picture changes.
+    /// Webcams whose picture fails to load are left out.
+    nonisolated private static func webcamPhotos(_ webcams: [Components.Schemas.Webcam]) async -> [Int: UIImage] {
+        await withTaskGroup(of: (Int, UIImage?).self) { group in
+            for webcam in webcams {
+                group.addTask {
+                    guard let url = URL(string: webcam.thumbnail_url) else { return (webcam.id, nil) }
+                    let request = URLRequest(url: url, cachePolicy: .reloadRevalidatingCacheData)
+                    let data = try? await URLSession.shared.data(for: request).0
+                    return (webcam.id, data.flatMap(UIImage.init(data:)))
+                }
+            }
+            var photos: [Int: UIImage] = [:]
+            for await (id, photo) in group {
+                photos[id] = photo
+            }
+            return photos
+        }
     }
 }

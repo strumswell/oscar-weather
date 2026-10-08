@@ -5,11 +5,11 @@
 
 import SwiftUI
 
-/// The multi-step first-launch flow: welcome → feature tour → location →
-/// (manual city) → (notifications) → finale. Steps share a background that
-/// starts as a picture-book sky and becomes the live weather simulation once
-/// a real location exists; between welcome and finale a solid canvas covers
-/// the lower two thirds so text never sits on the animated backdrop.
+/// The multi-step first-launch flow: welcome → feature pages → location →
+/// (manual city) → (notifications) → (crash reports) → finale. Steps share a
+/// background that starts as a picture-book sky and becomes the live weather
+/// simulation once a real location exists; between welcome and finale a
+/// solid canvas covers the lower part so text never sits on the backdrop.
 struct OnboardingView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     // ScreenshotMode is nil outside a staged run, so this is `.welcome` in
@@ -21,83 +21,56 @@ struct OnboardingView: View {
         ZStack {
             OnboardingBackgroundView(step: step)
 
-            // The collage lives beneath the stage canvas, so the feather
-            // gradient dissolves the drifting cards into solid ground.
-            if step == .features {
-                OnboardingCollage()
-                    .transition(collageTransition)
-                    .zIndex(1)
-            }
-
-            if showsStage {
-                OnboardingStage()
+            if let stageLayout {
+                // Raising or lowering the canvas animates with the step change.
+                OnboardingStage(layout: stageLayout)
                     .transition(stageTransition)
                     .zIndex(2)
             }
 
             stepContent
+                .transition(.onboardingSlide(reduceMotion: reduceMotion))
                 .zIndex(3)
         }
     }
 
     @ViewBuilder private var stepContent: some View {
-        ZStack {
-            switch step {
-            case .welcome:
-                OnboardingWelcomeStep { advance(to: .features) }
-                    .transition(stepTransition)
-            case .features:
-                OnboardingFeaturesStep {
-                    advance(to: .afterFeatures(locationService: locationService))
-                }
-                .transition(stepTransition)
-            case .location:
-                OnboardingLocationStep { granted in
-                    if granted {
-                        advance(to: .afterLocationResolved(locationService: locationService))
-                    } else {
-                        advance(to: .manualLocation)
-                    }
-                }
-                .transition(stepTransition)
-            case .manualLocation:
-                OnboardingManualLocationStep {
-                    advance(to: .afterLocationResolved(locationService: locationService))
-                }
-                .transition(stepTransition)
-            case .notifications:
-                OnboardingNotificationsStep { advance(to: .finale) }
-                    .transition(stepTransition)
-            case .finale:
-                OnboardingFinaleStep { OnboardingCoordinator.shared.complete() }
-                    .transition(stepTransition)
+        switch step {
+        case .welcome:
+            OnboardingWelcomeStep { advance(to: .features) }
+        case .features:
+            OnboardingFeaturesStep {
+                advance(to: .afterFeatures(locationService: locationService))
             }
+        case .location:
+            OnboardingLocationStep { granted in
+                if granted {
+                    advance(to: .afterLocationResolved(locationService: locationService))
+                } else {
+                    advance(to: .manualLocation)
+                }
+            }
+        case .manualLocation:
+            OnboardingManualLocationStep {
+                advance(to: .afterLocationResolved(locationService: locationService))
+            }
+        case .notifications:
+            OnboardingNotificationsStep { advance(to: .afterNotifications) }
+        case .crashReports:
+            OnboardingCrashReportsStep { advance(to: .finale) }
+        case .finale:
+            OnboardingFinaleStep { OnboardingCoordinator.shared.complete() }
         }
     }
 
     /// The canvas spans every step between the full-bleed welcome and finale.
-    private var showsStage: Bool {
+    private var stageLayout: OnboardingStage.Layout? {
         switch step {
-        case .welcome, .finale: false
-        default: true
+        case .welcome, .finale: nil
+        case .features: .tour
+        case .notifications: .list
+        case .location, .manualLocation, .crashReports: .question
         }
-    }
-
-    /// A soft push: the incoming step slides a short distance out of a slight
-    /// defocus while the outgoing one lags behind it — a crossfade when motion
-    /// is reduced.
-    private var stepTransition: AnyTransition {
-        guard !reduceMotion else { return .opacity }
-        return .asymmetric(
-            insertion: .modifier(
-                active: StepSlideModifier(offsetX: 90, opacity: 0, blur: 6),
-                identity: StepSlideModifier(offsetX: 0, opacity: 1, blur: 0)
-            ),
-            removal: .modifier(
-                active: StepSlideModifier(offsetX: -110, opacity: 0, blur: 6),
-                identity: StepSlideModifier(offsetX: 0, opacity: 1, blur: 0)
-            )
-        )
     }
 
     /// The canvas rises softly out of the welcome screen and dissolves under
@@ -110,54 +83,10 @@ struct OnboardingView: View {
         )
     }
 
-    /// The collage settles in from a slight zoom and drifts off up-wind once
-    /// the feature step ends.
-    private var collageTransition: AnyTransition {
-        guard !reduceMotion else { return .opacity }
-        return .asymmetric(
-            insertion: .modifier(
-                active: CollageDriftModifier(scale: 1.05, opacity: 0),
-                identity: CollageDriftModifier()
-            ),
-            removal: .modifier(
-                active: CollageDriftModifier(offset: CGSize(width: -80, height: -120), blur: 8, opacity: 0),
-                identity: CollageDriftModifier()
-            )
-        )
-    }
-
     private func advance(to next: OnboardingStep) {
         withAnimation(.smooth(duration: 0.55)) {
             step = next
         }
-    }
-}
-
-private struct StepSlideModifier: ViewModifier {
-    let offsetX: CGFloat
-    let opacity: Double
-    let blur: CGFloat
-
-    func body(content: Content) -> some View {
-        content
-            .offset(x: offsetX)
-            .opacity(opacity)
-            .blur(radius: blur)
-    }
-}
-
-private struct CollageDriftModifier: ViewModifier {
-    var offset: CGSize = .zero
-    var scale: CGFloat = 1
-    var blur: CGFloat = 0
-    var opacity: Double = 1
-
-    func body(content: Content) -> some View {
-        content
-            .offset(offset)
-            .scaleEffect(scale)
-            .blur(radius: blur)
-            .opacity(opacity)
     }
 }
 

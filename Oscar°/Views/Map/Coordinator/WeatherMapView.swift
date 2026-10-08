@@ -37,6 +37,13 @@ let weatherMapLogger = Logger(
 
 // MARK: - Map view (representable)
 
+/// A fixed layer choice for a map that must not follow (or change) the
+/// person's saved map settings.
+struct MapLayerOverride: Equatable {
+    var radar: Bool
+    var tileLayer: WeatherTileLayer?
+}
+
 struct WeatherMapView: UIViewRepresentable {
     let settingsService: SettingService
     var coordinates: CLLocationCoordinate2D
@@ -52,6 +59,9 @@ struct WeatherMapView: UIViewRepresentable {
     /// Tap on a storm-cell marker/footprint → that cell's details.
     var onCellTapped: ((StormCellInfo) -> Void)? = nil
     var onWebcamTapped: ((Components.Schemas.Webcam) -> Void)? = nil
+    /// Draws exactly these layers instead of the saved map settings, with
+    /// warnings, cells, clouds and webcams off (the onboarding's map).
+    var layerOverride: MapLayerOverride? = nil
 
     static let radarLayerID = "oscar-radar-layer"
     static let modelLayerID = "oscar-model-image"
@@ -96,7 +106,6 @@ struct WeatherMapView: UIViewRepresentable {
     static let cellArrowImageName = "oscar-cell-arrow"
     static let webcamSourceID = "oscar-webcams"
     static let webcamLayerID = "oscar-webcams-layer"
-    static let webcamImageName = "oscar-webcam-pin"
 
     /// Initial camera zoom, overridable via `-mapInitialZoom <z>` (UserDefaults
     /// argument domain or persisted default) — a dev/staging knob like
@@ -255,6 +264,7 @@ struct WeatherMapView: UIViewRepresentable {
         var isLoadingStormCells = false
 
         var webcams: [Components.Schemas.Webcam] = []
+        var webcamMarkers: [Int: UIImage] = [:]
         var webcamBox: WebcamBox?
         var webcamsFetchedAt: Date?
         var isLoadingWebcams = false
@@ -451,17 +461,19 @@ struct WeatherMapView: UIViewRepresentable {
             // these reads would register no dependencies — the observation loop (and
             // with it the whole map) would die on the first blocked call.
             let settings = parent.settingsService
-            let radarActive = settings.oscarRadarLayer
+            let fixedLayers = parent.layerOverride
+            let usesSettings = fixedLayers == nil
+            let radarActive = fixedLayers?.radar ?? settings.oscarRadarLayer
             let smoothMotion = settings.radarSmoothMotion
             let softRendering = settings.radarSoftRendering
             let motionArrows = settings.radarMotionArrows
             let valueBubbles = settings.mapValueBubbles
-            let activeTileLayer = settings.activeTileLayer
-            let alertPolygons = settings.showAlertPolygons
-            let stormCells = settings.showStormCells
-            let isobars = settings.showIsobars || activeTileLayer?.isPressureLayer == true
+            let activeTileLayer = usesSettings ? settings.activeTileLayer : fixedLayers?.tileLayer
+            let alertPolygons = usesSettings && settings.showAlertPolygons
+            let stormCells = usesSettings && settings.showStormCells
+            let isobars = (usesSettings && settings.showIsobars) || activeTileLayer?.isPressureLayer == true
             let radarRegion = settings.oscarRadarRegion
-            let webcamsOn = settings.mapWebcams
+            let webcamsOn = usesSettings && settings.mapWebcams
             // Registers the observation dependency; the value itself reaches the
             // layers via `parent.overlayOpacity` on the next updateUIView pass.
             _ = settings.mapOverlayOpacity
@@ -488,7 +500,7 @@ struct WeatherMapView: UIViewRepresentable {
             let radarAtEnd = radarRenderedIndex == radarFrameCount - 1
             let radarNext = continuationActive && radarAtEnd ? nil : radarState?.nextFrame
 
-            let cloudsActive = settings.cloudLayerActive
+            let cloudsActive = usesSettings && settings.cloudLayerActive
             let cloudState = parent.cloudLayerState
             let cloudBounds = cloudState?.bounds
             let cloudMotion = cloudState?.motion

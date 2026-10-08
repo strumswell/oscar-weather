@@ -158,7 +158,6 @@ private extension NowSection {
         case .environment: 140
         case .climate: 130
         case .stations: 215
-        case .webcams: 200
         }
     }
 }
@@ -167,32 +166,6 @@ private extension NowSection {
 /// values so every section shows whatever the weather. The caller scales it.
 private struct MiniPage: View {
     let sections: [NowSection]
-
-    /// A shower passing through over the next two hours.
-    private static let showerPoints: [PrecipChartPoint] = (0...24).map { step in
-        let progress = Double(step) / 24
-        return PrecipChartPoint(
-            date: Date(timeIntervalSinceReferenceDate: Double(step) * 300),
-            value: 2.4 * exp(-pow((progress - 0.4) / 0.18, 2))
-        )
-    }
-
-    /// Three stations around a mild day: cool night, warm afternoon.
-    private static let sampleStations: [Components.Schemas.NearbyStation] = [
-        ("Berlin Tempelhof", 5.8, 182.0, 0.0),
-        ("Berlin Dahlem", 10.2, 224.0, -2.4),
-        ("Potsdam", 27.9, 237.0, -1.3),
-    ].map { name, distance, bearing, offset in
-        let end = Date(timeIntervalSinceReferenceDate: 24 * 3600)
-        let history = (0...24).map { hour in
-            Components.Schemas.StationReading(
-                time: end.addingTimeInterval(Double(hour - 24) * 3600),
-                temperature_c: 13 + offset - 6 * cos(Double(hour + 3) / 24 * 2 * .pi))
-        }
-        return Components.Schemas.NearbyStation(
-            id: name, name: name, source: "esoh", latitude: 52.5, longitude: 13.4,
-            distance_km: distance, bearing_deg: bearing, last_report_at: end, current: history[24], history: history)
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: PageMap.spacing) {
@@ -211,7 +184,7 @@ private struct MiniPage: View {
                 .transition(.opacity)
             }
         }
-        .environment(\.cardBackgroundStyle, collageCardFill)
+        .environment(\.cardBackgroundStyle, stagedCardFill)
         // The grid's heights assume the default text size.
         .dynamicTypeSize(.large)
         .allowsHitTesting(false)
@@ -221,7 +194,7 @@ private struct MiniPage: View {
     private func card(for section: NowSection) -> some View {
         switch section {
         case .radar:
-            PrecipitationSeriesChart(points: Self.showerPoints, timeZone: .gmt)
+            PrecipitationSeriesChart(points: OnboardingSampleData.showerPoints, timeZone: .current)
                 .padding(16)
                 .frame(height: 120)
                 .cardBackground()
@@ -250,22 +223,8 @@ private struct MiniPage: View {
             CollageClimateCard()
                 .padding(.horizontal)
         case .stations:
-            StationsCard(stations: Self.sampleStations, timeZone: .gmt) { _ in }
+            StationsCard(stations: OnboardingSampleData.stations, timeZone: .current) { _ in }
                 .padding(.horizontal)
-        case .webcams:
-            // Blank frames: webcam images may not appear in anything published.
-            HStack(spacing: 12) {
-                ForEach(0..<3, id: \.self) { _ in
-                    Color.clear
-                        .frame(width: 200, height: 112)
-                        .cardBackground()
-                        .clipShape(.rect(cornerRadius: 12))
-                        .cardBorder(RoundedRectangle(cornerRadius: 12))
-                }
-            }
-            .padding(.leading)
-            .frame(width: PageMap.width, alignment: .leading)
-            .clipped()
         }
     }
 }

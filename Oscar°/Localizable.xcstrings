@@ -1,222 +1,6 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
-    "Webcams" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Webcams"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Webcams"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Web kameraları"
-          }
-        }
-      }
-    },
-    "Öffnet die Webcam" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Öffnet die Webcam"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opens the webcam"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Web kamerasını açar"
-          }
-        }
-      }
-    },
-    "Aufgenommen %@" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aufgenommen %@"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Taken at %@"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Çekim saati %@"
-          }
-        }
-      }
-    },
-    "Zeitraffer von heute" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zeitraffer von heute"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Today's Timelapse"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bugünün hızlandırılmış videosu"
-          }
-        }
-      }
-    },
-    "Mitteilungen sind in den iOS-Einstellungen ausgeschaltet." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notifications are turned off in iOS Settings."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bildirimler iOS Ayarları'nda kapalı."
-          }
-        }
-      }
-    },
-    "Bis zu 30 Minuten vorher." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Up to 30 minutes ahead."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "30 dakikaya kadar önceden."
-          }
-        }
-      }
-    },
-    "Auf Sperrbildschirm und Dynamic Island." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On the Lock Screen and in the Dynamic Island."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kilit ekranında ve Dynamic Island'da."
-          }
-        }
-      }
-    },
-    "Per Radar in Europa, den USA, Taiwan, Brasilien und auf den Kanaren." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Radar-based, in Europe, the US, Taiwan, Brazil and the Canary Islands."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Radara dayalı; Avrupa, ABD, Tayvan, Brezilya ve Kanarya Adaları'nda."
-          }
-        }
-      }
-    },
-    "Von DWD, MeteoAlarm, NWS und CWA." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "From DWD, MeteoAlarm, NWS and CWA."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DWD, MeteoAlarm, NWS ve CWA'dan."
-          }
-        }
-      }
-    },
-    "Gilt für deinen aktuellen Standort, auf etwa 100 m gerundet. Schaltest du alles aus, wird er gelöscht." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uses your current location, rounded to about 100 m. Turn everything off and it's deleted."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mevcut konumunuz yaklaşık 100 m'ye yuvarlanarak kullanılır. Hepsini kapatırsanız silinir."
-          }
-        }
-      }
-    },
-    "Erlaube Mitteilungen in den iOS-Einstellungen." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Allow notifications in iOS Settings."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iOS Ayarları'nda bildirimlere izin verin."
-          }
-        }
-      }
-    },
-    "Erlaube Live-Aktivitäten in den iOS-Einstellungen." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Allow Live Activities in iOS Settings."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iOS Ayarları'nda Canlı Etkinliklere izin verin."
-          }
-        }
-      }
-    },
     "" : {
 
     },
@@ -1105,6 +889,402 @@
     "0 m/s" : {
 
     },
+    "1 Becher Instant-Nudeln im Monat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Becher Instant-Nudeln im Monat"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 instant noodle cup a month"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayda 1 bardak hazır erişte"
+          }
+        }
+      }
+    },
+    "1 Burger mit Pommes im Restaurant" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Burger mit Pommes im Restaurant"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 restaurant burger with fries"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restoranda patatesli 1 hamburger"
+          }
+        }
+      }
+    },
+    "1 Burger-Menü" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Burger-Menü"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 burger meal"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 hamburger menü"
+          }
+        }
+      }
+    },
+    "1 Cola ohne Zucker im Monat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Cola ohne Zucker im Monat"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 sugar-free cola a month"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayda 1 şekersiz kola"
+          }
+        }
+      }
+    },
+    "1 Dose Kartoffelsuppe" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Dose Kartoffelsuppe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 can of potato soup"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 kutu patates çorbası"
+          }
+        }
+      }
+    },
+    "1 Karaage-Bento" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Karaage-Bento"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 karaage bento"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 karaage bento"
+          }
+        }
+      }
+    },
+    "1 Kasten Mate" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Kasten Mate"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 crate of Mate"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 kasa Mate"
+          }
+        }
+      }
+    },
+    "1 Kinoabend mit Popcorn" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Kinoabend mit Popcorn"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 movie night with popcorn"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Patlamış mısırlı 1 sinema gecesi"
+          }
+        }
+      }
+    },
+    "1 Monat Streaming" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Monat Streaming"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 month of streaming"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 aylık dizi-film aboneliği"
+          }
+        }
+      }
+    },
+    "1 Packung Paracetamol" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Packung Paracetamol"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 pack of paracetamol"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 kutu parasetamol"
+          }
+        }
+      }
+    },
+    "1 Packung Soja-Schnitzel" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Packung Soja-Schnitzel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 pack of soy schnitzel"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 paket soya şnitzel"
+          }
+        }
+      }
+    },
+    "1 Portion gebratener Reis" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Portion gebratener Reis"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 portion of fried rice"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 porsiyon kızarmış pilav"
+          }
+        }
+      }
+    },
+    "1 Softeis mit Karamell" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Softeis mit Karamell"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 caramel sundae"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 karamelli dondurma"
+          }
+        }
+      }
+    },
+    "1 Sprudel im Monat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Sprudel im Monat"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 sparkling water a month"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayda 1 maden suyu"
+          }
+        }
+      }
+    },
+    "1 Tafel Schokolade für Oma" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Tafel Schokolade für Oma"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 chocolate bar for grandma"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyükanneme 1 tablet çikolata"
+          }
+        }
+      }
+    },
+    "1 Tüte Gummibärchen im Monat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Tüte Gummibärchen im Monat"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 bag of gummy bears a month"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayda 1 paket ayıcık şeker"
+          }
+        }
+      }
+    },
+    "1 Tüte Riffelchips" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Tüte Riffelchips"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 bag of ridged chips"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 paket tırtıklı cips"
+          }
+        }
+      }
+    },
+    "1 Zitronensorbet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 Zitronensorbet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 lemon sorbet"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 limonlu sorbe"
+          }
+        }
+      }
+    },
     "2" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1128,8 +1308,162 @@
         }
       }
     },
+    "2 Becher Instant-Nudeln" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 Becher Instant-Nudeln"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 instant noodle cups"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 bardak hazır erişte"
+          }
+        }
+      }
+    },
+    "2 Dosen Erbsensuppe" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 Dosen Erbsensuppe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 cans of pea soup"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 kutu bezelye çorbası"
+          }
+        }
+      }
+    },
+    "2 französische Salamis" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 französische Salamis"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 French salamis"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 Fransız salamı"
+          }
+        }
+      }
+    },
+    "2 Kästen Sprudel" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 Kästen Sprudel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 crates of sparkling water"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 kasa maden suyu"
+          }
+        }
+      }
+    },
+    "2 Lasagne beim Italiener" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 Lasagne beim Italiener"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 lasagnas at the Italian place"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İtalyan restoranında 2 lazanya"
+          }
+        }
+      }
+    },
     "2 m/s" : {
 
+    },
+    "2 Packungen gute Pasta" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 Packungen gute Pasta"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 packs of good pasta"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 paket iyi makarna"
+          }
+        }
+      }
+    },
+    "2 Tüten Fruchtgummi" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 Tüten Fruchtgummi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 bags of fruit gums"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 paket meyveli jelibon"
+          }
+        }
+      }
     },
     "2.5" : {
       "extractionState" : "stale",
@@ -1177,13 +1511,322 @@
         }
       }
     },
+    "3 Dosen Cola ohne Zucker" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 Dosen Cola ohne Zucker"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 cans of sugar-free cola"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 kutu şekersiz kola"
+          }
+        }
+      }
+    },
+    "3 Flaschen Eistee" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 Flaschen Eistee"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 bottles of iced tea"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 şişe soğuk çay"
+          }
+        }
+      }
+    },
+    "3 Mate" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 Mate"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 Mate"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 Mate"
+          }
+        }
+      }
+    },
+    "3 Softeis im Jahr" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 Softeis im Jahr"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 sundaes a year"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yılda 3 dondurma"
+          }
+        }
+      }
+    },
+    "3 Tiefkühl-Lasagne" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 Tiefkühl-Lasagne"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 frozen lasagnas"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 dondurulmuş lazanya"
+          }
+        }
+      }
+    },
+    "3 Tüten Gummibärchen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 Tüten Gummibärchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 bags of gummy bears"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 paket ayıcık şeker"
+          }
+        }
+      }
+    },
+    "3 Tüten Gummibärchen. Die roten esse ich zuerst." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 Tüten Gummibärchen. Die roten esse ich zuerst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 bags of gummy bears. The red ones go first."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 paket ayıcık şeker. Önce kırmızıları yiyorum."
+          }
+        }
+      }
+    },
+    "4 Flaschen Sprudel" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4 Flaschen Sprudel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4 bottles of sparkling water"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4 şişe maden suyu"
+          }
+        }
+      }
+    },
     "4 m/s" : {
 
+    },
+    "5 Dosen Erbsensuppe" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 Dosen Erbsensuppe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 cans of pea soup"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 kutu bezelye çorbası"
+          }
+        }
+      }
+    },
+    "5 Packungen gute Pasta" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 Packungen gute Pasta"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 packs of good pasta"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 paket iyi makarna"
+          }
+        }
+      }
     },
     "6 m/s" : {
 
     },
+    "6 Mate im Jahr" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6 Mate im Jahr"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6 Mate a year"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yılda 6 Mate"
+          }
+        }
+      }
+    },
+    "6 Mate im Jahr. Prost!" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6 Mate im Jahr. Prost!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "6 Mate a year. Cheers!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yılda 6 Mate. Şerefe!"
+          }
+        }
+      }
+    },
+    "7 Becher Instant-Nudeln" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 Becher Instant-Nudeln"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 instant noodle cups"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 bardak hazır erişte"
+          }
+        }
+      }
+    },
+    "7 Mate" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 Mate"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 Mate"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 Mate"
+          }
+        }
+      }
+    },
     "7-Tage-Ensemble" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1201,6 +1844,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "7 günlük topluluk"
+          }
+        }
+      }
+    },
+    "8 Tüten Gummibärchen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8 Tüten Gummibärchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8 bags of gummy bears"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8 paket ayıcık şeker"
+          }
+        }
+      }
+    },
+    "8 Tüten Gummibärchen. Ich teile nicht." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8 Tüten Gummibärchen. Ich teile nicht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8 bags of gummy bears. I'm not sharing."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8 paket ayıcık şeker. Paylaşmıyorum."
           }
         }
       }
@@ -1400,6 +2087,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "18:00"
+          }
+        }
+      }
+    },
+    "21 Tüten Gummibärchen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "21 Tüten Gummibärchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "21 bags of gummy bears"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "21 paket ayıcık şeker"
+          }
+        }
+      }
+    },
+    "21 Tüten Gummibärchen. Das wird ein Problem. Danke!" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "21 Tüten Gummibärchen. Das wird ein Problem. Danke!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "21 bags of gummy bears. This will be a problem. Thank you!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "21 paket ayıcık şeker. Bu bir sorun olacak. Teşekkürler!"
           }
         }
       }
@@ -2256,6 +2987,7 @@
       }
     },
     "Alles auf einen Blick" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2273,6 +3005,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Her şey bir bakışta"
+          }
+        }
+      }
+    },
+    "Alles bereit." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles bereit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All set."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her şey hazır."
           }
         }
       }
@@ -2413,7 +3167,30 @@
         }
       }
     },
+    "Amtliche Warnung vor Gewitter" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amtliche Warnung vor Gewitter"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Official thunderstorm warning"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resmî fırtına uyarısı"
+          }
+        }
+      }
+    },
     "Amtliche Warnungen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2431,6 +3208,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Resmi uyarılar"
+          }
+        }
+      }
+    },
+    "Amtliche Warnungen in Europa (DWD, MeteoAlarm), den USA (NWS) und Taiwan (CWA)." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amtliche Warnungen in Europa (DWD, MeteoAlarm), den USA (NWS) und Taiwan (CWA)."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Official warnings in Europe (DWD, MeteoAlarm), the US (NWS) and Taiwan (CWA)."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avrupa (DWD, MeteoAlarm), ABD (NWS) ve Tayvan'da (CWA) resmi uyarılar."
           }
         }
       }
@@ -2933,6 +3732,67 @@
         }
       }
     },
+    "Auf Sperrbildschirm und Dynamic Island." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On the Lock Screen and in the Dynamic Island."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kilit ekranında ve Dynamic Island'da."
+          }
+        }
+      }
+    },
+    "Auf windy.com ansehen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf windy.com ansehen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View on windy.com"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "windy.com'da görüntüle"
+          }
+        }
+      }
+    },
+    "Aufgenommen %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufgenommen %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taken %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ çekildi"
+          }
+        }
+      }
+    },
     "Ausgewählt" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3343,6 +4203,7 @@
       }
     },
     "Benachrichtige mich" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3492,6 +4353,7 @@
       }
     },
     "Berechtigungen verwaltet iOS: Beim ersten Aktivieren fragt Oscar direkt an, danach öffnet der Schalter die passende Stelle in den iOS-Einstellungen." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3514,6 +4376,7 @@
       }
     },
     "Beta" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3706,6 +4569,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ tarihine kadar"
+          }
+        }
+      }
+    },
+    "Bis zu 30 Minuten vorher." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to 30 minutes ahead."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 dakikaya kadar önceden."
           }
         }
       }
@@ -4406,6 +5286,72 @@
         }
       }
     },
+    "Dann siehst du immer das Wetter da, wo du gerade bist, und Oscar kann dich warnen, bevor es bei dir regnet." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dann siehst du immer das Wetter da, wo du gerade bist, und Oscar kann dich warnen, bevor es bei dir regnet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Then you always see the weather where you are, and Oscar can warn you before the rain reaches you."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Böylece her zaman bulunduğunuz yerin havasını görürsünüz ve Oscar, bulunduğunuz yerde yağmur başlamadan önce sizi uyarabilir."
+          }
+        }
+      }
+    },
+    "Darf ich Fehlerberichte bekommen?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Darf ich Fehlerberichte bekommen?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can I get crash reports?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hata raporları alabilir miyim?"
+          }
+        }
+      }
+    },
+    "Darf Oscar deinen Standort nutzen?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Darf Oscar deinen Standort nutzen?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can Oscar use your location?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar konumunuzu kullanabilir mi?"
+          }
+        }
+      }
+    },
     "Darstellung" : {
       "localizations" : {
         "de" : {
@@ -4535,6 +5481,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bu, %2$@ yılından bu yana en sıcak %1$@."
+          }
+        }
+      }
+    },
+    "Das Nudelwasser ist gesalzen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Nudelwasser ist gesalzen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The pasta water is salted."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Makarna suyu tuzlandı."
+          }
+        }
+      }
+    },
+    "Das Wasser kocht. Noch 5 Minuten." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Wasser kocht. Noch 5 Minuten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The kettle is on. 5 more minutes."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su kaynıyor. 5 dakika kaldı."
           }
         }
       }
@@ -4719,6 +5709,7 @@
       }
     },
     "Dein Standort verlässt dein Gerät nur auf ca. 100 m gerundet und wird nur für eine Sache verwendet: dein Wetter." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4740,7 +5731,30 @@
         }
       }
     },
+    "Dein Standort wird auf etwa 100 Meter gerundet und nur fürs Wetter genutzt." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Standort wird auf etwa 100 Meter gerundet und nur fürs Wetter genutzt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your location is rounded to about 100 meters and only used for the weather."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konumunuz yaklaşık 100 metreye yuvarlanır ve yalnızca hava durumu için kullanılır."
+          }
+        }
+      }
+    },
     "Dein Wetter. Genau hier." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4785,6 +5799,7 @@
       }
     },
     "Deine Vorhersage ist bereit." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -4869,6 +5884,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Canlı yağmur durumu, yaklaşan yağmuru kilit ekranında ve Dynamic Island'da canlı aktivite olarak gösterir. Bunun için yağmur uyarılarının açık olması gerekir."
+          }
+        }
+      }
+    },
+    "Der Ofen läuft." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Ofen läuft."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The oven is on."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fırın açıldı."
           }
         }
       }
@@ -5020,6 +6057,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kalın dallar hareket eder, teller ıslık sesi çıkarabilir."
+          }
+        }
+      }
+    },
+    "Die Fruchtgummis grinsen schon." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Fruchtgummis grinsen schon."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The fruit gums are already grinning."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jelibonlar şimdiden sırıtıyor."
+          }
+        }
+      }
+    },
+    "Die nächste Folge läuft schon. Danke!" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die nächste Folge läuft schon. Danke!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The next episode is already playing. Thank you!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonraki bölüm çoktan başladı. Teşekkürler!"
+          }
+        }
+      }
+    },
+    "Die Pfanne ist heiß." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Pfanne ist heiß."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The pan is hot."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tava ısındı."
           }
         }
       }
@@ -5183,6 +6286,28 @@
         }
       }
     },
+    "Direkt vom Wetterdienst" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Direkt vom Wetterdienst"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Straight from the weather service"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doğrudan meteoroloji kurumundan"
+          }
+        }
+      }
+    },
     "Drag to reposition. While dragging, pinch with a second finger to resize or rotate." : {
       "localizations" : {
         "de" : {
@@ -5201,6 +6326,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Taşımak için sürükleyin. Sürüklerken ikinci parmakla boyutlandırın veya döndürün."
+          }
+        }
+      }
+    },
+    "Dreh so oft du willst, bis dir der Inhalt deines Care-Pakets an mich gefällt." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dreh so oft du willst, bis dir der Inhalt deines Care-Pakets an mich gefällt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spin as often as you like until you're happy with what's in your care package for me."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bana göndereceğiniz hediye paketinin içeriği hoşunuza gidene kadar istediğiniz kadar çevirin."
+          }
+        }
+      }
+    },
+    "Drei Softeis für die heißesten Tage." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drei Softeis für die heißesten Tage."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Three sundaes for the hottest days."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En sıcak günler için üç dondurma."
           }
         }
       }
@@ -5568,6 +6737,7 @@
       }
     },
     "Ein Wetterbericht mit allem, was Du wissen musst." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5611,7 +6781,30 @@
         }
       }
     },
+    "Ein Zitronensorbet, bevor die Sonne es holt." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Zitronensorbet, bevor die Sonne es holt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A lemon sorbet, before the sun gets it."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güneş eritmeden bir limonlu sorbe."
+          }
+        }
+      }
+    },
     "Eine kurze Warnung, bevor es an deinem Ort losregnet." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5928,6 +7121,7 @@
       }
     },
     "Ensembles, detaillierte Charts und auf Wunsch dein bevorzugtes Wettermodell." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5952,6 +7146,66 @@
     "Environment Canada" : {
 
     },
+    "Erbsensuppe für eine ganze Regenwoche." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erbsensuppe für eine ganze Regenwoche."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pea soup for a whole rainy week."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koca bir yağmurlu hafta için bezelye çorbası."
+          }
+        }
+      }
+    },
+    "Erbsensuppe für zwei Regentage." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erbsensuppe für zwei Regentage."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pea soup for two rainy days."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İki yağmurlu gün için bezelye çorbası."
+          }
+        }
+      }
+    },
+    "Erlaube Live-Aktivitäten in den iOS-Einstellungen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow Live Activities in iOS Settings."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS Ayarları'nda Canlı Etkinliklere izin verin."
+          }
+        }
+      }
+    },
     "Erlaube Mitteilungen in den iOS Einstellungen, um Regenwarnungen zu erhalten." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5971,6 +7225,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yağmur uyarılarını almak için iOS Ayarları'nda bildirimlere izin verin."
+          }
+        }
+      }
+    },
+    "Erlaube Mitteilungen in den iOS-Einstellungen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow notifications in iOS Settings."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS Ayarları'nda bildirimlere izin verin."
           }
         }
       }
@@ -5999,6 +7269,7 @@
       }
     },
     "Ermöglicht durch DWD, NOAA, ECMWF, MeteoSwiss und viele mehr." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6245,6 +7516,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avrupa Orta Vadeli Hava Tahminleri Merkezi"
+          }
+        }
+      }
+    },
+    "Extra viel Karamell. Danke!" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extra viel Karamell. Danke!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extra caramel. Thank you!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bol karamelli. Teşekkürler!"
           }
         }
       }
@@ -6830,6 +8123,28 @@
         }
       }
     },
+    "Für den nächsten Bug. Danke." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für den nächsten Bug. Danke."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For the next bug. Thank you."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir sonraki hata için. Teşekkürler."
+          }
+        }
+      }
+    },
     "Für die aktuelle Stunde liegen keine Luftqualitätsdaten vor." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6944,6 +8259,7 @@
       }
     },
     "Ganz ohne Standortfreigabe. Du kannst später jederzeit wechseln oder weitere Orte hinzufügen." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6961,6 +8277,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Konum izni gerekmez. İstediğiniz zaman değiştirebilir veya başka yerler ekleyebilirsiniz."
+          }
+        }
+      }
+    },
+    "Gebratener Reis ist bestellt. Danke!" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gebratener Reis ist bestellt. Danke!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fried rice is ordered. Thank you!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kızarmış pilav sipariş edildi. Teşekkürler!"
           }
         }
       }
@@ -7463,6 +8801,28 @@
         }
       }
     },
+    "Gewitter mit Starkregen möglich. Gültig bis %@. (%@)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gewitter mit Starkregen möglich. Gültig bis %@. (%@)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thunderstorms with heavy rain possible. Valid until %@. (%@)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şiddetli yağışlı gök gürültülü fırtına olası. %@ saatine kadar geçerli. (%@)"
+          }
+        }
+      }
+    },
     "GFS & HRRR - NOAA" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -7510,6 +8870,67 @@
         }
       },
       "shouldTranslate" : false
+    },
+    "Gilt für %@, den Ort, der gerade in Oscar° offen ist, auf etwa 100 m gerundet." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gilt für %@, den Ort, der gerade in Oscar° offen ist, auf etwa 100 m gerundet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applies to %@, the place currently open in Oscar°, rounded to about 100 m."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar°'da şu an açık olan konum için geçerlidir: %@, yaklaşık 100 m'ye yuvarlanır."
+          }
+        }
+      }
+    },
+    "Gilt für deinen aktuellen Standort, auf etwa 100 m gerundet. Schaltest du alles aus, wird er gelöscht." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uses your current location, rounded to about 100 m. Turn everything off and it's deleted."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mevcut konumunuz yaklaşık 100 m'ye yuvarlanarak kullanılır. Hepsini kapatırsanız silinir."
+          }
+        }
+      }
+    },
+    "Gilt für den Ort, der gerade in Oscar° offen ist, auf etwa 100 m gerundet." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gilt für den Ort, der gerade in Oscar° offen ist, auf etwa 100 m gerundet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applies to the place currently open in Oscar°, rounded to about 100 m."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar°'da şu an açık olan konum için geçerlidir, yaklaşık 100 m'ye yuvarlanır."
+          }
+        }
+      }
     },
     "Global" : {
       "extractionState" : "stale",
@@ -7623,6 +9044,50 @@
         }
       }
     },
+    "Grazie! Der Tisch für zwei ist reserviert." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grazie! Der Tisch für zwei ist reserviert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grazie! The table for two is booked."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grazie! İki kişilik masa ayrıldı."
+          }
+        }
+      }
+    },
+    "Große Bäume bewegen sich, Zweige können brechen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Große Bäume bewegen sich, Zweige können brechen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Large trees move and branches can break."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
+          }
+        }
+      }
+    },
     "Größere Zweige und kleine Bäume bewegen sich." : {
       "localizations" : {
         "de" : {
@@ -7663,28 +9128,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Birleşik Krallık"
-          }
-        }
-      }
-    },
-    "Große Bäume bewegen sich, Zweige können brechen." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Große Bäume bewegen sich, Zweige können brechen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Large trees move and branches can break."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
           }
         }
       }
@@ -8621,6 +10064,28 @@
         }
       }
     },
+    "Itadakimasu! Das Bento ist bestellt." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Itadakimasu! Das Bento ist bestellt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Itadakimasu! The bento is ordered."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Itadakimasu! Bento sipariş edildi."
+          }
+        }
+      }
+    },
     "Italien" : {
       "localizations" : {
         "de" : {
@@ -8643,6 +10108,50 @@
         }
       }
     },
+    "Ja, gerne" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ja, gerne"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yes, gladly"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evet, memnuniyetle"
+          }
+        }
+      }
+    },
+    "Jackpot!" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jackpot!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jackpot!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyük ikramiye!"
+          }
+        }
+      }
+    },
     "Japan" : {
       "localizations" : {
         "de" : {
@@ -8661,6 +10170,94 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Japonya"
+          }
+        }
+      }
+    },
+    "Jeden Monat ein Sprudel. Prost!" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeden Monat ein Sprudel. Prost!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A sparkling water every month. Cheers!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her ay bir maden suyu. Şerefe!"
+          }
+        }
+      }
+    },
+    "Jeden Monat ein warmes Mittagessen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeden Monat ein warmes Mittagessen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A warm lunch every month."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her ay sıcak bir öğle yemeği."
+          }
+        }
+      }
+    },
+    "Jeden Monat eine Dose. Zisch!" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeden Monat eine Dose. Zisch!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A can every month. Pssh!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her ay bir kutu. Pışş!"
+          }
+        }
+      }
+    },
+    "Jeden Monat Gummibärchen. Danke!" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeden Monat Gummibärchen. Danke!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gummy bears every month. Thank you!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her ay ayıcık şeker. Teşekkürler!"
           }
         }
       }
@@ -8710,6 +10307,28 @@
         }
       }
     },
+    "jetzt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "jetzt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "now"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "şimdi"
+          }
+        }
+      }
+    },
     "Jetzt" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8734,6 +10353,7 @@
       }
     },
     "Jetzt nicht" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -8999,6 +10619,28 @@
         }
       }
     },
+    "Kartoffelsuppe für den nächsten Nieselregen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kartoffelsuppe für den nächsten Nieselregen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Potato soup for the next drizzle."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir sonraki çisenti için patates çorbası."
+          }
+        }
+      }
+    },
     "Käufe wiederherstellen" : {
       "localizations" : {
         "de" : {
@@ -9093,6 +10735,7 @@
 
     },
     "Kein Spam, versprochen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -9267,6 +10910,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sonuç Yok"
+          }
+        }
+      }
+    },
+    "Keine Mitteilungen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Mitteilungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No notifications"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirim istemiyorum"
           }
         }
       }
@@ -9622,6 +11287,28 @@
     "kn" : {
       "shouldTranslate" : false
     },
+    "Knack. Die Tüte ist offen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knack. Die Tüte ist offen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crunch. The bag is open."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kıtır. Paket açıldı."
+          }
+        }
+      }
+    },
     "Korea" : {
       "localizations" : {
         "de" : {
@@ -9794,6 +11481,50 @@
         }
       }
     },
+    "Leichter Regen ab %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leichter Regen ab %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light Rain from %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ itibarıyla hafif yağmur"
+          }
+        }
+      }
+    },
+    "Leichter Regen in %@ ab %@, voraussichtlich bis %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leichter Regen in %@ ab %@, voraussichtlich bis %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light Rain in %@ from %@, likely until %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ bölgesinde %@ itibarıyla hafif yağmur, muhtemelen %@ saatine kadar."
+          }
+        }
+      }
+    },
     "Leichter Schauer" : {
       "localizations" : {
         "de" : {
@@ -9917,6 +11648,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Son sıcak rekoru"
+          }
+        }
+      }
+    },
+    "Lieber nicht" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lieber nicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No thanks"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hayır, teşekkürler"
           }
         }
       }
@@ -10046,28 +11799,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Canlı Etkinlikler kapalı"
-          }
-        }
-      }
-    },
-    "Live-Regenstatus" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Live-Regenstatus"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Live rain status"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Canlı yağmur durumu"
           }
         }
       }
@@ -10526,6 +12257,9 @@
         }
       }
     },
+    "max." : {
+
+    },
     "Maximum" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -10663,6 +12397,7 @@
       }
     },
     "Mehr als eine Vorhersage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -10730,6 +12465,7 @@
       }
     },
     "Mein Wetter anzeigen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -10819,6 +12555,28 @@
         }
       }
     },
+    "Merci! 2 Salamis hängen in der Küche." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merci! 2 Salamis hängen in der Küche."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merci! 2 salamis are hanging in the kitchen."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merci! 2 salam mutfakta asılı."
+          }
+        }
+      }
+    },
     "Messstationen" : {
       "localizations" : {
         "de" : {
@@ -10859,6 +12617,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meteoroloji istasyonları açılma"
+          }
+        }
+      }
+    },
+    "Messstationen, Luftqualität, Pollen, Klimadaten, Widgets und die Apple Watch. Kostenlos und ohne Werbung, für immer." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Messstationen, Luftqualität, Pollen, Klimadaten, Widgets und die Apple Watch. Kostenlos und ohne Werbung, für immer."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather stations, air quality, pollen, climate data, widgets and Apple Watch. Free and without ads, forever."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ölçüm istasyonları, hava kalitesi, polen, iklim verileri, widget'lar ve Apple Watch. Ücretsiz ve reklamsız, sonsuza dek."
           }
         }
       }
@@ -11048,6 +12828,7 @@
       }
     },
     "Minutengenau für deinen Ort" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -11092,6 +12873,7 @@
       }
     },
     "Mit deinem Standort zeigt Oscar° die Vorhersage für den Ort, an dem du gerade bist – zu Hause wie unterwegs." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -11109,6 +12891,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Konumunuzla Oscar°, tam olarak bulunduğunuz yer için tahmini gösterir – evde ve yolda."
+          }
+        }
+      }
+    },
+    "Mit extra Käse. Danke!" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit extra Käse. Danke!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extra cheese. Thank you!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekstra peynirli. Teşekkürler!"
+          }
+        }
+      }
+    },
+    "Mit Pommes. Danke!" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit Pommes. Danke!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "With fries. Thank you!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Patates kızartmasıyla. Teşekkürler!"
+          }
+        }
+      }
+    },
+    "Mittagessen für eine Woche. Das Wasser kocht." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mittagessen für eine Woche. Das Wasser kocht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lunch for a week. The kettle is on."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir haftalık öğle yemeği. Su kaynıyor."
           }
         }
       }
@@ -11131,6 +12979,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bildirimler"
+          }
+        }
+      }
+    },
+    "Mitteilungen erlauben" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mitteilungen erlauben"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow notifications"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirimlere izin ver"
           }
         }
       }
@@ -11198,6 +13068,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bildirimler sistem düzeyinde devre dışı bırakılmış."
+          }
+        }
+      }
+    },
+    "Mitteilungen sind in den iOS-Einstellungen ausgeschaltet." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications are turned off in iOS Settings."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirimler iOS Ayarları'nda kapalı."
           }
         }
       }
@@ -11616,6 +13502,7 @@
       }
     },
     "Neuer Ort, neue Vorhersage – ganz ohne Suchen." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -12047,6 +13934,7 @@
       }
     },
     "Nur relevante Hinweise – jederzeit in den Einstellungen abschaltbar." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -12184,6 +14072,7 @@
       }
     },
     "Offene Daten. Für immer kostenlos." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -12518,6 +14407,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tamam"
+          }
+        }
+      }
+    },
+    "Oma freut sich. Und teilt vielleicht." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oma freut sich. Und teilt vielleicht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grandma is happy. She might even share."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyükannem çok sevindi. Belki paylaşır bile."
+          }
+        }
+      }
+    },
+    "Oma hat jetzt ein Abo." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oma hat jetzt ein Abo."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grandma has a subscription now."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyükannemin artık bir aboneliği var."
+          }
+        }
+      }
+    },
+    "Oma sagt danke. Ich auch." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oma sagt danke. Ich auch."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grandma says thank you. So do I."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyükannem teşekkür ediyor. Ben de."
           }
         }
       }
@@ -12936,6 +14891,28 @@
         }
       }
     },
+    "Ort selbst suchen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ort selbst suchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search for a place"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yer ara"
+          }
+        }
+      }
+    },
     "Ort suchen …" : {
       "localizations" : {
         "de" : {
@@ -13116,6 +15093,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oscar mevcut konumunuz için yağmur uyarıları ve hava durumu uyarıları gönderebilir. Her uyarı türünü aşağıdan açıp kapatın."
+          }
+        }
+      }
+    },
+    "Oscar holt die Vorhersage von nationalen Wetterdiensten wie dem DWD in Deutschland oder NOAA in den USA." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar holt die Vorhersage von nationalen Wetterdiensten wie dem DWD in Deutschland oder NOAA in den USA."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar gets its forecast from national weather services like DWD in Germany or NOAA in the US."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar tahminleri Almanya'da DWD veya ABD'de NOAA gibi ulusal meteoroloji kurumlarından alır."
           }
         }
       }
@@ -13511,6 +15510,7 @@
       }
     },
     "Oscar° bündelt präzise Vorhersagen, Echtzeit-Radar und Klimadaten verschiedener Wetterdienste." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -13555,6 +15555,7 @@
       }
     },
     "Oscar° sagt dir Bescheid, bevor dich das Wetter überrascht – nur dann, wenn es wirklich zählt." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -13643,6 +15644,28 @@
         }
       }
     },
+    "Pasta für eine Woche. Grazie!" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pasta für eine Woche. Grazie!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pasta for a week. Grazie!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir haftalık makarna. Grazie!"
+          }
+        }
+      }
+    },
     "Pause" : {
       "localizations" : {
         "de" : {
@@ -13661,6 +15684,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Duraklat"
+          }
+        }
+      }
+    },
+    "Per Radar in Europa, den USA, Taiwan, Brasilien und auf den Kanaren." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar-based, in Europe, the US, Taiwan, Brazil and the Canary Islands."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radara dayalı; Avrupa, ABD, Tayvan, Brezilya ve Kanarya Adaları'nda."
           }
         }
       }
@@ -13825,6 +15864,72 @@
         }
       }
     },
+    "Popcorn salzig, bitte. Danke für den Kinoabend!" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Popcorn salzig, bitte. Danke für den Kinoabend!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salted popcorn, please. Thanks for the movie night!"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tuzlu mısır lütfen. Sinema gecesi için teşekkürler!"
+          }
+        }
+      }
+    },
+    "Pralinen für Oma" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pralinen für Oma"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chocolates for grandma"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyükanneme çikolata kutusu"
+          }
+        }
+      }
+    },
+    "Pralinen für Oma, jedes Jahr" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pralinen für Oma, jedes Jahr"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chocolates for grandma, every year"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her yıl büyükanneme çikolata"
+          }
+        }
+      }
+    },
     "Präzise Vorhersagen" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -13897,6 +16002,7 @@
 
     },
     "Privat by Design" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -13914,6 +16020,160 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tasarım gereği gizli"
+          }
+        }
+      }
+    },
+    "Profis rechnen das Wetter dutzende Male durch. Oscar zeigt dir alle Läufe: Liegen sie eng beieinander, kannst du dich auf die Vorhersage verlassen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profis rechnen das Wetter dutzende Male durch. Oscar zeigt dir alle Läufe: Liegen sie eng beieinander, kannst du dich auf die Vorhersage verlassen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Professionals calculate the weather dozens of times. Oscar shows you every run: when they stay close together, you can rely on the forecast."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzmanlar havayı onlarca kez hesaplar. Oscar size tüm hesaplamaları gösterir: Birbirine yakınlarsa tahmine güvenebilirsiniz."
+          }
+        }
+      }
+    },
+    "Prost! 3 Flaschen Eistee sind kalt gestellt." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prost! 3 Flaschen Eistee sind kalt gestellt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheers! 3 bottles of iced tea are on ice."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şerefe! 3 şişe soğuk çay soğumaya kondu."
+          }
+        }
+      }
+    },
+    "Prost! 3 Mate sind kalt gestellt." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prost! 3 Mate sind kalt gestellt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheers! 3 Mate are on ice."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şerefe! 3 Mate soğumaya kondu."
+          }
+        }
+      }
+    },
+    "Prost! 4 Flaschen Sprudel stehen im Kühlschrank." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prost! 4 Flaschen Sprudel stehen im Kühlschrank."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheers! 4 bottles of sparkling water are in the fridge."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şerefe! 4 şişe maden suyu buzdolabında."
+          }
+        }
+      }
+    },
+    "Prost! 7 Mate, das reicht für eine Woche." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prost! 7 Mate, das reicht für eine Woche."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheers! 7 Mate, that lasts a week."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şerefe! 7 Mate, bir hafta yeter."
+          }
+        }
+      }
+    },
+    "Prost! Der Kasten Mate steht im Flur." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prost! Der Kasten Mate steht im Flur."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheers! The crate of Mate is in the hallway."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şerefe! Kasa Mate koridorda duruyor."
+          }
+        }
+      }
+    },
+    "Prost! Zwei Kästen Sprudel, das Treppenhaus schafft das." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prost! Zwei Kästen Sprudel, das Treppenhaus schafft das."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheers! Two crates of sparkling water, the stairs can take it."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şerefe! İki kasa maden suyu, merdivenler dayanır."
           }
         }
       }
@@ -13985,6 +16245,7 @@
       }
     },
     "Radar & Karten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -14356,10 +16617,33 @@
     "Regen ab %@" : {
 
     },
+    "Regen auf dem Sperrbildschirm" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen auf dem Sperrbildschirm"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain on your Lock Screen"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kilit ekranında yağmur"
+          }
+        }
+      }
+    },
     "Regen bis %@" : {
 
     },
     "Regen im Anmarsch" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -14400,6 +16684,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saatlik yağmur ve kar"
+          }
+        }
+      }
+    },
+    "Regen zieht auf" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen zieht auf"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain soon"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur yaklaşıyor"
+          }
+        }
+      }
+    },
+    "Regen-Live-Aktivität" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen-Live-Aktivität"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain Live Activity"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur Canlı Etkinliği"
           }
         }
       }
@@ -14451,6 +16779,7 @@
       }
     },
     "Regen, Temperatur, Wind und Luftdruck live auf der Karte, minutengenau für die nächsten Stunden." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -14649,6 +16978,7 @@
 
     },
     "Reist automatisch mit" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -15099,6 +17429,28 @@
         }
       }
     },
+    "Schon bevor es losgeht, live mit jedem Radarbild." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schon bevor es losgeht, live mit jedem Radarbild."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before it even starts, live with every radar image."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha başlamadan, her radar görüntüsüyle canlı."
+          }
+        }
+      }
+    },
     "Schon vor dem Start im App Store habe ich über 250 € an Open-Source-Projekte wie Open-Meteo gegeben, ohne die es Oscar nicht gäbe. Von allem, was hier zusammenkommt, gebe ich einen Teil an Projekte gegen die Klimakrise weiter." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -15468,6 +17820,28 @@
         }
       }
     },
+    "Sieh, wo es gerade regnet und wohin der Regen zieht. Dazu Karten für Temperatur, Wind und Luftdruck." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sieh, wo es gerade regnet und wohin der Regen zieht. Dazu Karten für Temperatur, Wind und Luftdruck."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See where it's raining right now and where the rain is heading. Plus maps for temperature, wind and pressure."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu anda nerede yağmur yağdığını ve yağmurun nereye gittiğini görün. Ayrıca sıcaklık, rüzgâr ve hava basıncı haritaları."
+          }
+        }
+      }
+    },
     "Sinkender Luftdruck deutet auf schlechtes Wetter oder Stürme hin, steigender Luftdruck auf gutes Wetter oder Hochdruckgebiete." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -15620,6 +17994,7 @@
       }
     },
     "So tief du willst" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -15889,6 +18264,28 @@
         }
       }
     },
+    "Spin" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spin"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spin"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çevir"
+          }
+        }
+      }
+    },
     "spinner=%@ pending=%@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -16086,6 +18483,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Konum"
+          }
+        }
+      }
+    },
+    "Standort freigeben" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standort freigeben"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konumu paylaş"
           }
         }
       }
@@ -16648,6 +19067,28 @@
         }
       }
     },
+    "Stürzt Oscar ab oder hakt, bekomme ich einen Bericht und kann den Fehler beheben. Gespeichert bei Sentry in der EU." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stürzt Oscar ab oder hakt, bekomme ich einen Bericht und kann den Fehler beheben. Gespeichert bei Sentry in der EU."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If Oscar crashes or stutters, I get a report and can fix the problem. Stored with Sentry in the EU."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar çöker veya takılırsa bir rapor alırım ve hatayı düzeltebilirim. Sentry'de, AB'de saklanır."
+          }
+        }
+      }
+    },
     "Such dir den Betrag aus, der sich für dich richtig anfühlt. Als Dankeschön schaltest du alle App-Symbole und Sticker frei, und alles Kosmetische, das noch kommt. Funktionen kosten nie etwas." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -16667,6 +19108,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Size doğru gelen tutarı seçin. Teşekkür olarak tüm uygulama simgelerini, çıkartmaları ve gelecekteki tüm görsel ekstraları açarsınız. Özellikler asla ücretli olmaz."
+          }
+        }
+      }
+    },
+    "Such nach deinem Ort. Weitere kannst du später hinzufügen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Such nach deinem Ort. Weitere kannst du später hinzufügen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search for your place. You can add more later."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yerinizi arayın. Daha fazlasını sonra ekleyebilirsiniz."
           }
         }
       }
@@ -17279,6 +19742,7 @@
       }
     },
     "Temperatur, Regen und Wind exakt für deine Koordinaten." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -17885,6 +20349,28 @@
         }
       }
     },
+    "Und noch mehr" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Und noch mehr"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "And more"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ve dahası"
+          }
+        }
+      }
+    },
     "unregelmäßig" : {
       "localizations" : {
         "de" : {
@@ -18065,7 +20551,6 @@
       }
     },
     "Unwetterwarnungen" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -18088,6 +20573,7 @@
       }
     },
     "Unwetterwarnungen der offiziellen Wetterdienste für deinen Ort." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -18448,6 +20934,45 @@
         }
       }
     },
+    "Von DWD, MeteoAlarm, NWS und CWA." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From DWD, MeteoAlarm, NWS and CWA."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DWD, MeteoAlarm, NWS ve CWA'dan."
+          }
+        }
+      }
+    },
+    "voraussichtlich bis %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "voraussichtlich bis %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "likely until %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "muhtemelen %@ saatine kadar"
+          }
+        }
+      }
+    },
     "Vorhersage" : {
       "localizations" : {
         "de" : {
@@ -18674,6 +21199,28 @@
         }
       }
     },
+    "Wann soll sich Oscar melden?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wann soll sich Oscar melden?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When should Oscar let you know?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar size ne zaman haber versin?"
+          }
+        }
+      }
+    },
     "Wärmer als %@ aller %@ seit %@." : {
       "localizations" : {
         "de" : {
@@ -18781,6 +21328,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uyarılar açılma"
+          }
+        }
+      }
+    },
+    "Was genau gesendet wird" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was genau gesendet wird"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What exactly is sent"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tam olarak ne gönderiliyor"
           }
         }
       }
@@ -18939,6 +21508,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "WeatherNext 2 bir yapay zeka modelidir ve orta vadeli eğilimler için uygundur."
+          }
+        }
+      }
+    },
+    "Webcams" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Webcams"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Webcams"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Web kameraları"
           }
         }
       }
@@ -19142,6 +21733,29 @@
         }
       }
     },
+    "Wetter da, wo du bist" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetter da, wo du bist"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather where you are"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bulunduğunuz yerin havası"
+          }
+        }
+      }
+    },
     "Wetter nicht verfügbar" : {
       "localizations" : {
         "de" : {
@@ -19165,6 +21779,7 @@
       }
     },
     "Wetter, das sich meldet." : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -19402,6 +22017,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hava Durumu Uyarıları"
+          }
+        }
+      }
+    },
+    "Wie sicher ist die Vorhersage?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie sicher ist die Vorhersage?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How sure is the forecast?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tahmin ne kadar kesin?"
           }
         }
       }
@@ -19677,6 +22314,28 @@
         }
       }
     },
+    "Wo regnet es gerade?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wo regnet es gerade?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where is it raining right now?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu anda nerede yağmur yağıyor?"
+          }
+        }
+      }
+    },
     "Wochentag" : {
 
     },
@@ -19885,6 +22544,28 @@
         }
       }
     },
+    "Zeitraffer von heute" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeitraffer von heute"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today's Timelapse"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugünün hızlandırılmış videosu"
+          }
+        }
+      }
+    },
     "Zeitraum" : {
       "localizations" : {
         "de" : {
@@ -19995,6 +22676,28 @@
         }
       }
     },
+    "Zisch. Die erste Dose ist schon offen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zisch. Die erste Dose ist schon offen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pssh. The first can is already open."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pışş. İlk kutu çoktan açıldı."
+          }
+        }
+      }
+    },
     "Zugbahnen kräftiger Schauer" : {
       "localizations" : {
         "de" : {
@@ -20084,6 +22787,28 @@
         }
       }
     },
+    "Zum Wetter" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Wetter"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show me the weather"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava durumuna git"
+          }
+        }
+      }
+    },
     "Zur aktuellen Zeit springen" : {
       "localizations" : {
         "de" : {
@@ -20107,6 +22832,7 @@
       }
     },
     "Zur Vorhersage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

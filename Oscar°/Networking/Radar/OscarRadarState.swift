@@ -197,6 +197,25 @@ final class OscarRadarState {
         await reloadForCurrentRegion()
     }
 
+    // MARK: - Staged frames
+
+    /// Shows frames that didn't come from the server (the onboarding's replayed
+    /// composite): all resident up front, nothing to load or evict, and the
+    /// frame closest to the wall clock reads as LIVE.
+    func showStagedFrames(_ staged: [OscarRadarFrame], dates: [Date], bounds: OscarRadarBounds, motion: RadarMotionData?) {
+        resetForSourceChange()
+        suppressSelectionSideEffects = true
+        self.bounds = bounds
+        self.motion = motion
+        frameTimestamps = staged.map(\.timestamp)
+        frameDates = dates
+        frames = staged
+        loadedFrameIndices = Set(staged.indices)
+        currentFrameIndex = closestTimestampIndex(in: dates)
+        suppressSelectionSideEffects = false
+        lastMetadataLoad = Date()
+    }
+
     // MARK: - Loading
 
     /// Loads all frames, showing the scrubber skeleton immediately after metadata

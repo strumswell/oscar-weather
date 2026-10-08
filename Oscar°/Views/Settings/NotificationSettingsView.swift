@@ -8,14 +8,12 @@
 import SwiftUI
 import UIKit
 
-/// Rain alerts, the rain Live Activity and official weather warnings, each
-/// with one short line. Copy mirrors oscar-server: rain up to 30 min ahead
-/// from radar; warnings from DWD, MeteoAlarm, NWS and CWA; one rounded
-/// location, deleted when everything is off.
+/// Rain alerts, the rain Live Activity and official weather warnings.
 @MainActor
 struct NotificationSettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
+    @Environment(Location.self) private var location
     private let manager = NotificationSettingsManager.shared
     @State private var isUpdating = false
     @State private var refusal: Refusal?
@@ -37,23 +35,17 @@ struct NotificationSettingsView: View {
             }
 
             Section {
-                AlertToggle(
-                    title: "Regenwarnungen",
-                    detail: "Bis zu 30 Minuten vorher.",
-                    systemImage: "cloud.rain.fill",
-                    tint: .blue,
-                    isOn: toggle(rainAlertsEnabled, refusal: .notifications, update: manager.setRainAlertsEnabled)
-                )
+                Toggle(isOn: toggle(rainAlertsEnabled, refusal: .notifications, update: manager.setRainAlertsEnabled)) {
+                    Label("Regenwarnungen", systemImage: "cloud.rain.fill")
+                        .labelStyle(.settingsIcon(.blue))
+                }
                 .accessibilityIdentifier("notifications.rainAlerts")
 
                 if RainRadarLiveActivityManager.isSupported {
-                    AlertToggle(
-                        title: "Live-Regenstatus",
-                        detail: "Auf Sperrbildschirm und Dynamic Island.",
-                        systemImage: "lock.iphone",
-                        tint: .indigo,
-                        isOn: toggle(liveRainStatusEnabled, refusal: .liveActivities, update: manager.setLiveRainStatusEnabled)
-                    )
+                    Toggle(isOn: toggle(liveRainStatusEnabled, refusal: .liveActivities, update: manager.setLiveRainStatusEnabled)) {
+                        Label("Regen-Live-Aktivität", systemImage: "lock.iphone")
+                            .labelStyle(.settingsIcon(.indigo))
+                    }
                     .disabled(!rainAlertsEnabled)
                     .accessibilityIdentifier("notifications.liveRainStatus")
                 }
@@ -63,25 +55,22 @@ struct NotificationSettingsView: View {
             .disabled(isUpdating)
 
             Section {
-                AlertToggle(
-                    title: "Wetterwarnungen",
-                    detail: "Von DWD, MeteoAlarm, NWS und CWA.",
-                    systemImage: "exclamationmark.triangle.fill",
-                    tint: .orange,
-                    isOn: toggle(weatherAlertsEnabled, refusal: .notifications, update: manager.setWeatherAlertsEnabled)
-                )
+                Toggle(isOn: toggle(weatherAlertsEnabled, refusal: .notifications, update: manager.setWeatherAlertsEnabled)) {
+                    Label("Wetterwarnungen", systemImage: "exclamationmark.triangle.fill")
+                        .labelStyle(.settingsIcon(.orange))
+                }
                 .accessibilityIdentifier("notifications.weatherAlerts")
+            } footer: {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Amtliche Warnungen in Europa (DWD, MeteoAlarm), den USA (NWS) und Taiwan (CWA).")
+                    if location.name.isEmpty {
+                        Text("Gilt für den Ort, der gerade in Oscar° offen ist, auf etwa 100 m gerundet.")
+                    } else {
+                        Text("Gilt für \(location.name), den Ort, der gerade in Oscar° offen ist, auf etwa 100 m gerundet.")
+                    }
+                }
             }
             .disabled(isUpdating)
-
-            Section {
-                SettingsExternalLink(destination: URL(string: "https://oscars.love/privacy")!) {
-                    Label("Datenschutz", systemImage: "hand.raised.fill")
-                        .labelStyle(.settingsIcon(.blue))
-                }
-            } footer: {
-                Text("Gilt für deinen aktuellen Standort, auf etwa 100 m gerundet. Schaltest du alles aus, wird er gelöscht.")
-            }
         }
         .navigationTitle("Benachrichtigungen")
         .navigationBarTitleDisplayMode(.inline)
@@ -151,47 +140,9 @@ struct NotificationSettingsView: View {
     }
 }
 
-/// A switch with its settings tile, a Beta tag and one line on what it does.
-private struct AlertToggle: View {
-    let title: LocalizedStringKey
-    let detail: LocalizedStringKey
-    let systemImage: String
-    let tint: Color
-    @Binding var isOn: Bool
-
-    var body: some View {
-        Toggle(isOn: $isOn) {
-            Label {
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 8) {
-                        Text(title)
-                        BetaBadge()
-                    }
-                    Text(detail)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-            } icon: {
-                Image(systemName: systemImage)
-            }
-            .labelStyle(.settingsIcon(tint))
-        }
-    }
-}
-
-private struct BetaBadge: View {
-    var body: some View {
-        Text("Beta")
-            .font(.caption.bold())
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(.quaternary, in: .capsule)
-    }
-}
-
 #Preview {
     NavigationStack {
         NotificationSettingsView()
     }
+    .environment(Location())
 }

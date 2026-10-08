@@ -68,7 +68,7 @@ struct NowView: View {
 
     /// The sections about right now (nowcast, measured readings) sit on the
     /// stage under the map, in the user's order; the feed keeps the rest.
-    private static let stageSectionKinds: Set<NowSection> = [.radar, .stations, .webcams]
+    private static let stageSectionKinds: Set<NowSection> = [.radar, .stations]
 
     private var stageSections: [NowSection] {
         sections.filter { Self.stageSectionKinds.contains($0) }

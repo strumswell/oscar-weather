@@ -456,6 +456,7 @@ final class ScreenshotTests: XCTestCase {
             ("features", "29_onboarding_features"),
             ("location", "30_onboarding_location"),
             ("notifications", "32_onboarding_notifications"),
+            ("crashReports", "32b_onboarding_crash_reports"),
             ("finale", "33_onboarding_finale"),
         ]
         for (step, name) in steps {

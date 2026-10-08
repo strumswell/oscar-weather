@@ -1,31 +1,21 @@
 import StoreKit
 import SwiftUI
 
-/// One product as a tappable tile: a heart sized by tier, the price, and the
-/// name where it carries the period (monthly/yearly).
+/// One product as a tappable tile: a slot reel showing what the tier would
+/// buy, then the price.
 struct SupportTileStyle: ProductViewStyle {
-    let heartSize: Double
-    let showsName: Bool
-    let pulse: Int
+    let treat: SupportTreat
+    let index: Int
+    let jackpot: SupportJackpot?
 
     func makeBody(configuration: Configuration) -> some View {
         Button {
             configuration.purchase()
         } label: {
             VStack(spacing: 6) {
-                Image(systemName: "heart.fill")
-                    .font(.system(size: heartSize))
-                    .foregroundStyle(.pink)
-                    .symbolEffect(.bounce, value: pulse)
-                    .frame(height: 34)
-                    .accessibilityHidden(true)
+                TreatReel(treat: treat, index: index, jackpot: jackpot)
 
                 if let product = configuration.product {
-                    if showsName {
-                        Text(product.displayName)
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    }
                     Text(product.displayPrice)
                         .font(.headline)
                         .monospacedDigit()
@@ -37,7 +27,8 @@ struct SupportTileStyle: ProductViewStyle {
                         .foregroundStyle(.tertiary)
                 }
             }
-            .frame(maxWidth: .infinity, minHeight: 92)
+            .padding(.horizontal, 6)
+            .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
             .background(Color(uiColor: .secondarySystemBackground), in: .rect(cornerRadius: 18))
             .overlay(alignment: .topTrailing) {

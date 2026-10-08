@@ -26,8 +26,7 @@ struct OnboardingButtonStack: View {
             .disabled(primaryDisabled)
 
             if let secondaryTitle, let secondaryAction {
-                // Quiet text-only action: a second glass capsule competed
-                // with the primary button for weight.
+                // Text only: a second glass capsule competed with the primary.
                 Button(action: secondaryAction) {
                     Text(secondaryTitle)
                         .font(.subheadline.weight(.medium))
@@ -40,9 +39,8 @@ struct OnboardingButtonStack: View {
                 .frame(minHeight: 44)
             }
         }
-        .padding(.horizontal, 24)
-        // Phone width on iPad and Mac instead of a full-window bar.
-        .frame(maxWidth: 480)
+        .padding(.horizontal, OnboardingStage.edgePadding)
+        .frame(maxWidth: OnboardingStage.contentMaxWidth)
         .padding(.top, 12)
         .padding(.bottom, 6)
     }

@@ -5,9 +5,9 @@
 
 import SwiftUI
 
-/// Fourth screen (only without location access): pick a city by search. The
-/// selection is stored through CityService, which triggers the real weather
-/// refresh — the simulation in the hero window crossfades to the chosen place.
+/// Only without location access: pick a city by search. The selection is
+/// stored through CityService, which triggers the real weather refresh; the
+/// simulation in the hero window crossfades to the chosen place.
 struct OnboardingManualLocationStep: View {
     let onContinue: () -> Void
 
@@ -31,15 +31,14 @@ struct OnboardingManualLocationStep: View {
                     VStack(spacing: 16) {
                         VStack(spacing: 8) {
                             Text(title)
-                                .font(.system(.title, design: .rounded, weight: .bold))
-                                .multilineTextAlignment(.center)
+                                .font(.onboardingTitle)
                                 .contentTransition(.opacity)
                             Text(subtitle)
                                 .font(.callout)
                                 .foregroundStyle(.secondary)
-                                .multilineTextAlignment(.center)
                                 .contentTransition(.opacity)
                         }
+                        .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
                         .onboardingEntrance(appeared, delay: 0.1)
 
@@ -48,8 +47,8 @@ struct OnboardingManualLocationStep: View {
 
                         resultsList
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 20)
+                    .padding(.horizontal, OnboardingStage.edgePadding)
+                    .padding(.top, OnboardingStage.canvasInset)
                 }
                 .scrollBounceBehavior(.basedOnSize)
                 .scrollIndicators(.hidden)
@@ -77,8 +76,7 @@ struct OnboardingManualLocationStep: View {
         }
     }
 
-    /// Plain and confident: the chosen city becomes the headline; before
-    /// that, a simple ask.
+    /// The chosen city becomes the headline; before that, a simple ask.
     private var title: String {
         if let name = selectedCity?.label, !name.isEmpty {
             return name
@@ -90,7 +88,7 @@ struct OnboardingManualLocationStep: View {
         if selectedCity != nil {
             return String(localized: "Du kannst den Ort jederzeit wechseln oder weitere hinzufügen.")
         }
-        return String(localized: "Ganz ohne Standortfreigabe. Du kannst später jederzeit wechseln oder weitere Orte hinzufügen.")
+        return String(localized: "Such nach deinem Ort. Weitere kannst du später hinzufügen.")
     }
 
     private var searchField: some View {
@@ -117,7 +115,7 @@ struct OnboardingManualLocationStep: View {
         } else if !results.isEmpty {
             VStack(spacing: 0) {
                 ForEach(results.prefix(5).enumerated(), id: \.element.id) { index, result in
-                    // Row and its divider cascade in together, so no divider
+                    // Row and divider cascade in together, so no divider
                     // ever underlines an empty slot.
                     VStack(spacing: 0) {
                         Button {
@@ -189,9 +187,9 @@ struct OnboardingManualLocationStep: View {
     }
 }
 
-/// Cascades search-result rows in one after another instead of dropping the
-/// whole block onto the screen at once. Rows keep positional identity, so
-/// type-ahead updates swap text in place without re-running the cascade.
+/// Cascades search-result rows in one after another. Rows keep positional
+/// identity, so type-ahead updates swap text in place without re-running
+/// the cascade.
 private struct StaggeredRowAppearModifier: ViewModifier {
     let index: Int
 
@@ -212,7 +210,7 @@ private struct StaggeredRowAppearModifier: ViewModifier {
 
 #Preview {
     ZStack {
-        OnboardingSceneView(scene: .day)
+        OnboardingSceneView(scene: .night)
         OnboardingStage()
         OnboardingManualLocationStep {}
     }
