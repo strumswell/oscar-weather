@@ -22,6 +22,8 @@ final class Cloud {
     /// Band cover at which this sprite fades in.
     let threshold: Float
     let driftJitter = Double.random(in: 0.8...1.2)
+    /// Wraps at ±this, so the deck repeats every `2 * wrapDistance` points.
+    var wrapDistance: Double { max(620, 420 * scale) }
 
     init(band: Band, imageNumber: Int, scale: Double, threshold: Float, position: CGPoint) {
         self.band = band

@@ -8,6 +8,7 @@ struct SupportProductTiles: View {
     let ids: [String]
     let treats: [String: SupportTreat]
     var jackpot: SupportJackpot?
+    var pendingID: String?
     var shuffle: (() -> Void)?
     var isShuffling = false
 
@@ -31,7 +32,7 @@ struct SupportProductTiles: View {
             HStack(spacing: 12) {
                 ForEach(ids.enumerated(), id: \.element) { index, id in
                     ProductView(id: id)
-                        .productViewStyle(SupportTileStyle(treat: treats[id] ?? .fallback, index: index, jackpot: jackpot))
+                        .productViewStyle(SupportTileStyle(treat: treats[id] ?? .fallback, index: index, jackpot: jackpot, isPending: pendingID == id))
                 }
             }
         }

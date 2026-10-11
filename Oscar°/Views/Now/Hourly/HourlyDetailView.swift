@@ -45,6 +45,11 @@ struct HourlyDetailView: View {
             }
             .navigationDestination(item: $ensembleDate) { date in
                 EnsembleView(initialDate: date)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button(role: .close, action: finish)
+                        }
+                    }
             }
             .onAppear {
                 model.update(from: weather)

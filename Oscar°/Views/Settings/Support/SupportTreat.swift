@@ -32,7 +32,6 @@ struct SupportTreat: Identifiable, Equatable {
         "cloud.bolte.Oscar.tip.small": [
             fallback,
             SupportTreat(id: "gummies.3", image: "treat_gummies", name: "3 Tüten Gummibärchen", thanks: "3 Tüten Gummibärchen. Die roten esse ich zuerst."),
-            SupportTreat(id: "fruitgums.2", image: "treat_fruitgums", name: "2 Tüten Fruchtgummi", thanks: "Die Fruchtgummis grinsen schon."),
             SupportTreat(id: "water.4", image: "treat_water", name: "4 Flaschen Sprudel", thanks: "Prost! 4 Flaschen Sprudel stehen im Kühlschrank."),
             SupportTreat(id: "cola.3", image: "treat_cola", name: "3 Dosen Cola ohne Zucker", thanks: "Zisch. Die erste Dose ist schon offen."),
             SupportTreat(id: "icetea.3", image: "treat_icetea", name: "3 Flaschen Eistee", thanks: "Prost! 3 Flaschen Eistee sind kalt gestellt."),
@@ -44,7 +43,6 @@ struct SupportTreat: Identifiable, Equatable {
             SupportTreat(id: "chocolate.1", image: "treat_chocolate", name: "1 Tafel Schokolade für Oma", thanks: "Oma freut sich. Und teilt vielleicht."),
             SupportTreat(id: "schnitzel.1", image: "treat_schnitzel", name: "1 Packung Soja-Schnitzel", thanks: "Die Pfanne ist heiß."),
             SupportTreat(id: "chips.1", image: "treat_chips", name: "1 Tüte Riffelchips", thanks: "Knack. Die Tüte ist offen."),
-            SupportTreat(id: "pills.1", image: "treat_pills", name: "1 Packung Paracetamol", thanks: "Für den nächsten Bug. Danke."),
             SupportTreat(id: "sundae.1", image: "treat_sundae", name: "1 Softeis mit Karamell", thanks: "Extra viel Karamell. Danke!"),
         ],
         "cloud.bolte.Oscar.tip.medium": [
@@ -74,6 +72,7 @@ struct SupportTreat: Identifiable, Equatable {
             SupportTreat(id: "cola.monthly", image: "treat_cola", name: "1 Cola ohne Zucker im Monat", thanks: "Jeden Monat eine Dose. Zisch!"),
             SupportTreat(id: "gummies.monthly", image: "treat_gummies", name: "1 Tüte Gummibärchen im Monat", thanks: "Jeden Monat Gummibärchen. Danke!"),
             SupportTreat(id: "noodles.monthly", image: "treat_noodles", name: "1 Becher Instant-Nudeln im Monat", thanks: "Jeden Monat ein warmes Mittagessen."),
+            SupportTreat(id: "pills.monthly", image: "treat_pills", name: "1 Packung Paracetamol im Monat", thanks: "Für den Bug des Monats. Danke."),
         ],
         "cloud.bolte.Oscar.supporter.yearly": [
             SupportTreat(id: "mate.yearly", image: "treat_mate", name: "6 Mate im Jahr", thanks: "6 Mate im Jahr. Prost!"),

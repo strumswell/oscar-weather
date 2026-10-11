@@ -18,6 +18,7 @@ struct RootTabView: View {
     private let settingsService = SettingService.shared
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var presentation = NowPresentationCoordinator()
     @State private var modelFallbackToast: String?
 
@@ -52,8 +53,9 @@ struct RootTabView: View {
                     }
                 }
                 // On Karten the bar stays full-size: map pans read as scroll-downs
-                // and would collapse it mid-interaction.
-                .tabBarMinimizeBehavior(presentation.selectedTab == .maps || presentation.isNudgeOut ? .never : .onScrollDown)
+                // and would collapse it mid-interaction. The iPad top bar doesn't
+                // shrink, it hides, and stayed gone after adding a place.
+                .tabBarMinimizeBehavior(horizontalSizeClass == .regular || presentation.selectedTab == .maps || presentation.isNudgeOut ? .never : .onScrollDown)
                 // Monochrome bar like Apple Weather's bottom controls — the accent
                 // tint on the selected item is unreadable on glass over a bright
                 // sky. Tint cascades into tab content, so the tabs above swap in a
@@ -61,6 +63,9 @@ struct RootTabView: View {
                 // (the AccentColor asset is empty, so .accentColor would mean
                 // system blue). NowView stays monochrome.
                 .tint(.white)
+                .layerPickerInspector(isPresented: $presentation.isLayerPickerPresented, settingsService: settingsService) {
+                    presentation.selectLayer($0, $1)
+                }
             }
 
             if let message = modelFallbackToast, presentation.sheet == nil {

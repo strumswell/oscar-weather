@@ -46,8 +46,8 @@ struct NowLayoutSettingsView: View {
         .navigationTitle("Ansicht")
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Standard wiederherstellen", systemImage: "arrow.counterclockwise", action: restoreDefault)
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Standard wiederherstellen", systemImage: "slider.horizontal.2.arrow.trianglehead.counterclockwise", action: restoreDefault)
                     .disabled(isDefault)
             }
         }

@@ -309,3 +309,32 @@ private extension WeatherTileLayer {
         }
     }
 }
+
+extension View {
+    /// A sheet on iPhone, a trailing column on wider windows. `select` gets a
+    /// radar region, a model layer, or neither (the satellite clouds).
+    func layerPickerInspector(
+        isPresented: Binding<Bool>,
+        settingsService: SettingService,
+        select: @escaping (RadarRegion?, WeatherTileLayer?) -> Void
+    ) -> some View {
+        inspector(isPresented: isPresented) {
+            MapLayerPickerSheet(
+                settingsService: settingsService,
+                onSelectRadar: { select($0, nil) },
+                onSelectTileLayer: { select(nil, $0) },
+                onSelectClouds: { select(nil, nil) }
+            )
+            // No .presentationBackground override: iOS 26 renders the sheet as
+            // Liquid Glass at the medium detent and swaps to an opaque background
+            // when pulled up to .large.
+            .presentationDetents([.medium, .large])
+            .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+            .presentationDragIndicator(.hidden)
+            .inspectorColumnWidth(min: 320, ideal: 360, max: 420)
+            // The compact sheet can go away without resetting the binding (seen
+            // after a basemap switch); a stuck `true` blocks reopening.
+            .onDisappear { isPresented.wrappedValue = false }
+        }
+    }
+}

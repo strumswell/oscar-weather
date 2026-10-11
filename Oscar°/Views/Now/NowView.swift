@@ -193,14 +193,7 @@ struct NowView: View {
                 refreshIndicator
                 HeadView()
                     .padding(.top, 35)
-                    .debugConsoleTap {
-                        self.tapCount += 1
-                        if self.tapCount == 10 {
-                            self.tapCount = 0
-                            weather.debug.toggle()
-                            Haptics.impact()
-                        }
-                    }
+                    .debugConsoleTap(countDebugTap)
                 sectionList(sections.prefix(firstPageCount))
             }
             .frame(minHeight: firstPageMinHeight, alignment: .topLeading)
@@ -219,6 +212,7 @@ struct NowView: View {
         VStack(alignment: .leading, spacing: 0) {
             HeadView(compact: true)
                 .fixedSize(horizontal: false, vertical: true)
+                .debugConsoleTap(countDebugTap)
             MapPreview()
                 .frame(minHeight: 240, maxHeight: .infinity)
             sectionList(stageSections[...])
@@ -418,6 +412,14 @@ private struct WeatherUnavailableView: View {
 }
 
 extension NowView {
+    private func countDebugTap() {
+        tapCount += 1
+        guard tapCount == 10 else { return }
+        tapCount = 0
+        weather.debug.toggle()
+        Haptics.impact()
+    }
+
     private func openRadarMap() {
         settingsService.activeTileLayer = nil
         settingsService.oscarRadarLayer = true
@@ -429,7 +431,9 @@ extension NowView {
 private extension View {
     func debugConsoleTap(_ action: @escaping () -> Void) -> some View {
         #if DEBUG
-        onTapGesture(perform: action)
+        // Simultaneous: the place name's tap and the metrics' long press
+        // would otherwise swallow it.
+        simultaneousGesture(TapGesture().onEnded(action))
         #else
         self
         #endif

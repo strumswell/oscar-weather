@@ -25,6 +25,7 @@ struct WeatherMapDetailView: View {
     @Environment(Location.self) private var location: Location
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(NowPresentationCoordinator.self) private var presentation: NowPresentationCoordinator?
     @State private var layers = MapLayers()
     @State private var isLayerPickerPresented = false
     // sheet(item:), not sheet(isPresented:) + separate array state: the isPresented
@@ -190,21 +191,8 @@ struct WeatherMapDetailView: View {
         .onDisappear {
             layers.pause()
         }
-        // A sheet on iPhone, a trailing column next to the map on wider windows.
-        .inspector(isPresented: $isLayerPickerPresented) {
-            MapLayerPickerSheet(
-                settingsService: settingsService,
-                onSelectRadar: { activate(radar: $0) },
-                onSelectTileLayer: { activate(model: $0) },
-                onSelectClouds: { activate() }
-            )
-            // No .presentationBackground override: iOS 26 renders the sheet as
-            // Liquid Glass at the medium detent and swaps to an opaque background
-            // when pulled up to .large.
-            .presentationDetents([.medium, .large])
-            .presentationBackgroundInteraction(.enabled(upThrough: .medium))
-            .presentationDragIndicator(.hidden)
-            .inspectorColumnWidth(min: 320, ideal: 360, max: 420)
+        .layerPickerInspector(isPresented: $isLayerPickerPresented, settingsService: settingsService) {
+            activate(radar: $0, model: $1)
         }
         // In a regular-width window the inspector wraps the map in a column
         // container that stops below the status bar (a black strip); let that
@@ -318,8 +306,15 @@ struct WeatherMapDetailView: View {
         .glassEffect(.regular, in: Capsule())
     }
 
+    /// The tab map's picker lives on the TabView, beside the top tab bar
+    /// instead of under its inset; the classic map is a cover without one.
     private func presentLayerPicker() {
-        isLayerPickerPresented = true
+        if classicChrome {
+            isLayerPickerPresented = true
+        } else {
+            presentation?.selectLayer = { activate(radar: $0, model: $1) }
+            presentation?.isLayerPickerPresented = true
+        }
     }
     /// Layer-picker selection: radar region, model layer, or (neither) the
     /// satellite clouds. The layers are mutually exclusive; the deselected

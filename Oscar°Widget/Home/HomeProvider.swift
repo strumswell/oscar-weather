@@ -48,28 +48,34 @@ final class HomeProvider: TimelineProvider, Sendable {
                 ]
             )
             async let radarRequest = self.client.getRadarSeries(coordinates: coordinates)
-            let (weather, precipSeries) = try await (weatherRequest, radarRequest)
+            // A radar outage degrades to the model value instead of freezing the old entry.
+            let weather = try await weatherRequest
+            let precipSeries = try? await radarRequest
 
             let temperatureMin = weather.daily?.temperature_2m_min?.first ?? 0
             let temperatureMax = weather.daily?.temperature_2m_max?.first ?? 0
             let temperatureNow = weather.current?.temperature ?? 0
             let weathercode = weather.current?.weathercode ?? 0
             let isDay = weather.current?.is_day ?? 0
-            // Radar measures what is falling right now; the model's "current"
-            // value is an interpolated guess (mirrors the lockscreen provider).
-            let precipitation = precipSeries?.currentRate ?? (weather.current?.precipitation ?? 0)
-
-            return HomeEntry(
-                date: Date(),
-                location: locationName,
-                temperatureMin: temperatureMin,
-                temperatureMax: temperatureMax,
-                temperatureNow: temperatureNow,
-                icon: WeatherSymbol.sfSymbol(weathercode: weathercode, isDay: isDay, isRaining: precipSeries?.isRaining() ?? false, precipitation: precipitation),
-                backgroundGradient: await WeatherAtmosphericAdapter.widgetGradient(
-                    weather: weather, precipSeries: precipSeries, coordinates: coordinates
-                )
+            let modelPrecipitation = weather.current?.precipitation ?? 0
+            let gradient = await WeatherAtmosphericAdapter.widgetGradient(
+                weather: weather, precipSeries: precipSeries, coordinates: coordinates
             )
+
+            return nowcastEntryDates(refreshMinutes: 30).map { date in
+                // Radar measures what is falling; the model's "current" value is an
+                // interpolated guess (mirrors the lockscreen provider).
+                let precipitation = precipSeries?.rate(at: date) ?? modelPrecipitation
+                return HomeEntry(
+                    date: date,
+                    location: locationName,
+                    temperatureMin: temperatureMin,
+                    temperatureMax: temperatureMax,
+                    temperatureNow: temperatureNow,
+                    icon: WeatherSymbol.sfSymbol(weathercode: weathercode, isDay: isDay, isRaining: precipitation > 0, precipitation: precipitation),
+                    backgroundGradient: gradient
+                )
+            }
         }
     }
 }

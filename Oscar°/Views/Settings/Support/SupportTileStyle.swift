@@ -7,6 +7,7 @@ struct SupportTileStyle: ProductViewStyle {
     let treat: SupportTreat
     let index: Int
     let jackpot: SupportJackpot?
+    let isPending: Bool
 
     func makeBody(configuration: Configuration) -> some View {
         Button {
@@ -17,7 +18,9 @@ struct SupportTileStyle: ProductViewStyle {
                 TreatReel(treat: treat, index: index, jackpot: jackpot)
                     .environment(\.locale, .current)
 
-                if let product = configuration.product {
+                if isPending {
+                    ProgressView()
+                } else if let product = configuration.product {
                     Text(product.displayPrice)
                         .font(.headline)
                         .monospacedDigit()
@@ -43,6 +46,6 @@ struct SupportTileStyle: ProductViewStyle {
             }
         }
         .buttonStyle(PressScaleButtonStyle())
-        .disabled(configuration.product == nil)
+        .disabled(configuration.product == nil || isPending)
     }
 }

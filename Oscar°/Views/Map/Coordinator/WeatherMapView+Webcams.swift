@@ -45,7 +45,10 @@ extension WeatherMapView.Coordinator {
                         north: box.north, south: box.south, east: box.east, west: box.west)
                     let photos = await Self.webcamPhotos(webcams)
                     guard let self, !self.isTornDown else { return }
-                    let markers = photos.mapValues(MapChip.webcam)
+                    let now = Date()
+                    let markers = Dictionary(webcams.compactMap { webcam in
+                        photos[webcam.id].map { (webcam.id, MapChip.webcam($0, age: now.timeIntervalSince(webcam.updated_at))) }
+                    }, uniquingKeysWith: { first, _ in first })
                     let gone = self.webcamMarkers.keys.filter { markers[$0] == nil }
                     self.webcams = webcams.filter { markers[$0.id] != nil }
                     self.webcamMarkers = markers

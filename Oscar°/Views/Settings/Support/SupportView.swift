@@ -18,6 +18,8 @@ struct SupportView: View {
     @State private var jackpot: SupportJackpot?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var thanks: SupportTreat?
+    /// The App Store sheet can take seconds on a slow connection; the tile spins meanwhile.
+    @State private var pendingProductID: String?
 
     private static let productIDs = SupporterStore.tipProductIDs + SupporterStore.subscriptionProductIDs
 
@@ -60,7 +62,11 @@ struct SupportView: View {
             SupportThanks(treat: treat, close: closeWin)
                 .presentationBackground(.clear)
         }
+        .onInAppPurchaseStart { product in
+            pendingProductID = product.id
+        }
         .onInAppPurchaseCompletion { product, result in
+            pendingProductID = nil
             guard case .success(.success(let verification)) = result,
                   case .verified(let transaction) = verification else { return }
             supporter.markSupporter(since: transaction.originalPurchaseDate)
@@ -145,11 +151,12 @@ struct SupportView: View {
                 ids: SupporterStore.tipProductIDs,
                 treats: treats,
                 jackpot: jackpot,
+                pendingID: pendingProductID,
                 shuffle: roll,
                 isShuffling: isRolling
             )
                 .onboardingEntrance(appeared, delay: 0.3)
-            SupportProductTiles(title: "Regelmäßig unterstützen", ids: SupporterStore.subscriptionProductIDs, treats: treats, jackpot: jackpot)
+            SupportProductTiles(title: "Regelmäßig unterstützen", ids: SupporterStore.subscriptionProductIDs, treats: treats, jackpot: jackpot, pendingID: pendingProductID)
                 .onboardingEntrance(appeared, delay: 0.4)
             SupportFooter()
                 .onboardingEntrance(appeared, delay: 0.5)

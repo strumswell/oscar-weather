@@ -21,6 +21,7 @@ final class NowPresentationCoordinator {
     var selectedTab: AppTab = UserDefaults.standard.bool(forKey: "autoPresentMap") ? .maps : .forecast {
         didSet {
             guard selectedTab != oldValue else { return }
+            if selectedTab != .maps { isLayerPickerPresented = false }
             UsageStatsStore.shared.record { $0.tabs["\(selectedTab)", default: 0] += 1 }
         }
     }
@@ -31,6 +32,10 @@ final class NowPresentationCoordinator {
 
     /// The diver sits behind the full-size tab bar, so the bar stays full while a cat is out.
     var isNudgeOut = false
+
+    var isLayerPickerPresented = false
+    /// Set by the map when it opens the picker: radar region, model layer, or neither (clouds).
+    var selectLayer: (RadarRegion?, WeatherTileLayer?) -> Void = { _, _ in }
 
     func present(_ sheet: NowSheet) {
         self.sheet = sheet

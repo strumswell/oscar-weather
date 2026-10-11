@@ -168,29 +168,62 @@ enum MapChip {
     }
 
     /// A webcam's picture as a small framed photo. 64×36 pt stays within the 200×112 px
-    /// thumbnail on 3x screens: Windy's terms forbid upscaling.
-    static func webcam(_ photo: UIImage) -> UIImage {
+    /// thumbnail on 3x screens: Windy's terms forbid upscaling. From 30 min on the picture
+    /// carries its age; from 2 h it turns gray and faded, so frozen cameras don't read as live.
+    static func webcam(_ photo: UIImage, age: TimeInterval) -> UIImage {
         let margin: CGFloat = 3
         let photoRect = CGRect(x: margin, y: margin, width: 64, height: 36)
         let size = CGSize(width: photoRect.maxX + margin, height: photoRect.maxY + margin)
+        let isStale = age > 2 * 3600
         return UIGraphicsImageRenderer(size: size).image { context in
+            let cg = context.cgContext
+            if isStale {
+                cg.setAlpha(0.55)
+                cg.beginTransparencyLayer(auxiliaryInfo: nil)
+            }
             let frame = UIBezierPath(roundedRect: photoRect, cornerRadius: 6)
-            context.cgContext.setShadow(
-                offset: CGSize(width: 0, height: 1),
-                blur: 3,
-                color: UIColor.black.withAlphaComponent(0.35).cgColor
-            )
+            cg.setShadow(offset: CGSize(width: 0, height: 1), blur: 3, color: UIColor.black.withAlphaComponent(0.35).cgColor)
             fill.setFill()
             frame.fill()
-            context.cgContext.setShadow(offset: .zero, blur: 0, color: nil)
-            context.cgContext.saveGState()
+            cg.setShadow(offset: .zero, blur: 0, color: nil)
+            cg.saveGState()
             frame.addClip()
             photo.draw(in: photoRect)
-            context.cgContext.restoreGState()
+            if isStale {
+                UIColor.gray.setFill()
+                UIRectFillUsingBlendMode(photoRect, .saturation)
+            }
+            if age >= 30 * 60 {
+                drawAgeTag(age, in: photoRect)
+            }
+            cg.restoreGState()
             UIColor.white.setStroke()
             frame.lineWidth = 1.5
             frame.stroke()
+            if isStale {
+                cg.endTransparencyLayer()
+            }
         }
+    }
+
+    /// "45 min", "7 h", "3 d" in a dark pill, bottom-trailing inside the photo.
+    private static func drawAgeTag(_ age: TimeInterval, in photoRect: CGRect) {
+        let label = Duration.seconds(age).formatted(
+            .units(allowed: [.days, .hours, .minutes], width: .narrow, maximumUnitCount: 1))
+        let text = NSAttributedString(string: label, attributes: [
+            .font: UIFont.systemFont(ofSize: 9, weight: .semibold),
+            .foregroundColor: UIColor.white,
+        ])
+        let textSize = text.size()
+        let tag = CGRect(
+            x: photoRect.maxX - textSize.width - 8,
+            y: photoRect.maxY - textSize.height - 3,
+            width: textSize.width + 6,
+            height: textSize.height
+        )
+        UIColor.black.withAlphaComponent(0.65).setFill()
+        UIBezierPath(roundedRect: tag, cornerRadius: tag.height / 2).fill()
+        text.draw(at: CGPoint(x: tag.minX + 3, y: tag.minY))
     }
 
     /// The shared chrome: dark capsule, hairline stroke, soft drop shadow.

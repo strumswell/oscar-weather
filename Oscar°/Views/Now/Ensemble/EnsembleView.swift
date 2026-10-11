@@ -13,20 +13,20 @@ struct EnsembleView: View {
         EnsembleContent(state: state, expandedLens: $expandedLens)
             .navigationTitle("Ensemble")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    modelPicker
-                }
-            }
             .task(id: state.model) {
                 await state.load(at: location.coordinates, anchor: initialDate)
             }
             .accessibilityIdentifier("ensemble.detail")
     }
+}
 
-    /// Toggles, not a Picker: menu toggles keep the provider headers and show
-    /// the coverage as a subtitle instead of wrapping it into the name.
-    private var modelPicker: some View {
+/// A glass chip on the caption's date line; the top-right slot belongs to the close button.
+/// Toggles, not a Picker: menu toggles keep the provider headers and show the coverage as a
+/// subtitle instead of wrapping it into the name.
+private struct EnsembleModelPicker: View {
+    let state: EnsembleState
+
+    var body: some View {
         Menu {
             ForEach(DailyEnsembleModel.modelsByProvider, id: \.provider) { group in
                 Section(group.provider.rawValue) {
@@ -39,7 +39,16 @@ struct EnsembleView: View {
                 }
             }
         } label: {
-            Text(verbatim: state.model.displayName)
+            HStack(spacing: 4) {
+                Text(verbatim: state.model.displayName)
+                Image(systemName: "chevron.up.chevron.down")
+                    .imageScale(.small)
+            }
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .glassEffect(.regular.interactive(), in: Capsule())
         }
         .accessibilityLabel(Text("Wettermodell"))
         .accessibilityValue(Text(verbatim: state.model.displayName))
@@ -68,18 +77,24 @@ private struct EnsembleContent: View {
                     ProgressView()
                         .tint(.white)
                 } else {
-                    ContentUnavailableView(
-                        "Keine Ensemble-Daten",
-                        systemImage: "chart.line.downtrend.xyaxis",
-                        description: Text("Außerhalb der Modellabdeckung")
-                    )
+                    ContentUnavailableView {
+                        Label("Keine Ensemble-Daten", systemImage: "chart.line.downtrend.xyaxis")
+                    } description: {
+                        Text("Außerhalb der Modellabdeckung")
+                    } actions: {
+                        EnsembleModelPicker(state: state)
+                    }
                 }
             } else {
                 VStack(spacing: 0) {
                     Spacer(minLength: 0)
 
-                    DetailDeckCaption(eyebrow: state.eyebrowLabel, title: state.titleLabel, footnote: state.footnote)
-                        .padding(.horizontal, 18)
+                    // Baseline-aligned, so the chip's name sits on the date line.
+                    ZStack(alignment: Alignment(horizontal: .trailing, vertical: .firstTextBaseline)) {
+                        DetailDeckCaption(eyebrow: state.eyebrowLabel, title: state.titleLabel, footnote: state.footnote)
+                        EnsembleModelPicker(state: state)
+                    }
+                    .padding(.horizontal, 18)
                         .padding(.bottom, 14)
 
                     EnsembleDeck(state: state, expandedLens: $expandedLens)

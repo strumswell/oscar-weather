@@ -608,9 +608,13 @@ struct WeatherMapView: UIViewRepresentable {
         /// Overlay layers (radar, model image) sit above ALL geometry
         /// (roads included — "below the first symbol layer" landed under the streets:
         /// the dark style's first symbol is a water label that sits below the road
-        /// lines), below the trailing labels.
+        /// lines), below the trailing labels. The location dot's circles sit on top and
+        /// don't count, else a late overlay lands above the webcams and arrows.
         func insertOverlayLayer(_ layer: MLNStyleLayer, in style: MLNStyle) {
-            if let lastGeometry = style.layers.last(where: { !($0 is MLNSymbolStyleLayer) }) {
+            let dotLayerIDs = [UserLocationDot.haloLayerID, UserLocationDot.pulseLayerID, UserLocationDot.dotLayerID]
+            if let lastGeometry = style.layers.last(where: {
+                !($0 is MLNSymbolStyleLayer) && !dotLayerIDs.contains($0.identifier)
+            }) {
                 style.insertLayer(layer, above: lastGeometry)
             } else {
                 style.addLayer(layer)

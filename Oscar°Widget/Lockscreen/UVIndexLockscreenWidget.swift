@@ -30,7 +30,7 @@ struct UVIndexProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<UVIndexLockScreenEntry>) -> ()) {
         runWidgetTimeline(refreshMinutes: 30, completion: completion) { coordinates in
             let air = try await client.getAirQuality(coordinates: coordinates)
-            return UVIndexLockScreenEntry(date: Date(), uvIndex: Self.currentUVIndex(from: air, now: Date()))
+            return [UVIndexLockScreenEntry(date: Date(), uvIndex: Self.currentUVIndex(from: air, now: Date()))]
         }
     }
 

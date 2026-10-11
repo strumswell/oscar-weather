@@ -74,11 +74,14 @@ final class MapLayers {
         }
     }
 
-    /// The model hours after the radar's nowcast. The cutoff moves per hour,
-    /// so radar refreshes within it load nothing.
+    /// The model hours after the radar's nowcast, loaded once the radar frames are in so the
+    /// two don't compete for bandwidth. The cutoff moves per hour, so radar refreshes within
+    /// it load nothing.
     func loadContinuation(_ continuation: Continuation?) async {
         guard let continuation,
               model.currentLayer != continuation.layer || model.startsAfter != continuation.cutoff else { return }
+        await radar.waitForFrames()
+        guard !Task.isCancelled else { return }
         await model.loadLayer(continuation.layer, after: continuation.cutoff)
     }
 

@@ -25,7 +25,7 @@ final class CloudGroup {
         for cloud in clouds {
             cloud.position.x += delta * drift * cloud.band.profile.driftFactor * cloud.scale * cloud.driftJitter
 
-            let offScreenDistance = max(620, 420 * cloud.scale)
+            let offScreenDistance = cloud.wrapDistance
             if cloud.position.x < -offScreenDistance {
                 cloud.position.x = offScreenDistance
             } else if cloud.position.x > offScreenDistance {

@@ -1175,24 +1175,24 @@
         }
       }
     },
-    "1 Packung Paracetamol" : {
+    "1 Packung Paracetamol im Monat" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1 Packung Paracetamol"
+            "value" : "1 Packung Paracetamol im Monat"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1 pack of paracetamol"
+            "value" : "1 pack of paracetamol a month"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1 kutu parasetamol"
+            "value" : "Ayda 1 kutu parasetamol"
           }
         }
       }
@@ -1527,28 +1527,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "2 paket iyi makarna"
-          }
-        }
-      }
-    },
-    "2 Tüten Fruchtgummi" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2 Tüten Fruchtgummi"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2 bags of fruit gums"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "2 paket meyveli jelibon"
           }
         }
       }
@@ -6149,28 +6127,6 @@
         }
       }
     },
-    "Die Fruchtgummis grinsen schon." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Fruchtgummis grinsen schon."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The fruit gums are already grinning."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jelibonlar şimdiden sırıtıyor."
-          }
-        }
-      }
-    },
     "Die nächste Folge läuft schon. Danke!" : {
       "localizations" : {
         "de" : {
@@ -8211,24 +8167,24 @@
         }
       }
     },
-    "Für den nächsten Bug. Danke." : {
+    "Für den Bug des Monats. Danke." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Für den nächsten Bug. Danke."
+            "value" : "Für den Bug des Monats. Danke."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "For the next bug. Thank you."
+            "value" : "For the bug of the month. Thank you."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bir sonraki hata için. Teşekkürler."
+            "value" : "Ayın hatası için. Teşekkürler."
           }
         }
       }

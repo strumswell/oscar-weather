@@ -36,7 +36,7 @@ struct RainTimelineProvider: TimelineProvider {
         runWidgetTimeline(refreshMinutes: 15, retryMinutes: 10, completion: completion) { coordinates in
             // nil = server successfully reported no radar coverage here.
             let precipSeries = try await client.getRadarSeries(coordinates: coordinates)
-            return Self.makeEntry(from: precipSeries, now: Date())
+            return nowcastEntryDates(refreshMinutes: 15).map { Self.makeEntry(from: precipSeries, now: $0) }
         }
     }
 
@@ -45,9 +45,9 @@ struct RainTimelineProvider: TimelineProvider {
             return RainTimelineEntry(
                 date: now,
                 bars: [],
-                headline: String(localized: "Radardaten sind veraltet", comment: "LS Widget Regenverlauf mit veralteten Radardaten"),
+                headline: String(localized: "Keine Radardaten", comment: "LS Widget Regenverlauf ohne Radarabdeckung"),
                 spanMinutes: 0,
-                hasRadarCoverage: true
+                hasRadarCoverage: false
             )
         }
 
@@ -58,9 +58,9 @@ struct RainTimelineProvider: TimelineProvider {
             return RainTimelineEntry(
                 date: now,
                 bars: [],
-                headline: String(localized: "Keine Radardaten", comment: "LS Widget Regenverlauf ohne Radarabdeckung"),
+                headline: String(localized: "Radardaten sind veraltet", comment: "LS Widget Regenverlauf mit veralteten Radardaten"),
                 spanMinutes: 0,
-                hasRadarCoverage: false
+                hasRadarCoverage: true
             )
         }
 
@@ -155,13 +155,13 @@ private struct RainTimelineContent: View {
     let entry: RainTimelineEntry
 
     var body: some View {
-        if entry.hasRadarCoverage {
-            RainTimelineBars(bars: entry.bars)
-            RainTimelineAxisLabel(spanMinutes: entry.spanMinutes)
-        } else {
+        if !entry.hasRadarCoverage {
             Text("Radar ist für diesen Ort nicht verfügbar")
                 .font(.system(size: 11))
                 .foregroundStyle(.secondary)
+        } else if !entry.bars.isEmpty {
+            RainTimelineBars(bars: entry.bars)
+            RainTimelineAxisLabel(spanMinutes: entry.spanMinutes)
         }
     }
 }

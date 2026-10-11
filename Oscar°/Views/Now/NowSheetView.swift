@@ -18,7 +18,7 @@ struct NowSheetView: View {
             NavigationStack {
                 EnsembleView(initialDate: .now)
                     .toolbar {
-                        ToolbarItem(placement: .topBarLeading) {
+                        ToolbarItem(placement: .topBarTrailing) {
                             Button(role: .close) { dismiss() }
                         }
                     }

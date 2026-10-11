@@ -49,13 +49,13 @@ struct WindProvider: TimelineProvider {
                 : (weather.hourly_units?.windspeed_10m ?? unit.displayUnit)
             let direction = weather.current?.wind_direction_10m
 
-            return WindLockScreenEntry(
+            return [WindLockScreenEntry(
                 date: Date(),
                 speed: speed,
                 unitLabel: unitLabel,
                 directionDegrees: direction,
                 compass: direction.map(Self.compassDirection) ?? ""
-            )
+            )]
         }
     }
 

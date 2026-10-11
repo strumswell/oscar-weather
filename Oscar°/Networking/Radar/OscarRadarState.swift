@@ -224,6 +224,13 @@ final class OscarRadarState {
         await loadFrames(allowBackgroundPreload: allowsBackgroundPreload())
     }
 
+    /// Returns once the running load and the preload it kicks off have finished
+    /// (or were cancelled by an interaction), so the model continuation queues behind them.
+    func waitForFrames() async {
+        await bootstrapTask?.value
+        await backgroundPreloadTask?.value
+    }
+
     // MARK: - Playback
 
     func play() {

@@ -75,18 +75,23 @@ struct CloudsView: View {
                         let alpha = Double(cloud.visibility(coverage: coverage)) * profile.presence
                         guard alpha > 0.01,
                               let image = images[CloudSpriteKey(image: cloud.imageNumber, band: band)] else { continue }
-                        // The deck is laid out for the full-screen sim — skip sprites
-                        // fully outside a smaller canvas (location cards).
+                        // The deck is a phone-wide strip; wider canvases (iPad, Mac)
+                        // repeat it so the clouds reach across.
                         let y = cloud.position.y + sink
-                        guard cloud.position.x < size.width,
-                              y < size.height,
-                              cloud.position.x + image.size.width * cloud.scale > 0,
-                              y + image.size.height * cloud.scale > 0 else { continue }
+                        let width = image.size.width * cloud.scale
+                        guard y < size.height, y + image.size.height * cloud.scale > 0 else { continue }
+                        let period = 2 * cloud.wrapDistance
+                        var x = cloud.position.x
+                        while x + width > 0 { x -= period }
+                        x += period
                         context.opacity = alpha
-                        context.translateBy(x: cloud.position.x, y: y)
-                        context.scaleBy(x: cloud.scale, y: cloud.scale)
-                        context.draw(image, at: .zero, anchor: .topLeading)
-                        context.transform = .identity
+                        while x < size.width {
+                            context.translateBy(x: x, y: y)
+                            context.scaleBy(x: cloud.scale, y: cloud.scale)
+                            context.draw(image, at: .zero, anchor: .topLeading)
+                            context.transform = .identity
+                            x += period
+                        }
                     }
                 }
             }

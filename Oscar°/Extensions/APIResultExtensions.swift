@@ -38,26 +38,27 @@ extension PrecipSeriesResponse {
     /// "no data" instead of replaying an outdated value.
     private static let freshnessWindow: TimeInterval = 20 * 60
 
-    /// The point nearest to "now" across the whole series — observed *or* nowcast.
-    /// Radar observations lag the wall clock by 5–15 min, so shortly after rain
-    /// starts the value that is actually "now" lives in the nowcast half;
-    /// preferring observed frames here used to read a stale dry frame while the
-    /// chart already showed rain.
-    private func nearestToNow() -> PrecipPoint? {
-        let now = Date()
+    /// Precipitation rate in mm/h at `date` from the nearest point across the whole
+    /// series — observed *or* nowcast — or nil when no sample lies near that time
+    /// (stale data). Radar observations lag the wall clock by 5–15 min, so shortly
+    /// after rain starts the value that is actually "now" lives in the nowcast
+    /// half; preferring observed frames here used to read a stale dry frame while
+    /// the chart already showed rain. Widgets pass future dates to step their
+    /// timeline entries through the nowcast.
+    func rate(at date: Date) -> Double? {
         guard let nearest = series.min(by: {
-            abs($0.timestamp.timeIntervalSince(now)) < abs($1.timestamp.timeIntervalSince(now))
-        }), abs(nearest.timestamp.timeIntervalSince(now)) <= Self.freshnessWindow else {
+            abs($0.timestamp.timeIntervalSince(date)) < abs($1.timestamp.timeIntervalSince(date))
+        }), abs(nearest.timestamp.timeIntervalSince(date)) <= Self.freshnessWindow else {
             return nil
         }
-        return nearest
+        return nearest.precipitation
     }
 
-    /// Precipitation rate in mm/h at "now", or nil when the series has no sample
-    /// near the current time (stale data). Lets callers with their own fallback
-    /// (e.g. the forecast value) tell "radar says dry" apart from "no radar".
+    /// Precipitation rate in mm/h at "now", or nil when the series is stale. Lets
+    /// callers with their own fallback (e.g. the forecast value) tell "radar says
+    /// dry" apart from "no radar".
     var currentRate: Double? {
-        nearestToNow()?.precipitation
+        rate(at: Date())
     }
 
     /// Current precipitation rate in mm/h at "now" (nearest frame, 0 when stale).
