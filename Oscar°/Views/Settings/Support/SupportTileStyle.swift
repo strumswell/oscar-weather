@@ -13,7 +13,9 @@ struct SupportTileStyle: ProductViewStyle {
             configuration.purchase()
         } label: {
             VStack(spacing: 6) {
+                // ProductView sets the storefront's locale; the treats speak the app's language.
                 TreatReel(treat: treat, index: index, jackpot: jackpot)
+                    .environment(\.locale, .current)
 
                 if let product = configuration.product {
                     Text(product.displayPrice)

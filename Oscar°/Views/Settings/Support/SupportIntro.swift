@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SupportIntro: View {
     let isSupporter: Bool
+    var isAsking = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -9,6 +10,13 @@ struct SupportIntro: View {
                 Text("Danke, dass du Oscar unterstützt.")
                     .font(.title.bold())
                 Text("Alle App-Symbole und Sticker sind für dich freigeschaltet.")
+                    .foregroundStyle(.secondary)
+            } else if isAsking {
+                Text("Oscar ist kostenlos")
+                    .font(.title.bold())
+                Text("Für mich als einzelnen Entwickler kostet der Betrieb aber jeden Monat einiges. Wenn dir Oscar gefällt, hilft jede Unterstützung.")
+                    .foregroundStyle(.secondary)
+                Text(verbatim: "– Philipp")
                     .foregroundStyle(.secondary)
             } else {
                 Text("Oscar unterstützen")

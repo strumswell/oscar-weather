@@ -29,6 +29,9 @@ final class NowPresentationCoordinator {
     /// LocationsView observes it and presents the search field.
     var placesSearchRequests = 0
 
+    /// The diver sits behind the full-size tab bar, so the bar stays full while a cat is out.
+    var isNudgeOut = false
+
     func present(_ sheet: NowSheet) {
         self.sheet = sheet
     }

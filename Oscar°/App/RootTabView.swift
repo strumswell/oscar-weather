@@ -53,7 +53,7 @@ struct RootTabView: View {
                 }
                 // On Karten the bar stays full-size: map pans read as scroll-downs
                 // and would collapse it mid-interaction.
-                .tabBarMinimizeBehavior(presentation.selectedTab == .maps ? .never : .onScrollDown)
+                .tabBarMinimizeBehavior(presentation.selectedTab == .maps || presentation.isNudgeOut ? .never : .onScrollDown)
                 // Monochrome bar like Apple Weather's bottom controls — the accent
                 // tint on the selected item is unreadable on glass over a bright
                 // sky. Tint cascades into tab content, so the tabs above swap in a

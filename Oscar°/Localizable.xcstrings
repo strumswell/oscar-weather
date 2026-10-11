@@ -1,6 +1,94 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "Gefällt dir Oscar?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gefällt dir Oscar?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enjoying Oscar?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar'ı beğeniyor musunuz?"
+          }
+        }
+      }
+    },
+    "Nicht jetzt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht jetzt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Now"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şimdi değil"
+          }
+        }
+      }
+    },
+    "Oscar ist kostenlos" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar ist kostenlos"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar is free"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar ücretsiz"
+          }
+        }
+      }
+    },
+    "Für mich als einzelnen Entwickler kostet der Betrieb aber jeden Monat einiges. Wenn dir Oscar gefällt, hilft jede Unterstützung." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für mich als einzelnen Entwickler kostet der Betrieb aber jeden Monat einiges. Wenn dir Oscar gefällt, hilft jede Unterstützung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As a solo developer, running it costs me a fair amount every month. If you enjoy Oscar, any support helps."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ancak tek başına çalışan bir geliştirici olarak işletmesi bana her ay epey masrafa mal oluyor. Oscar'ı beğendiyseniz her destek işe yarar."
+          }
+        }
+      }
+    },
     "" : {
 
     },

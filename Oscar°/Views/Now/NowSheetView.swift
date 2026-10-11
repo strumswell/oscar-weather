@@ -45,6 +45,8 @@ struct NowSheetView: View {
             SettingsView()
         case .layout:
             NowLayoutSheet()
+        case .support:
+            SupportView(close: { dismiss() })
         }
     }
 }

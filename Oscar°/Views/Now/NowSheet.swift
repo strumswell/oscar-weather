@@ -9,6 +9,7 @@ enum NowSheet: Identifiable {
     case alerts
     case settings
     case layout
+    case support
 
     var id: String {
         switch self {
@@ -28,6 +29,8 @@ enum NowSheet: Identifiable {
             "settings"
         case .layout:
             "layout"
+        case .support:
+            "support"
         }
     }
 }

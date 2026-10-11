@@ -76,6 +76,7 @@ struct StatsView: View {
         case "alerts": "Warnungen geöffnet"
         case "settings": "Einstellungen geöffnet"
         case "layout": "Ansicht angepasst"
+        case "support": "Oscar unterstützen"
         case let id where id.hasPrefix("environment"): "Umwelt geöffnet"
         default: LocalizedStringKey(id)
         }

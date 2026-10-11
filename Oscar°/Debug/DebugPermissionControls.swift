@@ -17,6 +17,9 @@ import UserNotifications
 struct DebugPermissionControls: View {
     private let locationService = LocationService.shared
     private let notificationManager = NotificationSettingsManager.shared
+    #if DEBUG
+    @AppStorage(SupportNudge.forcedKey) private var forcesSupportNudge = false
+    #endif
 
     var body: some View {
         VStack(spacing: 8) {
@@ -37,6 +40,11 @@ struct DebugPermissionControls: View {
             }
             #if DEBUG
             liveActivityRow
+            Toggle(isOn: $forcesSupportNudge) {
+                Text(verbatim: "Support cats")
+            }
+            .font(.caption)
+            .fixedSize()
             #endif
         }
         .padding(.bottom, 12)

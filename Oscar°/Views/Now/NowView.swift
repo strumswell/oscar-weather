@@ -168,6 +168,8 @@ struct NowView: View {
         // One column runs under the status bar like the sky; two columns sit
         // below the top tab bar of iPad and Mac.
         .ignoresSafeArea(edges: isTwoColumn ? [] : .top)
+        // Outside the safe-area opt-out, so the cat sees the real bars.
+        .overlay { SupportNudgeOverlay(isEnabled: weather.hasContent) }
         .onGeometryChange(for: CGSize.self, of: { $0.size }) { size in
             // The bar minimizing moves the height by well under 100 pt.
             if let old = stageSize, old.width == size.width, abs(old.height - size.height) < 100 {

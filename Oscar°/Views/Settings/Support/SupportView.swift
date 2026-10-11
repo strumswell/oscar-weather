@@ -5,6 +5,9 @@ import SwiftUI
 /// that feathers into the canvas; the products are StoreKit `ProductView`s in
 /// a custom tile style, so loading, purchase and entitlement stay native.
 struct SupportView: View {
+    /// Set when the cat asked.
+    var close: (() -> Void)?
+
     private let supporter = SupporterStore.shared
     @State private var appeared = false
     @State private var purchases = 0
@@ -18,7 +21,7 @@ struct SupportView: View {
 
     private static let productIDs = SupporterStore.tipProductIDs + SupporterStore.subscriptionProductIDs
 
-    private static let heroFraction = 0.25
+    private var heroFraction: Double { close == nil ? 0.25 : 0.17 }
     private static let featherHeight = 90.0
 
     var body: some View {
@@ -37,6 +40,19 @@ struct SupportView: View {
                     .modifier(ShineModifier())
             }
             .ignoresSafeArea()
+        }
+        .safeAreaInset(edge: .bottom) {
+            if let close {
+                Button(action: close) {
+                    Text("Nicht jetzt")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 6)
+                }
+                .buttonStyle(.glass)
+                .padding(.horizontal)
+                .padding(.bottom, 8)
+            }
         }
         // Over everything, tab bar and sheet included; the win fades itself
         // in and out, so the cover's own slide is switched off.
@@ -67,7 +83,7 @@ struct SupportView: View {
         VStack(spacing: 0) {
             Color.clear
                 .containerRelativeFrame(.vertical) { height, _ in
-                    max(height * Self.heroFraction - Self.featherHeight, 0)
+                    max(height * heroFraction - Self.featherHeight, 0)
                 }
             LinearGradient(
                 colors: [Color(uiColor: .systemBackground).opacity(0), Color(uiColor: .systemBackground)],
@@ -81,6 +97,10 @@ struct SupportView: View {
     /// After the win the reels roll on to fresh treats, so no tile keeps
     /// showing the bought treat over another tier's price.
     private func closeWin() {
+        if let close {
+            close()
+            return
+        }
         withoutCoverAnimation { thanks = nil }
         roll()
     }
@@ -118,7 +138,7 @@ struct SupportView: View {
 
     private var canvas: some View {
         VStack(alignment: .leading, spacing: 24) {
-            SupportIntro(isSupporter: supporter.isSupporter)
+            SupportIntro(isSupporter: supporter.isSupporter, isAsking: close != nil)
                 .onboardingEntrance(appeared, delay: 0.1)
             SupportProductTiles(
                 title: "Einmal unterstützen",
