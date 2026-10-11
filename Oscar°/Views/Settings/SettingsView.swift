@@ -86,6 +86,7 @@ struct SettingsView: View {
             Label("Ansicht anpassen", systemImage: "rectangle.stack")
               .labelStyle(.settingsIcon(.pink))
           }
+          .accessibilityIdentifier("settings.layout")
 
           // A Mac running the iPad app can't swap its icon.
           if UIApplication.shared.supportsAlternateIcons {

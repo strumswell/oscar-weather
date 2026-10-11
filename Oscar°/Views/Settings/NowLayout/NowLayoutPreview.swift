@@ -3,17 +3,21 @@ import SwiftUI
 /// The band above the layout list, under the real sky: the head with its
 /// metrics at full size, or the whole page zoomed out to a minimap of real
 /// cards (the onboarding collage's staged data) with a label beside every
-/// section. Animates as the list below changes.
+/// section. On a wide window (iPad, the Duo unfolded, Mac) the minimap is
+/// the two-column page: stage labels on the left, feed labels on the right.
+/// Animates as the list below changes.
 struct NowLayoutPreview: View {
     let part: NowLayoutSettingsView.Part
 
     @Environment(Weather.self) private var weather
     @Environment(Location.self) private var location
+    @Environment(NowPresentationCoordinator.self) private var presentation
     @State private var snapshotCache = AtmosphereSnapshotCache()
     private let settingsService = SettingService.shared
 
     private static let height: CGFloat = 260
     private static let mapInset: CGFloat = 12
+    private static let calloutWidth: CGFloat = 150
 
     var body: some View {
         let snapshot = weather.forecast.hourly != nil
@@ -27,49 +31,73 @@ struct NowLayoutPreview: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: Self.height)
-        .background(AtmosphereSampler.skyGradient(snapshot: snapshot), in: .rect(cornerRadius: 26))
+        .background(AtmosphereSampler.skyGradient(snapshot: snapshot))
+        .clipShape(.rect(cornerRadius: 26))
         .animation(.snappy, value: settingsService.nowSections)
+        .animation(.snappy, value: settingsService.stageNowSections)
         .animation(.snappy, value: settingsService.headMetrics)
         // Decorative: the list below is the accessible surface, and the
         // values are spoken on the forecast page itself.
         .accessibilityHidden(true)
     }
 
+    private var wideSize: CGSize? {
+        presentation.forecastIsWide ? presentation.forecastSize : nil
+    }
+
     /// The page scaled to fit the band and a label level with each section.
     private var pageMap: some View {
-        let map = PageMap(sections: settingsService.nowSections)
-        // Capped so a page of one or two sections doesn't balloon.
-        let scale = min((Self.height - 2 * Self.mapInset) / map.height, 0.3)
-        return HStack(alignment: .top, spacing: 3) {
-            MiniPage(sections: map.sections)
-                .frame(width: PageMap.width, height: map.height, alignment: .top)
-                .scaleEffect(scale, anchor: .topLeading)
-                .frame(width: PageMap.width * scale, height: map.height * scale, alignment: .topLeading)
-                .background(.white.opacity(0.1), in: .rect(cornerRadius: 5))
-            ZStack(alignment: .topLeading) {
-                ForEach(map.sections) { section in
-                    callout(section)
-                        .offset(y: map.midY(of: section) * scale - 10)
-                        .transition(.opacity)
+        let map = wideSize.map { PageMap(stage: settingsService.nowStageSections, feed: settingsService.nowFeedSections, size: $0) }
+            ?? PageMap(stage: settingsService.nowPageSections, feed: [], size: nil)
+        let labelColumns: CGFloat = map.isWide ? 2 : 1
+        return GeometryReader { geometry in
+            // Capped so a page of one or two sections doesn't balloon.
+            let scale = min(
+                (Self.height - 2 * Self.mapInset) / map.size.height,
+                (geometry.size.width - labelColumns * (Self.calloutWidth + 3)) / map.size.width,
+                0.3
+            )
+            HStack(alignment: .top, spacing: 3) {
+                if map.isWide {
+                    callouts(map.stage, in: map, scale: scale, mirrored: true)
                 }
-                if map.sections.isEmpty {
-                    Text("Keine Abschnitte")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(.white)
-                        .shadow(radius: 2)
-                        .padding(.leading, 8)
-                        .offset(y: PageMap.headHeight * scale / 2 - 10)
-                }
+                MiniPage(map: map)
+                    .frame(width: map.size.width, height: map.size.height, alignment: .top)
+                    .scaleEffect(scale, anchor: .topLeading)
+                    .frame(width: map.size.width * scale, height: map.size.height * scale, alignment: .topLeading)
+                    .background(.white.opacity(0.1), in: .rect(cornerRadius: 5))
+                callouts(map.isWide ? map.feed : map.stage, in: map, scale: scale, mirrored: false)
             }
-            .frame(width: 150, alignment: .topLeading)
+            .frame(width: geometry.size.width, height: geometry.size.height)
         }
     }
 
-    private func callout(_ section: NowSection) -> some View {
-        HStack(spacing: 6) {
-            Rectangle()
-                .frame(width: 16, height: 1)
-                .opacity(0.6)
+    private func callouts(_ sections: [NowSection], in map: PageMap, scale: CGFloat, mirrored: Bool) -> some View {
+        let alignment: Alignment = mirrored ? .topTrailing : .topLeading
+        return ZStack(alignment: alignment) {
+            ForEach(sections) { section in
+                callout(section, mirrored: mirrored)
+                    .offset(y: map.midY(of: section) * scale - 10)
+                    .transition(.opacity)
+            }
+            if !mirrored, map.stage.isEmpty, map.feed.isEmpty {
+                Text("Keine Abschnitte")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .shadow(radius: 2)
+                    .padding(.leading, 8)
+                    .offset(y: (map.isWide ? PageMap.spacing : map.headHeight / 2) * scale - 10)
+            }
+        }
+        .frame(width: Self.calloutWidth, alignment: alignment)
+    }
+
+    private func callout(_ section: NowSection, mirrored: Bool) -> some View {
+        let leader = Rectangle()
+            .frame(width: 16, height: 1)
+            .opacity(0.6)
+        return HStack(spacing: 6) {
+            if !mirrored { leader }
             Image(systemName: section.systemImage)
                 .font(.system(size: 10, weight: .semibold))
                 .frame(width: 20, height: 20)
@@ -77,6 +105,7 @@ struct NowLayoutPreview: View {
             Text(section.title)
                 .font(.footnote.weight(.semibold))
                 .lineLimit(1)
+            if mirrored { leader }
         }
         .frame(height: 20)
         .foregroundStyle(.white)
@@ -117,41 +146,69 @@ private struct PreviewHead: View {
     }
 }
 
-/// The miniature's vertical grid in full-size page points. Every block has
-/// a fixed height, so the labels are placed by arithmetic instead of
-/// measuring the scaled page.
+/// The miniature's grid in full-size page points. Every block has a fixed
+/// height, so the labels are placed by arithmetic instead of measuring the
+/// scaled page. The phone page is one column as tall as its content; the
+/// wide page is the window, the stage's map taking the spare height and the
+/// feed running off the bottom like the real scroll.
 private struct PageMap {
-    static let width: CGFloat = 390
+    static let phoneWidth: CGFloat = 390
     static let headHeight: CGFloat = 170
+    static let compactHeadHeight: CGFloat = 150
     static let spacing: CGFloat = 20
 
-    let sections: [NowSection]
-    let tops: [CGFloat]
-    let height: CGFloat
+    let size: CGSize
+    let isWide: Bool
+    let stageWidth: CGFloat
+    let stage: [NowSection]
+    let feed: [NowSection]
+    private let mapHeight: CGFloat
+    private let tops: [NowSection: CGFloat]
 
-    init(sections: [NowSection]) {
-        var tops: [CGFloat] = []
-        var y = Self.headHeight
-        for section in sections {
+    var headHeight: CGFloat { isWide ? Self.compactHeadHeight : Self.headHeight }
+    var feedWidth: CGFloat { size.width - stageWidth }
+
+    init(stage: [NowSection], feed: [NowSection], size wide: CGSize?) {
+        isWide = wide != nil
+        self.stage = stage
+        self.feed = feed
+        let headHeight = isWide ? Self.compactHeadHeight : Self.headHeight
+        let fixed = stage.reduce(0) { $0 + Self.spacing + ($1 == .map ? 0 : $1.pageHeight) } + Self.spacing
+        mapHeight = wide.map { max(NowSection.map.pageHeight, $0.height - headHeight - fixed) } ?? 0
+
+        var tops: [NowSection: CGFloat] = [:]
+        var y = headHeight
+        for section in stage {
             y += Self.spacing
-            tops.append(y)
+            tops[section] = y
+            y += section == .map ? mapHeight : section.pageHeight
+        }
+        let stageHeight = y + Self.spacing
+        y = 0
+        for section in feed {
+            y += Self.spacing
+            tops[section] = y
             y += section.pageHeight
         }
-        self.sections = sections
         self.tops = tops
-        height = y + Self.spacing
+        size = wide ?? CGSize(width: Self.phoneWidth, height: stageHeight)
+        stageWidth = wide.map { $0.width - WideForecast.feedWidth(for: $0.width) } ?? Self.phoneWidth
+    }
+
+    func height(of section: NowSection) -> CGFloat {
+        section == .map ? mapHeight : section.pageHeight
     }
 
     func midY(of section: NowSection) -> CGFloat {
-        guard let index = sections.firstIndex(of: section) else { return 0 }
-        return tops[index] + section.pageHeight / 2
+        (tops[section] ?? 0) + height(of: section) / 2
     }
 }
 
 private extension NowSection {
-    /// Title plus staged card, in page points.
+    /// Title plus staged card, in page points; the map's minimum.
     var pageHeight: CGFloat {
         switch self {
+        case .map: 280
         case .radar: 155
         case .hourly: 180
         case .daily: 220
@@ -165,34 +222,63 @@ private extension NowSection {
 /// The forecast page at full size, built from the real cards with staged
 /// values so every section shows whatever the weather. The caller scales it.
 private struct MiniPage: View {
-    let sections: [NowSection]
+    let map: PageMap
 
     var body: some View {
-        VStack(alignment: .leading, spacing: PageMap.spacing) {
-            PreviewHead()
-                .frame(maxWidth: .infinity)
-                .frame(height: PageMap.headHeight)
-            ForEach(sections) { section in
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(section.title)
-                        .font(.title3.bold())
-                        .foregroundStyle(.white)
-                        .padding(.leading)
-                    card(for: section)
+        HStack(alignment: .top, spacing: 0) {
+            VStack(alignment: .leading, spacing: PageMap.spacing) {
+                PreviewHead()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: map.headHeight)
+                ForEach(map.stage) { MiniSection(section: $0, width: map.stageWidth, height: map.height(of: $0)) }
+            }
+            .frame(width: map.stageWidth, alignment: .top)
+            if map.isWide {
+                VStack(alignment: .leading, spacing: PageMap.spacing) {
+                    ForEach(map.feed) { MiniSection(section: $0, width: map.feedWidth, height: map.height(of: $0)) }
                 }
-                .frame(height: section.pageHeight, alignment: .top)
-                .transition(.opacity)
+                .padding(.top, PageMap.spacing)
+                .frame(width: map.feedWidth, alignment: .top)
             }
         }
+        .frame(width: map.size.width, height: map.size.height, alignment: .topLeading)
+        .clipped()
         .environment(\.cardBackgroundStyle, stagedCardFill)
         // The grid's heights assume the default text size.
         .dynamicTypeSize(.large)
         .allowsHitTesting(false)
     }
+}
+
+/// One section's title and staged card at full size.
+private struct MiniSection: View {
+    let section: NowSection
+    let width: CGFloat
+    let height: CGFloat
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(section.title)
+                .font(.title3.bold())
+                .foregroundStyle(.white)
+                .padding(.leading)
+            card
+        }
+        .frame(height: height, alignment: .top)
+        .transition(.opacity)
+    }
 
     @ViewBuilder
-    private func card(for section: NowSection) -> some View {
+    private var card: some View {
         switch section {
+        case .map:
+            // Stands in for the live map: an empty tile filling the block.
+            Color.clear
+                .cardBackground()
+                .clipShape(.rect(cornerRadius: 10))
+                .cardBorder()
+                .padding(.horizontal)
+                .padding(.bottom)
         case .radar:
             PrecipitationSeriesChart(points: OnboardingSampleData.showerPoints, timeZone: .current)
                 .padding(16)
@@ -208,7 +294,7 @@ private struct MiniPage: View {
             }
             .font(.system(size: 18))
             .padding(.leading)
-            .frame(width: PageMap.width, alignment: .leading)
+            .frame(width: width, alignment: .leading)
             .clipped()
         case .daily:
             CollageDailyCard()

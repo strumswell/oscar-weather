@@ -30,7 +30,7 @@ struct NowView: View {
     /// when the window really changes (rotation, fold, split, resize): the
     /// bottom safe area shrinks when the bar minimizes on scroll-down, and
     /// tracking that live would re-stretch the first page mid-scroll.
-    @State private var stageSize: CGSize?
+    private var stageSize: CGSize? { presentation.forecastSize }
 
     private static let scrollTopPadding: CGFloat = 40
     /// The bottom safe area tops out well above the floating bar's glass.
@@ -51,36 +51,21 @@ struct NowView: View {
         weather.isLoading && weather.hasContent && !manualRefreshInFlight && scenePhase == .active
     }
 
-    private var sections: [NowSection] { settingsService.nowSections }
+    private var sections: [NowSection] {
+        isTwoColumn ? settingsService.nowSections : settingsService.nowPageSections
+    }
 
     /// The launch "page" is the head plus the first section — plus the next
     /// one when the first is the short, optional radar teaser.
     private var firstPageCount: Int { sections.first == .radar ? 2 : 1 }
 
-    /// From this width the forecast splits into the stage (now) and the feed
-    /// (later): iPad, the Duo's inner display in landscape, Mac windows.
-    private static let twoColumnMinWidth: CGFloat = 760
+    private var isTwoColumn: Bool { presentation.forecastIsWide }
 
-    private var isTwoColumn: Bool { (stageSize?.width ?? 0) >= Self.twoColumnMinWidth }
+    private var feedWidth: CGFloat { WideForecast.feedWidth(for: stageSize?.width ?? 0) }
 
-    /// Phone-sized cards: half the window, between 380 and 640 pt.
-    private var feedWidth: CGFloat { min(640, max(380, (stageSize?.width ?? 0) / 2)) }
+    private var stageSections: [NowSection] { settingsService.nowStageSections }
 
-    /// The sections about right now (nowcast, measured readings) sit on the
-    /// stage under the map, in the user's order; the feed keeps the rest.
-    private static let stageSectionKinds: Set<NowSection> = [.radar, .stations]
-
-    private var stageSections: [NowSection] {
-        sections.filter { Self.stageSectionKinds.contains($0) }
-    }
-
-    /// The open day in the daily list carries the hours, so the hourly
-    /// strip only stays when the daily list is hidden.
-    private var feedSections: [NowSection] {
-        sections.filter { section in
-            !Self.stageSectionKinds.contains(section) && !(section == .hourly && sections.contains(.daily))
-        }
-    }
+    private var feedSections: [NowSection] { settingsService.nowFeedSections }
 
     var body: some View {
         // Cards share the sky's hue instead of a fixed dark material (same
@@ -175,7 +160,7 @@ struct NowView: View {
             if let old = stageSize, old.width == size.width, abs(old.height - size.height) < 100 {
                 return
             }
-            stageSize = size
+            presentation.forecastSize = size
         }
     }
 
@@ -204,8 +189,8 @@ struct NowView: View {
         .animation(.snappy, value: sections)
     }
 
-    /// The wide layout's left column, right now: the head, a live map that
-    /// takes the spare height, then the stage sections. Too short to hold
+    /// The wide layout's left column, right now: the head, then the stage
+    /// sections with the map taking the spare height. Too short to hold
     /// them all (Duo, small iPad with rain), the map bottoms out and the
     /// column scrolls.
     private var stage: some View {
@@ -213,13 +198,11 @@ struct NowView: View {
             HeadView(compact: true)
                 .fixedSize(horizontal: false, vertical: true)
                 .debugConsoleTap(countDebugTap)
-            MapPreview()
-                .frame(minHeight: 240, maxHeight: .infinity)
             sectionList(stageSections[...])
         }
         .padding(.bottom)
         .frame(minHeight: stageSize?.height, alignment: .top)
-        .animation(.snappy, value: sections)
+        .animation(.snappy, value: stageSections)
     }
 
     /// The wide layout's right column: the forecast sections.
@@ -230,7 +213,7 @@ struct NowView: View {
             pageEnd
         }
         .animation(.easeInOut(duration: 0.3), value: showRefreshIndicator)
-        .animation(.snappy, value: sections)
+        .animation(.snappy, value: feedSections)
     }
 
     @ViewBuilder
@@ -323,8 +306,9 @@ struct NowView: View {
         ForEach(sections) { section in
             section.view(openRadarMap: openRadarMap, isWide: isWide)
                 // Horizontal strips are greedy in height and would swallow
-                // the first page's stretch — pin every section to its content.
-                .fixedSize(horizontal: false, vertical: true)
+                // the first page's stretch — pin every section to its content,
+                // except the map, which stretches on purpose.
+                .fixedSize(horizontal: false, vertical: section != .map)
                 .padding(.top, 28)
                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
         }

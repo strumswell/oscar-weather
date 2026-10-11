@@ -34,6 +34,9 @@ final class NowPresentationCoordinator {
     var isNudgeOut = false
 
     var isLayerPickerPresented = false
+    /// Latched by NowView; the layout settings read the split from it.
+    var forecastSize: CGSize?
+    var forecastIsWide: Bool { (forecastSize?.width ?? 0) >= WideForecast.minWidth }
     /// Set by the map when it opens the picker: radar region, model layer, or neither (clouds).
     var selectLayer: (RadarRegion?, WeatherTileLayer?) -> Void = { _, _ in }
 

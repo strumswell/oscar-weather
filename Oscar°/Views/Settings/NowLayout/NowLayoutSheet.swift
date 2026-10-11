@@ -7,7 +7,7 @@ struct NowLayoutSheet: View {
 
     var body: some View {
         NavigationStack {
-            NowLayoutSettingsView()
+            NowLayoutSettingsView(resetPlacement: .topBarLeading)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(role: .close) { dismiss() }

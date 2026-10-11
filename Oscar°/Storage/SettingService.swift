@@ -102,6 +102,9 @@ final class SettingService {
     var hiddenNowSectionsRaw: [String]? {
         didSet { UserDefaults.standard.set(hiddenNowSectionsRaw, forKey: "hiddenNowSections") }
     }
+    var stageNowSectionsRaw: [String]? {
+        didSet { UserDefaults.standard.set(stageNowSectionsRaw, forKey: "stageNowSections") }
+    }
     var headMetricOrderRaw: [String]? {
         didSet { UserDefaults.standard.set(headMetricOrderRaw, forKey: "headMetricOrder") }
     }
@@ -217,6 +220,7 @@ final class SettingService {
         classicTheme = UserDefaults.standard.bool(forKey: "classicTheme")
         nowSectionOrderRaw = UserDefaults.standard.stringArray(forKey: "nowSectionOrder")
         hiddenNowSectionsRaw = UserDefaults.standard.stringArray(forKey: "hiddenNowSections")
+        stageNowSectionsRaw = UserDefaults.standard.stringArray(forKey: "stageNowSections")
         headMetricOrderRaw = UserDefaults.standard.stringArray(forKey: "headMetricOrder")
         hiddenHeadMetricsRaw = UserDefaults.standard.stringArray(forKey: "hiddenHeadMetrics")
         favoriteStationIDs = UserDefaults.standard.stringArray(forKey: "favoriteStationIDs") ?? []

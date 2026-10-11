@@ -8,7 +8,12 @@ import SwiftUI
 struct NowLayoutSettingsView: View {
     enum Part { case metrics, sections }
 
+    /// Trailing under a back button (Settings push), leading beside the
+    /// sheet's close button.
+    var resetPlacement: ToolbarItemPlacement = .topBarTrailing
+
     @Environment(Weather.self) private var weather
+    @Environment(NowPresentationCoordinator.self) private var presentation
     private let settingsService = SettingService.shared
     @State private var part: Part = .metrics
 
@@ -17,6 +22,7 @@ struct NowLayoutSettingsView: View {
             && settingsService.hiddenNowSections.isEmpty
             && settingsService.headMetricOrder == HeadMetric.allCases
             && settingsService.hiddenHeadMetrics == HeadMetric.defaultHidden
+            && settingsService.stageNowSections == WideForecast.defaultStage
     }
 
     private var metricsFull: Bool {
@@ -46,7 +52,7 @@ struct NowLayoutSettingsView: View {
         .navigationTitle("Ansicht")
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
+            ToolbarItem(placement: resetPlacement) {
                 Button("Standard wiederherstellen", systemImage: "slider.horizontal.2.arrow.trianglehead.counterclockwise", action: restoreDefault)
                     .disabled(isDefault)
             }
@@ -81,27 +87,56 @@ struct NowLayoutSettingsView: View {
     }
 
     private var sectionsList: some View {
-        List {
-            Section {
-                ForEach(settingsService.nowSectionOrder, id: \.self) { section in
-                    CheckRow(isOn: !settingsService.hiddenNowSections.contains(section)) {
-                        settingsService.hiddenNowSections.formSymmetricDifference([section])
-                    } label: {
-                        Label { Text(section.title) } icon: { Image(systemName: section.systemImage) }
-                            .labelStyle(.settingsIcon(section.tint))
-                    }
-                }
-                .onMove { settingsService.nowSectionOrder.move(fromOffsets: $0, toOffset: $1) }
-            } header: {
-                Text("Wetterabschnitte")
+        let order = settingsService.nowSectionOrder
+        let stage = settingsService.stageNowSections
+        return List {
+            if presentation.forecastIsWide {
+                sectionRows(order.filter { stage.contains($0) }, header: "Links", swap: "Nach rechts", swapImage: "arrow.right")
+                sectionRows(order.filter { !stage.contains($0) }, header: "Rechts", swap: "Nach links", swapImage: "arrow.left")
+            } else {
+                sectionRows(order.filter { $0 != .map }, header: "Wetterabschnitte")
             }
         }
+    }
+
+    private func sectionRows(_ rows: [NowSection], header: LocalizedStringKey, swap: LocalizedStringKey? = nil, swapImage: String = "") -> some View {
+        Section(header) {
+            ForEach(rows, id: \.self) { section in
+                CheckRow(isOn: !settingsService.hiddenNowSections.contains(section)) {
+                    settingsService.hiddenNowSections.formSymmetricDifference([section])
+                } label: {
+                    Label { Text(section.title) } icon: { Image(systemName: section.systemImage) }
+                        .labelStyle(.settingsIcon(section.tint))
+                    if let swap {
+                        Spacer()
+                        Button(swap, systemImage: swapImage) {
+                            withAnimation(.snappy) { settingsService.stageNowSections.formSymmetricDifference([section]) }
+                        }
+                        .labelStyle(.iconOnly)
+                        .buttonStyle(.borderless)
+                    }
+                }
+            }
+            .onMove { reorder(rows, from: $0, to: $1) }
+        }
+    }
+
+    /// Rows not listed here (the other column, the map on the phone) keep
+    /// their slots in the stored order.
+    private func reorder(_ rows: [NowSection], from: IndexSet, to: Int) {
+        var rows = rows
+        rows.move(fromOffsets: from, toOffset: to)
+        var order = settingsService.nowSectionOrder
+        let slots = order.indices.filter { rows.contains(order[$0]) }
+        for (slot, section) in zip(slots, rows) { order[slot] = section }
+        settingsService.nowSectionOrder = order
     }
 
     private func restoreDefault() {
         withAnimation(.snappy) {
             settingsService.nowSectionOrderRaw = nil
             settingsService.hiddenNowSectionsRaw = nil
+            settingsService.stageNowSectionsRaw = nil
             settingsService.headMetricOrderRaw = nil
             settingsService.hiddenHeadMetricsRaw = nil
         }

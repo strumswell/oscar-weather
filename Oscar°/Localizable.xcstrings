@@ -1,6 +1,94 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "Links" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Links"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sol"
+          }
+        }
+      }
+    },
+    "Rechts" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechts"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağ"
+          }
+        }
+      }
+    },
+    "Nach rechts" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach rechts"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To the right"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağa"
+          }
+        }
+      }
+    },
+    "Nach links" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach links"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To the left"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sola"
+          }
+        }
+      }
+    },
     "Gefällt dir Oscar?" : {
       "localizations" : {
         "de" : {
@@ -10163,7 +10251,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yes, gladly"
+            "value" : "Sure"
           }
         },
         "tr" : {

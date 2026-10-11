@@ -249,6 +249,7 @@ struct HeadView: View {
           presentation.present(.layout)
         }
         .accessibilityElement(children: .ignore)
+        .accessibilityIdentifier("now.metrics")
         .accessibilityLabel(Text(metricsDescription))
         .accessibilityActions {
           if settingsService.headMetrics.contains(.measured), let id = weather.headStation?.id {
