@@ -134,14 +134,12 @@ struct NowView: View {
                     Task { await weather.refresh(location: location) }
                 }
             }
-            #if DEBUG
             if weather.debug {
                 AtmosphereDebugPanel(state: atmosphereDebug)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                     .padding(.horizontal, 12)
                     .padding(.bottom, 12)
             }
-            #endif
         }
         .environment(atmosphereDebug)
         .environment(\.cardTint, cardFill)
@@ -249,7 +247,6 @@ struct NowView: View {
         }
         footer
             .padding(.top, 28)
-        #if DEBUG
         if weather.debug {
             VStack {
                 DebugPermissionControls()
@@ -277,7 +274,6 @@ struct NowView: View {
                 Text(String(reflecting: weather.forecast))
             }
         }
-        #endif
     }
 
     /// The vertical forecast scroll with its pull-to-refresh, shared by the
@@ -418,12 +414,8 @@ extension NowView {
 
 private extension View {
     func debugConsoleTap(_ action: @escaping () -> Void) -> some View {
-        #if DEBUG
         // Simultaneous: the place name's tap and the metrics' long press
         // would otherwise swallow it.
         simultaneousGesture(TapGesture().onEnded(action))
-        #else
-        self
-        #endif
     }
 }

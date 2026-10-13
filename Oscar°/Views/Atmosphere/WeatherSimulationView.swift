@@ -216,11 +216,9 @@ struct WeatherSimulationView: View, Animatable {
                     }
                 }
 
-                #if DEBUG
                 if weather.debug {
                     AtmosphereDebugOverlay(snapshot: snapshot)
                 }
-                #endif
             }
             .preferredColorScheme(.dark)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -244,11 +242,9 @@ struct WeatherSimulationView: View, Animatable {
         phase: Double,
         overriding: Bool
     ) -> Double? {
-        #if DEBUG
         if weather.debug && !overriding {
             return 0.5
         }
-        #endif
 
         // Never hard-gate on cloud cover: the moon stays visible even in full overcast (the
         // opacity + blur on MoonView dim and soften it through the clouds). Only suppress it when
