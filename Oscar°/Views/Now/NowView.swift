@@ -51,8 +51,12 @@ struct NowView: View {
         weather.isLoading && weather.hasContent && !manualRefreshInFlight && scenePhase == .active
     }
 
+    private var arrangement: SectionArrangement {
+        settingsService.arrangement(for: LayoutForm.of(stageSize ?? .zero))
+    }
+
     private var sections: [NowSection] {
-        isTwoColumn ? settingsService.nowSections : settingsService.nowPageSections
+        isTwoColumn ? stageSections + feedSections : arrangement.pageSections
     }
 
     /// The launch "page" is the head plus the first section — plus the next
@@ -61,11 +65,9 @@ struct NowView: View {
 
     private var isTwoColumn: Bool { presentation.forecastIsWide }
 
-    private var feedWidth: CGFloat { WideForecast.feedWidth(for: stageSize?.width ?? 0) }
+    private var stageSections: [NowSection] { arrangement.stageSections }
 
-    private var stageSections: [NowSection] { settingsService.nowStageSections }
-
-    private var feedSections: [NowSection] { settingsService.nowFeedSections }
+    private var feedSections: [NowSection] { arrangement.feedSections }
 
     var body: some View {
         // Cards share the sky's hue instead of a fixed dark material (same
@@ -84,8 +86,9 @@ struct NowView: View {
                         HStack(spacing: 0) {
                             forecastScroll { stage }
                                 .scrollBounceBehavior(.basedOnSize)
+                                .frame(maxWidth: WideForecast.maxColumnWidth)
                             forecastScroll { feed }
-                                .frame(width: feedWidth)
+                                .frame(maxWidth: WideForecast.maxColumnWidth)
                         }
                     } else {
                         forecastScroll { page }
@@ -161,6 +164,7 @@ struct NowView: View {
                 return
             }
             presentation.forecastSize = size
+            LayoutFrame.rememberWideWindow(size)
         }
     }
 

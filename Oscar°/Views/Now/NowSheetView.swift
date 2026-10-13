@@ -43,8 +43,10 @@ struct NowSheetView: View {
                 .presentationDragIndicator(.hidden)
         case .settings:
             SettingsView()
+                .presentationSizing(.page)
         case .layout:
             NowLayoutSheet()
+                .presentationSizing(.page)
         case .support:
             SupportView(close: { dismiss() })
         }

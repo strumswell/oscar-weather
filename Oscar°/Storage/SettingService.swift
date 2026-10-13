@@ -92,10 +92,11 @@ final class SettingService {
     var classicTheme: Bool {
         didSet { UserDefaults.standard.set(classicTheme, forKey: "classicTheme") }
     }
-    /// Raw ids of the forecast page's sections and head values: the user's
-    /// order of all of them, and the hidden ones. The app's typed accessors
-    /// (`nowSectionOrder`, `hiddenNowSections`, ...) live next to the enums;
-    /// nil = defaults.
+    /// `SectionArrangement` JSON per `LayoutForm.rawValue`; a missing form
+    /// falls back to the three legacy keys below.
+    var sectionArrangementsRaw: [String: Data] {
+        didSet { UserDefaults.standard.set(sectionArrangementsRaw, forKey: "sectionArrangements") }
+    }
     var nowSectionOrderRaw: [String]? {
         didSet { UserDefaults.standard.set(nowSectionOrderRaw, forKey: "nowSectionOrder") }
     }
@@ -218,6 +219,7 @@ final class SettingService {
         let storedOpacity = UserDefaults.standard.object(forKey: "mapOverlayOpacity") as? Double
         mapOverlayOpacity = min(max(storedOpacity ?? 0.7, 0.3), 1)
         classicTheme = UserDefaults.standard.bool(forKey: "classicTheme")
+        sectionArrangementsRaw = UserDefaults.standard.dictionary(forKey: "sectionArrangements") as? [String: Data] ?? [:]
         nowSectionOrderRaw = UserDefaults.standard.stringArray(forKey: "nowSectionOrder")
         hiddenNowSectionsRaw = UserDefaults.standard.stringArray(forKey: "hiddenNowSections")
         stageNowSectionsRaw = UserDefaults.standard.stringArray(forKey: "stageNowSections")

@@ -1,10 +1,11 @@
 import SwiftUI
 
-/// Settings > Ansicht. A segment picks what to edit, the band under it shows
-/// that part under the real sky, and one edit list sorts (drag handle) and
-/// shows or hides (check circle) its rows. Hidden rows keep their place in
-/// the order. The circles are buttons, not List selection: a drag on a
-/// selected row would carry every selected row along.
+/// Settings > Ansicht. A segment picks what to edit. Kennzahlen: the head
+/// under the real sky and an edit list that sorts (drag handle) and shows
+/// or hides (check circle) its rows; hidden rows keep their place in the
+/// order, and the circles are buttons, not List selection, since a drag on
+/// a selected row would carry every selected row along. Abschnitte: the
+/// page itself as a drag canvas, see `NowLayoutCanvas`.
 struct NowLayoutSettingsView: View {
     enum Part { case metrics, sections }
 
@@ -13,16 +14,13 @@ struct NowLayoutSettingsView: View {
     var resetPlacement: ToolbarItemPlacement = .topBarTrailing
 
     @Environment(Weather.self) private var weather
-    @Environment(NowPresentationCoordinator.self) private var presentation
     private let settingsService = SettingService.shared
     @State private var part: Part = .metrics
 
     private var isDefault: Bool {
-        settingsService.nowSectionOrder == NowSection.allCases
-            && settingsService.hiddenNowSections.isEmpty
+        settingsService.arrangementsAreDefault
             && settingsService.headMetricOrder == HeadMetric.allCases
             && settingsService.hiddenHeadMetrics == HeadMetric.defaultHidden
-            && settingsService.stageNowSections == WideForecast.defaultStage
     }
 
     private var metricsFull: Bool {
@@ -39,12 +37,14 @@ struct NowLayoutSettingsView: View {
             .padding(.horizontal, 16)
             .padding(.top, 4)
 
-            NowLayoutPreview(part: part)
-                .padding(16)
-
             switch part {
-            case .metrics: metricsList
-            case .sections: sectionsList
+            case .metrics:
+                NowLayoutPreview()
+                    .padding(16)
+                metricsList
+            case .sections:
+                NowLayoutCanvas()
+                    .padding(.vertical, 16)
             }
         }
         .background(Color(uiColor: .systemGroupedBackground))
@@ -86,57 +86,9 @@ struct NowLayoutSettingsView: View {
         }
     }
 
-    private var sectionsList: some View {
-        let order = settingsService.nowSectionOrder
-        let stage = settingsService.stageNowSections
-        return List {
-            if presentation.forecastIsWide {
-                sectionRows(order.filter { stage.contains($0) }, header: "Links", swap: "Nach rechts", swapImage: "arrow.right")
-                sectionRows(order.filter { !stage.contains($0) }, header: "Rechts", swap: "Nach links", swapImage: "arrow.left")
-            } else {
-                sectionRows(order.filter { $0 != .map }, header: "Wetterabschnitte")
-            }
-        }
-    }
-
-    private func sectionRows(_ rows: [NowSection], header: LocalizedStringKey, swap: LocalizedStringKey? = nil, swapImage: String = "") -> some View {
-        Section(header) {
-            ForEach(rows, id: \.self) { section in
-                CheckRow(isOn: !settingsService.hiddenNowSections.contains(section)) {
-                    settingsService.hiddenNowSections.formSymmetricDifference([section])
-                } label: {
-                    Label { Text(section.title) } icon: { Image(systemName: section.systemImage) }
-                        .labelStyle(.settingsIcon(section.tint))
-                    if let swap {
-                        Spacer()
-                        Button(swap, systemImage: swapImage) {
-                            withAnimation(.snappy) { settingsService.stageNowSections.formSymmetricDifference([section]) }
-                        }
-                        .labelStyle(.iconOnly)
-                        .buttonStyle(.borderless)
-                    }
-                }
-            }
-            .onMove { reorder(rows, from: $0, to: $1) }
-        }
-    }
-
-    /// Rows not listed here (the other column, the map on the phone) keep
-    /// their slots in the stored order.
-    private func reorder(_ rows: [NowSection], from: IndexSet, to: Int) {
-        var rows = rows
-        rows.move(fromOffsets: from, toOffset: to)
-        var order = settingsService.nowSectionOrder
-        let slots = order.indices.filter { rows.contains(order[$0]) }
-        for (slot, section) in zip(slots, rows) { order[slot] = section }
-        settingsService.nowSectionOrder = order
-    }
-
     private func restoreDefault() {
         withAnimation(.snappy) {
-            settingsService.nowSectionOrderRaw = nil
-            settingsService.hiddenNowSectionsRaw = nil
-            settingsService.stageNowSectionsRaw = nil
+            settingsService.resetArrangements()
             settingsService.headMetricOrderRaw = nil
             settingsService.hiddenHeadMetricsRaw = nil
         }

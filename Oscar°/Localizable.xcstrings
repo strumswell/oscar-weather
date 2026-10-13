@@ -1,182 +1,6 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
-    "Links" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Links"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Left"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sol"
-          }
-        }
-      }
-    },
-    "Rechts" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rechts"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Right"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sağ"
-          }
-        }
-      }
-    },
-    "Nach rechts" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nach rechts"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "To the right"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sağa"
-          }
-        }
-      }
-    },
-    "Nach links" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nach links"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "To the left"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sola"
-          }
-        }
-      }
-    },
-    "Gefällt dir Oscar?" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gefällt dir Oscar?"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enjoying Oscar?"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar'ı beğeniyor musunuz?"
-          }
-        }
-      }
-    },
-    "Nicht jetzt" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nicht jetzt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not Now"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Şimdi değil"
-          }
-        }
-      }
-    },
-    "Oscar ist kostenlos" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar ist kostenlos"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar is free"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar ücretsiz"
-          }
-        }
-      }
-    },
-    "Für mich als einzelnen Entwickler kostet der Betrieb aber jeden Monat einiges. Wenn dir Oscar gefällt, hilft jede Unterstützung." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Für mich als einzelnen Entwickler kostet der Betrieb aber jeden Monat einiges. Wenn dir Oscar gefällt, hilft jede Unterstützung."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "As a solo developer, running it costs me a fair amount every month. If you enjoy Oscar, any support helps."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ancak tek başına çalışan bir geliştirici olarak işletmesi bana her ay epey masrafa mal oluyor. Oscar'ı beğendiyseniz her destek işe yarar."
-          }
-        }
-      }
-    },
     "" : {
 
     },
@@ -3050,6 +2874,28 @@
         }
       }
     },
+    "Alle Abschnitte sind auf der Seite. Zieh einen hierher, um ihn auszublenden." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Abschnitte sind auf der Seite. Zieh einen hierher, um ihn auszublenden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every section is on the page. Drag one here to hide it."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm bölümler sayfada. Gizlemek için birini buraya sürükle."
+          }
+        }
+      }
+    },
     "Alle App-Symbole und Sticker sind für dich freigeschaltet." : {
       "localizations" : {
         "de" : {
@@ -3943,6 +3789,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ çekildi"
+          }
+        }
+      }
+    },
+    "Ausblenden" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausblenden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gizle"
           }
         }
       }
@@ -5074,6 +4942,28 @@
         }
       },
       "shouldTranslate" : false
+    },
+    "Bühne" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bühne"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stage"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sahne"
+          }
+        }
+      }
     },
     "by Philipp Bolte" : {
       "localizations" : {
@@ -6981,6 +6871,28 @@
         }
       }
     },
+    "Einfügen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einfügen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekle"
+          }
+        }
+      }
+    },
     "Einführung erneut ansehen" : {
       "localizations" : {
         "de" : {
@@ -8368,6 +8280,28 @@
         }
       }
     },
+    "Für mich als einzelnen Entwickler kostet der Betrieb aber jeden Monat einiges. Wenn dir Oscar gefällt, hilft jede Unterstützung." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für mich als einzelnen Entwickler kostet der Betrieb aber jeden Monat einiges. Wenn dir Oscar gefällt, hilft jede Unterstützung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As a solo developer, running it costs me a fair amount every month. If you enjoy Oscar, any support helps."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ancak tek başına çalışan bir geliştirici olarak işletmesi bana her ay epey masrafa mal oluyor. Oscar'ı beğendiyseniz her destek işe yarar."
+          }
+        }
+      }
+    },
     "Für Unterstützer:innen" : {
       "localizations" : {
         "de" : {
@@ -8431,6 +8365,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kızarmış pilav sipariş edildi. Teşekkürler!"
+          }
+        }
+      }
+    },
+    "Gefällt dir Oscar?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gefällt dir Oscar?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enjoying Oscar?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar'ı beğeniyor musunuz?"
           }
         }
       }
@@ -9198,28 +9154,6 @@
         }
       }
     },
-    "Große Bäume bewegen sich, Zweige können brechen." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Große Bäume bewegen sich, Zweige können brechen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Large trees move and branches can break."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
-          }
-        }
-      }
-    },
     "Größere Zweige und kleine Bäume bewegen sich." : {
       "localizations" : {
         "de" : {
@@ -9260,6 +9194,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Birleşik Krallık"
+          }
+        }
+      }
+    },
+    "Große Bäume bewegen sich, Zweige können brechen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Große Bäume bewegen sich, Zweige können brechen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Large trees move and branches can break."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
           }
         }
       }
@@ -9778,6 +9734,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yüksek çözünürlüklü bölgesel model, ECMWF ile dünya genelinde tamamlanır."
+          }
+        }
+      }
+    },
+    "Hochkant" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hochkant"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Portrait"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dikey"
           }
         }
       }
@@ -10935,6 +10913,7 @@
       }
     },
     "Keine Abschnitte" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -11824,6 +11803,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Şimşek çıkartması"
+          }
+        }
+      }
+    },
+    "Links" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Links"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sol"
           }
         }
       }
@@ -13476,6 +13478,94 @@
         }
       }
     },
+    "Nach links" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach links"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To the left"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sola"
+          }
+        }
+      }
+    },
+    "Nach oben" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach oben"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move up"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yukarı taşı"
+          }
+        }
+      }
+    },
+    "Nach rechts" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach rechts"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To the right"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağa"
+          }
+        }
+      }
+    },
+    "Nach unten" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach unten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move down"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aşağı taşı"
+          }
+        }
+      }
+    },
     "Nächsten Tage" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -13652,6 +13742,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yeni yer, yeni tahmin – aramaya gerek yok."
+          }
+        }
+      }
+    },
+    "Nicht auf der Seite" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht auf der Seite"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not on the page"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sayfada değil"
+          }
+        }
+      }
+    },
+    "Nicht jetzt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht jetzt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Now"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şimdi değil"
           }
         }
       }
@@ -15251,6 +15385,28 @@
         }
       }
     },
+    "Oscar ist kostenlos" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar ist kostenlos"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar is free"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar ücretsiz"
+          }
+        }
+      }
+    },
     "Oscar ist und bleibt kostenlos. Alle Funktionen, für alle, ohne Werbung und ohne Tracking. Das wird sich nicht ändern." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -16354,6 +16510,28 @@
         }
       }
     },
+    "Quer" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Landscape"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yatay"
+          }
+        }
+      }
+    },
     "Radar" : {
       "localizations" : {
         "de" : {
@@ -16643,6 +16821,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yasal"
+          }
+        }
+      }
+    },
+    "Rechts" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechts"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağ"
           }
         }
       }
@@ -20953,6 +21154,28 @@
         }
       }
     },
+    "Verlauf" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verlauf"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feed"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akış"
+          }
+        }
+      }
+    },
     "Verlauf anzeigen" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -21934,6 +22157,7 @@
       }
     },
     "Wetterabschnitte" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

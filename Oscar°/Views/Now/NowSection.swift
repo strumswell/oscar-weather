@@ -1,9 +1,9 @@
 import SwiftUI
 
 /// The blocks of the forecast page below the head, shown in the order the
-/// user keeps them (`SettingService.nowSections`; absent = hidden). The map
-/// only exists on the wide page's stage; the phone page skips it.
-enum NowSection: String, CaseIterable, Identifiable {
+/// user keeps them per layout form (`SectionArrangement`). The map only
+/// exists on the wide page's stage; the hourly strip only on the phone page.
+enum NowSection: String, CaseIterable, Identifiable, Codable {
     case map, radar, hourly, daily, stations, environment, climate
 
     var id: String { rawValue }
@@ -45,6 +45,14 @@ enum NowSection: String, CaseIterable, Identifiable {
         }
     }
 
+    func renders(wide: Bool) -> Bool {
+        switch self {
+        case .map: wide
+        case .hourly: !wide
+        default: true
+        }
+    }
+
     /// The live section. Only the radar teaser needs a way onto the map;
     /// `isWide` lets the daily list open days in place. The map takes the
     /// stage's spare height.
@@ -69,53 +77,85 @@ enum WideForecast {
     static let minWidth: CGFloat = 760
     static let defaultStage: Set<NowSection> = [.map, .radar, .stations]
 
-    /// Phone-sized cards: half the window, between 380 and 640 pt.
-    static func feedWidth(for width: CGFloat) -> CGFloat {
-        min(640, max(380, width / 2))
+    static let maxColumnWidth: CGFloat = 720
+}
+
+enum LayoutForm: String, CaseIterable {
+    case compact, widePortrait, wideLandscape
+
+    static func of(_ size: CGSize) -> LayoutForm {
+        if size.width < WideForecast.minWidth { .compact } else if size.width > size.height { .wideLandscape } else { .widePortrait }
+    }
+
+    var isWide: Bool { self != .compact }
+}
+
+struct SectionArrangement: Codable, Equatable {
+    var order: [NowSection]
+    var hidden: Set<NowSection>
+    var stage: Set<NowSection>
+
+    static let `default` = SectionArrangement(order: NowSection.allCases, hidden: [], stage: WideForecast.defaultStage)
+
+    var visible: [NowSection] { order.filter { !hidden.contains($0) } }
+
+    var pageSections: [NowSection] { visible.filter { $0.renders(wide: false) } }
+
+    var stageSections: [NowSection] { visible.filter { $0.renders(wide: true) && stage.contains($0) } }
+
+    var feedSections: [NowSection] { visible.filter { $0.renders(wide: true) && !stage.contains($0) } }
+
+    var completed: SectionArrangement {
+        var copy = self
+        for section in NowSection.allCases where !copy.order.contains(section) {
+            let predecessor = NowSection.allCases.prefix { $0 != section }.last { copy.order.contains($0) }
+            copy.order.insert(section, at: predecessor.flatMap { copy.order.firstIndex(of: $0) }.map { $0 + 1 } ?? 0)
+        }
+        return copy
+    }
+
+    mutating func place(_ section: NowSection, at index: Int, among column: [NowSection], onStage: Bool?) {
+        order.removeAll { $0 == section }
+        let column = column.filter { $0 != section }
+        hidden.remove(section)
+        if let onStage, section != .map {
+            if onStage { stage.insert(section) } else { stage.remove(section) }
+        }
+        if column.isEmpty {
+            onStage == true ? order.insert(section, at: 0) : order.append(section)
+        } else if index < column.count, let slot = order.firstIndex(of: column[index]) {
+            order.insert(section, at: slot)
+        } else if let last = column.last, let slot = order.firstIndex(of: last) {
+            order.insert(section, at: slot + 1)
+        }
     }
 }
 
 extension SettingService {
-    /// Every section in the user's order. Sections missing from the stored
-    /// order (new ones) fall in right after their default predecessor.
-    var nowSectionOrder: [NowSection] {
-        get {
-            var order = (nowSectionOrderRaw ?? []).compactMap(NowSection.init(rawValue:))
-            for section in NowSection.allCases where !order.contains(section) {
-                let predecessor = NowSection.allCases.prefix { $0 != section }.last { order.contains($0) }
-                order.insert(section, at: predecessor.flatMap { order.firstIndex(of: $0) }.map { $0 + 1 } ?? 0)
-            }
-            return order
+    func arrangement(for form: LayoutForm) -> SectionArrangement {
+        if let data = sectionArrangementsRaw[form.rawValue],
+           let stored = try? JSONDecoder().decode(SectionArrangement.self, from: data) {
+            return stored.completed
         }
-        set { nowSectionOrderRaw = newValue.map(\.rawValue) }
+        return SectionArrangement(
+            order: (nowSectionOrderRaw ?? []).compactMap(NowSection.init(rawValue:)),
+            hidden: Set((hiddenNowSectionsRaw ?? []).compactMap(NowSection.init(rawValue:))),
+            stage: stageNowSectionsRaw.map { Set($0.compactMap(NowSection.init(rawValue:))) } ?? WideForecast.defaultStage
+        ).completed
     }
 
-    var hiddenNowSections: Set<NowSection> {
-        get { Set((hiddenNowSectionsRaw ?? []).compactMap(NowSection.init(rawValue:))) }
-        set { hiddenNowSectionsRaw = newValue.map(\.rawValue).sorted() }
+    func setArrangement(_ arrangement: SectionArrangement, for form: LayoutForm) {
+        sectionArrangementsRaw[form.rawValue] = try? JSONEncoder().encode(arrangement)
     }
 
-    /// The sections on the wide page's left column.
-    var stageNowSections: Set<NowSection> {
-        get { stageNowSectionsRaw.map { Set($0.compactMap(NowSection.init(rawValue:))) } ?? WideForecast.defaultStage }
-        set { stageNowSectionsRaw = newValue.map(\.rawValue).sorted() }
+    var arrangementsAreDefault: Bool {
+        LayoutForm.allCases.allSatisfy { arrangement(for: $0) == .default }
     }
 
-    /// What the forecast page shows, in order.
-    var nowSections: [NowSection] {
-        nowSectionOrder.filter { !hiddenNowSections.contains($0) }
-    }
-
-    /// The phone page: everything but the map.
-    var nowPageSections: [NowSection] {
-        nowSections.filter { $0 != .map }
-    }
-
-    var nowStageSections: [NowSection] {
-        nowSections.filter { stageNowSections.contains($0) }
-    }
-
-    var nowFeedSections: [NowSection] {
-        nowSections.filter { !stageNowSections.contains($0) }
+    func resetArrangements() {
+        sectionArrangementsRaw = [:]
+        nowSectionOrderRaw = nil
+        hiddenNowSectionsRaw = nil
+        stageNowSectionsRaw = nil
     }
 }
