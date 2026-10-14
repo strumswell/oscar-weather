@@ -7,9 +7,6 @@
 
 import SwiftUI
 
-/// Height-locked provider mark. The template logos (DWD, ECMWF, EUMETNET,
-/// Oscar° Server) tint via the surrounding foregroundStyle; NOAA and
-/// Open-Meteo carry their own artwork.
 struct ProviderLogo: View {
     let asset: String
     var height: CGFloat = 14
@@ -22,7 +19,6 @@ struct ProviderLogo: View {
     }
 }
 
-/// "Powered by <Oscar° Server lockup>" credit line.
 struct PoweredByOscarServer: View {
     var lockupHeight: CGFloat = 20
 

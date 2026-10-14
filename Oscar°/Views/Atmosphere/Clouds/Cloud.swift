@@ -7,10 +7,7 @@
 
 import SwiftUI
 
-/// One sprite in the deck. Layout (band, image, size, threshold) is fixed for
-/// the deck's lifetime; only `position` moves.
 final class Cloud {
-    /// Draw order = distance: high first, low (nearest, fastest) last.
     enum Band: CaseIterable {
         case high, mid, low
     }
@@ -19,10 +16,8 @@ final class Cloud {
     let band: Band
     let imageNumber: Int
     let scale: Double
-    /// Band cover at which this sprite fades in.
     let threshold: Float
     let driftJitter = Double.random(in: 0.8...1.2)
-    /// Wraps at ±this, so the deck repeats every `2 * wrapDistance` points.
     var wrapDistance: Double { max(620, 420 * scale) }
 
     init(band: Band, imageNumber: Int, scale: Double, threshold: Float, position: CGPoint) {
@@ -33,9 +28,6 @@ final class Cloud {
         self.position = position
     }
 
-    /// 0…1 presence for a band cover; sprites appear in threshold order so the
-    /// visible count grows with cover, small ones first. The ramp never starts
-    /// below zero: a clear sky (cover 0) shows no sprite at all.
     func visibility(coverage: Float) -> Float {
         AtmosphereWeatherMapper.smoothstep(max(0, threshold - 0.15), threshold + 0.02, coverage)
     }

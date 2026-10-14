@@ -94,7 +94,6 @@ struct DailyForecastRow: View {
     }
 }
 
-/// Compact row for the small widget — no range bar, just weekday · icon · high/low.
 struct DailyForecastCompactRow: View {
     let day: DayForecast
 

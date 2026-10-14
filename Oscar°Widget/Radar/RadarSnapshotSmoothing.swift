@@ -4,12 +4,6 @@ import UIKit
 extension RadarSnapshotRenderer {
     // MARK: - Smoothing (data-space, mirrors the fullscreen layer)
 
-    /// The app's "Weichzeichnen", CPU edition. The fullscreen Metal layer samples
-    /// the value grid with a bicubic B-spline and colormaps AFTER interpolation
-    /// through a premultiplied palette LUT with linear blending. Blurring the
-    /// colormapped tiles instead looks visibly different (off-palette color blends,
-    /// softened alpha rims), so this reverses the tiles to palette indices, runs
-    /// the same B-spline resample in data space, and recolormaps.
     private static var cachedPalettes: [String: [PixelRGBA]] = [:]
 
     static func palette(id: String) async -> [PixelRGBA]? {
@@ -30,8 +24,6 @@ extension RadarSnapshotRenderer {
         guard let zoom = tiles.first?.zoom, !tiles.isEmpty else { return nil }
         let n = pow(2, Double(zoom))
 
-        // Premultiplied palette, like the Metal layer's LUT texture — index
-        // reversal and linear blending both happen in premultiplied space.
         let premul: [(r: Double, g: Double, b: Double, a: Double)] = palette.map { entry in
             let a = Double(entry.a) / 255
             return (Double(entry.r) * a, Double(entry.g) * a, Double(entry.b) * a, Double(entry.a))
@@ -43,7 +35,6 @@ extension RadarSnapshotRenderer {
             reverseLUT[key] = UInt8(index)
         }
 
-        // Stitch the tiles' index planes into one mosaic (0 = no data/dry).
         let minX = tiles.map(\.tx).min()!, maxX = tiles.map(\.tx).max()!
         let minY = tiles.map(\.ty).min()!, maxY = tiles.map(\.ty).max()!
         let mosaicW = (maxX - minX + 1) * 256
@@ -68,8 +59,6 @@ extension RadarSnapshotRenderer {
                     } else if let index = nearestMemo[key] {
                         mosaic[dst + px] = index
                     } else {
-                        // Off-palette color (server-side resampling rounding):
-                        // nearest premultiplied entry, memoized per distinct color.
                         var best = 0
                         var bestDistance = Double.infinity
                         for (index, entry) in premul.enumerated() {
@@ -90,9 +79,6 @@ extension RadarSnapshotRenderer {
             }
         }
 
-        // Resample in data space at composite resolution: bicubic B-spline over
-        // the index mosaic (Sigg & Hadwiger weights, same as the shader), then
-        // linear palette blend — colormap strictly after interpolation.
         let outW = Int(frame.size.width * compositeScale)
         let outH = Int(frame.size.height * compositeScale)
         guard outW > 0, outH > 0 else { return nil }
@@ -165,7 +151,6 @@ extension RadarSnapshotRenderer {
         return UIImage(cgImage: cgImage, scale: compositeScale, orientation: .up)
     }
 
-    /// Decode a 256 px tile into premultiplied RGBA bytes.
     nonisolated static func rgbaPlane(from image: UIImage) -> [UInt8]? {
         guard let cgImage = image.cgImage else { return nil }
         var rgba = [UInt8](repeating: 0, count: 256 * 256 * 4)

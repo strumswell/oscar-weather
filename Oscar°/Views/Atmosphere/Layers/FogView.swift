@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// Drifting ground-fog banks for the fog condition: an even haze plus three
-/// soft bands swaying on detuned sine paths across the lower half.
 struct FogView: View {
     let density: Double
     let nightAmount: Double
@@ -12,13 +10,10 @@ struct FogView: View {
             let width = proxy.size.width
             let height = proxy.size.height
             let shade = 0.85 - 0.5 * nightAmount
-            // Geometry is read once; only the sine sway needs the per-frame clock, so the
-            // timeline drives the inner content rather than re-laying-out every tick.
             TimelineView(.animation(minimumInterval: pacing.minimumInterval(base: 1.0 / 20.0), paused: pacing.isPaused)) { timeline in
                 let t = timeline.date.timeIntervalSinceReferenceDate
 
                 ZStack {
-                    // Even ground haze under the drifting banks.
                     LinearGradient(
                         colors: [.clear, Color(white: shade).opacity(0.30 * density)],
                         startPoint: .top,

@@ -5,9 +5,6 @@
 
 import SwiftUI
 
-/// Only without location access: pick a city by search. The selection is
-/// stored through CityService, which triggers the real weather refresh; the
-/// simulation in the hero window crossfades to the chosen place.
 struct OnboardingManualLocationStep: View {
     let onContinue: () -> Void
 
@@ -53,8 +50,6 @@ struct OnboardingManualLocationStep: View {
                 .scrollBounceBehavior(.basedOnSize)
                 .scrollIndicators(.hidden)
 
-                // The button yields to the keyboard: while typing, the search
-                // results need every point of the shrunken canvas.
                 if !searchFocused {
                     OnboardingButtonStack(
                         primaryTitle: "Weiter",
@@ -76,7 +71,6 @@ struct OnboardingManualLocationStep: View {
         }
     }
 
-    /// The chosen city becomes the headline; before that, a simple ask.
     private var title: String {
         if let name = selectedCity?.label, !name.isEmpty {
             return name
@@ -115,8 +109,6 @@ struct OnboardingManualLocationStep: View {
         } else if !results.isEmpty {
             VStack(spacing: 0) {
                 ForEach(results.prefix(5).enumerated(), id: \.element.id) { index, result in
-                    // Row and divider cascade in together, so no divider
-                    // ever underlines an empty slot.
                     VStack(spacing: 0) {
                         Button {
                             select(result)
@@ -155,7 +147,6 @@ struct OnboardingManualLocationStep: View {
             return
         }
 
-        // Debounce: task(id:) cancels the previous run on every keystroke.
         try? await Task.sleep(for: .milliseconds(250))
         guard !Task.isCancelled else { return }
 
@@ -187,9 +178,6 @@ struct OnboardingManualLocationStep: View {
     }
 }
 
-/// Cascades search-result rows in one after another. Rows keep positional
-/// identity, so type-ahead updates swap text in place without re-running
-/// the cascade.
 private struct StaggeredRowAppearModifier: ViewModifier {
     let index: Int
 

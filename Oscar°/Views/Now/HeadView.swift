@@ -8,8 +8,6 @@ import CoreLocation
 import SwiftUI
 
 struct HeadView: View {
-  /// Tight sky gaps for the wide forecast's stage, where the map below takes
-  /// the spare height instead.
   var compact = false
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @Environment(Weather.self) private var weather: Weather
@@ -20,17 +18,9 @@ struct HeadView: View {
   private let settingsService = SettingService.shared
   private let cityService = CityService.shared
 
-  // Classic Oscar composition: the temperature floats alone in the sky and
-  // the metrics anchor the bottom of the gap just above the first card — but
-  // the two sky gaps are flexible, not fixed. NowView stretches the head so
-  // the hourly strip below it ends right at the tab bar; the gaps soak up
-  // whatever the screen size and the optional content (alert, radar card,
-  // eyebrow) leave over, and compress down to these floors before the page
-  // starts to overflow and scroll.
   private static let temperatureGapMinHeight: CGFloat = 70
   private static let metricsGapMinHeight: CGFloat = 110
 
-  /// Spoken form of the metrics row: "Bewölkung 45 %, Wind 12 km/h, …".
   private var metricsDescription: String {
     settingsService.headMetrics.compactMap { metric in
       metric.value(in: weather).map { "\(String(localized: metric.title)) \($0)" }
@@ -38,23 +28,15 @@ struct HeadView: View {
     .joined(separator: ", ")
   }
 
-  /// The active place's personalization: the selected city's, or the current
-  /// location's (UserDefaults-backed) when GPS is active.
   private var activePersonalization: PlacePersonalization {
     cityService.cities.first(where: { $0.selected })?.personalization
       ?? cityService.currentLocationPersonalization
   }
 
-  /// "🏠 Zuhause" above the place name: an emoji mark, then the custom label —
-  /// never the generic base name, the city name below already covers that.
-  /// The GPS entry's standard location glyph sits inline with the name instead.
   private var eyebrow: Text? {
     eyebrowDescription.map { Text(verbatim: $0) }
   }
 
-  /// The GPS entry keeps its standard glyph directly before the resolved
-  /// place name; an emoji choice moves to the eyebrow, "no icon" leaves the
-  /// name bare.
   private var showsLocationGlyph: Bool {
     cityService.cities.first(where: { $0.selected }) == nil
       && gpsAuthorized
@@ -62,8 +44,6 @@ struct HeadView: View {
   }
 
 
-  /// Spoken form of the eyebrow — the location glyph is decoration, so only
-  /// emoji and label count here.
   private var eyebrowDescription: String? {
     let personalization = activePersonalization
     let text = [personalization.mark.emoji, personalization.customLabel]
@@ -77,17 +57,12 @@ struct HeadView: View {
     return status == .authorizedWhenInUse || status == .authorizedAlways
   }
 
-  /// Arrow + minute for the cloud metric's annotation: the satellite series'
-  /// detected transition — nil (the usual case) renders nothing.
   private var cloudTrendAnnotation: (arrow: String, time: String)? {
     guard let trend = weather.cloudSeries?.trend() else { return nil }
     return (trend.direction == .clearing ? "arrow.down.right" : "arrow.up.right",
             SettingService.formattedTime(trend.at, timeZone: weather.forecast.locationTimeZone))
   }
 
-  /// Exclusive selection over the saved places, tagged by objectID URI;
-  /// `nil` is the GPS pseudo-entry. Transient menu content, so the manual
-  /// binding can't go stale.
   private var locationSwitchPicker: some View {
     Picker("Ort", selection: Binding(
       get: { cityService.getSelectedCity()?.objectID.uriRepresentation() },
@@ -133,23 +108,16 @@ struct HeadView: View {
   private var locationHeader: some View {
     VStack(spacing: 4) {
       if let eyebrow {
-        // An "eyebrow" over the place name: small caps, letterspaced,
-        // deliberately quiet next to the city name.
         eyebrow
           .font(.caption.weight(.semibold))
           .textCase(.uppercase)
           .tracking(1.2)
           .foregroundStyle(Color(uiColor: .label).opacity(0.6))
           .lineLimit(1)
-          // Mutes the emoji too — foregroundStyle can't touch its colors, and
-          // at full saturation it outweighs the city name above it.
           .opacity(0.8)
       }
       HStack(spacing: 6) {
         if showsLocationGlyph {
-          // Concatenated Text put the small glyph on the name's baseline,
-          // hanging low — the stack centers it on the optical middle. Muted
-          // to the eyebrow's level so the name keeps the weight.
           Image(systemName: "location.fill")
             .font(.system(size: cityNameFontSize * 0.55, weight: .bold))
             .foregroundStyle(Color(uiColor: .label).opacity(0.75))
@@ -175,8 +143,6 @@ struct HeadView: View {
       .onTapGesture {
         presentation.selectedTab = .places
       }
-      // Long-press shortcut for switching places without leaving the
-      // forecast — Tab accepts no gestures or menus, so it lives here.
       .contextMenu {
         locationSwitchPicker
         Divider()
@@ -219,8 +185,6 @@ struct HeadView: View {
                 Image(systemName: metric.systemImage)
                 Text(value)
                 if metric == .cloudCover, let annotation = cloudTrendAnnotation {
-                  // The satellite nowcast's sky transition rides inline after the
-                  // cloud value — smaller type, optically centered on the row.
                   HStack(spacing: 2) {
                     Image(systemName: annotation.arrow)
                       .font(.system(size: 9, weight: .bold))

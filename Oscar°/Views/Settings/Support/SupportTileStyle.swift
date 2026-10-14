@@ -1,8 +1,6 @@
 import StoreKit
 import SwiftUI
 
-/// One product as a tappable tile: a slot reel showing what the tier would
-/// buy, then the price.
 struct SupportTileStyle: ProductViewStyle {
     let treat: SupportTreat
     let index: Int
@@ -14,7 +12,6 @@ struct SupportTileStyle: ProductViewStyle {
             configuration.purchase()
         } label: {
             VStack(spacing: 6) {
-                // ProductView sets the storefront's locale; the treats speak the app's language.
                 TreatReel(treat: treat, index: index, jackpot: jackpot)
                     .environment(\.locale, .current)
 

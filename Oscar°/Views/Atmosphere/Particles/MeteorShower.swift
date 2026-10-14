@@ -11,8 +11,6 @@ class MeteorShower {
     var meteors = Set<Meteor>()
     var lastUpdate = Date.now
 
-    /// Seconds between spawns; the onboarding night diorama shortens it so a
-    /// meteor reliably streaks past while the step is on screen.
     let delayRange: ClosedRange<Double>
     var lastCreationDate = Date.now
     var nextCreationDelay: Double
@@ -30,8 +28,6 @@ class MeteorShower {
             createMeteor(in: size)
         }
 
-        // Collect spent meteors and remove them after the loop — mutating the Set mid-iteration
-        // triggers a copy-on-write on every removal and is fragile semantics.
         var spent: [Meteor] = []
         for meteor in meteors {
             if meteor.isMovingRight {

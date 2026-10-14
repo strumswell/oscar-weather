@@ -5,9 +5,6 @@
 
 import SwiftUI
 
-/// A step that asks one thing: a title, a short explanation, an optional
-/// third line, and a yes/no pair of buttons. The location and crash-report
-/// asks are both this.
 struct OnboardingQuestionStep<Footer: View>: View {
     let icon: OnboardingStepIcon
     let title: LocalizedStringKey

@@ -1,13 +1,9 @@
 import SwiftUI
 
-/// The readings under the big temperature (`SettingService.headMetrics`).
-/// Current-conditions values come straight from `current`; the rest sample
-/// the hourly series at the present hour.
 enum HeadMetric: String, CaseIterable, Identifiable {
     case cloudCover, wind, windDirection, feelsLike, humidity, uvIndex, pressure, precipitationChance, gusts, measured
 
     static let maxShown = 4
-    /// Out of the box only cloud cover, wind and wind direction are shown.
     static let defaultHidden: Set<HeadMetric> = [.feelsLike, .humidity, .uvIndex, .pressure, .precipitationChance, .gusts, .measured]
 
     var id: String { rawValue }
@@ -42,7 +38,6 @@ enum HeadMetric: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Settings tile color; a fixed hue per reading so rows read at a glance.
     var tint: Color {
         switch self {
         case .cloudCover: .gray
@@ -58,7 +53,6 @@ enum HeadMetric: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Formatted value, nil when the data isn't there (the row skips it).
     @MainActor
     func value(in weather: Weather) -> String? {
         let current = weather.forecast.current
@@ -90,12 +84,10 @@ enum HeadMetric: String, CaseIterable, Identifiable {
             return (environmentValue(from: hourly?.windgusts_10m, time: time) ?? nil)
                 .map { Self.windString($0, weather: weather) }
         case .measured:
-            // A station's reading, next to (never instead of) the forecast temperature.
             return weather.headStation?.current.temperature_c.map { StationUnits().temperatureString($0) }
         }
     }
 
-    /// Speeds arrive in the chosen unit; Beaufort is derived on device from km/h.
     @MainActor
     private static func windString(_ speed: Double, weather: Weather) -> String {
         let unit = WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit)
@@ -107,8 +99,6 @@ enum HeadMetric: String, CaseIterable, Identifiable {
 }
 
 extension SettingService {
-    /// Every reading in the user's order. Readings missing from the stored
-    /// order (new ones) fall in at the end.
     var headMetricOrder: [HeadMetric] {
         get {
             let stored = (headMetricOrderRaw ?? []).compactMap(HeadMetric.init(rawValue:))
@@ -122,7 +112,6 @@ extension SettingService {
         set { hiddenHeadMetricsRaw = newValue.map(\.rawValue).sorted() }
     }
 
-    /// The readings under the big temperature, in order.
     var headMetrics: [HeadMetric] {
         headMetricOrder.filter { !hiddenHeadMetrics.contains($0) }
     }

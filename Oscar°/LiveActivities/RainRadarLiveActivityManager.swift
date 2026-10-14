@@ -8,23 +8,14 @@ import Foundation
 import OSLog
 import UIKit
 
-/// Keeps the server able to reach the rain card and cleans up what it can't.
-/// Started from the app delegate on every launch, including the background wake
-/// iOS gives the app after a push-to-start: that wake is when the per-activity
-/// update token arrives, and without it the server can never end the card.
 @MainActor
 final class RainRadarLiveActivityManager {
     static let shared = RainRadarLiveActivityManager()
 
-    // Read from the nonisolated reconcile/end path, hence explicitly nonisolated.
-    /// The server updates every 10 minutes and ends a card within 45 minutes of
-    /// losing contact; content older than this has no server behind it any more.
     nonisolated static let abandonedAfter: TimeInterval = 60 * 60
     nonisolated static let previewSubscriptionId = "preview"
 
     nonisolated private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "LiveActivities")
-    /// Xcode's preview host launches the app without the Live Activity daemon behind
-    /// it; ActivityKit calls then stall the launch the canvas is waiting for.
     nonisolated private static let isPreviewHost =
         ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
     private var isMonitoring = false
@@ -32,8 +23,6 @@ final class RainRadarLiveActivityManager {
 
     private init() {}
 
-    /// Lock Screen cards exist only on iPhone (the Duo included), not on iPad
-    /// or on a Mac running the iPad app.
     static var isSupported: Bool { UIDevice.current.userInterfaceIdiom == .phone }
 
     func startMonitoring() {
@@ -43,13 +32,6 @@ final class RainRadarLiveActivityManager {
         Task { await observeActivities() }
     }
 
-    /// Ends cards the server can't or won't end: the feature switched off, a card
-    /// superseded by a newer one, an ended card past its dismissal time, or one whose
-    /// content stopped updating. Runs on launch, on foreground and on every change.
-    ///
-    /// Off the main actor on purpose: `Activity` is not Sendable and ending one is a
-    /// nonisolated async call, so the cards are fetched and ended in one isolation
-    /// domain instead of being sent out of the main actor.
     nonisolated func reconcile(now: Date = Date()) async {
         guard !Self.isPreviewHost else { return }
         let enabled = await NotificationSettingsManager.shared.liveRainStatusEnabled
@@ -82,7 +64,6 @@ final class RainRadarLiveActivityManager {
         }
     }
 
-    /// The person switched the feature (or rain alerts) off: nothing may linger.
     nonisolated func endAll() async {
         guard !Self.isPreviewHost else { return }
         for activity in Activity<RainRadarActivityAttributes>.activities {
@@ -126,8 +107,6 @@ final class RainRadarLiveActivityManager {
         logger.info("Observing activity \(activity.id, privacy: .public); phase=\(activity.content.state.phase.rawValue, privacy: .public)")
         Task {
             for await tokenData in activity.pushTokenUpdates {
-                // A token for a card the server already ended must not bring it back
-                // to life there; only a live card needs its token synced.
                 guard activity.activityState == .active || activity.activityState == .stale else { continue }
                 let token = tokenData.hexEncodedString()
                 logger.info("Update token received; activityId=\(activity.id, privacy: .public) length=\(token.count, privacy: .public)")
@@ -138,8 +117,6 @@ final class RainRadarLiveActivityManager {
             for await state in activity.activityStateUpdates {
                 switch state {
                 case .ended, .dismissed:
-                    // Ended by the server (a no-op there) or removed by the person or
-                    // the system: either way the server must stop targeting it.
                     observedActivityIds.remove(activity.id)
                     await NotificationSettingsManager.shared.reportLiveActivityEnded(activityId: activity.id)
                 case .stale:
@@ -152,9 +129,6 @@ final class RainRadarLiveActivityManager {
     }
 
     #if DEBUG
-    /// Starts a local card with sample content so the layout can be checked on a
-    /// device without waiting for rain. The server never learns about it; the
-    /// Ende button or the reconcile after an hour without updates removes it.
     func startPreview(phase: RainRadarActivityAttributes.ContentState.Phase) throws {
         let content = RainRadarActivityAttributes.ContentState.sample(phase: phase)
         _ = try Activity.request(

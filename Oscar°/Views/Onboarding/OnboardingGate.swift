@@ -5,8 +5,6 @@
 
 import SwiftUI
 
-/// Mounts the onboarding flow above NowView on first launch and when replayed
-/// from settings; dismissal is a soft zoom-through that unveils the app.
 struct OnboardingGate: View {
     private let coordinator = OnboardingCoordinator.shared
 

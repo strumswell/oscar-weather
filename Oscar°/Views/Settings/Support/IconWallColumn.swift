@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// Loops its content downward: laid out `copies` times, one linear
-/// repeat-forever offset advances by exactly one copy so the seam never shows.
 struct IconWallColumn<Content: View>: View {
     let speed: Double
     var initialOffset = 0.0

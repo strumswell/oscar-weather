@@ -1,7 +1,5 @@
 import Foundation
 
-/// 256-entry RGBA palettes from `/colormaps/{id}`, resolved once per process, with
-/// local fallbacks for the ids the app can build itself.
 @MainActor
 enum ServerPalettes {
     private static var cache: [String: [PixelRGBA]] = [:]
@@ -9,8 +7,6 @@ enum ServerPalettes {
     private static var failedAt: [String: Date] = [:]
     private static let retryInterval: TimeInterval = 60
 
-    /// Server palette, else the local fallback for known ids, else nil. Concurrent
-    /// callers share one request, and a failed id is not retried for a minute.
     static func resolve(id: String) async -> [PixelRGBA]? {
         if let cached = cache[id] { return cached }
         if let running = inFlight[id] { return await running.value }

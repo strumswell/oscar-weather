@@ -37,8 +37,6 @@ let weatherMapLogger = Logger(
 
 // MARK: - Map view (representable)
 
-/// A fixed layer choice for a map that must not follow (or change) the
-/// person's saved map settings.
 struct MapLayerOverride: Equatable {
     var radar: Bool
     var tileLayer: WeatherTileLayer?
@@ -52,27 +50,15 @@ struct WeatherMapView: UIViewRepresentable {
     var oscarRadarState: OscarRadarState?
     var modelGridState: ModelGridLayerState?
     var cloudLayerState: CloudLayerState?
-    /// Radar continued by the model; nil in the classic theme's map.
     var combinedTimeline: CombinedTimelineState? = nil
-    /// Tap on warning polygon(s) → all warnings under the finger, most severe first.
     var onAlertsTapped: (([WeatherAlertInfo]) -> Void)? = nil
-    /// Tap on a storm-cell marker/footprint → that cell's details.
     var onCellTapped: ((StormCellInfo) -> Void)? = nil
     var onWebcamTapped: ((Components.Schemas.Webcam) -> Void)? = nil
-    /// Draws exactly these layers instead of the saved map settings, with
-    /// warnings, cells, clouds and webcams off (the onboarding's map).
     var layerOverride: MapLayerOverride? = nil
 
     static let radarLayerID = "oscar-radar-layer"
     static let modelLayerID = "oscar-model-image"
     static let cloudsLayerID = "oscar-clouds-layer"
-    // The warning overlay is SPLIT across several sources: MapLibre silently
-    // stops rendering features once one source's tile bucket packs too many
-    // vertices (a dense Meteoalarm viewport dropped whole department outlines,
-    // leaving stray fragments) — round-robin distribution keeps every bucket
-    // far below that threshold at full geometry fidelity. Eight sources put a
-    // ~30k-vertex continental viewport at ~4k per source, the empirically
-    // clean range (4 sources @ ~7k still dropped features).
     static let alertSourceCount = 8
     static func alertSourceID(_ index: Int) -> String { "oscar-alert-polygons-\(index)" }
     static func alertFillLayerID(_ index: Int) -> String { "oscar-alert-fill-\(index)" }
@@ -80,8 +66,6 @@ struct WeatherMapView: UIViewRepresentable {
     static var alertFillLayerIDs: Set<String> {
         Set((0..<alertSourceCount).map(alertFillLayerID))
     }
-    // Isobars are double-buffered (two sources + layer sets): a frame change
-    // loads the hidden buffer and cross-fades, instead of hard-swapping GeoJSON.
     static let isobarBufferCount = 2
     static func isobarSourceID(_ buffer: Int) -> String { "oscar-isobar-source-\(buffer)" }
     static func isobarCasingLayerID(_ buffer: Int) -> String { "oscar-isobar-casing-\(buffer)" }
@@ -107,19 +91,11 @@ struct WeatherMapView: UIViewRepresentable {
     static let webcamSourceID = "oscar-webcams"
     static let webcamLayerID = "oscar-webcams-layer"
 
-    /// Initial camera zoom, overridable via `-mapInitialZoom <z>` (UserDefaults
-    /// argument domain or persisted default) — a dev/staging knob like
-    /// `-radarBaseURL`, unset in every normal launch.
     private static var initialZoom: Double {
         let override = UserDefaults.standard.double(forKey: "mapInitialZoom")
         return override > 0 ? override : 7
     }
 
-    /// Initial camera center, overridable via `-mapInitialCenter "@lat,lon"` —
-    /// a capture knob (layer-picker preview tiles are screenshot at a fixed
-    /// spot regardless of the selected city), unset in every normal launch.
-    /// The `@` prefix keeps a negative latitude from being parsed as the next
-    /// launch-argument key.
     private static var initialCenterOverride: CLLocationCoordinate2D? {
         guard let raw = UserDefaults.standard.string(forKey: "mapInitialCenter") else { return nil }
         let parts = raw.trimmingCharacters(in: CharacterSet(charactersIn: "@ "))
@@ -132,33 +108,19 @@ struct WeatherMapView: UIViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     func makeUIView(context: Context) -> MLNMapView {
-        // OpenFreeMap basemap (no API key), user-selectable style — Fiord default.
         let mapView = MLNMapView(frame: .zero, styleURL: settingsService.mapBasemapStyle.styleURL)
         weatherMapLogger.info("map view created")
         mapView.delegate = context.coordinator
         mapView.setCenter(Self.initialCenterOverride ?? coordinates,
                           zoomLevel: Self.initialZoom, animated: false)
         mapView.allowsTilting = false
-        // MapLibre requests location permission itself the moment this is enabled
-        // while the status is undetermined, so show the user dot only once access
-        // already exists; updateUIView turns it on after a grant.
         mapView.showsUserLocation = Self.locationAuthorized
-        // OpenFreeMap/OSM (ODbL) attribution is an always-visible corner label
-        // (MapAttributionLabel, drawn by the SwiftUI host) — the OSMF-preferred
-        // form — so MapLibre's ⓘ button and wordmark both stay hidden.
         mapView.logoView.isHidden = true
         mapView.attributionButton.isHidden = true
-        // Compass: adaptive — appears only while the map is rotated off north,
-        // tap resets. Seated below the SwiftUI control capsules that own the
-        // top-right corner (see compassMargins) and centered on their 46pt
-        // width (the compass image is 40pt).
         mapView.compassView.compassVisibility = .adaptive
         mapView.compassViewPosition = .topRight
         mapView.compassViewMargins = Self.compassMargins(radarControls: false)
 
-        // Feature tap-through: warnings + storm cells. The map's own tap
-        // recognizers must fail first (annotation selection, double-tap zoom) —
-        // the standard MapLibre feature-query pattern.
         let tap = UITapGestureRecognizer(
             target: context.coordinator, action: #selector(Coordinator.handleMapTap(_:)))
         for recognizer in mapView.gestureRecognizers ?? []
@@ -167,8 +129,6 @@ struct WeatherMapView: UIViewRepresentable {
         }
         mapView.addGestureRecognizer(tap)
 
-        // Wind particle overlay: a sibling view ABOVE the map (its content is
-        // re-seeded on region changes; particles need no per-frame map sync).
         let particleView = WindParticleView(frame: mapView.bounds)
         particleView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         particleView.mapView = mapView
@@ -181,16 +141,10 @@ struct WeatherMapView: UIViewRepresentable {
         return mapView
     }
 
-    /// Safe-area-relative, matching the SwiftUI overlay's frame: 16pt top padding
-    /// + a capsule of three 46pt buttons and two dividers + 12pt gap, twice while the
-    /// radar's control capsule shows.
     static func compassMargins(radarControls: Bool) -> CGPoint {
         CGPoint(x: 19, y: radarControls ? 273 : 168)
     }
 
-    /// True only when location access has already been granted — never triggers a
-    /// prompt, so the map's user-location dot cannot raise the system dialog
-    /// before the onboarding step does.
     @MainActor static var locationAuthorized: Bool {
         switch LocationService.shared.authStatus {
         case .authorizedWhenInUse, .authorizedAlways: true
@@ -203,8 +157,6 @@ struct WeatherMapView: UIViewRepresentable {
         context.coordinator.syncAll()
         context.coordinator.recenterIfPlaceChanged()
 
-        // Enable the user-location dot once access is granted (e.g. after the
-        // onboarding location step), without recreating the map.
         let authorized = Self.locationAuthorized
         if mapView.showsUserLocation != authorized {
             mapView.showsUserLocation = authorized
@@ -269,7 +221,6 @@ struct WeatherMapView: UIViewRepresentable {
         var webcamsFetchedAt: Date?
         var isLoadingWebcams = false
 
-        // Per-frame isobar GeoJSON, keyed "framesEndpoint/frameKey" (see syncIsobars).
         var isobarShapes: [String: MLNShape] = [:]
         var isobarFetchesInFlight: Set<String> = []
         var isobarFailures: [String: Date] = [:]
@@ -303,7 +254,6 @@ struct WeatherMapView: UIViewRepresentable {
             ) { [weak self] _ in
                 MainActor.assumeIsolated { self?.syncAll() }
             }
-            // Camera command from the locate button.
             centerOnUserObserver = NotificationCenter.default.addObserver(
                 forName: .mapCenterOnUser, object: nil, queue: .main
             ) { [weak self] _ in
@@ -322,12 +272,6 @@ struct WeatherMapView: UIViewRepresentable {
             }
         }
 
-        /// Locate button: fly to the user's position. Reads the app's own
-        /// location service (CLLocationManager's last fix) — MapLibre's
-        /// `userLocation` stays empty until ITS internal manager delivers one,
-        /// which made the button a silent no-op. Zooms in when the camera is
-        /// wide, keeps the user's closer zoom otherwise. Still a no-op without
-        /// any fix or permission.
         private func centerOnUserLocation() {
             guard let mapView,
                   let coordinate = LocationService.shared.getGPSCoordinates(),
@@ -335,7 +279,6 @@ struct WeatherMapView: UIViewRepresentable {
             mapView.setCenter(coordinate, zoomLevel: max(mapView.zoomLevel, 9), animated: true)
         }
 
-        /// Centers on a newly picked place; the 2 km floor ignores GPS drift of the current location.
         func recenterIfPlaceChanged() {
             let target = parent.coordinates
             let moved = CLLocation(latitude: target.latitude, longitude: target.longitude)
@@ -357,8 +300,6 @@ struct WeatherMapView: UIViewRepresentable {
             userDotPulseTimer = nil
         }
 
-        /// Logs a sync-blocking reason once per transition (not per call) — makes a
-        /// permanently-stuck guard visible in the log without spamming.
         func blocked(_ reason: String?) {
             guard lastBlockReason != reason else { return }
             lastBlockReason = reason
@@ -367,11 +308,6 @@ struct WeatherMapView: UIViewRepresentable {
             }
         }
 
-        /// Re-runs `syncAll` whenever an observable property it reads changes
-        /// (radar state, tile-layer state, settings). SwiftUI's diffing cannot
-        /// deliver this: the representable's stored properties are bitwise-identical
-        /// across those mutations, so `updateUIView` is skipped no matter what the
-        /// parent body observes.
         func startObservingAppState() {
             guard !isTornDown else { return }
             withObservationTracking { [weak self] in
@@ -385,9 +321,6 @@ struct WeatherMapView: UIViewRepresentable {
 
         func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
             weatherMapLogger.info("style loaded")
-            // A (re)loaded style contains none of our layers/sources/images —
-            // drop every cached handle so syncAll rebuilds them in THIS style.
-            // First load: everything is nil already, all no-ops.
             radarLayer?.stopPlayback()
             radarLayer?.purgeTextures()
             radarLayer = nil
@@ -442,10 +375,6 @@ struct WeatherMapView: UIViewRepresentable {
                     self.parent.modelGridState?.endMapInteraction()
                     self.parent.cloudLayerState?.endMapInteraction()
                 }
-                // The viewport is an input to the alert-polygon fetch box but
-                // not an observable one — re-run the sync once the camera
-                // settles so a long pan or zoom-out refetches the warnings
-                // for the newly visible area.
                 self.syncAll()
             }
             interactionEndWorkItem = workItem
@@ -456,10 +385,6 @@ struct WeatherMapView: UIViewRepresentable {
 
         func syncAll() {
             guard !isTornDown else { return }
-            // Read EVERY observable input up front, before the guards: syncAll is
-            // re-armed via withObservationTracking, and an early return that skipped
-            // these reads would register no dependencies — the observation loop (and
-            // with it the whole map) would die on the first blocked call.
             let settings = parent.settingsService
             let fixedLayers = parent.layerOverride
             let usesSettings = fixedLayers == nil
@@ -474,8 +399,6 @@ struct WeatherMapView: UIViewRepresentable {
             let isobars = (usesSettings && settings.showIsobars) || activeTileLayer?.isPressureLayer == true
             let radarRegion = settings.oscarRadarRegion
             let webcamsOn = usesSettings && settings.mapWebcams
-            // Registers the observation dependency; the value itself reaches the
-            // layers via `parent.overlayOpacity` on the next updateUIView pass.
             _ = settings.mapOverlayOpacity
             let basemapStyle = settings.mapBasemapStyle
 
@@ -488,14 +411,9 @@ struct WeatherMapView: UIViewRepresentable {
             let radarIsPlaying = radarState?.isPlaying ?? false
             let radarMotion = radarState?.motion
 
-            // Radar continued by the model: past the nowcast the model layer
-            // shows and the radar (with its arrows and cells) steps aside.
             let continuation = parent.combinedTimeline
             let continuationActive = radarActive && (continuation?.includesModel ?? false)
             let showsModelPart = radarActive && (continuation?.isShowingModel ?? false)
-            // Playback then advances the combined timeline and runs on across the
-            // seam, so each part's last frame holds instead of morphing back to
-            // the start of its own loop.
             let radarPlayer: (any TimelinePlayerState)? = continuation != nil ? continuation : radarState
             let radarAtEnd = radarRenderedIndex == radarFrameCount - 1
             let radarNext = continuationActive && radarAtEnd ? nil : radarState?.nextFrame
@@ -505,8 +423,6 @@ struct WeatherMapView: UIViewRepresentable {
             let cloudBounds = cloudState?.bounds
             let cloudMotion = cloudState?.motion
             let cloudIsPlaying = cloudState?.isPlaying ?? false
-            // Registers the dependency that re-fires the sync when cloud
-            // metadata/payloads land (payloads themselves are ObservationIgnored).
             _ = cloudState?.loadRevision
             _ = cloudState?.isActive
             _ = cloudState?.currentFrameIndex
@@ -523,16 +439,10 @@ struct WeatherMapView: UIViewRepresentable {
             let modelPlayer: (any TimelinePlayerState)? = continuationActive ? continuation : modelState
             let modelIsPlaying = modelState?.isPlaying ?? false
             let modelMotion = modelState?.motion
-            // Observation re-arm reads (not passed anywhere): currentLayer and the
-            // frame indices must be read HERE so withObservationTracking re-fires
-            // syncAll when they change — currentFrame/currentFrameKey read them
-            // behind guards that can hide them from the tracker on some paths.
             _ = modelState?.currentLayer
             _ = modelState?.renderFrameIndex
             _ = modelState?.currentFrameIndex
 
-            // Style switch: setting styleURL reloads the style; didFinishLoading
-            // drops every cached layer handle and this sync path rebuilds them.
             if let mapView, mapView.styleURL != basemapStyle.styleURL {
                 mapView.styleURL = basemapStyle.styleURL
                 return blocked("style reloading")
@@ -548,7 +458,6 @@ struct WeatherMapView: UIViewRepresentable {
 
             syncHandover(radarActive: radarActive, showsModelPart: showsModelPart,
                          isPlaying: continuation?.isPlaying ?? false)
-            // Mid-sweep both layers draw, each clipped to its side of the line.
             let sweeping = handoverSweep.isRunning
 
             syncClouds(style: style, active: cloudsActive, state: cloudState,
@@ -569,29 +478,18 @@ struct WeatherMapView: UIViewRepresentable {
                            smoothMotion: smoothMotion, softRendering: softRendering, player: modelPlayer)
             syncValueBubbles(style: style, selection: activeTileLayer, enabled: valueBubbles,
                              payload: modelFrame, frameKey: modelFrameKey)
-            // Isobars ride the hourly model frame keys, so they need a model layer —
-            // the 5-minute radar timeline has no matching pressure fields.
             syncIsobars(style: style, active: isobars && activeTileLayer != nil,
                         selection: activeTileLayer, frameKey: modelFrameKey)
             syncAlertPolygons(style: style, active: alertPolygons)
-            // Cell tracks are radar-scale nowcasts — they'd be misleading floating
-            // over a model forecast layer, so they require the radar to be active.
             syncStormCells(style: style, active: stormCells && radarActive && !showsModelPart,
                            region: radarRegion)
             syncWindParticles(selection: activeTileLayer, state: modelState)
-            // Only the map that can open a webcam shows them (not the forecast preview).
             syncWebcams(style: style, active: webcamsOn && parent.onWebcamTapped != nil)
             syncUserLocationDot(style: style)
-            // Last: chips and the selected-city marker re-assert themselves as
-            // the topmost layers, so they must run after every sync that may
-            // have added layers above them. The marker runs after the chips —
-            // the selected city always reads above its neighbors.
             syncCityChips(style: style)
             syncSelectedCityMarker(style: style)
         }
 
-        /// One pending delayed `syncAll` — used when a layer can't build textures
-        /// yet because MapLibre hasn't delivered the Metal device (`didMove`).
         var syncRetryScheduled = false
         func scheduleSyncRetry() {
             guard !syncRetryScheduled else { return }
@@ -605,11 +503,6 @@ struct WeatherMapView: UIViewRepresentable {
 
         // MARK: Helpers
 
-        /// Overlay layers (radar, model image) sit above ALL geometry
-        /// (roads included — "below the first symbol layer" landed under the streets:
-        /// the dark style's first symbol is a water label that sits below the road
-        /// lines), below the trailing labels. The location dot's circles sit on top and
-        /// don't count, else a late overlay lands above the webcams and arrows.
         func insertOverlayLayer(_ layer: MLNStyleLayer, in style: MLNStyle) {
             let dotLayerIDs = [UserLocationDot.haloLayerID, UserLocationDot.pulseLayerID, UserLocationDot.dotLayerID]
             if let lastGeometry = style.layers.last(where: {
@@ -621,9 +514,6 @@ struct WeatherMapView: UIViewRepresentable {
             }
         }
 
-        /// After a radar-region switch the map can be looking at the wrong continent
-        /// (Berlin → USA radar). If the camera centre is outside the new region's
-        /// footprint, fly to the region instead of showing empty map.
         func recenterIntoRadarBoundsIfNeeded(animated: Bool) {
             guard let mapView, let bounds = parent.oscarRadarState?.bounds,
                   parent.settingsService.oscarRadarLayer else { return }
@@ -635,7 +525,6 @@ struct WeatherMapView: UIViewRepresentable {
                 latitude: (bounds.north + bounds.south) / 2,
                 longitude: (bounds.west + bounds.east) / 2)
             let lonSpan = max(1, bounds.east - bounds.west)
-            // Rough fit: world is 360° at zoom 0; pad by one notch for UI chrome.
             let zoom = max(2.5, log2(360.0 / lonSpan) + 0.5)
             mapView.setCenter(regionCenter, zoomLevel: zoom, animated: animated)
         }
@@ -657,9 +546,6 @@ extension MLNStyle {
 }
 
 extension WeatherMapView.Coordinator {
-    /// Playback ownership (radar, model and cloud layers alike): while playing,
-    /// the layer's display link owns phase + frame advancement; the state's
-    /// Timer would double-advance, so it is cancelled while the layer runs.
     func syncPlayback(of layer: RadarCustomStyleLayer, state: any TimelinePlayerState,
                       playing: Bool, interval: TimeInterval, interpolate: Bool) {
         if playing {

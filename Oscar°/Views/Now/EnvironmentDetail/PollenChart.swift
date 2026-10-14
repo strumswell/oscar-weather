@@ -20,8 +20,6 @@ struct PollenSeries: Identifiable {
     let lineColor: Color
     let points: [PollenDataPoint]
 
-    /// Builds the series once from the parallel Open-Meteo arrays; types with
-    /// no data drop out.
     static func build(
         time: [Double], alder: [Double?], birch: [Double?], grass: [Double?],
         mugwort: [Double?], ragweed: [Double?]
@@ -57,7 +55,6 @@ struct PollenSeries: Identifiable {
 
 struct PollenChart: View {
     let series: [PollenSeries]
-    /// Raw hourly stamps for the day-separator rules.
     let time: [Double]
     let maxTimeRange: ClosedRange<Date>
     let referenceDate: Date

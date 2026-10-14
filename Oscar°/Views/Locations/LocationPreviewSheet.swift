@@ -34,8 +34,6 @@ struct LocationPreviewSheet: View {
     }
 
     var body: some View {
-        // Same sky-adaptive card treatment as the Now stack, from this sheet's
-        // own weather instance.
         let atmosphere = weather.forecast.hourly != nil
             ? snapshotCache.snapshot(from: weather, at: candidate.coordinate)
             : .twilight
@@ -92,8 +90,6 @@ struct LocationPreviewSheet: View {
         }
     }
 
-    // Deliberately spare: place name and temperature only — the sim and the
-    // hourly/daily sections below carry the condition.
     private var header: some View {
         VStack(spacing: 4) {
             Text(candidate.name)
@@ -137,9 +133,6 @@ struct LocationPreviewSheet: View {
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
             .controlSize(.large)
-            // The locations tab runs a white control tint (readable on glass),
-            // which turns this prominent capsule white-on-white; the primary
-            // action wants real contrast, so it opts back into blue.
             .tint(.blue)
         }
         .padding(.horizontal, 16)

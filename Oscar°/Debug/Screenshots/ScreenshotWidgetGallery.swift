@@ -1,15 +1,4 @@
 #if DEBUG
-//
-//  ScreenshotWidgetGallery.swift
-//  Oscar°
-//
-//  Marketing composition for the widgets screenshot (`-screenshotScene
-//  widgets`): the radar and daily-forecast home widgets rendered at their real
-//  point sizes over a wallpaper-style backdrop. The widget entry views live
-//  only in the widget target (adding them to the app would duplicate their
-//  App Intents), so the small layouts are mirrored here — the radar composite
-//  itself comes from the real RadarSnapshotRenderer.
-//
 
 import CoreLocation
 import SwiftUI
@@ -20,7 +9,6 @@ struct ScreenshotWidgetGallery: View {
         longitude: ScreenshotFixtures.longitude
     )
 
-    /// Widget point sizes on the 6.9" iPhone class.
     private static let largeSize = CGSize(width: 364, height: 382)
     private static let mediumSize = CGSize(width: 364, height: 170)
 
@@ -53,8 +41,6 @@ struct ScreenshotWidgetGallery: View {
         }
         .task {
             WidgetBasemapStore.registerRequestedStyle(MapBasemapStyle.fiord.rawValue)
-            // First run on a fresh simulator: style + basemap tiles stream in
-            // live, so retry until the composite (basemap included) succeeds.
             for _ in 0..<6 {
                 await WidgetBasemapRenderer.refreshIfNeeded()
                 radar = await RadarSnapshotRenderer.render(
@@ -68,8 +54,6 @@ struct ScreenshotWidgetGallery: View {
         }
     }
 
-    // Mirrors RadarWidgetEntryView (widget target): filled map composite with
-    // the frame-time badge in the top-left corner.
     @ViewBuilder
     private var radarWidget: some View {
         if let radar {
@@ -98,7 +82,6 @@ struct ScreenshotWidgetGallery: View {
         }
     }
 
-    // Mirrors DailyForecastEntryView's medium layout (widget target).
     private var dailyWidget: some View {
         let days = Self.days
         let minTemp = days.map(\.low).min() ?? 0

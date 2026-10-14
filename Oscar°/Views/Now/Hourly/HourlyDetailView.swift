@@ -1,11 +1,5 @@
 import SwiftUI
 
-/// The hourly detail sheet, organized as a deck: the atmosphere sim fills the
-/// sheet and renders the scrubbed hour, and one card holds every lens as a
-/// row showing its live value at that hour. The selected row expands in place
-/// to carry the full chart, so scrubbing anywhere updates all rows at once.
-/// The 14-day rail sits at the very bottom, in the thumb zone. Cards pick up
-/// the scene's hue via the Now stack's card wash.
 struct HourlyDetailView: View {
     var initialTarget: Date? = nil
 
@@ -61,8 +55,6 @@ struct HourlyDetailView: View {
                 model.update(from: weather)
             }
         }
-        // Sheets don't inherit the app root's forced scheme, but the whole
-        // design (white ink, frost + wash over the sim) assumes dark.
         .preferredColorScheme(.dark)
     }
 
@@ -71,8 +63,6 @@ struct HourlyDetailView: View {
     }
 }
 
-/// Reads the stage clock in its own body: re-evaluating the sheet's toolbar at
-/// 10 Hz made the glass buttons re-layout mid-scrub.
 private struct HourlyContent: View {
     let model: HourlyTimelineModel
     let isCovered: Bool
@@ -82,10 +72,6 @@ private struct HourlyContent: View {
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
 
-    /// Stage pushes land ~10 Hz in 2-minute steps; this spring carries the
-    /// sim and the card wash between them. Retargeted every push, it also
-    /// low-passes fast scrubs across days into one continuous sweep instead
-    /// of a strobe. Knob: shorter tracks tighter, longer smooths more.
     private static let stageTween: Animation = .smooth(duration: 0.3)
 
     var body: some View {
@@ -94,9 +80,6 @@ private struct HourlyContent: View {
             at: location.coordinates,
             for: model.stageDate
         )
-        // Only the stage clock is read here: everything that follows the raw
-        // scrub time lives in child views, so the mapper above runs at the
-        // stage's 10 Hz instead of every drag frame.
         ZStack {
             HourlyStage(model: model, snapshot: snapshot, isCovered: isCovered)
 
@@ -124,8 +107,6 @@ private struct HourlyContent: View {
     }
 }
 
-/// The sim with the sky drag and its VoiceOver readout. Reads the raw scrub
-/// time (for the readout) in its own body, so those per-frame updates stop here.
 private struct HourlyStage: View {
     let model: HourlyTimelineModel
     let snapshot: AtmosphereSnapshot
@@ -164,8 +145,6 @@ private struct HourlyStage: View {
     }
 }
 
-/// Eyebrow + title for the scrubbed hour; a child so its per-frame label
-/// reads don't re-evaluate the sheet.
 private struct HourlyCaption: View {
     let model: HourlyTimelineModel
 
@@ -174,9 +153,6 @@ private struct HourlyCaption: View {
     }
 }
 
-/// The deck card: every lens as a row with its live value at the scrubbed
-/// hour; the expanded row carries the chart in place. One gesture anywhere,
-/// eight answers.
 private struct HourlyDeck: View {
     let model: HourlyTimelineModel
     @Binding var expandedLens: HourlyLens?

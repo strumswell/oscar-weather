@@ -7,7 +7,6 @@ enum MapBasemapStyle: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// OpenFreeMap style endpoint (no API key).
     var styleURL: URL {
         URL(string: "https://tiles.openfreemap.org/styles/\(rawValue)")!
     }

@@ -98,8 +98,6 @@ struct SettingsView: View {
             }
           }
 
-          // Locked until supported, but never locks anyone out of a theme
-          // that is already on.
           if supporter.isSupporter || settingsService.classicTheme {
             Toggle(isOn: $settingsService.classicTheme) {
               classicThemeLabel

@@ -9,10 +9,6 @@ import UIKit
 // MARK: Satellite clouds (own layer with its own timeline)
 
 extension WeatherMapView.Coordinator {
-    /// The clouds are a SELECTABLE layer like the model layers: the cloud
-    /// state owns pair + playback via the display link. (The former
-    /// radar-synced underlay mode is gone — clouds, radar and model layers
-    /// are mutually exclusive.)
     func syncClouds(
         style: MLNStyle, active: Bool,
         state: CloudLayerState?, bounds: OscarRadarBounds?, motion: RadarMotionData?,
@@ -28,7 +24,7 @@ extension WeatherMapView.Coordinator {
             }
             return
         }
-        guard let bounds else { return }   // metadata not loaded yet
+        guard let bounds else { return }
 
         let layer: RadarCustomStyleLayer
         if let existing = cloudsLayer {
@@ -39,7 +35,6 @@ extension WeatherMapView.Coordinator {
             cloudsLayer = layer
         }
         layer.configure(bounds: bounds, opacity: Float(parent.overlayOpacity))
-        // Clouds are soft by nature — the hard/sharp toggle is a radar look.
         layer.setSampling(.soft)
         layer.setMotion(motion)
 
@@ -50,7 +45,6 @@ extension WeatherMapView.Coordinator {
             } else if !cloudsPaletteFetching {
                 cloudsPaletteFetching = true
                 Task { @MainActor [weak self] in
-                    // Server palette with a local fallback — always resolves.
                     let palette = await CloudLayerState.resolvedPalette()
                     guard let self else { return }
                     self.cloudsPaletteFetching = false

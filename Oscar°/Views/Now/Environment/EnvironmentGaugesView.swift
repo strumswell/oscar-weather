@@ -64,9 +64,6 @@ struct EnvironmentGaugesView: View {
                             AQIGaugeCard(metric: metric)
                         }
                         .buttonStyle(.plain)
-                        // Lives here rather than on the card: outside a scroll
-                        // view (the onboarding collage) the phase never resolves
-                        // to identity and the card rendered permanently blurred.
                         .scrollTransition { content, phase in
                             content
                                 .opacity(phase.isIdentity ? 1 : 0.5)
@@ -93,7 +90,6 @@ struct EnvironmentGaugesView: View {
         }
     }
 
-    /// Opens on the most pressing metric, the one leading the strip.
     private func showDetail() {
         presentation.present(.environment(metrics.first.map { detailSection(for: $0) } ?? .aqi))
     }

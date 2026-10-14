@@ -31,9 +31,6 @@ class Storm {
         }
     }
 
-    /// Matches the live drop count to the latest forecast intensity without
-    /// resetting drops that are already falling. New drops pick up the
-    /// current wind direction; existing ones keep theirs.
     func sync(strength: Int, direction: Angle) {
         if drops.count < strength {
             for _ in drops.count..<strength {
@@ -44,9 +41,6 @@ class Storm {
         }
     }
 
-    /// `speedMultiplier` compensates small containers: drop speed is a fraction
-    /// of the view height per second, so the same drop that streaks across the
-    /// fullscreen sim crawls inside a ~100pt card without a boost.
     func update(date: Date, size: CGSize, speedMultiplier: Double = 1) {
         guard size.width > 0, size.height > 0 else {
             lastUpdate = date

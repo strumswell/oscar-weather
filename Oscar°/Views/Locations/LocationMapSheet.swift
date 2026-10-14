@@ -1,8 +1,6 @@
 import CoreLocation
 import SwiftUI
 
-/// Display data for a saved city's marker: temperature + condition icon once
-/// the batch conditions are in, the emoji/pin fallback before that.
 struct CityMapChip: Equatable {
     var latitude: Double
     var longitude: Double
@@ -38,8 +36,6 @@ struct LocationMapSheet: View {
         self.onAdd = onAdd
     }
 
-    /// Live per-city chip data; the store publishes and the map re-syncs its
-    /// annotations as conditions arrive.
     private var chips: [CityMapChip] {
         cities.map { city in
             let conditions = conditionsStore.conditions(
@@ -61,8 +57,6 @@ struct LocationMapSheet: View {
         var longitude: Double
         var name: String?
         var detail: String?
-        /// Reverse geocoding still running: the card shows a spinner, never the
-        /// raw coordinates (those remain only as the failure fallback).
         var isResolving = true
 
         var coordinate: CLLocationCoordinate2D {
@@ -112,8 +106,6 @@ struct LocationMapSheet: View {
                     pickedCard(picked)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 } else {
-                    // What this screen is for — swapped out for the card the
-                    // moment a pin is dropped.
                     ToastBanner(message: String(localized: "Tippe auf die Karte, um einen Ort hinzuzufügen."))
                         .padding(.bottom, 16)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -137,8 +129,6 @@ struct LocationMapSheet: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 if point.isResolving && point.name == nil {
-                    // Never flash raw coordinates while the geocoder works;
-                    // they only remain as the failure fallback below.
                     ProgressView()
                         .controlSize(.small)
                         .frame(height: 20)
@@ -205,14 +195,11 @@ struct LocationMapSheet: View {
         }
     }
 
-    /// Names the dropped pin via reverse geocoding; best-effort, the raw
-    /// coordinates stay usable (and become the label) when it fails.
     private func resolveName(for coordinate: CLLocationCoordinate2D) async {
         let geocoder = CLGeocoder()
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         let placemark = try? await geocoder.reverseGeocodeLocation(location).first
 
-        // A new tap may have replaced the pin while geocoding ran.
         guard !Task.isCancelled, var current = picked,
               current.latitude == coordinate.latitude,
               current.longitude == coordinate.longitude else {

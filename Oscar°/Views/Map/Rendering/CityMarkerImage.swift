@@ -1,10 +1,6 @@
 import SwiftUI
 import UIKit
 
-/// iOS-style marker replica (`SelectedCityMarker` asset, 534×652 with the
-/// balloon tip at 97.4% height), shared by the weather map's selected-city
-/// marker layer and the locations map picker's dropped pin. The canvas is twice
-/// the tip's y so a CENTER-anchored image pins the tip on the coordinate.
 @MainActor
 enum CityMarkerImage {
     static func make() -> UIImage {

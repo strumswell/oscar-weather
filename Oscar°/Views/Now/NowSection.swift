@@ -1,8 +1,5 @@
 import SwiftUI
 
-/// The blocks of the forecast page below the head, shown in the order the
-/// user keeps them per layout form (`SectionArrangement`). The map only
-/// exists on the wide page's stage; the hourly strip only on the phone page.
 enum NowSection: String, CaseIterable, Identifiable, Codable {
     case map, radar, hourly, daily, stations, environment, climate
 
@@ -32,7 +29,6 @@ enum NowSection: String, CaseIterable, Identifiable, Codable {
         }
     }
 
-    /// Settings tile color; a fixed hue per section so rows read at a glance.
     var tint: Color {
         switch self {
         case .map: .cyan
@@ -53,9 +49,6 @@ enum NowSection: String, CaseIterable, Identifiable, Codable {
         }
     }
 
-    /// The live section. Only the radar teaser needs a way onto the map;
-    /// `isWide` lets the daily list open days in place. The map takes the
-    /// stage's spare height.
     @MainActor @ViewBuilder
     func view(openRadarMap: @escaping () -> Void = {}, isWide: Bool = false) -> some View {
         switch self {
@@ -70,9 +63,6 @@ enum NowSection: String, CaseIterable, Identifiable, Codable {
     }
 }
 
-/// The wide forecast (iPad, the Duo's inner display in landscape, Mac
-/// windows) splits the page into the stage on the left and the feed on the
-/// right; the user picks which sections go where.
 enum WideForecast {
     static let minWidth: CGFloat = 760
     static let defaultStage: Set<NowSection> = [.map, .radar, .stations]

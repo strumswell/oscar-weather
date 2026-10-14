@@ -1,10 +1,5 @@
 import SwiftUI
 
-/// The playhead readout, styled like the retired chart cards' selection
-/// tooltip: a frosted box beside the playhead, only always visible now. Each
-/// series is a dot + label + value row in the lens' fixed order (primary
-/// first, then by altitude/depth), so rows never trade places while the
-/// lines cross. The rows double as the legend.
 struct HourlyReadoutBox: View {
     let model: HourlyTimelineModel
     let layout: HourlyLensLayout
@@ -57,8 +52,6 @@ struct HourlyReadoutBox: View {
                 value: layout.extremeFormat(value)
             ))
         }
-        // The precipitation row stays put when it is dry — a 0 keeps the box
-        // from resizing mid-scrub and is an answer in itself.
         if layout.showsBars, let barsLabel = layout.barsLabel {
             let rate = model.sample(model.precipitation) ?? 0
             let isSnow = (model.sample(model.snowfall) ?? 0) > 0

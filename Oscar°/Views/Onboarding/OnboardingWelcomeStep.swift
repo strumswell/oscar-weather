@@ -5,8 +5,6 @@
 
 import SwiftUI
 
-/// First screen: app icon and greeting over the postcard sky, with the letter
-/// that blows away in the wind when the journey starts.
 struct OnboardingWelcomeStep: View {
     let onContinue: () -> Void
 
@@ -27,8 +25,6 @@ struct OnboardingWelcomeStep: View {
 
             Spacer(minLength: 24)
 
-            // The note renders as an overlay so its oversized frame can't
-            // widen the stack; it overflows the slot in every direction.
             Color.clear
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .overlay(alignment: .top) { letter.offset(y: -12) }
@@ -38,15 +34,11 @@ struct OnboardingWelcomeStep: View {
 
             OnboardingButtonStack(primaryTitle: "Los geht's", primaryAction: continueTapped)
         }
-        // Taller than any phone (iPad, Mac): the group centers instead of
-        // pinning the button to the bottom edge far below the note.
         .frame(maxHeight: 880)
         .sensoryFeedback(.impact(weight: .medium), trigger: letterFlownAway)
         .onAppear(perform: animateIn)
     }
 
-    /// The handwritten note exists in German and English; every other
-    /// localization reads the English one.
     private var letterAssetName: String {
         Bundle.main.preferredLocalizations.first == "de" ? "letterDE" : "letterEN"
     }
@@ -55,11 +47,8 @@ struct OnboardingWelcomeStep: View {
         Image(letterAssetName)
             .resizable()
             .scaledToFit()
-            // Note-pad size, so the handwriting stays legible; capped so iPad
-            // doesn't get a wall-sized note.
             .containerRelativeFrame(.horizontal) { length, _ in min(length * 0.95, 430) }
             .fixedSize(horizontal: false, vertical: true)
-            // Inner pair: gentle idle float. Outer pair: the wind gust.
             .rotationEffect(.degrees(letterFloating ? -1.2 : 1.2))
             .offset(y: letterFloating ? -1 : 0)
             .rotationEffect(.degrees(gustRotation))
@@ -106,9 +95,6 @@ struct OnboardingWelcomeStep: View {
         return 1
     }
 
-    /// The wind takes the letter in two beats: a short lift as the gust
-    /// catches it, then the rush off to the upper left. Sequential, not
-    /// overlapped with the step slide, so the two never stack.
     private func continueTapped() {
         guard !letterLifting, !letterFlownAway else { return }
 

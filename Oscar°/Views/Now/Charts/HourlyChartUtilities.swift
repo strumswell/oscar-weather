@@ -3,11 +3,6 @@ import Foundation
 import SwiftUI
 
 extension Binding where Value == Date? {
-    /// Wraps a `.chartXSelection` binding so the continuous drag samples only
-    /// invalidate SwiftUI when the selection reaches a different data step.
-    /// The cursor and tooltip resolve to the nearest hour anyway, so the
-    /// per-sample writes (60–120 Hz) re-rendered the entire chart for
-    /// identical output — that was the scrub lag.
     static func snapped(to interval: TimeInterval, _ source: Binding<Date?>) -> Binding<Date?> {
         Binding(
             get: { source.wrappedValue },
@@ -44,7 +39,6 @@ enum HourlyChartUtilities {
 }
 
 extension HourlyChartUtilities {
-    /// Dashed rule with a weekday badge at every day change.
     @ChartContentBuilder
     static func daySeparatorMarks(time: [Double]) -> some ChartContent {
         ForEach(dayChangeIndices(time: time), id: \.self) { index in
@@ -66,7 +60,6 @@ extension HourlyChartUtilities {
         }
     }
 
-    /// Black ring with a white dot marking the current hour on a series.
     @ChartContentBuilder
     static func currentPointMark(x: Date, series: String, value: Double) -> some ChartContent {
         PointMark(x: .value("Current Hour", x), y: .value(series, value))

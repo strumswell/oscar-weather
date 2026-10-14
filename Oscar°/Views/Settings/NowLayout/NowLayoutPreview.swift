@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// The band above the metrics list: the head with its metrics at full size
-/// under the real sky. Animates as the list below changes.
 struct NowLayoutPreview: View {
     private let settingsService = SettingService.shared
 
@@ -12,8 +10,6 @@ struct NowLayoutPreview: View {
                 .frame(height: 260)
         }
         .animation(.snappy, value: settingsService.headMetrics)
-        // Decorative: the list below is the accessible surface, and the
-        // values are spoken on the forecast page itself.
         .accessibilityHidden(true)
     }
 }
@@ -35,7 +31,6 @@ struct SkyBand<Content: View>: View {
     }
 }
 
-/// City, temperature and the chosen metrics, as the forecast page's head.
 struct PreviewHead: View {
     @Environment(Weather.self) private var weather
     @Environment(Location.self) private var location

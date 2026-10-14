@@ -12,11 +12,9 @@ extension OscarRadarBounds {
 extension RadarSnapshotRenderer {
     // MARK: - Geo helpers
 
-    /// Linear Web-Mercator mapping between a coordinate rectangle and composite
-    /// points — the CPU analog of the basemap snapshot's point conversion.
     struct MercatorFrame {
-        let x0, x1: Double // world-fraction X at west/east
-        let y0, y1: Double // world-fraction Y at north/south
+        let x0, x1: Double
+        let y0, y1: Double
         let size: CGSize
 
         init(bounds: OscarRadarBounds, size: CGSize) {
@@ -40,9 +38,6 @@ extension RadarSnapshotRenderer {
         }
     }
 
-    /// The coordinate rectangle a bounds-fitted snapshot of `size` would show: the
-    /// 65 km box extended along one axis to the size's aspect ratio in Mercator
-    /// space. Used only when no prerendered basemap exists yet.
     nonisolated static func fittedBounds(
         around center: CLLocationCoordinate2D, spanMeters: Double, size: CGSize
     ) -> OscarRadarBounds {

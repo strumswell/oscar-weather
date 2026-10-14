@@ -37,10 +37,6 @@ struct RainView: View {
                     .padding([.leading, .trailing, .bottom])
                     .frame(height: 180)
                     .contentShape(.rect)
-                    // Simultaneous, not .onTapGesture: the chart's selection
-                    // gesture would swallow a plain tap. A scrub (press +
-                    // drag) never completes a tap, so scrubbing can't
-                    // accidentally open the map.
                     .simultaneousGesture(TapGesture().onEnded { openRadarMap() })
             }
             .scrollTransition { [reduceMotion] content, phase in
@@ -51,9 +47,6 @@ struct RainView: View {
         }
     }
 
-    /// Keep only the present reading and everything after it — i.e. now → future,
-    /// dropping past observations (the series now includes both). Returns empty if
-    /// there is no data at/after the current time, so stale data isn't shown.
     private static func fromNow(_ points: [PrecipChartPoint]) -> [PrecipChartPoint] {
         let now = Date()
         let sorted = points.sorted { $0.date < $1.date }
@@ -73,7 +66,6 @@ struct PrecipChartPoint: Identifiable {
     let value: Double  // mm/h
 }
 
-/// Renders the oscar-server precipitation time series (mm/h) as an area chart.
 struct PrecipitationSeriesChart: View {
     let points: [PrecipChartPoint]
     let timeZone: TimeZone
@@ -88,9 +80,6 @@ struct PrecipitationSeriesChart: View {
         [0, maxValue / 2, maxValue]
     }
 
-    /// Explicit ticks every 30 min starting at the first point: the automatic
-    /// axis only labels "nice" round times, which drops the label at the left
-    /// edge because the domain starts at the current (non-round) minute.
     private var xAxisValues: [Date] {
         guard let first = points.first?.date, let last = points.last?.date else { return [] }
         return stride(
@@ -114,8 +103,6 @@ struct PrecipitationSeriesChart: View {
                         startPoint: .top, endPoint: .bottom
                     )
                 )
-                // Gradients are scaled per mark by default, so the fade restarts
-                // on every segment instead of running down the whole plot.
                 .alignsMarkStylesWithPlotArea()
             }
 
@@ -146,13 +133,9 @@ struct PrecipitationSeriesChart: View {
         .chartXAxis {
             AxisMarks(position: .bottom, values: xAxisValues) { value in
                 AxisTick()
-                // Lead-anchor the first label so it renders inside the plot
-                // instead of being clipped at the leading edge.
                 AxisValueLabel(anchor: value.index == 0 ? .topLeading : .top) {
                     if let date = value.as(Date.self) {
                         Text(SettingService.formattedTime(date, timeZone: timeZone))
-                            // Charts' default axis gray vanishes over a bright
-                            // sky behind the translucent card.
                             .foregroundStyle(.white.opacity(0.72))
                     }
                 }

@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// One capsule of the nowcast bar chart (lock-screen widget, Live Activity, watch):
-/// a 3 pt stub when dry, otherwise 4 pt plus the bar fraction of the remaining area.
 struct RainNowcastBar: View {
     let value: Double
     let reference: Double
@@ -22,14 +20,10 @@ struct RainNowcastBar: View {
     }
 }
 
-/// The radar nowcast as bars plus a one-line headline, shared by the lock-screen
-/// rain timeline and the watch radar page.
 enum RainNowcastSummary {
     static let horizon: TimeInterval = 90 * 60
     static let maxBars = 18
 
-    /// One radar step of slack into the past so the bar for "now" survives the
-    /// 5-min cadence; everything else is the upcoming window.
     static func points(from series: PrecipSeriesResponse?, now: Date) -> [PrecipPoint] {
         guard let series else { return [] }
         return Array(series.series
@@ -60,12 +54,10 @@ enum RainNowcastSummary {
         return String(localized: "Kein Regen in Sicht")
     }
 
-    /// Fixed floor so drizzle doesn't render like a downpour.
     static func reference(for values: [Double]) -> Double {
         max(2.0, values.max() ?? 0)
     }
 
-    /// Square root emphasizes light rain, which is what matters at a glance.
     static func barFraction(value: Double, reference: Double) -> Double {
         guard value > 0, reference > 0 else { return 0 }
         return min(1.0, (value / reference).squareRoot())

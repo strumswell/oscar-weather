@@ -1,8 +1,6 @@
 import Charts
 import SwiftUI
 
-/// Tap-through for "Messstationen": one station's readings and its last 24 h. The chips
-/// switch between all nearby stations; everything comes from `weather.stations`, no refetch.
 struct StationDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(Weather.self) private var weather
@@ -58,14 +56,10 @@ struct StationDetailView: View {
                 }
             }
         }
-        // White ink like the hourly sheet, which assumes dark too.
         .preferredColorScheme(.dark)
     }
 }
 
-/// How often the station reports, from the typical gap between its temperature readings:
-/// "alle 10 Min.", "stündlich", "alle 3 Std.", or "unregelmäßig" when fewer than three in
-/// four gaps match it (some secondary stations report in bursts). Nil with too few readings.
 private func reportingInterval(_ history: [Components.Schemas.StationReading]) -> String? {
     let times = history.filter { $0.temperature_c != nil }.map(\.time)
     guard times.count > 2 else { return nil }
@@ -131,12 +125,9 @@ private struct StationHeader: View {
     }
 }
 
-/// Starring winds the star up, pops it gold with a glow, two rings and a spray of sparks;
-/// unstarring just swaps back.
 private struct FavoriteStar: View {
     let id: String
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    /// Counts new favorites only, so switching chips never replays the burst.
     @State private var bursts = 0
 
     private struct Pop {
@@ -163,7 +154,6 @@ private struct FavoriteStar: View {
                 .font(.title3)
                 .foregroundStyle(isFavorite ? AnyShapeStyle(Self.gold) : AnyShapeStyle(.primary))
                 .contentTransition(.symbolEffect(.replace))
-                // Squash and twist back, then snap past full size and settle with a wobble.
                 .keyframeAnimator(initialValue: Pop(), trigger: reduceMotion ? 0 : bursts) { content, pop in
                     content.scaleEffect(pop.scale).rotationEffect(.degrees(pop.angle))
                 } keyframes: { _ in
@@ -191,8 +181,6 @@ private struct FavoriteStar: View {
     }
 }
 
-/// Fires on the star's release (after its 0.1 s wind-up): a flash of glow, two rings,
-/// then sparks that fly out, spin, drift down a little and fade.
 private struct StarBurst: View {
     let trigger: Int
 
@@ -215,7 +203,6 @@ private struct StarBurst: View {
 
     private static let release = 0.1
 
-    /// Fixed jitter per spark, so the spray looks hand-thrown but never random.
     private static let sparks: [SparkStyle] = (0..<14).map { index -> SparkStyle in
         let angleJitter: [Double] = [0, 9, -6, 4]
         let reachJitter: [CGFloat] = [0, 5, -3, 7, 2]
@@ -366,7 +353,6 @@ private struct StationValue: View {
     }
 }
 
-/// "Gemessene Werte …" plus the source marks; the licence details live on the data-provider page.
 private struct StationFooter: View {
     var body: some View {
         VStack(spacing: 16) {
@@ -389,7 +375,6 @@ private struct StationFooter: View {
     }
 }
 
-/// The 24 h window every chart of one station shares, with the forecast's night hours.
 struct StationChartFrame {
     let window: ClosedRange<Date>
     let nightRanges: [ClosedRange<Date>]
@@ -406,7 +391,6 @@ struct StationChartFrame {
     }
 }
 
-/// Title and trailing summary over a chart, legend below.
 private struct StationChartCard<Content: View>: View {
     let title: LocalizedStringResource
     var summary: String?
@@ -442,7 +426,6 @@ private func points(_ history: [Components.Schemas.StationReading], _ value: (Co
     history.compactMap { reading in value(reading).map { .init(time: reading.time, value: $0) } }
 }
 
-/// Joint min/max padded like the hourly lenses' `paddedDomain`.
 private func paddedDomain(_ lines: [StationChart.Line], from lowerPin: Double? = nil, minimumPad: Double = 0.5) -> ClosedRange<Double> {
     let values = lines.flatMap { $0.points.map(\.value) }
     guard var low = values.min(), var high = values.max() else { return (lowerPin ?? 0)...((lowerPin ?? 0) + 1) }
@@ -481,14 +464,12 @@ private struct StationWindChart: View {
     var body: some View {
         let units = StationUnits()
         let unit = units.windUnit.displayUnit
-        // Gusts sit behind the mean like the hourly lens' higher-altitude lines.
         let lines = [
             StationChart.Line(points: points(history) { $0.wind_gust_ms.map(units.wind) }, color: .teal.mix(with: .black, by: 0.4),
                               width: 1.5, label: String(localized: "Böen")),
             StationChart.Line(points: points(history) { $0.wind_speed_ms.map(units.wind) }, color: .teal,
                               label: String(localized: "Wind")),
         ]
-        // One arrow per 3 h keeps the direction readable at hourly and 10-min cadence.
         let arrows = history.compactMap { reading -> StationChart.Point? in
             guard let direction = reading.wind_direction_deg,
                   Int(reading.time.timeIntervalSince1970) % (3 * 3600) == 0 else { return nil }
@@ -521,8 +502,6 @@ private struct StationPrecipitationChart: View {
         }
     }
 
-    /// Sub-hourly sums fold into the hour they end in: hourly bars like the hourly view
-    /// instead of 144 ten-minute slivers.
     private func hourlyBars(_ units: StationUnits) -> [StationChart.Bar] {
         var bars: [StationChart.Bar] = []
         for reading in history {
@@ -561,7 +540,6 @@ private struct StationPressureChart: View {
         }
     }
 
-    /// "+1,2 hPa in 3h" against the reading closest to three hours before the newest.
     private func threeHourTrend(_ pressures: [StationChart.Point]) -> String? {
         guard let last = pressures.last else { return nil }
         let target = last.time.addingTimeInterval(-3 * 3600)
@@ -572,8 +550,6 @@ private struct StationPressureChart: View {
     }
 }
 
-/// A station's last 24 h in the hourly palette: default y axis, and a rule plus
-/// tooltip only while the chart is touched.
 struct StationChart: View {
     struct Point {
         let time: Date
@@ -595,19 +571,16 @@ struct StationChart: View {
     }
 
     let frame: StationChartFrame
-    /// The last line is the primary: extremes and arrows ride it.
     let lines: [Line]
     var bars: [Bar] = []
     let yDomain: ClosedRange<Double>
     let valueFormat: (Double) -> String
     var extremeFormat: ((Double) -> String)?
     var showsExtremes = false
-    /// Wind direction (degrees, from) at 3 h steps.
     var arrows: [Point] = []
 
     @State private var selectedDate: Date?
 
-    /// Longer than any station's report interval: a wider hole in a series is missing data.
     private static let maxGap: TimeInterval = 3.5 * 3600
 
     var body: some View {
@@ -630,10 +603,8 @@ struct StationChart: View {
         .chartXScale(domain: frame.window)
         .chartYScale(domain: yDomain)
         .chartXAxis {
-            // The shared 6 h marks; a label too close to the right edge would clip, so it skips.
             AxisMarks(values: tickDates) { value in
                 AxisValueLabel {
-                    // Labels hang right of their tick and need ~3 h of the 24 h width.
                     if let date = value.as(Date.self), frame.window.upperBound.timeIntervalSince(date) >= 3.5 * 3600 {
                         Text(HourlyChartUtilities.hourString(from: date))
                     }
@@ -642,7 +613,6 @@ struct StationChart: View {
                 AxisTick()
             }
         }
-        // Default axis minus the thousands separator ("1020", not "1.020").
         .chartYAxis {
             AxisMarks { _ in
                 AxisGridLine()
@@ -673,8 +643,6 @@ struct StationChart: View {
         HourlyChartUtilities.daySeparatorMarks(time: hourStamps)
     }
 
-    /// The hourly strip's bars: a gap between neighbours and only the top corners rounded,
-    /// which chart marks can't do. Drawn behind the marks so the selection stays on top.
     private func drawBars(in context: GraphicsContext, proxy: ChartProxy, plot: CGRect) {
         guard let base = proxy.position(forY: 0.0) else { return }
         for bar in bars where bar.value > 0 {
@@ -688,7 +656,6 @@ struct StationChart: View {
         }
     }
 
-    /// One series per gap-free run, so a hole in the data stays a hole.
     private var runs: [(id: String, line: Line, points: [Point])] {
         lines.enumerated().flatMap { index, line in
             Self.segments(line.points).enumerated().map { segment, points in ("\(index)-\(segment)", line, points) }
@@ -698,7 +665,6 @@ struct StationChart: View {
     @ChartContentBuilder
     private var lineMarks: some ChartContent {
         ForEach(runs, id: \.id) { run in
-            // A reading between two gaps has no line to sit on.
             if run.points.count == 1, let point = run.points.first {
                 PointMark(x: .value("Zeit", point.time), y: .value(run.line.label, point.value))
                     .symbolSize(24)
@@ -746,7 +712,6 @@ struct StationChart: View {
         }
     }
 
-    /// The tooltip reads the readings at the finger.
     private func tooltip(at date: Date) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(date, format: .dateTime.hour().minute())
@@ -777,7 +742,6 @@ struct StationChart: View {
             .filter { frame.window.contains($0) }
     }
 
-    /// Hourly stamps across the window, for the shared day-separator marks.
     private var hourStamps: [Double] {
         Array(stride(from: frame.window.lowerBound.timeIntervalSince1970, through: frame.window.upperBound.timeIntervalSince1970, by: 3600))
     }
@@ -788,7 +752,6 @@ struct StationChart: View {
         }.joined(separator: ", ")
     }
 
-    /// High and low of a series, only when they're worth a label.
     private func extremes(of line: Line) -> [(point: Point, isHigh: Bool)] {
         guard let high = line.points.max(by: { $0.value < $1.value }),
               let low = line.points.min(by: { $0.value < $1.value }),
@@ -796,7 +759,6 @@ struct StationChart: View {
         return [(high, true), (low, false)]
     }
 
-    /// Runs of readings without a gap wider than `maxGap`.
     private static func segments(_ points: [Point]) -> [[Point]] {
         var runs: [[Point]] = []
         for point in points {
@@ -809,7 +771,6 @@ struct StationChart: View {
         return runs
     }
 
-    /// Linear between the neighbouring readings; nil outside the series or across a gap.
     private static func sample(_ points: [Point], at date: Date) -> Double? {
         guard let upper = points.firstIndex(where: { $0.time >= date }) else { return nil }
         if points[upper].time == date || upper == 0 {

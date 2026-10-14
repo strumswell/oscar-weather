@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// One lens across all days: runs as nested bands (all faint, eight in ten
-/// strong, median line), or for the sky each day's share of runs per weather.
 struct EnsembleChart: View {
     let state: EnsembleState
     let lens: EnsembleLens
@@ -124,7 +122,6 @@ struct EnsembleChart: View {
               let highestBand = known.map(\.high).max() else { return }
         let fromZero = lens == .precipitation || lens == .wind
         let bottom = fromZero ? 0 : lowest
-        // A single soaked run would flatten every other day; its column runs off the top instead.
         let top = lens == .precipitation ? highestBand * 1.3 : highest
         let span = max(top - bottom, lens == .precipitation ? 2 : 4)
         let lower = fromZero ? 0 : bottom - span * 0.08
@@ -144,7 +141,6 @@ struct EnsembleChart: View {
             context.stroke(grid, with: .color(.white.opacity(0.1)), style: StrokeStyle(lineWidth: 0.75, dash: [2, 3]))
         }
 
-        // Bands sit on a dark underlay so the series color stays saturated on a bright card wash.
         func layer(_ path: Path, opacity: Double, in target: inout GraphicsContext) {
             target.fill(path, with: .color(.black.opacity(0.15)))
             target.fill(path, with: .color(lens.color.opacity(opacity)))
@@ -245,8 +241,6 @@ struct EnsembleChart: View {
     }
 }
 
-/// The selected day's numbers beside the playhead; each row's swatch
-/// matches its layer in the chart, so the box is the legend too.
 private struct EnsembleReadout: View {
     let state: EnsembleState
     let lens: EnsembleLens
@@ -296,8 +290,6 @@ private struct EnsembleReadout: View {
 }
 
 extension Path {
-    /// Monotone cubic (Fritsch–Carlson) through points ordered along x: smooth
-    /// like the hourly lines, but never overshoots past the data between days.
     mutating func addMonotoneCurve(through points: [CGPoint]) {
         guard let first = points.first else { return }
         if isEmpty { move(to: first) } else { addLine(to: first) }

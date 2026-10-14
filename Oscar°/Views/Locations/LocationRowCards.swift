@@ -2,10 +2,6 @@ import SwiftUI
 
 // MARK: - Row cards
 
-/// City row content. Personalization and the default flag arrive as values:
-/// an edited City is the SAME reference as before, so a row keyed on the
-/// object alone would never re-render, while every mutation goes through
-/// CityService.save(), which reassigns `cities` and re-runs the list body.
 struct CityCard: View {
     let personalization: PlacePersonalization
     let isDefault: Bool
@@ -27,10 +23,6 @@ struct CityCard: View {
     }
 }
 
-/// The GPS pseudo-entry's card: personalization and the default flag come from
-/// CityService's observable UserDefaults mirror instead of a City entity —
-/// read HERE in body (not passed in) so the lazy List row re-renders on its
-/// own observation, independent of parent/row diffing.
 struct CurrentLocationCard: View {
     let conditions: CityConditions?
     let isSelected: Bool
@@ -53,7 +45,6 @@ struct CurrentLocationCard: View {
 }
 
 extension View {
-    /// Card rows manage their own background and spacing.
     func listRowStyling() -> some View {
         self
             .listRowSeparator(.hidden)
@@ -61,8 +52,6 @@ extension View {
             .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
     }
 
-    /// Edit and default actions of an Orte row as context menu and swipe
-    /// actions; saved places add delete (full swipe) in front of edit.
     func placeRowActions(
         isDefault: Bool,
         onEdit: @escaping () -> Void,
@@ -87,8 +76,6 @@ extension View {
                     Button(role: .destructive, action: onDelete) {
                         Label("Löschen", systemImage: "trash")
                     }
-                    // The destructive role only reds the text — the icon follows the
-                    // cascading label tint and stayed white without this.
                     .tint(.red)
                 }
             }
@@ -97,8 +84,6 @@ extension View {
                     Button(role: .destructive, action: onDelete) {
                         Label("Löschen", systemImage: "trash")
                     }
-                    // Explicit red: the role's default is lost to the tab bar's
-                    // cascading white tint, same reason the neighbors set theirs.
                     .tint(.red)
                 }
                 editButton

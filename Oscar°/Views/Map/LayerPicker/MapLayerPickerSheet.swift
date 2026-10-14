@@ -11,11 +11,6 @@ import UIKit
 
 // MARK: - Layer picker sheet
 
-/// Apple-Maps-style "Kartenmodi" sheet: square screenshot tiles per layer in two
-/// groups by what the data is — measured (radar, satellite; live + nowcast) or
-/// computed (model forecast, one row per model) — plus display toggles.
-/// Selection state reads straight from the observable SettingService, so tiles
-/// re-ring live while the sheet stays open and the map swaps behind it.
 struct MapLayerPickerSheet: View {
     @Bindable var settingsService: SettingService
     let onSelectRadar: (RadarRegion) -> Void
@@ -28,9 +23,6 @@ struct MapLayerPickerSheet: View {
 
     private static let tileColumns = Array(
         repeating: GridItem(.flexible(), spacing: 12), count: 4)
-    /// Radar tiles scroll horizontally (six coverages don't fit a row), so they
-    /// need a fixed width — sized to the 4-column grid below on a compact phone,
-    /// which leaves a peek of the next tile as the scroll affordance.
     private static let radarTileWidth: CGFloat = 76
 
     var body: some View {
@@ -64,8 +56,6 @@ struct MapLayerPickerSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    // No text label: with a bare .close role the system renders
-                    // the standard glass X and localizes the accessibility label.
                     Button(role: .close, action: { dismissSheet() })
                 }
             }
@@ -110,8 +100,6 @@ struct MapLayerPickerSheet: View {
                 .scrollIndicators(.hidden)
                 .scrollClipDisabled()
                 .onAppear {
-                    // A selected coverage at the row's end would otherwise open
-                    // hidden behind the fold.
                     guard settingsService.oscarRadarLayer else { return }
                     proxy.scrollTo(settingsService.oscarRadarRegion, anchor: .trailing)
                 }
@@ -144,7 +132,6 @@ struct MapLayerPickerSheet: View {
         }
     }
 
-    /// One model: region + source line over its four products.
     private func modelRow(title: LocalizedStringKey, detail: LocalizedStringKey,
                           layers: [WeatherTileLayer]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -160,8 +147,6 @@ struct MapLayerPickerSheet: View {
         }
     }
 
-    /// Brand strip for the sources feeding the map layers — CWA and REDEMET
-    /// stay text-only (their names are on the tiles; no bundled logos).
     private var attributionFooter: some View {
         VStack(spacing: 12) {
             HStack(spacing: 18) {
@@ -170,8 +155,6 @@ struct MapLayerPickerSheet: View {
                 ProviderLogo(asset: "logo-eumetnet", height: 28)
                 ProviderLogo(asset: "logo-noaa", height: 28)
             }
-            // Attribution required by the EUMETSAT data policy for the cloud
-            // layer (Meteosat SEVIRI IR imagery).
             Text("Contains modified EUMETSAT Meteosat data \(String(Calendar.current.component(.year, from: Date())))")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
@@ -182,8 +165,6 @@ struct MapLayerPickerSheet: View {
         .padding(.top, 4)
     }
 
-    /// Isobars ride the hourly model frames, so they need a model layer —
-    /// the 5-minute radar timeline has no matching pressure fields.
     private var isobarsAvailable: Bool {
         settingsService.activeTileLayer != nil
     }
@@ -276,14 +257,11 @@ struct MapLayerPickerSheet: View {
 
     private func select(_ activate: () -> Void) {
         activate()
-        // Picking a layer is the sheet's terminal action — close it so the map
-        // is immediately visible; the display toggles keep the sheet open.
         dismissSheet()
     }
 }
 
 private extension WeatherTileLayer {
-    /// Tile label in the layer picker (the model lives in the row header).
     var productTitle: LocalizedStringKey {
         switch self {
         case .iconPrecip, .ecmwfPrecip: "Regen"
@@ -293,9 +271,6 @@ private extension WeatherTileLayer {
         }
     }
 
-    /// Preview screenshot in Assets.xcassets/LayerPreviews. The "gfs" names
-    /// are historic — the artwork was captured from the retired GFS layers,
-    /// which looked the same as ECMWF's global products.
     var previewImageName: String {
         switch self {
         case .iconPrecip:   return "layer-icon-precip"
@@ -311,8 +286,6 @@ private extension WeatherTileLayer {
 }
 
 extension View {
-    /// A sheet on iPhone, a trailing column on wider windows. `select` gets a
-    /// radar region, a model layer, or neither (the satellite clouds).
     func layerPickerInspector(
         isPresented: Binding<Bool>,
         settingsService: SettingService,
@@ -325,15 +298,10 @@ extension View {
                 onSelectTileLayer: { select(nil, $0) },
                 onSelectClouds: { select(nil, nil) }
             )
-            // No .presentationBackground override: iOS 26 renders the sheet as
-            // Liquid Glass at the medium detent and swaps to an opaque background
-            // when pulled up to .large.
             .presentationDetents([.medium, .large])
             .presentationBackgroundInteraction(.enabled(upThrough: .medium))
             .presentationDragIndicator(.hidden)
             .inspectorColumnWidth(min: 320, ideal: 360, max: 420)
-            // The compact sheet can go away without resetting the binding (seen
-            // after a basemap switch); a stuck `true` blocks reopening.
             .onDisappear { isPresented.wrappedValue = false }
         }
     }

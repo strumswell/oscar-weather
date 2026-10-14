@@ -2,10 +2,6 @@ import Foundation
 import OSLog
 import Security
 
-/// Generic-password items under one service. Items are readable after the first
-/// unlock so token updates delivered while the device is locked can still be
-/// patched. Items written by earlier builds carried no service attribute; `load`
-/// migrates them on first read.
 struct KeychainStore: Sendable {
     let service: String
     private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Keychain")
@@ -34,8 +30,6 @@ struct KeychainStore: Sendable {
     func load(key: String) -> String? {
         if let value = read(key: key, legacy: false) { return value }
         guard let legacyValue = read(key: key, legacy: true) else { return nil }
-        // The legacy query carries no service attribute, so it would also match the
-        // migrated copy: delete first, then write.
         SecItemDelete(baseQuery(key: key, legacy: true) as CFDictionary)
         save(key: key, value: legacyValue)
         return legacyValue

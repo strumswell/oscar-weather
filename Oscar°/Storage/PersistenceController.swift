@@ -29,10 +29,6 @@ struct PersistenceController {
             Self.logger.fault(
                 "Persistent store load failed: \(error.localizedDescription, privacy: .public)"
             )
-            // Only the app starts over, and only for a store that can never open again
-            // (corruption, downgrade past a model change). A transient failure, such as
-            // an extension reading the protected file before first unlock, must not
-            // rename the user's data away.
             guard !inMemory, Self.isAppProcess, Self.isUnrecoverable(error) else {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }

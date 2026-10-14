@@ -12,26 +12,17 @@ import CoreLocation
 import Foundation
 import SwiftUI
 
-/// Current conditions of one saved location, ready for a list card.
 struct CityConditions {
     let temperature: Double
     let weathercode: Int
     let isDay: Bool
-    /// Radar sees rain at the location right now (may disagree with the forecast).
     let isRadarRaining: Bool
-    /// Sky state for the card's static sim backdrop.
     let snapshot: AtmosphereSnapshot
 
-    /// Derived from the snapshot's condition family, not the raw weathercode:
-    /// the mapper lifts a dry forecast to rain when radar measures precipitation,
-    /// and the label must agree with the sky the card shows.
     var conditionText: String {
         WeatherConditionLabel.text(for: snapshot.condition)
     }
 
-    /// The app's own weather icon asset (01d…50n) for the map chip, radar-aware
-    /// like the widget's icon: measured rain over a dry forecast code shows the
-    /// rain icon.
     var iconAssetName: String {
         if isRadarRaining, ![51...57, 61...67, 71...77, 80...86, 95...99].contains(where: { $0.contains(weathercode) }) {
             return isDay ? "10d" : "10n"
@@ -43,8 +34,6 @@ struct CityConditions {
 @MainActor
 @Observable
 final class CityConditionsStore {
-    /// Shared so re-presenting the locations sheet reuses the last fetch
-    /// instead of flashing placeholders on every open.
     static let shared = CityConditionsStore()
 
     private(set) var conditions: [String: CityConditions] = [:]
@@ -55,9 +44,6 @@ final class CityConditionsStore {
         conditions[Self.key(for: coordinate)]
     }
 
-    /// One request for all coordinates. Throttled: a coordinate set already
-    /// covered by a fetch within 5 minutes is a no-op unless forced — reorders
-    /// keep the same key set and deletions shrink it, so neither refetches.
     func refresh(coordinates: [CLLocationCoordinate2D], force: Bool = false) async {
         let outbound = coordinates.map(LocationService.outboundCoordinate)
         guard !outbound.isEmpty else { return }
@@ -74,17 +60,10 @@ final class CityConditionsStore {
         defer { isLoading = false }
 
         do {
-            // Radar runs alongside the forecast batch: nowcast rain that the
-            // forecast doesn't see yet must reach the cards too. Best-effort —
-            // a missing series just means "no radar" for that place.
             async let radarTask = Self.fetchRadar(coordinates: outbound)
             let entries = try await Self.fetchBatch(coordinates: outbound)
             let radarByKey = await radarTask
-            // Rebuild from the requested set only, so entries for deleted
-            // cities don't accumulate over the session.
             var updated = conditions.filter { fetchKeys.contains($0.key) }
-            // Open-Meteo answers in request order; zip against what was asked
-            // so grid-snapped response coordinates can't break the mapping.
             for (requested, entry) in zip(outbound, entries) {
                 let key = Self.key(for: requested)
                 updated[key] = Self.makeConditions(
@@ -98,14 +77,10 @@ final class CityConditionsStore {
         } catch is CancellationError {
             return
         } catch {
-            // Cards keep showing their previous conditions (or placeholders);
-            // the next sheet presentation retries.
             return
         }
     }
 
-    /// One radar series per coordinate, fetched concurrently. Failures and
-    /// "no coverage" both collapse to a missing entry.
     private static func fetchRadar(
         coordinates: [CLLocationCoordinate2D]
     ) async -> [String: PrecipSeriesResponse] {
@@ -131,9 +106,6 @@ final class CityConditionsStore {
         return "\(rounded.latitude),\(rounded.longitude)"
     }
 
-    /// Builds the card snapshot through the real weather→sky mapper by wrapping
-    /// the batched current conditions in a minimal forecast payload, so cards and
-    /// the full simulation always agree on how a sky looks.
     private static func makeConditions(
         entry: BatchCurrentEntry,
         coordinate: CLLocationCoordinate2D,
@@ -142,17 +114,11 @@ final class CityConditionsStore {
         guard let current = entry.current else { return nil }
 
         let shell = Weather()
-        // The mapper reads the radar rate at "now" and lifts a dry forecast to
-        // a rainy scene when the measurement disagrees — same as the main sim.
         shell.precipSeries = radar
         shell.forecast = .init(
             latitude: entry.latitude,
             longitude: entry.longitude,
             utc_offset_seconds: entry.utc_offset_seconds,
-            // The mapper reads humidity and pressure only from hourly arrays;
-            // a one-element hour carries the batched current values so the card
-            // sky gets the same haze/turbidity inputs as the full simulation
-            // (which otherwise default to 50% humidity and standard pressure).
             hourly: .init(
                 time: [current.time],
                 relativehumidity_2m: current.relativehumidity_2m.map { [$0] },
@@ -181,10 +147,6 @@ final class CityConditionsStore {
         )
     }
 
-    /// Deliberately NOT on the generated client: the batch form of `/v1/forecast`
-    /// returns an object for one location but an array for several, and modeling
-    /// that oneOf onto the spec's existing single-point `/v1/forecast` operation
-    /// would break the generated types every forecast call site uses.
     private static func fetchBatch(
         coordinates: [CLLocationCoordinate2D]
     ) async throws -> [BatchCurrentEntry] {
@@ -213,7 +175,6 @@ final class CityConditionsStore {
         let (data, http) = try await APIClient.fetchWithRetry(request)
         guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
 
-        // One coordinate answers with a single object, several with an array.
         let decoder = JSONDecoder()
         if let list = try? decoder.decode([BatchCurrentEntry].self, from: data) {
             return list
@@ -222,8 +183,6 @@ final class CityConditionsStore {
     }
 }
 
-/// Response shape of the batched request (field names match the requested
-/// legacy parameter names the rest of the app uses).
 private struct BatchCurrentEntry: Decodable {
     struct Current: Decodable {
         let time: Double

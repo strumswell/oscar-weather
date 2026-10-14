@@ -4,7 +4,6 @@ struct MemberCardStickerStore {
     private let defaults: UserDefaults
     private let storageKey = "memberCardStickerPlacements"
 
-    /// Versioned so a future field can be added without wiping saved layouts.
     private struct Envelope: Codable {
         var version = 1
         var placements: [MemberCardStickerPlacement]

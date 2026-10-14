@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// European Air Quality Index bands: 0-20 good up to >100 extremely poor.
 enum EUAirQualityBand: CaseIterable {
     case good, fair, moderate, poor, veryPoor, extremelyPoor
 
@@ -26,7 +25,6 @@ enum EUAirQualityBand: CaseIterable {
         }
     }
 
-    /// nil for the open-ended top band.
     var upperBound: Double? {
         switch self {
         case .good: 20
@@ -64,6 +62,5 @@ enum EUAirQualityBand: CaseIterable {
         String(localized: String.LocalizationValue(statusKey))
     }
 
-    /// Gauge gradient on a 0...100 scale: each band's color at its start.
     static let gradientStops: [(location: Double, color: Color)] = allCases.map { ($0.lowerBound / 100, $0.color) }
 }

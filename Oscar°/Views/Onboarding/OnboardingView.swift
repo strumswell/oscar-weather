@@ -5,15 +5,8 @@
 
 import SwiftUI
 
-/// The multi-step first-launch flow: welcome → feature pages → location →
-/// (manual city) → (notifications) → (crash reports) → finale. Steps share a
-/// background that starts as a picture-book sky and becomes the live weather
-/// simulation once a real location exists; between welcome and finale a
-/// solid canvas covers the lower part so text never sits on the backdrop.
 struct OnboardingView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    // ScreenshotMode is nil outside a staged run, so this is `.welcome` in
-    // every normal launch.
     @State private var step: OnboardingStep = ScreenshotMode.onboardingStep ?? .welcome
     private let locationService = LocationService.shared
 
@@ -22,7 +15,6 @@ struct OnboardingView: View {
             OnboardingBackgroundView(step: step)
 
             if let stageLayout {
-                // Raising or lowering the canvas animates with the step change.
                 OnboardingStage(layout: stageLayout)
                     .transition(stageTransition)
                     .zIndex(2)
@@ -63,7 +55,6 @@ struct OnboardingView: View {
         }
     }
 
-    /// The canvas spans every step between the full-bleed welcome and finale.
     private var stageLayout: OnboardingStage.Layout? {
         switch step {
         case .welcome, .finale: nil
@@ -73,8 +64,6 @@ struct OnboardingView: View {
         }
     }
 
-    /// The canvas rises softly out of the welcome screen and dissolves under
-    /// the finale's frost.
     private var stageTransition: AnyTransition {
         guard !reduceMotion else { return .opacity }
         return .asymmetric(

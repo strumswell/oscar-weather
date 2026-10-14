@@ -5,8 +5,6 @@
 
 import SwiftUI
 
-/// Seven days with the shared temperature-range bars, scaled to the
-/// week's overall min/max like the iPhone daily list.
 struct WatchDailyView: View {
     @Environment(Weather.self) private var weather: Weather
 
@@ -122,7 +120,6 @@ struct WatchDailyView: View {
         return (min, max)
     }
 
-    /// Abbreviated weekday ("Mo.", "Mon") — full names truncate in the column.
     private static func weekdayFormatter(timeZone: TimeZone) -> DateFormatter {
         let formatter = DateFormatter()
         formatter.locale = .autoupdatingCurrent

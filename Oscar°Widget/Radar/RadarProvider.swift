@@ -8,16 +8,11 @@ struct RadarEntry: TimelineEntry {
     let image: UIImage
 }
 
-/// Timeline provider for the radar widget. The map is CPU-composited over the
-/// app-prerendered basemap (see RadarSnapshotRenderer); this type only supplies
-/// the location, the per-widget configuration, and the refresh cadence.
 struct RadarProvider: AppIntentTimelineProvider {
     typealias Entry = RadarEntry
     typealias Intent = RadarWidgetConfigIntent
 
     func placeholder(in context: Context) -> RadarEntry {
-        // placeholder() must never fail; a missing/renamed asset would otherwise crash the
-        // widget process on every gallery/redacted render.
         let image = UIImage(named: "rain") ?? UIImage(systemName: "cloud.rain") ?? UIImage()
         return RadarEntry(date: Date(), frameDate: Date(), image: image)
     }
@@ -38,8 +33,6 @@ struct RadarProvider: AppIntentTimelineProvider {
     private func buildWidgetEntry(
         configuration: RadarWidgetConfigIntent, displaySize: CGSize, family: WidgetFamily
     ) async -> RadarEntry {
-        // Tell the app which basemap styles are in use — it prerenders them on
-        // next foreground (the widget itself may not do GPU work).
         WidgetBasemapStore.registerRequestedStyle(configuration.style.rawValue)
 
         let location = await MainActor.run { LocationService.shared.update(); return LocationService.shared.getCoordinates() }
@@ -63,10 +56,6 @@ struct RadarProvider: AppIntentTimelineProvider {
         )
     }
 
-    /// Small logical render sizes keep the composite (and the entry image) well
-    /// inside the widget memory budget; the entry view scales up with .fill. The
-    /// sizes are the canonical basemap-store sizes — they key the prerendered
-    /// basemap lookup, so they must not vary per device.
     private func snapshotSize(for displaySize: CGSize, family: WidgetFamily) -> CGSize {
         switch family {
         case .systemLarge:

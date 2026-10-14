@@ -1,9 +1,5 @@
 import SwiftUI
 
-/// A user-selectable weather model for the forecast request.
-///
-/// The raw value is the Open-Meteo `models` identifier and must stay in sync with the
-/// `models` enum in `openapi.yml` (which generates `Operations.getForecast.Input.Query.modelsPayload`).
 enum ForecastModelPreference: String, CaseIterable, Identifiable {
   case bestMatch = "best_match"
 
@@ -28,7 +24,6 @@ enum ForecastModelPreference: String, CaseIterable, Identifiable {
 
   var id: String { rawValue }
 
-  /// The value sent as the Open-Meteo `models` query parameter.
   var apiValue: String { rawValue }
 
   enum Group: CaseIterable, Identifiable {
@@ -59,7 +54,6 @@ enum ForecastModelPreference: String, CaseIterable, Identifiable {
     }
   }
 
-  /// Short, user-facing name. Provider/model names are proper nouns and stay untranslated.
   var name: String {
     switch self {
     case .bestMatch: return String(localized: "Automatisch")
@@ -83,7 +77,6 @@ enum ForecastModelPreference: String, CaseIterable, Identifiable {
     }
   }
 
-  /// Operating agency, shown as a subtitle next to the flag.
   var provider: String? {
     switch self {
     case .bestMatch: return nil
@@ -105,7 +98,6 @@ enum ForecastModelPreference: String, CaseIterable, Identifiable {
     }
   }
 
-  /// The individual models combined into this prediction (proper nouns, untranslated).
   var combinedModels: String? {
     switch self {
     case .dwdICON: return "ICON Global · ICON EU · ICON D2"
@@ -123,7 +115,6 @@ enum ForecastModelPreference: String, CaseIterable, Identifiable {
     }
   }
 
-  /// One-line description for models that don't combine several sub-models.
   var summary: LocalizedStringKey? {
     switch self {
     case .bestMatch:
@@ -184,7 +175,6 @@ enum ForecastModelPreference: String, CaseIterable, Identifiable {
     }
   }
 
-  /// Maximum forecast horizon in days.
   private var forecastDays: Double? {
     switch self {
     case .bestMatch: return nil
@@ -206,7 +196,6 @@ enum ForecastModelPreference: String, CaseIterable, Identifiable {
     }
   }
 
-  /// Update cadence in hours.
   private var updateHours: Int? {
     switch self {
     case .bestMatch: return nil
@@ -247,8 +236,6 @@ enum ForecastModelPreference: String, CaseIterable, Identifiable {
     return String(localized: "alle \(hours) Std.")
   }
 
-  /// The home region a model is optimized for. Most models still deliver worldwide data;
-  /// see `regionalOnly` for the few that don't.
   var optimizedRegion: String? {
     switch self {
     case .dwdICON: return String(localized: "Europa")
@@ -269,8 +256,6 @@ enum ForecastModelPreference: String, CaseIterable, Identifiable {
     }
   }
 
-  /// `true` when the model only covers its home region and returns no data elsewhere
-  /// (no global model and no ECMWF fallback).
   var regionalOnly: Bool {
     switch self {
     case .meteoSwiss, .italiaMeteo: return true

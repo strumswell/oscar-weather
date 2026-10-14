@@ -48,7 +48,6 @@ final class HomeProvider: TimelineProvider, Sendable {
                 ]
             )
             async let radarRequest = self.client.getRadarSeries(coordinates: coordinates)
-            // A radar outage degrades to the model value instead of freezing the old entry.
             let weather = try await weatherRequest
             let precipSeries = try? await radarRequest
 
@@ -63,8 +62,6 @@ final class HomeProvider: TimelineProvider, Sendable {
             )
 
             return nowcastEntryDates(refreshMinutes: 30).map { date in
-                // Radar measures what is falling; the model's "current" value is an
-                // interpolated guess (mirrors the lockscreen provider).
                 let precipitation = precipSeries?.rate(at: date) ?? modelPrecipitation
                 return HomeEntry(
                     date: date,
@@ -81,8 +78,6 @@ final class HomeProvider: TimelineProvider, Sendable {
 }
 
 extension WeatherAtmosphericAdapter {
-    /// Build the atmospheric gradient on the main actor (Weather + adapter are
-    /// @MainActor); only the resulting Sendable gradient crosses back.
     nonisolated static func widgetGradient(
         weather: Operations.getForecast.Output.Ok.Body.jsonPayload,
         precipSeries: PrecipSeriesResponse?,

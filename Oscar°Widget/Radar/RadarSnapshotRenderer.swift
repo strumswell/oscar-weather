@@ -24,7 +24,6 @@ import CoreLocation
 import Foundation
 import UIKit
 
-/// Per-widget render options, straight from the configuration intent.
 struct RadarWidgetRenderOptions {
     var style: String = WidgetBasemapStore.defaultStyle
     var smoothing = true
@@ -39,15 +38,10 @@ enum RadarSnapshotRenderer {
         let frameDate: Date?
     }
 
-    /// Same framing as WidgetBasemapRenderer and the previous MapKit widget.
     static let mapSpanMeters = 65_000.0
-    /// Matches the prerendered basemap PNGs.
     static let compositeScale: CGFloat = 2
     private static let radarOverlayAlpha: CGFloat = 0.7
 
-    /// Fallback canvas when no basemap has been prerendered yet for the widget's
-    /// style (app not opened since install / location or style change) — each
-    /// style's land tone.
     private static func fallbackBackground(style: String) -> UIColor {
         switch style {
         case "dark": UIColor(red: 0.11, green: 0.11, blue: 0.13, alpha: 1)
@@ -58,9 +52,6 @@ enum RadarSnapshotRenderer {
 
     // MARK: - Entry point
 
-    /// Composites the widget map for a location. Returns nil only when there is
-    /// neither a cached basemap nor any precip data (e.g. offline on first run) —
-    /// the provider then shows its connectivity fallback.
     static func render(
         center: CLLocationCoordinate2D, size: CGSize,
         options: RadarWidgetRenderOptions = RadarWidgetRenderOptions()
@@ -117,10 +108,6 @@ enum RadarSnapshotRenderer {
         return Rendered(image: image, frameDate: plan.frameDate)
     }
 
-    /// Precip overlay alone (tiles of the frame closest to now; regional radar in
-    /// coverage, ECMWF precip elsewhere), projected into a `size`-pt viewport spanning
-    /// `spanMeters` around `center`. For widgets that draw their own basemap
-    /// (GlobalRadarWidget's MKMapSnapshotter) instead of the app-group prerender.
     static func overlayImage(
         center: CLLocationCoordinate2D, spanMeters: Double, size: CGSize
     ) async -> Rendered? {
@@ -153,17 +140,12 @@ enum RadarSnapshotRenderer {
     ) -> (image: UIImage, bounds: OscarRadarBounds)? {
         guard let (record, image) = WidgetBasemapStore.load(size: size, style: style) else { return nil }
         let bounds = OscarRadarBounds(north: record.north, south: record.south, west: record.west, east: record.east)
-        // A basemap rendered for a different location is still geographically exact
-        // (overlays project through its stored bounds) — but once the marker would
-        // leave the frame, treat it as missing and let the app re-render.
         guard bounds.contains(center) else { return nil }
         return (image, bounds)
     }
 
     // MARK: - Overlay plans
 
-    /// Radar coverage: raster tiles of the frame closest to now, plus the motion
-    /// arrows of that frame (best-effort).
     private static func radarPlan(
         region: RadarRegion, around center: CLLocationCoordinate2D, includeArrows: Bool = true
     ) async -> RadarOverlayPlan {
@@ -198,8 +180,6 @@ enum RadarSnapshotRenderer {
         return plan
     }
 
-    /// Global fallback outside all radar coverages: ECMWF precipitation forecast,
-    /// frame closest to now. No motion fields — no arrows.
     private static func ecmwfPlan() async -> RadarOverlayPlan {
         guard let response = try? await APIClient.shared.modelFrames(
                 model: "ecmwf", profile: .snapshot),
@@ -210,7 +190,7 @@ enum RadarSnapshotRenderer {
             tileSource: .ecmwfModel(key: frame.key),
             maximumTileZoom: 7,
             frameDate: frame.date,
-            colormapId: RadarPlasma.colormapId // ECMWF precip shares plasma
+            colormapId: RadarPlasma.colormapId
         )
     }
 
@@ -226,15 +206,11 @@ enum RadarSnapshotRenderer {
     struct OverlayTile {
         let rect: CGRect
         let image: UIImage
-        /// Web-Mercator tile address — the smoothing resample stitches tiles into
-        /// one index mosaic and needs their grid positions.
         let zoom: Int
         let tx: Int
         let ty: Int
     }
 
-    /// Fetches the raster tiles covering the frame at a zoom where tile pixels
-    /// roughly match composite pixels (capped per source, like the app's layers).
     private static func fetchOverlayTiles(plan: RadarOverlayPlan, frame: MercatorFrame) async -> [OverlayTile] {
         guard let source = plan.tileSource else { return [] }
         let worldWidth = frame.x1 - frame.x0
@@ -311,7 +287,6 @@ enum RadarSnapshotRenderer {
         }
     }
 
-    /// Blue location dot, matching the previous MapKit widget's marker.
     private static func drawLocationMarker(at point: CGPoint) {
         let rect = CGRect(x: point.x - 6, y: point.y - 6, width: 12, height: 12)
         UIColor.systemBlue.setFill()
@@ -327,8 +302,6 @@ enum RadarSnapshotRenderer {
 // MARK: - Overlay plan
 
 private struct RadarOverlayPlan {
-    /// Which oscar-server endpoint family the plan's tiles come from — carries
-    /// enough to address any tile of the chosen frame (region/key or model/key).
     enum TileSource {
         case radar(region: RadarRegion, key: String)
         case ecmwfModel(key: String)
@@ -336,8 +309,6 @@ private struct RadarOverlayPlan {
     var tileSource: TileSource?
     var maximumTileZoom: Float = 10
     var frameDate: Date?
-    /// Server palette (`/colormaps/{id}`) the tile colors index into — needed to
-    /// reverse tiles to data values for the smoothing resample.
     var colormapId: String?
     var arrows: [RadarArrow] = []
 }

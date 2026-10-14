@@ -61,6 +61,10 @@ enum OnboardingSampleData {
         EnvironmentMetric.forAQI(id: "aqi", label: "AQI", value: 18),
         EnvironmentMetric.forUV(value: 6),
         EnvironmentMetric.forPollen(type: .grass, label: String(localized: "Gräser"), value: 22),
+        EnvironmentMetric.forAQI(id: "pm25", label: "PM", subscript_: "2.5", value: 14),
+        EnvironmentMetric.forAQI(id: "pm10", label: "PM", subscript_: "10", value: 11),
+        EnvironmentMetric.forPollen(type: .birch, label: String(localized: "Birke"), value: 4),
+        EnvironmentMetric.forAQI(id: "no2", label: "NO", subscript_: "2", value: 9),
     ].compactMap { $0 }
 
     /// A warming-stripes series with the familiar cool-then-hot arc, pinned so

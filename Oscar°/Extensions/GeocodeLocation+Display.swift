@@ -5,7 +5,6 @@ extension Components.Schemas.Location {
         name ?? String(localized: "Unbekannter Ort")
     }
 
-    /// Region line without the place name itself.
     var detailLine: String? {
         let detail = [admin3, admin1, country]
             .compactMap { $0 }

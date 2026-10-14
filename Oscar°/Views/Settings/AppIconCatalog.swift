@@ -23,7 +23,6 @@ struct AppIconSection: Identifiable {
 }
 
 enum AppIconCatalog {
-    /// Everything else unlocks by supporting Oscar (see `SupporterStore`).
     static let freeIDs: Set<String> = ["original", "chill-day", "tv-classic", "mecha-oscar", "flat-oscar-classic", "flat-oscar-black"]
 
     static let sections: [AppIconSection] = [

@@ -1,8 +1,5 @@
 import Foundation
 
-/// When Oscar the cat asks for support. Only after real, repeated use, never
-/// supporters, and every "not now" (or an ignored ask) doubles the wait.
-/// The back-off is mirrored to iCloud, like the usage stats it's checked against.
 enum SupportNudge {
     enum Pose: CaseIterable {
         case rappel, peek, diver
@@ -21,7 +18,6 @@ enum SupportNudge {
     private static let nextAskKey = "supportNudgeNextAsk"
     private static var cloud: NSUbiquitousKeyValueStore { .default }
 
-    /// `-supportNudge YES` or the debug panel's switch skips every rule, for trying it out.
     static let forcedKey = "supportNudge"
     static var isForced: Bool { UserDefaults.standard.bool(forKey: forcedKey) }
 
@@ -54,7 +50,6 @@ enum SupportNudge {
         return stats.activeDays >= minActiveDays && stats.opens >= minOpens
     }
 
-    /// 14, 28, 56, 112, then 180 days.
     static func nextAsk(afterDismissals count: Int, now: Date) -> Date {
         let days = min(firstBackoffDays * pow(2, Double(max(count - 1, 0))), maxBackoffDays)
         return now.addingTimeInterval(days * 86_400)

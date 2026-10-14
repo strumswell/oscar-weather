@@ -5,9 +5,6 @@
 
 import SwiftUI
 
-/// Glanceable current conditions over the simulation: location, temperature,
-/// condition, and today's range. Radar overrides the condition line the same
-/// way the widgets do — measured rain beats the model's interpolation.
 struct WatchNowView: View {
     @Environment(Weather.self) private var weather: Weather
     @Environment(Location.self) private var location: Location
@@ -25,8 +22,6 @@ struct WatchNowView: View {
     private var conditions: some View {
         let current = weather.forecast.current
         let daily = weather.forecast.daily
-        // Same rain signal as HourlyForecastBuilder's "Jetzt" card: radar wins
-        // where it has fresh coverage, the model's current value fills the gap.
         let radarRate = weather.precipSeries?.currentRate
         let forecastPrecipitation = current?.precipitation ?? 0
         let isRaining = (radarRate ?? forecastPrecipitation) > 0
@@ -90,8 +85,6 @@ struct WatchNowView: View {
         }
     }
 
-    /// Weather-code families as short labels; measured or modeled rain lifts a
-    /// dry-sky code to a rain description (mirrors the widgets' radar-aware icon).
     private func conditionDescription(weathercode: Double?, isRaining: Bool, rate: Double) -> String {
         var code = Int(weathercode ?? 0)
         if isRaining, code < 51 {
@@ -102,7 +95,6 @@ struct WatchNowView: View {
     }
 }
 
-/// Icon and text tight together, sized for one row of chips on a 40 mm watch.
 private struct WatchCompactLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 2) {

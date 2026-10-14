@@ -5,12 +5,9 @@
 
 import SwiftUI
 
-/// The next 12 hours as card rows, built by the shared radar-aware forecast
-/// builder (leading "Jetzt" card, sunrise/sunset rows included).
 struct WatchHourlyView: View {
     @Environment(Weather.self) private var weather: Weather
 
-    // 12 forecast hours plus whatever sun events fall in between.
     private static let maxRows = 14
 
     var body: some View {
@@ -100,8 +97,6 @@ struct WatchHourlyView: View {
         .padding(.horizontal, 8)
     }
 
-    /// Compact hour label: "14" instead of "14 Uhr" — the row is too narrow
-    /// for the long form. 12-hour clocks keep their "2 PM".
     private func hourLabel(for item: HourlyForecastItem, formatter: DateFormatter) -> String {
         if item.isNow {
             return String(localized: "Jetzt")

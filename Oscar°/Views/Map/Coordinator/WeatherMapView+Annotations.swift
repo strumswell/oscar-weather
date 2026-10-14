@@ -13,9 +13,6 @@ extension WeatherMapView.Coordinator {
 
     func mapView(_ mapView: MLNMapView, viewFor annotation: MLNAnnotation) -> MLNAnnotationView? {
         guard annotation is MLNUserLocation else { return nil }
-        // Empty view suppresses the stock puck: view-based annotations lag
-        // one display frame behind the basemap during gestures. The visible
-        // dot renders in-style instead (UserLocationDot, syncUserLocationDot).
         return MLNUserLocationAnnotationView(reuseIdentifier: "user-location-hidden")
     }
 
@@ -30,8 +27,6 @@ extension WeatherMapView.Coordinator {
         guard !isTornDown else { return }
         UserLocationDot.sync(style: style, coordinate: mapView?.userLocation?.coordinate)
 
-        // Each beat animates paint transitions, which keeps the map render
-        // loop busy, so Reduce Motion gets the static halo only.
         let wantsPulse = !UIAccessibility.isReduceMotionEnabled
         if wantsPulse, userDotPulseTimer == nil {
             userDotPulseTimer = Timer.scheduledTimer(withTimeInterval: 2.5, repeats: true) { [weak self] _ in
@@ -48,12 +43,6 @@ extension WeatherMapView.Coordinator {
 
     // MARK: Selected-city marker (style layer)
 
-    /// iOS-style marker replica for the selected city (red balloon, white
-    /// location glyph, tip anchored on the spot) as a style symbol layer.
-    /// The former MLNPointAnnotation rendered in MapLibre's internal
-    /// annotation layer, which sat BELOW later-added overlay layers — the
-    /// marker vanished under radar and warning fills. As a style layer it
-    /// re-hoists itself topmost like the chips and the user dot.
     private static let cityMarkerSourceID = "oscar-selected-city"
     private static let cityMarkerLayerID = "oscar-selected-city-layer"
     private static let cityMarkerImageName = "oscar-selected-city-marker"
@@ -85,8 +74,6 @@ extension WeatherMapView.Coordinator {
                 selectedCityMarkerIdentity = identity
             }
         } else {
-            // The marker canvas is twice the balloon-tip's y, so the default
-            // center icon anchor pins the tip on the coordinate.
             style.setImage(CityMarkerImage.make(), forName: Self.cityMarkerImageName)
             let source = MLNShapeSource(identifier: Self.cityMarkerSourceID,
                                         shape: point, options: nil)

@@ -51,7 +51,6 @@ struct ClassicWeatherCard: View {
         .padding(.top, Self.heroOverhang * scale)
     }
 
-    /// How far the art reaches above the card's top edge (320pt units).
     static let heroOverhang: CGFloat = 36
 
     // MARK: - Header
@@ -128,7 +127,6 @@ struct ClassicWeatherCard: View {
         let isDay: Double
     }
 
-    /// The selected day's hours; today starts at the current hour.
     private var hours: [Hour] {
         guard let hourly = forecast?.payload.hourly,
               let dayStart = forecast?.payload.daily?.time[safe: selectedDay]
@@ -196,7 +194,6 @@ struct ClassicWeatherCard: View {
         .accessibilityAddTraits(index == selectedDay ? .isSelected : [])
     }
 
-    /// The hero composition shrunk to row size.
     private func miniArt(code: Double, isDay: Bool) -> some View {
         ClassicHeroArt(
             weatherCode: code,
@@ -246,7 +243,6 @@ struct ClassicWeatherCard: View {
             if let sky = forecast?.sky {
                 AtmosphereSampler.skyGradient(snapshot: sky)
             }
-            // The sky reads too bright for white type; iOS 6's card was deep navy.
             LinearGradient(colors: [.black.opacity(0.25), .black.opacity(0.55)], startPoint: .top, endPoint: .bottom)
         }
     }
@@ -266,7 +262,6 @@ struct ClassicWeatherCard: View {
         }
     }
 
-    /// "21°" with the degree sign small and raised, like the original.
     private func degrees(_ value: Double?, size: CGFloat, weight: String) -> Text {
         guard let value else { return Text(verbatim: "–").font(.custom(weight, fixedSize: size)) }
         return Text(verbatim: "\(Int(value.rounded()))").font(.custom(weight, fixedSize: size))

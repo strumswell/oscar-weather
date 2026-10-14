@@ -5,8 +5,6 @@
 
 import SwiftUI
 
-/// Bottom action area shared by all onboarding steps: a prominent glass CTA
-/// and an optional quiet secondary action beneath it.
 struct OnboardingButtonStack: View {
     let primaryTitle: LocalizedStringKey
     var primaryDisabled = false
@@ -26,7 +24,6 @@ struct OnboardingButtonStack: View {
             .disabled(primaryDisabled)
 
             if let secondaryTitle, let secondaryAction {
-                // Text only: a second glass capsule competed with the primary.
                 Button(action: secondaryAction) {
                     Text(secondaryTitle)
                         .font(.subheadline.weight(.medium))

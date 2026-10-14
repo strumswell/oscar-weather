@@ -16,13 +16,6 @@ private let mapLibreLogger = Logger(
 
 // MARK: - Custom style layer (radar rendered inside MapLibre's Metal render loop)
 
-/// Draws the radar quad with the map's own projection matrix each frame. Frame data
-/// stays as `r8Unorm` value-grid textures (grid indices, row 0 = north); the fragment
-/// shader warps both frames along the pair's motion field, bilinearly samples the
-/// DATA, and colormaps after interpolation via a 256×1 palette LUT.
-///
-/// `@unchecked Sendable`: mutable state shared with MapLibre's render thread is guarded
-/// by `stateLock`; the texture caches are main-actor-only.
 final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     private static let shaderSource = """
     #include <metal_stdlib>
@@ -101,14 +94,11 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     }
     """
 
-    /// How the fragment shader samples data and palette (raw value = shader param).
     enum SamplingMode: Float {
-        case hard = 0             // linear data, nearest palette — crisp isobands
-        case soft = 1             // bicubic data, linear palette — RainViewer look
+        case hard = 0
+        case soft = 1
     }
 
-    // Written by the coordinator (main thread), read by `draw` on MapLibre's render
-    // thread — every access goes through `stateLock`.
     private let stateLock = NSLock()
     nonisolated(unsafe) private var overlayBounds: OscarRadarBounds?
     nonisolated(unsafe) private var opacity: Float = 0.7
@@ -122,17 +112,10 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     nonisolated(unsafe) private var paletteTexture: MTLTexture?
     nonisolated(unsafe) private var zeroFlowTexture: MTLTexture?
 
-    // Render state (built in didMove(to:) from the map's own Metal backend)
     nonisolated(unsafe) private var device: MTLDevice?
     nonisolated(unsafe) private var pipelineState: MTLRenderPipelineState?
     nonisolated(unsafe) private var depthStencilState: MTLDepthStencilState?
 
-    // r8 texture cache: whole timeline on roomy devices, scrub window on tight ones.
-    // Rebuild on miss is a ~16–29 MB memcpy from the frame's in-RAM grid indices.
-    // Main-thread only (the render thread never touches the cache, just the two refs).
-    // The byte budget is GLOBAL: radar + model layer can coexist, and independent
-    // per-instance budgets would double the worst case. Enforcement evicts LRU
-    // entries from whichever live instance holds the most bytes.
     private var textures: [String: MTLTexture] = [:]
     private var textureLRU: [String] = []
     private var textureBytes = 0
@@ -141,16 +124,11 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     @MainActor private static var totalTextureBytes: Int {
         instances.allObjects.reduce(0) { $0 + $1.textureBytes }
     }
-    // Layers currently in a style (didMove/willMove); weak so removal can't leak.
     @MainActor private static let instances = NSHashTable<RadarCustomStyleLayer>.weakObjects()
 
-    // Flow-field textures for the active motion payload (a few KB each; keep all).
     private var motionData: RadarMotionData?
     private var flowTextures: [Int: MTLTexture] = [:]
 
-    // Playback (main thread): the layer owns the cross-fade/morph phase and frame
-    // advancement, exactly like the old Metal overlay — the state's internal 0.5 s
-    // Timer is cancelled while this runs (it would double-advance).
     nonisolated(unsafe) private var playbackLink: CADisplayLink?
     private var playbackAdvance: (() -> Void)?
     private var playbackInterval: TimeInterval = 0.5
@@ -174,7 +152,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         if opacityChanged { setNeedsDisplay() }
     }
 
-    /// Data/palette sampling: `.soft` = RainViewer look, `.hard` = crisp isobands.
     @MainActor func setSampling(_ mode: SamplingMode) {
         let changed = stateLock.withLock { () -> Bool in
             guard samplingMode != mode.rawValue else { return false }
@@ -184,8 +161,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         if changed { setNeedsDisplay() }
     }
 
-    /// Handover sweep clip: draw only on one screen side of `edge` (NDC x, -1…1).
-    /// nil = no clip.
     @MainActor func setWipe(edge: Float?, keepsLeft: Bool) {
         stateLock.withLock {
             wipe = edge.map { SIMD4($0, keepsLeft ? 1 : -1, 0.03, 0) } ?? .zero
@@ -196,8 +171,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     // MARK: Lifecycle
 
     override func didMove(to mapView: MLNMapView) {
-        // Style mutations happen on the main thread; `backendResource()` is
-        // main-actor-isolated in the framework's annotations.
         MainActor.assumeIsolated {
             let resource = mapView.backendResource()
             guard let device = resource.device else {
@@ -206,10 +179,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
             }
 
             let pipeline: MTLRenderPipelineState
-            // Read EVERY format from the map's actual MTKView. A mismatch (device MSAA
-            // sample count, different depth format) does NOT fail pipeline creation —
-            // it silently rejects every draw call at encode time: blank layer on
-            // device while the simulator happens to match.
             guard let mtkView = resource.mtkView else {
                 mapLibreLogger.error("custom layer: backendResource has no MTKView")
                 return
@@ -244,8 +213,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
             depthDescriptor.isDepthWriteEnabled = false
             let depthStencil = device.makeDepthStencilState(descriptor: depthDescriptor)
 
-            // 1×1 zero flow bound whenever a pair has no motion field — the warp
-            // degrades to the plain cross-fade with no shader variant.
             let zeroDescriptor = MTLTextureDescriptor.texture2DDescriptor(
                 pixelFormat: .rg16Float, width: 1, height: 1, mipmapped: false)
             zeroDescriptor.usage = .shaderRead
@@ -269,8 +236,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     override func willMove(from mapView: MLNMapView) {
         MainActor.assumeIsolated {
             stopPlayback()
-            // Purge here too (not just in the coordinator) so a removed layer can
-            // never keep counting against the shared texture budget.
             purgeTextures()
             Self.instances.remove(self)
         }
@@ -293,8 +258,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
             pixelFormat: .rgba8Unorm, width: 256, height: 1, mipmapped: false)
         descriptor.usage = .shaderRead
         guard let texture = device.makeTexture(descriptor: descriptor) else { return }
-        // Premultiply so LINEAR palette sampling (soft mode) interpolates correctly
-        // through transparent entries; nearest sampling is unaffected.
         var bytes = [UInt8](repeating: 0, count: 256 * 4)
         for i in 0..<256 {
             let p = palette[i], o = i * 4
@@ -309,7 +272,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         stateLock.withLock { paletteTexture = texture }
     }
 
-    /// Swap in a region's motion payload; flow textures rebuild lazily per field.
     @MainActor
     func setMotion(_ data: RadarMotionData?) {
         guard motionData?.id != data?.id else { return }
@@ -321,7 +283,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         }
     }
 
-    /// The frame's `r8Unorm` texture (grid indices, natural row order), cached.
     @MainActor
     func texture(for frame: OscarRadarFrame) -> MTLTexture? {
         texture(key: frame.key, payload: frame.gridPayload)
@@ -354,8 +315,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         return texture
     }
 
-    /// Evict LRU textures from whichever live layer holds the most bytes until the
-    /// GLOBAL budget is met; every instance keeps at least its most recent texture.
     @MainActor
     private static func enforceSharedTextureBudget() {
         while totalTextureBytes > sharedTextureBudget {
@@ -373,8 +332,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         }
     }
 
-    /// rg16Float flow texture for a motion field, in UV DISPLACEMENT PER SERVER STEP
-    /// (the shader multiplies by the pair's gap/step). Built once per field.
     @MainActor
     private func flowTexture(forField index: Int) -> MTLTexture? {
         if let cached = flowTextures[index] { return cached }
@@ -403,9 +360,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         return texture
     }
 
-    /// Show a frame pair, morphing along `flowFieldIndex` (an index into the motion
-    /// payload's fields) scaled by `flowScale` = actual-gap / step. nil / 0 (loop
-    /// seam, gaps while loading, motion not fetched) fall back to the plain cross-fade.
     @MainActor
     func display(frameA: MTLTexture?, frameB: MTLTexture?,
                  flowFieldIndex: Int? = nil, flowScale: Float = 0) {
@@ -440,9 +394,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         }
     }
 
-    /// App-level memory-warning hook: every live layer drops its cached textures
-    /// except the pair currently on screen (the visible frame must survive or the
-    /// map blanks; everything else is a ~16–29 MB memcpy away on demand).
     @MainActor
     static func purgeCachedTextures() {
         for layer in instances.allObjects {
@@ -466,14 +417,9 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         textures = kept
         textureLRU = keptLRU
         textureBytes = keptBytes
-        // Flow textures are a few KB each and rebuild lazily; the bound current
-        // flowTexture ref survives in the render state.
         flowTextures.removeAll()
     }
 
-    /// Drop the palette texture. Required on a variable switch: `hasPalette` gates the
-    /// coordinator's re-apply loop, so a stale palette would otherwise stick forever
-    /// (precip's plasma rendering temperature/wind grids).
     @MainActor
     func clearPalette() {
         stateLock.withLock { paletteTexture = nil }
@@ -513,8 +459,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         guard playbackLink != nil else { return }
         let t = (link.timestamp - playbackStart) / playbackInterval
         if t >= 1 {
-            // Hold fully on frame B until the advance lands (display() resets phase);
-            // if the next frame is still downloading this just dwells — no snap-back.
             stateLock.withLock { phase = 1 }
             if !awaitingAdvance {
                 awaitingAdvance = true
@@ -528,15 +472,9 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
 
     // MARK: Draw (called by MapLibre every rendered frame)
 
-    // One-shot diagnostic: which guard blocks the first draw of this layer instance.
     private var didLogFirstDraw = false
 
     override func draw(in mapView: MLNMapView, with context: MLNStyleLayerDrawingContext) {
-        // Snapshot the drawable state — `draw` runs on MapLibre's render thread.
-        // `self.` is load-bearing: the guard below re-declares these names as
-        // locals typed from `snapshot`, and unqualified lookup on the release
-        // Swift compiler binds the closure to those locals → "circular reference"
-        // (the beta compiler resolves to the properties and builds fine).
         let snapshot = stateLock.withLock {
             (pipeline: self.pipelineState, depthStencil: self.depthStencilState,
              texA: self.textureA, texB: self.textureB, palette: self.paletteTexture,
@@ -550,7 +488,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
             return true
         }
         if shouldLogFirstDraw {
-            // One-shot per display(): only worth a log line when a guard would block.
             if snapshot.pipeline == nil || snapshot.texA == nil || snapshot.palette == nil
                 || snapshot.bounds == nil {
                 mapLibreLogger.info(
@@ -567,9 +504,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
               snapshot.opacity > 0 else { return }
         let textureB = snapshot.texB
 
-        // Corners → Web-Mercator [0,1] → tile coordinates (× worldSize) → clip space.
-        // The matrix multiply happens on the CPU in DOUBLE precision: tile coordinates
-        // reach ~2^zoom·512 and float32 vertices would jitter at deep zoom.
         let worldSize = 512.0 * pow(2.0, context.zoomLevel)
         func mercator(_ latitude: Double, _ longitude: Double) -> (x: Double, y: Double) {
             (WebMercator.unitX(longitude: longitude) * worldSize,
@@ -577,7 +511,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         }
         let m = context.projectionMatrix
         func clip(_ p: (x: Double, y: Double)) -> SIMD4<Float> {
-            // Column-major MLNMatrix4, position (x, y, 1, 1) as in the official example.
             let x = m.m00 * p.x + m.m10 * p.y + m.m20 + m.m30
             let y = m.m01 * p.x + m.m11 * p.y + m.m21 + m.m31
             let z = m.m02 * p.x + m.m12 * p.y + m.m22 + m.m32
@@ -585,7 +518,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
             return SIMD4(Float(x), Float(y), Float(z), Float(w))
         }
 
-        // Triangle-strip order NW, NE, SW, SE; texture row 0 = north.
         let clipPositions: [SIMD4<Float>] = [
             clip(mercator(bounds.north, bounds.west)),
             clip(mercator(bounds.north, bounds.east)),
@@ -611,7 +543,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     }
 }
 
-/// Breaks the CADisplayLink retain cycle (the link retains its target).
 private final class RadarPlaybackLinkProxy: NSObject {
     weak var target: RadarCustomStyleLayer?
     @MainActor @objc func tick(_ link: CADisplayLink) { target?.playbackTick(link) }

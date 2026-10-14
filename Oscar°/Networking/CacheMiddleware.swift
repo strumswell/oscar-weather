@@ -5,10 +5,6 @@ import OpenAPIRuntime
 import OSLog
 
 actor CacheStore {
-  /// All API clients share one store: every instance points at the same on-disk
-  /// `caches/APICache` directory, so separate stores each enforced their own
-  /// eviction over shared files — one client could delete entries another still
-  /// believed it held, and each reloaded the full directory at launch.
   static let shared = CacheStore()
 
   private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Cache")
@@ -48,8 +44,6 @@ actor CacheStore {
       ?? cachesDirectory.appendingPathComponent("APICache", isDirectory: true)
     self.persistentEntryLifetime = persistentEntryLifetime
     self.maxEntryCount = maxEntryCount
-    // Disk entries are loaded lazily by key. This keeps launch cheap while
-    // preserving week-old last-known-good responses for offline fallback.
     self.cache = [:]
   }
 
@@ -67,7 +61,6 @@ actor CacheStore {
     saveToPersistentStorage(key: key, value: value)
     schedulePersistentMaintenanceIfNeeded()
     
-    // Limit cache size to prevent unbounded growth
     if cache.count > maxEntryCount {
       cleanOldEntries()
     }
@@ -236,7 +229,6 @@ actor CacheStore {
 }
 
 extension String {
-  /// Stable on-disk file stem for a cache key (also used by the ensemble and climate caches).
   var sha256Hex: String {
     SHA256.hash(data: Data(utf8)).map { String(format: "%02x", $0) }.joined()
   }
@@ -311,8 +303,6 @@ nonisolated final class CachingMiddleware: ClientMiddleware {
 
     let cached = await cacheStore.get(key)
 
-    // Fresh entries avoid the request entirely. Older persisted entries stay
-    // available below as last-known-good data if the network/server fails.
     if let (timestamp, cachedResponse, cachedData) = cached,
       Date.now.timeIntervalSince(timestamp) < cacheTime
     {
@@ -323,17 +313,13 @@ nonisolated final class CachingMiddleware: ClientMiddleware {
     do {
       let (response, responseBody) = try await next(request, body, baseURL)
 
-      // Cache only successful responses (2xx status codes)
       if (200...299).contains(response.status.code), let responseBody = responseBody {
         do {
-          let data = try await Data(collecting: responseBody, upTo: 10 * 1024 * 1024)  // 10 MB limit
+          let data = try await Data(collecting: responseBody, upTo: 10 * 1024 * 1024)
           await cacheStore.set(key, value: (Date(), response, data))
           Self.logger.debug("Create cache for \(baseURL, privacy: .public)")
           return (response, HTTPBody(data))
         } catch {
-          // `responseBody` is a single-pass stream that the failed collect may have already
-          // partially consumed, so it can't be safely returned. Surface the error rather than
-          // handing a truncated body to the decoder.
           throw error
         }
       }

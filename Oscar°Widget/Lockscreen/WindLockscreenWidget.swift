@@ -12,10 +12,8 @@ import WidgetKit
 
 struct WindLockScreenEntry: TimelineEntry {
     let date: Date
-    /// Wind speed in the user's unit (already converted to Beaufort when selected).
     let speed: Double?
     let unitLabel: String
-    /// Meteorological direction in degrees: where the wind comes FROM.
     let directionDegrees: Double?
     let compass: String
 }
@@ -33,7 +31,6 @@ struct WindProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<WindLockScreenEntry>) -> ()) {
         runWidgetTimeline(refreshMinutes: 30, completion: completion) { coordinates in
-            // windspeed_10m only so the response carries the unit label for the display.
             let weather = try await client.getForecast(
                 coordinates: coordinates,
                 forecastDays: ._1,
@@ -42,7 +39,6 @@ struct WindProvider: TimelineProvider {
 
             let unit = WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit)
             let rawSpeed = weather.current?.windspeed
-            // Beaufort is displayed locally: the API delivers km/h in that case (see WindSpeedUnit.apiRawValue).
             let speed = unit.usesBeaufortDisplay ? BeaufortScale.value(forKilometersPerHour: rawSpeed) : rawSpeed
             let unitLabel = unit.usesBeaufortDisplay
                 ? unit.displayUnit
@@ -59,8 +55,6 @@ struct WindProvider: TimelineProvider {
         }
     }
 
-    /// Compass shorthand for a meteorological direction (German letters in the
-    /// source language, e.g. 45° → "NO").
     static func compassDirection(_ degrees: Double) -> String {
         let directions = [
             String(localized: "N", comment: "Kompass Nord"),
@@ -90,8 +84,6 @@ struct WindLockScreenView: View {
                 VStack(spacing: 0) {
                     Image(systemName: "location.north.fill")
                         .font(.system(size: 11))
-                        // Degrees say where the wind comes FROM; the arrow should point
-                        // where it blows TO.
                         .rotationEffect(.degrees((entry.directionDegrees ?? 0) + 180))
                         .opacity(entry.directionDegrees == nil ? 0 : 1)
                         .widgetAccentable()

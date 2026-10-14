@@ -1,15 +1,4 @@
 #if DEBUG
-//
-//  ScreenshotFixtures.swift
-//  Oscar°
-//
-//  Wire-format payloads served by ScreenshotFixtureServer: a heavy-rain "now"
-//  that clears into a warm week, with matching air quality, a severe-rain
-//  alert, a dramatic radar series, a warming climate archive, and a widening
-//  ensemble. Everything anchors to `storyNow` (tomorrow, 14:00 local) so
-//  "now"-relative views line up in daylight; the values themselves never
-//  change between runs.
-//
 
 import CoreLocation
 import Foundation
@@ -21,17 +10,6 @@ enum ScreenshotFixtures {
     static let latitude = 51.3397
     static let longitude = 12.3731
 
-    /// Every fixture timestamp hangs off this instant instead of the launch
-    /// clock: tomorrow at 14:00 local. Two reasons. The set renders in daylight
-    /// whatever time of day the pipeline runs — the sky, the hourly icons and
-    /// every clock label agree on early afternoon. And because the served
-    /// arrays never straddle the real "now", `AtmosphereWeatherMapper` falls
-    /// through to `current.time` for the sky instead of the device clock (it
-    /// prefers the device clock only while the forecast actually covers it).
-    /// Tomorrow, not today, so the story is always ahead of the real clock;
-    /// 14:00 rather than noon so no clock label in the set has to render a
-    /// 12-hour "12:30 PM", which is wide enough to collide with its neighbour
-    /// on the rain chart's axis.
     static var storyNow: Date {
         let calendar = Calendar.current
         let tomorrow = calendar.date(byAdding: .day, value: 1, to: .now) ?? .now
@@ -39,11 +17,6 @@ enum ScreenshotFixtures {
         return calendar.date(bySettingHour: hour, minute: 0, second: 0, of: tomorrow) ?? tomorrow
     }
 
-    /// Social Studio (bin/social-studio.sh) stages single captures by hand and
-    /// overrides parts of the story through launch arguments, like the scene
-    /// itself: `-screenshotStory rain|sunny|showers`, `-screenshotHour 0…23`,
-    /// `-screenshotTemperature <°C now>`, `-screenshotWeathercode <WMO now>`,
-    /// `-screenshotPlace <name>`. The App Store pipeline passes none of them.
     private static func override(_ key: String) -> String? {
         UserDefaults.standard.string(forKey: key)
     }
@@ -54,34 +27,22 @@ enum ScreenshotFixtures {
 
     static var storyDayStart: Date { Calendar.current.startOfDay(for: storyNow) }
 
-    /// Two scenes tell a different story than the rain set: a sunny summer day
-    /// with no precipitation and no alert.
     private static var sunnyStory: Bool {
         if let story = override("screenshotStory") { return story == "sunny" }
         return ScreenshotMode.scene == .nowForecast || ScreenshotMode.scene == .nowClear
     }
 
-    /// A third story for the hourly detail deck: a mild, part-cloudy day with a
-    /// shower block in the late afternoon. The downpour flattens every lens row
-    /// to "rain" and the summer day flattens them to "nothing happens" — the
-    /// deck only reads as a deck with something in between.
     private static var showersStory: Bool {
         if let story = override("screenshotStory") { return story == "showers" }
         return ScreenshotMode.scene == .hourlyDetail
     }
 
-    /// Picks a value per story. Rain is the default set; every arm is a plain
-    /// value, so eager evaluation costs nothing.
     private static func byStory<T>(rain: T, sunny: T, showers: T) -> T {
         if sunnyStory { return sunny }
         if showersStory { return showers }
         return rain
     }
 
-    /// Fixture copy ships per-language here instead of the localization
-    /// catalog — it is marketing staging, not product UI. The alert banner and
-    /// detail sheet read the `_de` fields regardless of locale, so the switch
-    /// happens at fixture-build time.
     private static func localized(de: String, en: String, tr: String) -> String {
         switch Locale.current.language.languageCode?.identifier {
         case "de": de
@@ -98,14 +59,9 @@ enum ScreenshotFixtures {
         let dayStart = storyDayStart
         let hourIndex = calendar.component(.hour, from: now)
 
-        // As many hourly days as daily ones: the hourly deck's day rail spans
-        // every hour served, and two days leave it looking half empty.
         let hourCount = 12 * 24
         let times = (0..<hourCount).map { dayStart.timeIntervalSince1970 + Double($0) * 3600 }
 
-        // Story, in hours relative to launch: heavy rain now, easing over the
-        // afternoon, showers by evening, clearing into a warm sunny stretch.
-        // The forecast scene (sunnyStory) swaps this for a calm summer day.
         func precipitation(_ dt: Int) -> Double {
             if sunnyStory { return 0 }
             if showersStory {
@@ -133,8 +89,6 @@ enum ScreenshotFixtures {
         }
         func weathercode(_ dt: Int) -> Double {
             if sunnyStory {
-                // Mostly sunny with a few fair-weather clouds drifting through
-                // the hourly strip: sun stays the dominant impression.
                 let hour = (dt + hourIndex + 48) % 24
                 guard (8...19).contains(hour) else { return 1 }
                 return hour % 4 == 1 ? 2 : (hour % 2 == 0 ? 1 : 0)
@@ -169,15 +123,11 @@ enum ScreenshotFixtures {
                 return 15 + 6.5 * exp(-pow((hour - 15) / 5, 2))
             }
             let clearing = min(max(Double(dt) - 6, 0), 16)
-            // A diurnal swing fades in once the rain has cleared, so the days
-            // after the story's first one don't chart as a flat line.
             let hour = Double((dt + hourIndex + 48) % 24)
             let swing = min(max(Double(dt) - 12, 0), 24) / 24
             return 14.0 + clearing * 0.5 + swing * 5 * exp(-pow((hour - 15) / 5, 2))
         }
 
-        // Overrides pin the "now" values; temperatures shift the whole curve
-        // along so the charts still agree with the headline number.
         let temperatureNow = byStory(
             rain: 14.3, sunny: (temperature(0) * 10).rounded() / 10, showers: 21.4
         )
@@ -242,10 +192,6 @@ enum ScreenshotFixtures {
         let dailyTimes = (0..<dayCount).map { dayStart.timeIntervalSince1970 + Double($0) * 86_400 }
         let daily: [String: Any] = [
             "time": dailyTimes,
-            // Rain story: today is a warm day broken by heavy afternoon storms
-            // (high 24°, but 14° right now under the downpour). Keeps the
-            // climate section on the warming message — today reads warm vs the
-            // ~23° July normal rather than "coldest ever" off a cold daily high.
             "temperature_2m_max": byStory(
                 rain: [24, 19, 22, 24, 26, 25, 21, 24, 27, 25, 23, 26],
                 sunny: [27, 28, 26, 27, 29, 28, 26, 25, 27, 28, 26, 27],
@@ -325,8 +271,6 @@ enum ScreenshotFixtures {
         let hourCount = 72
         let times = (0..<hourCount).map { dayStart.timeIntervalSince1970 + Double($0) * 3600 }
 
-        // Diurnal curves: ozone and UV peak in the afternoon, particulates and
-        // NO₂ around the commutes. Day one stays subdued under the rain.
         func bell(_ hourOfDay: Double, peak: Double, width: Double) -> Double {
             let x = (hourOfDay - 14) / width
             return peak * exp(-x * x)
@@ -387,8 +331,6 @@ enum ScreenshotFixtures {
         if sunnyStory || showersStory { return ["alertCount": 0, "alerts": [] as [Any]] }
         let formatter = ISO8601DateFormatter()
         let now = storyNow
-        // The banner uppercases the event; Turkish ships pre-uppercased so İ/ı
-        // survive the locale-insensitive uppercased().
         let event = localized(
             de: "Ergiebiger Dauerregen",
             en: "Persistent heavy rain",
@@ -424,30 +366,16 @@ enum ScreenshotFixtures {
 
     static func precipSeriesJSON(for url: URL? = nil) -> [String: Any] {
         let formatter = ISO8601DateFormatter()
-        // The watch radar page runs the series through RainNowcastSummary,
-        // which keeps only points inside the REAL now ± 90 min — anchored to
-        // the story clock (a day ahead) that page is always empty. Nothing on
-        // the watch couples this series to the staged sky, so it reads the
-        // same curve around its own clock.
         #if os(watchOS)
         let now = Date()
         #else
         let now = storyNow
         #endif
-        // Peak of the main cell in mm/h. The Orte list asks for ONE series per
-        // saved place, so the scene answers per coordinate: only Essen rains,
-        // and its card is the one with the animated precipitation backdrop.
-        // The showers story keeps its rain hours away, outside this window.
         let peak: Double = ScreenshotMode.scene == .places
             ? (url.map { isNear($0, place: essen) } == true ? 3.4 : 0)
             : byStory(rain: 7.4, sunny: 0, showers: 0)
-        // -30 min … +105 min in 5-minute steps: rain peaking shortly after
-        // "now", easing off within the next one and a half hours.
         let series = stride(from: -30, through: 105, by: 5).map { minutes -> [String: Any] in
             let t = Double(minutes)
-            // Smooth gaussian humps instead of piecewise lines — the area
-            // chart interpolates these into a natural rain curve: the main
-            // cell peaking just after "now", a small trailing shower later.
             let value = peak * exp(-pow((t - 10) / 48, 2))
                 + (peak > 0 ? 1.9 : 0) * exp(-pow((t - 90) / 22, 2))
             return [
@@ -467,9 +395,6 @@ enum ScreenshotFixtures {
 
     // MARK: - Climate archive (archive-api.open-meteo.com)
 
-    /// Daily highs for whatever range the archive service requests: a Berlin-ish
-    /// seasonal cycle plus a warming trend, deterministic jitter per day. The
-    /// climate section reduces this through the real `ClimateSummary.make`.
     static func archiveJSON(for url: URL) -> [String: Any] {
         let query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
         func date(_ name: String, fallback: Date) -> Date {
@@ -581,25 +506,16 @@ enum ScreenshotFixtures {
     }
     static let essen = Place(name: "Essen", latitude: 51.4556, longitude: 7.0116)
 
-    /// The GPS row's pinned coordinate. Berlin, not Leipzig, so the "Mein
-    /// Standort" card isn't a duplicate of the saved Leipzig one — and so it
-    /// never inherits whatever fix a previous run cached.
     static let gpsCoordinate = CLLocationCoordinate2D(latitude: 52.52, longitude: 13.405)
 
     static func savedPlaces(for scene: ScreenshotScene) -> [Place] {
         switch scene {
         case .places: [leipzig, essen]
-        // The manual-location onboarding step headlines the SELECTED city, so
-        // a pre-seeded one would replace the "Wähle deinen Ort" ask.
         case .onboarding: []
         default: [leipzig]
         }
     }
 
-    /// The Orte list batches every coordinate into ONE `/v1/forecast` call, and
-    /// Open-Meteo answers with an ARRAY as soon as more than one is asked for —
-    /// the single-object forecast fixture fails to decode there. Conditions are
-    /// pinned per place, so the three cards look the same on every run.
     static func conditionsBatchJSON(for url: URL) -> [[String: Any]] {
         queryCoordinates(url).map { coordinate in
             let pinned = pinnedConditions(at: coordinate)
@@ -633,11 +549,9 @@ enum ScreenshotFixtures {
         if isNear(coordinate, place: leipzig) {
             return (21.4, 2, 40, 11, 0, 58, 1018)
         }
-        return (19.8, 1, 25, 12, 0, 54, 1020)  // "Mein Standort"
+        return (19.8, 1, 25, 12, 0, 54, 1020)
     }
 
-    /// Geocoder hits for the onboarding city step. The same list answers every
-    /// query, so what the test types can never change what the shot shows.
     static func geocodeSearchJSON() -> [String: Any] {
         let germany = localized(de: "Deutschland", en: "Germany", tr: "Almanya")
         let hits: [(String, Double, Double, String)] = [
@@ -675,7 +589,6 @@ enum ScreenshotFixtures {
         queryCoordinates(url).contains { isNear($0, place: place) }
     }
 
-    /// `lat`/`lon` (single) or `latitude`/`longitude` (comma-separated batch).
     private static func queryCoordinates(_ url: URL) -> [CLLocationCoordinate2D] {
         let query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
         func values(_ names: [String]) -> [Double] {
@@ -697,8 +610,6 @@ enum ScreenshotFixtures {
 
     #if !os(watchOS)
     static var stickerPlacements: [MemberCardStickerPlacement] {
-        // Kept clear of the left column, where the card prints the member name
-        // (top) and the "Beta User" tier (bottom).
         [
             MemberCardStickerPlacement(assetName: "sticker_sun", xRatio: 0.60, yRatio: 0.28, scale: 0.85, rotation: 0.16, zIndex: 1),
             MemberCardStickerPlacement(assetName: "sticker_umbrella", xRatio: 0.58, yRatio: 0.70, scale: 1.0, rotation: -0.2, zIndex: 2),
@@ -708,8 +619,6 @@ enum ScreenshotFixtures {
     }
     #endif
 
-    /// oscar-server's `formatNotificationTime`, mirrored: 24-hour + " Uhr" in
-    /// German, 12-hour elsewhere.
     static func notificationTime(_ date: Date) -> String {
         let german = Locale.current.language.languageCode?.identifier == "de"
         let formatter = DateFormatter()
@@ -718,12 +627,6 @@ enum ScreenshotFixtures {
         return german ? "\(formatter.string(from: date)) Uhr" : formatter.string(from: date)
     }
 
-    /// The two pushes oscar-server sends, word for word: `rainNotification`'s
-    /// `.start(.upcoming)` case and `alertCopy`'s DWD branch (which drops the
-    /// headline's "Amtliche " prefix and appends the validity and the place).
-    /// Times are pinned to the status-bar override the lock screen's own clock
-    /// follows (9:41), not to the real clock — a real-clock "21:55 Uhr" under a
-    /// 9:41 lock screen reads as a bug.
     static func lockScreenNotificationCopy() -> [(title: String, body: String)] {
         func clock(_ hour: Int, _ minute: Int) -> String {
             let date = Calendar.current.date(bySettingHour: hour, minute: minute, second: 0, of: .now)
@@ -764,13 +667,7 @@ enum ScreenshotFixtures {
     }()
 }
 
-/// Replays the two oscar-server pushes as LOCAL notifications for the
-/// lock-screen scene: no device token, no backend, no APNs — and the copy is
-/// identical to what the server would have sent.
 enum ScreenshotLockScreenNotifications {
-    /// Delivery is deliberately delayed: the UI test locks the screen first,
-    /// and a notification that arrives while the app is in front never reaches
-    /// the lock screen at all.
     static let deliveryDelay: TimeInterval = 14
 
     @MainActor
@@ -780,7 +677,6 @@ enum ScreenshotLockScreenNotifications {
         else { return }
         center.removeAllDeliveredNotifications()
         center.removeAllPendingNotificationRequests()
-        // Oldest first: the last one added lands on top of the stack.
         for (index, copy) in ScreenshotFixtures.lockScreenNotificationCopy().enumerated() {
             let content = UNMutableNotificationContent()
             content.title = copy.title

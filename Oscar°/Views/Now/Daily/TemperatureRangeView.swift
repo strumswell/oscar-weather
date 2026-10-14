@@ -122,9 +122,6 @@ struct TemperatureRangeView: View {
     }
   }
 
-  /// Centers each label on its value, then — when both are shown and distinct — pushes
-  /// them apart to a minimum gap around their midpoint so the text never overlaps.
-  /// The dots keep their true positions; only the labels move.
   private func separatedLabelOffsets(
     lowPosition: CGFloat,
     highPosition: CGFloat,

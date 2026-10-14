@@ -53,7 +53,6 @@ let defaults = layout["defaults"] as? [String: Any] ?? [:]
 let scenes = layout["scenes"] as? [String: Any] ?? [:]
 let locales = layout["locales"] as? [String: Any] ?? [:]
 
-/// Per-key style lookup. `block` carries inline styles of an extra text block.
 struct Style {
     let section: String
     let scene: String
@@ -108,9 +107,6 @@ func font(path: String, size: CGFloat, weight: CGFloat = 0) -> NSFont {
     }
     var ct = CTFontCreateWithGraphicsFont(cgFont, size, nil, nil)
     if weight > 0 {
-        // CSS-scale weight (100…900) on the 'wght' variation axis, matching
-        // the editor's font-variation-settings. Fonts without the axis (all
-        // single-style files) ignore it, so no synthetic bolding either way.
         let variation: [NSNumber: NSNumber] = [
             NSNumber(value: 0x7767_6874): NSNumber(value: Double(weight))  // 'wght'
         ]
@@ -133,8 +129,6 @@ var spriteCache: [String: Sprite] = [:]
 func sprite(at path: String) -> Sprite? {
     if let s = spriteCache[path] { return s }
     guard let image = NSImage(contentsOfFile: path) else { return nil }
-    // Pixel dimensions, not NSImage points — frame art and screenshots carry
-    // differing dpi metadata.
     let rep = image.representations.max { $0.pixelsWide < $1.pixelsWide }
     let s = Sprite(image: image,
                    pixelWidth: CGFloat(rep?.pixelsWide ?? Int(image.size.width)),
@@ -145,8 +139,6 @@ func sprite(at path: String) -> Sprite? {
 
 // MARK: - Shadows
 
-/// Rotates the wrapped drawing clockwise around a center point (degrees, like
-/// CSS rotate). The flipped CTM makes positive angles read clockwise.
 func withRotation(_ degrees: CGFloat, around center: CGPoint, in cg: CGContext, draw: () -> Void) {
     guard degrees != 0 else { return draw() }
     cg.saveGState()
@@ -157,8 +149,6 @@ func withRotation(_ degrees: CGFloat, around center: CGPoint, in cg: CGContext, 
     cg.restoreGState()
 }
 
-/// Shadow the style defines (any of blur/offset non-zero), nil otherwise. Positive
-/// shadowY means down; offsets live in device space, which is unflipped here — so y is negated.
 func shadowParams(_ style: Style) -> (blur: CGFloat, offset: CGSize, color: NSColor)? {
     let blur = style.number("shadowBlur", 0)
     let sx = style.number("shadowX", 0)
@@ -169,7 +159,6 @@ func shadowParams(_ style: Style) -> (blur: CGFloat, offset: CGSize, color: NSCo
     return (blur, CGSize(width: sx, height: -sy), shadowColor)
 }
 
-/// Draws with a CoreGraphics shadow applied to the whole group.
 func withShadow(_ style: Style, in cg: CGContext, draw: () -> Void) {
     guard let shadow = shadowParams(style) else { return draw() }
     cg.saveGState()
@@ -236,12 +225,6 @@ let deviceConfig = layout["device"] as? [String: Any] ?? [:]
 let screenOffsetX = CGFloat((deviceConfig["screenOffsetX"] as? NSNumber)?.doubleValue ?? 75)
 let screenOffsetY = CGFloat((deviceConfig["screenOffsetY"] as? NSNumber)?.doubleValue ?? 66)
 let screenWidth = CGFloat((deviceConfig["screenWidth"] as? NSNumber)?.doubleValue ?? 1320)
-// Display corner radius in frame pixel space. Screenshots are square; without
-// this clip their corners poke past the frame's rounded screen cutout into
-// the transparent corner region. The cutout is an Apple squircle; a circular
-// radius of 180 is the largest that stays under the bezel along the whole
-// curve (217, the tip radius, cuts visible slivers mid-arc). Editable in the
-// editor's device inspector.
 let screenCornerRadius = CGFloat((deviceConfig["screenCornerRadius"] as? NSNumber)?.doubleValue ?? 0)
 
 var rendered = 0
@@ -249,8 +232,6 @@ var rendered = 0
 for locale in localeDirs {
     let dir = "\(screenshotsDir)/\(locale)"
     let titles = NSDictionary(contentsOfFile: "\(dir)/title.strings") as? [String: String] ?? [:]
-    // Watch captures live alongside but are delivered raw (ASC wants the bare
-    // watch UI, no frames) — never composite them.
     let pngs = ((try? fm.contentsOfDirectory(atPath: dir)) ?? []).filter {
         $0.lowercased().hasSuffix(".png") && !$0.contains("_framed") && $0.contains("-")
             && !$0.lowercased().contains("watch")
@@ -258,12 +239,9 @@ for locale in localeDirs {
 
     for png in pngs {
         let stem = String(png.dropLast(4))
-        // Last dash: device names can contain one ("iPad Pro 13-inch (M5)").
         guard let dash = stem.lastIndex(of: "-") else { continue }
         let scene = String(stem[stem.index(after: dash)...])
         if let sceneFilter, scene != sceneFilter { continue }
-        // Hidden scenes are composition sources (extra device shots) only; an
-        // explicit --scene still renders them for editor previews.
         if sceneFilter == nil,
            ((scenes[scene] as? [String: Any])?["hidden"] as? Bool) == true { continue }
         guard let screenshot = sprite(at: "\(dir)/\(png)") else {
@@ -271,9 +249,6 @@ for locale in localeDirs {
             continue
         }
 
-        // iPad captures have no frame art: the screenshot itself, rounded and
-        // lifted off the gradient under the scene's caption, on a canvas of
-        // the capture's own App Store size (2752×2064 in landscape).
         let isPad = png.contains("iPad")
         let canvasW = isPad ? screenshot.pixelWidth : canvasW
         let canvasH = isPad ? screenshot.pixelHeight : canvasH
@@ -289,24 +264,17 @@ for locale in localeDirs {
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = NSGraphicsContext(cgContext: cg, flipped: true)
 
-        // Background gradient, top → bottom. NSGradient angles work in the
-        // flipped user space here: 90° puts the starting color at the visual
-        // top (verified by pixel-sampling a red→green render).
         let top = color(hex: background["top"] as? String ?? "#3AA0FF")
         let bottom = color(hex: background["bottom"] as? String ?? "#0067DF")
         NSGradient(starting: top, ending: bottom)?
             .draw(in: CGRect(x: 0, y: 0, width: canvasW, height: canvasH), angle: 90)
 
         let sceneConfig = scenes[scene] as? [String: Any]
-        // Extra texts, images and devices are placed for the iPhone canvas.
         let extras = isPad ? [] : sceneConfig?["extraTexts"] as? [[String: Any]] ?? []
         let sceneImages = isPad ? [] : sceneConfig?["images"] as? [[String: Any]] ?? []
         let extraDevices = isPad ? [] : sceneConfig?["devices"] as? [[String: Any]] ?? []
         var painters: [String: () -> Void] = [:]
 
-        // A device instance: screenshot underneath, frame art on top, rotated
-        // as a group. Geometry in frame pixel coordinates (offsets.json
-        // values), scaled to the target width.
         func devicePainter(shot: Sprite, style: Style, defaultX: CGFloat) -> (() -> Void)? {
             let frameName = style.string("frame", "Apple iPhone 17 Pro Max Deep Blue")
             guard let frame = sprite(at: "\(studioDir)/frames/\(frameName).png") else {
@@ -360,8 +328,6 @@ for locale in localeDirs {
                 defaultX: (canvasW - deviceStyle.number("width", 1200)) / 2)
         }
 
-        // Extra device instances show another capture from the same locale
-        // (e.g. the wind and pressure map layers fanned next to temperature).
         let capturePrefix = String(stem[..<dash])
         for (i, block) in extraDevices.enumerated() {
             let style = Style(section: "device", scene: scene, locale: locale, block: block)
@@ -373,8 +339,6 @@ for locale in localeDirs {
             painters["device\(i + 1)"] = devicePainter(shot: shot, style: style, defaultX: 200)
         }
 
-        // Caption from title.strings; on iPad one line across the top band,
-        // keeping the scene's font and color.
         let padTitle: [String: Any]? = isPad
             ? ["x": 120, "y": canvasH * 0.045, "width": canvasW - 240, "size": 130]
             : nil
@@ -385,7 +349,6 @@ for locale in localeDirs {
             }
         }
 
-        // Extra text blocks carry their styles and per-locale strings inline.
         for (i, block) in extras.enumerated() {
             painters["extra\(i)"] = {
                 let texts = block["text"] as? [String: String] ?? [:]
@@ -394,7 +357,6 @@ for locale in localeDirs {
             }
         }
 
-        // External images, uploaded through the editor into frame-studio/images.
         for (i, block) in sceneImages.enumerated() {
             painters["image\(i)"] = {
                 guard let src = block["src"] as? String,
@@ -417,8 +379,6 @@ for locale in localeDirs {
             }
         }
 
-        // Paint order: the scene's stored order first, then anything new in
-        // default stacking (devices lowest, then images, then texts).
         let defaultOrder = ["device"] + extraDevices.indices.map { "device\($0 + 1)" }
             + sceneImages.indices.map { "image\($0)" }
             + ["title"] + extras.indices.map { "extra\($0)" }
@@ -444,7 +404,6 @@ for locale in localeDirs {
 
 if rendered == 0 { fail("nothing rendered — check --scene/--locale filters") }
 
-// Overview page of the framed deliverables, one section per locale.
 if sceneFilter == nil && outPath == nil {
     var sections = ""
     for locale in localeDirs {

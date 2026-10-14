@@ -24,11 +24,9 @@ struct WidgetCityOptionsProvider: DynamicOptionsProvider {
         }
     }
 
-    /// Saved cities from the Core Data store shared via the app group.
     private func savedCities() -> [WidgetCity] {
         let context = PersistenceController.shared.container.viewContext
         return context.performAndWait {
-            // Drop cached snapshots first so cities the app added/renamed are read fresh.
             context.refreshAllObjects()
             let request: NSFetchRequest<City> = City.fetchRequest()
             request.sortDescriptors = [NSSortDescriptor(key: "orderIndex", ascending: true)]

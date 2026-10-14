@@ -5,7 +5,6 @@
 
 import SwiftUI
 
-/// The bare SF Symbol that crowns a step's title on the stage canvas.
 struct OnboardingStepIcon: View {
     let systemImage: String
     let tint: Color

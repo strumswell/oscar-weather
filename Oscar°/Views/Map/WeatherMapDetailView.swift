@@ -12,14 +12,8 @@ import UIKit
 
 // MARK: - Fullscreen detail view
 
-/// Fullscreen weather map: legend, layer menu, and the shared timeline chip
-/// (radar or model layer, depending on what's active). Hosted as the Karten tab,
-/// so it stays alive across tab switches: loads are guarded against re-runs and
-/// playback pauses when the tab disappears.
 struct WeatherMapDetailView: View {
     let settingsService: SettingService
-    /// iOS 6 bars instead of the glass chrome (the classic theme's map),
-    /// closed through `onDone`. Loading and layer switching are the same.
     var classicChrome = false
     var onDone: () -> Void = {}
     @Environment(Location.self) private var location: Location
@@ -28,9 +22,6 @@ struct WeatherMapDetailView: View {
     @Environment(NowPresentationCoordinator.self) private var presentation: NowPresentationCoordinator?
     @State private var layers = MapLayers()
     @State private var isLayerPickerPresented = false
-    // sheet(item:), not sheet(isPresented:) + separate array state: the isPresented
-    // variant renders its content once with the PRE-tap (empty) array on the first
-    // presentation — the classic stale-state sheet bug.
     @State private var tappedAlerts: TappedAlerts?
     @State private var tappedCell: StormCellInfo?
     @State private var tappedWebcam: Components.Schemas.Webcam?
@@ -81,9 +72,6 @@ struct WeatherMapDetailView: View {
                     onDone: onDone
                 )
             } else {
-            // Timestamp badge + legend — top-left. The badge doubles as the
-            // scrub readout: eyes travel up from the scrubber to read the time
-            // here, so it stays even though the chip header shows it too.
             VStack {
                 HStack(alignment: .top) {
                     MapLegendStack(settingsService: settingsService,
@@ -99,7 +87,6 @@ struct WeatherMapDetailView: View {
                 Spacer()
             }
 
-            // Timeline chip — bottom, with the basemap credit tucked underneath
             VStack(spacing: 0) {
                 Spacer()
                 Group {
@@ -115,7 +102,6 @@ struct WeatherMapDetailView: View {
                     }
                 }
                 .padding(.horizontal, 16)
-                // Phone width on iPad and Mac: a window-wide scrubber is a long reach.
                 .frame(maxWidth: 640)
                 MapAttributionLabel()
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -125,22 +111,14 @@ struct WeatherMapDetailView: View {
             }
             }
         }
-        // Declared BEFORE the load task so the source pick lands first (both run
-        // on the main actor and the pick has no suspension points).
         .task(id: "\(location.coordinates.latitude)|\(location.coordinates.longitude)") {
             layers.pickRadarSource(for: location.coordinates)
         }
         .task {
-            // Cloud layer activation is settings-derived (not sync-derived: the
-            // map coordinator's observation pass must stay read-only). Re-runs on
-            // every return to the tab.
             layers.syncCloudActivation()
         }
         .task {
-            // Re-runs on every return to the tab.
             await layers.loadActiveLayer()
-            // Testing hook: `-radarAutoPlay YES` starts playback immediately
-            // (exercises sustained frame swaps without touch input).
             if settingsService.oscarRadarLayer, UserDefaults.standard.bool(forKey: "radarAutoPlay") {
                 radarState.play()
             }
@@ -155,8 +133,6 @@ struct WeatherMapDetailView: View {
             await layers.keepFresh()
         }
         .onChange(of: scenePhase) { _, phase in
-            // Coming back from background: the timeline may be minutes to hours
-            // old. refreshIfStale keeps a quick app switch free.
             guard phase == .active else { return }
             Task { await layers.refreshIfStale() }
         }
@@ -194,9 +170,6 @@ struct WeatherMapDetailView: View {
         .layerPickerInspector(isPresented: $isLayerPickerPresented, settingsService: settingsService) {
             activate(radar: $0, model: $1)
         }
-        // In a regular-width window the inspector wraps the map in a column
-        // container that stops below the status bar (a black strip); let that
-        // container reach the top. Compact widths get a sheet, no container.
         .ignoresSafeArea(edges: horizontalSizeClass == .regular ? .top : [])
         .sheet(item: $tappedAlerts) { tapped in
             AlertInfoSheet(alerts: tapped.alerts)
@@ -220,18 +193,12 @@ struct WeatherMapDetailView: View {
         }
     }
 
-    /// The classic map has no continuation chip, so it never loads one.
     private var continuation: MapLayers.Continuation? {
         classicChrome ? nil : layers.continuation
     }
 
     // MARK: - Map controls
 
-    /// Apple-Maps-style control stack: the layer-picker entry point, the
-    /// locate button and the webcam toggle share ONE glass capsule (user request — no separate
-    /// floating circles). Locate flies the camera to the user's position
-    /// (no-op without a fix/permission). The radar's own toggles sit in a second
-    /// capsule below, which melts out of the first when radar is picked.
     private var mapControlStack: some View {
         GlassEffectContainer(spacing: 12) {
             VStack(spacing: 12) {
@@ -282,7 +249,6 @@ struct WeatherMapDetailView: View {
         .glassEffect(.regular, in: Capsule())
     }
 
-    /// On/off reads as a slash through the control, like the system's `.slash` symbols.
     private var radarControls: some View {
         @Bindable var settings = settingsService
         let model = settingsService.oscarRadarRegion.continuationLayer
@@ -306,8 +272,6 @@ struct WeatherMapDetailView: View {
         .glassEffect(.regular, in: Capsule())
     }
 
-    /// The tab map's picker lives on the TabView, beside the top tab bar
-    /// instead of under its inset; the classic map is a cover without one.
     private func presentLayerPicker() {
         if classicChrome {
             isLayerPickerPresented = true
@@ -316,9 +280,6 @@ struct WeatherMapDetailView: View {
             presentation?.isLayerPickerPresented = true
         }
     }
-    /// Layer-picker selection: radar region, model layer, or (neither) the
-    /// satellite clouds. The layers are mutually exclusive; the deselected
-    /// ones pause, the selected one keeps its playback state.
     private func activate(radar: RadarRegion? = nil, model: WeatherTileLayer? = nil) {
         let clouds = radar == nil && model == nil
         settingsService.radarAutoFallbackActive = false
@@ -334,7 +295,6 @@ struct WeatherMapDetailView: View {
 
 // MARK: - Radar control toggles
 
-/// A bare 46 pt tap target for the control capsule; state shows in the label.
 private struct MapControlToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
         Button {
@@ -349,8 +309,6 @@ private struct MapControlToggleStyle: ToggleStyle {
     }
 }
 
-/// The system `.slash` look for glyphs that have no slash variant: a thin
-/// glyph-sized stroke with a knockout gap cut into the content around it.
 private struct SlashedWhenOff: ViewModifier {
     let isOn: Bool
 
@@ -384,9 +342,6 @@ private struct SlashLine: Shape {
 
 // MARK: - Legend stack
 
-/// Own view so the per-tick `currentFrameTimestamp` reads invalidate only this
-/// stack, not the whole map body. Shared by the Karten tab and the forecast's
-/// map preview.
 struct MapLegendStack: View {
     let settingsService: SettingService
     let timeline: CombinedTimelineState

@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// One square layer tile, Apple-Maps-Kartenmodi-style: screenshot artwork with a
-/// hairline rim, accent selection ring with a small gap, caption label below.
 struct LayerTile: View {
     let title: LocalizedStringKey
     let subtitle: LocalizedStringKey?

@@ -6,11 +6,9 @@ struct DataProviderLink: Identifiable {
     var id: String { url.absoluteString }
 }
 
-/// One credited data provider: the settings row and its attribution page.
 struct DataProvider: Identifiable {
     let id: String
     let name: String
-    /// Proper nouns stay verbatim; the rest resolves through the string catalog.
     var nameIsLocalized = false
     let title: String
     var titleIsLocalized = false

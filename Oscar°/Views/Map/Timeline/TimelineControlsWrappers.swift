@@ -2,11 +2,9 @@ import SwiftUI
 
 struct OscarRadarTimelineControls: View {
     let timeline: CombinedTimelineState
-    /// Tapping the source badge (e.g. "DWD Radar") opens the layer picker.
     var onBadgeTap: (() -> Void)?
 
     var body: some View {
-        // Past the nowcast the badge names the model that took over.
         let model = timeline.isShowingModel ? timeline.model.currentLayer : nil
         TimelineControlsChip(
             state: timeline,
@@ -23,7 +21,6 @@ struct OscarRadarTimelineControls: View {
 
 struct CloudTimelineControls: View {
     let cloudState: CloudLayerState
-    /// Tapping the source badge opens the layer picker.
     var onBadgeTap: (() -> Void)?
 
     var body: some View {
@@ -41,7 +38,6 @@ struct CloudTimelineControls: View {
 
 struct WeatherTileTimelineControls: View {
     let imageState: ModelGridLayerState
-    /// Tapping the source badge (e.g. "DWD ICON-D2") opens the layer picker.
     var onBadgeTap: (() -> Void)?
 
     var body: some View {

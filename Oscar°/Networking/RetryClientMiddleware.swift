@@ -24,63 +24,41 @@ import HTTPTypes
 import OpenAPIRuntime
 import OSLog
 
-/// Retries failed requests for the signals and policy configured per client
-/// (wired into every production client in `APIClient.get(url:prepending:)`).
 nonisolated struct RetryingMiddleware {
 
   private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Retry")
 
-  /// The failure signal that can lead to a retried request.
   enum RetryableSignal: Hashable {
 
-    /// Retry if the response code matches this code.
     case code(Int)
 
-    /// Retry if the response code falls into this range.
     case range(Range<Int>)
 
-    /// Retry if an error is thrown by a downstream middleware or transport.
     case errorThrown
   }
 
-  /// The policy to use when a retryable signal hints that a retry might be appropriate.
   enum RetryingPolicy: Hashable {
 
-    /// Don't retry.
     case never
 
-    /// Retry up to the provided number of attempts.
     case upToAttempts(count: Int)
   }
 
-  /// The policy of delaying the retried request.
   enum DelayPolicy: Hashable {
 
-    /// Don't delay, retry immediately.
     case none
 
-    /// Constant delay.
     case constant(seconds: TimeInterval)
 
-    /// Exponential backoff with full jitter, capped at `maxSeconds`. Honors a server
-    /// `Retry-After` header (delta-seconds form) when present.
     case exponentialWithJitter(base: TimeInterval, maxSeconds: TimeInterval)
   }
 
-  /// The signals that lead to the retry policy being evaluated.
   var signals: Set<RetryableSignal>
 
-  /// The policy used to evaluate whether to perform a retry.
   var policy: RetryingPolicy
 
-  /// The delay policy for retries.
   var delay: DelayPolicy
 
-  /// Creates a new retrying middleware.
-  /// - Parameters:
-  ///   - signals: The signals that lead to the retry policy being evaluated.
-  ///   - policy: The policy used to evaluate whether to perform a retry.
-  ///   - delay: The delay policy for retries.
   init(
     signals: Set<RetryableSignal> = [.code(429), .range(500..<600), .errorThrown],
     policy: RetryingPolicy = .upToAttempts(count: 3),
@@ -127,8 +105,6 @@ extension RetryingMiddleware: ClientMiddleware {
           try await Task.sleep(for: .seconds(min(retryAfter, maxSeconds)))
           return
         }
-        // Full jitter: a random point in [0, cappedExponential] spreads retries so many
-        // clients don't hammer a rate-limited endpoint in lock-step.
         let cappedExponential = min(base * pow(2, Double(attempt - 1)), maxSeconds)
         try await Task.sleep(for: .seconds(Double.random(in: 0...cappedExponential)))
       }
@@ -142,8 +118,6 @@ extension RetryingMiddleware: ClientMiddleware {
           logRequest(attempt: attempt, maxAttemptCount: maxAttemptCount)
           (response, responseBody) = try await next(request, body, baseURL)
         } catch {
-          // Don't retry cancellations — including URLSession's form, which is
-          // how a cancelled Swift task surfaces from the transport.
           if error is CancellationError || (error as? URLError)?.code == .cancelled {
             throw error
           }
@@ -176,7 +150,6 @@ extension RetryingMiddleware: ClientMiddleware {
 }
 
 private extension HTTPResponse {
-  /// The `Retry-After` header parsed as delta-seconds. The HTTP-date form is not handled.
   var retryAfterSeconds: TimeInterval? {
     guard let name = HTTPField.Name("Retry-After"),
       let value = headerFields[name],
@@ -187,9 +160,6 @@ private extension HTTPResponse {
 }
 
 extension Set where Element == RetryingMiddleware.RetryableSignal {
-  /// Checks whether the provided response code matches the retryable signals.
-  /// - Parameter code: The provided code to check.
-  /// - Returns: `true` if the code matches at least one of the signals, `false` otherwise.
   func contains(_ code: Int) -> Bool {
     for signal in self {
       switch signal {

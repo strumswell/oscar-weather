@@ -25,7 +25,6 @@ struct UVDataPoint: Identifiable {
 
 struct UVChart: View {
     let points: [UVDataPoint]
-    /// Raw hourly stamps for the day-separator rules.
     let time: [Double]
     let maxTimeRange: ClosedRange<Date>
     let referenceDate: Date

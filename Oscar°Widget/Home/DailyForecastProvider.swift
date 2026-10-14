@@ -14,8 +14,6 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
     }
 
     func timeline(for configuration: SelectCityIntent, in context: Context) async -> Timeline<DailyForecastEntry> {
-        // Always emit an entry for the resolved location — never an empty timeline, which would
-        // make WidgetKit keep the *previous* location's entry on screen after a config change.
         let entry = await makeEntry(for: configuration)
         let nextRefresh: TimeInterval = entry.days.isEmpty ? 15 * 60 : 60 * 60
         return Timeline(entries: [entry], policy: .after(.now.addingTimeInterval(nextRefresh)))
@@ -53,7 +51,6 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
         let mins: [Double]? = daily?.temperature_2m_min
         let maxs: [Double]? = daily?.temperature_2m_max
         let codes: [Double]? = daily?.weathercode
-        // Open-Meteo types this one field as an array of *optional* doubles.
         let probabilities: [Double?]? = daily?.precipitation_probability_max
         let sums: [Double]? = daily?.precipitation_sum
         let dayCount = min(times?.count ?? 0, 9)

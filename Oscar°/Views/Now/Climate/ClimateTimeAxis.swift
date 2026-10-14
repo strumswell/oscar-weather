@@ -1,13 +1,9 @@
 import SwiftUI
 
-/// Decade labels under the ribbon, each placed at its true year position. The first year sits flush
-/// left and "heute" flush right; interior labels are the 20-year marks that fit, dropping any within
-/// 8 years of an endpoint so nothing collides.
 struct ClimateTimeAxis: View {
     let firstYear: Int
     let todayYear: Int
 
-    // Scale the row height with the caption2 metric so the labels don't clip at large Dynamic Type.
     @ScaledMetric(relativeTo: .caption2) private var axisHeight: CGFloat = 13
 
     private struct Tick: Identifiable {
@@ -35,7 +31,6 @@ struct ClimateTimeAxis: View {
                 ForEach(ticks) { tick in
                     label(for: tick)
                         .fixedSize()
-                        // Center the label on its year, clamped so the end labels stay fully on-screen.
                         .alignmentGuide(.leading) { dimensions in
                             let center = tick.fraction * width
                             let leading = min(

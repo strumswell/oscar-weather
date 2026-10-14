@@ -5,10 +5,6 @@
 
 import SwiftUI
 
-/// Only where oscar-server has alert coverage: pick which alerts to get while
-/// a thunderstorm rages in the hero window. Each choice shows a preview of
-/// what will actually arrive. Confirming requests the system permission and
-/// enrolls through NotificationSettingsManager.
 struct OnboardingNotificationsStep: View {
     let onContinue: () -> Void
 
@@ -21,8 +17,6 @@ struct OnboardingNotificationsStep: View {
 
     private var anySelected: Bool { rainAlerts || weatherAlerts }
 
-    /// The person's own place when one is known: GPS name first, then the
-    /// city picked on the manual step.
     private var place: String {
         if !location.name.isEmpty { return location.name }
         return LocationService.shared.city.getSelectedCity()?.label ?? "Leipzig"
@@ -65,7 +59,6 @@ struct OnboardingNotificationsStep: View {
                                 ) {
                                     LiveActivityPreview(place: place)
                                 }
-                                // Same rule as Settings: the Live Activity rides on rain alerts.
                                 .disabled(!rainAlerts)
                             }
                         }
@@ -77,7 +70,6 @@ struct OnboardingNotificationsStep: View {
                 }
                 .scrollBounceBehavior(.basedOnSize)
                 .scrollIndicators(.hidden)
-                // Previews that run on below fade out instead of cutting off at the buttons.
                 .mask {
                     VStack(spacing: 0) {
                         Color.black
@@ -99,9 +91,6 @@ struct OnboardingNotificationsStep: View {
         .onAppear { appeared = true }
     }
 
-    /// Turns on what was picked. The first call raises the system prompt and
-    /// registers with APNs/oscar-server; the rest reuse that answer. A denied
-    /// prompt simply moves on.
     private func confirm() {
         guard !enabling else { return }
         enabling = true
@@ -124,9 +113,6 @@ struct OnboardingNotificationsStep: View {
     }
 }
 
-/// A toggle with a preview of what it sends underneath; the preview fades to
-/// gray while the choice is off. The optional detail renders as the toggle's
-/// subtitle.
 private struct NotificationChoice<Preview: View>: View {
     let title: LocalizedStringKey
     var detail: LocalizedStringKey?
@@ -155,13 +141,11 @@ private struct NotificationChoice<Preview: View>: View {
     }
 }
 
-/// Times for the previews, a few minutes ahead of when the step first shows.
 private enum SampleTimes {
     static let rainStart = minutesFromNow(15)
     static let rainEnd = minutesFromNow(55)
     static let warningEnd = minutesFromNow(240)
 
-    /// On a five-minute mark, like real alerts read.
     private static func minutesFromNow(_ minutes: Double) -> Date {
         let step = 5.0 * 60
         let now = Date.now.timeIntervalSinceReferenceDate
@@ -170,7 +154,6 @@ private enum SampleTimes {
     }
 }
 
-/// A look-alike of an iOS notification banner.
 private struct NotificationBanner: View {
     let title: LocalizedStringKey
     let message: Text
@@ -202,9 +185,6 @@ private struct NotificationBanner: View {
     }
 }
 
-/// The rain Live Activity's Lock Screen card as it really lays out: place and
-/// radar stamp, headline, subline, the peak ahead as the hero value, and the
-/// hour as bars. Rain is expected, so the first bars are dry.
 private struct LiveActivityPreview: View {
     let place: String
 

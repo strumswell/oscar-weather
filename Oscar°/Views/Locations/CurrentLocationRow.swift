@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// The GPS place at the top of the Orte list; cannot be moved or deleted.
 struct CurrentLocationRow: View {
     let conditions: CityConditions?
     let isSelected: Bool

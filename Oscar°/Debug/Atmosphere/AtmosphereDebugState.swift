@@ -14,10 +14,8 @@ import Observation
 @Observable
 final class AtmosphereDebugState {
     var overrideEnabled = false
-    /// Local time as a day fraction (0 = midnight, 0.5 = noon).
     var timeOfDay: Double = 0.5
     var condition: AtmosphereConditionFamily = .clear
-    /// Strength of the active phenomenon (rain/snow/thunder), 0…1.
     var intensity: Double = 0.5
     var cloudCoverage: Double = 0.3
     var windSpeed: Double = 0.2

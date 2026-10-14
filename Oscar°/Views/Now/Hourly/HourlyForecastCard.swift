@@ -2,8 +2,6 @@ import SwiftUI
 
 struct HourlyForecastCard: View {
   let item: HourlyForecastItem
-  /// One width for every card in the hourly strip (forecast, sun event,
-  /// placeholder), so the row reads as an even rhythm.
   static let cardWidth: CGFloat = 82
 
   var body: some View {
@@ -14,8 +12,6 @@ struct HourlyForecastCard: View {
         .minimumScaleFactor(0.75)
       Text(item.precipitation)
         .font(.footnote)
-        // Not .secondary: its vibrant rendering blends into a bright sky
-        // behind the translucent card and can disappear entirely.
         .foregroundStyle(.white.opacity(0.72))
         .padding(.top, 3)
       Image(item.iconName)

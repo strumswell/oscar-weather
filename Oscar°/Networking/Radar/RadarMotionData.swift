@@ -10,32 +10,20 @@ import Foundation
 
 // MARK: - Motion fields (/radar/{region}/motion)
 
-/// Decoded `/radar/{region}/motion` payload: per adjacent served frame pair, a coarse
-/// flow field in OVERVIEW-IMAGE pixels per server step (5 min), quantized Int16 ×
-/// `scale` on the wire. The morph shader samples it as an rg32Float texture and warps
-/// the two frame textures toward each other (two-sided backward warp).
 struct RadarMotionData: Sendable {
     struct Pair: Sendable {
         let fieldIndex: Int
         let gapMinutes: Int
     }
 
-    /// Identity token so consumers (the layer's flow-texture cache) can cheaply tell
-    /// "same payload" from "new payload" without comparing the field arrays.
     let id = UUID()
     let cols: Int
     let rows: Int
     let overviewWidth: Int
     let overviewHeight: Int
     let stepMinutes: Int
-    /// Per field: `cols·rows` u values then `cols·rows` v values (row-major each),
-    /// in overview px per step. +u = east, +v = south (matches texture row order).
     let fields: [[Float]]
-    /// Keyed `"fromKey|toKey"` for adjacent served frames, in timeline order.
     let pairs: [String: Pair]
-    /// Fallback keyed by the pair's FROM frame: when the displayed pair skips served
-    /// frames (progressive loading), the from-frame's field still describes the local
-    /// flow — the caller rescales it by the actual timestamp gap.
     let pairsByFrom: [String: Pair]
 
     init?(payload: Components.Schemas.MotionResponse) {

@@ -2,8 +2,6 @@ import SwiftUI
 
 // MARK: - Emoji keyboard input
 
-/// An invisible text field pinned to the emoji keyboard: any emoji typed is
-/// reported and the field clears itself. Non-emoji input is ignored.
 struct EmojiKeyboardField: UIViewRepresentable {
     var isFocused: FocusState<Bool>.Binding
     let onPick: (String) -> Void
@@ -58,7 +56,6 @@ struct EmojiKeyboardField: UIViewRepresentable {
     }
 }
 
-/// UITextField that opens with the system emoji keyboard.
 final class EmojiTextField: UITextField {
     // A stable identifier keeps UIKit from restoring the last-used keyboard.
     override var textInputContextIdentifier: String? { "" }
@@ -70,8 +67,6 @@ final class EmojiTextField: UITextField {
 }
 
 private extension Character {
-    /// True for anything the emoji keyboard produces (incl. flags and ZWJ
-    /// sequences); digits/symbols that are merely emoji-capable don't count.
     var isEmoji: Bool {
         guard let scalar = unicodeScalars.first else { return false }
         return scalar.properties.isEmoji && (scalar.value > 0x238C || unicodeScalars.count > 1)

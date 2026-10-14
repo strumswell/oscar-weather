@@ -16,8 +16,6 @@ import simd
 
 // MARK: - Warning sheet
 
-/// All warnings under the tapped point, active-first — presented small like
-/// the Kartenebenen sheet, pullable to .large for long official texts.
 struct AlertInfoSheet: View {
     let alerts: [WeatherAlertInfo]
     @Environment(\.dismiss) private var dismissSheet
@@ -29,7 +27,6 @@ struct AlertInfoSheet: View {
                     ForEach(alerts) { alert in
                         AlertInfoCard(alert: alert)
                     }
-                    // Canadian alerts come straight from EC, not oscar-server.
                     if alerts.contains(where: { $0.source != "ec" }) {
                         PoweredByOscarServer(lockupHeight: 30)
                             .foregroundStyle(.tertiary)

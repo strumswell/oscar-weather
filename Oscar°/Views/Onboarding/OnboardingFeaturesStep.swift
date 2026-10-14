@@ -5,8 +5,6 @@
 
 import SwiftUI
 
-/// The feature pages, in order. Each one has a visual in the hero window
-/// (OnboardingFeatureStages.swift) and two lines of text on the canvas.
 enum OnboardingFeaturePage: CaseIterable {
     case forecast
     case radar
@@ -14,14 +12,11 @@ enum OnboardingFeaturePage: CaseIterable {
     case extras
 }
 
-/// The app tour: one page at a time, picture first. There is no skip; the
-/// button walks through every page and then continues the flow.
 struct OnboardingFeaturesStep: View {
     let onContinue: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var page = OnboardingFeaturePage.forecast
-    /// The radar page's frames, built while the first page is read.
     @State private var radarGrids: Task<[[UInt8]], Never>?
 
     var body: some View {
@@ -82,7 +77,6 @@ private extension OnboardingFeaturePage {
     }
 }
 
-/// Where the reader is in the tour, so pages without a skip don't feel endless.
 private struct PageDots: View {
     let current: OnboardingFeaturePage
 

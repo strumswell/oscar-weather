@@ -2,17 +2,7 @@ import Foundation
 import HTTPTypes
 import OpenAPIRuntime
 
-/// Open-Meteo returns `null` for variables a selected model doesn't provide and for time steps
-/// beyond a model's forecast horizon. Most series are decoded as non-optional `[Double]`, so a
-/// single `null` makes the entire forecast fail to decode (the user then sees stale or empty data).
-///
-/// This middleware cleans `getForecast` responses before decoding: series that are missing from
-/// the start are dropped, every block is truncated to the range free of `null`s (so a short-range
-/// model shows only the days it covers), and required `current` scalars that came back `null` are
-/// filled with a neutral default. `best_match` series are left alone; the few it can null past a
-/// model's horizon (e.g. gusts in western Germany) are declared nullable instead.
 nonisolated final class ForecastSanitizingMiddleware: ClientMiddleware {
-  /// Series the schema already declares nullable; their generated type tolerates `null`.
   private static let nullableHourly: Set<String> = [
     "precipitation_probability",
     "windspeed_80m", "windspeed_180m", "winddirection_180m", "windgusts_10m",
@@ -45,8 +35,6 @@ nonisolated final class ForecastSanitizingMiddleware: ClientMiddleware {
       return (response, HTTPBody(data))
     }
 
-    // Only a forced model returns null series; best_match arrays pass through
-    // untouched. The current block and unit labels are repaired for every model.
     let models = queryParameters(from: request)["models"]
     if let models, models != "best_match" {
       sanitizeSeries(&root, key: "hourly", nullableFields: Self.nullableHourly)
@@ -61,7 +49,6 @@ nonisolated final class ForecastSanitizingMiddleware: ClientMiddleware {
     return (response, HTTPBody(cleaned))
   }
 
-  /// Cleans a block of parallel arrays (`hourly`/`daily`) keyed off its `time` spine.
   private func sanitizeSeries(_ root: inout [String: Any], key: String, nullableFields: Set<String>) {
     guard var block = root[key] as? [String: Any],
       let time = block["time"] as? [Any]
@@ -75,7 +62,6 @@ nonisolated final class ForecastSanitizingMiddleware: ClientMiddleware {
         validLength = min(validLength, array.count)
         continue
       }
-      // Non-nullable series: drop it if it never starts, otherwise cut at its first null.
       if array.isEmpty || (array.first as? NSNull) != nil {
         block.removeValue(forKey: field)
         continue
@@ -93,7 +79,6 @@ nonisolated final class ForecastSanitizingMiddleware: ClientMiddleware {
     root[key] = block
   }
 
-  /// Maps a `current` scalar to the matching `hourly` series it can be backfilled from.
   private static let currentToHourly: [String: String] = [
     "time": "time",
     "temperature": "temperature_2m",
@@ -105,9 +90,6 @@ nonisolated final class ForecastSanitizingMiddleware: ClientMiddleware {
     "is_day": "is_day",
   ]
 
-  /// `current` is a single object whose required scalars must stay present and non-null. A missing
-  /// or `null` value is backfilled from the matching `hourly` series at the current time, falling
-  /// back to `0` only if the model provides no hourly value either.
   private func sanitizeCurrent(_ root: inout [String: Any]) {
     guard var current = root["current"] as? [String: Any] else { return }
 
@@ -133,9 +115,6 @@ nonisolated final class ForecastSanitizingMiddleware: ClientMiddleware {
     root["current"] = current
   }
 
-  /// Some models report a unit of `"undefined"`; the app would then display that literal string
-  /// (e.g. "7.6 undefined" for wind). The values are in the units requested via the `*_unit` query
-  /// params, so resolve those — falling back to known fixed units (°, %, hPa, …) per variable.
   private func sanitizeUnits(_ root: inout [String: Any], request: HTTPRequest) {
     let query = queryParameters(from: request)
     let speedUnit = Self.speedUnit(query["windspeed_unit"] ?? query["wind_speed_unit"])
@@ -202,7 +181,6 @@ nonisolated final class ForecastSanitizingMiddleware: ClientMiddleware {
     return ""
   }
 
-  /// Index of the hourly step at or just before `time` (the current step), or `0` / `nil`.
   private func hourlyIndex(for time: Double?, in hourlyTime: [Any]?) -> Int? {
     guard let hourlyTime, !hourlyTime.isEmpty else { return nil }
     guard let time else { return 0 }

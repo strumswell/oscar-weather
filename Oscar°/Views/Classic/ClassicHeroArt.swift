@@ -17,10 +17,7 @@ struct ClassicHeroArt: View {
     let weatherCode: Double
     let isDay: Bool
     let latitude: Double
-    /// Card width; the art scales with it.
     let width: CGFloat
-    /// Extra shrink for the clouds; the row icons use it because the wide
-    /// wisps read as a smear at row size.
     var cloudScale: CGFloat = 1
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -43,7 +40,6 @@ struct ClassicHeroArt: View {
         }
     }
 
-    /// Gray for rain, darker for thunder, white otherwise.
     private var cloudTint: Color {
         switch family {
         case .rain: Color(white: 0.72)
@@ -61,26 +57,19 @@ struct ClassicHeroArt: View {
                 }
             } else {
                 stars
-                // A new moon is nothing but a dark disc; leave the stars alone then.
                 if family == .clear || family == .partly, MoonPhase.illumination(for: moonPhase) > 0.05 {
-                    // Just above the cloud's belly, the lower half behind it,
-                    // like the sim's moon peeking out of the deck.
                     moon.offset(x: -40 * scale * cloudScale, y: (28 - 36 * cloudScale) * scale)
                 }
             }
             clouds
             precipitation
         }
-        // Fixed frame no matter the composition, so rows and strip cells
-        // space evenly.
         .frame(width: width, height: 110 * scale)
         .accessibilityHidden(true)
     }
 
     // MARK: - Precipitation
 
-    /// Rain streaks, snow flakes or a bolt under the clouds; without them a
-    /// rainy sky would read as just another overcast one.
     @ViewBuilder
     private var precipitation: some View {
         switch family {
@@ -100,39 +89,24 @@ struct ClassicHeroArt: View {
         }
     }
 
-    /// Where the precipitation box sits (320pt units): below the cloud's
-    /// belly (its dense band ends ~67 at header size, ~40 in rows), the
-    /// header with a longer fall, the width following the cloud so row
-    /// drops don't spawn past its edges.
     private var stormBox: (top: CGFloat, width: CGFloat, height: CGFloat) {
         let height = 45 + 35 * cloudScale
-        // The iOS 6 rain symbol is drops only; without a cloud they sit
-        // centered in the icon frame.
         let top = isRowRainIcon ? -height / 2 : 15 + 30 * cloudScale
         return (top, 170 * cloudScale, height)
     }
 
-    /// Strip and row rain: the original's symbol had no cloud, only drops.
     private var isRowRainIcon: Bool { cloudScale != 1 && family == .rain }
 
-    /// The header animates; rows and Reduce Motion get a still frame.
     private var animated: Bool { cloudScale == 1 && !reduceMotion }
 
-    /// The sim's storm, boxed under the cloud (320pt units, then scaled as
-    /// a whole so the drops shrink with the art). Straight down like the
-    /// iOS 6 original.
     private func storm(_ type: Storm.Contents) -> some View {
         let box = stormBox
-        // The sim's drops are sized for a full screen; render the header
-        // box larger and shrink it so they come out smaller. Rows go the
-        // other way: at icon size the plain drops are too fine to see.
         let shrink: CGFloat = cloudScale == 1 ? 1.5 : 0.7
         return StormView(
             type: type,
             direction: .zero,
             strength: type == .snow ? 30 : 45,
             pacing: animated ? .active : .still,
-            // Drop speed is per view height; 80pt would crawl.
             speedMultiplier: 3
         )
         .frame(width: box.width * shrink, height: box.height * shrink)
@@ -147,7 +121,6 @@ struct ClassicHeroArt: View {
 
     private var sun: some View {
         ZStack {
-            // The halo only carries at header size; at row size it is a blob.
             if cloudScale == 1 {
                 Image("halo")
                     .resizable()
@@ -159,8 +132,6 @@ struct ClassicHeroArt: View {
                 .resizable()
                 .frame(width: 145 * scale, height: 145 * scale)
                 .blur(radius: 2 * scale)
-                // The flare is nearly white; screen-blending over navy
-                // washes it out further, so push the yellow first.
                 .saturation(2.2)
         }
         .blendMode(.screen)
@@ -168,13 +139,8 @@ struct ClassicHeroArt: View {
 
     // MARK: - Moon and stars
 
-    /// Same source as the simulation (the snapshot's `phase` is the day
-    /// phase, not the lunar one).
     private var moonPhase: Double { MoonPhase.phaseFraction() }
 
-    /// The sim's moon with its real phase, glow and terminator. Rendered
-    /// at the reference size and scaled as a whole so the fixed blur radii
-    /// inside MoonView shrink along with it at row size.
     private var moon: some View {
         MoonView(
             phase: moonPhase,
@@ -199,8 +165,6 @@ struct ClassicHeroArt: View {
 
     // MARK: - Clouds
 
-    /// One cloud image, drawn once, everywhere; only size, tint and opacity
-    /// vary by weather, so header and rows stay consistent.
     private static let cloudAsset = "cloud5"
 
     @ViewBuilder
@@ -220,8 +184,6 @@ struct ClassicHeroArt: View {
     }
 
     private func wisp(width: CGFloat, x: CGFloat, y: CGFloat, opacity: Double) -> some View {
-        // Explicit height: with scaledToFit alone the 110pt art frame caps
-        // every wisp at ~200pt wide and the widths below never apply.
         Image(Self.cloudAsset)
             .resizable()
             .frame(width: width * scale * cloudScale, height: width * 0.55 * scale * cloudScale)

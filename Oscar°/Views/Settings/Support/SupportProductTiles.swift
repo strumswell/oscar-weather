@@ -1,8 +1,6 @@
 import StoreKit
 import SwiftUI
 
-/// A titled row of product tiles, each with a reel showing its current treat.
-/// With `shuffle`, the header carries a trailing button that rerolls the reels.
 struct SupportProductTiles: View {
     let title: LocalizedStringKey
     let ids: [String]

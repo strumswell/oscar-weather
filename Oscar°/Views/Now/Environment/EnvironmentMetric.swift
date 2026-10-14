@@ -21,7 +21,6 @@ struct EnvironmentMetric: Identifiable {
 
     private static let aqiColorStops = EUAirQualityBand.gradientStops
 
-    // Pollen tier colors (none → very high, 5 equal steps)
     private static let pollenColorStops: [(location: Double, color: Color)] = [
         (0.0,  .green),
         (0.25, .yellow),
@@ -30,23 +29,22 @@ struct EnvironmentMetric: Identifiable {
         (1.0,  .purple),
     ]
 
-    // UV index colors per integer value (index 0–13, index 14 = >13)
     private static let uvColors: [Color] = [
-        Color(red: 78/255,  green: 180/255, blue:   0),       // 0  #4eb400
-        Color(red: 78/255,  green: 180/255, blue:   0),       // 1  #4eb400
-        Color(red: 159/255, green: 206/255, blue:   1/255),   // 2  #9fce01
-        Color(red: 247/255, green: 228/255, blue:   0),       // 3  #f7e400
-        Color(red: 248/255, green: 182/255, blue:   0),       // 4  #f8b600
-        Color(red: 248/255, green: 135/255, blue:   0),       // 5  #f88700
-        Color(red: 248/255, green:  89/255, blue:   0),       // 6  #f85900
-        Color(red: 232/255, green:  44/255, blue:  13/255),   // 7  #e82c0d
-        Color(red: 216/255, green:   1/255, blue:  29/255),   // 8  #d8011d
-        Color(red: 255/255, green:   0,     blue: 154/255),   // 9  #ff009a
-        Color(red: 181/255, green:  76/255, blue: 255/255),   // 10 #b54cff
-        Color(red: 153/255, green: 140/255, blue: 255/255),   // 11 #998cff
-        Color(red: 212/255, green: 140/255, blue: 189/255),   // 12 #d48cbd
-        Color(red: 234/255, green: 168/255, blue: 211/255),   // 13 #eaa8d3
-        Color(red: 244/255, green: 200/255, blue: 229/255),   // >13 #f4c8e5
+        Color(red: 78/255,  green: 180/255, blue:   0),
+        Color(red: 78/255,  green: 180/255, blue:   0),
+        Color(red: 159/255, green: 206/255, blue:   1/255),
+        Color(red: 247/255, green: 228/255, blue:   0),
+        Color(red: 248/255, green: 182/255, blue:   0),
+        Color(red: 248/255, green: 135/255, blue:   0),
+        Color(red: 248/255, green:  89/255, blue:   0),
+        Color(red: 232/255, green:  44/255, blue:  13/255),
+        Color(red: 216/255, green:   1/255, blue:  29/255),
+        Color(red: 255/255, green:   0,     blue: 154/255),
+        Color(red: 181/255, green:  76/255, blue: 255/255),
+        Color(red: 153/255, green: 140/255, blue: 255/255),
+        Color(red: 212/255, green: 140/255, blue: 189/255),
+        Color(red: 234/255, green: 168/255, blue: 211/255),
+        Color(red: 244/255, green: 200/255, blue: 229/255),
     ]
 
     static let aqiGradient = Gradient(stops: aqiColorStops.map { .init(color: $0.color, location: $0.location) })

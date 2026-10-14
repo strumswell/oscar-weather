@@ -7,7 +7,6 @@ final class UsageStatsStore {
     static let shared = UsageStatsStore()
 
     private(set) var stats: UsageStats
-    /// Blobs of other installs, pulled from iCloud.
     private(set) var otherInstalls: [UsageStats] = []
 
     @ObservationIgnored private var sessionStart: Date?
@@ -41,7 +40,6 @@ final class UsageStatsStore {
         }
     }
 
-    /// Everything across all installs, for display.
     var combined: UsageStats {
         var total = stats
         for other in otherInstalls {
@@ -81,17 +79,14 @@ final class UsageStatsStore {
         flush()
     }
 
-    /// Called per scroll frame; folded into the blob on the next flush.
     func addScroll(points: Double) {
         pendingScroll += points
     }
 
-    /// Values arrive in the units the forecast was requested in.
     func recordConditions(temperature: Double?, wind: Double?, precipitation: Double?, uv: Double?, place: String) {
         let settings = SettingService.shared
         let temperatureUnit = settings.temperatureUnit == "fahrenheit" ? "°F" : "°C"
         let windSetting = WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit)
-        // Beaufort is derived on device; the API delivers km/h for it.
         let windUnit = windSetting == .bft ? "km/h" : windSetting.displayUnit
         let precipitationUnit = settings.precipitationUnit == "inch" ? "in" : "mm"
 

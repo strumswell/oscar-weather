@@ -26,9 +26,6 @@ enum HourlyForecastBuilder {
     let precipitationUnit = forecast.hourly_units?.precipitation ?? "mm"
     let sunEvents = SunEventIndex(daily: forecast.daily, timeZone: timeZone)
 
-    // "Jetzt" replaces the current hour: a card with the live conditions —
-    // radar-aware precipitation and icon — followed by the whole hours strictly
-    // after now.
     if let current = forecast.current,
        let firstFutureIndex = hourly.time.firstIndex(where: { $0 > current.time }),
        firstFutureIndex < availableCount {
@@ -36,8 +33,6 @@ enum HourlyForecastBuilder {
         .forecast(nowItem(current: current, precipSeries: precipSeries, precipitationUnit: precipitationUnit))
       ]
 
-      // A sunrise/sunset between now and the first whole hour lives in the hour
-      // slot the Jetzt card replaces — carry it over instead of dropping it.
       if !isLoading, firstFutureIndex > 0,
          let sunEvent = sunEvents.item(forHourAt: hourly.time[firstFutureIndex - 1]),
          sunEvent.timestamp > current.time {
@@ -55,8 +50,6 @@ enum HourlyForecastBuilder {
       return items
     }
 
-    // No usable current conditions (or the forecast is exhausted): the plain
-    // hourly strip starting at the hour nearest to now.
     let startIndex = min(localizedHourIndex(currentTime: forecast.current?.time, hours: hourly.time), availableCount - 1)
     return hourlyItems(
       range: startIndex...min(startIndex + 48, availableCount - 1),
@@ -104,9 +97,6 @@ enum HourlyForecastBuilder {
     return items
   }
 
-  /// The "Jetzt" card: current conditions, with radar overriding the model where
-  /// it has fresh coverage — radar measures what is falling right now, while the
-  /// model's "current" precipitation is an interpolated guess.
   private static func nowItem(
     current: Components.Schemas.CurrentWeather,
     precipSeries: PrecipSeriesResponse?,
@@ -118,9 +108,6 @@ enum HourlyForecastBuilder {
       ?? forecastPrecipitation
     let isRaining = (radarRate ?? forecastPrecipitation) > 0
 
-    // Lift a dry-sky code to a precipitation icon when rain is actually reaching
-    // the ground (mirrors the widgets' radar-aware icon). A code that already
-    // shows precipitation keeps its more specific icon (snow, thunderstorm, …).
     var weatherCode = current.weathercode
     if isRaining, weatherCode < 51 {
       weatherCode = (radarRate ?? forecastPrecipitation) >= 2.5 ? 61 : 51
@@ -152,8 +139,6 @@ enum HourlyForecastBuilder {
     return hours.indices.min { abs(currentTime - hours[$0]) < abs(currentTime - hours[$1]) } ?? 0
   }
 
-  /// Sunrise and sunset per local day, built once per item list so the
-  /// per-hour lookup is a dictionary hit instead of a calendar scan.
   private struct SunEventIndex {
     private var byDay: [Double: (sunrise: Double?, sunset: Double?)] = [:]
     private var calendar: Calendar

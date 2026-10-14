@@ -17,6 +17,7 @@ struct SupportNudgeOverlay: View {
     @State private var isOut = false
     @State private var isTalking = false
     @State private var isAsking = false
+    @State private var isTrial = false
     /// Bumped after every exit so the rules run again; with `-supportNudge`
     /// that brings the next cat.
     @State private var round = 0
@@ -69,8 +70,9 @@ struct SupportNudgeOverlay: View {
             .onGeometryChange(for: EdgeInsets.self, of: { $0.safeAreaInsets }) { insets = $0 }
             .task(id: canShow ? round : -1) { await run() }
             .onChange(of: pose) { _, pose in presentation.isNudgeOut = pose != nil }
-            .onChange(of: isForced) {
-                if pose == nil { round += 1 } else { leave(dismissed: false) }
+            .onChange(of: isForced, restart)
+            .onChange(of: presentation.requestedNudge) { _, requested in
+                if requested != nil { restart() }
             }
             .onChange(of: canShow) { _, can in
                 if !can, !isAsking { leave(dismissed: true) }
@@ -85,12 +87,21 @@ struct SupportNudgeOverlay: View {
             leave(dismissed: !SupporterStore.shared.isSupporter)
             return
         }
-        guard pose == nil, SupportNudge.isDue else { return }
-        guard (try? await Task.sleep(for: Self.delay)) != nil else { return }
+        let requested = presentation.requestedNudge
+        guard pose == nil, requested != nil || SupportNudge.isDue else { return }
+        if requested == nil {
+            guard (try? await Task.sleep(for: Self.delay)) != nil else { return }
+        }
+        presentation.requestedNudge = nil
+        isTrial = requested != nil
         // Forced runs record no dismissals, so they cycle by round.
-        pose = isForced ? SupportNudge.Pose.allCases[round % 3] : SupportNudge.pose
+        pose = requested ?? (isForced ? SupportNudge.Pose.allCases[round % 3] : SupportNudge.pose)
         guard (try? await Task.sleep(for: Self.patience)) != nil else { return }
         leave(dismissed: true)
+    }
+
+    private func restart() {
+        if pose == nil { round += 1 } else { leave(dismissed: false) }
     }
 
     private func enter() {
@@ -109,7 +120,7 @@ struct SupportNudgeOverlay: View {
             pose = nil
             return
         }
-        if dismissed { SupportNudge.recordDismissal() }
+        if dismissed, !isTrial { SupportNudge.recordDismissal() }
         withAnimation(.easeOut(duration: 0.15)) { isTalking = false }
         withAnimation(.easeIn(duration: reduceMotion ? 0.3 : 0.45)) {
             isOut = false

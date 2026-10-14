@@ -17,7 +17,6 @@ struct ClimateDetailView: View {
         ClimateTemperatureUnit(settingValue: SettingService.resolvedTemperatureUnit)
     }
 
-    /// On a record day the headline is already the superlative, so the rank line would just repeat it.
     private var isRecord: Bool {
         summary.warmerRank == 1 || summary.warmerRank == summary.totalYears
     }

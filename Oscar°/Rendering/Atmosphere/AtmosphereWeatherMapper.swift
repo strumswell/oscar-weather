@@ -13,9 +13,6 @@ enum AtmosphereWeatherMapper {
         }
 
         let now = Date.now.timeIntervalSince1970
-        // Hourly-detail scrubs render an arbitrary forecast hour. Near "now" the
-        // live path below answers (current + radar stay authoritative); further
-        // out those sources describe the wrong moment and must not bleed in.
         if let date, abs(date.timeIntervalSince1970 - now) > 900 {
             return scrubbedSnapshot(from: weather, at: location, for: date)
         }
@@ -53,28 +50,15 @@ enum AtmosphereWeatherMapper {
             mid: normalized(Float(midCover), max: 100),
             high: normalized(Float(highCover), max: 100)
         )
-        // Precipitation "now": fresh radar wins in both directions — a measured 0
-        // is an answer, only nil (no coverage / stale) falls through to the model's
-        // current value, then the hourly slot (which smears mid-hour rain onset).
         let radarRate = weather.precipSeries?.currentRate.map { Float($0) }
-        // The hourly slot, like the scrubbed path: `current.precipitation` is
-        // built from 15-minutely data and reads far lower than the hour's sum.
         let modelPrecipitation = Float(value(at: accumulationIndex, in: weather.forecast.hourly?.precipitation)
             ?? weather.forecast.current?.precipitation
             ?? 0)
         let precipitation = radarRate ?? modelPrecipitation
-        // Radar includes snow as liquid equivalent; the 7:1 snow-to-liquid ratio
-        // converts its mm/h to the hourly array's cm.
         let snowfall = radarRate.map { $0 * 0.7 }
             ?? Float(value(at: accumulationIndex, in: weather.forecast.hourly?.snowfall) ?? 0)
-        // Radar mm/h saturates at ~6; the model's hourly mm at ~8.
         let precipitationIntensity = radarRate.map { clamp($0 / 6, 0, 1) }
             ?? clamp(modelPrecipitation / 8, 0, 1)
-        // Radar sees rain the forecast doesn't: a blue, sunny sky can't be right while
-        // precipitation reaches the ground. Lift a dry forecast to an overcast, rainy
-        // scene so the sky/clouds/sun agree with the rain animation that already shows.
-        // Any measurable rate counts (0.1 mm/h is the series' smallest nonzero step) —
-        // even drizzle must not fall out of a rendered blue sky.
         if let radarRate, radarRate >= 0.1, condition == .clear || condition == .partlyCloudy || condition == .overcast {
             condition = .rain
             cloudCoverage = max(cloudCoverage, clamp(0.55 + precipitationIntensity * 0.45, 0, 1))
@@ -104,12 +88,6 @@ enum AtmosphereWeatherMapper {
         )
     }
 
-    /// Scrub path: a snapshot for an arbitrary forecast hour. Hourly values only
-    /// — `current` describes now, and the radar nowcast only knows its own span,
-    /// so neither may bleed into a scrubbed hour (radar still wins inside that
-    /// span, where it genuinely knows the minute). Continuous fields interpolate
-    /// between the surrounding hours so the sky doesn't step at hour boundaries
-    /// while scrubbing; the weather code (categorical) snaps to the nearest hour.
     @MainActor private static func scrubbedSnapshot(
         from weather: Weather,
         at location: CLLocationCoordinate2D,
@@ -149,16 +127,12 @@ enum AtmosphereWeatherMapper {
             ?? Float(interpolatedValue(at: timestamp, times: times, values: hourly?.snowfall) ?? 0)
         let precipitationIntensity = radarRate.map { clamp($0 / 6, 0, 1) }
             ?? clamp(modelPrecipitation / 8, 0, 1)
-        // Same sky/rain agreement rule as the live path: measurable radar rain
-        // must not fall out of a rendered blue sky.
         if let radarRate, radarRate >= 0.1, condition == .clear || condition == .partlyCloudy || condition == .overcast {
             condition = .rain
             cloudCoverage = max(cloudCoverage, clamp(0.55 + precipitationIntensity * 0.45, 0, 1))
         }
         reconcile(&deck, total: cloudCoverage, condition: condition)
         let windSpeed = Float(interpolatedValue(at: timestamp, times: times, values: hourly?.windspeed_10m) ?? 0)
-        // Direction is circular: interpolating across the 360° wrap would swing
-        // the drops through the whole rose, so it snaps to the nearest hour.
         let windDirection = Float(value(at: nearest, in: hourly?.winddirection_10m) ?? 0) * .pi / 180
 
         return finalize(
@@ -178,13 +152,6 @@ enum AtmosphereWeatherMapper {
         )
     }
 
-    /// The total (current observation, radar lift) is what the sky shader and
-    /// sun follow; the bands come from the nearest model hour and may sit
-    /// below it. Lift them so the densest band matches the total, and split
-    /// a band-less total the way hand-built snapshots do. Precipitation
-    /// reaches the ground from a low-based deck: the model's low share under
-    /// rain is layer accounting (48 % low under a raining 100 % sky), not
-    /// what the sky looks like, so the low band takes the whole total.
     static func reconcile(_ deck: inout CloudDeck, total: Float, condition: AtmosphereConditionFamily) {
         switch condition {
         case .drizzle, .rain, .freezingRain, .showers, .snow, .thunderstorm:
@@ -201,8 +168,6 @@ enum AtmosphereWeatherMapper {
         }
     }
 
-    /// Shared tail of every mapper path: everything derived once condition,
-    /// coverage, moisture, and precipitation are settled.
     static func finalize(
         utcOffsetSeconds: Int,
         aqiHaze: Float,
@@ -307,9 +272,6 @@ enum AtmosphereWeatherMapper {
         }
     }
 
-    /// Linear interpolation over an ascending hourly series. Internal (not
-    /// private): the hourly detail timeline samples its HUD values with the same
-    /// semantics the sim renders.
     static func interpolatedValue(at timestamp: Double, times: [Double], values: [Double]?) -> Double? {
         guard let values, !values.isEmpty, !times.isEmpty else { return nil }
         guard values.count == times.count else {
@@ -326,9 +288,6 @@ enum AtmosphereWeatherMapper {
         return values[lower] + (values[upper] - values[lower]) * fraction
     }
 
-    /// Radar/nowcast rate at an arbitrary time — only within the series' own
-    /// span (± one 5-minute frame): beyond it the radar knows nothing and must
-    /// return nil so the model forecast answers instead.
     private static func radarRate(from series: PrecipSeriesResponse?, at timestamp: Double) -> Float? {
         guard let points = series?.series, !points.isEmpty else { return nil }
         var nearest: PrecipPoint?
@@ -344,9 +303,6 @@ enum AtmosphereWeatherMapper {
         return Float(nearest.precipitation)
     }
 
-    /// Slot whose accumulation covers `timestamp`: Open-Meteo's hourly sums
-    /// (precipitation, snowfall) describe the hour ending at each stamp, so the
-    /// first stamp at or after now is the current hour, not the nearest one.
     private static func accumulationIndex(for timestamp: Double, in times: [Double]?) -> Int? {
         guard let times, !times.isEmpty else { return nil }
         return insertionIndex(for: timestamp, in: times)
@@ -361,9 +317,6 @@ enum AtmosphereWeatherMapper {
         return low
     }
 
-    /// First index whose time is >= `timestamp`, clamped to the last index.
-    /// Hourly times are sorted ascending: a binary search instead of an O(n)
-    /// scan on the per-snapshot path. `times` must be non-empty.
     private static func insertionIndex(for timestamp: Double, in times: [Double]) -> Int {
         var low = 0
         var high = times.count - 1
@@ -396,9 +349,6 @@ enum AtmosphereWeatherMapper {
         return clamp(max(pm25, max(pm10, no2)) / 100, 0, 1)
     }
 
-    // Internal (not private): the debug-mode snapshot builder in
-    // Debug/AtmosphereDebugSnapshot.swift reuses these derivations so
-    // synthetic states match the live mapper.
     static func cloudDensityFor(
         condition: AtmosphereConditionFamily,
         cloudCoverage: Float,
@@ -426,8 +376,6 @@ enum AtmosphereWeatherMapper {
         return clamp(cloudCoverage * 0.68 + humidity * 0.12 + precipitation * 0.2 + conditionBoost, 0, 1)
     }
 
-    /// Single reusable UTC calendar — the snapshot path runs per frame, so we shift the date by
-    /// the offset (below) instead of allocating a calendar with a per-call timezone each time.
     private static let utcCalendar: Calendar = {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = .gmt
@@ -439,7 +387,6 @@ enum AtmosphereWeatherMapper {
         location: CLLocationCoordinate2D,
         utcOffsetSeconds: Int
     ) -> Float {
-        // Represent local time by shifting the instant, then read components with the shared UTC calendar.
         let localDate = Date(timeIntervalSince1970: date.timeIntervalSince1970 + Double(utcOffsetSeconds))
         let day = Float(utcCalendar.ordinality(of: .day, in: .year, for: localDate) ?? 1)
         let components = utcCalendar.dateComponents([.hour, .minute, .second], from: localDate)

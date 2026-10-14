@@ -7,21 +7,14 @@ struct TimelineScrubber: View {
     let timestamps: [String]
     let selectedIndex: Int
     let loadedIndices: Set<Int>
-    /// Model timelines are forecast end to end, so they get no nowcast zone.
     let isForecast: Bool
-    /// Radar continued by a model: the nowcast zone ends here and the model hours follow.
     var forecastStartIndex: Int? = nil
     let onSelectionChanged: (Int) -> Void
     let onInteractionChanged: (Bool) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isDragging = false
-    /// Raw finger x while dragging — the thumb follows this continuously instead
-    /// of snapping between quantized frame positions, so scrubbing tracks at
-    /// display refresh rate. nil when idle (thumb sits on the selected frame).
     @State private var dragX: CGFloat?
-    /// timestamps parsed once per timeline — body re-runs per drag pixel and
-    /// must not re-parse 50 ISO strings each time.
     @State private var cachedDates: [Date?] = []
 
     private var frameCount: Int { timestamps.count }
@@ -37,10 +30,6 @@ struct TimelineScrubber: View {
             let runs = loadedRuns()
             let nowCenter = thumbRadius + xOffset(for: nowIndex, width: trackWidth)
             let nowLabelX = min(max(nowCenter - nowLabelWidth / 2, 0), width - nowLabelWidth)
-            // All collision tests use measured label widths (see labelWidth):
-            // the edge labels can be wide ("12:55 PM"), mid marks are usually
-            // short ("2 PM", "14:00") — hardcoded slot constants either waste
-            // marks or overlap, depending on locale.
             let startWidth = labelWidth(edgeLabel(dates.first ?? nil))
             let endWidth = labelWidth(edgeLabel(dates.last ?? nil))
             let showStart = nowLabelX > startWidth + 8
@@ -80,9 +69,6 @@ struct TimelineScrubber: View {
                 .frame(height: trackHeight)
                 .padding(.horizontal, thumbRadius)
 
-            // Buffered bands — playability, video-player style. Edges spring as
-            // the contiguous ranges grow; islands from scrub-triggered preloads
-            // render as their own segments.
             ZStack(alignment: .leading) {
                 ForEach(runs.enumerated(), id: \.offset) { _, run in
                     Capsule()
@@ -95,8 +81,6 @@ struct TimelineScrubber: View {
             .padding(.leading, thumbRadius)
             .animation(.smooth(duration: 0.55), value: loadedIndices)
 
-            // Nowcast zone right of the now marker: extrapolated, not
-            // measured, hence the hatching.
             if !isForecast, nowIndex < frameCount - 1 {
                 let nowX = xOffset(for: nowIndex, width: trackWidth)
                 let endX = forecastStartIndex.map { xOffset(for: $0, width: trackWidth) } ?? trackWidth
@@ -114,7 +98,6 @@ struct TimelineScrubber: View {
                     .offset(x: thumbRadius + nowX)
             }
 
-            // Where the model takes over from the radar.
             if let forecastStartIndex {
                 RoundedRectangle(cornerRadius: 1)
                     .fill(.white.opacity(0.5))
@@ -127,7 +110,6 @@ struct TimelineScrubber: View {
                 .frame(height: trackHeight)
                 .padding(.horizontal, thumbRadius)
 
-            // One tick per axis label, so the labels visibly anchor to the track.
             ForEach(midMarks, id: \.x) { mark in
                 Capsule()
                     .fill(.white.opacity(0.32))
@@ -142,7 +124,6 @@ struct TimelineScrubber: View {
                     .padding(.leading, thumbRadius)
             }
 
-            // "Now" marker separating observation from nowcast.
             RoundedRectangle(cornerRadius: 1)
                 .fill(.white.opacity(0.9))
                 .frame(width: 2, height: trackHeight + 6)
@@ -182,14 +163,12 @@ struct TimelineScrubber: View {
                         isDragging = false
                         onInteractionChanged(false)
                     }
-                    // Settle onto the selected frame's quantized position.
                     withAnimation(.snappy(duration: 0.2)) {
                         dragX = nil
                     }
                 }
         )
         .onChange(of: fullyBuffered) { _, ready in
-            // The whole timeline just became scrubbable under the user's finger.
             if ready && isDragging {
                 Haptics.impact()
             }
@@ -213,10 +192,6 @@ struct TimelineScrubber: View {
 
     // MARK: Axis
 
-    /// First and last frame time at the edges, round in-between times along the
-    /// track, and "Jetzt" anchored under the now marker. Labels yield to their
-    /// neighbors when space gets tight (filtering happens in body, shared with
-    /// the track's tick marks).
     private func axisRow(width: CGFloat, dates: [Date?],
                          midMarks: [(x: CGFloat, text: String, width: CGFloat)],
                          nowLabelX: CGFloat, showStart: Bool, showEnd: Bool) -> some View {
@@ -252,9 +227,6 @@ struct TimelineScrubber: View {
         return axisTime(date)
     }
 
-    /// Axis time label. 12-hour locales get ":00" dropped on full hours
-    /// ("2 PM" instead of "2:00 PM") — the AM/PM suffix already eats the
-    /// width budget, and round track marks are full hours almost always.
     private var selectedDate: Date? {
         cachedDates.indices.contains(selectedIndex) ? cachedDates[selectedIndex] : nil
     }
@@ -266,13 +238,10 @@ struct TimelineScrubber: View {
         return SettingService.formattedTime(date)
     }
 
-    /// AM/PM designators are letters; 24-hour strings are digits and ":".
     private var uses12HourClock: Bool {
         SettingService.formattedTime(.now).contains(where: \.isLetter)
     }
 
-    /// The axis row renders in .caption.monospacedDigit() — measure candidate
-    /// labels with the matching UIFont so spacing decisions use real widths.
     private static let axisUIFont = UIFont.monospacedDigitSystemFont(
         ofSize: UIFont.preferredFont(forTextStyle: .caption1).pointSize, weight: .regular)
 
@@ -280,12 +249,6 @@ struct TimelineScrubber: View {
         ceil((text as NSString).size(withAttributes: [.font: Self.axisUIFont]).width)
     }
 
-    /// Round times between the first and last frame. Candidate steps go from
-    /// dense to sparse; for each one the labels are generated and MEASURED,
-    /// and the first step whose widest label (plus a 12 pt gap) fits the
-    /// on-track spacing wins. Hour-only strings ("2 PM") therefore pack
-    /// tighter than minute strings ("2:30 PM") automatically, in every
-    /// locale, on every layer span — radar's 3 h and the models' 36 h alike.
     private func midAxisLabels(
         dates: [Date?], trackWidth: CGFloat
     ) -> [(x: CGFloat, text: String, width: CGFloat)] {
@@ -304,8 +267,6 @@ struct TimelineScrubber: View {
                               text: text, width: 0))
                 tick += step
             }
-            // Frames sit at even spacing whatever their cadence, so the marks
-            // don't: the tightest pair decides.
             let tightest = zip(marks.dropFirst(), marks).map { $0.x - $1.x }.min() ?? .infinity
             if tightest >= widest + 12 {
                 return marks.map { (x: $0.x, text: $0.text, width: widest) }
@@ -314,7 +275,6 @@ struct TimelineScrubber: View {
         return []
     }
 
-    /// Track position of a time, interpolated between its neighboring frames.
     private func trackFraction(of time: TimeInterval, in times: [TimeInterval]) -> CGFloat {
         guard let upper = times.firstIndex(where: { $0 >= time }) else { return 1 }
         guard upper > 0 else { return 0 }
@@ -331,7 +291,6 @@ struct TimelineScrubber: View {
     private var axisHeight: CGFloat { 14 }
     private var nowLabelWidth: CGFloat { 48 }
 
-    /// Contiguous runs of loaded frames, left to right.
     private func loadedRuns() -> [ClosedRange<Int>] {
         var runs: [ClosedRange<Int>] = []
         var index = 0
@@ -350,7 +309,6 @@ struct TimelineScrubber: View {
         return runs
     }
 
-    /// X-ranges not covered by any buffered band — the shimmer's mask.
     private func gapSegments(runs: [ClosedRange<Int>], trackWidth: CGFloat) -> [ClosedRange<CGFloat>] {
         var gaps: [ClosedRange<CGFloat>] = []
         var cursor = 0

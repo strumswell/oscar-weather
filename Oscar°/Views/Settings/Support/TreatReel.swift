@@ -1,17 +1,11 @@
 import SwiftUI
 
-/// A one-window slot reel. When `treat` changes, a strip of random stickers
-/// rolls down through the window and lands on it; reels further right
-/// (higher `index`) start a beat later and roll longer, so they stop in order.
-/// A new `jackpot` rolls the reel onto the bought treat.
 struct TreatReel: View {
     let treat: SupportTreat
     let index: Int
     let jackpot: SupportJackpot?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    /// What the window shows. Only a landing changes it, so a new `treat`
-    /// never flashes up before its roll has started.
     @State private var landed: SupportTreat?
     @State private var strip: [String] = []
     @State private var offset = 0.0
@@ -22,7 +16,6 @@ struct TreatReel: View {
     @State private var rolls = 0
 
     private static let cell = 64.0
-    /// The cream of an old reel strip, matching the sticker backgrounds.
     private static let paper = Color(red: 0.95, green: 0.91, blue: 0.82)
 
     private var shown: SupportTreat { landed ?? treat }
@@ -63,7 +56,6 @@ struct TreatReel: View {
         .modifier(ReelMotion(blur: blur, curve: curve))
         .clipped()
         .background(Self.paper)
-        // The drum curving away at the top and bottom edge.
         .overlay {
             LinearGradient(
                 stops: [
@@ -85,7 +77,6 @@ struct TreatReel: View {
         .accessibilityHidden(true)
     }
 
-    /// The thin red line across the window, with a dot at each end.
     private var payline: some View {
         HStack(spacing: 0) {
             Circle().frame(width: 5, height: 5)
@@ -94,7 +85,6 @@ struct TreatReel: View {
         }
         .foregroundStyle(.red)
         .padding(.horizontal, 4)
-        // Blinks when the reel lands.
         .keyframeAnimator(initialValue: 0.75, trigger: landings) { line, opacity in
             line.opacity(opacity)
         } keyframes: { _ in
@@ -114,28 +104,20 @@ struct TreatReel: View {
             return
         }
         let spin = ReelSpin(duration: 2.2 + 0.45 * Double(index))
-        // Built bottom-up: the shown sticker sits in the window, the new one at
-        // the top of the strip, and the strip slides down until it arrives.
-        // One spare sticker under the shown one fills the window during the kick.
         let randomImage = { SupportTreat.allImages.randomElement() ?? new.image }
         let fillers = (0..<spin.cells(perSecond: 14)).map { _ in randomImage() }
         strip = [new.image] + fillers + [shown.image, randomImage()]
         offset = -Double(strip.count - 2) * Self.cell
         withAnimation(.easeOut(duration: 0.2)) { isRolling = true }
         Task { @MainActor in
-            // Lets the reset strip render before the roll starts, and staggers the reels.
             try? await Task.sleep(for: .milliseconds(30 + 60 * index))
-            // A short kick upwards before the reel drops, like a real reel catching.
             withAnimation(.easeOut(duration: 0.12)) { offset -= 12 }
             try? await Task.sleep(for: .milliseconds(120))
             guard roll == rolls else { return }
             withAnimation(Animation(spin)) {
                 offset = 0
             } completion: {
-                // A newer roll owns the strip now.
                 guard roll == rolls else { return }
-                // One transaction: clearing the strip and showing the new treat
-                // separately would draw the old treat for a frame in between.
                 withAnimation(.snappy) {
                     strip = []
                     landed = new
@@ -143,8 +125,6 @@ struct TreatReel: View {
                 }
                 landings += 1
             }
-            // Smeared and bent round the drum only while the reel moves; at
-            // rest the sticker sits flat and sharp.
             withAnimation(.easeIn(duration: ReelSpin.spinUp)) {
                 blur = 8
                 curve = 0.9
@@ -156,9 +136,6 @@ struct TreatReel: View {
     }
 }
 
-/// The moving strip: vertical motion blur and the bend round the drum
-/// (`curve` is how far the drum turns from the window's centre to its edge,
-/// in radians). Animatable so both ease in and out with the spin.
 @Animatable
 private struct ReelMotion: ViewModifier {
     var blur: Double
@@ -181,18 +158,13 @@ private struct ReelMotion: ViewModifier {
     }
 }
 
-/// How a real reel moves: it spins up, runs at full speed, then brakes and
-/// rocks a little past the stop before settling (an ease-out-back brake whose
-/// start speed matches the cruise, so there is no visible seam).
 private struct ReelSpin: CustomAnimation {
     let duration: TimeInterval
 
     static let spinUp = 0.25
     static let brake = 0.9
-    /// Overshoot of the brake; about a sixth of a sticker at 14 stickers/s.
     static let back = 1.2
 
-    /// How many stickers pass the window at `perSecond` cruise speed.
     func cells(perSecond: Double) -> Int {
         Int((perSecond * travelTime).rounded())
     }
@@ -202,7 +174,6 @@ private struct ReelSpin: CustomAnimation {
         return value.scaled(by: progress(at: time))
     }
 
-    /// Distance in units of the cruise speed: the time it would take at full speed.
     private var travelTime: Double {
         Self.spinUp / 2 + cruise + Self.brake / (Self.back + 3)
     }

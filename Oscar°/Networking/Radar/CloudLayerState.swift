@@ -20,18 +20,11 @@ final class CloudLayerState {
     private(set) var frameKeys: [String] = []
     private(set) var frameTimestamps: [String] = []
     private(set) var bounds: OscarRadarBounds?
-    /// Byte-identical wire shape to the radar motion payload.
     private(set) var motion: RadarMotionData?
-    /// Bumped on metadata and every payload arrival — the coordinator's `syncAll`
-    /// reads it in the observation preamble and re-syncs when loads land.
     private(set) var loadRevision = 0
     private(set) var isActive = false
 
     // MARK: Standalone timeline (TimelinePlayerState)
-    //
-    // Used only when clouds are the SELECTED layer (own scrubber through the
-    // nowcast). In underlay mode the radar timeline stays the clock and these
-    // stay idle.
 
     var currentFrameIndex: Int = 0 {
         didSet {
@@ -59,15 +52,10 @@ final class CloudLayerState {
     @ObservationIgnored private var loadSessionID = UUID()
     @ObservationIgnored private var lastAnchorIndex = 0
 
-    /// Mirrors the radar metadata cache window.
     private static let metadataStaleAfter: TimeInterval = 10 * 60
-    /// Decoded payloads kept around the anchor (≈3.6 MB each at the 2048 overview),
-    /// sized from the process's memory headroom like the radar grids.
     private static let residencyBudget = adaptiveCacheBudget(
         fraction: 0.06, floor: 32 * 1024 * 1024, cap: 100 * 1024 * 1024)
     private static let residencyRadius = max(4, residencyBudget / 3_600_000 / 2)
-    /// Frames fetched around the anchor per prefetch pass — clouds are the
-    /// secondary consumer, one below the radar's focused window.
     private static let focusedCount = 4
 
     private static let instances = NSHashTable<CloudLayerState>.weakObjects()
@@ -76,14 +64,10 @@ final class CloudLayerState {
         Self.instances.add(self)
     }
 
-    /// Resolved clouds palette: server `/colormaps/clouds` preferred, local
-    /// fallback when unreachable (mirrors `OscarRadarState.resolvedPalette`).
     static func resolvedPalette() async -> [PixelRGBA] {
         await ServerPalettes.resolve(id: colormapId) ?? localPalette
     }
 
-    /// Kept in sync with oscar-server's `Colormaps.cloudsPalette256`: index 0
-    /// transparent; 1…255 a cool blue-grey → near-white ramp, alpha 0→210.
     static let localPalette: [PixelRGBA] = {
         func mix(_ a: Double, _ b: Double, _ t: Double) -> UInt8 {
             UInt8(clamping: Int((a + (b - a) * t).rounded()))
@@ -101,8 +85,6 @@ final class CloudLayerState {
         return out
     }()
 
-    /// App-level memory-warning hook: keep only the frames beside each
-    /// instance's last anchor; everything else reloads on demand.
     static func purgeDecodedCaches() {
         for state in instances.allObjects {
             state.prefetchTask?.cancel()
@@ -122,8 +104,6 @@ final class CloudLayerState {
 
     // MARK: - Activation
 
-    /// Activate (fetch metadata, allow prefetch) or deactivate (cancel work,
-    /// drop decoded frames, keep metadata for a cheap re-toggle).
     func setActive(_ active: Bool) {
         guard active != isActive else { return }
         isActive = active
@@ -167,9 +147,6 @@ final class CloudLayerState {
         currentFrameIndex = next
     }
 
-    /// Stops the internal Timer without changing `isPlaying` — while playing,
-    /// the map layer's display link owns frame advancement (both running would
-    /// double-advance; same ownership rule as the radar/model layers).
     func cancelInternalTimer() {
         playback.stop()
     }
@@ -193,14 +170,12 @@ final class CloudLayerState {
         handleSelectionChanged()
     }
 
-    /// The displayed frame (render anchor with selection fallback) plus its key.
     var currentFrameKeyed: (key: String, payload: RadarGridPayload)? {
         let index = renderFrameIndex ?? currentFrameIndex
         guard frameKeys.indices.contains(index), let payload = payloads[frameKeys[index]] else { return nil }
         return (frameKeys[index], payload)
     }
 
-    /// The next loaded frame — the crossfade target in standalone playback.
     var nextFrameKeyed: (key: String, payload: RadarGridPayload)? {
         guard !frameKeys.isEmpty else { return nil }
         let anchor = renderFrameIndex ?? currentFrameIndex
@@ -211,7 +186,6 @@ final class CloudLayerState {
         return (frameKeys[next], payload)
     }
 
-    /// True on the exact closest-to-now frame (the radar's LIVE convention).
     var isCurrentFrameLive: Bool {
         guard !frameKeys.isEmpty else { return false }
         return currentFrameIndex == closestTimestampIndex(in: frameDates)
@@ -225,7 +199,6 @@ final class CloudLayerState {
         prefetch(aroundKey: frameKeys[currentFrameIndex])
     }
 
-    /// Foreground/staleness hook (WeatherMapDetailView's refresh loop).
     func refreshIfStale() {
         guard isActive else { return }
         loadMetadataIfStale()
@@ -250,8 +223,6 @@ final class CloudLayerState {
         do {
             guard let response = try await APIClient.shared.cloudFrames() else {
                 guard loadSessionID == sessionID else { return }
-                // 503 = server warming up, 404 = layer not configured — treat both as
-                // "no cloud frames right now" and retry via the staleness loop.
                 lastMetadataLoad = Date()
                 if frameKeys.isEmpty {
                     error = String(localized: "Satellitenbilder sind derzeit nicht verfügbar.")
@@ -262,16 +233,9 @@ final class CloudLayerState {
             decoded = response
         } catch {
             guard loadSessionID == sessionID else { return }
-            // Held frames keep serving through a failed refresh; only an empty
-            // state surfaces the failure (mirrors OscarRadarState). Cancellation
-            // (deactivating the layer mid-load) is not a failure. The generated
-            // client wraps transport/decode errors in `ClientError`, so classify
-            // the cause inside, not the wrapper.
             let cause = (error as? ClientError)?.underlyingError ?? error
             let cancelled = cause is CancellationError || (cause as? URLError)?.code == .cancelled
             if frameKeys.isEmpty, !cancelled {
-                // Unexpected statuses and undecodable payloads read as "not
-                // available"; genuine transport failures keep their description.
                 if (cause as? URLError)?.code == .badServerResponse || cause is DecodingError {
                     self.error = String(localized: "Satellitenbilder sind derzeit nicht verfügbar.")
                 } else {
@@ -293,8 +257,6 @@ final class CloudLayerState {
         indexByKey = Dictionary(uniqueKeysWithValues: keys.enumerated().map { ($1, $0) })
         bounds = (decoded.image_bounds ?? decoded.bounds).asDomain
         lastMetadataLoad = Date()
-        // Metadata replaced the key list; drop payloads for keys that vanished and
-        // remap the index-based bookkeeping to the new ordering.
         payloads = payloads.filter { indexByKey[$0.key] != nil }
         loadedFrameIndices = Set(payloads.keys.compactMap { indexByKey[$0] })
         loadingFrameIndices = Set(loadingKeys.compactMap { indexByKey[$0] })
@@ -323,10 +285,6 @@ final class CloudLayerState {
 
     // MARK: - Prefetch
 
-    /// Load frames around the anchor key (the current selection; exact match or
-    /// nearest by date). Serial download+decode through the shared lane;
-    /// thermally gated. A new anchor supersedes a running pass — the freshest
-    /// position wins.
     func prefetch(aroundKey key: String) {
         guard isActive, !frameKeys.isEmpty else { return }
         let anchor = indexByKey[key] ?? nearestIndex(to: key)
@@ -357,8 +315,6 @@ final class CloudLayerState {
     }
 
     private func nearestIndex(to key: String) -> Int {
-        // Radar and cloud keys share the format, so lexicographic order is
-        // chronological — nearest at-or-before wins.
         var best = 0
         for (index, frameKey) in frameKeys.enumerated() where frameKey <= key {
             best = index

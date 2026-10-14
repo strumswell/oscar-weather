@@ -43,7 +43,6 @@ struct MemberCard: View {
             overlayLayer
         }
         .coordinateSpace(.named(Self.coordinateSpaceName))
-        // Card-level gesture captures scale+rotation while dragging a sticker.
         .simultaneousGesture(
             MagnifyGesture()
                 .simultaneously(with: RotateGesture())
@@ -164,7 +163,6 @@ struct MemberCard: View {
 
     private func openDock() {
         guard !isEditing else { return }
-        // Discrete row height: an animated List row height jitters against the cell resize.
         var instant = Transaction()
         instant.disablesAnimations = true
         withTransaction(instant) {
@@ -357,8 +355,6 @@ struct MemberCard: View {
         }
 
         let finalScale = clampedScale(placement.scale * inFlightScaleMultiplier)
-        // Reject only drops that left the card. The check uses the pre-pinch size so a
-        // resize near the edge is kept and clamped instead of thrown away.
         let allowedCenterBounds = stickerCenterBounds(for: placement.scale, in: cardSize)
 
         guard allowedCenterBounds.contains(proposedCenter) else {

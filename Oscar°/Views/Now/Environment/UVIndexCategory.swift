@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// WHO exposure categories, decided on the rounded index like the WHO tables.
 enum UVIndexCategory: CaseIterable {
     case low, moderate, high, veryHigh, extreme
 
@@ -14,8 +13,6 @@ enum UVIndexCategory: CaseIterable {
         }
     }
 
-    /// Continuous value span used for chart bands. The edges sit where the rounded
-    /// index changes category, so a band never contradicts the badge.
     var range: Range<Double> {
         switch self {
         case .low: 0..<2.5

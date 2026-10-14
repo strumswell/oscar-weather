@@ -1,16 +1,8 @@
 import SwiftUI
 
-/// Settings > Ansicht. A segment picks what to edit. Kennzahlen: the head
-/// under the real sky and an edit list that sorts (drag handle) and shows
-/// or hides (check circle) its rows; hidden rows keep their place in the
-/// order, and the circles are buttons, not List selection, since a drag on
-/// a selected row would carry every selected row along. Abschnitte: the
-/// page itself as a drag canvas, see `NowLayoutCanvas`.
 struct NowLayoutSettingsView: View {
     enum Part { case metrics, sections }
 
-    /// Trailing under a back button (Settings push), leading beside the
-    /// sheet's close button.
     var resetPlacement: ToolbarItemPlacement = .topBarTrailing
 
     @Environment(Weather.self) private var weather
@@ -95,8 +87,6 @@ struct NowLayoutSettingsView: View {
     }
 }
 
-/// A row with a leading check circle that looks like List's edit-mode
-/// selection; the whole row toggles.
 private struct CheckRow<Content: View>: View {
     let isOn: Bool
     let toggle: () -> Void

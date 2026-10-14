@@ -1,16 +1,4 @@
 #if DEBUG
-//
-//  ScreenshotFixtureServer.swift
-//  Oscar°
-//
-//  URLProtocol fake server behind `-screenshotScene`: intercepts the forecast
-//  (single and batched), geocoding, air-quality, alert, ensemble, archive and
-//  notification endpoints on URLSession.shared and answers from
-//  ScreenshotFixtures. oscar-server's radar
-//  endpoints (frames, value grids, raster tiles, motion, cells, series) are
-//  answered from SyntheticRadar so the map and widget scenes are deterministic.
-//  Everything else (basemap tiles, colormaps) passes through untouched.
-//
 
 import Foundation
 import HTTPTypes
@@ -41,9 +29,6 @@ final class ScreenshotFixtureServer: URLProtocol {
 
     // MARK: - Staged responses (non-URLProtocol paths)
 
-    /// The fixture payload for a URL, or nil to let it hit the network.
-    /// Backs the URLProtocol AND the APIClient staging seams — watchOS runs
-    /// URLSession loading out of process, so URLProtocol never fires there.
     static func stagedResponse(for url: URL) -> (body: Data, contentType: String)? {
         guard ScreenshotMode.active, let route = route(for: url) else { return nil }
         return try? route(url)
@@ -66,11 +51,6 @@ final class ScreenshotFixtureServer: URLProtocol {
         { url in (try JSONSerialization.data(withJSONObject: make(url)), "application/json") }
     }
 
-    /// Binary radar assets. The payload is a PNG (`UIImage(data:)` sniffs the
-    /// format, and so does the widget's tile decoder), but it must be announced
-    /// as WebP: the generated oscar-server client accepts exactly the content
-    /// types the spec lists for these operations, and a mismatch throws instead
-    /// of returning the image — which silently emptied the radar map.
     private static func radarImage(_ make: @escaping (URL) -> Data) -> Route {
         { url in (make(url), "image/webp") }
     }
@@ -86,9 +66,6 @@ final class ScreenshotFixtureServer: URLProtocol {
 
         switch host {
         case "api.open-meteo.com" where path.hasPrefix("/v1/forecast"):
-            // A comma-separated latitude list is the Orte list's batch form,
-            // and Open-Meteo answers THAT with an array — the single-location
-            // object would not decode there.
             return json { url in
                 if isBatchForecast(url) {
                     return ScreenshotFixtures.conditionsBatchJSON(for: url)
@@ -110,10 +87,8 @@ final class ScreenshotFixtureServer: URLProtocol {
         guard url.absoluteString.hasPrefix(radarBaseURL) else { return nil }
 
         if path.hasPrefix("/radar/series") {
-            // Per coordinate: the Orte list asks one series per saved place.
             return json { url in ScreenshotFixtures.precipSeriesJSON(for: url) }
         }
-        // Windy's terms forbid webcam images in anything published.
         if path.hasPrefix("/webcams") {
             return json { _ in ["webcams": [Any]()] }
         }
@@ -127,10 +102,6 @@ final class ScreenshotFixtureServer: URLProtocol {
             }
         }
 
-        // Synthetic radar: /radar/{region}/frames[/{key}/(grid|tiles/z/x/y)]
-        // plus /radar/{region}/(motion|cells). The clouds endpoints share the radar
-        // wire shape, so the same synthetic generators answer them. Colormaps and
-        // basemaps stay live.
         let parts = path.split(separator: "/").map(String.init)
         guard parts.first == "radar" || parts.first == "clouds", parts.count >= 3 else { return nil }
         let isClouds = parts.first == "clouds"
@@ -158,8 +129,6 @@ final class ScreenshotFixtureServer: URLProtocol {
     }
 }
 
-/// OpenAPI-client edition of the fixture server, prepended to every generated
-/// client via `APIClient.stagingMiddlewares` (see there for the watchOS why).
 struct ScreenshotFixtureMiddleware: ClientMiddleware {
     func intercept(
         _ request: HTTPRequest,
@@ -168,9 +137,6 @@ struct ScreenshotFixtureMiddleware: ClientMiddleware {
         operationID: String,
         next: (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
     ) async throws -> (HTTPResponse, HTTPBody?) {
-        // Concatenate, don't resolve: request.path is relative to the server
-        // URL, and URL(string:relativeTo:) would drop the base's own path
-        // segment (e.g. the /v1 in api.open-meteo.com/v1).
         if let url = URL(string: baseURL.absoluteString + (request.path ?? "")),
            let staged = ScreenshotFixtureServer.stagedResponse(for: url) {
             var response = HTTPResponse(status: .ok)

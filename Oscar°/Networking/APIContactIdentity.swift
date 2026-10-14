@@ -28,9 +28,6 @@ extension URLRequest {
   }
 }
 
-/// Counts network requests per host for the usage statistics. Placed behind
-/// `CachingMiddleware`, so cache hits stay uncounted; retries sit inside it
-/// and count once. Widgets and the watch never set the hook and count nothing.
 nonisolated struct UsageCountingMiddleware: ClientMiddleware {
   nonisolated(unsafe) static var onRequest: (@Sendable (_ host: String) -> Void)?
 

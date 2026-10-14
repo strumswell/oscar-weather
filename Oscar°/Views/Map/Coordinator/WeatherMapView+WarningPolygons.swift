@@ -16,8 +16,6 @@ extension WeatherMapView.Coordinator {
         let maxLon: Double
     }
 
-    /// The map's visible bounds as a box; falls back to a viewport-sized window
-    /// around the given center before the map has laid out.
     private func visibleAlertBox(fallbackCenter: CLLocationCoordinate2D) -> AlertFetchBox {
         if let bounds = mapView?.visibleCoordinateBounds,
            bounds.ne.latitude > bounds.sw.latitude {
@@ -32,8 +30,6 @@ extension WeatherMapView.Coordinator {
         )
     }
 
-    /// Visible bounds + 50% pan/zoom headroom per side, clamped to the server's
-    /// 25°×40° `/area` guard and world bounds.
     private func alertRequestBox(visible: AlertFetchBox) -> AlertFetchBox {
         let latPad = (visible.maxLat - visible.minLat) * 0.5
         let lonPad = (visible.maxLon - visible.minLon) * 0.5
@@ -43,10 +39,6 @@ extension WeatherMapView.Coordinator {
         ))
     }
 
-    /// Shrinks a box to the server's `/area` span guard (kept centered) and clamps
-    /// it to world bounds. Also applied to the *visible* box in the outgrown check:
-    /// a whole-continent viewport can never be contained by any fetchable box, and
-    /// comparing the clamped (= servable) part prevents a refetch-every-sync loop.
     private func clampedToAreaGuard(_ box: AlertFetchBox) -> AlertFetchBox {
         let maxLatSpan = 24.0
         let maxLonSpan = 38.0
@@ -75,9 +67,6 @@ extension WeatherMapView.Coordinator {
             && inner.minLon >= outer.minLon && inner.maxLon <= outer.maxLon
     }
 
-    /// Warning areas draw ON TOP of whichever radar/model layer is active —
-    /// translucent severity-colored fills plus a crisp outline, refreshed at
-    /// most every 5 minutes while the toggle is on.
     func syncAlertPolygons(style: MLNStyle, active: Bool) {
         guard active else {
             removeAlertPolygonLayers(from: style)
@@ -88,9 +77,6 @@ extension WeatherMapView.Coordinator {
         let visible = visibleAlertBox(fallbackCenter: center)
         let request = alertRequestBox(visible: visible)
         let isStale = alertOverlayFetchedAt.map { Date().timeIntervalSince($0) > 300 } ?? true
-        // The fetch box is the visible bounds plus pan/zoom headroom, so a refetch
-        // is needed whenever the viewport outgrows the last fetched box (long pan
-        // OR zoom-out) — otherwise warnings would silently stop at the box edge.
         let outgrown = alertOverlayBox.map { !alertBoxContains($0, clampedToAreaGuard(visible)) } ?? true
         if (isStale || outgrown), !isLoadingAlertOverlay {
             isLoadingAlertOverlay = true
@@ -105,10 +91,6 @@ extension WeatherMapView.Coordinator {
                     self.alertOverlayData = data
                     self.alertOverlayFetchedAt = Date()
                     self.alertOverlayBox = request
-                    // Swap the shapes into the existing sources instead of tearing
-                    // them down: MapLibre re-tiles a fresh GeoJSON source
-                    // asynchronously, so a rebuild blanks the polygons for a beat on
-                    // every refresh (the isobar sources use the same pattern).
                     if let style = self.mapView?.style,
                        style.source(withIdentifier: WeatherMapView.alertSourceID(0)) != nil,
                        let chunks = Self.alertShapeChunks(data: data) {
@@ -121,8 +103,6 @@ extension WeatherMapView.Coordinator {
                     }
                 } catch {
                     weatherMapLogger.error("Alert polygon fetch failed: \(error.localizedDescription, privacy: .public)")
-                    // Back off until the staleness window elapses; keep stale data
-                    // visible and stop outgrown-retriggering for the attempted box.
                     self?.alertOverlayFetchedAt = Date()
                     self?.alertOverlayBox = request
                 }
@@ -134,12 +114,6 @@ extension WeatherMapView.Coordinator {
               let chunks = Self.alertShapeChunks(data: data)
         else { return }
 
-        // Severity ranks: 1 Minor (default), 2 Moderate, 3 Severe, 4 Extreme.
-        // Typed constructor — MapLibre's NSExpression parser rejects the old
-        // MGL_MATCH format-string spelling at runtime. Meteoalarm's ladder has
-        // no Minor (yellow IS Moderate), so its shapes color one step lighter
-        // to match the national services' own maps; mirrors
-        // `AlertSeverityStyle.color(rank:source:)`.
         let meteoalarmColor = NSExpression(
             forMLNMatchingKey: NSExpression(forKeyPath: "severity_rank"),
             in: [
@@ -177,28 +151,18 @@ extension WeatherMapView.Coordinator {
                 identifier: WeatherMapView.alertOutlineLayerID(index), source: source)
             outline.lineColor = severityColor
             outline.lineWidth = NSExpression(forConstantValue: 1.6)
-            // Outlines only from regional zoom in: Meteoalarm neighbors
-            // genuinely neither touch nor share borders (thin gap strips
-            // between French departments), so at country scale the doubled
-            // border lines collapse into scribble artifacts — there the
-            // fills alone carry the severity, like DWD's own warning map.
             outline.lineOpacity = NSExpression(
                 forMLNInterpolating: NSExpression(forVariable: "zoomLevel"),
                 curveType: .linear,
                 parameters: nil,
                 stops: NSExpression(forConstantValue: [6.2: 0, 7.2: 0.9])
             )
-            // Round joins: the default miter shoots needle spikes off acute
-            // vertices in the server's viewport-decimated rings.
             outline.lineJoin = NSExpression(forConstantValue: "round")
             outline.lineCap = NSExpression(forConstantValue: "round")
             insertOverlayLayer(outline, in: style)
         }
     }
 
-    /// The fetched FeatureCollection distributed round-robin into
-    /// `alertSourceCount` chunks (see the source-ID comment). Always returns
-    /// exactly that many shapes; a non-collection payload lands in chunk 0.
     private static func alertShapeChunks(data: Data) -> [MLNShape]? {
         guard let shape = try? MLNShape(data: data, encoding: String.Encoding.utf8.rawValue)
         else { return nil }

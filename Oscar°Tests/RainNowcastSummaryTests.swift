@@ -40,7 +40,6 @@ struct RainNowcastSummaryTests {
 }
 
 struct SyntheticRadarTests {
-    /// The onboarding's fast grid must match sampling `intensity` per pixel.
     @Test
     func fastGridMatchesPerPixelSampling() {
         for minutes in [0.0, 45, 120] {

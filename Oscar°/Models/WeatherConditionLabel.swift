@@ -1,6 +1,5 @@
 import Foundation
 
-/// Weather-code families as short labels, shared by the app and the watch.
 enum WeatherConditionLabel {
     static func text(for code: Int) -> String {
         switch code {
@@ -29,8 +28,6 @@ enum WeatherConditionLabel {
         }
     }
 
-    /// Label for an already-derived condition family (the mapper may have
-    /// upgraded a dry code to rain based on radar).
     static func text(for family: AtmosphereConditionFamily) -> String {
         switch family {
         case .clear:

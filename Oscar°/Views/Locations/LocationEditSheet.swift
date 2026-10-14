@@ -9,8 +9,6 @@
 
 import SwiftUI
 
-/// What the edit sheet operates on: a saved city, or the current location
-/// (whose personalization lives in UserDefaults, see CityService).
 enum LocationEditTarget: Identifiable {
     case city(City)
     case currentLocation
@@ -35,15 +33,12 @@ struct LocationEditSheet: View {
     @FocusState private var emojiFieldFocused: Bool
     private let cityService = CityService.shared
 
-    /// Curated set covering the common cases (home, work, family, travel).
     private static let emojiChoices = [
         "🏠", "🏢", "💼", "🏫", "👵", "👴", "👨‍👩‍👧", "❤️",
         "🌲", "⛰️", "🏖️", "🌊", "🎿", "🏕️", "⚽️", "🚜",
         "✈️", "🚗", "⛵️", "🎡", "🐶", "🐴", "🍇", "🎣",
     ]
 
-    /// Label suggestions; picking one also proposes a fitting emoji when
-    /// none is chosen yet.
     private static let labelSuggestions: [(label: String, emoji: String)] = [
         (String(localized: "Zuhause"), "🏠"),
         (String(localized: "Arbeit"), "💼"),
@@ -72,8 +67,6 @@ struct LocationEditSheet: View {
         return false
     }
 
-    /// What "nothing picked" means for this target: the GPS entry falls back
-    /// to its location glyph, a saved city to no mark at all.
     private var standardMark: PlacePersonalization.Mark {
         isCurrentLocationTarget ? .locationGlyph : .plain
     }
@@ -108,9 +101,6 @@ struct LocationEditSheet: View {
                                 Button {
                                     withAnimation(.snappy) {
                                         customLabel = suggestion.label
-                                        // Only propose an emoji while the mark
-                                        // is untouched — an explicit choice
-                                        // (incl. "none") is respected.
                                         if mark == standardMark {
                                             mark = .emoji(suggestion.emoji)
                                         }
@@ -155,8 +145,6 @@ struct LocationEditSheet: View {
                 }
 
                 Section {
-                    // Stock switch green; the tab's cascading label tint would
-                    // paint the track white/black.
                     Toggle("Standardort", isOn: $isDefault)
                         .tint(.green)
                 } footer: {
@@ -183,8 +171,6 @@ struct LocationEditSheet: View {
         .presentationDragIndicator(.visible)
     }
 
-    /// One selectable cell in the mark grid — shared chrome and selection;
-    /// the face is the given SF symbol, or the mark's emoji itself.
     private func markCell(_ value: PlacePersonalization.Mark, symbol: String? = nil) -> some View {
         let isSelected = mark == value
         return Button {
@@ -215,21 +201,16 @@ struct LocationEditSheet: View {
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
-    /// Symbol cells keep a filled base so the glyph reads as a button; emoji
-    /// are their own face and sit on clear. Selection highlights either way.
     private func cellFill(isSelected: Bool, isSymbol: Bool) -> AnyShapeStyle {
         if isSelected { return AnyShapeStyle(.fill.secondary) }
         return isSymbol ? AnyShapeStyle(.fill.tertiary) : AnyShapeStyle(.clear)
     }
 
-    /// Whether the chosen emoji came from the keyboard rather than the grid.
     private var customEmojiSelected: Bool {
         guard let emoji = mark.emoji else { return false }
         return !Self.emojiChoices.contains(emoji)
     }
 
-    /// Free choice beyond the curated grid: the cell opens the emoji keyboard
-    /// and shows whatever was picked there.
     private var customEmojiCell: some View {
         ZStack {
             if customEmojiSelected, let emoji = mark.emoji {

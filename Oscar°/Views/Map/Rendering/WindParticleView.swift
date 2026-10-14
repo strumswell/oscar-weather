@@ -11,10 +11,6 @@ private final class WindParticleDisplayLinkProxy: NSObject {
 
 // MARK: - Wind particle overlay
 
-/// A transparent UIView that renders animated wind particles above the map.
-/// Placed as a sibling above the MLNMapView; the coordinator forwards region
-/// changes so particles re-seed after pan/zoom.
-/// Respects Reduce Motion: hidden when the system preference is enabled.
 final class WindParticleView: UIView { 
 
     // MARK: - Configuration
@@ -94,7 +90,6 @@ final class WindParticleView: UIView {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            // The observer is registered with `queue: .main`, so this fires on the main actor.
             MainActor.assumeIsolated { self?.applyReduceMotionState() }
         }
         thermalObserver = NotificationCenter.default.addObserver(
@@ -147,9 +142,6 @@ final class WindParticleView: UIView {
     }
 
     private func rebuildBitmapContext() {
-        // 2× is indistinguishable for soft trails and nearly halves the pixels the
-        // fade + stroke + makeImage copy touch every tick (thermal, see the device
-        // overheat history around parallel decode).
         let scale = min(2, window?.windowScene?.screen.scale ?? traitCollection.displayScale)
         let pw = bounds.width
         let ph = bounds.height
@@ -166,7 +158,6 @@ final class WindParticleView: UIView {
             bitmapInfo: CGBitmapInfo.byteOrder32Little.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue
         ) else { return }
 
-        // Flip to UIKit coordinate system (origin top-left, y increases downward).
         ctx.translateBy(x: 0, y: CGFloat(h))
         ctx.scaleBy(x: scale, y: -scale)
         bitmapContext = ctx
@@ -178,7 +169,6 @@ final class WindParticleView: UIView {
         guard w > 0, h > 0 else { return }
         let zoomLevel = approximateZoomLevel(for: mapView)
         let zoomDensityScale = particleDensityScale(for: zoomLevel)
-        // Thermal backpressure: fewer particles once the device runs warm.
         let thermalScale: CGFloat
         switch ProcessInfo.processInfo.thermalState {
         case .critical: thermalScale = 0.25
@@ -190,8 +180,6 @@ final class WindParticleView: UIView {
     }
 
     private func randomParticle(w: Float, h: Float) -> Particle {
-        // ~2.3–5.7 s at 30 fps: long enough for coherent streamlines, short
-        // enough that the field re-seeds visibly after pan/zoom.
         return Particle(
             x: Float.random(in: 0..<w),
             y: Float.random(in: 0..<h),
@@ -235,21 +223,14 @@ final class WindParticleView: UIView {
         let metersScale = particleVelocityScale(
             forContinuousZoom: continuousZoomLevel(for: mapView), usesGlobalModelStyle: usesGlobalModelStyle)
         let minPixelStep: Float = 0.2
-        // Hard ceiling on the per-tick step — degenerate samples (tile seams,
-        // spike values) must never paint screen-length streaks.
         let maxPixelStep: Float = 14
         let dt = max(0.5, deltaMs / 16.667)
 
-        // Fade previous strokes instead of fully clearing, so particles leave trails.
-        // 0.05/tick ≈ a ~0.7 s tail at 30 fps — the trail comes from persistence,
-        // not from stretching the per-tick step. Far-out zooms get a slower fade:
-        // continent-scale streamlines read better with longer tails.
         let frameRect = CGRect(origin: .zero, size: CGSize(width: w, height: h))
         ctx.setBlendMode(.destinationOut)
         ctx.setFillColor(UIColor.black.withAlphaComponent(zoomLevel <= 4 ? 0.035 : 0.05).cgColor)
         ctx.fill(frameRect)
 
-        // Stroke style tuned for readability over busy radar/map imagery.
         ctx.setBlendMode(.normal)
         if usesGlobalModelStyle {
             ctx.setStrokeColor(red: 232/255, green: 244/255, blue: 1, alpha: 0.9)
@@ -261,8 +242,6 @@ final class WindParticleView: UIView {
 
         let fw = Float(w)
         let fh = Float(h)
-        // Axis-aligned fast path: per-particle conversions in plain Web-Mercator math
-        // (two MapLibre `convert` calls per particle per tick would be the slow path).
         let visible = mapView.visibleCoordinateBounds
         let isAxisAligned = mapView.direction == 0 && mapView.camera.pitch == 0
         let nw = Self.mercatorUnit(latitude: visible.ne.latitude, longitude: visible.sw.longitude)
@@ -328,7 +307,6 @@ final class WindParticleView: UIView {
             let nx = sx + dx
             let ny = sy + dy
 
-            // Cull particles that left the visible area
             if nx < -20 || ny < -20 || nx > fw + 20 || ny > fh + 20 {
                 particles[i].age = particles[i].ttl
                 continue
@@ -392,14 +370,12 @@ final class WindParticleView: UIView {
 
     // MARK: - Tile management
 
-    /// Called by the map coordinator when the region changes.
     func onMapRegionChanged() {
         guard let key = frameKey, let layer = activeLayer else { return }
         fetchVisibleTiles(frameId: key, layer: layer)
         resetParticles()
     }
 
-    /// Kick off a prefetch for an adjacent frame (fire-and-forget).
     func prefetchFrame(frameId: String, layer: WeatherTileLayer) {
         guard let mapView else { return }
         let (z, positions) = visibleTilePositions(in: mapView)
@@ -494,27 +470,16 @@ final class WindParticleView: UIView {
         }
     }
 
-    /// Continuous, UNCAPPED zoom for the velocity scale. approximateZoomLevel's
-    /// cap at 8 (the wind-tile zoom ceiling) must not leak in here: past the cap
-    /// the 2^z compensation stopped tracking the map scale, so the per-tick pixel
-    /// step doubled with every further zoom level — the "endless very long
-    /// particles" deep-zoom bug.
     private func continuousZoomLevel(for mapView: MLNMapView) -> Double {
         let visible = mapView.visibleCoordinateBounds
         let lonSpan = visible.ne.longitude - visible.sw.longitude
         return max(0, log2(360.0 / max(0.001, lonSpan)) + 1)
     }
 
-    /// Degrees-per-(m/s) factor chosen so a given wind speed moves a particle the
-    /// SAME number of screen pixels at every zoom (the 2^z term cancels the map
-    /// scale): 10 m/s ≈ 50 px/s. Far-out zooms are damped a touch — continental
-    /// views read better when the field drifts rather than races.
     private func particleVelocityScale(
         forContinuousZoom zoom: Double, usesGlobalModelStyle: Bool
     ) -> Double {
         let scaleInvariant = 65.0 * pow(2, 6 - zoom)
-        // Far-out boost: at continent scale the same px/s reads as stubby dashes,
-        // so let the field flow faster (Windy-style long streamlines).
         let farOutBoost: Double
         switch zoom {
         case ...3.5: farOutBoost = 1.7

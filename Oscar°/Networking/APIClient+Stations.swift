@@ -1,12 +1,9 @@
 import CoreLocation
 import Foundation
 
-/// oscar-server `/stations/nearby` rows, shown as `ForEach` chips and cards.
 extension Components.Schemas.NearbyStation: Identifiable {}
 
 extension APIClient {
-  /// The nearest stations with fresh readings, nearest first. Empty outside
-  /// oscar-server's station coverage (Europe), without a request.
   func getNearbyStations(coordinates: CLLocationCoordinate2D) async throws
     -> [Components.Schemas.NearbyStation]
   {

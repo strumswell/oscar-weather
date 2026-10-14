@@ -66,8 +66,6 @@ extension WeatherMapView.Coordinator {
         }
 
         if lastBounds != bounds {
-            // Region switch: frame keys are bare timestamps that collide across
-            // regions — the texture cache must go too.
             layer.purgeTextures()
             lastBounds = bounds
             lastFrameKey = nil
@@ -91,16 +89,10 @@ extension WeatherMapView.Coordinator {
         blocked(nil)
 
         guard let textureA = layer.texture(for: frame) else {
-            // No Metal device yet (didMove pending) — retry without stamping
-            // lastFrameKey, or this frame would never be re-displayed.
             scheduleSyncRetry()
             return
         }
         let textureB = next.flatMap { layer.texture(for: $0) }
-        // Flow lookup: exact adjacent pair first; when the displayed pair skips
-        // served frames (progressive loading), fall back to the FROM frame's
-        // field and rescale by the real timestamp gap. Never morph backwards
-        // across the loop seam (negative gap) or across data holes (> 1 h).
         var flowFieldIndex: Int?
         var flowScale: Float = 0
         if let motion, let next {
@@ -118,13 +110,6 @@ extension WeatherMapView.Coordinator {
         lastRenderIndex = renderedIndex
     }
 
-    /// Motion arrows for the CURRENT observed frame, built client-side from the
-    /// /motion flow field + the frame's in-RAM value grid (one point feature per
-    /// coarse cell that carries precipitation). Replaces the server raster
-    /// vector tiles, whose stretched old-zoom tiles flashed huge arrows during
-    /// zoom transitions — symbol icons are screen-space (no scaling flicker)
-    /// and MapLibre's collision thins them automatically when zooming out.
-    /// Hidden during playback, like the raster tiles were.
     private static let arrowSourceIdentifier = "oscar-motion-arrows"
     private static let arrowImageName = "oscar-motion-arrow"
 
@@ -158,13 +143,11 @@ extension WeatherMapView.Coordinator {
             layer.iconImageName = NSExpression(forConstantValue: Self.arrowImageName)
             layer.iconRotation = NSExpression(forKeyPath: "rotation")
             layer.iconScale = NSExpression(forKeyPath: "scale")
-            // Map-aligned: arrows keep their geographic direction when the map
-            // rotates; their SIZE stays screen-space at every zoom.
             layer.iconRotationAlignment = NSExpression(forConstantValue: "map")
             layer.iconAllowsOverlap = NSExpression(forConstantValue: false)
             layer.iconOpacity = NSExpression(forConstantValue: 0.9)
             style.addSource(source)
-            style.addLayer(layer)     // topmost — arrows read above the labels
+            style.addLayer(layer)
         }
         arrowSourceID = desiredID
     }
@@ -180,11 +163,6 @@ extension WeatherMapView.Coordinator {
 // MARK: Handover sweep (nowcast ↔ model)
 
 extension WeatherMapView.Coordinator {
-    /// When the selection crosses between the radar nowcast and the model
-    /// hours, a soft light line sweeps across the map (left to right going
-    /// forward, back going back) and wipes the incoming layer in behind it,
-    /// each side named next to the line. Playback wrapping from the last model
-    /// hour back to the radar start is a loop, not a handover: no sweep.
     func syncHandover(radarActive: Bool, showsModelPart: Bool, isPlaying: Bool) {
         defer { lastShowsModelPart = radarActive ? showsModelPart : nil }
         guard radarActive, let mapView, !UIAccessibility.isReduceMotionEnabled,
@@ -200,16 +178,13 @@ extension WeatherMapView.Coordinator {
         }
     }
 
-    /// Model left of the edge, radar right of it; nil ends the sweep.
     private func applyHandoverWipe(_ edge: Float?) {
-        if edge == nil { syncAll() }   // hides the outgoing layer before the clip goes
+        if edge == nil { syncAll() }
         radarLayer?.setWipe(edge: edge, keepsLeft: false)
         modelLayer?.setWipe(edge: edge, keepsLeft: true)
     }
 }
 
-/// Drives one sweep on one display link: moves the light line (a gradient band
-/// over the map) with a label on each side, and reports the clip edge in NDC x.
 @MainActor
 final class MapHandoverSweep {
     private static let duration: CFTimeInterval = 1.4
@@ -275,7 +250,6 @@ final class MapHandoverSweep {
         let t = min(1, (CACurrentMediaTime() - start) / Self.duration)
         let eased = t * t * (3 - 2 * t)
         let x = (forward ? eased : 1 - eased) * view.bounds.width
-        // Quick fade in, hold, fade out over the last fifth.
         let alpha = min(1, t / 0.12, (1 - t) / 0.2)
         CATransaction.begin()
         CATransaction.setDisableActions(true)
@@ -299,7 +273,6 @@ final class MapHandoverSweep {
         label.textAlignment = alignment
         label.alpha = 0
         label.isUserInteractionEnabled = false
-        // Soft dark halo: legible over any radar color without a backing plate.
         label.layer.shadowColor = UIColor.black.cgColor
         label.layer.shadowOpacity = 0.55
         label.layer.shadowRadius = 5
@@ -307,7 +280,6 @@ final class MapHandoverSweep {
         return label
     }
 
-    /// Title over source, e.g. "Vorhersage" / "ICON-D2".
     private static func text(title: String, source: String, alignment: NSTextAlignment) -> NSAttributedString {
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = alignment
@@ -327,7 +299,6 @@ final class MapHandoverSweep {
     }
 }
 
-/// Breaks the CADisplayLink retain cycle (the link retains its target).
 private final class HandoverLinkProxy: NSObject {
     weak var target: MapHandoverSweep?
     @MainActor @objc func tick() { target?.step() }

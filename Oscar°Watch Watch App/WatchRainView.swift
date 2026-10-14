@@ -5,9 +5,6 @@
 
 import SwiftUI
 
-/// The radar nowcast without a map: precipitation (mm/h) for the next
-/// ~90 minutes as a bar chart, with the same headline logic as the
-/// lock-screen rain timeline widget.
 struct WatchRainView: View {
     @Environment(Weather.self) private var weather: Weather
 
@@ -35,8 +32,6 @@ struct WatchRainView: View {
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
 
-                // Flexible height, no Spacer: a Spacer would win the layout
-                // fight and squeeze the chart to zero height.
                 chart(bars: bars)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(.vertical, 4)
@@ -60,8 +55,6 @@ struct WatchRainView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    /// Capsule bars like the lock-screen widget — Swift Charts' BarMark gets
-    /// no usable bar width on a continuous date axis, so we lay out manually.
     private func chart(bars: [PrecipPoint]) -> some View {
         let reference = RainNowcastSummary.reference(for: bars.map(\.precipitation))
 

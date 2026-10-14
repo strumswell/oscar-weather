@@ -7,9 +7,6 @@
 
 import SwiftUI
 
-/// Pushed from the radar section header: one sentence on what the radar layer
-/// shows, then a short card per coverage — provider, resolution, measurement
-/// cadence and what to expect. Terse like WeatherModelInfoView.
 struct RadarInfoView: View {
     var body: some View {
         ScrollView {
@@ -65,8 +62,6 @@ struct RadarInfoView: View {
         }
         .navigationTitle("Regenradar")
         .navigationBarTitleDisplayMode(.inline)
-        // Keep the navigation layer clear, or it would paint an opaque background
-        // behind this view and kill the sheet's Liquid Glass at the medium detent.
         .containerBackground(.clear, for: .navigation)
     }
 }

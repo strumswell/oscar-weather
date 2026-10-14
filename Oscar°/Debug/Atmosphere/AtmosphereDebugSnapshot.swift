@@ -8,9 +8,6 @@
 import Foundation
 
 extension AtmosphereWeatherMapper {
-    /// Fully synthetic snapshot for the hidden debug panel. Derived values
-    /// (sun position, cloud density, haze, turbidity) follow the same
-    /// formulas as the live mapper so visual tweaks transfer 1:1.
     static func debugSnapshot(
         timeOfDay: Float,
         condition: AtmosphereConditionFamily,
@@ -20,7 +17,6 @@ extension AtmosphereWeatherMapper {
         windDirectionDegrees: Float,
         aqiHaze: Float
     ) -> AtmosphereSnapshot {
-        // Idealized solar arc: peaks at local noon, bottoms out at midnight.
         let maxElevation: Float = 58 * .pi / 180
         let sunElevation = sin(2 * .pi * (timeOfDay - 0.25)) * maxElevation
         let phase = daylightPhase(sunElevation: sunElevation)
@@ -65,8 +61,6 @@ extension AtmosphereWeatherMapper {
         )
 
         return AtmosphereSnapshot(
-            // Deterministic in timeOfDay so the shader clock doesn't jump
-            // while a slider is being dragged.
             timestamp: Double(timeOfDay) * 86_400,
             timeOfDay: timeOfDay,
             sunElevation: sunElevation,

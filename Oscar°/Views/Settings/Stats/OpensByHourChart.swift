@@ -2,11 +2,9 @@ import Charts
 import SwiftUI
 
 struct OpensByHourChart: View {
-    /// Index = hour of day.
     let counts: [Int]
 
     var body: some View {
-        // Each hour spans [h, h+1) so bar 23 stays inside the plot instead of centering on its edge.
         Chart(counts.enumerated(), id: \.offset) { hour, count in
             BarMark(
                 xStart: .value("Stunde", Double(hour) + 0.15),

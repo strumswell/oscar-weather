@@ -13,20 +13,14 @@ struct StormView: View {
     let strength: Int
     let pacing: SimulationPacing
     let speedMultiplier: Double
-    // State-owned so body re-evaluations don't reset every falling drop;
-    // the call site's .id() swaps it out when the contents change.
     @State private var storm: Storm
 
     var body: some View {
-        // Falling precipitation runs at full display refresh — moving
-        // particles judder visibly at capped frame rates on ProMotion.
         TimelineView(.animation(minimumInterval: pacing.minimumInterval(base: nil), paused: pacing.isPaused)) { timeline in
             Canvas { context, size in
                 storm.sync(strength: strength, direction: direction)
                 storm.update(date: timeline.date, size: size, speedMultiplier: speedMultiplier)
 
-                // Resolve the particle image once per frame, not once per drop: at full display
-                // refresh with hundreds of drops that was thousands of redundant resolves/second.
                 let resolvedImage = context.resolve(storm.image)
                 for drop in storm.drops {
                     var contextCopy = context

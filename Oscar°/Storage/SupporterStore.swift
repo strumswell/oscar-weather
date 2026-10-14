@@ -32,9 +32,6 @@ final class SupporterStore {
 
     private init() {}
 
-    /// Any verified purchase ever made on this Apple ID counts. Refunds and
-    /// lapsed subscriptions keep the flag on purpose. Finished consumables
-    /// appear in the history because of `SKIncludeConsumableInAppPurchaseHistory`.
     func start() async {
         Task {
             for await result in Transaction.updates {

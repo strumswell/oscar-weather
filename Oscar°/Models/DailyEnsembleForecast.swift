@@ -1,7 +1,5 @@
 import Foundation
 
-/// The Open-Meteo ensemble response. Every variable arrives once per run under
-/// dynamic keys (`temperature_2m_max`, `temperature_2m_max_member01`, …).
 struct DailyEnsembleForecastResponse: Decodable {
   let utcOffsetSeconds: Int
   let timezone: String?
@@ -20,7 +18,6 @@ struct DailyEnsembleForecastResponse: Decodable {
   }
 }
 
-/// Per variable, one series per run: the control run first, then the members.
 struct DailyEnsembleForecastDaily: Decodable {
   let time: [String]
   let highs: [[Double?]]
@@ -44,7 +41,6 @@ struct DailyEnsembleForecastDaily: Decodable {
   }
 }
 
-/// One day across all runs of an ensemble.
 struct EnsembleDay: Identifiable {
   let id: Int
   let noon: Double
@@ -58,7 +54,6 @@ struct EnsembleDay: Identifiable {
   let sky: EnsembleSkyMix
 }
 
-/// Where a day's runs land: the extremes, the middle eight in ten, the median.
 struct EnsembleSpread {
   let lowest: Double
   let low: Double
@@ -94,7 +89,6 @@ struct EnsembleSpread {
   }
 }
 
-/// The weather a day's runs settle on, coarsened to what a sky can show.
 enum EnsembleSky: CaseIterable {
   case sun, clouds, rain, snow
 
@@ -112,7 +106,6 @@ struct EnsembleSkyMix {
   let counts: [EnsembleSky: Int]
   let total: Int
   let dominant: EnsembleSky?
-  /// The most common weather code among the dominant runs; what the sim renders.
   let dominantCode: Int?
 
   init(codes: [Int]) {
@@ -179,7 +172,6 @@ private struct DynamicCodingKey: CodingKey {
 }
 
 private extension KeyedDecodingContainer where Key == DynamicCodingKey {
-  /// The control run (`name`) sorts ahead of its members (`name_member01…`).
   func runs(of name: String) -> [[Double?]] {
     allKeys
       .filter { $0.stringValue == name || $0.stringValue.hasPrefix(name + "_member") }

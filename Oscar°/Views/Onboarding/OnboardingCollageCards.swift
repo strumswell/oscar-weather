@@ -1,10 +1,12 @@
 import SwiftUI
 
-/// Compact five-day block built from the real temperature-range bars.
+/// Compact block of up to five staged days built from the real temperature-range bars.
 struct CollageDailyCard: View {
+    var dayCount = 5
+
     var body: some View {
         VStack(spacing: 14) {
-            ForEach(OnboardingSampleData.dailyRows) { row in
+            ForEach(OnboardingSampleData.dailyRows.prefix(dayCount)) { row in
                 HStack(spacing: 8) {
                     Text(row.weekday)
                         .font(.footnote.weight(.semibold))

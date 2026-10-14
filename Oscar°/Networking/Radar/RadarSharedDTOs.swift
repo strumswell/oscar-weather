@@ -15,17 +15,10 @@ typealias ModelFramesResponse = Components.Schemas.ModelFramesResponse
 typealias RadarFrameInfo = Components.Schemas.RadarFrameInfo
 typealias ModelFrameInfo = Components.Schemas.ModelFrameInfo
 
-/// The `bounds` / `image_bounds` object on the frames endpoints (generated as
-/// `image_bounds`, not `imageBounds` — the wire spelling, unlike `validTime` on
-/// `ModelFrameInfo`, isn't camelCased by the generator).
 extension Components.Schemas.RadarBounds {
     var asDomain: OscarRadarBounds { OscarRadarBounds(north: north, south: south, west: west, east: east) }
 }
 
-/// Model frames `bounds` is shape-polymorphic: ECMWF serves lat/lon edges, ICON
-/// a Mercator {minX,…} rectangle (its lat/lon rectangle is `image_bounds`), so
-/// the schema keeps every field optional and the mapping yields nil unless all
-/// four edges are present — callers fall through to `image_bounds` first anyway.
 extension Components.Schemas.ModelBounds {
     var asDomain: OscarRadarBounds? {
         guard let north, let south, let west, let east else { return nil }

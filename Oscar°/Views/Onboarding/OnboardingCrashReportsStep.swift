@@ -5,8 +5,6 @@
 
 import SwiftUI
 
-/// Asks once whether crash and performance reports may go to Sentry. Nothing
-/// is sent before the answer (see CrashReporting.isEnabled).
 struct OnboardingCrashReportsStep: View {
     let onContinue: () -> Void
 

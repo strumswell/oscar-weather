@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// Every app icon and sticker, in columns that drift down endlessly at their
-/// own pace. Decorative: the copy on the canvas says what it shows.
 struct IconWall: View {
     private struct Item: Identifiable {
         let asset: String
@@ -12,7 +10,6 @@ struct IconWall: View {
     private static let columnCount = 5
     private static let spacing = 12.0
 
-    /// A sticker after every second icon, dealt round-robin into the columns.
     private static let columns: [[Item]] = {
         let icons = AppIconCatalog.sections.flatMap(\.icons).map(\.previewAssetName)
         let stickers = MemberCardStickerCatalog.assets

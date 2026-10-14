@@ -13,8 +13,6 @@ import os
 
 struct PixelRGBA { let r: UInt8; let g: UInt8; let b: UInt8; let a: UInt8 }
 
-/// One radar timeline frame: the server's 8-bit value grid (quantized dBZ indices),
-/// colormapped on the GPU at draw time by the MapLibre custom layer. Row 0 = north.
 @MainActor
 final class OscarRadarFrame: Identifiable {
     let id = UUID()
@@ -29,33 +27,23 @@ final class OscarRadarFrame: Identifiable {
     }
 }
 
-/// A frame's raw 8-bit value grid (index into a 256-entry palette; row 0 = north).
 struct RadarGridPayload: Sendable {
     let indices: [UInt8]
     let width: Int
     let height: Int
 }
 
-/// Reference wrapper so grid payloads can live in an `NSCache`.
 final class GridPayloadBox: Sendable {
     let payload: RadarGridPayload
     init(payload: RadarGridPayload) { self.payload = payload }
 }
 
-/// Serial decode lane: ALL CPU-heavy frame decoding (WebP → grid extraction) funnels
-/// through this one actor, one frame at a time, off the main thread.
-/// Two constraints meet here: (1) fully parallel decode was shipped once and reverted —
-/// concurrent full-composite decodes saturate the CPU and overheat the device; downloads
-/// may overlap freely, decode must not. (2) The old inline decode ran on the main actor
-/// (the class is @MainActor), so every frame decode blocked the UI — this moves it off.
 actor RadarFrameDecodeLane {
     static let shared = RadarFrameDecodeLane()
 
-    /// Decode the lossless WebP and extract the 8-bit index plane.
     func decodeGrid(_ data: Data) -> RadarGridPayload? {
         guard let grid = UIImage(data: data)?.cgImage else { return nil }
         let w = grid.width, h = grid.height
-        // Guard against a malformed/hostile grid causing an oversized allocation or w*h overflow.
         guard w > 0, h > 0, w <= 8192, h <= 8192 else { return nil }
         var indices = [UInt8](repeating: 0, count: w * h)
         let ok = indices.withUnsafeMutableBytes { raw -> Bool in
@@ -69,17 +57,12 @@ actor RadarFrameDecodeLane {
     }
 }
 
-/// Cache budget derived from the process's actual memory headroom (`os_proc_available_memory`,
-/// sampled at startup) instead of a fixed constant — a 6–8 GB device can afford to keep the
-/// whole timeline warm; a 3 GB one cannot.
 func adaptiveCacheBudget(fraction: Double, floor floorBytes: Int, cap: Int) -> Int {
     let available = Int(clamping: os_proc_available_memory())
     guard available > 0 else { return floorBytes }
     return min(cap, max(floorBytes, Int(Double(available) * fraction)))
 }
 
-/// Frame indices to keep decoded around `center`: a ±radius window whose frames fit
-/// `budget`, wrapping so playback's loop (last frame → first) stays warm.
 func residencyWindow(count: Int, center: Int, bytesPerFrame: Int, budget: Int) -> Set<Int> {
     let radius = max(8, budget / max(1, bytesPerFrame) / 2)
     guard count > 2 * radius + 1 else { return Set(0..<count) }

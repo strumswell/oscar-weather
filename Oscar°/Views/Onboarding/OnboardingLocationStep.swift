@@ -6,9 +6,6 @@
 import CoreLocation
 import SwiftUI
 
-/// Why Oscar wants the location, with the actual system prompt behind the
-/// primary button. Resolves with `true` once access is granted and `false`
-/// when the user declines either the step or the system prompt.
 struct OnboardingLocationStep: View {
     let onResolved: (_ granted: Bool) -> Void
 

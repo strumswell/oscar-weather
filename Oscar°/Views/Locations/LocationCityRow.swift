@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// A saved place in the Orte list: live-conditions card with the edit,
-/// default and delete actions in the context menu and as swipe actions.
 struct LocationCityRow: View {
     let personalization: PlacePersonalization
     let isDefault: Bool

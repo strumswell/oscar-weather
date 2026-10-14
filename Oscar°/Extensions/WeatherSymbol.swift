@@ -1,7 +1,5 @@
 import Foundation
 
-/// Weather code to SF Symbol. `sfSymbol(weathercode:isDay:isRaining:precipitation:)` is
-/// radar-aware for the "now" widgets; `sfSymbol(weathercode:isDay:)` maps the code alone.
 enum WeatherSymbol {
     static func sfSymbol(weathercode: Double, isDay: Bool = true) -> String {
         switch weathercode {

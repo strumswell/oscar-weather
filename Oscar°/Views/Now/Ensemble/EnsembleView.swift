@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// The ensemble page, built like the hourly sheet: the sky shows the weather
-/// most runs agree on, the caption how sure that is, the deck where runs land.
 struct EnsembleView: View {
     let initialDate: Date
 
@@ -20,9 +18,6 @@ struct EnsembleView: View {
     }
 }
 
-/// A glass chip on the caption's date line; the top-right slot belongs to the close button.
-/// Toggles, not a Picker: menu toggles keep the provider headers and show the coverage as a
-/// subtitle instead of wrapping it into the name.
 private struct EnsembleModelPicker: View {
     let state: EnsembleState
 
@@ -55,8 +50,6 @@ private struct EnsembleModelPicker: View {
     }
 }
 
-/// The sim and everything over it; its own view so picking a day doesn't
-/// rebuild the navigation bar.
 private struct EnsembleContent: View {
     let state: EnsembleState
     @Binding var expandedLens: EnsembleLens?
@@ -89,7 +82,6 @@ private struct EnsembleContent: View {
                 VStack(spacing: 0) {
                     Spacer(minLength: 0)
 
-                    // Baseline-aligned, so the chip's name sits on the date line.
                     ZStack(alignment: Alignment(horizontal: .trailing, vertical: .firstTextBaseline)) {
                         DetailDeckCaption(eyebrow: state.eyebrowLabel, title: state.titleLabel, footnote: state.footnote)
                         EnsembleModelPicker(state: state)
@@ -115,8 +107,6 @@ private struct EnsembleContent: View {
     }
 }
 
-/// Every lens as a row with the selected day's value; the expanded row
-/// carries its chart across all days.
 private struct EnsembleDeck: View {
     let state: EnsembleState
     @Binding var expandedLens: EnsembleLens?

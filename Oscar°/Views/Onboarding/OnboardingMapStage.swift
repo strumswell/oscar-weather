@@ -6,22 +6,15 @@
 import CoreLocation
 import SwiftUI
 
-/// The radar page's picture: the real map over Leipzig. It starts on the
-/// screenshot run's replayed radar composite (real echoes, no network), then
-/// steps through live model layers, with the map's own timeline controls.
 struct OnboardingMapStage: View {
-    /// Frames already being built (started by the features step's first
-    /// page); nil builds them here.
     var prebuiltGrids: Task<[[UInt8]], Never>?
 
     @State private var radar = OscarRadarState()
     @State private var model = ModelGridLayerState()
     @State private var selection = 0
-    /// The layer whose countdown runs: set once its data is on the map.
     @State private var countingSelection: Int?
 
     private static let leipzig = CLLocationCoordinate2D(latitude: 51.3397, longitude: 12.3731)
-    /// nil = radar.
     private static let layers: [WeatherTileLayer?] = [nil, .iconTemp, .iconWind, .iconPressure]
     private static let titles: [LocalizedStringKey] = ["Regenradar", "Temperatur", "Wind", "Luftdruck"]
     private static let secondsPerLayer = 10.0
@@ -86,8 +79,6 @@ struct OnboardingMapStage: View {
         }
     }
 
-    /// Plays one layer, then moves on to the next after a few seconds. The
-    /// time starts once the layer is loaded, so a slow network never skips one.
     private func show(_ layer: WeatherTileLayer?) async {
         countingSelection = nil
         if let layer {
@@ -97,7 +88,6 @@ struct OnboardingMapStage: View {
             model.play()
         } else {
             model.pause()
-            // The first pass waits for the staged frames to be built.
             while !radar.hasAnyLoadedFrame {
                 try? await Task.sleep(for: .milliseconds(100))
                 if Task.isCancelled { return }
@@ -110,8 +100,6 @@ struct OnboardingMapStage: View {
         selection = (selection + 1) % Self.layers.count
     }
 
-    /// The replayed radar's value grids, from now to two hours ahead in
-    /// five-minute steps, built in parallel off the main actor.
     nonisolated static func buildGrids() async -> [[UInt8]] {
         let offsets = SyntheticRadar.offsets
         return await withTaskGroup(of: (Int, [UInt8]).self) { group in
@@ -126,7 +114,6 @@ struct OnboardingMapStage: View {
         }
     }
 
-    /// Turns the grids into frames timed from now and hands them to the map.
     private func stageRadar() async {
         let offsets = SyntheticRadar.offsets
         let grids = if let prebuiltGrids {
@@ -160,8 +147,6 @@ struct OnboardingMapStage: View {
         )
     }
 
-    /// The fixture's flow field through the same decoder the server's goes
-    /// through; nil just means a plain cross-fade between frames.
     private static func stagedMotion() -> RadarMotionData? {
         guard let json = try? JSONSerialization.data(withJSONObject: SyntheticRadar.motionJSON()),
               let payload = try? JSONDecoder().decode(Components.Schemas.MotionResponse.self, from: json)
@@ -170,8 +155,6 @@ struct OnboardingMapStage: View {
     }
 }
 
-/// The layers as a segmented pill over the map. The current one shows a
-/// thin countdown line once its data is loaded; tapping jumps to a layer.
 private struct LayerTabs: View {
     let titles: [LocalizedStringKey]
     let current: Int
@@ -201,7 +184,6 @@ private struct LayerTabs: View {
                         }
                         .overlay(alignment: .bottom) {
                             if isCurrent && isCounting {
-                                // A fresh view per layer, so the line restarts at zero.
                                 Countdown(duration: duration)
                                     .id(current)
                                     .padding(.horizontal, 14)

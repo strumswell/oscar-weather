@@ -35,8 +35,6 @@ enum MemberCardStickerAlphaBounds {
             return fallbackMetrics(for: assetName)
         }
 
-        // Normalized metrics only need a coarse scan; the 1024 px sources
-        // would cost a million alpha reads on the main actor per asset.
         let downscale = min(1, 160 / Double(max(sourceImage.width, sourceImage.height)))
         let width = max(1, Int(Double(sourceImage.width) * downscale))
         let height = max(1, Int(Double(sourceImage.height) * downscale))

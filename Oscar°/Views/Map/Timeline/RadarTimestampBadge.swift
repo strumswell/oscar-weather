@@ -1,8 +1,6 @@
 import SwiftUI
 
 // MARK: - Timestamp badge
-// isLive is driven explicitly by OscarRadarState.isCurrentFrameLive so that the
-// pulsing dot only appears on the "natural now" frame, never on scrubbed frames.
 
 struct RadarTimestampBadge: View {
     let timestamp: String

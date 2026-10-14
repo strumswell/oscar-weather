@@ -1,9 +1,6 @@
 import SwiftUI
 import UIKit
 
-/// One webcam tapped on the map: its latest picture to pinch and zoom, when it was taken,
-/// and the way to windy.com. Loads the picture when shown, never in the background
-/// (Windy's terms forbid scanning, and image URLs expire after 10 min).
 struct WebcamSheet: View {
     static let previewSize = CGSize(width: 400, height: 224)
 
@@ -55,7 +52,6 @@ struct WebcamSheet: View {
     }
 }
 
-/// Pinch or double-tap to zoom, drag to pan.
 private struct ZoomableImage: UIViewRepresentable {
     let image: UIImage
 
@@ -104,8 +100,6 @@ private struct ZoomableImage: UIViewRepresentable {
     }
 }
 
-/// The acknowledgment Windy's terms require next to every webcam, in their wording and with
-/// both links, so it stays English in every language.
 struct WebcamCredit: View {
     private static let text = (try? AttributedString(markdown:
         "Webcams provided by [windy.com](https://www.windy.com) - [add new webcam](https://www.windy.com/webcams/add)"))

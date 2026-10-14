@@ -9,9 +9,7 @@ extension RadarSnapshotRenderer {
         let center: CLLocationCoordinate2D
         let peakMmh: Double
         let velocityKmh: Double
-        /// Extrapolated centroids at +15/+30/+45/+60 min.
         let path: [CLLocationCoordinate2D]
-        /// Convex-hull outline (closed ring); empty when the server sent none.
         let footprint: [CLLocationCoordinate2D]
     }
 
@@ -42,8 +40,6 @@ extension RadarSnapshotRenderer {
         }
     }
 
-    /// Widget-scale rendition of the app's cell overlay: footprint hull, dashed
-    /// extrapolated track, and an intensity-colored marker at the cell core.
     static func drawStormCells(_ cells: [WidgetStormCell], frame: MercatorFrame) {
         for cell in cells {
             let color = intensityColor(peakMmh: cell.peakMmh)
@@ -62,7 +58,6 @@ extension RadarSnapshotRenderer {
                 hull.stroke()
             }
 
-            // Track only for cells that actually move — the app's rule.
             let trackPoints = [cell.center] + cell.path
             if cell.velocityKmh >= 3, trackPoints.count >= 2 {
                 let track = UIBezierPath()
@@ -87,13 +82,12 @@ extension RadarSnapshotRenderer {
         }
     }
 
-    /// The app's peak-intensity severity steps (WeatherMapView / StormCellLegend).
     private static func intensityColor(peakMmh: Double) -> UIColor {
         switch peakMmh {
-        case ..<2: UIColor(red: 0, green: 0.79, blue: 0.79, alpha: 1)       // #00caca
-        case ..<10: UIColor(red: 1, green: 1, blue: 0, alpha: 1)            // moderate
-        case ..<50: UIColor(red: 1, green: 0, blue: 0, alpha: 1)            // heavy
-        default: UIColor(red: 0.996, green: 0.2, blue: 1, alpha: 1)         // extreme
+        case ..<2: UIColor(red: 0, green: 0.79, blue: 0.79, alpha: 1)
+        case ..<10: UIColor(red: 1, green: 1, blue: 0, alpha: 1)
+        case ..<50: UIColor(red: 1, green: 0, blue: 0, alpha: 1)
+        default: UIColor(red: 0.996, green: 0.2, blue: 1, alpha: 1)
         }
     }
 }

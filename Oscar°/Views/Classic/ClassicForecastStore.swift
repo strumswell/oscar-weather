@@ -27,14 +27,9 @@ struct ClassicForecast {
     typealias Payload = Operations.getForecast.Output.Ok.Body.jsonPayload
 
     let payload: Payload
-    /// The sky the location cards render for this place; the classic card
-    /// paints its gradient from it. Radar-aware like the main sim.
     let sky: AtmosphereSnapshot
-    /// Fresh radar measured rain right now.
     let isRadarRaining: Bool
 
-    /// The code the "now" art follows: measured rain over a dry forecast
-    /// code reads as rain, same rule as the map chips and widgets.
     var currentWeatherCode: Double {
         let code = payload.current?.weathercode ?? 0
         let isPrecipitation = [51...57, 61...67, 71...77, 80...86, 95...99].contains { $0.contains(Int(code)) }
@@ -53,10 +48,6 @@ final class ClassicForecastStore {
 
     private init() {}
 
-    /// Rebuilds the page list (GPS spot first, then the saved cities in the
-    /// user's order) and fetches every forecast, or with `onlyMissing` just
-    /// the places without one. A failed fetch keeps the previous forecast
-    /// for that place.
     func refresh(onlyMissing: Bool = false) async {
         var next: [ClassicPlace] = []
         if let gps = LocationService.shared.getGPSCoordinates() {
@@ -77,9 +68,6 @@ final class ClassicForecastStore {
         }
         places = next
 
-        // Payloads and radar are fetched off the main actor; the sky snapshots
-        // need it (the mapper reads a `Weather` shell), so they are built
-        // afterwards. Radar is best effort: no coverage is simply no radar.
         let payloads = await withTaskGroup(of: (ClassicPlace.ID, Payload?, PrecipSeriesResponse?).self) { group in
             for place in next where !onlyMissing || forecasts[place.id] == nil {
                 group.addTask {
@@ -118,8 +106,6 @@ final class ClassicForecastStore {
     ) -> AtmosphereSnapshot {
         let shell = Weather()
         shell.forecast = payload
-        // The mapper lifts a dry forecast to a rainy scene when the radar
-        // measures rain, same as the main sim.
         shell.precipSeries = radar
         return AtmosphereWeatherMapper.snapshot(from: shell, at: coordinate)
     }

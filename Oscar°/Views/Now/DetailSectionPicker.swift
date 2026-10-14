@@ -4,7 +4,6 @@ protocol DetailSection: CaseIterable, Hashable, Identifiable where AllCases: Ran
     var title: LocalizedStringKey { get }
 }
 
-/// The segmented switch above the detail sheets' paged sections.
 struct DetailSectionPicker<Section: DetailSection>: View {
     let label: LocalizedStringKey
     @Binding var selection: Section

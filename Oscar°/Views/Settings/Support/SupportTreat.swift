@@ -1,9 +1,5 @@
 import SwiftUI
 
-/// What a support tier would buy, shown on the tile instead of a plain heart.
-/// Generic names only (no brands); the sticker does the hinting.
-/// A purchase: every reel rolls onto the bought treat. `id` makes each
-/// purchase a new event, even for the same treat.
 struct SupportJackpot: Equatable {
     let id: Int
     let treat: SupportTreat
@@ -17,7 +13,6 @@ struct SupportTreat: Identifiable, Equatable {
 
     static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
 
-    /// A random treat for the product, never `current` again when there is a choice.
     static func pick(for productID: String, excluding current: SupportTreat? = nil) -> SupportTreat {
         let pool = catalog[productID] ?? []
         let fresh = pool.filter { $0 != current }

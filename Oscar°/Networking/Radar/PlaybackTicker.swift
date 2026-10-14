@@ -1,6 +1,5 @@
 import Foundation
 
-/// Repeating main-actor tick for timeline playback; ends on `stop()` or deinit.
 @MainActor
 final class PlaybackTicker {
     private var task: Task<Void, Never>?

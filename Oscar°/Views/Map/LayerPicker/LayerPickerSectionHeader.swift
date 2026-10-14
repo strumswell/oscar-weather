@@ -1,9 +1,5 @@
 import SwiftUI
 
-/// Section header row: semibold title, optionally followed by an info symbol —
-/// with `onInfoTap` the whole title cluster becomes a button (the forecast
-/// sections link to the weather-model explainer). The trailing edge carries an
-/// optional secondary detail.
 struct LayerPickerSectionHeader: View {
     let title: LocalizedStringKey
     let detail: LocalizedStringKey?
@@ -49,10 +45,6 @@ struct LayerPickerSectionHeader: View {
     }
 }
 
-/// Top-level group in the layer picker, naming what kind of data follows:
-/// bold title (with the pulsing live dot for measured data) over a one-line
-/// caption. With `onInfoTap` the title gets the same inline info symbol as
-/// the section headers and becomes a button.
 struct LayerPickerGroupHeader: View {
     let title: LocalizedStringKey
     let caption: LocalizedStringKey

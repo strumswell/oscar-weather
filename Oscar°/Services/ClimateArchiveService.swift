@@ -19,8 +19,6 @@ actor ClimateArchiveStore {
         category: "Climate"
     )
 
-    /// What we persist per location: the full daily-high series plus the calendar day we last hit
-    /// the network, so repeated views within a day never refetch.
     private struct CacheEntry: Codable {
         var time: [String]
         var tmax: [Double?]
@@ -36,9 +34,6 @@ actor ClimateArchiveStore {
         memory.removeAll()
     }
 
-    // Rate limit: at most `maxFullCallsPerMinute` cold (no-cache) full-history fetches per rolling
-    // minute. Warm delta fetches and cache hits are cheap and bypass it entirely. When the window
-    // is exhausted a caller waits until a slot frees, then proceeds.
     private var fullCallTimestamps: [Date] = []
     private let maxFullCallsPerMinute = 2
     private let window: TimeInterval = 60
@@ -49,10 +44,6 @@ actor ClimateArchiveStore {
         cacheDirectory = caches.appendingPathComponent("ClimateArchiveCache", isDirectory: true)
     }
 
-    /// Reduced climate summary for a location. Serves from the persisted series when present,
-    /// fetching only the missing recent days; a cold location triggers a full 1940→today fetch
-    /// gated by the rate limiter, which invokes `onWaiting` while it blocks so the UI can show a
-    /// spinner. The heavy reduction runs here, off the main actor.
     func summary(
         latitude: Double,
         longitude: Double,
@@ -66,13 +57,6 @@ actor ClimateArchiveStore {
 
         if entry?.lastFetchDay != todayStr {
             if var existing = entry {
-                // Warm cache: refetch a rolling ~90-day trailing window (or further back, if the
-                // cache is staler than that) through today, then merge. This serves two purposes:
-                // it keeps the series gap-free no matter how long since the last touch, and it lets
-                // final ERA5 values overwrite the preliminary ERA5T figures published for the most
-                // recent months — so the cache self-heals toward the real reanalysis rather than
-                // drifting. `min` (not `max`) guarantees we never start *after* the last stored day,
-                // which would leave a hole. (`merge` prefers non-nil incoming values.)
                 let lastDay = existing.time.last ?? earliestDate
                 let refreshStart = Self.dayString(
                     Calendar.current.date(byAdding: .day, value: -90, to: today) ?? today)
@@ -85,12 +69,10 @@ actor ClimateArchiveStore {
                     save(entry: existing, key: key)
                     entry = existing
                 } catch {
-                    // Offline / transient: keep the stale series rather than failing the section.
                     Self.logger.error(
                         "Climate delta fetch failed: \(error.localizedDescription, privacy: .public)")
                 }
             } else {
-                // Cold location: the expensive call. Gate it behind the rate limiter.
                 try await acquireFullCallSlot(onWaiting: onWaiting)
                 let fetched = try await fetch(
                     latitude: latitude, longitude: longitude, start: earliestDate, end: todayStr)
@@ -140,8 +122,6 @@ actor ClimateArchiveStore {
 
     // MARK: - Merge helpers
 
-    /// Merges a freshly fetched window into the stored series by date, preferring non-nil incoming
-    /// values (so previously unavailable recent days get backfilled) and adding any new days.
     private func merge(into entry: inout CacheEntry, time: [String], tmax: [Double?]) {
         guard !time.isEmpty else { return }
         var map: [String: Double?] = [:]
@@ -161,7 +141,6 @@ actor ClimateArchiveStore {
         trimTrailingNils(&entry)
     }
 
-    /// Drops trailing all-nil rows so "today" tracks the most recent day with real data.
     private func trimTrailingNils(_ entry: inout CacheEntry) {
         while let last = entry.tmax.last, last == nil {
             entry.tmax.removeLast()
@@ -196,8 +175,6 @@ actor ClimateArchiveStore {
     }
 
     private static func locationKey(latitude: Double, longitude: Double) -> String {
-        // The grid-snapped forecast coordinates are stable across refreshes; 2-decimal bucketing
-        // (~1 km) absorbs any float jitter and maximizes reuse when revisiting a city.
         String(format: "%.2f,%.2f", latitude, longitude)
     }
 

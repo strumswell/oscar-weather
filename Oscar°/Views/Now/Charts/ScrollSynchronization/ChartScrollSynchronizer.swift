@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// Mirrors native Chart scroll offsets without invalidating SwiftUI on every display frame.
 @MainActor
 final class ChartScrollSynchronizer {
     @MainActor
@@ -56,13 +55,8 @@ final class ChartScrollSynchronizer {
     private var lastNotifiedOffset: CGFloat?
     private var idleFrameCount = 0
 
-    /// Invoked (throttled) with the current normalized offset whenever the
-    /// synchronized group scrolls — lets an overview control track the
-    /// viewport without observing UIKit itself.
     var onNormalizedOffsetChange: ((CGFloat) -> Void)?
 
-    /// Programmatically scrolls every registered chart to the given
-    /// normalized offset (0 = domain start, 1 = domain end minus viewport).
     func scroll(toNormalizedOffset offset: CGFloat) {
         let clamped = min(max(offset, 0), 1)
         lastNormalizedOffset = clamped
@@ -199,7 +193,6 @@ final class ChartScrollSynchronizer {
             setNormalizedOffset(normalizedOffset, on: target)
         }
 
-        // Threshold keeps SwiftUI invalidations far below display rate.
         if abs((lastNotifiedOffset ?? -1) - normalizedOffset) > 0.002 {
             lastNotifiedOffset = normalizedOffset
             onNormalizedOffsetChange?(normalizedOffset)

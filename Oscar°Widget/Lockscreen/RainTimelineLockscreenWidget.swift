@@ -12,10 +12,8 @@ import WidgetKit
 
 struct RainTimelineEntry: TimelineEntry {
     let date: Date
-    /// Precipitation (mm/h) per radar step covering the next ~90 minutes.
     let bars: [Double]
     let headline: String
-    /// Minutes between "now" and the last bar, for the axis label.
     let spanMinutes: Int
     let hasRadarCoverage: Bool
 }
@@ -32,9 +30,7 @@ struct RainTimelineProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<RainTimelineEntry>) -> ()) {
-        // Radar nowcasts go stale fast, refresh more often than the other widgets.
         runWidgetTimeline(refreshMinutes: 15, retryMinutes: 10, completion: completion) { coordinates in
-            // nil = server successfully reported no radar coverage here.
             let precipSeries = try await client.getRadarSeries(coordinates: coordinates)
             return nowcastEntryDates(refreshMinutes: 15).map { Self.makeEntry(from: precipSeries, now: $0) }
         }
@@ -54,7 +50,6 @@ struct RainTimelineProvider: TimelineProvider {
         let points = RainNowcastSummary.points(from: series, now: now)
 
         guard let last = points.last else {
-            // Series exists but has no usable frames around "now" (stale data).
             return RainTimelineEntry(
                 date: now,
                 bars: [],
@@ -73,7 +68,6 @@ struct RainTimelineProvider: TimelineProvider {
         )
     }
 
-    /// Synthetic series for placeholder/snapshot: dry now, rain starting mid-window.
     static func placeholderSeries(now: Date = Date()) -> PrecipSeriesResponse {
         let points: [PrecipPoint] = (0..<RainNowcastSummary.maxBars).map { step -> PrecipPoint in
             let timestamp = now.addingTimeInterval(Double(step) * 300)

@@ -37,7 +37,7 @@ struct StarsView: View {
             if (opacityOverride ?? 1) > 0.01 {
                 Canvas { context, size in
                     let timeInterval = timeline.date.timeIntervalSince1970
-                    starField.update(date: timeline.date)
+                    starField.update(date: timeline.date, width: size.width)
                     meteorShower.update(date: timeline.date, size: size)
                     
                     let rightColors = [.clear, Color(red: 0.8, green: 1, blue: 1), .white]
@@ -64,8 +64,8 @@ struct StarsView: View {
                     context.addFilter(.blur(radius: 0.3))
                     
                     for (index, star) in starField.stars.enumerated() {
-                        // The field spans 600×550pt regardless of canvas size —
-                        // skip stars outside it (4pt margin covers the bloom blur).
+                        // The field is as wide as the widest canvas so far and 600pt
+                        // tall; skip stars outside this one (4pt margin covers the bloom blur).
                         if star.y > size.height + 4 || star.x > size.width + 4 || star.x + star.size < -4 {
                             continue
                         }

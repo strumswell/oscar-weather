@@ -1,12 +1,5 @@
 import SwiftUI
 
-/// The sunlit region of the lunar disc as seen from Earth.
-///
-/// The lit region is bounded by the limb (a half circle on the lit side) and
-/// the terminator, which projects onto the disc as a half-ellipse whose
-/// horizontal semi-axis is `r·cos(2π·phase)` — toward the lit limb for a
-/// crescent, away from it for a gibbous moon. Both halves are drawn with
-/// cubic Béziers so the winding is unambiguous.
 struct MoonLitShape: Shape {
     let phase: Double
     let litOnRight: Bool
@@ -16,7 +9,6 @@ struct MoonLitShape: Shape {
         let c = CGPoint(x: rect.midX, y: rect.midY)
         let kappa: CGFloat = 0.5522847498
 
-        // +1 at new moon … −1 at full moon.
         let t = CGFloat(cos(phase * 2 * .pi))
         let side: CGFloat = litOnRight ? 1 : -1
         let limbX = side * r
@@ -28,7 +20,6 @@ struct MoonLitShape: Shape {
         var path = Path()
         path.move(to: top)
 
-        // Lit limb: half circle, top → bottom.
         path.addCurve(
             to: CGPoint(x: c.x + limbX, y: c.y),
             control1: CGPoint(x: c.x + limbX * kappa, y: c.y - r),
@@ -40,7 +31,6 @@ struct MoonLitShape: Shape {
             control2: CGPoint(x: c.x + limbX * kappa, y: c.y + r)
         )
 
-        // Terminator: half ellipse, bottom → top.
         path.addCurve(
             to: CGPoint(x: c.x + bulge, y: c.y),
             control1: CGPoint(x: c.x + bulge * kappa, y: c.y + r),
@@ -58,14 +48,10 @@ struct MoonLitShape: Shape {
 
 struct MoonView: View {
     let phase: Double
-    /// 0 at moonrise … 0.5 at transit … 1 at moonset.
     let altitudeProgress: Double
-    /// Screen position as fractions of the container size.
     let xFraction: Double
     let yFraction: Double
     let isSouthernHemisphere: Bool
-    /// 0 in full daylight … 1 at night. Suppresses the halo by day, where the
-    /// real moon shows as a pale disc with no glow.
     var skyDarkness: Double = 1
     var diameter: CGFloat = Self.diameter
 
@@ -76,38 +62,27 @@ struct MoonView: View {
         GeometryReader { proxy in
             ZStack {
                 ZStack {
-                    // Wide sky glow, emitted by the lit region only — a
-                    // crescent throws a thin rim of light, a full moon a
-                    // real halo.
                     litShape
                         .fill(Self.glowTint)
                         .blur(radius: 24 + 14 * illumination)
                         .opacity((0.50 + 0.45 * illumination) * skyDarkness)
 
-                    // Tight glow hugging the lit limb.
                     litShape
                         .fill(.white)
                         .blur(radius: 6)
                         .opacity((0.60 + 0.30 * illumination) * skyDarkness)
 
-                    // The disc occludes the sky glow behind it; without this
-                    // the halo washes the dark side grey.
                     Circle()
                         .blendMode(.destinationOut)
                 }
                 .compositingGroup()
 
-                // Dark side: a touch darker than the sky, never a hard disc.
-                // (Stars behind the moon are culled in StarsView.)
                 Circle()
                     .fill(.black.opacity(0.26))
 
-                // Earthshine: the dark side is only barely visible against
-                // the night sky.
                 moonPhoto
                     .opacity(0.02)
 
-                // Sunlit surface: soft terminator, crisp limb.
                 moonPhoto
                     .brightness(0.50)
                     .contrast(1.10)
@@ -119,8 +94,6 @@ struct MoonView: View {
                             .clipShape(Circle())
                     }
 
-                // Inner bloom: lifts the lit surface's luminance like an
-                // overexposed photo while the crater texture still shows.
                 litShape
                     .fill(.white)
                     .blur(radius: 4)
@@ -128,9 +101,7 @@ struct MoonView: View {
                     .clipShape(Circle())
             }
             .frame(width: diameter, height: diameter)
-            // The lit limb leans toward the below-horizon sun.
             .rotationEffect(.degrees(litOnRight ? 24 : -24))
-            // Atmospheric extinction: subtly dimmer near rise and set.
             .opacity(0.9 + 0.15 * sin(.pi * altitudeProgress))
             .position(
                 x: proxy.size.width * xFraction,
@@ -144,8 +115,6 @@ struct MoonView: View {
         MoonPhase.illumination(for: phase)
     }
 
-    // Northern hemisphere: a waxing moon is lit on the right; mirrored south
-    // of the equator.
     private var litOnRight: Bool {
         (phase < 0.5) != isSouthernHemisphere
     }

@@ -1,16 +1,9 @@
 import CoreLocation
 import Foundation
 
-/// One active warning in the map's tap sheet. Since the `/area` overlay went
-/// dissolved (severity shapes without per-alert text), taps resolve through
-/// `/weather-alerts/point` and this is built from `OscarPointAlert`; the
-/// attribute-based init remains for servers still serving per-alert features.
 struct WeatherAlertInfo: Identifiable {
     let id: String
-    /// Ingesting agency: "dwd" (Germany) or "nws" (US); nil from servers that
-    /// predate the field. Drives attribution and severity terminology.
     let source: String?
-    /// Originating national service behind a Meteoalarm alert ("Météo-France").
     let senderName: String?
     let event: String
     let severityRank: Int
@@ -48,7 +41,6 @@ struct WeatherAlertInfo: Identifiable {
         expires = pointAlert.expiresAt
     }
 
-    /// Mirrors the server's `severityRank` CAP mapping.
     private static func rank(ofSeverity severity: String) -> Int {
         switch severity.trimmingCharacters(in: .whitespaces).lowercased() {
         case "minor": 1
@@ -67,7 +59,6 @@ struct WeatherAlertInfo: Identifiable {
 }
 
 extension [WeatherAlertInfo] {
-    /// Active warnings first (severity breaks ties), then upcoming by start.
     func sortedForDisplay(now: Date = Date()) -> [WeatherAlertInfo] {
         sorted {
             let l = Swift.max(0, $0.onset?.timeIntervalSince(now) ?? 0)

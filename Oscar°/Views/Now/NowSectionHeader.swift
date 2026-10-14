@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// A Now section's title with a quiet "Mehr" link to its detail page, so the
-/// way in doesn't depend on guessing that the card is tappable.
 struct NowSectionHeader<Title: View>: View {
     var showMore: (() -> Void)?
     @ViewBuilder let title: Title

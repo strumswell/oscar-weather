@@ -5,24 +5,16 @@
 
 import SwiftUI
 
-/// Hand-built weather dioramas behind the onboarding steps, composed from the
-/// real simulation's primitives with fixed snapshots — the live mapper can't
-/// be steered, since sun position and conditions come from wall clock and
-/// forecast. The flow walks through a day: noon, starry night, storm.
 struct OnboardingSceneView: View {
     enum Scene {
-        /// Idealized clear noon: the postcard behind welcome and features.
         case day
-        /// Clear night: dense twinkling stars, meteors, a waxing crescent.
         case night
-        /// Heavy thunderstorm: dark deck, lightning, slanted rain.
         case storm
     }
 
     let scene: Scene
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    /// Crescent position, kept inside the hero window above the canvas.
     private static let moonX = 0.72
     private static let moonY = 0.15
 
@@ -59,7 +51,6 @@ struct OnboardingSceneView: View {
                     SunView(progress: 0.45)
                 }
 
-                // A clear night stays cloudless — the stars are the show.
                 if scene != .night {
                     CloudsView(
                         deck: CloudDeck(total: scene == .storm ? 1 : 0.2),
@@ -75,10 +66,6 @@ struct OnboardingSceneView: View {
                     StormView(type: .rain, direction: .degrees(-12), strength: 140, pacing: pacing)
                         .opacity(reduceMotion ? 0.55 : 1)
 
-                    // The shader's lightning lives in the sky layer, which the
-                    // near-total deck hides (and it strikes ~every 10 s) — a
-                    // real storm reads as the whole deck lighting up, so the
-                    // glow renders above clouds and rain, and often.
                     LightningFlashView(pacing: pacing)
                 }
             }
@@ -96,8 +83,6 @@ struct OnboardingSceneView: View {
 }
 
 extension AtmosphereSnapshot {
-    /// A deep, cloudless night: sun far below the horizon so the sky sits at
-    /// the shader's darkest palette and the star field carries the scene.
     static let onboardingNight = AtmosphereSnapshot(
         timestamp: Date.now.timeIntervalSince1970,
         timeOfDay: 0.97,
@@ -119,9 +104,6 @@ extension AtmosphereSnapshot {
         aqiHaze: 0
     )
 
-    /// A severe afternoon thunderstorm: near-total cover, a dense dark deck
-    /// with a hint of hail-green, lightning driving the sky shader's flash
-    /// timeline, and wind-slanted rain.
     static let onboardingStorm = AtmosphereSnapshot(
         timestamp: Date.now.timeIntervalSince1970,
         timeOfDay: 0.58,
@@ -144,9 +126,6 @@ extension AtmosphereSnapshot {
     )
 }
 
-/// Frequent flashes above the storm's cloud deck: hash-triggered strikes every
-/// couple of seconds, each a sharp pulse with a flicker afterglow — the same
-/// cadence math as the sky shader, tuned far more frequent for the diorama.
 private struct LightningFlashView: View {
     var pacing: SimulationPacing = .active
 
@@ -165,8 +144,6 @@ private struct LightningFlashView: View {
         }
     }
 
-    /// Strikes in ~55% of 1.5-second buckets — a flash every 2–3 seconds on
-    /// average — with a fast quadratic decay and a weaker second flicker.
     static func flashOpacity(at time: TimeInterval) -> Double {
         let cadence = 1.5
         let bucket = (time / cadence).rounded(.down)

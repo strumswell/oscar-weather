@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// Eyebrow and title over the sim, above a detail deck.
 struct DetailDeckCaption: View {
     let eyebrow: String
     let title: String
@@ -37,8 +36,6 @@ struct DetailDeckCaption: View {
     }
 }
 
-/// One row of a detail deck: its live value in the header, its chart
-/// unfolding in place underneath while expanded.
 struct DetailDeckRow<Chart: View>: View {
     let title: LocalizedStringKey
     let systemImage: String

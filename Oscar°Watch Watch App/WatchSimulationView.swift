@@ -12,9 +12,7 @@ import SwiftUI
 
 struct WatchSimulationView: View {
     enum Style {
-        /// Full animated scene, for the Now page.
         case full
-        /// Sky gradient only, dimmed so text on content pages stays legible.
         case gradientOnly
     }
 
@@ -45,9 +43,6 @@ struct WatchSimulationView: View {
     }
 
     private func fullScene(snapshot: AtmosphereSnapshot) -> some View {
-        // Always-on wrist-down state must not burn frames on particles. Ambient
-        // layers (stars, clouds) drift slowly and get by at 8 fps; falling rain
-        // and snow judder visibly there, so the storm runs at full rate.
         let isStill = reduceMotion || luminanceReduced
         let pacing: SimulationPacing = isStill ? .still : .background
         let stormPacing: SimulationPacing = isStill ? .still : .active

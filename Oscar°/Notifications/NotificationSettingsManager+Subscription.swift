@@ -22,9 +22,6 @@ extension NotificationSettingsManager {
     }
 
     func performSubscriptionSync(forceRegister: Bool) async {
-        // Everything off: delete the server-side subscription instead of syncing it, so
-        // nothing (location included) reaches the server while notifications are off.
-        // A failed delete keeps the credentials, and the launch path retries it.
         guard enabled else {
             await deleteServerSubscription()
             return
@@ -144,8 +141,6 @@ extension NotificationSettingsManager {
             persistLastSentSubscriptionState(state)
             UserDefaults.standard.set(true, forKey: installationRegistrationCompletedKey)
             notificationLogger.info("Lifecycle: subscription register request succeeded; subscriptionIdLength=\(registerResponse.subscriptionId.count, privacy: .public)")
-            // A register creates a new subscription row: the push-to-start token
-            // synced to the old one has to be sent again.
             UserDefaults.standard.removeObject(forKey: syncedLiveActivityPushToStartTokenKey)
             await flushPendingLiveActivityReports()
         } catch {

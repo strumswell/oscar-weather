@@ -20,21 +20,15 @@ import XCTest
 final class ScreenshotTests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false
-        // iPad captures run in landscape, where the forecast splits into the
-        // stage (map, nowcast) and the feed.
         if isPad { XCUIDevice.shared.orientation = .landscapeLeft }
     }
 
     private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
 
-    /// The iPad set: the scenes that show the wide layouts. Lock screen,
-    /// widgets, settings and onboarding are iPhone-only App Store shots.
     private func skipOnPad() throws {
         try XCTSkipIf(isPad, "iPhone-only scene")
     }
 
-    /// One upward swipe. On iPad the forecast scrolls in the right-hand feed;
-    /// the stage on the left holds a map that doesn't scroll.
     private func swipeUp(_ app: XCUIApplication) {
         guard isPad else { return app.swipeUp(velocity: .fast) }
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.8))
@@ -48,11 +42,9 @@ final class ScreenshotTests: XCTestCase {
         setupSnapshot(app)
         app.launchArguments += [
             "-screenshotScene", scene,
-            // The onboarding scenes want the flow, everything else skips it.
             "-hasCompletedOnboarding", scene == "onboarding" ? "NO" : "YES",
         ]
         app.launchArguments += extraArguments
-        // The iPad forecast's stage map shows radar unless a scene picks a layer.
         if isPad && !extraArguments.contains("-oscarRadarLayer") {
             app.launchArguments += ["-oscarRadarLayer", "YES"]
         }
@@ -60,11 +52,6 @@ final class ScreenshotTests: XCTestCase {
         return app
     }
 
-    /// Opens the settings sheet from the bottom of the forecast scroll.
-    /// Not via `scrollTo`/`tapVisible`: the entry is the LAST thing in the
-    /// scroll and parks ~30 pt inside the 120 pt bottom band those reserve, so
-    /// they can never call it visible. It lands clear of the tab bar, so a
-    /// direct coordinate tap on its own frame is the reliable move.
     @discardableResult
     private func openSettings(_ app: XCUIApplication) -> XCUIElement {
         waitForNowContent(app)
@@ -80,32 +67,22 @@ final class ScreenshotTests: XCTestCase {
         return card
     }
 
-    /// Vertically scrolls until the element's center is comfortably on screen.
-    /// Deliberately avoids `isHittable`: while a fast swipe settles, lazy
-    /// content has transient frames and the hittability query THROWS
-    /// ("Activation point invalid…") instead of returning false. Frame math
-    /// never throws; visible-center + coordinate taps replace hit testing.
     @discardableResult
     private func scrollTo(_ element: XCUIElement, in app: XCUIApplication, maxSwipes: Int = 8) -> Bool {
         for _ in 0..<maxSwipes {
             if isSufficientlyVisible(element, in: app) { return true }
             swipeUp(app)
-            usleep(400_000)  // let the scroll settle before re-reading frames
+            usleep(400_000)
         }
         let visible = isSufficientlyVisible(element, in: app)
         XCTAssertTrue(visible, "Could not scroll to \(element)")
         return visible
     }
 
-    /// The screen area safely below the status bar and above the home
-    /// indicator, where taps land reliably.
     private func safeArea(of app: XCUIApplication) -> CGRect {
         app.windows.firstMatch.frame.insetBy(dx: 0, dy: 120)
     }
 
-    /// Enough of the element is on screen to tap it: its intersection with
-    /// the safe area is (almost) its own height, or 120 pt for elements
-    /// taller than the screen (the 12-day daily card never fits whole).
     private func isSufficientlyVisible(_ element: XCUIElement, in app: XCUIApplication) -> Bool {
         guard element.exists else { return false }
         let frame = element.frame
@@ -116,15 +93,12 @@ final class ScreenshotTests: XCTestCase {
             && visible.width >= min(frame.width * 0.9, 120)
     }
 
-    /// Tap the element's own center, safe area be damned.
     private func tapFrameCenter(_ element: XCUIElement, in app: XCUIApplication) {
         app.coordinate(withNormalizedOffset: .zero)
             .withOffset(CGVector(dx: element.frame.midX, dy: element.frame.midY))
             .tap()
     }
 
-    /// Tap the center of the element's VISIBLE part via screen coordinates —
-    /// no hittability evaluation, which throws on transient frames.
     private func tapVisible(_ element: XCUIElement, in app: XCUIApplication) {
         let visible = element.frame.intersection(safeArea(of: app))
         let point = visible.isNull || visible.isEmpty
@@ -152,19 +126,11 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func test02Forecast() {
-        // The sunny story's stage map shows the (fixture) satellite clouds,
-        // not radar rain.
         let app = launch(scene: "nowForecast", extraArguments: isPad ? [
             "-oscarRadarLayer", "NO",
             "-cloudLayerActive", "YES",
         ] : [])
         waitForNowContent(app)
-        // Composition: hourly strip near the top, the daily list filling the
-        // rest. Scroll to the hourly section, then drag by the exact distance
-        // that parks its top at `targetY` (slow drag + hold, so no momentum
-        // overshoots the position). Not tighter than this: the conditions row
-        // sits right above the section and would land under the status bar,
-        // colliding with the clock.
         let hourly = app.descendants(matching: .any)["now.hourly"].firstMatch
         scrollTo(hourly, in: app)
         let targetY: CGFloat = 150
@@ -204,9 +170,6 @@ final class ScreenshotTests: XCTestCase {
         snapshot("04_map_temp", timeWaitingForIdle: 0)
     }
 
-    // Wind and pressure layer captures: composition sources for the combined
-    // "Temperatur, Wind und Druck" App Store shot (scenes are marked hidden in
-    // frame-studio/layout.json, so they get no framed export of their own).
     func test04bMapWind() throws {
         try skipOnPad()
         let app = launch(scene: "mapWind", extraArguments: [
@@ -222,7 +185,6 @@ final class ScreenshotTests: XCTestCase {
 
     func test04cMapPressure() throws {
         try skipOnPad()
-        // Isobars turn on automatically for pressure layers.
         let app = launch(scene: "mapPressure", extraArguments: [
             "-autoPresentMap", "YES",
             "-oscarRadarLayer", "NO",
@@ -239,8 +201,6 @@ final class ScreenshotTests: XCTestCase {
         waitForNowContent(app)
         let daily = app.descendants(matching: .any)["now.daily"].firstMatch
         scrollTo(daily, in: app)
-        // The first match is the section title, which isn't a button; its
-        // "Mehr" opens the same first day.
         tapVisible(app.buttons["now.daily"].firstMatch, in: app)
         let ensemble = app.buttons["hourly.ensemble"].firstMatch
         _ = ensemble.waitForExistence(timeout: 10)
@@ -252,11 +212,6 @@ final class ScreenshotTests: XCTestCase {
     func test06AirQuality() {
         let app = launch(scene: "airQuality")
         waitForNowContent(app)
-        // The environment gauges are a HORIZONTAL strip ordered by severity,
-        // so the AQI card's position depends on the launch hour (afternoon
-        // ozone/pollen outrank a low AQI). Scroll the strip vertically into
-        // view via its first gauge, then swipe the strip itself left until
-        // the AQI card is on screen.
         let anyGauge = app.descendants(matching: .any)
             .matching(NSPredicate(format: "identifier BEGINSWITH 'now.environment.'"))
             .firstMatch
@@ -282,8 +237,6 @@ final class ScreenshotTests: XCTestCase {
         let app = launch(scene: "climate")
         waitForNowContent(app)
         let climateCard = app.descendants(matching: .any)["now.climate"].firstMatch
-        // The card appears once the (fixture) archive is reduced; give it a
-        // moment to exist, then scroll it into view.
         _ = climateCard.waitForExistence(timeout: 10)
         scrollTo(climateCard, in: app, maxSwipes: 12)
         tapVisible(climateCard, in: app)
@@ -291,8 +244,6 @@ final class ScreenshotTests: XCTestCase {
         snapshot("07_klima", timeWaitingForIdle: 0)
     }
 
-    /// The calm counterpart to scene 01: same hero, clear summer sky, no rain
-    /// animation and no alert banner.
     func test08NowClear() throws {
         try skipOnPad()
         let app = launch(scene: "nowClear")
@@ -311,19 +262,10 @@ final class ScreenshotTests: XCTestCase {
     }
 
     // MARK: - Library scenes
-    //
-    // Captured for docs, store pages and release notes rather than the ten
-    // App Store slots, so they are marked `hidden` (source-only) in
-    // frame-studio/layout.json and get no framed export until promoted.
 
     func test20HourlyDetail() {
         let app = launch(scene: "hourlyDetail")
         waitForNowContent(app)
-        // `now.hourly` resolves to the "Stündlich" header button, and tapping
-        // THAT only scrolls the strip back to its start. The card row sits
-        // directly beneath it, so the sheet opens from a point below the
-        // header. (An identifier on the strip itself is not an option: it sits
-        // on a Group, which surfaces no element of its own.)
         let header = app.descendants(matching: .any)["now.hourly"].firstMatch
         scrollTo(header, in: app)
         let x = isPad ? header.frame.midX : app.windows.firstMatch.frame.midX
@@ -349,17 +291,8 @@ final class ScreenshotTests: XCTestCase {
         app.descendants(matching: .any)["map.layerPicker"].firstMatch.tap()
         sleep(3)
         snapshot("21_map_layers", timeWaitingForIdle: 0)
-        // On iPad the picker is a full-height inspector column, so the
-        // second half is already on screen.
         guard !isPad else { return }
 
-        // Same sheet, second half. One drag on the sheet's title bar (just
-        // below the medium detent's top edge) pulls it up to .large; a drag
-        // that starts on the content also scrolls it, and on iOS 27 that
-        // combined gesture dismisses the sheet on lift. Then drags walk down
-        // to the display toggles. Not `scrollTo`: its swipe from the center
-        // starts on a radar tile and selects it, closing the picker. These
-        // drags start in the 20 pt margin left of the tile grids.
         app.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.52))
             .press(forDuration: 0.1,
                    thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.05)),
@@ -374,8 +307,6 @@ final class ScreenshotTests: XCTestCase {
             usleep(400_000)
         }
         XCTAssertTrue(isSufficientlyVisible(display, in: app), "Display toggles never scrolled into view")
-        // Park the section header near the top so every toggle fits; the hold
-        // before lift kills momentum, so the drag distance is the scroll.
         let startY = display.frame.minY
         let targetY: CGFloat = 190
         if startY > targetY {
@@ -442,15 +373,12 @@ final class ScreenshotTests: XCTestCase {
         let app = launch(scene: "customization")
         let card = openSettings(app)
         tapVisible(card, in: app)
-        // The dock reveal is a two-stage animation (layout, then fade-in).
         sleep(3)
         snapshot("27_member_card_dock", timeWaitingForIdle: 0)
     }
 
     func test28Onboarding() throws {
         try skipOnPad()
-        // One launch per step: the flow's own transitions are permission-gated,
-        // and `-onboardingStep` drops straight onto each screen instead.
         let steps = [
             ("welcome", "28_onboarding_welcome"),
             ("features", "29_onboarding_features"),
@@ -467,7 +395,6 @@ final class ScreenshotTests: XCTestCase {
             app.terminate()
         }
 
-        // The city step is only interesting with results on screen.
         let app = launch(scene: "onboarding", extraArguments: ["-onboardingStep", "manualLocation"])
         _ = app.wait(for: .runningForeground, timeout: 30)
         let field = app.textFields.firstMatch
@@ -486,10 +413,7 @@ final class ScreenshotTests: XCTestCase {
         try skipOnPad()
         let app = launch(scene: "places")
         waitForNowContent(app)
-        // Orte is the first tab; its title is localized, so index it.
         app.tabBars.buttons.element(boundBy: 0).tap()
-        // Card conditions arrive in one batched request; the backdrops need a
-        // moment more to settle into their sky.
         XCTAssertTrue(
             app.staticTexts["Essen"].waitForExistence(timeout: 30), "Orte list stayed empty"
         )
@@ -498,28 +422,15 @@ final class ScreenshotTests: XCTestCase {
     }
 
     // MARK: - Lock screen
-    //
-    // Last on purpose: these leave the simulator locked until `unlock()` runs,
-    // and the private lock-button selector is the only way for a UI test to get
-    // there (XCUIDevice exposes no lock button). The lock screen exposes NO
-    // accessibility elements to XCTest (its tree is bare windows), so every
-    // interaction there is a screen-coordinate tap, and those only land while
-    // the display is lit: SpringBoard holds a touch lock while the backlight
-    // is off, and on the simulator neither a notification nor a touch lights
-    // it — only the lock button does.
 
     func test80LockNotifications() throws {
         try skipOnPad()
         let app = launch(scene: "lockNotifications")
         _ = app.wait(for: .runningForeground, timeout: 30)
         allowNotificationsIfAsked()
-        pressLockButton()  // lock; the display goes dark
-        // Both local notifications fire on a delay, after the lock.
+        pressLockButton()
         sleep(22)
-        pressLockButton()  // light the lock screen, still locked
-        // iOS stacks an app's lock-screen notifications behind a count badge.
-        // One tap on the stack fans them out (a tap opens the app only when a
-        // single card is showing, which is why both have to have landed first).
+        pressLockButton()
         springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.80)).tap()
         sleep(3)
         snapshot("37_lock_notifications", timeWaitingForIdle: 0)
@@ -531,16 +442,9 @@ final class ScreenshotTests: XCTestCase {
         let app = launch(scene: "lockLiveActivity")
         _ = app.wait(for: .runningForeground, timeout: 30)
         sleep(6)
-        pressLockButton()  // lock; the display goes dark
+        pressLockButton()
         sleep(6)
-        pressLockButton()  // light the lock screen, still locked
-        // The first card an app ever posts carries ActivityKit's consent
-        // question ("Live-Aktivitäten von Oscar° erlauben?") inside itself,
-        // with "Erlauben" / "Allow" at the card's lower right. Answer it so
-        // the card shows its own layout. The Snapfile reinstalls the app per
-        // language pass, so the question is there on every pass — a retry
-        // pass (no reinstall) finds it answered, and this tap then opens the
-        // app from the card instead; re-run that pass by hand.
+        pressLockButton()
         springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.71, dy: 0.81)).tap()
         sleep(4)
         snapshot("38_lock_live_activity", timeWaitingForIdle: 0)
@@ -553,7 +457,6 @@ final class ScreenshotTests: XCTestCase {
         XCUIApplication(bundleIdentifier: "com.apple.springboard")
     }
 
-    /// The permission prompt only appears on the first run after an install.
     private func allowNotificationsIfAsked() {
         let allow = springboard.buttons.matching(
             NSPredicate(format: "label IN {'Allow', 'Erlauben', 'İzin Ver'}")
@@ -561,11 +464,6 @@ final class ScreenshotTests: XCTestCase {
         if allow.waitForExistence(timeout: 8) { allow.tap() }
     }
 
-    /// XCUIDevice has no public lock button; `pressLockButton` is the private
-    /// selector XCTest itself uses. It TOGGLES the display: from an unlocked,
-    /// lit device it locks and darkens; from a dark locked one it lights the
-    /// lock screen. Guarded, so a future SDK that drops it fails the lock
-    /// scenes instead of crashing the whole run.
     private func pressLockButton() {
         let selector = NSSelectorFromString("pressLockButton")
         guard XCUIDevice.shared.responds(to: selector) else {
@@ -576,10 +474,6 @@ final class ScreenshotTests: XCTestCase {
         sleep(3)
     }
 
-    /// From a lit lock screen back to an unlocked device, or every following
-    /// test launches into a locked one. A drag up from the bottom edge: a
-    /// swipe from mid-screen scrolls the notifications into Notification
-    /// Center instead. No passcode on the simulator, so no code to enter.
     private func unlock() {
         springboard.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.985))
             .press(

@@ -31,14 +31,12 @@ actor WindFieldCache {
 
     // MARK: - Public API
 
-    /// Returns a cached tile immediately, or fetches it (deduplicating concurrent requests).
     func tile(key: WindTileKey, layer: WeatherTileLayer) async -> WindFieldTile? {
         if let hit = tiles[key] { return hit }
         let task = fetching[key] ?? makeTask(key: key, layer: layer)
         return await task.value
     }
 
-    /// Fire-and-forget prefetch for a set of tile positions.
     func prefetch(frameId: String, z: Int, positions: [(x: Int, y: Int)], layer: WeatherTileLayer) {
         for (x, y) in positions {
             let key = WindTileKey(
@@ -48,7 +46,6 @@ actor WindFieldCache {
         }
     }
 
-    /// Drop tiles for frame IDs outside the retention set.
     func evict(retaining keepIds: Set<String>, model: String? = nil) {
         tiles = tiles.filter { key, _ in
             (model != nil && key.model != model) || keepIds.contains(key.frameId)

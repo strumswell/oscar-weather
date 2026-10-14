@@ -58,11 +58,8 @@ struct MemberCardStickerDock: View {
                 }
             }
             .scrollIndicators(.hidden)
-            // Lifted stickers and their shadows may spill above and below the rail,
-            // but never sideways into the divider and bin.
             .scrollClipDisabled()
             .mask { Rectangle().padding(.vertical, -32) }
-            // The rail stops scrolling the moment a press turns into a pickup.
             .scrollDisabled(pickupAssetName != nil)
             .onScrollGeometryChange(for: CGFloat.self, of: { $0.contentOffset.x }) { _, offset in
                 railScrollOffset = offset
@@ -194,8 +191,6 @@ struct MemberCardStickerDock: View {
     }
 }
 
-/// Press-and-hold pickup that coexists with the rail's horizontal scroll: a short
-/// hold with little movement lifts a sticker, a swipe keeps scrolling.
 private struct DockPickupGesture: UIGestureRecognizerRepresentable {
     let onBegan: (CGPoint, CGPoint) -> Void
     let onMoved: (CGPoint) -> Void

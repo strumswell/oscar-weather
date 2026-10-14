@@ -1,7 +1,5 @@
 import Foundation
 
-/// Cached DateFormatters keyed by preference + zone, usable off the main actor
-/// (widgets and the watch format on background timelines).
 extension SettingService {
     nonisolated private static let formatterLock = NSLock()
     nonisolated(unsafe) private static var formatterCache: [String: DateFormatter] = [:]

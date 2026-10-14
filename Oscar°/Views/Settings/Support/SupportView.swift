@@ -1,11 +1,7 @@
 import StoreKit
 import SwiftUI
 
-/// Pay-what-you-want support page. An icon wall drifts behind a hero window
-/// that feathers into the canvas; the products are StoreKit `ProductView`s in
-/// a custom tile style, so loading, purchase and entitlement stay native.
 struct SupportView: View {
-    /// Set when the cat asked.
     var close: (() -> Void)?
 
     private let supporter = SupporterStore.shared
@@ -18,7 +14,6 @@ struct SupportView: View {
     @State private var jackpot: SupportJackpot?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var thanks: SupportTreat?
-    /// The App Store sheet can take seconds on a slow connection; the tile spins meanwhile.
     @State private var pendingProductID: String?
 
     private static let productIDs = SupporterStore.tipProductIDs + SupporterStore.subscriptionProductIDs
@@ -34,7 +29,6 @@ struct SupportView: View {
             }
         }
         .background(alignment: .top) {
-            // Only the band above the canvas is ever visible.
             GeometryReader { proxy in
                 IconWall()
                     .frame(height: proxy.size.height * 0.5, alignment: .top)
@@ -56,8 +50,6 @@ struct SupportView: View {
                 .padding(.bottom, 8)
             }
         }
-        // Over everything, tab bar and sheet included; the win fades itself
-        // in and out, so the cover's own slide is switched off.
         .fullScreenCover(item: $thanks) { treat in
             SupportThanks(treat: treat, close: closeWin)
                 .presentationBackground(.clear)
@@ -72,7 +64,6 @@ struct SupportView: View {
             supporter.markSupporter(since: transaction.originalPurchaseDate)
             await transaction.finish()
             purchases += 1
-            // Every reel rolls onto the bought treat, then the win takes the screen.
             guard let treat = treats[product.id] else { return }
             jackpot = SupportJackpot(id: (jackpot?.id ?? 0) + 1, treat: treat)
             if !reduceMotion { try? await Task.sleep(for: .seconds(3.6)) }
@@ -100,8 +91,6 @@ struct SupportView: View {
         }
     }
 
-    /// After the win the reels roll on to fresh treats, so no tile keeps
-    /// showing the bought treat over another tier's price.
     private func closeWin() {
         if let close {
             close()
@@ -117,7 +106,6 @@ struct SupportView: View {
         withTransaction(transaction, change)
     }
 
-    /// Every tile gets a different treat; the reels roll for about three seconds.
     private func roll() {
         for id in Self.productIDs {
             treats[id] = .pick(for: id, excluding: treats[id])
@@ -125,8 +113,6 @@ struct SupportView: View {
         rolls += 1
         isRolling = true
         Task {
-            // Reel clicks: steady while the reels run at full speed, then
-            // slowing down with them, about 3 s in total.
             var gap = 0.05
             for step in 0..<50 where gap < 0.25 {
                 try? await Task.sleep(for: .seconds(gap))
@@ -163,7 +149,6 @@ struct SupportView: View {
         }
         .padding(.bottom, 32)
         .frame(maxWidth: .infinity, alignment: .leading)
-        // Reaches far below the content so the bottom bounce never reveals the wall.
         .background(Color(uiColor: .systemBackground).padding(.bottom, -1000))
     }
 }

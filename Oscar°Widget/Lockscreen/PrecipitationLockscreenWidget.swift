@@ -21,8 +21,6 @@ struct PrecipitationLockScreenView: View {
                     Text("\(entry.precipitationProbability) % • \(entry.precipitation, specifier: "%.1f") mm")
                 }
             case .accessoryCorner:
-                // Corner anatomy: a square-ish glyph as inner content, the values
-                // on the curved label — stacking both inside gets clipped.
                 Image(systemName: "umbrella.fill")
                     .font(.system(size: 24, weight: .medium))
                     .symbolRenderingMode(.hierarchical)

@@ -3,17 +3,20 @@ import SwiftUI
 @MainActor
 struct NowLayoutCanvas: View {
     private nonisolated static let space = "layoutCanvas"
-    private nonisolated static let row = "layoutRow"
+    private static let gutter: CGFloat = 130
+    private static let frameSpacing: CGFloat = 14
+    private static let captionHeight: CGFloat = 16
     private let settingsService = SettingService.shared
     private let frames = LayoutFrame.device
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var drag: SectionDrag?
+    @State private var screenHeights: [Int: CGFloat] = [:]
+    @State private var screenRects: [Int: CGRect] = [:]
     @State private var columnRects: [ColumnID: CGRect] = [:]
+    @State private var gutterRects: [ColumnID: CGRect] = [:]
     @State private var blockRects: [BlockID: CGRect] = [:]
     @State private var dockRect: CGRect = .zero
-    @State private var rowSize: CGSize?
-    @State private var rowRect: CGRect = .zero
 
     var body: some View {
         VStack(spacing: 16) {
@@ -30,24 +33,22 @@ struct NowLayoutCanvas: View {
     private var frameStack: some View {
         GeometryReader { geometry in
             let fit = fittingScale(in: geometry.size)
-            VStack(spacing: 6) {
-                HStack(alignment: .top, spacing: 14) {
-                    ForEach(frames) { screen($0) }
-                }
-                .coordinateSpace(.named(Self.row))
-                .fixedSize()
-                .onGeometryChange(for: CGSize.self, of: { $0.size }) { rowSize = $0 }
-                .scaleEffect(fit, anchor: .topLeading)
-                .frame(width: (rowSize?.width ?? 0) * fit, height: (rowSize?.height ?? 0) * fit, alignment: .topLeading)
-                .onGeometryChange(for: CGRect.self, of: { $0.frame(in: .named(Self.space)) }) { rowRect = $0 }
-                if frames.count > 1 {
-                    HStack(spacing: 14 * fit) {
-                        ForEach(frames) { frame in
-                            Text(frame.title ?? "")
+            VStack(spacing: Self.frameSpacing) {
+                ForEach(frames) { frame in
+                    VStack(spacing: 4) {
+                        if let title = frame.title {
+                            Text(title)
                                 .font(.caption2.weight(.semibold))
                                 .foregroundStyle(.white)
                                 .shadow(radius: 2)
-                                .frame(width: frame.size.width * fit)
+                                .frame(height: Self.captionHeight)
+                        }
+                        HStack(alignment: .top, spacing: 0) {
+                            if frame.isWide {
+                                callouts(in: ColumnID(frame: frame.id, side: .stage), fit: fit)
+                            }
+                            scaledScreen(frame, fit: fit)
+                            callouts(in: ColumnID(frame: frame.id, side: frame.isWide ? .feed : .page), fit: fit)
                         }
                     }
                 }
@@ -61,21 +62,42 @@ struct NowLayoutCanvas: View {
     }
 
     private func fittingScale(in size: CGSize) -> CGFloat {
-        let captions: CGFloat = frames.count > 1 ? 22 : 0
-        let natural = rowSize ?? CGSize(
-            width: frames.map(\.size.width).reduce(0, +) + CGFloat(frames.count - 1) * 14,
-            height: frames.map(\.size.height).max() ?? 1
-        )
-        return max(min(size.width / natural.width, max(0, size.height - captions) / natural.height, 0.5), 0.05)
+        let captions = CGFloat(frames.filter { $0.title != nil }.count) * (Self.captionHeight + 4)
+        let gaps = CGFloat(frames.count - 1) * Self.frameSpacing
+        let height = frames.map { screenHeight($0) }.reduce(0, +)
+        let widthFit = frames.map { (size.width - gutters(for: $0)) / $0.size.width }.min() ?? 1
+        let heightFit = max(0, size.height - captions - gaps) / height
+        return max(min(widthFit, heightFit, 0.5), 0.05)
     }
 
-    private func screen(_ frame: LayoutFrame) -> some View {
+    private func gutters(for frame: LayoutFrame) -> CGFloat {
+        frame.isWide ? 2 * Self.gutter : Self.gutter
+    }
+
+    private func screenHeight(_ frame: LayoutFrame) -> CGFloat {
+        screenHeights[frame.id] ?? frame.size.height
+    }
+
+    private nonisolated static func frameSpace(_ id: Int) -> String {
+        "layoutFrame\(id)"
+    }
+
+    private func scaledScreen(_ frame: LayoutFrame, fit: CGFloat) -> some View {
+        screen(frame, fit: fit)
+            .fixedSize()
+            .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { screenHeights[frame.id] = $0 }
+            .scaleEffect(fit, anchor: .topLeading)
+            .frame(width: frame.size.width * fit, height: screenHeight(frame) * fit, alignment: .topLeading)
+            .onGeometryChange(for: CGRect.self, of: { $0.frame(in: .named(Self.space)) }) { screenRects[frame.id] = $0 }
+    }
+
+    private func screen(_ frame: LayoutFrame, fit: CGFloat) -> some View {
         HStack(alignment: .top, spacing: 12) {
             if frame.isWide {
-                column(ColumnID(frame: frame.id, side: .stage))
-                column(ColumnID(frame: frame.id, side: .feed))
+                column(ColumnID(frame: frame.id, side: .stage), fit: fit)
+                column(ColumnID(frame: frame.id, side: .feed), fit: fit)
             } else {
-                column(ColumnID(frame: frame.id, side: .page))
+                column(ColumnID(frame: frame.id, side: .page), fit: fit)
             }
         }
         .padding(12)
@@ -84,12 +106,13 @@ struct NowLayoutCanvas: View {
         .background(.white.opacity(0.12), in: .rect(cornerRadius: 32))
         .overlay { RoundedRectangle(cornerRadius: 32).strokeBorder(.white.opacity(0.35), lineWidth: 6) }
         .clipShape(.rect(cornerRadius: 32))
+        .coordinateSpace(.named(Self.frameSpace(frame.id)))
     }
 
-    private func column(_ id: ColumnID) -> some View {
-        let frame = frames[id.frame]
+    private func column(_ id: ColumnID, fit: CGFloat) -> some View {
+        let space = Self.frameSpace(id.frame)
         let run = sections(in: id)
-        let others = run.filter { $0 != drag?.section || drag?.source != id.frame }
+        let others = run.filter { !isDragged($0, from: id.frame) }
         let insertion = insertionIndex(in: id)
         return VStack(spacing: 28) {
             if let title = id.side.title {
@@ -101,38 +124,68 @@ struct NowLayoutCanvas: View {
             }
             if id.side != .feed {
                 PreviewHead()
-                    .frame(height: frame.isWide ? 300 : 420)
+                    .padding(.vertical, 24)
                     .accessibilityHidden(true)
             }
             ForEach(run) { section in
                 if insertion == others.firstIndex(of: section) { insertionBar }
-                SectionBlock(section: section, isWide: frame.isWide)
-                    .opacity(drag?.section == section && drag?.source == id.frame ? 0.3 : 1)
-                    .onGeometryChange(for: CGRect.self, of: { $0.frame(in: .named(Self.row)) }) {
+                SectionBlock(section: section)
+                    .opacity(isDragged(section, from: id.frame) ? 0.3 : 1)
+                    .onGeometryChange(for: CGRect.self, of: { $0.frame(in: .named(space)) }) {
                         blockRects[BlockID(column: id, section: section)] = $0
                     }
                     .overlay { Color.clear.contentShape(.rect).gesture(dragGesture(for: section, from: id.frame)) }
+                    .overlay(alignment: .topTrailing) { removeButton(section, in: id.frame, fit: fit) }
                     .accessibilityActions { blockActions(section, in: id) }
             }
             if insertion == others.count { insertionBar }
         }
         .frame(maxWidth: .infinity, alignment: .top)
-        .frame(height: columnHeight(id), alignment: .top)
         .overlay {
             if case .column(let target, _) = drag?.target, target == id {
                 RoundedRectangle(cornerRadius: 20).strokeBorder(.white, lineWidth: 6)
             }
         }
-        .onGeometryChange(for: CGRect.self, of: { $0.frame(in: .named(Self.row)) }) { columnRects[id] = $0 }
+        .onGeometryChange(for: CGRect.self, of: { $0.frame(in: .named(space)) }) { columnRects[id] = $0 }
     }
 
-    private func columnHeight(_ id: ColumnID) -> CGFloat? {
-        let run = sections(in: id)
-        guard run.contains(.map) else { return nil }
-        let fixed = run.filter { $0 != .map }.compactMap { blockRects[BlockID(column: id, section: $0)]?.height }
-        guard fixed.count == run.count - 1 else { return nil }
-        let natural = fixed.reduce(0, +) + 140 + 300 + 34 + CGFloat(run.count + 1) * 28
-        return max(frames[id.frame].size.height, natural)
+    private func isDragged(_ section: NowSection, from frameIndex: Int) -> Bool {
+        drag?.section == section && drag?.source == frameIndex
+    }
+
+    private func removeButton(_ section: NowSection, in frameIndex: Int, fit: CGFloat) -> some View {
+        Button {
+            withAnimation(motion) { hide(section, in: frameIndex) }
+        } label: {
+            Image(systemName: "xmark")
+                .font(.system(size: 10 / fit, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 22 / fit, height: 22 / fit)
+                .background(.black.opacity(0.4), in: .circle)
+                .contentShape(.circle)
+        }
+        .buttonStyle(.plain)
+        .accessibilityHidden(true)
+    }
+
+    private func callouts(in column: ColumnID, fit: CGFloat) -> some View {
+        let screenSide: HorizontalEdge = column.side == .stage ? .trailing : .leading
+        let alignment: Alignment = screenSide == .trailing ? .topTrailing : .topLeading
+        return ZStack(alignment: alignment) {
+            ForEach(sections(in: column)) { section in
+                if let rect = blockRects[BlockID(column: column, section: section)] {
+                    Callout(section: section, screenSide: screenSide)
+                        .opacity(isDragged(section, from: column.frame) ? 0.3 : 1)
+                        .gesture(dragGesture(for: section, from: column.frame))
+                        .offset(y: rect.midY * fit - Callout.height / 2)
+                        .transition(.opacity)
+                }
+            }
+        }
+        .frame(width: Self.gutter, height: screenHeight(frames[column.frame]) * fit, alignment: alignment)
+        .onGeometryChange(for: CGRect.self, of: { $0.frame(in: .named(Self.space)) }) { gutterRects[column] = $0 }
+        .animation(motion, value: blockRects)
+        .accessibilityHidden(true)
     }
 
     private var insertionBar: some View {
@@ -208,13 +261,28 @@ struct NowLayoutCanvas: View {
     // ponytail: impossible targets show nothing; add a column outline if users miss it.
     private func target(for section: NowSection, at point: CGPoint) -> DropTarget? {
         if dockRect.contains(point) { return .dock }
-        guard let rowSize, rowSize.width > 0, rowRect.width > 0 else { return nil }
-        let fit = rowRect.width / rowSize.width
-        let local = CGPoint(x: (point.x - rowRect.minX) / fit, y: (point.y - rowRect.minY) / fit)
-        guard let column = columnRects.first(where: { $0.value.contains(local) })?.key else { return nil }
+        guard let hit = columnHit(at: point) else { return nil }
+        let column = hit.column
         guard section.renders(wide: frames[column.frame].isWide), section != .map || column.side == .stage else { return nil }
         let others = sections(in: column).filter { $0 != section }.compactMap { blockRects[BlockID(column: column, section: $0)] }
-        return .column(column, index: others.count { $0.midY < local.y })
+        return .column(column, index: others.count { $0.midY < hit.y })
+    }
+
+    private func columnHit(at point: CGPoint) -> (column: ColumnID, y: CGFloat)? {
+        if let gutter = gutterRects.first(where: { $0.value.contains(point) }) {
+            let fit = scale(of: gutter.key.frame)
+            return fit > 0 ? (gutter.key, (point.y - gutter.value.minY) / fit) : nil
+        }
+        guard let screen = screenRects.first(where: { $0.value.contains(point) }) else { return nil }
+        let fit = scale(of: screen.key)
+        guard fit > 0 else { return nil }
+        let x = (point.x - screen.value.minX) / fit
+        let column = columnRects.first { $0.key.frame == screen.key && $0.value.minX <= x && x <= $0.value.maxX }?.key
+        return column.map { ($0, (point.y - screen.value.minY) / fit) }
+    }
+
+    private func scale(of frameIndex: Int) -> CGFloat {
+        (screenRects[frameIndex]?.width ?? 0) / frames[frameIndex].size.width
     }
 
     private func drop() {
@@ -381,45 +449,98 @@ private struct SectionDrag {
 
 private struct SectionBlock: View {
     let section: NowSection
-    let isWide: Bool
 
     var body: some View {
-        Group {
-            switch section {
-            case .map:
-                Color.clear
-                    .cardBackground()
-                    .clipShape(.rect(cornerRadius: 10))
-                    .cardBorder()
-                    .padding(.horizontal)
-                    .frame(minHeight: 140, maxHeight: .infinity)
-            case .radar:
-                RainView()
-            case .hourly:
-                HourlyView()
-            case .daily:
-                DailyView(expandsDays: isWide)
-            case .environment:
-                EnvironmentGaugesView()
-            case .climate:
-                staged { CollageClimateCard() }
-            case .stations:
-                staged { StationsCard(stations: OnboardingSampleData.stations, timeZone: .current) { _ in } }
+        VStack(alignment: .leading, spacing: 8) {
+            if section != .map {
+                Text(section.title)
+                    .font(.title3.bold())
+                    .foregroundStyle(.white)
+                    .padding(.leading)
             }
+            card
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(section.title))
     }
 
-    private func staged(@ViewBuilder card: () -> some View) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(section.title)
-                .font(.title3.bold())
-                .foregroundStyle(.white)
-                .padding(.leading)
-            card()
+    @ViewBuilder
+    private var card: some View {
+        switch section {
+        case .map:
+            Color.clear
+                .frame(height: 260)
+                .cardBackground()
+                .clipShape(.rect(cornerRadius: 10))
+                .cardBorder()
+                .padding(.horizontal)
+        case .radar:
+            PrecipitationSeriesChart(points: OnboardingSampleData.showerPoints, timeZone: .current)
+                .padding(16)
+                .frame(height: 120)
+                .cardBackground()
+                .clipShape(.rect(cornerRadius: 10))
+                .cardBorder()
+                .padding(.horizontal)
+        case .hourly:
+            strip(spacing: 12) {
+                ForEach(OnboardingSampleData.hourlyItems.prefix(5)) { HourlyForecastCard(item: $0) }
+            }
+        case .daily:
+            CollageDailyCard(dayCount: 3)
+                .padding(.horizontal)
+        case .stations:
+            StationsCard(stations: Array(OnboardingSampleData.stations.prefix(1)), timeZone: .current) { _ in }
+                .padding(.horizontal)
+        case .environment:
+            strip(spacing: 14) {
+                ForEach(OnboardingSampleData.gauges) { AQIGaugeCard(metric: $0) }
+            }
+        case .climate:
+            CollageClimateCard()
                 .padding(.horizontal)
         }
+    }
+
+    private func strip(spacing: CGFloat, @ViewBuilder cards: () -> some View) -> some View {
+        HStack(spacing: spacing, content: cards)
+            .font(.system(size: 18))
+            .fixedSize()
+            .padding(.leading)
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+            .clipped()
+    }
+}
+
+private struct Callout: View {
+    static let height: CGFloat = 20
+
+    let section: NowSection
+    let screenSide: HorizontalEdge
+
+    var body: some View {
+        HStack(spacing: 6) {
+            if screenSide == .leading { line }
+            Image(systemName: section.systemImage)
+                .font(.system(size: 10, weight: .semibold))
+                .frame(width: 20, height: 20)
+                .background(section.tint.gradient, in: .rect(cornerRadius: 5))
+            Text(section.title)
+                .font(.footnote.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            if screenSide == .trailing { line }
+        }
+        .frame(height: Self.height)
+        .foregroundStyle(.white)
+        .shadow(radius: 2)
+        .contentShape(Rectangle().inset(by: -6))
+    }
+
+    private var line: some View {
+        Rectangle()
+            .frame(width: 16, height: 1)
+            .opacity(0.6)
     }
 }
 

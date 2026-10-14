@@ -1,10 +1,6 @@
 import Foundation
 import OpenAPIRuntime
 
-/// Live Activity bookkeeping toward the server. Reports are queued before they are
-/// sent and dropped only once the server acknowledged them: the update token
-/// usually arrives during a background wake on a flaky network, and losing it
-/// means the server can never end the card.
 extension NotificationSettingsManager {
     struct PendingLiveActivityReport: Codable, Equatable {
         enum Kind: String, Codable {
@@ -17,8 +13,6 @@ extension NotificationSettingsManager {
         let token: String?
     }
 
-    /// iOS hands the push-to-start token out whenever it likes, feature on or off;
-    /// the freshest one is kept and sent once a subscription can use it.
     func syncLiveActivityPushToStartToken(_ token: String) async {
         UserDefaults.standard.set(token, forKey: liveActivityPushToStartTokenKey)
         await flushPendingLiveActivityReports()
@@ -30,16 +24,12 @@ extension NotificationSettingsManager {
     }
 
     func reportLiveActivityEnded(activityId: String) async {
-        // An end supersedes a queued token for the same card.
         var queue = pendingLiveActivityReports.filter { $0.activityId != activityId }
         queue.append(.init(kind: .ended, activityId: activityId, token: nil))
         savePendingLiveActivityReports(queue)
         await flushPendingLiveActivityReports()
     }
 
-    /// Sends what is queued, oldest first, stopping at the first failure. Runs after
-    /// every enqueue, on launch, on foreground and after a successful register/patch;
-    /// a call during a running flush schedules one more pass instead of racing it.
     func flushPendingLiveActivityReports() async {
         guard !liveActivityFlushInProgress else {
             liveActivityFlushRequested = true
@@ -73,7 +63,6 @@ extension NotificationSettingsManager {
 
         while let report = pendingLiveActivityReports.first {
             if report.kind == .updateToken, !liveRainStatusEnabled {
-                // Cards are ended locally while the feature is off; nothing to sync.
                 dropFirstPendingLiveActivityReport()
                 continue
             }
@@ -81,7 +70,6 @@ extension NotificationSettingsManager {
             if let token = report.token { body["token"] = token }
             switch await patchLiveActivity(path: report.kind.rawValue, body: body) {
             case .success, .notFound:
-                // A vanished subscription has nothing left to tell.
                 dropFirstPendingLiveActivityReport()
             case .failure:
                 return

@@ -16,11 +16,8 @@ struct LocationCard: View {
     var snapshot: AtmosphereSnapshot?
     var isSelected = false
     var isDefault = false
-    /// True while the list is on another tab or under a sheet: the backdrop's
-    /// precipitation layer would otherwise keep animating unseen.
     var backdropPaused = false
 
-    // The card grows with Dynamic Type so title/detail keep fitting.
     @ScaledMetric(relativeTo: .headline) private var cardHeight: CGFloat = 102
     @ScaledMetric(relativeTo: .title) private var temperatureFontSize: CGFloat = 36
 
@@ -72,14 +69,9 @@ struct LocationCard: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: cardHeight)
-        // The backdrop renders at a FIXED width (screen width covers every card)
-        // so edit mode's width change only moves the clip edge over it. Sized to
-        // the card instead, the shader/canvas layers snap to the target width
-        // while the container is still animating.
         .background(alignment: .leading) {
             LocationSimBackdrop(snapshot: snapshot, paused: backdropPaused)
                 .overlay(
-                    // Bottom-weighted scrim so white text stays readable on bright skies.
                     LinearGradient(
                         stops: [
                             .init(color: .black.opacity(0.12), location: 0),
@@ -129,8 +121,6 @@ struct LocationCard: View {
             Text(emoji).font(.system(size: 24))
         case .locationGlyph:
             Image(systemName: "location.fill")
-                // Fixed size: .body grows past the 44pt badge circle at
-                // accessibility text sizes.
                 .font(.body)
                 .foregroundStyle(.white)
         case .plain:
@@ -147,12 +137,6 @@ struct LocationCard: View {
     }
 }
 
-/// Near-static rendering of the weather sim for one card, composed from the
-/// live simulation's primitives — the same pattern as the onboarding dioramas.
-/// Sky, stars, and clouds hold a single frame (`.still`); falling rain/snow is
-/// the one layer that animates, so a wet card reads as weather, not a photo.
-/// Without a snapshot it shows the calm twilight the app also uses before any
-/// data arrives.
 struct LocationSimBackdrop: View {
     var snapshot: AtmosphereSnapshot?
     var paused = false
@@ -185,8 +169,6 @@ struct LocationSimBackdrop: View {
                     )
                 }
             }
-            // Flatten the still layers into one texture per card; the animated
-            // storm stays outside so its ticks don't re-rasterize the stack.
             .drawingGroup()
             .overlay {
                 if snap.showsPrecipitation {
@@ -195,8 +177,6 @@ struct LocationSimBackdrop: View {
                         direction: .degrees(0),
                         strength: snap.stormStrength(rainBase: 25, snowBase: 25, weight: 80, floor: 10, cap: 90, ramped: false),
                         pacing: reduceMotion || paused ? .still : .active,
-                        // Drop speed is per view height; at card height the
-                        // unscaled fall reads as slow motion.
                         speedMultiplier: 3
                     )
                     .opacity(0.75)
@@ -209,7 +189,6 @@ struct LocationSimBackdrop: View {
 
 }
 
-/// Press feedback for card rows: a gentle shrink, no gray highlight.
 struct LocationCardButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label

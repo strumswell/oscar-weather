@@ -2,8 +2,6 @@ import SwiftUI
 
 // MARK: - Loading choreography pieces
 
-/// One slow highlight sweeping the track — "working" without per-frame flicker.
-/// Callers mask it to the unbuffered gaps (or show it bare on the skeleton).
 struct ShimmerBand: View {
     let trackWidth: CGFloat
     let height: CGFloat
@@ -30,7 +28,6 @@ struct ShimmerBand: View {
     }
 }
 
-/// Rounded rects over the given x-ranges — the shimmer's gap mask.
 struct SegmentsShape: Shape {
     let segments: [ClosedRange<CGFloat>]
 
@@ -48,7 +45,6 @@ struct SegmentsShape: Shape {
     }
 }
 
-/// Indeterminate ring around the thumb while the frame under it is decoding.
 struct ThumbLoadingRing: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var rotating = false
@@ -69,8 +65,6 @@ struct ThumbLoadingRing: View {
     }
 }
 
-/// Skeleton track shown before frame metadata arrives — same footprint as the
-/// real scrubber so the chip doesn't jump when data lands.
 struct GhostTrack: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -100,7 +94,6 @@ struct GhostTrack: View {
     }
 }
 
-/// Diagonal lines across the rect, one every `spacing` points.
 struct DiagonalHatch: Shape {
     var spacing: CGFloat = 5
 

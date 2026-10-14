@@ -3,8 +3,6 @@ import Foundation
 extension HourlyTimelineModel {
     // MARK: - Derived timeline features
 
-    /// Each night run spans from its first hour to the following day hour
-    /// (or the last hour when the night runs off the end).
     static func nightRanges(times: [Double], isDay: [Double]) -> [ClosedRange<Double>] {
         guard times.count == isDay.count, !times.isEmpty else { return [] }
         var ranges: [ClosedRange<Double>] = []
@@ -78,8 +76,6 @@ extension HourlyTimelineModel {
                 if values[next] < values[lowIndex] { lowIndex = next }
                 next += 1
             }
-            // Partial edge days with only a couple of hours would stack both
-            // marks on nearly the same point — skip those.
             if next - index >= 3 {
                 marks.append(ExtremeMark(timestamp: times[highIndex], value: values[highIndex], isHigh: true))
                 if lowIndex != highIndex {

@@ -56,9 +56,6 @@ struct DailyForecastEntry: TimelineEntry {
         )
     }
 
-    /// Rendered when the forecast fetch fails: keeps the resolved location visible (with no rows)
-    /// so a configuration change always takes effect and a transient error never leaves the
-    /// previously selected city's data on screen. WidgetKit retries per the timeline policy.
     static func unavailable(location: String) -> DailyForecastEntry {
         DailyForecastEntry(
             date: .now,

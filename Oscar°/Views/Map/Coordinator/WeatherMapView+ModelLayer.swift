@@ -34,8 +34,6 @@ extension WeatherMapView.Coordinator {
         layer.setSampling(softRendering ? .soft : .hard)
         layer.setMotion(motion)
 
-        // Variable switch: grid indices mean different things per palette and
-        // frame keys collide across variables — palette and textures must go.
         if modelPaletteId != selection.colormapId {
             modelPaletteId = selection.colormapId
             modelPalette = nil
@@ -55,9 +53,6 @@ extension WeatherMapView.Coordinator {
             }
             return
         }
-        // Re-applied until it sticks: `setPalette` needs the Metal device from the
-        // layer's `didMove`, which MapLibre can deliver AFTER a fast (local/cached)
-        // palette fetch — a one-shot set would be lost forever.
         if !layer.hasPalette, let modelPalette {
             layer.setPalette(modelPalette)
             layer.setNeedsDisplay()
@@ -70,33 +65,18 @@ extension WeatherMapView.Coordinator {
         }
 
         defer {
-            // Hourly frames morph along the model flow (precip) or cross-fade in
-            // data space while playing.
             syncPlayback(of: layer, state: player ?? state, playing: isPlaying && payload != nil,
                          interval: 0.8, interpolate: smoothMotion && !UIAccessibility.isReduceMotionEnabled)
         }
 
         guard let payload, let frameKey else { return }
-        // Re-display when either end of the pair changes (the next frame can
-        // arrive later than the current one during progressive loading).
         let pairKey = "\(frameKey)|\(next?.key ?? "-")"
         guard lastModelFrameKey != pairKey else { return }
         guard let textureA = layer.texture(key: frameKey, payload: payload) else {
-            // No Metal device yet (didMove pending). Do NOT stamp pairKey — a
-            // cached palette + grid can resolve before didMove, and nothing
-            // observable changes when the device lands, so nudge a retry.
             scheduleSyncRetry()
             return
         }
         let textureB = next.flatMap { layer.texture(key: $0.key, payload: $0.payload) }
-        // Flow lookup, precipitation only — temperature/wind blend in data
-        // space without warping. Exact adjacent pair first; FROM-frame fallback
-        // (rescaled by the real timestamp gap) when the displayed pair skips
-        // served frames. Hourly pairs arrive with gap_minutes=60, right at the
-        // radar path's ceiling: the shader scales the per-5-min field by
-        // 60/5 = 12 — the full hour of motion, dry pairs share a zero field
-        // (degrades to the plain cross-fade). Larger gaps (skipped frames
-        // while loading) never morph.
         var flowFieldIndex: Int?
         var flowScale: Float = 0
         if selection.morphsAlongMotion, let motion, let next {

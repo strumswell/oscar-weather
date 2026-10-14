@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// "kühler ▭▭▭ wärmer" — a small blue→red gradient key for the stripe colors.
 struct ClimateLegend: View {
     var body: some View {
         HStack(spacing: 8) {

@@ -2,9 +2,6 @@ import Foundation
 
 // MARK: - Value grid palette
 
-/// Local fallback for the server `/colormaps/plasma` palette — kept in sync with
-/// oscar-server's `Colormaps.plasma` so on-device rendering matches the raster path
-/// when the palette endpoint is unreachable. idx 0 = transparent; sqrt-spaced.
 enum RadarPlasma {
     static let colormapId = "plasma"
     private struct Stop { let value: Double; let color: PixelRGBA }

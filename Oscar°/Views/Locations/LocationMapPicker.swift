@@ -14,9 +14,6 @@ import UIKit
 
 // MARK: - MapLibre map (representable)
 
-/// The picker's map: the same MapLibre basemap as the weather map (same style
-/// setting, same hidden-chrome/attribution arrangement, same user-location
-/// dot), without any of its overlay layers.
 struct MapLibreLocationPicker: UIViewRepresentable {
     let chips: [CityMapChip]
     let initialCenter: CLLocationCoordinate2D
@@ -32,18 +29,12 @@ struct MapLibreLocationPicker: UIViewRepresentable {
         mapView.allowsTilting = false
         // Never triggers the system prompt: enabled only once access exists.
         mapView.showsUserLocation = WeatherMapView.locationAuthorized
-        // Attribution is the visible MapAttributionLabel corner credit;
-        // MapLibre's ⓘ button and wordmark stay hidden (see WeatherMapView).
         mapView.logoView.isHidden = true
         mapView.attributionButton.isHidden = true
-        // Adaptive compass (visible only while rotated), below the glass
-        // close button in the top-right corner.
         mapView.compassView.compassVisibility = .adaptive
         mapView.compassViewPosition = .topRight
         mapView.compassViewMargins = CGPoint(x: 21, y: 80)
 
-        // The map's own tap recognizers (annotation selection, double-tap zoom)
-        // must fail before a tap counts as "drop a pin here".
         let tap = UITapGestureRecognizer(
             target: context.coordinator, action: #selector(Coordinator.handleMapTap(_:)))
         for recognizer in mapView.gestureRecognizers ?? []
@@ -103,7 +94,6 @@ struct MapLibreLocationPicker: UIViewRepresentable {
             cityAnnotations = parent.chips.map { chip in
                 let pin = CityPinAnnotation()
                 pin.coordinate = chip.coordinate
-                // The callout repeats the identity line baked under the chip.
                 pin.title = [chip.emoji ?? "", chip.title]
                     .filter { !$0.isEmpty }
                     .joined(separator: " ")
@@ -136,13 +126,10 @@ struct MapLibreLocationPicker: UIViewRepresentable {
         }
 
         // MARK: Delegate (main-actor methods behind a @preconcurrency
-        // conformance; MapLibre delivers its callbacks on the main thread)
 
         func mapView(_ mapView: MLNMapView, imageFor annotation: MLNAnnotation) -> MLNAnnotationImage? {
             var result: MLNAnnotationImage?
             if let cityPin = annotation as? CityPinAnnotation, let chip = cityPin.chip {
-                // Same identity line as the weather map's chips: the emoji
-                // leads the name under the capsule.
                 let identity = [chip.emoji ?? "", chip.title]
                     .filter { !$0.isEmpty }
                     .joined(separator: " ")
@@ -159,8 +146,6 @@ struct MapLibreLocationPicker: UIViewRepresentable {
                             reuseIdentifier: reuseID
                         )
                 } else {
-                    // Conditions not in yet: the emoji/pin disc as fallback
-                    // (emoji on the disc, only the name underneath).
                     let reuseID = "city-pin-\(chip.emoji ?? "plain")-\(chip.title)"
                     result = mapView.dequeueReusableAnnotationImage(withIdentifier: reuseID)
                         ?? MLNAnnotationImage(
@@ -181,8 +166,6 @@ struct MapLibreLocationPicker: UIViewRepresentable {
 
         func mapView(_ mapView: MLNMapView, viewFor annotation: MLNAnnotation) -> MLNAnnotationView? {
             guard annotation is MLNUserLocation else { return nil }
-            // Empty view suppresses the stock puck; the visible dot renders
-            // in-style instead (UserLocationDot, below).
             return MLNUserLocationAnnotationView(reuseIdentifier: "user-location-hidden")
         }
 
@@ -202,10 +185,8 @@ struct MapLibreLocationPicker: UIViewRepresentable {
     }
 }
 
-/// A saved city on the picker map.
 private final class CityPinAnnotation: MLNPointAnnotation {
     var chip: CityMapChip?
 }
 
-/// The candidate marker dropped by a tap.
 private final class PickedPinAnnotation: MLNPointAnnotation {}

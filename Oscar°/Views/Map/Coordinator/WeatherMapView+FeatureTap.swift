@@ -9,9 +9,6 @@ import UIKit
 // MARK: Feature tap-through (webcams, warnings, storm cells)
 
 extension WeatherMapView.Coordinator {
-    /// Query the tapped point's rendered features: webcams, then cells win (small targets,
-    /// padded hit box), then every warning polygon under the finger — deduped by alert id
-    /// (MultiPolygon parts return one feature each) and sorted active-first.
     @objc func handleMapTap(_ gesture: UITapGestureRecognizer) {
         guard gesture.state == .ended, let mapView else { return }
         let point = gesture.location(in: mapView)
@@ -48,11 +45,6 @@ extension WeatherMapView.Coordinator {
         guard !warningFeatures.isEmpty else { return }
         Haptics.impact()
 
-        // The dissolved overlay features carry no per-alert text, so the tap
-        // resolves against `/weather-alerts/point` at the tapped coordinate —
-        // exact geometry containment, full official texts. If the fetch fails,
-        // fall back to whatever the rendered attributes carry (per-alert
-        // features from an older server still work fully offline-cached).
         let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
         var seen = Set<String>()
         var attributeAlerts: [WeatherAlertInfo] = []

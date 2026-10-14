@@ -32,6 +32,7 @@ final class NowPresentationCoordinator {
 
     /// The diver sits behind the full-size tab bar, so the bar stays full while a cat is out.
     var isNudgeOut = false
+    var requestedNudge: SupportNudge.Pose?
 
     var isLayerPickerPresented = false
     /// Latched by NowView.

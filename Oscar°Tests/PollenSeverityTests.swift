@@ -26,7 +26,6 @@ struct PollenTierTests {
 }
 
 struct PollenTypeThresholdTests {
-    /// Grass thresholds: <1 none, ≤20 low, ≤50 moderate, ≤150 high, else very high.
     @Test(arguments: [
         (0.0, PollenTier.none), (0.99, .none),
         (1.0, .low), (20.0, .low),
@@ -38,7 +37,6 @@ struct PollenTypeThresholdTests {
         #expect(PollenType.grass.tier(for: value) == expected)
     }
 
-    /// Ragweed is far more potent: ≤5 low, ≤11 moderate, ≤40 high, else very high.
     @Test(arguments: [
         (0.5, PollenTier.none),
         (1.0, .low), (5.0, .low),

@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// One model in the explainer: preview thumbnail, name, provider, a grid-size
-/// capsule, and a one-liner on what the resolution means for the user.
 struct WeatherModelCard: View {
     let name: String
     let provider: LocalizedStringKey

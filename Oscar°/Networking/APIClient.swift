@@ -10,16 +10,6 @@ import Foundation
 import OpenAPIRuntime
 import OpenAPIURLSession
 
-/// Base URL of the companion oscar-server backend (radar, models, precip series,
-/// notifications). Defined here because `APIClient` is a member of every target
-/// (incl. the watch widget extension), unlike the MapKit-dependent radar files.
-///
-/// Dev override: launch with `-radarBaseURL http://localhost:3000` (the Oscar° scheme
-/// ships this argument disabled — tick it in Edit Scheme → Run → Arguments), or persist
-/// it via `defaults write cloud.bolte.Oscar radarBaseURL ...`. On a physical device use
-/// the Mac's LAN address (e.g. `http://<mac>.local:3000` — oscar-server binds 0.0.0.0).
-/// Only the app process sees the override; widget/watch extensions read their own
-/// defaults and stay on production.
 let radarBaseURL: String = {
     #if DEBUG
     if let override = UserDefaults.standard.string(forKey: "radarBaseURL"),
@@ -38,14 +28,7 @@ final class APIClient: Sendable {
   let openMeteoGeo: Client
   let openMeteoArchive: Client
   let canadaWeather: Client
-  /// oscar-server via the generated client. No `CachingMiddleware`: the radar/model
-  /// states cache decoded frames themselves, and series/alerts callers keep
-  /// last-known-good — HTTP-level caching would only double-buffer megabyte grids.
   let oscarServer: Client
-  /// oscar-server for widget snapshot rendering: WidgetKit grants a refresh only
-  /// ~30 s of wall clock, so requests time out after 20 s (the budget of the old
-  /// direct-URLSession path) and are never retried — a degraded basemap-only
-  /// snapshot beats an abandoned refresh that leaves a stale one on screen.
   let oscarServerSnapshot: Client
 
   init() {
@@ -83,8 +66,6 @@ final class APIClient: Sendable {
   }
 
 
-  /// The generated `Servers.serverN()` build compile-time-constant base URLs; a failure is a
-  /// spec/build error, so fail loudly with a clear message instead of force-trying.
   private static func serverURL(_ make: () throws -> URL) -> URL {
     do {
       return try make()
@@ -93,11 +74,6 @@ final class APIClient: Sendable {
     }
   }
 
-  /// Staging seams, set once at launch by `ScreenshotMode.bootstrap()` before
-  /// any client exists. They exist because watchOS runs URLSession loading
-  /// out of process, where a registered `URLProtocol` never fires: the
-  /// middleware intercepts the generated clients, `stagedFetch` the raw
-  /// `fetchWithRetry` path. Empty/nil outside screenshot runs.
   nonisolated(unsafe) static var stagingMiddlewares: [any ClientMiddleware] = []
   nonisolated(unsafe) static var stagedFetch: (@Sendable (URLRequest) -> (Data, HTTPURLResponse)?)?
 
@@ -125,9 +101,6 @@ final class APIClient: Sendable {
   ) async throws -> Operations.getForecast.Output.Ok.Body.jsonPayload {
     let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
 
-    // Read units from shared app-group defaults rather than the viewContext-bound managed object:
-    // the widget process caches its Core Data `settings` at launch and would otherwise keep
-    // requesting a stale unit (e.g. still Fahrenheit after the app switched to Celsius).
     let temperatureUnit = SettingService.resolvedTemperatureUnit
     let precipitationUnit = SettingService.resolvedPrecipitationUnit
     let windSpeedUnit = WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit)
@@ -167,11 +140,9 @@ final class APIClient: Sendable {
 
     let modelPreference = SettingService.resolvedForecastModelPreference
 
-    // A user-forced model overrides the automatic best_match and regional logic below.
     if modelPreference != .bestMatch {
       query.models = Operations.getForecast.Input.Query.modelsPayload(rawValue: modelPreference.apiValue)
     }
-    // For regions where ICON model is better
     else if coordinates.country() == .spain || coordinates.country() == .portugal {
       query.models = .icon_seamless
       query.forecast_days = ._7
@@ -186,8 +157,6 @@ final class APIClient: Sendable {
           iconForecast = result
         }
       case .badRequest(_), .undocumented(statusCode: _, _):
-        // No usable data for this location/model — surface the failure so refresh()
-        // keeps the last-known-good forecast instead of showing a fabricated one.
         throw URLError(.badServerResponse)
       }
 
@@ -200,7 +169,6 @@ final class APIClient: Sendable {
       case let .ok(response):
         switch response.body {
         case .json(let result):
-          // Merge the daily forecasts: first 7 days from ICON, next 7 days from best_match
           guard var iconDaily = iconForecast.daily,
             let bestMatchDaily = result.daily,
             bestMatchDaily.time.count > 7,
@@ -215,9 +183,6 @@ final class APIClient: Sendable {
             return iconForecast
           }
 
-          // Append best_match days beyond what ICON actually returned, keyed off ICON's own
-          // day count rather than a hardcoded 7 (the sanitizer may trim ICON to fewer days),
-          // so the merged timeline stays contiguous and the parallel arrays stay aligned.
           let startIndex = iconDaily.time.count
           guard bestMatchDaily.time.count > startIndex else { return iconForecast }
           iconDaily.time.append(contentsOf: bestMatchDaily.time.dropFirst(startIndex))
@@ -234,11 +199,10 @@ final class APIClient: Sendable {
           return iconForecast
         }
       case .badRequest(_), .undocumented(statusCode: _, _):
-        return iconForecast  // Return just the ICON forecast if best_match fails
+        return iconForecast
       }
     }
 
-    // For all other regions, proceed with normal request
     let response = try await openMeteo.getForecast(.init(query: query))
 
     switch response {
@@ -248,9 +212,6 @@ final class APIClient: Sendable {
         return result
       }
     case .badRequest(_), .undocumented(statusCode: _, _):
-      // A user-forced model may have no data for this location ("No data is available for this
-      // location"). Fall back to best_match first; if that also fails, surface the error so
-      // refresh() keeps the last-known-good forecast rather than showing a fabricated one.
       if modelPreference != .bestMatch,
         let fallback = try await fallbackToBestMatch(query: query, failedModel: modelPreference)
       {
@@ -260,8 +221,6 @@ final class APIClient: Sendable {
     }
   }
 
-  /// Re-requests the forecast with `best_match` after a forced model returned no data, and posts a
-  /// notification so the app can inform the user. Returns `nil` if `best_match` also fails.
   private func fallbackToBestMatch(
     query: Operations.getForecast.Input.Query,
     failedModel: ForecastModelPreference
@@ -322,10 +281,6 @@ final class APIClient: Sendable {
     }
   }
 
-  /// Deliberately NOT on the generated client: the ensemble response carries
-  /// per-member arrays under DYNAMIC keys (`temperature_2m_min_member01…N`),
-  /// which an OpenAPI schema can't express — `DailyEnsembleForecastResponse`
-  /// decodes them with a dynamic-key container instead.
   func getDailyEnsembleForecast(
     coordinates: CLLocationCoordinate2D,
     model: DailyEnsembleModel = .ecmwfAIFS025Ensemble
@@ -376,18 +331,11 @@ final class APIClient: Sendable {
       throw URLError(.badServerResponse)
     }
 
-    // Decode first so a malformed 200 body (schema drift, HTML error page) never poisons
-    // the cache for its 12h lifetime and re-throws on every subsequent call.
     let decoded = try decoder.decode(DailyEnsembleForecastResponse.self, from: data)
     await DailyEnsembleForecastCache.shared.set(data, for: cacheKey)
     return decoded
   }
 
-  /// Historical daily maximum temperatures (ERA5 reanalysis) for a coordinate over a date range.
-  /// Backs the climate timeline. Coordinates are passed through unrounded because callers feed in
-  /// the already grid-snapped `forecast.latitude/longitude`, which keeps the cache key stable.
-  /// The (cold) full-history request is extremely heavy, so callers cache the result indefinitely
-  /// and only ever fetch the missing recent days; this method itself stays a thin transport.
   func getArchive(
     latitude: Double,
     longitude: Double,
@@ -437,10 +385,6 @@ final class APIClient: Sendable {
     }
   }
 
-  /// Retry/backoff for the hand-written (non-OpenAPI) endpoints, mirroring the
-  /// generated clients' RetryingMiddleware policy: 3 attempts on 429/5xx or a
-  /// thrown transport error, exponential backoff with jitter. Cancellation and
-  /// client-error statuses surface immediately.
   static func fetchWithRetry(
     _ request: URLRequest, attempts: Int = 3
   ) async throws -> (Data, HTTPURLResponse) {

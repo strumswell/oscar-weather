@@ -5,9 +5,6 @@
 
 import SwiftUI
 
-/// Last screen: the welcome greeting returns as a bookend over the frosted
-/// NowView that is already living underneath. The final button just lets
-/// the glass dissolve.
 struct OnboardingFinaleStep: View {
     let onFinish: () -> Void
 
@@ -47,8 +44,6 @@ struct OnboardingFinaleStep: View {
     }
 }
 
-/// App icon over "Willkommen bei Oscar°": opens the flow on the sky and
-/// closes it on the frosted app. `onSky` paints it white with a shadow.
 struct OnboardingLockup: View {
     var onSky = false
 

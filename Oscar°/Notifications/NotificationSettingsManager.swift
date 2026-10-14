@@ -29,10 +29,6 @@ final class NotificationSettingsManager: NSObject {
 
     private let baseURL = URL(string: radarBaseURL)!
     let keychain = KeychainStore(service: (Bundle.main.bundleIdentifier ?? "Oscar") + ".notifications")
-    /// Generated client for the subscription endpoints. Deliberately NO retry
-    /// middleware (registers/patches were never retried; a blind retry could
-    /// double-register), and the bearer key is injected per request from the
-    /// Keychain — register runs before one exists and simply goes out bare.
     @ObservationIgnored lazy var oscarNotifications: Client = Client(
         serverURL: baseURL,
         transport: URLSessionTransport(),
@@ -71,9 +67,6 @@ final class NotificationSettingsManager: NSObject {
 
         rainAlertsEnabled = storedRainAlertsEnabled
         weatherAlertsEnabled = storedWeatherAlertsEnabled
-        // Live rain status rides on the rain-alert subscription: it can't be on alone.
-        // Restored here, not later: a background wake for a push-to-start reports the
-        // card's update token before any view appears.
         liveRainStatusEnabled = defaults.bool(forKey: liveRainStatusEnabledKey) && storedRainAlertsEnabled
         enabled = storedRainAlertsEnabled || storedWeatherAlertsEnabled
         super.init()
@@ -83,8 +76,6 @@ final class NotificationSettingsManager: NSObject {
         UNUserNotificationCenter.current().delegate = self
         notificationLogger.info("Lifecycle: configureOnLaunch started; enabled=\(self.enabled, privacy: .public) storedCredentials=\(self.hasStoredSubscriptionCredentials, privacy: .public)")
 
-        // Migration: drop this device's subscription on the legacy radar.oscars.love server before
-        // anything re-registers against the new server and overwrites the stored credentials.
         deregisterLegacyRadarSubscriptionIfNeeded()
 
         await refreshAuthorizationStatus()
@@ -100,8 +91,6 @@ final class NotificationSettingsManager: NSObject {
         await flushPendingLiveActivityReports()
     }
 
-    /// Foreground pass: end cards the server lost and deliver reports that failed
-    /// while the app was in the background.
     func handleForeground() async {
         await RainRadarLiveActivityManager.shared.reconcile()
         await flushPendingLiveActivityReports()
@@ -215,16 +204,12 @@ final class NotificationSettingsManager: NSObject {
         await refreshAuthorizationStatus()
     }
 
-    /// Debug-menu path: raises the bare system prompt without enabling any
-    /// alert type, so the permission dance can be exercised in isolation.
     func requestPermissionOnly() async {
         _ = await requestNotificationPermission()
         await refreshAuthorizationStatus()
     }
 
     #if DEBUG
-    /// Screenshot staging for the alerts settings scene: every alert type on
-    /// and authorized, without touching UNUserNotificationCenter or the server.
     func stageForScreenshots() {
         rainAlertsEnabled = true
         weatherAlertsEnabled = true
@@ -285,9 +270,6 @@ final class NotificationSettingsManager: NSObject {
 
     private func refreshAuthorizationStatus() async {
         #if DEBUG
-        // Screenshot runs stage the status: the fixture sandbox never holds a
-        // real grant, and a re-read would flip the settings scene back to the
-        // "not determined" footer while the shot is being taken.
         if ScreenshotMode.active { return }
         #endif
         let updatedStatus = await withCheckedContinuation { continuation in
@@ -300,8 +282,6 @@ final class NotificationSettingsManager: NSObject {
     }
 
     private func syncSubscriptionForCurrentState(forceRegister: Bool) async {
-        // A running sync folds this request into one more pass instead of racing
-        // it: two concurrent registrations would create two subscriptions.
         if let subscriptionSyncTask {
             pendingSyncRequested = true
             pendingSyncForceRegister = pendingSyncForceRegister || forceRegister

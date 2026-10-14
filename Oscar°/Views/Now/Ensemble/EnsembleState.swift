@@ -1,8 +1,6 @@
 import CoreLocation
 import SwiftUI
 
-/// The ensemble page's data and selected day. Chart, rail, rows and caption
-/// observe one instance, so picking a day anywhere moves all of them.
 @MainActor
 @Observable
 final class EnsembleState {
@@ -23,7 +21,6 @@ final class EnsembleState {
         days.indices.contains(selectedIndex) ? days[selectedIndex] : nil
     }
 
-    /// Keeps the selected date across model switches; the first load lands on `anchor`.
     func load(at coordinates: CLLocationCoordinate2D, anchor: Date) async {
         loadGeneration += 1
         let generation = loadGeneration
@@ -44,8 +41,6 @@ final class EnsembleState {
         isLoading = false
     }
 
-    /// Days built in code instead of loaded (the onboarding's sample), in the
-    /// default units.
     func stage(_ days: [EnsembleDay], selectedIndex: Int = 0) {
         loadGeneration += 1
         self.days = days
@@ -167,7 +162,6 @@ final class EnsembleState {
 }
 
 extension AtmosphereWeatherMapper {
-    /// A day's consensus sky at local noon: the weather most runs agree on.
     static func snapshot(
         for day: EnsembleDay,
         at location: CLLocationCoordinate2D,

@@ -19,8 +19,6 @@ struct AlertListView: View {
 }
 
 extension AlertResponse {
-    /// Unified card models, active-first — the badge (AlertView) and the sheet
-    /// share this so the badge always headlines the sheet's top card.
     var displayInfos: [WeatherAlertInfo] {
         let infos: [WeatherAlertInfo] =
             switch self {
@@ -36,7 +34,6 @@ extension AlertResponse {
 }
 
 extension WeatherAlertInfo {
-    /// EC's app API has no CAP severity; rank from alert type.
     init(
         canadianAlert alert: Operations.getCanadianWeatherAlerts.Output.Ok.Body.jsonPayloadPayload
             .alertPayload.alertsPayloadPayload

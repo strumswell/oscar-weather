@@ -16,7 +16,6 @@ struct AQIDataPoint: Identifiable {
     let o3: Double
     let so2: Double
 
-    /// Zips the parallel Open-Meteo arrays once; the chart body only iterates.
     static func points(
         time: [Double], aqi: [Double], pm25: [Double], pm10: [Double],
         no2: [Double], o3: [Double], so2: [Double]
@@ -39,7 +38,6 @@ struct AQIDataPoint: Identifiable {
 
 struct AQIChart: View {
     let points: [AQIDataPoint]
-    /// Raw hourly stamps for the day-separator rules.
     let time: [Double]
     let maxTimeRange: ClosedRange<Date>
     let referenceDate: Date

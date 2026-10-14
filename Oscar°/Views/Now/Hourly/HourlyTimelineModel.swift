@@ -1,17 +1,12 @@
 import SwiftUI
 import UIKit
 
-/// Scrub clock + timeline data for the hourly detail sheet. The stage, HUD,
-/// and strip observe one instance, so a drag anywhere moves all of them.
-/// Glides run on a ~60 Hz ticker task owned by the model.
 @MainActor
 @Observable
 final class HourlyTimelineModel {
     struct DayMark {
         let start: Double
         let label: String
-        /// Compact variant for the minimap ("Heute", "Mo."), where fourteen
-        /// full date labels would collide.
         let shortLabel: String
     }
 
@@ -58,7 +53,6 @@ final class HourlyTimelineModel {
     private(set) var soilMoistureUnit = "m³/m³"
     private(set) var et0Unit = "mm"
 
-    /// Not observed: mutated lazily from `layout(for:)` during view updates.
     @ObservationIgnored private var layoutCache: [HourlyLens: HourlyLensLayout] = [:]
 
     var hasData: Bool { times.count > 1 }
@@ -66,9 +60,6 @@ final class HourlyTimelineModel {
 
     // MARK: - Scrub state
 
-    /// Set, the strip shows exactly this range (one day in the wide daily
-    /// list) and the playhead moves across it; nil, it shows a 48-hour
-    /// window that pans under a centered playhead (the hourly sheet).
     private(set) var dayWindow: ClosedRange<Double>?
 
     var windowSeconds: Double {
@@ -76,7 +67,6 @@ final class HourlyTimelineModel {
         return dayWindow.upperBound - dayWindow.lowerBound
     }
 
-    /// Where the scrub may go: the day window when set, else all the data.
     private var scrubRange: ClosedRange<Double> {
         guard let dayWindow,
               dayWindow.lowerBound < domain.upperBound,
@@ -84,18 +74,9 @@ final class HourlyTimelineModel {
         return max(dayWindow.lowerBound, domain.lowerBound)...min(dayWindow.upperBound, domain.upperBound)
     }
     private(set) var scrubTime: Double = Date.now.timeIntervalSince1970
-    /// Coarse (2-min) scrub time for the stage, throttled to ~10 Hz: small
-    /// steps at a steady cadence read as continuous sky/sun motion, while the
-    /// deck cross-fades stay short enough not to overlap.
     private(set) var stageTime: Double = Date.now.timeIntervalSince1970
-    /// Increments when the scrub crosses a six-hour mark, the cadence of the
-    /// strip's axis labels (haptic trigger; every hour was a buzz on fast pans).
     private(set) var hourTick = 0
 
-    /// The playhead is pinned to the strip's center: the window is derived
-    /// from the scrub, so panning the strip IS scrubbing. Near the data edges
-    /// the window simply extends into empty space, keeping the bar centered.
-    /// A day window stays put instead.
     var windowStart: Double { dayWindow?.lowerBound ?? scrubTime - windowSeconds / 2 }
 
     var stageDate: Date { Date(timeIntervalSince1970: stageTime) }
@@ -105,8 +86,6 @@ final class HourlyTimelineModel {
     private var glide: (from: Double, to: Double, start: TimeInterval, duration: TimeInterval, easeOut: Bool)?
     @ObservationIgnored private var stagePushTask: Task<Void, Never>?
     @ObservationIgnored private var lastStagePush: TimeInterval = 0
-    /// No deinit cancellation needed: the loop holds self weakly and exits on
-    /// its next 16 ms tick once the model is gone.
     private var ticker: Task<Void, Never>?
 
     // MARK: - Data
@@ -167,7 +146,6 @@ final class HourlyTimelineModel {
         stageTime = quantized(scrubTime)
     }
 
-    /// Pins the strip to one day and puts the playhead at `time`.
     func show(day: ClosedRange<Double>, at time: Double) {
         glide = nil
         panStartTime = nil
@@ -175,13 +153,10 @@ final class HourlyTimelineModel {
         setScrub(time)
     }
 
-    /// Values up to the first gap: best_match leaves some series null past their model's horizon.
     private static func leading(_ values: [Double?]?) -> [Double] {
         (values ?? []).prefix { $0 != nil }.compactMap { $0 }
     }
 
-    /// Optional-element Open-Meteo arrays ([Double?]) forward-filled into plain
-    /// values — a nil hour carries the previous reading instead of faking a 0.
     private static func filled(_ values: [Double?]?) -> [Double] {
         var last = 0.0
         return (values ?? []).map { value in
@@ -215,38 +190,30 @@ final class HourlyTimelineModel {
         panStartTime = scrubTime
     }
 
-    /// Panning the strip scrubs: content follows the finger while the playhead
-    /// stays pinned to the center, so dragging left pulls the future in.
     func pan(byFraction deltaFraction: Double) {
         guard let panStartTime else { return }
         setScrub(panStartTime - deltaFraction * windowSeconds)
     }
 
-    /// Lets a fast pan coast on, using the gesture's predicted overshoot.
     func endPan(coastFraction: Double = 0) {
         panStartTime = nil
         guard abs(coastFraction) > 0.02 else { return }
         glide(to: scrubTime - coastFraction * windowSeconds, easeOut: true)
     }
 
-    /// A tap on the strip glides the tapped time under the centered playhead.
     func tap(atFraction fraction: Double) {
         glide(to: windowStart + fraction * windowSeconds)
     }
 
-    /// Absolute scrub used by the sky drag and the minimap.
     func scrub(to time: Double) {
         glide = nil
         setScrub(time)
     }
 
-    /// VoiceOver + keyboard stepping.
     func nudge(hours: Double) {
         scrub(to: scrubTime + hours * 3_600)
     }
 
-    /// Eased jump for taps and pan coasting; instant under Reduce Motion.
-    /// `easeOut` skips the slow-in so a fling keeps its speed.
     func glide(to time: Double, easeOut: Bool = false) {
         panStartTime = nil
         guard hasData else { return }
@@ -317,7 +284,6 @@ final class HourlyTimelineModel {
         }
     }
 
-    /// One ticker frame; returns false once there is nothing left to animate.
     private func tick() -> Bool {
         if let glide {
             let progress = min(1, (CACurrentMediaTime() - glide.start) / max(glide.duration, 0.01))

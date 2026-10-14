@@ -12,7 +12,6 @@ struct WarmingStripesRibbon: View {
             let stripeWidth = size.width / CGFloat(stripes.count)
             for (index, stripe) in stripes.enumerated() {
                 let x = CGFloat(index) * stripeWidth
-                // Overdraw a hair so adjacent fills don't leave hairline seams.
                 let rect = CGRect(x: x, y: 0, width: stripeWidth + 0.75, height: size.height)
                 context.fill(
                     Path(rect),

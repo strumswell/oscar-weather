@@ -1,8 +1,6 @@
 import SwiftUI
 
 struct DailyView: View {
-  /// Wide layouts open a day in place (today to start) instead of opening
-  /// the hourly sheet.
   var expandsDays = false
 
   @Environment(Weather.self) private var weather: Weather
@@ -11,15 +9,12 @@ struct DailyView: View {
   private let settingsService = SettingService.shared
   @State private var expandedDay: Int? = 0
 
-  // Column widths scale with Dynamic Type so the weekday and temperature labels keep their
-  // alignment without truncating at larger accessibility text sizes.
   @ScaledMetric private var weekdayColumnWidth: CGFloat = 45
   @ScaledMetric private var precipitationColumnWidth: CGFloat = 50
   @ScaledMetric private var temperatureColumnWidth: CGFloat = 37
   @ScaledMetric private var dayIconSize: CGFloat = 30
 
   var body: some View {
-    // Cap at 12 days to keep View from getting too large with too much (unreliable) data
     let showsPlaceholders = shouldShowPlaceholders
     let dayNumber = showsPlaceholders ? placeholderDayCount : dailyDisplayCount
     let temperatureScale = displayedTemperatureScale
@@ -28,7 +23,6 @@ struct DailyView: View {
     let precipitationUnit = weather.forecast.daily_units?.precipitation_sum ?? "mm"
 
     VStack(alignment: .leading) {
-      // Wide layouts show the hours in the open day, so "Mehr" goes a level further.
       NowSectionHeader(showMore: hasDays ? { expandsDays ? presentation.present(.ensemble) : presentDetails(day: 0) } : nil) {
         Text(heading)
       }
@@ -125,7 +119,6 @@ extension DailyView {
       .frame(height: rowTemperatures.focusLow == nil ? 5 : 28)
       Text(roundTemperatureString(temperature: rowTemperatures.labelHigh))
         .frame(width: temperatureColumnWidth, alignment: .leading)
-      // Only where rows fold open (nil: they open the sheet).
       if let isExpanded {
         Image(systemName: "chevron.down")
           .font(.caption2.weight(.bold))
@@ -288,14 +281,12 @@ extension DailyView {
     return isExpanded ? Text("Klappt das Diagramm ein") : Text("Zeigt das Diagramm")
   }
 
-  /// Midnight to midnight; the next day's start keeps DST days right.
   private func dayRange(_ day: Int) -> ClosedRange<Double>? {
     guard let times = weather.forecast.daily?.time, times.indices.contains(day) else { return nil }
     let end = times.indices.contains(day + 1) ? times[day + 1] : times[day] + 86_400
     return times[day]...end
   }
 
-  /// Today opens at the current hour, later days at noon.
   private func presentDetails(day: Int) {
     guard hasDays else { return }
     let noon = day == 0 ? nil : dailyTemperature(weather.forecast.daily?.time, at: day).map {

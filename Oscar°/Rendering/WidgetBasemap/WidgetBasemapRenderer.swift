@@ -16,22 +16,14 @@ import WidgetKit
 
 @MainActor
 enum WidgetBasemapRenderer {
-    /// Shared with RadarProvider.snapshotSize in the widget (same store keys).
     private static let sizes = WidgetBasemapStore.compositeSizes
-    /// Same framing as the widget compositor / in-app map.
     private static let spanMeters = 65_000.0
     private static let scale: CGFloat = 2
-    /// Re-render when the location moved past this or the cache got old.
     private static let maxLocationDrift: CLLocationDistance = 500
     private static let maxAge: TimeInterval = 30 * 24 * 3600
 
     private static var isRefreshing = false
 
-    /// Renders any missing/stale basemaps for the current location and reloads the
-    /// radar widget when something new landed. Cheap when the cache is warm.
-    /// One basemap per (size, style) — styles come from the widget instances'
-    /// intent configurations via the app-group handshake (a style newly picked in
-    /// a widget renders over the flat fallback until the app runs this).
     static func refreshIfNeeded() async {
         guard !isRefreshing else { return }
         isRefreshing = true
@@ -79,7 +71,6 @@ enum WidgetBasemapRenderer {
         )
         options.scale = scale
         options.showsLogo = false
-        // OpenFreeMap/OSM attribution is covered by the map ⓘ + SettingsView.
         options.showsAttribution = false
 
         let run = SnapshotRun(snapshotter: MLNMapSnapshotter(options: options))
@@ -93,16 +84,11 @@ enum WidgetBasemapRenderer {
                 continuation.resume(throwing: URLError(.timedOut))
             }
             run.snapshotter.start { snapshot, error in
-                // The snapshot's own corner conversion captures the ACTUAL rendered
-                // rectangle (coordinateBounds gets extended to the size's aspect) —
-                // the widget relies on it for pixel-exact overlay math. Read it here
-                // so only Sendable values cross into the main-actor block.
                 let rendered = snapshot.map { snapshot in
                     (nw: snapshot.coordinate(for: .zero),
                      se: snapshot.coordinate(for: CGPoint(x: size.width, y: size.height)),
                      image: snapshot.image)
                 }
-                // MapLibre delivers the completion on the main queue.
                 MainActor.assumeIsolated {
                     guard run.finish() else { return }
                     run.timeout?.cancel()
@@ -123,8 +109,6 @@ enum WidgetBasemapRenderer {
         }
     }
 
-    /// One snapshot request: retains the snapshotter and makes sure exactly one
-    /// of completion and timeout resumes the continuation.
     @MainActor
     private final class SnapshotRun {
         let snapshotter: MLNMapSnapshotter
@@ -133,7 +117,6 @@ enum WidgetBasemapRenderer {
 
         init(snapshotter: MLNMapSnapshotter) { self.snapshotter = snapshotter }
 
-        /// True for the first caller only.
         func finish() -> Bool {
             if finished { return false }
             finished = true

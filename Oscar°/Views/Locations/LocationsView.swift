@@ -38,8 +38,6 @@ struct LocationsView: View {
         !searchText.isEmpty
     }
 
-    /// Card backdrops animate only while the list is actually in front; on
-    /// another tab or under a sheet the storm layers would render unseen.
     private var cardBackdropsPaused: Bool {
         presentation.selectedTab != .places
             || presentation.sheet != nil
@@ -55,28 +53,12 @@ struct LocationsView: View {
                 .toolbarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
-                        // No map.badge.plus exists in SF Symbols, so the
-                        // badge.plus treatment is composed from system
-                        // glyphs. (The MapBadgePlus.symbolset compiles into
-                        // the catalog but the iOS 26 runtime refuses to load
-                        // it — SwiftUI faults "No image named … found in
-                        // asset catalog".)
-                        // A ZStack, not a Label: the toolbar extracts a
-                        // Label's icon down to the bare symbol and strips
-                        // composed overlays.
                         Button(action: presentMapPicker) {
                             Image(systemName: "map")
                                 .overlay(alignment: .bottomTrailing) {
                                     Image(systemName: "plus.circle.fill")
                                         .font(.system(size: 10, weight: .bold))
                                         .symbolRenderingMode(.palette)
-                                        // Plus knocked out in the (dynamic)
-                                        // background color, disc in the label
-                                        // color; the scaled backing circle
-                                        // fakes the SF badge knockout against
-                                        // the map. Explicit color — the
-                                        // .background STYLE renders as a hazy
-                                        // material on the glass toolbar.
                                         .foregroundStyle(Color(uiColor: .systemBackground), .primary)
                                         .background {
                                             Circle()
@@ -100,16 +82,10 @@ struct LocationsView: View {
                     }
                 }
         }
-        // On the NavigationStack, not the list content. Attached inside the
-        // stack, the system's round dismiss button survived a swipe-down
-        // dismissal and kept covering the nav bar header.
         .searchable(text: $searchText, isPresented: $isSearchPresented)
         .onChange(of: isSearchPresented) { _, presented in
-            // A swipe-down dismissal keeps the typed text otherwise, leaving
-            // the list in results mode with no visible search field.
             if !presented { searchText = "" }
         }
-        // A re-tap on the active Orte tab jumps straight into the search.
         .onChange(of: presentation.placesSearchRequests) {
             isSearchPresented = true
         }
@@ -151,10 +127,6 @@ struct LocationsView: View {
                 try await Task.sleep(for: .milliseconds(300))
                 searchResult = try await client.getGeocodeSearchResult(name: searchText)
             } catch {
-                // Cancellation arrives in wrapped shapes too (middleware
-                // ClientError around CancellationError / URLError -999), so the
-                // task flag is the reliable signal. A cancelled task must not
-                // touch state — the newer search owns it already.
                 guard !Task.isCancelled else { return }
                 searchResult = .init()
                 searchError = error.localizedDescription
@@ -165,10 +137,6 @@ struct LocationsView: View {
 
     // MARK: - List
 
-    /// ONE List for both the saved places and the search results. Swapping
-    /// whole views here (list ↔ results ↔ "no results") tears down siblings of
-    /// the search field mid-typing and cost it first-responder status; content
-    /// swaps inside a stable List identity don't.
     private var locationList: some View {
         List {
             if isSearching {
@@ -249,9 +217,6 @@ struct LocationsView: View {
         }
     }
 
-    /// Error/loading/empty state over the (then row-less) list. "No results"
-    /// only after a search actually completed — while one is in flight the
-    /// overlay is a spinner, and earlier results stay in the rows below it.
     @ViewBuilder
     private var searchStatusOverlay: some View {
         if isSearching {
@@ -310,7 +275,6 @@ struct LocationsView: View {
         showForecast()
     }
 
-    /// Picking a place answers "what's the weather there" — jump to the forecast.
     private func showForecast() {
         presentation.selectedTab = .forecast
     }

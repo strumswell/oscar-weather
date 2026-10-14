@@ -25,8 +25,6 @@ enum ClimateStripeColor {
         }
     }
 
-    // The 8 most saturated reds and blues from the ColorBrewer 9-class single-hue palettes — the
-    // exact colors Ed Hawkins uses for the warming stripes. Index 0 sits closest to normal.
     static let reds: [Stop] = [
         hex(0xFEE0D2), hex(0xFCBBA1), hex(0xFC9272), hex(0xFB6A4A),
         hex(0xEF3B2C), hex(0xCB181D), hex(0xA50F15), hex(0x67000D),
@@ -37,11 +35,6 @@ enum ClimateStripeColor {
     ]
     static let fullScaleSigma = 3.0
 
-    /// Maps an anomaly (°C, vs. the 1961–1990 reference normal) to a stripe color on the current
-    /// Ed-Hawkins scale: the full ±3.0σ reference range ramps continuously through the 8 ColorBrewer
-    /// reds (warmer) or blues (cooler), palest at normal. Every year is colored — no neutral band —
-    /// so the modest local warming signal isn't hidden. (σ is the historical day-to-day spread; the
-    /// canonical "~0.1 °C per shade" only holds for low-variance global-annual data.)
     static func color(anomaly: Double, sigma: Double) -> Color {
         let referenceSigma = max(sigma, 0.001)
         let rampMagnitude = min(abs(anomaly) / referenceSigma / fullScaleSigma, 1)
@@ -55,7 +48,6 @@ enum ClimateStripeColor {
             .color
     }
 
-    /// Cool → warm ramp (darkest blue → lightest → darkest red) for the legend swatch.
     static var legendGradient: [Color] {
         (Array(blues.reversed()) + reds).map(\.color)
     }

@@ -39,9 +39,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         }
         MainActor.assumeIsolated {
             UNUserNotificationCenter.current().delegate = NotificationSettingsManager.shared
-            // Here and not in a view task: a push-to-start wakes the app in the
-            // background without UI, and that wake is when ActivityKit hands out the
-            // per-card update token the server needs to update and end the card.
             RainRadarLiveActivityManager.shared.startMonitoring()
         }
         return true
@@ -71,13 +68,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
-/// Sentry crash and performance reports. The onboarding asks before anything is sent; the
-/// person can change it in Settings, which starts or stops the SDK right away.
 enum CrashReporting {
     static let enabledKey = "crashReportsEnabled"
 
-    /// Fresh installs stay off until the onboarding asks. People who finished the
-    /// onboarding before it asked keep the old on-by-default.
     static var isEnabled: Bool {
         UserDefaults.standard.object(forKey: enabledKey) as? Bool ?? OnboardingCoordinator.hasCompleted
     }
@@ -121,19 +114,13 @@ struct WeatherApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
-        // Increase shared URLCache so aggressive tile preloading survives across frames.
         URLCache.shared = URLCache(
-            memoryCapacity: 50 * 1024 * 1024,   // 50 MB
-            diskCapacity: 500 * 1024 * 1024      // 500 MB
+            memoryCapacity: 50 * 1024 * 1024,
+            diskCapacity: 500 * 1024 * 1024
         )
 
-        // Screenshot runs (fastlane snapshot) swap the network layer for a fixture
-        // server and skip crash reporting; a no-op in every normal launch.
         #if DEBUG
         if ScreenshotMode.bootstrap() {
-            // Pin the GPS-backed location to the fixture city: the simulator
-            // has no fix, so views reading `location` (map camera) would sit
-            // on the Location() default until a refresh lands — or forever.
             location.coordinates = CLLocationCoordinate2D(
                 latitude: ScreenshotFixtures.latitude,
                 longitude: ScreenshotFixtures.longitude
@@ -153,9 +140,6 @@ struct WeatherApp: App {
             }
         }
 
-        // Honor the user's launch default (a saved city or "current location")
-        // before hydration compares coordinates and before the first refresh
-        // resolves a location.
         locationService.city.applyDefaultSelectionOnLaunch()
         hydrateFromCache()
     }
@@ -189,11 +173,6 @@ struct WeatherApp: App {
                     #if DEBUG
                     await ScreenshotMode.stageOnAppear()
                     #endif
-                    // Second chance for the init-time hydration: a prewarmed
-                    // launch can run `init` before first unlock, while the
-                    // app-group snapshot is still data-protected and unreadable.
-                    // The UI appearing means the device is unlocked, so retry;
-                    // a guarded no-op whenever init already hydrated.
                     hydrateFromCache()
                     await weather.refresh(location: location)
                     await notificationSettingsManager.configureOnLaunch()
@@ -216,18 +195,7 @@ struct WeatherApp: App {
         .commands { OscarCommands() }
     }
 
-    /// Bridges the launch gap with the last session's weather so the sim opens
-    /// on a real scene instead of the twilight fallback. Called from `init` and
-    /// deliberately synchronous: `.task` fires only after SwiftUI commits the
-    /// first frame, so the previous async hydrate let twilight flash on every
-    /// cold start until its load landed — the snapshot has to be in place
-    /// before the first body evaluation. The snapshot is applied when it
-    /// plausibly belongs to the location the first refresh is about to query:
-    /// near the saved city / last GPS fix, or — with no fix yet this early in
-    /// the process — unconditionally, since the refresh that follows corrects
-    /// any actual move and twilight is wrong everywhere.
     private func hydrateFromCache() {
-        // Screenshot runs stay on fixture data only.
         guard !ScreenshotMode.active, weather.lastUpdated == nil else { return }
         guard let snapshot = WeatherSnapshotStore.load() else { return }
         locationService.update()

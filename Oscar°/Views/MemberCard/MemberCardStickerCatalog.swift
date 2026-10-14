@@ -14,7 +14,6 @@ enum MemberCardStickerCatalog {
         "sticker_qourses"
     ]
 
-    /// The rest unlocks by supporting Oscar (see `SupporterStore`).
     static let freeAssets: Set<String> = [
         "sticker_sun",
         "sticker_grumpy_cloud",

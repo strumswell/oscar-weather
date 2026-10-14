@@ -3,9 +3,6 @@ import Observation
 
 // MARK: - Shared player-state surface
 
-/// The slice of OscarRadarState / ModelGridLayerState that the unified timeline
-/// chip drives. Both are @MainActor @Observable classes; property reads through
-/// the existential still register with SwiftUI's observation tracking.
 @MainActor
 protocol TimelinePlayerState: AnyObject, Observable {
     var frameTimestamps: [String] { get }
@@ -30,10 +27,6 @@ extension CloudLayerState: TimelinePlayerState {}
 
 // MARK: - Radar continued by the model
 
-/// The radar timeline (past + nowcast), followed by the model precipitation
-/// hours after the nowcast while the map's continuation button is on. Owns
-/// both layer states; the selection lives in one of them at a time and the
-/// map shows that layer.
 @MainActor
 @Observable
 final class CombinedTimelineState: TimelinePlayerState {
@@ -41,15 +34,12 @@ final class CombinedTimelineState: TimelinePlayerState {
     let model = ModelGridLayerState()
     private var selectsModel = false
 
-    /// The model state also serves plain model-layer picks, so its frames only
-    /// count when they were loaded as this radar's continuation.
     var includesModel: Bool {
         SettingService.shared.radarModelContinuation
             && model.startsAfter != nil
             && model.currentLayer == radar.region.continuationLayer
     }
 
-    /// Combined index of the first model frame; nil while the timeline is radar only.
     var modelStartIndex: Int? {
         includesModel && !model.frameTimestamps.isEmpty ? radar.frameTimestamps.count : nil
     }
@@ -96,8 +86,6 @@ final class CombinedTimelineState: TimelinePlayerState {
         return radarIndices.union(modelIndices.lazy.map { $0 + offset })
     }
 
-    // Playback runs radar → model hours → radar start. The part holding the
-    // selection plays; both map layers advance through `advanceFrame` here.
     func play() { isShowingModel ? model.play() : radar.play() }
 
     func advanceFrame() {
@@ -106,7 +94,7 @@ final class CombinedTimelineState: TimelinePlayerState {
         guard let next = nextLoadedIndex(in: frameTimestamps.indices.map(loaded.contains),
                                          after: currentFrameIndex) else { return }
         let wasShowingModel = isShowingModel
-        currentFrameIndex = next               // crossing the seam pauses the other part
+        currentFrameIndex = next
         if isShowingModel != wasShowingModel { play() }
     }
 
@@ -133,14 +121,12 @@ final class CombinedTimelineState: TimelinePlayerState {
 
 // MARK: - Shared timeline helpers
 
-/// Index of the frame closest to the wall clock (the scrubber's "now" marker).
 func closestIndexToNow(_ timestamps: [String]) -> Int? {
     guard !timestamps.isEmpty else { return nil }
     return closestTimestampIndex(in: timestamps.map(parseFrameDate))
 }
 
 enum TimelineFormatters {
-    /// Compact signed offsets for the status pill / axis end ("+35 Min.", "+2 Std.").
     static let delta: DateComponentsFormatter = {
         let f = DateComponentsFormatter()
         f.allowedUnits = [.hour, .minute]

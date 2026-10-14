@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// The layout page as a sheet: the forecast page's way in once every
-/// section is hidden.
 struct NowLayoutSheet: View {
     @Environment(\.dismiss) private var dismiss
 

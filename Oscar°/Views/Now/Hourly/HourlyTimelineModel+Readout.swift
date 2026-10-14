@@ -1,7 +1,6 @@
 import SwiftUI
 
 extension HourlyTimelineModel {
-    /// Nearest-hour value for categorical series (weather code).
     private func nearestValue(in values: [Double]) -> Double? {
         guard hasData, let first = times.first, !values.isEmpty else { return nil }
         let index = Int(((scrubTime - first) / 3_600).rounded())
@@ -25,9 +24,6 @@ extension HourlyTimelineModel {
         HourlyFormatting.dayLabel(timestamp: scrubTime, timeZone: timeZone, now: .now)
     }
 
-    /// The small-caps line above the title: weekday and date while the day
-    /// is relative ("Samstag · 29. Aug."), the date alone once it IS the
-    /// weekday.
     var eyebrowLabel: String {
         guard hasData else { return "" }
         let date = Date(timeIntervalSince1970: scrubTime)
@@ -39,7 +35,6 @@ extension HourlyTimelineModel {
 
     var clockLabel: String {
         guard hasData else { return "" }
-        // Snap the shown minutes to 10 so the label doesn't flicker mid-drag.
         let displayTime = (scrubTime / 600).rounded(.down) * 600
         return HourlyFormatting.timeString(timestamp: displayTime, timeZone: timeZone)
     }
@@ -56,8 +51,6 @@ extension HourlyTimelineModel {
     var conditionLabel: String {
         guard hasData else { return "" }
         let code = Int(nearestValue(in: weathercode) ?? 0)
-        // Match the stage's sky/rain agreement rule: when the sampled rate says
-        // rain while the code stays dry, the label follows the rain.
         let dryCodes = code < 51 || code > 99
         if dryCodes, precipitationRate >= 0.1 {
             return WeatherConditionLabel.text(for: (sample(snowfall) ?? 0) > 0 ? .snow : .rain)
@@ -78,7 +71,6 @@ extension HourlyTimelineModel {
         )
     }
 
-    /// Formatted like the lens' chart labels so row and chart never disagree.
     func rowValue(for lens: HourlyLens) -> String? {
         guard hasData else { return nil }
         let layout = layout(for: lens)
@@ -93,7 +85,6 @@ extension HourlyTimelineModel {
         }
     }
 
-    /// Fraction slash keeps "m³⁄m³" compact enough for the value labels.
     var compactMoistureUnit: String {
         soilMoistureUnit.replacingOccurrences(of: "/", with: "\u{2044}")
     }

@@ -5,13 +5,8 @@
 
 import SwiftUI
 
-/// The small things as the old feature collage: three endless columns of
-/// real cards, tilted so they drift from bottom right to top left, fading
-/// out where the text begins.
 struct OnboardingExtrasStage: View {
     var body: some View {
-        // The clear view takes the hero window; the much taller columns hang
-        // off it and get clipped, so the stage never grows to their height.
         Color.clear
             .overlay {
                 HStack(alignment: .top, spacing: 14) {
@@ -76,14 +71,9 @@ struct OnboardingExtrasStage: View {
     }
 }
 
-/// Loops its content upward at a constant speed. The content is laid out
-/// `copies` times up front (every card exists before it scrolls into view),
-/// and one linear repeatForever offset advances by exactly one copy, so the
-/// seam is invisible. The offset is a pure transform: GPU-only scrolling.
 private struct MarqueeColumn<Content: View>: View {
     let speed: Double
     var initialOffset: CGFloat = 0
-    /// The stations card needs a wider column than gauges and tiles.
     var width: CGFloat = 230
     var copies = 3
     @ViewBuilder var content: Content
@@ -107,7 +97,6 @@ private struct MarqueeColumn<Content: View>: View {
         .onChange(of: reduceMotion) { restart() }
     }
 
-    /// One copy plus the gap after it.
     private var copyStride: CGFloat {
         (stackHeight + spacing) / CGFloat(copies)
     }
@@ -123,8 +112,6 @@ private struct MarqueeColumn<Content: View>: View {
     }
 }
 
-/// The radar widget: the map with the latest radar frame, its time, and the
-/// place as a dot.
 private struct RadarWidgetTile: View {
     var body: some View {
         Image("layer-radar-germany")
@@ -150,7 +137,6 @@ private struct RadarWidgetTile: View {
     }
 }
 
-/// The medium daily widget: the place and four days on the sky gradient.
 private struct DailyWidgetTile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -196,9 +182,6 @@ private struct DailyWidgetTile: View {
     }
 }
 
-/// The Oscar watch app, rebuilt from WatchNowView and WatchRainView with the
-/// same fonts and layout, inside an Apple Watch case. Laid out at the real
-/// 46 mm screen size, then scaled down for the collage.
 private struct WatchTile: View {
     enum Face { case now, radar }
 
@@ -206,7 +189,6 @@ private struct WatchTile: View {
 
     private static let screen = CGSize(width: 208, height: 248)
     private static let scale: CGFloat = 0.72
-    /// Glass border plus case, around the screen on every side.
     private static let border: CGFloat = 16
 
     var body: some View {
@@ -227,7 +209,6 @@ private struct WatchTile: View {
             in: .rect(cornerRadius: 54, style: .continuous)
         )
         .overlay(alignment: .trailing) {
-            // Digital crown and side button.
             VStack(spacing: 22) {
                 Capsule().frame(width: 9, height: 40)
                 Capsule().frame(width: 6, height: 30)
@@ -245,7 +226,6 @@ private struct WatchTile: View {
     @ViewBuilder private var background: some View {
         switch face {
         case .now:
-            // The watch's clear-day sky with the sun's glow.
             LinearGradient(
                 colors: [Color(red: 0.33, green: 0.58, blue: 0.9), Color(red: 0.66, green: 0.8, blue: 0.95)],
                 startPoint: .top,
@@ -257,7 +237,6 @@ private struct WatchTile: View {
                     .offset(x: -20, y: -40)
             }
         case .radar:
-            // Overcast while it rains.
             LinearGradient(
                 colors: [Color(red: 0.19, green: 0.24, blue: 0.31), Color(red: 0.36, green: 0.39, blue: 0.43)],
                 startPoint: .top,
@@ -266,7 +245,6 @@ private struct WatchTile: View {
         }
     }
 
-    /// The system clock top right and the app's page dots on the edge.
     private var statusBar: some View {
         ZStack(alignment: .topTrailing) {
             Text(verbatim: "10:09")
@@ -298,7 +276,6 @@ private struct WatchTile: View {
         }
     }
 
-    /// WatchNowView: place, big thin temperature, condition, the day's range.
     private var nowPage: some View {
         VStack(spacing: 0) {
             Text(verbatim: "Leipzig")
@@ -331,7 +308,6 @@ private struct WatchTile: View {
         }
     }
 
-    /// WatchRainView: title, the nowcast headline, capsule bars, time axis.
     private var radarPage: some View {
         let points = Self.rainPoints
         let reference = RainNowcastSummary.reference(for: points.map(\.precipitation))
@@ -376,7 +352,6 @@ private struct WatchTile: View {
 
     private static let rainStart = Date.now
 
-    /// Rain now, easing off over the next hour and a half.
     private static let rainPoints: [PrecipPoint] = (0..<18).map { step in
         PrecipPoint(
             timestamp: rainStart.addingTimeInterval(Double(step) * 300),

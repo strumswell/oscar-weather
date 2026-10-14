@@ -19,8 +19,6 @@ enum MapValueBubbles {
         }
     }
 
-    /// Nearest grid index at a coordinate (0 / outside → nil). UV via the
-    /// mercator-aligned image bounds, like the render quad.
     static func sampleGridIndex(
         payload: RadarGridPayload, bounds: OscarRadarBounds, lat: Double, lon: Double
     ) -> UInt8? {
@@ -39,11 +37,7 @@ enum MapValueBubbles {
         return index > 0 ? index : nil
     }
 
-    /// Curated city set: rank tiers gate visibility by zoom (0 = metropolis,
-    /// shown first; 2 = only zoomed in). European density favors the ICON-D2
-    /// wedge; the world set is for the global ECMWF layers.
     static let bubbleCities: [(lat: Double, lon: Double, rank: Int, name: String)] = [
-        // DACH + central Europe (ICON-D2 wedge)
         (52.52, 13.41, 0, "Berlin"), (53.55, 10.00, 1, "Hamburg"),
         (48.14, 11.58, 0, "München"), (50.94, 6.96, 1, "Köln"),
         (50.11, 8.68, 1, "Frankfurt"), (48.78, 9.18, 1, "Stuttgart"),
@@ -73,7 +67,6 @@ enum MapValueBubbles {
         (45.81, 15.98, 1, "Zagreb"), (43.86, 18.41, 2, "Sarajevo"),
         (51.51, -0.13, 0, "London"), (52.48, -1.90, 2, "Birmingham"),
         (53.48, -2.24, 1, "Manchester"), (55.95, -3.19, 1, "Edinburgh"),
-        // DACH densification (zoomed-in ICON-D2 use)
         (51.23, 6.78, 2, "Düsseldorf"), (51.51, 7.47, 2, "Dortmund"),
         (51.96, 7.63, 2, "Münster"), (54.32, 10.14, 2, "Kiel"),
         (54.09, 12.10, 2, "Rostock"), (52.13, 11.62, 2, "Magdeburg"),
@@ -88,7 +81,6 @@ enum MapValueBubbles {
         (46.62, 14.31, 2, "Klagenfurt"), (47.50, 9.75, 2, "Bregenz"),
         (46.00, 8.95, 2, "Lugano"), (47.42, 9.37, 2, "St. Gallen"),
         (46.52, 6.63, 2, "Lausanne"), (46.85, 9.53, 2, "Chur"),
-        // Wider Europe densification
         (52.09, 5.12, 2, "Utrecht"), (51.44, 5.47, 2, "Eindhoven"),
         (47.22, -1.55, 2, "Nantes"), (43.61, 3.88, 2, "Montpellier"),
         (45.19, 5.72, 2, "Grenoble"), (40.85, 14.27, 1, "Napoli"),
@@ -104,7 +96,6 @@ enum MapValueBubbles {
         (59.44, 24.75, 2, "Tallinn"), (53.90, 27.56, 1, "Minsk"),
         (49.84, 24.03, 2, "Lviv"), (46.48, 30.73, 2, "Odesa"),
         (42.70, 23.32, 1, "Sofia"), (40.64, 22.94, 2, "Thessaloniki"),
-        // World (global model layers)
         (40.71, -74.01, 0, "New York"), (34.05, -118.24, 0, "Los Angeles"),
         (41.88, -87.63, 1, "Chicago"), (29.76, -95.37, 1, "Houston"),
         (25.76, -80.19, 1, "Miami"), (39.74, -104.99, 2, "Denver"),
@@ -138,7 +129,6 @@ enum MapValueBubbles {
         (-33.87, 151.21, 0, "Sydney"), (-37.81, 144.96, 1, "Melbourne"),
         (-31.95, 115.86, 2, "Perth"), (-36.85, 174.76, 2, "Auckland"),
         (61.22, -149.90, 2, "Anchorage"), (21.31, -157.86, 2, "Honolulu"),
-        // World densification
         (33.45, -112.07, 2, "Phoenix"), (32.78, -96.80, 1, "Dallas"),
         (33.75, -84.39, 1, "Atlanta"), (42.36, -71.06, 1, "Boston"),
         (39.95, -75.17, 2, "Philadelphia"), (38.91, -77.04, 1, "Washington"),

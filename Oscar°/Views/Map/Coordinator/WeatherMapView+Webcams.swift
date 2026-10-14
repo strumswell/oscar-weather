@@ -6,8 +6,6 @@ import UIKit
 // MARK: Webcam markers
 
 extension WeatherMapView.Coordinator {
-    /// The visible box grown to the server's 0.5° grid, so a small pan keeps the same box
-    /// and needs no refetch. Nil when the view spans more than the server allows.
     struct WebcamBox: Equatable {
         let north, south, east, west: Double
 
@@ -22,9 +20,6 @@ extension WeatherMapView.Coordinator {
         }
     }
 
-    /// Up to 50 of the most popular webcams in view as small live pictures, refetched when the
-    /// view leaves the fetched box and at most every 5 minutes otherwise. Zoomed out too far,
-    /// they hide.
     func syncWebcams(style: MLNStyle, active: Bool) {
         guard active, let bounds = mapView?.visibleCoordinateBounds, let box = WebcamBox(bounds) else {
             style.removeLayers(withIdentifiers: [WeatherMapView.webcamLayerID])
@@ -35,7 +30,6 @@ extension WeatherMapView.Coordinator {
         let isStale = webcamsFetchedAt.map { Date().timeIntervalSince($0) > 300 } ?? true
         if (box != webcamBox || isStale), !isLoadingWebcams {
             isLoadingWebcams = true
-            // Set up front so a failed fetch backs off instead of retrying every sync.
             webcamBox = box
             webcamsFetchedAt = Date()
             Task { @MainActor [weak self] in
@@ -71,7 +65,6 @@ extension WeatherMapView.Coordinator {
         style.addSource(source)
         let layer = MLNSymbolStyleLayer(identifier: WeatherMapView.webcamLayerID, source: source)
         layer.iconImageName = NSExpression(forKeyPath: "icon")
-        // Overlapping pictures hide the less popular ones (the server sorts by popularity).
         layer.symbolSortKey = NSExpression(forKeyPath: "rank")
         layer.iconAllowsOverlap = NSExpression(forConstantValue: false)
         style.addLayer(layer)
@@ -94,8 +87,6 @@ extension WeatherMapView.Coordinator {
         })
     }
 
-    /// Each webcam's latest thumbnail. Revalidated, since Windy keeps the URL while the picture changes.
-    /// Webcams whose picture fails to load are left out.
     nonisolated private static func webcamPhotos(_ webcams: [Components.Schemas.Webcam]) async -> [Int: UIImage] {
         await withTaskGroup(of: (Int, UIImage?).self) { group in
             for webcam in webcams {

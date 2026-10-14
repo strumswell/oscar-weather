@@ -63,7 +63,6 @@ struct StatsView: View {
         }
         .navigationTitle("Statistik")
         .toolbarTitleDisplayMode(.inline)
-        // Folds the scroll distance collected since the last save into the numbers shown.
         .onAppear { store.flush() }
     }
 

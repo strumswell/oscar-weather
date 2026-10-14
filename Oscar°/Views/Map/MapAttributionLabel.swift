@@ -1,10 +1,5 @@
 import SwiftUI
 
-/// ODbL/OpenMapTiles credit for the OpenFreeMap basemap. Initially visible in
-/// the map corner, then auto-fades after 5 s — one of the collapse mechanisms
-/// the OSMF attribution guidelines explicitly sanction, provided the credit
-/// stays findable afterwards (SettingsView's OpenStreetMap/OpenFreeMap entries).
-/// MapLibre's ⓘ button stays hidden; this label replaces it.
 struct MapAttributionLabel: View {
     @State private var visible = true
 

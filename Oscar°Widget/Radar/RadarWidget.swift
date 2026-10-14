@@ -10,8 +10,6 @@ import SwiftUI
 
 // MARK: - Configuration intent
 
-/// Raw values must match MapBasemapStyle — they key the app-prerendered
-/// basemaps in the app group (WidgetBasemapStore).
 enum RadarWidgetStyle: String, AppEnum {
     case fiord
     case dark
@@ -50,10 +48,6 @@ struct RadarWidgetEntryView: View {
     var entry: RadarProvider.Entry
 
     var body: some View {
-        // The composite only matches the widget's aspect approximately, so it fills
-        // and gets clipped INSIDE this container — a bare scaledToFill image would
-        // grow past the proposed size, drag the frame-time badge along with it, and
-        // push it out of the visible top-left corner (shipped once on systemLarge).
         Color.clear
             .overlay {
                 mapImage

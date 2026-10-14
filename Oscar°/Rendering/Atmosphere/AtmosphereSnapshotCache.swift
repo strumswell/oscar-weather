@@ -1,8 +1,5 @@
 import CoreLocation
 
-/// Memoizes `AtmosphereWeatherMapper.snapshot` across body re-evaluations; recomputes
-/// only when the weather data (`lastUpdated`), location, or a coarse 60-second
-/// time bucket changes. Held via `@State` and only touched on the main actor.
 @MainActor
 final class AtmosphereSnapshotCache {
     private struct Key: Equatable {

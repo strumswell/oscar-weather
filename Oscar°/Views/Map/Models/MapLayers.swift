@@ -8,11 +8,6 @@
 import CoreLocation
 import Foundation
 
-/// The weather layers one map shows (radar continued by the model, model
-/// layers, satellite clouds) and how they load and refresh. The Karten tab
-/// and the forecast's map preview each own one: every map's radar layer
-/// advances its state from its own display link, so two maps sharing one
-/// state would play it at double speed.
 @MainActor
 final class MapLayers {
     let timeline = CombinedTimelineState()
@@ -27,9 +22,6 @@ final class MapLayers {
         let cutoff: Date
     }
 
-    /// The region's model, cut at the start of the last radar frame's hour: its
-    /// frames after that continue the radar. nil while the continuation is off
-    /// or the radar hasn't loaded.
     var continuation: Continuation? {
         guard settings.oscarRadarLayer, settings.radarModelContinuation,
               let last = radar.frameTimestamps.last.flatMap(parseFrameDate),
@@ -37,9 +29,6 @@ final class MapLayers {
         return Continuation(layer: settings.oscarRadarRegion.continuationLayer, cutoff: cutoff)
     }
 
-    /// The radar source covering the place. Capture knob: `-radarRegionLock
-    /// brasil` pins the coverage (used with `-mapInitialCenter` to screenshot
-    /// the layer-picker preview tiles), overriding the location-based pick.
     func pickRadarSource(for coordinates: CLLocationCoordinate2D) {
         if let raw = UserDefaults.standard.string(forKey: "radarRegionLock"),
            let region = RadarRegion(rawValue: raw) {
@@ -51,12 +40,10 @@ final class MapLayers {
         settings.autoSelectRadarSource(latitude: coordinates.latitude, longitude: coordinates.longitude)
     }
 
-    /// Cloud activation is settings-derived; setActive no-ops when unchanged.
     func syncCloudActivation() {
         clouds.setActive(settings.cloudLayerActive)
     }
 
-    /// Full load of the picked layer the first time, cheap staleness checks after that.
     func loadActiveLayer() async {
         if settings.oscarRadarLayer {
             radar.setRegion(settings.oscarRadarRegion)
@@ -74,9 +61,6 @@ final class MapLayers {
         }
     }
 
-    /// The model hours after the radar's nowcast, loaded once the radar frames are in so the
-    /// two don't compete for bandwidth. The cutoff moves per hour, so radar refreshes within
-    /// it load nothing.
     func loadContinuation(_ continuation: Continuation?) async {
         guard let continuation,
               model.currentLayer != continuation.layer || model.startsAfter != continuation.cutoff else { return }
@@ -95,7 +79,6 @@ final class MapLayers {
         }
     }
 
-    /// A map left open across server updates re-fetches once the metadata expires.
     func keepFresh() async {
         while !Task.isCancelled {
             try? await Task.sleep(for: .seconds(5 * 60))
@@ -114,16 +97,12 @@ final class MapLayers {
         }
     }
 
-    /// Stops playback; frames stay cached for the next visit.
     func pause() {
         radar.pause()
         model.pause()
         clouds.pause()
     }
 
-    /// The saved-city chips need the batch conditions even when the map opens
-    /// before the locations list ever fetched them. The store throttles to one
-    /// fetch per 5 minutes.
     func refreshCityChips() async {
         await CityConditionsStore.shared.refresh(
             coordinates: LocationService.shared.city.cities.map {

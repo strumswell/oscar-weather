@@ -4,7 +4,6 @@ import StoreKitTest
 import Testing
 @testable import Oscar_
 
-/// The local `Oscar°.storekit` config must list exactly the products the app asks for.
 struct StoreKitConfigTests {
     @Test @MainActor
     func configOffersEveryProductTheAppUses() async throws {

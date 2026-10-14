@@ -6,9 +6,6 @@
 import ActivityKit
 import Foundation
 
-/// Shared by the app (token plumbing, local cleanup) and the widget extension
-/// (rendering). Mirrors `RainLiveActivityContentState` on oscar-server: times are
-/// unix seconds, rain in mm/h, and every line of copy is derived on the device.
 struct RainRadarActivityAttributes: ActivityAttributes {
     struct ContentState: Codable, Hashable {
         enum Phase: String, Codable, Hashable {
@@ -20,9 +17,7 @@ struct RainRadarActivityAttributes: ActivityAttributes {
 
         struct Bucket: Codable, Hashable, Identifiable {
             var id: Int { t }
-            /// Unix seconds of the radar step.
             let t: Int
-            /// mm/h
             let v: Double
 
             var date: Date { Date(timeIntervalSince1970: TimeInterval(t)) }
@@ -31,16 +26,11 @@ struct RainRadarActivityAttributes: ActivityAttributes {
         let phase: Phase
         let startsAt: Int?
         let endsAt: Int?
-        /// The rain reaches the forecast horizon; `endsAt` is a lower bound.
         let endIsOpen: Bool
-        /// After the rain: the next run the radar already shows.
         let nextStartsAt: Int?
         let peakMmPerHour: Double
-        /// Newest radar observation behind this content; also the "now" of the timeline.
         let observedAt: Int
-        /// 15 minutes of observations and up to 90 minutes of nowcast, 5-minute steps.
         let timeline: [Bucket]
-        /// When the app may remove an ended card itself if the end push never lands.
         let dismissAt: Int?
     }
 
@@ -59,7 +49,6 @@ extension RainRadarActivityAttributes.ContentState {
         Date(timeIntervalSince1970: TimeInterval(seconds))
     }
 
-    /// A plausible card for previews and the debug menu, aligned to radar steps.
     static func sample(phase: Phase, now: Date = Date()) -> Self {
         let base = Int(now.timeIntervalSince1970 / 300) * 300
         func at(_ step: Int) -> Int { base + step * 300 }

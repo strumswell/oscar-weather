@@ -5,14 +5,8 @@
 
 import SwiftUI
 
-/// Card fill for components shown with staged data over an animated sky
-/// (onboarding, the layout preview in Settings). A translucent fill instead
-/// of the cards' live material: plain alpha, no per-frame re-blur.
 let stagedCardFill = AnyShapeStyle(Color(uiColor: .systemBackground).opacity(0.78))
 
-/// The picture in the hero window of each feature page, built from the real
-/// app views with staged data. Fills whatever height the hero window has;
-/// the collage runs edge to edge, the rest sit inset.
 struct OnboardingFeatureStage: View {
     let page: OnboardingFeaturePage
     var radarGrids: Task<[[UInt8]], Never>?
@@ -29,8 +23,6 @@ struct OnboardingFeatureStage: View {
         .environment(\.cardBackgroundStyle, stagedCardFill)
     }
 
-    /// Phone-wide, with air on the sides and a stop above the feather so
-    /// the picture never runs into the dark part under it.
     private func inset(@ViewBuilder _ content: () -> some View) -> some View {
         content()
             .frame(maxWidth: OnboardingStage.contentMaxWidth)
@@ -40,10 +32,8 @@ struct OnboardingFeatureStage: View {
     }
 }
 
-/// Hourly cards, the day list and the logos of the services behind them.
 private struct ForecastStage: View {
     var body: some View {
-        // Small phones drop the day list rather than squeeze everything.
         ViewThatFits(in: .vertical) {
             VStack(spacing: 12) {
                 hourlyRow
@@ -91,16 +81,12 @@ private struct HourlyRow: View {
     }
 }
 
-/// The ensemble page's own caption, deck and day rail with sixteen staged
-/// days. Live like the real page: drag the chart or tap a row.
 private struct EnsembleStage: View {
     @State private var state = EnsembleState()
     @State private var expandedLens: EnsembleLens? = .high
 
     var body: some View {
         OnboardingAppPanel {
-            // Shorter hero windows (small phones, the Duo's cover) drop rows,
-            // then the caption.
             ViewThatFits(in: .vertical) {
                 content(lenses: [.high, .precipitation, .sky], showsRail: true)
                 content(lenses: [.high, .precipitation], showsRail: false)
@@ -109,7 +95,6 @@ private struct EnsembleStage: View {
             }
         }
         .onAppear {
-            // Tomorrow: fairly sure, not a done deal.
             if state.days.isEmpty {
                 state.stage(OnboardingSampleData.ensembleDays, selectedIndex: 1)
             }
@@ -152,8 +137,6 @@ private struct EnsembleStage: View {
     }
 }
 
-/// A rounded window into the app: the night-blue page the real cards are
-/// designed for, so their white text reads the way it does in Oscar.
 private struct OnboardingAppPanel<Content: View>: View {
     @ViewBuilder var content: Content
 

@@ -65,8 +65,6 @@ struct ChartScrollViewLocator: UIViewRepresentable {
                     return
                 }
 
-                // Content size can be transiently zero during TabView layout.
-                // Keep the known chart registered until it actually leaves.
                 return
             }
 
@@ -106,8 +104,6 @@ struct ChartScrollViewLocator: UIViewRepresentable {
             }
         }
 
-        // Swift Charts does not expose its scroll view, so inspect each new
-        // sibling subtree while walking up from the locator.
         private func findChartScrollView() -> UIScrollView? {
             guard let window else { return nil }
 

@@ -2,27 +2,12 @@ import Foundation
 import OpenAPIRuntime
 
 // MARK: - oscar-server accessors (generated client)
-//
-// Every oscar-server endpoint the app consumes goes through the generated
-// OpenAPI client via these accessors — JSON endpoints return generated
-// schema types, asset endpoints (WebP value grids, tiles, palettes) return
-// raw Data. The only oscar-server calls NOT here are the two GeoJSON
-// passthroughs (`getWeatherAlertPolygons`, `getPressureIsolines`): MapLibre
-// consumes those as raw bytes, and round-tripping megabyte FeatureCollections
-// through the generated freeform JSON container would box every coordinate.
 
 extension APIClient {
-  /// Upper bound for collected asset bodies (largest today: ~1.5 MB cloud grids).
   private static let assetByteLimit = 64 * 1024 * 1024
 
-  /// oscar-server stamps `date-time` fields with millisecond fractions
-  /// (`2026-06-17T12:05:00.000Z`), which the runtime's default `.iso8601`
-  /// transcoder rejects.
   static let oscarServerConfiguration = Configuration(dateTranscoder: OscarServerDateTranscoder())
 
-  /// Which oscar-server client serves a call: `.standard` retries with backoff
-  /// (in-app, a late answer still helps); `.snapshot` caps every request at 20 s
-  /// with no retries, for renderers on a WidgetKit refresh budget.
   enum ServerProfile {
     case standard
     case snapshot
@@ -46,9 +31,6 @@ extension APIClient {
     }
   }
 
-  /// nil = clouds not ready yet (404/503) — callers treat it as "no frames",
-  /// distinct from transport errors (thrown as-is) and other bad statuses
-  /// (thrown as `URLError(.badServerResponse)`).
   func cloudFrames() async throws -> Components.Schemas.RadarFramesResponse? {
     switch try await oscarServer.getCloudFrames(.init()) {
     case .ok(let ok): return try ok.body.json
@@ -94,8 +76,6 @@ extension APIClient {
 
   // MARK: Value grids / tiles / palettes (binary WebP & RGBA assets)
 
-  /// nil = 404, which the radar/model states render as a dry (fully
-  /// transparent) frame rather than an error.
   func radarGrid(region: String, key: String) async throws -> Data? {
     let output = try await oscarServer.getRadarGrid(
       .init(path: .init(region: region, key: key)))
@@ -116,7 +96,6 @@ extension APIClient {
     }
   }
 
-  /// nil = 404, rendered as a dry frame (see `radarGrid`).
   func modelGrid(model: String, key: String, variable: String) async throws -> Data? {
     let output = try await oscarServer.getModelGrid(
       .init(path: .init(model: model, key: key, variable: variable)))
@@ -185,8 +164,6 @@ extension APIClient {
   }
 }
 
-/// `PrecipSeriesDate` as the generated client's date transcoder: fractional
-/// seconds first, plain ISO-8601 accepted too.
 struct OscarServerDateTranscoder: DateTranscoder {
   func encode(_ date: Date) throws -> String { PrecipSeriesDate.string(from: date) }
 

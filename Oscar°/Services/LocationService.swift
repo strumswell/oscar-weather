@@ -22,9 +22,6 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
     nonisolated static let outboundCoordinateDecimalPlaces = 3
     var city = CityService.shared
     var authStatus: CLAuthorizationStatus?
-    // Seeded from the app-group cache: short-lived processes (widgets) usually
-    // finish their timeline before a live fix arrives, and without the seed
-    // they would query the Berlin placeholder below and render that city.
     var gpsLocation: CLLocationCoordinate2D = LocationService.cachedGPSLocation() ?? CLLocationCoordinate2D(latitude: 52.52, longitude: 13.4) {
         didSet { Self.cacheGPSLocation(gpsLocation) }
     }
@@ -43,18 +40,10 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         self.manager.distanceFilter = 2_500
         self.authStatus = self.manager.authorizationStatus
 
-        // Always authorization has no UI on watchOS; whenInUse is the supported scope there.
         #if os(watchOS)
         self.manager.requestWhenInUseAuthorization()
         self.manager.startUpdatingLocation()
         #else
-        // On iOS the dedicated onboarding location step is the ONLY place that ever
-        // requests authorization — the app must never surface the system prompt at
-        // launch. requestWhenInUse/AlwaysAuthorization() AND startUpdatingLocation()
-        // each raise the prompt while the status is .notDetermined, so at launch we
-        // only resume updates when access already exists (a returning user, or a
-        // grant made earlier during onboarding). A first-time grant arrives through
-        // the authorization delegate, which starts updates from there.
         if isAuthorized {
             self.manager.startUpdatingLocation()
         }
@@ -68,8 +57,6 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
             || manager.authorizationStatus == .authorizedWhenInUse
     }
 
-    /// Last known GPS fix, shared across app, widget, and watch processes.
-    /// UserDefaults is thread-safe, hence the unsafe opt-out is sound here.
     nonisolated private static var sharedDefaults: UserDefaults { AppGroup.defaults }
     nonisolated private static let cachedGPSLatitudeKey = "lastKnownGPSLatitude"
     nonisolated private static let cachedGPSLongitudeKey = "lastKnownGPSLongitude"
@@ -87,7 +74,6 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         sharedDefaults.set(coordinate.longitude, forKey: cachedGPSLongitudeKey)
     }
     
-    /// Explicit permission request, used by the onboarding location step.
     func requestAuthorization() {
         #if os(watchOS)
         manager.requestWhenInUseAuthorization()
@@ -103,9 +89,6 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
 
     func updateGPSCoordinates() {
         guard let newGPSCoordinates = getGPSCoordinates() else { return }
-        // CLLocationCoordinate2D isn't Equatable, so @Observable can't drop a
-        // no-op write: re-assigning the same fix (every refresh calls this)
-        // invalidates every view that reads the location.
         guard newGPSCoordinates.latitude != gpsLocation.latitude
             || newGPSCoordinates.longitude != gpsLocation.longitude else { return }
         gpsLocation = newGPSCoordinates
@@ -120,7 +103,6 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         return nil
     }
     
-    /// Get current coordinates of the user's GPS or city, if selected
     func getCoordinates() -> CLLocationCoordinate2D {
         if let selectedCity = city.getSelectedCity() {
             return CLLocationCoordinate2D(latitude: selectedCity.lat, longitude: selectedCity.lon)
@@ -128,15 +110,10 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         return gpsLocation
     }
 
-    /// The coordinates a refresh would query right now, or nil while they are
-    /// genuinely unknown — current-location mode before this process' first
-    /// GPS fix, when `getCoordinates()` would return the placeholder default.
     func knownCoordinates() -> CLLocationCoordinate2D? {
         city.getSelectedCityCoordinates() ?? getGPSCoordinates()
     }
     
-    /// Ortsteil-level overrides for small villages that CLGeocoder collapses into their Gemeinde.
-    /// Each entry: (name, minLat, maxLat, minLon, maxLon) from OSM relation bounding boxes.
     private static let localityOverrides: [(name: String, minLat: Double, maxLat: Double, minLon: Double, maxLon: Double)] = [
         ("Hessen", 52.00414699991591, 52.02869882742752, 10.763293296975537, 10.797439784181817),
     ]
@@ -148,12 +125,10 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         }?.name
     }
 
-    /// Get current location name of the user's GPS reverse-geocoded cooridinates or city, if selected
     func getLocationName() async -> String {
         await getPlacemarkInfo().name
     }
 
-    /// Get the current location name and country code, if reverse geocoding is available.
     func getPlacemarkInfo() async -> (name: String, countryCode: String?) {
         let selectedCity = city.getSelectedCity()
 
@@ -183,14 +158,9 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         let latitude = coordinates.latitude
         let longitude = coordinates.longitude
         do {
-            // Bound the reverse geocode: CLGeocoder has no timeout of its own and can
-            // stall indefinitely (e.g. on a flaky network right after foregrounding),
-            // which would otherwise hang the whole refresh.
             let geocoded = try await withTimeout(seconds: 6) {
                 let location = CLLocation(latitude: latitude, longitude: longitude)
                 #if os(watchOS)
-                // CLGeocoder is deprecated AND non-functional on watchOS 26;
-                // MKReverseGeocodingRequest is its designated replacement.
                 return try await mapKitReverseGeocode(location)
                 #else
                 let placemarks = try await reverseGeocode(location)
@@ -211,7 +181,6 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         return ("", nil)
     }
     
-    /// Get current Location object of the user's GPS reverse-geocoded cooridinates or city, if selected
     func getLocation() async -> Location {
         let coordinates = getCoordinates()
         let info = await getPlacemarkInfo()
@@ -224,12 +193,6 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         return location
     }
     
-    /// The manager's status is the truth everywhere except a screenshot run:
-    /// the Orte scene stages an authorized status (its list only shows the GPS
-    /// row with access) and the fixture sandbox never holds a real grant, so a
-    /// re-read here would drop that row mid-capture. The launch argument is
-    /// read directly rather than through ScreenshotMode — this file also
-    /// compiles into the widget extensions, which don't carry that type.
     private func applyManagerAuthorizationStatus() {
         #if DEBUG
         if UserDefaults.standard.string(forKey: "screenshotScene") != nil { return }
@@ -241,8 +204,6 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         let status = manager.authorizationStatus
         applyManagerAuthorizationStatus()
         if status == .authorizedWhenInUse || status == .authorizedAlways {
-            // Deferred at init on a fresh install (see init): the onboarding
-            // location step's grant lands here and is where updates actually start.
             manager.startUpdatingLocation()
             updateGPSCoordinates()
             notificationCenter.post(name: .weatherRefreshNeeded, object: nil)
@@ -251,9 +212,9 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
     
     internal func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.last {
-            if (location.distance(from: CLLocation(latitude: gpsLocation.latitude , longitude: gpsLocation.longitude )) > 2500) { // if distance change > 2.5 km
+            if (location.distance(from: CLLocation(latitude: gpsLocation.latitude , longitude: gpsLocation.longitude )) > 2500) {
                 gpsLocation = location.coordinate
-                notificationCenter.post(name: .weatherRefreshNeeded, object: nil) // notify view
+                notificationCenter.post(name: .weatherRefreshNeeded, object: nil)
             }
         }
     }
@@ -272,14 +233,10 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
 }
 
 #if os(watchOS)
-/// Same single-use box rationale as `SendableGeocoder` below: `cancel()` is
-/// designed to be called concurrently with the in-flight request.
 private struct SendableGeocodingRequest: @unchecked Sendable {
     let request: MKReverseGeocodingRequest?
 }
 
-/// Reverse-geocodes via MapKit (the watchOS 26 replacement for CLGeocoder),
-/// cancellation-aware so the enclosing timeout can unblock it.
 private func mapKitReverseGeocode(_ location: CLLocation) async throws -> (name: String, countryCode: String?) {
     let box = SendableGeocodingRequest(request: MKReverseGeocodingRequest(location: location))
     guard let request = box.request else {
@@ -298,17 +255,10 @@ private func mapKitReverseGeocode(_ location: CLLocation) async throws -> (name:
 }
 #endif
 
-/// CLGeocoder isn't `Sendable`, but `cancelGeocode()` is explicitly designed to be called
-/// concurrently with an in-flight request — exactly what the cancellation handler does below.
-/// Boxing the single-use geocoder lets the operation and cancel closures share it across the
-/// `sending`/`@Sendable` boundary without weakening any real guarantee.
 private struct SendableGeocoder: @unchecked Sendable {
     let geocoder = CLGeocoder()
 }
 
-/// Reverse-geocodes a location, cancellation-aware so an enclosing timeout can unblock it:
-/// cancelling the task calls `cancelGeocode()`, which fires the completion handler instead of
-/// leaving the continuation (and any awaiting task group) suspended forever.
 private func reverseGeocode(_ location: CLLocation) async throws -> [CLPlacemark] {
     let box = SendableGeocoder()
     return try await withTaskCancellationHandler {
@@ -330,8 +280,6 @@ private func reverseGeocode(_ location: CLLocation) async throws -> [CLPlacemark
 
 private struct TimeoutError: Error {}
 
-/// Runs `operation`, throwing `TimeoutError` if it does not finish within `seconds`.
-/// The operation task is cancelled when the timeout wins.
 private func withTimeout<T: Sendable>(
     seconds: Double,
     _ operation: @escaping @Sendable () async throws -> T

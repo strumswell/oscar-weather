@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// One row of the ensemble deck.
 enum EnsembleLens: CaseIterable, Identifiable {
     case sky, high, low, precipitation, wind
 
@@ -57,12 +56,9 @@ extension EnsembleSky {
     }
 }
 
-/// How far a day's runs agree, in words: the page's headline.
 enum EnsembleConfidence {
     case sure, fairlySure, fairlyUnsure, unsure
 
-    /// Doubt grows with the eight-in-ten spread of highs and lows (8 °C is
-    /// fully open) and with runs disagreeing on the weather.
     init(day: EnsembleDay, fahrenheit: Bool) {
         let degrees = fahrenheit ? 1 / 1.8 : 1
         let spreads = [day.high, day.low].compactMap { $0.map { ($0.high - $0.low) * degrees } }

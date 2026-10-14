@@ -1,11 +1,8 @@
 import CoreLocation
 import SwiftUI
 
-/// Details for one tapped Regenzelle: intensity, size, movement — and when the
-/// projected track passes the selected location, the estimated arrival time.
 struct StormCellInfoSheet: View {
     let cell: StormCellInfo
-    /// The selected location the ETA line refers to (NowView's active city).
     var referenceCoordinate: CLLocationCoordinate2D?
     var referenceName: String?
     @Environment(\.dismiss) private var dismissSheet
@@ -91,7 +88,6 @@ struct StormCellInfoSheet: View {
     }
 
     private var intensity: (label: LocalizedStringKey, color: Color) {
-        // Same steps as the map markers / StormCellLegend.
         switch cell.peakMmh {
         case ..<2: ("Leichter Schauer", Color(hex: 0x00CACA))
         case ..<10: ("Mäßiger Schauer", Color(hex: 0xFFFF00))
@@ -105,7 +101,6 @@ struct StormCellInfoSheet: View {
         return "\(compassDirection) · \(Int(cell.velocityKmh.rounded())) km/h"
     }
 
-    /// 8-way compass word for the movement direction ("toward").
     private var compassDirection: String {
         let names = ["N", "NO", "O", "SO", "S", "SW", "W", "NW"]
         let normalizedBearing = cell.bearingDeg.truncatingRemainder(dividingBy: 360) + 360

@@ -5,26 +5,14 @@
 
 import Foundation
 
-/// Every per-band tuning knob in one table. The sprites are soft-edged
-/// (~15 % mean alpha over their box), so a band needs heavy overdraw before
-/// it reads as a deck. Sized so a full mid band closes ~3/4 of what a full
-/// low band does and a full high band ~1/3: an altostratus lid is overcast,
-/// a cirrostratus veil whitens the sky without hiding it.
 struct CloudBandProfile {
     let count: Int
     let scale: ClosedRange<Double>
     let yRange: ClosedRange<Double>
     let imagePool: [Int]
-    /// Share of the low band's drift speed (parallax).
     let driftFactor: Double
-    /// Peak opacity: far bands sit closer to the sky.
     let presence: Double
-    /// Share of the top→bottom tint gradient a sprite shows: a thin cirrus
-    /// veil has almost no shaded underside, a low deck the full one.
     let shading: Double
-    /// Peak opacity of the uniform wash a closed band lays under its sprites.
-    /// Sprites are broken cloud; a stratiform sky is a lid with no blue left,
-    /// bright for cirrostratus, grey for altostratus, darkest for stratus.
     let veil: Double
 
     static let high = CloudBandProfile(

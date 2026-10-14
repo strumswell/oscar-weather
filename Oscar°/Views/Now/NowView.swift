@@ -26,27 +26,11 @@ struct NowView: View {
     @State private var manualRefreshInFlight = false
     @State private var showRefreshIndicator = false
     @State private var spinnerShownAt: Date?
-    /// Screen size above the tab bar, latched at launch and re-measured only
-    /// when the window really changes (rotation, fold, split, resize): the
-    /// bottom safe area shrinks when the bar minimizes on scroll-down, and
-    /// tracking that live would re-stretch the first page mid-scroll.
     private var stageSize: CGSize? { presentation.forecastSize }
 
     private static let scrollTopPadding: CGFloat = 40
-    /// The bottom safe area tops out well above the floating bar's glass.
-    /// Extending the first page this far past it tucks the daily section
-    /// title under the bar instead of into that gap, while the hourly strip
-    /// (whose cards end 20pt higher) still clears the glass.
     private static let firstPageOvershoot: CGFloat = 48
 
-    // Drive the pull-down spinner only while the scene is actually active. Coming
-    // back from the background, `willEnterForeground` starts a refresh before the app
-    // is on-screen; if we debounced from that moment, the spinner's whole show/hide
-    // cycle could play out during the invisible transition and the user would catch
-    // only its tail — a jump as the view snapped back up. Gating on `.active` measures
-    // the debounce from when the app is visible, so a refresh that finishes around the
-    // time the app appears shows no spinner, and a genuinely slow one shows a full,
-    // on-screen cycle.
     private var spinnerPending: Bool {
         weather.isLoading && weather.hasContent && !manualRefreshInFlight && scenePhase == .active
     }
@@ -59,8 +43,6 @@ struct NowView: View {
         isTwoColumn ? stageSections + feedSections : arrangement.pageSections
     }
 
-    /// The launch "page" is the head plus the first section — plus the next
-    /// one when the first is the short, optional radar teaser.
     private var firstPageCount: Int { sections.first == .radar ? 2 : 1 }
 
     private var isTwoColumn: Bool { presentation.forecastIsWide }
@@ -70,8 +52,6 @@ struct NowView: View {
     private var feedSections: [NowSection] { arrangement.feedSections }
 
     var body: some View {
-        // Cards share the sky's hue instead of a fixed dark material (same
-        // snapshot the sim renders; twilight before any data).
         let atmosphere = weather.forecast.hourly != nil
             ? snapshotCache.snapshot(from: weather, at: location.coordinates)
             : .twilight
@@ -97,12 +77,6 @@ struct NowView: View {
                 }
                 .task(id: spinnerPending) {
                     guard spinnerPending else {
-                        // Loading finished, or the scene left `.active`. If the spinner is
-                        // showing, hold it for a minimum on-screen time before hiding, so a
-                        // slow refresh that finishes just after the debounce reads as a clean
-                        // spinner rather than a brief flash. `try?` lets the hide run even if
-                        // this task is cancelled mid-hold, so the indicator can never get
-                        // stranded on.
                         if showRefreshIndicator, let shownAt = spinnerShownAt {
                             let remaining = 0.6 - Date.now.timeIntervalSince(shownAt)
                             if remaining > 0 { try? await Task.sleep(for: .seconds(remaining)) }
@@ -111,25 +85,12 @@ struct NowView: View {
                         spinnerShownAt = nil
                         return
                     }
-                    // Debounce: only show the spinner if loading lingers past 500ms of
-                    // on-screen time, so quick (cache-hit) refreshes don't flash it.
                     guard (try? await Task.sleep(for: .milliseconds(500))) != nil else { return }
-                    // If loading finishes right at the debounce boundary, the sleep's timer
-                    // can win the race against cancellation and resume normally even though
-                    // the id already flipped to `false` and the replacement (hide) task has
-                    // already run. Showing the spinner then would strand it on screen — the
-                    // id won't change again, so nothing would ever hide it. `spinnerPending`
-                    // is captured at body time (always `true` here) and can't catch this;
-                    // the cancellation flag is set either way, so check it explicitly.
                     guard !Task.isCancelled else { return }
                     spinnerShownAt = .now
                     showRefreshIndicator = true
                 }
             } else if weather.loadState == .failed {
-                // Cold start with no cached forecast and a failed fetch: offer a retry over the
-                // twilight backdrop instead of an empty screen (the all-zero forecast used to
-                // stand in here). `loadState` latches `.failed` so a re-triggered refresh that
-                // clears `error` can't flicker this away. Later errors keep last-known-good.
                 WeatherUnavailableView(isRetrying: weather.isLoading) {
                     Task { await weather.refresh(location: location) }
                 }
@@ -144,20 +105,10 @@ struct NowView: View {
         .environment(atmosphereDebug)
         .environment(\.cardTint, cardFill)
         .environment(\.cardBorderOpacity, AtmosphereSampler.cardBorderOpacity(snapshot: atmosphere))
-        // Lighter frost than the default: thinMaterial's dark base swallowed
-        // the sky, and even ultraThin's built-in gray muted it — fading the
-        // material layer lets the sim's color reach the cards through the frost.
-        // 0.6 keeps the blur (frost) alive — fading the material fades its
-        // blur too, so this trades a bit more desaturation (compensated in
-        // cardFill's saturation push) for a visibly frosted card.
         .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial.opacity(0.6)))
-        // One column runs under the status bar like the sky; two columns sit
-        // below the top tab bar of iPad and Mac.
         .ignoresSafeArea(edges: isTwoColumn ? [] : .top)
-        // Outside the safe-area opt-out, so the cat sees the real bars.
         .overlay { SupportNudgeOverlay(isEnabled: weather.hasContent) }
         .onGeometryChange(for: CGSize.self, of: { $0.size }) { size in
-            // The bar minimizing moves the height by well under 100 pt.
             if let old = stageSize, old.width == size.width, abs(old.height - size.height) < 100 {
                 return
             }
@@ -166,16 +117,8 @@ struct NowView: View {
         }
     }
 
-    /// The scroll content: head, the user's sections, attribution, settings.
     private var page: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // The launch "page": head plus the leading section(s), stretched
-            // so the bar never floats over the first strip's cards — it
-            // overlays the next section's title right behind it instead.
-            // HeadView's flexible sky gaps absorb the stretch (and whatever
-            // extra content shows: alert, radar card, eyebrow), so this holds
-            // across display sizes; when the content genuinely doesn't fit,
-            // the page overflows past the minimum and scrolls like before.
             VStack(alignment: .leading, spacing: 0) {
                 refreshIndicator
                 HeadView()
@@ -191,10 +134,6 @@ struct NowView: View {
         .animation(.snappy, value: sections)
     }
 
-    /// The wide layout's left column, right now: the head, then the stage
-    /// sections with the map taking the spare height. Too short to hold
-    /// them all (Duo, small iPad with rain), the map bottoms out and the
-    /// column scrolls.
     private var stage: some View {
         VStack(alignment: .leading, spacing: 0) {
             HeadView(compact: true)
@@ -207,7 +146,6 @@ struct NowView: View {
         .animation(.snappy, value: stageSections)
     }
 
-    /// The wide layout's right column: the forecast sections.
     private var feed: some View {
         VStack(alignment: .leading, spacing: 0) {
             refreshIndicator
@@ -230,12 +168,9 @@ struct NowView: View {
         }
     }
 
-    /// Below the last section: the way back in when all are hidden, the
-    /// attribution footer and the debug dump.
     @ViewBuilder
     private var pageEnd: some View {
         if sections.isEmpty {
-            // Everything hidden: offer the way back in.
             Button("Abschnitte hinzufügen", systemImage: "plus") {
                 Haptics.impact()
                 presentation.present(.layout)
@@ -276,38 +211,25 @@ struct NowView: View {
         }
     }
 
-    /// The vertical forecast scroll with its pull-to-refresh, shared by the
-    /// one-column page and the wide layout's feed.
     private func forecastScroll(@ViewBuilder content: () -> some View) -> some View {
         ScrollView(.vertical) {
             content()
         }
         .scrollIndicators(.hidden)
         .onScrollGeometryChange(for: CGFloat.self, of: { $0.contentOffset.y }) { old, new in
-            // Jumps beyond a screen are programmatic (content swap, scroll-to-top).
             let delta = abs(new - old)
             if delta < 1500 { UsageStatsStore.shared.addScroll(points: delta) }
         }
         .refreshable {
-            // Run the refresh in an unstructured task so it doesn't inherit the
-            // pull-to-refresh gesture's cancellation. SwiftUI cancels the
-            // `.refreshable` action task when the refresh control resolves, which
-            // would otherwise abort the still-in-flight radar/alerts requests
-            // (forecast/air usually survive as cache hits) and discard good data.
             manualRefreshInFlight = true
             await Task { await weather.refresh(location: location) }.value
             manualRefreshInFlight = false
         }
     }
 
-    /// One run of sections in the user's order (the first page holds the
-    /// leading one or two, the rest follow below the stretch).
     private func sectionList(_ sections: ArraySlice<NowSection>, isWide: Bool = false) -> some View {
         ForEach(sections) { section in
             section.view(openRadarMap: openRadarMap, isWide: isWide)
-                // Horizontal strips are greedy in height and would swallow
-                // the first page's stretch — pin every section to its content,
-                // except the map, which stretches on purpose.
                 .fixedSize(horizontal: false, vertical: section != .map)
                 .padding(.top, 28)
                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
@@ -316,9 +238,6 @@ struct NowView: View {
 
     private var footer: some View {
         VStack(spacing: 0) {
-            // Low-opacity white like the map's basemap credit, but the
-            // large lockups need more than its hairline shadow: a crisp
-            // edge plus a soft ambient plate to lift them off bright sky.
             HStack(spacing: 24) {
                 ProviderLogo(asset: "logo-dwd", height: 36)
                 ProviderLogo(asset: "logo-open-meteo", height: 32)
@@ -328,10 +247,6 @@ struct NowView: View {
             .opacity(0.7)
             .shadow(color: .black.opacity(0.35), radius: 1)
             .shadow(color: .black.opacity(0.45), radius: 8, y: 2)
-            // The stacked shadows hit every logo separately — six blur
-            // passes over the animated sim. Rasterize the static row
-            // once; the padding keeps the 8pt blur inside the offscreen
-            // bounds, the negative pad gives the layout size back.
             .padding(12)
             .drawingGroup()
             .padding(-12)
@@ -343,8 +258,6 @@ struct NowView: View {
                 Haptics.impact()
                 presentation.present(.settings)
             } label: {
-                // Bare text over the sim: same white + shadow plate as
-                // the attribution row above so it reads on bright sky.
                 Label("Einstellungen", systemImage: "gearshape")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.white)
@@ -361,17 +274,11 @@ struct NowView: View {
         }
     }
 
-    /// From the top of the scroll content down past the bottom safe area
-    /// into the bar's glass: the ZStack above spans screen top (top safe
-    /// area ignored) to the bottom safe area. `nil` until measured — the
-    /// frame then simply has no minimum for that first layout pass.
     private var firstPageMinHeight: CGFloat? {
         (stageSize?.height).map { $0 - Self.scrollTopPadding + Self.firstPageOvershoot }
     }
 }
 
-/// Shown over the twilight backdrop on a cold start when no forecast could be loaded and
-/// nothing is cached. Offers a retry; background observers also keep retrying on their own.
 private struct WeatherUnavailableView: View {
     let isRetrying: Bool
     let retry: () -> Void
@@ -414,8 +321,6 @@ extension NowView {
 
 private extension View {
     func debugConsoleTap(_ action: @escaping () -> Void) -> some View {
-        // Simultaneous: the place name's tap and the metrics' long press
-        // would otherwise swallow it.
         simultaneousGesture(TapGesture().onEnded(action))
     }
 }

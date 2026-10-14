@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// "Messstationen": the three nearest stations with fresh readings. Hidden when there
-/// are none (outside Europe, or the fetch failed).
 struct StationsView: View {
     @Environment(Weather.self) private var weather
     @Environment(NowPresentationCoordinator.self) private var presentation
@@ -31,7 +29,6 @@ struct StationsView: View {
     }
 }
 
-/// Also staged in the layout preview, hence the injected tap action.
 struct StationsCard: View {
     let stations: [Components.Schemas.NearbyStation]
     let timeZone: TimeZone
@@ -61,7 +58,6 @@ private struct StationRow: View {
 
     var body: some View {
         let units = StationUnits()
-        // Rain only when there was some; rounded to 0,0 it says nothing.
         let rain = station.precipitation_24h_mm.flatMap { $0 >= 0.05 ? units.precipitationString($0) : nil }
         let detail = [stationSubtitle(station, timeZone: timeZone), rain].compactMap(\.self).joined(separator: " · ")
         let condition = station.current.weather_code.map(WeatherConditionLabel.text(for:))
@@ -110,12 +106,9 @@ private struct StationRow: View {
     }
 }
 
-/// Temperature over the last 24 h, scaled to its own range; the dot marks the newest reading and
-/// quiet labels mark the high and the low.
 private struct StationSparkline: View {
     let history: [Components.Schemas.StationReading]
 
-    /// Room above and below the line for the high/low labels.
     private static let labelBand: CGFloat = 11
 
     var body: some View {
@@ -128,8 +121,6 @@ private struct StationSparkline: View {
                   let lowPoint = points.min(by: { $0.1 < $1.1 }), let highPoint = points.max(by: { $0.1 < $1.1 }) else { return }
             let low = lowPoint.1
             let span = max(highPoint.1 - low, 1)
-            // Stretched over the readings there are, like the y scale: a 3-hourly station
-            // with 19 h of history would otherwise start with an empty gap.
             let start = points[0].0
             let duration = max(last.0 - start, 1)
             let top = Self.labelBand
@@ -164,7 +155,6 @@ private struct StationSparkline: View {
 }
 
 extension Weather {
-    /// The head's "Gemessen" station: the nearest starred one in range, else the nearest.
     var headStation: Components.Schemas.NearbyStation? {
         let favorites = SettingService.shared.favoriteStationIDs
         let reporting = stations.filter { $0.current.temperature_c != nil }
@@ -172,15 +162,12 @@ extension Weather {
     }
 }
 
-/// "5,8 km S · 22:00": distance and direction from the place, then the reading's time
-/// (a clock time rather than "44 min ago", which would need a ticking timer).
 func stationSubtitle(_ station: Components.Schemas.NearbyStation, timeZone: TimeZone) -> String {
     let distance = station.distance_km.formatted(.number.precision(.fractionLength(1)))
     let time = station.last_report_at.formatted(Date.FormatStyle(date: .omitted, time: .shortened, timeZone: timeZone))
     return "\(distance) km \(compassDirection(station.bearing_deg)) · \(time)"
 }
 
-/// Station values arrive in SI; the display follows the unit settings.
 @MainActor
 struct StationUnits {
     let temperatureUnit = ClimateTemperatureUnit(settingValue: SettingService.shared.temperatureUnit)
@@ -191,7 +178,6 @@ struct StationUnits {
 
     func temperature(_ celsius: Double) -> Double { temperatureUnit.value(fromCelsius: celsius) }
 
-    /// "15,7°", one decimal: measured values are that precise, forecasts are not.
     func temperatureString(_ celsius: Double?) -> String {
         guard let celsius else { return "–" }
         return "\(temperature(celsius).formatted(.number.precision(.fractionLength(1))))°"

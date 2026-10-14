@@ -8,9 +8,6 @@
 
 import SwiftUI
 
-/// Pushed from the satellite section header: what the cloud layer actually is
-/// (cloud optical thickness from the MTG OCA product), then a source card with the
-/// hard numbers. Terse like RadarInfoView/WeatherModelInfoView.
 struct SatelliteInfoView: View {
     var body: some View {
         ScrollView {
@@ -36,8 +33,6 @@ struct SatelliteInfoView: View {
         }
         .navigationTitle("Satellit")
         .navigationBarTitleDisplayMode(.inline)
-        // Keep the navigation layer clear, or it would paint an opaque background
-        // behind this view and kill the sheet's Liquid Glass at the medium detent.
         .containerBackground(.clear, for: .navigation)
     }
 }

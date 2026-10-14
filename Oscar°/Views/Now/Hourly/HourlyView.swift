@@ -73,8 +73,6 @@ struct HourlyView: View {
         .padding(.leading)
       }
       .scrollIndicators(.hidden)
-      // .never lets a flick travel several cards; the default limit stops
-      // momentum after one page, which reads as a stiff scroll.
       .scrollTargetBehavior(.viewAligned(limitBehavior: .never))
       .scrollPosition(id: $leadingItemID)
       .contentMargins(.trailing, 16, for: .scrollContent)
@@ -113,8 +111,6 @@ struct HourlyView: View {
     }
   }
 
-  /// Single-root container keeps the lazy row unary, so the stack can template
-  /// row identity without evaluating every card.
   private func timelineItemView(_ item: HourlyTimelineItem) -> some View {
     VStack(spacing: 0) {
       switch item {
@@ -139,7 +135,6 @@ struct HourlyView: View {
   }
 
   private func scrollToStart() {
-    // Only act when actually scrolled away from the start (nil = untouched = already there).
     guard let firstID = items.first?.id, let current = leadingItemID, current != firstID else {
       return
     }

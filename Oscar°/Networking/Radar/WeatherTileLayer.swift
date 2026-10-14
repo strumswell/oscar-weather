@@ -19,8 +19,6 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
     case ecmwfWind = "ecmwf_wind"
     case ecmwfPressure = "ecmwf_pressure"
 
-    /// Frames-path prefix for grid requests. Combined with the frame key and
-    /// variable: `{framesEndpoint}/{frameKey}/{variableSegment}/grid`.
     var framesEndpoint: String {
         switch self {
         case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "models/icon/frames"
@@ -28,7 +26,6 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
         }
     }
 
-    /// Variable path segment in oscar-server model URLs.
     var variableSegment: String {
         switch self {
         case .iconPrecip, .ecmwfPrecip:       return "precipitation"
@@ -54,7 +51,6 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
         }
     }
 
-    /// Server palette id (`/colormaps/{id}`) the value grids of this layer index into.
     var colormapId: String {
         switch self {
         case .iconPrecip, .ecmwfPrecip:     return "plasma"
@@ -71,7 +67,6 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
         }
     }
 
-    /// Nominal forecast length, for the map's continuation button label.
     var horizonHours: Int { isGlobalModel ? 84 : 36 }
 
     var isGlobalModel: Bool {
@@ -85,7 +80,6 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
 }
 
 extension WeatherTileLayer {
-    /// oscar-server model id path segment ("models/{id}/…") for this layer.
     var windFieldPrefix: String {
         switch self {
         case .iconPrecip, .iconTemp, .iconWind, .iconPressure: "icon"
@@ -97,8 +91,6 @@ extension WeatherTileLayer {
 }
 
 extension RadarRegion {
-    /// Model precipitation that continues this radar past its nowcast. ICON-D2
-    /// only covers central Europe, so every radar but DWD's hands over to ECMWF.
     var continuationLayer: WeatherTileLayer {
         self == .germany ? .iconPrecip : .ecmwfPrecip
     }

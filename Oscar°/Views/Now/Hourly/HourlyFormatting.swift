@@ -12,8 +12,6 @@ enum HourlyFormatting {
     return SettingService.formattedTime(date, timeZone: timeZone, showsMinutes: false)
   }
 
-  /// Beaufort shows force + "Bft"; every other unit the rounded speed in the
-  /// unit the API delivered.
   static func windString(_ value: Double, unit: WindSpeedUnit, unitString: String) -> String {
     if unit.usesBeaufortDisplay {
       return "\(BeaufortScale.force(forKilometersPerHour: value)) \(unit.displayUnit)"
@@ -27,8 +25,6 @@ enum HourlyFormatting {
     return SettingService.formattedTime(date, timeZone: timeZone)
   }
 
-  /// Short weekday ("Do", "Fri") for the sun-event cards, which share the
-  /// narrow hourly-card width.
   static func weekdayString(timestamp: Double, timeZone: TimeZone) -> String {
     SettingService.formattedShortWeekday(
       Date(timeIntervalSince1970: TimeInterval(timestamp)),
@@ -36,8 +32,6 @@ enum HourlyFormatting {
     )
   }
 
-  /// Day label for the hourly strip's scroll indicator: "Heute"/"Morgen" for the first
-  /// two days, then the full, locale-aware weekday name ("Montag", "Dienstag", …).
   static func dayLabel(timestamp: Double, timeZone: TimeZone, now: Date) -> String {
     let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
     var calendar = Calendar.current
@@ -65,7 +59,6 @@ enum HourlyFormatting {
     "\(value.formatted(.number.precision(.fractionLength(1)))) \(unit)"
   }
 
-  /// Radar and model rates are always mm; the display follows the user's unit setting.
   static func displayRate(fromMillimeters value: Double, unit: String) -> Double {
     unit.lowercased() == "inch" ? value / 25.4 : value
   }

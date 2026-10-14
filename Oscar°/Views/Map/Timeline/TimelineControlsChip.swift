@@ -3,27 +3,16 @@ import UIKit
 
 // MARK: - Unified timeline chip
 
-/// One-row header (play + time + status pill + source) over the scrubber.
-/// Loading is communicated as playability, video-player style: a buffered band
-/// grows along the track, the play button carries a progress ring, and the
-/// unbuffered remainder shimmers. Before metadata arrives the chip renders a
-/// same-size skeleton so nothing jumps when data lands.
 struct TimelineControlsChip: View {
     let state: any TimelinePlayerState
     let sourceLabel: String
     let shortSourceLabel: String
     let isLive: Bool
-    /// Model layer: every frame is computed, none measured. Radar and clouds
-    /// are measurements up to now and a nowcast after it.
     let isForecast: Bool
-    /// Radar continued by a model: frames from this index on are model hours.
     var forecastStartIndex: Int? = nil
     let loadingLabel: LocalizedStringKey
     var onBadgeTap: (() -> Void)?
 
-    /// Latches once the initial prefetch is over so the progress ring doesn't
-    /// flicker back in when playback or the residency window reloads single
-    /// evicted frames (which briefly re-populates loadingFrameIndices).
     @State private var prefetchSettled = false
 
     var body: some View {
@@ -63,7 +52,6 @@ struct TimelineControlsChip: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .glassEffect(in: RoundedRectangle(cornerRadius: 24))
-        // Block the underlying map from receiving touches inside the chip
         .contentShape(RoundedRectangle(cornerRadius: 24))
         .gesture(DragGesture(minimumDistance: 0).onChanged { _ in })
         .onChange(of: bufferFraction >= 1) { _, full in
@@ -73,8 +61,6 @@ struct TimelineControlsChip: View {
             prefetchSettled = false
         }
         .task(id: loadingIsIdle) {
-            // Idle without ever reaching 100 % (failed frames, eviction on very
-            // long timelines): settle after a debounce instead of never.
             guard loadingIsIdle else { return }
             try? await Task.sleep(for: .milliseconds(800))
             guard !Task.isCancelled else { return }
@@ -91,8 +77,6 @@ struct TimelineControlsChip: View {
     private var header: some View {
         HStack(spacing: 12) {
             playButton
-            // Fixed-content variants so ViewThatFits can drop the weekday and
-            // shorten the source label before anything truncates.
             ViewThatFits(in: .horizontal) {
                 headerContent(showDay: true, source: sourceLabel)
                 headerContent(showDay: false, source: sourceLabel)
@@ -149,8 +133,6 @@ struct TimelineControlsChip: View {
         .accessibilityLabel(state.isPlaying ? Text("Pause") : Text("Wiedergabe"))
     }
 
-    /// Fraction of the timeline that is decoded and ready — the play button's
-    /// determinate progress ring during prefetch.
     private var bufferFraction: CGFloat {
         let count = state.frameTimestamps.count
         guard count > 0 else { return 0 }
@@ -163,8 +145,6 @@ struct TimelineControlsChip: View {
 
     // MARK: Status pill
 
-    /// LIVE on the natural now frame, "Jetzt" when a coarser timeline sits on
-    /// its closest-to-now frame, otherwise a signed offset that jumps back to now.
     @ViewBuilder
     private var statusPill: some View {
         if isLive {
@@ -197,7 +177,6 @@ struct TimelineControlsChip: View {
                             .lineLimit(1)
                             .fixedSize()
                     }
-                    // Orange marks the nowcast only, matching the track's zone.
                     .foregroundStyle(delta > 0 && !isForecast && !isModelFrame
                                      ? AnyShapeStyle(.orange) : AnyShapeStyle(.secondary))
                     .padding(.horizontal, 9)

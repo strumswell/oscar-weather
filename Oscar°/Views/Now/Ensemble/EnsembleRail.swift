@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// The day picker under the deck: the highs' eight-in-ten band (its widening
-/// is the forecast losing certainty), rain ticks, and the selected day's box.
 struct EnsembleRail: View {
     let state: EnsembleState
 

@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// A glint that pops over the support heart every few seconds.
 struct HeartSparkle: View {
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
 

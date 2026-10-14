@@ -7,15 +7,10 @@
 
 import Foundation
 
-/// One fixed sprite deck for all three bands; cover only changes which
-/// sprites show, never the layout, so tweened hours don't reshuffle the sky.
 final class CloudGroup {
-    /// Built on first draw, not in `init`: the `@State` default is evaluated
-    /// on every parent body pass (per frame under a scrub tween).
     private(set) lazy var clouds: [Cloud] = Self.makeDeck()
     private var lastUpdate = Date.now
 
-    /// `drift`: low-band points per second at scale 1, signed (negative = left).
     func update(date: Date, drift: Double) {
         var delta = date.timeIntervalSince1970 - lastUpdate.timeIntervalSince1970
         if delta > 10 {
@@ -41,8 +36,6 @@ final class CloudGroup {
         for band in Cloud.Band.allCases {
             let profile = band.profile
             for i in 0..<profile.count {
-                // Thresholds spread evenly across the band, size grows with the
-                // threshold: the first sprites to appear are the small ones.
                 let threshold = (Float(i) + Float.random(in: 0.2...0.8)) / Float(profile.count)
                 let scaleSpan = profile.scale.upperBound - profile.scale.lowerBound
                 let scale = profile.scale.lowerBound + scaleSpan * (Double(threshold) * 0.7 + Double.random(in: 0...0.3))

@@ -30,15 +30,10 @@ struct WidgetCity: Identifiable {
         self.longitude = longitude
     }
 
-    /// The identifier encodes the coordinates *and* name so the selection can be reconstructed
-    /// from the id alone — see `init?(id:)`.
     static func makeID(latitude: Double, longitude: Double, name: String) -> String {
         "city_\(coordinateToken(latitude))_\(coordinateToken(longitude))_\(encodeName(name))"
     }
 
-    /// Rebuilds a city straight from its identifier. Widget timeline resolution must not depend
-    /// on a fresh Core Data read, because WidgetKit can run it in a separate process after the
-    /// configuration UI has already closed.
     init?(id: String) {
         if id == Self.currentLocationID || id == Self.legacyCurrentLocationID {
             self = .currentLocation
@@ -50,7 +45,6 @@ struct WidgetCity: Identifiable {
             return
         }
 
-        // Compatibility with older widget configurations that stored "lat,lon,name".
         let parts = id.split(separator: ",", maxSplits: 2, omittingEmptySubsequences: false)
         guard parts.count >= 2,
               let latitude = Double(parts[0]),

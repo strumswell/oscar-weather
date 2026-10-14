@@ -5,10 +5,6 @@ import UIKit
 extension RadarSnapshotRenderer {
     // MARK: - Motion arrows (shares RadarArrowGeometry with WeatherMapView)
 
-    /// One arrow per coarse motion cell that carries precipitation and non-trivial
-    /// flow, culled to the widget's viewport. Identical placement math to the app
-    /// (RadarArrowGeometry); only the precip gate differs (raster-tile alpha
-    /// instead of the value grid).
     static func arrowFeatures(
         motion: RadarMotionData, fieldIndex: Int, bounds: OscarRadarBounds,
         cull: OscarRadarBounds, gate: PrecipGate?
@@ -21,8 +17,6 @@ extension RadarSnapshotRenderer {
         for cell in RadarArrowGeometry.arrowCells(motion: motion, fieldIndex: fieldIndex, bounds: bounds) {
             guard cull.contains(cell.coordinate) else { continue }
 
-            // ≥2 of 25 subsampled points inside the cell footprint carry precip —
-            // the app's cellHasPrecip rule, sampled from the gate tiles.
             var hits = 0
             subsample: for sy in 0..<5 {
                 for sx in 0..<5 {
@@ -45,9 +39,6 @@ extension RadarSnapshotRenderer {
 
     // MARK: - Precip gate (alpha-sampled radar tiles)
 
-    /// A few 256 px radar tiles around the viewport, kept as alpha planes; answers
-    /// "is there precipitation at this coordinate" for the arrow gate. Bounded by
-    /// construction: at most 6 tiles ≈ 400 KB transient.
     struct PrecipGate {
         let zoom: Int
         let tiles: [Int: [UInt8]] // key: x << 16 | y, value: 256×256 alpha plane
@@ -89,7 +80,6 @@ extension RadarSnapshotRenderer {
             return alpha[py * 256 + px] > 16
         }
 
-        /// Decode a 256 px tile and keep only its alpha channel (dry = transparent).
         private static func alphaPlane(from data: Data) -> [UInt8]? {
             guard let image = UIImage(data: data), let rgba = rgbaPlane(from: image) else { return nil }
             return (0..<256 * 256).map { rgba[$0 * 4 + 3] }

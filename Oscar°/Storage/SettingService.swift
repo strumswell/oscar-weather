@@ -11,9 +11,6 @@ final class SettingService {
         subsystem: Bundle.main.bundleIdentifier ?? "Oscar",
         category: "Storage"
     )
-    /// Units live in the shared app-group defaults so the widget process reads the
-    /// same value the app just wrote. The watch has its own container and keeps
-    /// its own copy.
     var temperatureUnit: String {
         didSet { unitDidChange(key: Self.temperatureUnitKey, value: temperatureUnit) }
     }
@@ -29,71 +26,45 @@ final class SettingService {
     var activeTileLayerRaw: String? {
         didSet { UserDefaults.standard.set(activeTileLayerRaw, forKey: "activeTileLayer") }
     }
-    /// Shared app group so the radar widget reads the same region.
     var oscarRadarRegionRaw: String {
         didSet { Self.defaults.set(oscarRadarRegionRaw, forKey: "oscarRadarRegion") }
     }
-    /// When true (default), radar playback morphs between frames along the server's
-    /// motion fields (RainViewer-style smooth motion). False = exact frames only —
-    /// also forced by the system Reduce Motion setting at render time.
     var radarSmoothMotion: Bool {
         didSet { UserDefaults.standard.set(radarSmoothMotion, forKey: "radarSmoothMotion") }
     }
-    /// When true (default), map layers render with RainViewer-style soft edges
-    /// (bicubic data sampling + smooth palette gradients). False = crisp isobands.
     var radarSoftRendering: Bool {
         didSet { UserDefaults.standard.set(radarSoftRendering, forKey: "radarSoftRendering") }
     }
-    /// When true (default), the paused radar view overlays motion arrows showing
-    /// where precipitation is heading.
     var radarMotionArrows: Bool {
         didSet { UserDefaults.standard.set(radarMotionArrows, forKey: "radarMotionArrows") }
     }
-    /// When true, the radar timeline continues past the nowcast with the model
-    /// precipitation forecast (ICON-D2 for DWD, ECMWF elsewhere).
     var radarModelContinuation: Bool {
         didSet { UserDefaults.standard.set(radarModelContinuation, forKey: "radarModelContinuation") }
     }
-    /// When true (default), model temperature/wind layers show sampled city value
-    /// bubbles on the map.
     var mapValueBubbles: Bool {
         didSet { UserDefaults.standard.set(mapValueBubbles, forKey: "mapValueBubbles") }
     }
-    /// Webcam markers on the map (off by default).
     var mapWebcams: Bool {
         didSet { UserDefaults.standard.set(mapWebcams, forKey: "mapWebcams") }
     }
-    /// When true, active severe-weather warning areas render as a polygon overlay
-    /// on top of whichever radar/model layer is showing.
     var showAlertPolygons: Bool {
         didSet { UserDefaults.standard.set(showAlertPolygons, forKey: "showAlertPolygons") }
     }
-    /// When true, tracked precipitation cells render as markers with their
-    /// extrapolated tracks, alongside whichever layer is showing.
     var showStormCells: Bool {
         didSet { UserDefaults.standard.set(showStormCells, forKey: "showStormCells") }
     }
-    /// When true, MSLP isobars (with H/T centers) overlay the active model layer —
-    /// the Großwetterlage view on top of pressure, temperature, or wind.
     var showIsobars: Bool {
         didSet { UserDefaults.standard.set(showIsobars, forKey: "showIsobars") }
     }
-    /// When true, the satellite cloud layer is the SELECTED map layer with its own
-    /// timeline (scrub through the cloud nowcast) — mutually exclusive with
-    /// `oscarRadarLayer` and `activeTileLayer`, like those are with each other.
     var cloudLayerActive: Bool {
         didSet { UserDefaults.standard.set(cloudLayerActive, forKey: "cloudLayerActive") }
     }
-    /// Opacity of the radar/model data overlays (0.3…1).
     var mapOverlayOpacity: Double {
         didSet { UserDefaults.standard.set(mapOverlayOpacity, forKey: "mapOverlayOpacity") }
     }
-    /// Supporter theme: the iOS 6 weather card replaces the tab bar (see RootTabView).
     var classicTheme: Bool {
         didSet { UserDefaults.standard.set(classicTheme, forKey: "classicTheme") }
     }
-    /// `SectionArrangement` JSON per `LayoutForm.rawValue`; a missing form
-    /// falls back to the three legacy keys below.
     var sectionArrangementsRaw: [String: Data] {
         didSet { UserDefaults.standard.set(sectionArrangementsRaw, forKey: "sectionArrangements") }
     }
@@ -112,11 +83,9 @@ final class SettingService {
     var hiddenHeadMetricsRaw: [String]? {
         didSet { UserDefaults.standard.set(hiddenHeadMetricsRaw, forKey: "hiddenHeadMetrics") }
     }
-    /// Stations starred in the station sheet; the head's "Gemessen" prefers one in range.
     var favoriteStationIDs: [String] {
         didSet { UserDefaults.standard.set(favoriteStationIDs, forKey: "favoriteStationIDs") }
     }
-    /// Shared app group so the widget basemap prerender follows the map style.
     var mapBasemapStyleRaw: String {
         didSet { Self.defaults.set(mapBasemapStyleRaw, forKey: "mapBasemapStyle") }
     }
@@ -197,8 +166,6 @@ final class SettingService {
         precipitationUnit = Self.resolvedPrecipitationUnit
         oscarRadarLayer = UserDefaults.standard.bool(forKey: "oscarRadarLayer")
         activeTileLayerRaw = UserDefaults.standard.string(forKey: "activeTileLayer")
-        // Prefer the shared app group; migrate a value written to standard defaults by older
-        // builds so the radar widget (which can only read the group) stays in sync.
         let resolvedRadarRegion = Self.defaults.string(forKey: "oscarRadarRegion")
             ?? UserDefaults.standard.string(forKey: "oscarRadarRegion")
             ?? "germany"
@@ -268,8 +235,6 @@ final class SettingService {
         WidgetCenter.shared.reloadAllTimelines()
     }
 
-    /// Units used to live in the Core Data `Settings` row; installs that predate the
-    /// app-group defaults copy them over once.
     private static func migrateUnitsFromCoreDataIfNeeded() {
         guard defaults.string(forKey: temperatureUnitKey) == nil else { return }
         let context = PersistenceController.shared.container.viewContext
@@ -288,15 +253,11 @@ final class SettingService {
         return TimeFormatPreference(rawValue: rawValue ?? "") ?? .system
     }
 
-    /// Reads the selected forecast model from shared defaults. Safe to call from extensions.
     nonisolated static var resolvedForecastModelPreference: ForecastModelPreference {
         let rawValue = defaults.string(forKey: forecastModelPreferenceKey)
         return ForecastModelPreference(rawValue: rawValue ?? "") ?? .bestMatch
     }
 
-    /// Selected units read from shared defaults. Safe to call from the widget process, which must
-    /// not read units from the viewContext-bound `settings` (cached at process launch, blind to
-    /// the app's writes).
     nonisolated static var resolvedTemperatureUnit: String {
         defaults.string(forKey: temperatureUnitKey) ?? "celsius"
     }

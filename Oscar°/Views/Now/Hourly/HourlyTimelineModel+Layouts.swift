@@ -2,8 +2,6 @@ import SwiftUI
 
 extension HourlyTimelineModel {
     func buildLayout(for lens: HourlyLens) -> HourlyLensLayout {
-        // The format closures capture plain locals, not self: layouts live in
-        // a cache on the model, so a self capture would cycle.
         let temperatureUnit = self.temperatureUnit
         let temperatureFormat: (Double) -> String = { "\(Int($0.rounded()))\(temperatureUnit)" }
         let percentFormat: (Double) -> String = { "\(Int($0.rounded()))%" }
@@ -27,8 +25,6 @@ extension HourlyTimelineModel {
             let displayed: ([Double]) -> [Double] = unit.usesBeaufortDisplay
                 ? BeaufortScale.convertedValues(fromKilometersPerHour:)
                 : { $0 }
-            // Highest altitude first: the readout box lists lines in reverse,
-            // so its rows read 10 m upwards.
             let heights = [windspeed180, windspeed120, windspeed80].map(displayed)
             let heightColors: [Color] = [.teal.mix(with: .black, by: 0.55),
                                          .teal.mix(with: .black, by: 0.4),
@@ -139,8 +135,6 @@ extension HourlyTimelineModel {
         HourlyLensLayout.Line(values: values, color: color, width: width, label: label)
     }
 
-    /// Joint min/max over all series, padded so curves don't kiss the edges.
-    /// `from` pins the lower bound (wind and ET₀ start at zero).
     private func paddedDomain(
         _ series: [[Double]],
         from lowerPin: Double? = nil,

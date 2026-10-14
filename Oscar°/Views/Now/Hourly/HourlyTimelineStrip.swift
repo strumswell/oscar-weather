@@ -1,22 +1,5 @@
 import SwiftUI
 
-/// The hourly detail timeline: a 48-hour window over the full 14-day range,
-/// rendered for whatever lens is active — line stack, optional precipitation
-/// bars, cloud ribbons, or area fill, night shading, sticky day labels,
-/// per-day extremes, value gridlines, hour ticks, and the playhead.
-///
-/// The playhead is pinned to the center: dragging moves the timeline beneath
-/// it, which scrubs the stage. A tap glides the tapped time under the
-/// playhead, and a fast pan coasts on with the gesture's momentum. Past hours
-/// render faded.
-///
-/// With a day window on the model the strip shows just that day: the
-/// playhead moves instead, the y scale fits the day, and the overview lens
-/// carries an icon per hour with the current hour marked. The owner then
-/// supplies the scrub gesture (see `DayDetailView`).
-///
-/// Canvas, not Charts: at this height features are a few points tall and the
-/// whole strip redraws per pan/scrub frame.
 struct HourlyTimelineStrip: View {
     let model: HourlyTimelineModel
     let lens: HourlyLens
@@ -67,9 +50,6 @@ struct HourlyTimelineStrip: View {
                 isEnabled: model.dayWindow == nil
             )
             .overlay(alignment: .topLeading) {
-                // Below the day-label row along the chart's top edge. The day
-                // view leaves it out: it would hide the coming hours, and its
-                // lens tiles carry the values.
                 if model.dayWindow == nil {
                     HourlyReadoutBox(model: model, layout: layout)
                         .onGeometryChange(for: CGSize.self, of: { $0.size }) { readoutSize = $0 }
@@ -87,15 +67,9 @@ struct HourlyTimelineStrip: View {
         }
     }
 
-    /// The readout box sits right of the playhead like the old tooltip; when
-    /// its rows are wide enough to reach into the right-edge value labels
-    /// (Bodenwassergehalt), it flips to the faded past side instead — the old
-    /// annotation's fit-to-chart behavior.
     private func readoutX(width: CGFloat, layout: HourlyLensLayout) -> CGFloat {
         let trailing = width / 2 + 10
         guard layout.bands.isEmpty else { return trailing }
-        // Rough width of the gridline labels (9.5 pt font): enough precision
-        // to decide the flip.
         let reserved = CGFloat(layout.extremeFormat(layout.domain.upperBound).count) * 5.5 + 12
         guard trailing + readoutSize.width > width - reserved else { return trailing }
         return max(width / 2 - 10 - readoutSize.width, 2)
@@ -139,8 +113,6 @@ struct HourlyTimelineStrip: View {
             max(2, CGFloat(value / model.precipitationMax) * chartHeight * 0.5)
         }
 
-        // Past hours draw faded; split at the now boundary. (No dash — with
-        // stacked series the dashes read as noise.)
         func splitStroke(_ path: Path, color: Color, lineWidth: CGFloat) {
             let style = StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round)
             if nowX > 0 {
@@ -177,7 +149,6 @@ struct HourlyTimelineStrip: View {
             )
         }
 
-        // The day view marks the hour we're in with a soft column.
         let hourWidth = width * CGFloat(3_600 / windowSeconds)
         let currentHour = Int((nowTime - firstTime) / 3_600)
         if showsDay, model.times.indices.contains(currentHour) {
@@ -188,11 +159,8 @@ struct HourlyTimelineStrip: View {
             )
         }
 
-        // Text placed on the chart registers here so later labels can dodge
-        // it; whatever cannot find a free spot skips drawing.
         var labelRects: [CGRect] = []
 
-        // Value gridlines with right-edge labels (line lenses only).
         if layout.bands.isEmpty {
             let step = Self.niceStep(span / 3)
             let gridFont = Font.system(size: 9.5, weight: .medium)
@@ -245,8 +213,6 @@ struct HourlyTimelineStrip: View {
             ribbon.closeSubpath()
             splitFill(ribbon, color: .hourlyCloud, opacity: 0.85)
 
-            // Shadowed so the label stays readable on the white ribbon in
-            // dark mode too.
             var labelContext = context
             labelContext.addFilter(.shadow(color: .black.opacity(0.35), radius: 1.5))
             let label = labelContext.resolve(
@@ -303,9 +269,6 @@ struct HourlyTimelineStrip: View {
                 var rotated = context
                 rotated.translateBy(x: arrowX, y: yOf(primary.values[index]))
                 rotated.rotate(by: .degrees(model.winddirection[index] + 180))
-                // A darker-teal outline hugging the glyph (the same symbol
-                // drawn offset in a ring behind it) lifts the arrow off the
-                // line.
                 let outline = rotated.resolve(
                     Text(Image(systemName: "location.north.fill"))
                         .font(.system(size: 10))
@@ -328,7 +291,6 @@ struct HourlyTimelineStrip: View {
             }
         }
 
-        // One weather icon per hour, just above the highest line.
         if showsDay, lens == .overview {
             let iconSize = min(20, hourWidth - 3)
             var icons: [String: GraphicsContext.ResolvedImage] = [:]
@@ -351,7 +313,6 @@ struct HourlyTimelineStrip: View {
             }
         }
 
-        // The day view's header already names the day.
         if !showsDay {
             let dayFont = Font.system(size: 11, weight: .semibold)
             for (index, mark) in model.dayMarks.enumerated() {
@@ -401,9 +362,6 @@ struct HourlyTimelineStrip: View {
                     .foregroundStyle(.white)
             )
             let labelSize = label.measure(in: CGSize(width: 200, height: 20))
-            // Preferred side first (above the highs, below the lows), the
-            // other side if that spot is taken, no label if both are — the
-            // dot alone marks the extreme then.
             let clampedX = min(max(markX - labelSize.width / 2, 2), width - labelSize.width - 2)
             let aboveY = max(markY - 7 - labelSize.height, 3)
             let belowY = min(markY + 7, chartHeight - labelSize.height - 3)
@@ -431,7 +389,6 @@ struct HourlyTimelineStrip: View {
             [.year, .month, .day, .hour],
             from: Date(timeIntervalSince1970: windowStart)
         )
-        // A single day gets 3-hour labels, six hours would leave three.
         let tickHours = showsDay ? 3 : 6
         components.hour = ((components.hour ?? 0) / tickHours) * tickHours
         components.minute = 0
@@ -441,12 +398,9 @@ struct HourlyTimelineStrip: View {
             guardCounter += 1
             let tickX = x(tickDate.timeIntervalSince1970)
             let hour = calendar.component(.hour, from: tickDate)
-            // The window can extend past the data near the edges; keep the
-            // axis empty there so the void reads as "no forecast".
             let inData = tickDate.timeIntervalSince1970 >= model.domain.lowerBound - 1_800
                 && tickDate.timeIntervalSince1970 <= model.domain.upperBound + 1_800
             if inData {
-                // Midnight already carries the stronger day rule.
                 if hour != 0, tickX > 0, tickX < width {
                     context.fill(
                         Path(CGRect(x: tickX - 0.375, y: 0, width: 0.75, height: chartHeight)),
@@ -468,7 +422,6 @@ struct HourlyTimelineStrip: View {
             tickDate = next
         }
 
-        // Playhead: pinned to the strip's center; the timeline moves beneath it.
         let headX = x(scrubTime)
         context.fill(
             Path(CGRect(x: headX - 0.75, y: 0, width: 1.5, height: chartHeight)),
@@ -478,9 +431,6 @@ struct HourlyTimelineStrip: View {
             AtmosphereWeatherMapper.interpolatedValue(at: scrubTime, times: model.times, values: values)
         }
 
-        // Dots mark where the playhead crosses each series; the values live in
-        // the readout box overlaid next to the playhead, where rows keep a
-        // fixed order instead of chasing the lines.
         for line in layout.lines {
             guard let value = interpolated(line.values) else { continue }
             let dot = Path(ellipseIn: CGRect(x: headX - 4, y: yOf(value) - 4, width: 8, height: 8))
@@ -500,14 +450,11 @@ struct HourlyTimelineStrip: View {
         }
     }
 
-    /// The y range of one day's lines, so a single day isn't flattened by
-    /// the fortnight's extremes. Pinned at zero where the lens is (wind, ET₀).
     private static func dayDomain(_ layout: HourlyLensLayout, indices: ClosedRange<Int>) -> ClosedRange<Double> {
         let values = layout.lines.flatMap { line in
             indices.filter { $0 < line.values.count }.map { line.values[$0] }
         }
         guard let low = values.min(), let high = values.max() else { return layout.domain }
-        // A floor on the padding keeps a flat pressure day from zooming into noise.
         let pad = max((high - low) * 0.1, (layout.domain.upperBound - layout.domain.lowerBound) * 0.05)
         let lower = layout.domain.lowerBound == 0 ? 0 : low - pad
         return lower...(high + pad)

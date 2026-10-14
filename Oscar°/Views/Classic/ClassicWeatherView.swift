@@ -22,8 +22,6 @@ struct ClassicWeatherView: View {
     @State private var flipAngle: Double = 0
 
     var body: some View {
-        // The ⓘ flips the whole screen over, like the original. Both sides
-        // stay mounted (scroll positions, tapped day) and swap while edge-on.
         ZStack {
             front
                 .opacity(isFlipped ? 0 : 1)
@@ -34,8 +32,6 @@ struct ClassicWeatherView: View {
             .opacity(isFlipped ? 1 : 0)
             .accessibilityHidden(!isFlipped)
         }
-        // perspective 0: the near edge would scale up mid-turn and the card
-        // looked like it morphs into the other side's shape.
         .rotation3DEffect(.degrees(flipAngle), axis: (x: 0, y: 1, z: 0), perspective: 0)
         .background(Color.black.ignoresSafeArea())
         .preferredColorScheme(.dark)
@@ -43,12 +39,9 @@ struct ClassicWeatherView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await store.refresh() } }
         }
-        // Adds, deletes and reorders on the back: keep what is loaded.
         .onReceive(NotificationCenter.default.publisher(for: .cityToggle)) { _ in
             Task { await store.refresh(onlyMissing: true) }
         }
-        // `initial`: the shared store may already hold places when the theme
-        // is switched on, and the page id must match one of them.
         .onChange(of: store.places, initial: true) { _, places in
             if !places.contains(where: { $0.id == page }) { page = places.first?.id ?? "" }
         }
@@ -59,9 +52,6 @@ struct ClassicWeatherView: View {
         }
     }
 
-    /// Two half turns: out to edge-on, swap sides while nothing is visible,
-    /// in from the other edge. A single turn with a crossfade shows the
-    /// mirrored back through the front.
     private func flip() {
         let direction: Double = isFlipped ? -1 : 1
         withAnimation(.easeIn(duration: 0.3)) {
@@ -73,8 +63,6 @@ struct ClassicWeatherView: View {
                 isFlipped.toggle()
                 flipAngle = -90 * direction
             }
-            // Next tick: started in the swap's tick, the page view's re-layout
-            // rode along on this animation and then snapped.
             DispatchQueue.main.async {
                 withAnimation(.easeOut(duration: 0.3)) { flipAngle = 0 }
             }
@@ -83,9 +71,6 @@ struct ClassicWeatherView: View {
 
     private var front: some View {
         GeometryReader { geometry in
-            // The iOS 6 card was laid out for a 320pt screen with 16pt gutters;
-            // everything in the card scales with that width, up to a
-            // Pro Max sized card on iPad and Mac.
             let cardWidth = min(geometry.size.width, 460)
             let scale = (cardWidth - 32) / 288
 
@@ -105,15 +90,11 @@ struct ClassicWeatherView: View {
                             )
                             .padding(.horizontal, 16)
                             .frame(maxWidth: cardWidth)
-                            // Into the safe area a bit; only the halo's soft rim ends up under the status bar.
                             .padding(.top, geometry.safeAreaInsets.top - 16 * scale)
                             .tag(place.id)
                         }
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
-                    // The pager clips at its top edge; let it reach into the
-                    // safe area so the sun's halo isn't cut off. The card is
-                    // padded back down by the same inset.
                     .ignoresSafeArea(edges: .top)
                     dots
                 }
@@ -122,8 +103,6 @@ struct ClassicWeatherView: View {
         }
     }
 
-    /// The GPS page shows the geocoded town while the app follows GPS,
-    /// otherwise the "Mein Standort" label.
     private func title(for place: ClassicPlace) -> String {
         guard place.isCurrentLocation, CityService.shared.getSelectedCity() == nil, !location.name.isEmpty else {
             return place.title

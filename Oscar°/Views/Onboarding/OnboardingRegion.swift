@@ -5,9 +5,6 @@
 
 import CoreLocation
 
-/// Coarse boxes for where oscar-server's notification products have coverage:
-/// Europe (DWD/OPERA reach), North America (NOAA/ECCC alerts), Taiwan (CWA
-/// alerts), and the Canary Islands (AEMET radar rain alerts + Meteoalarm).
 enum OnboardingRegion {
     private struct Box {
         let latitudes: ClosedRange<Double>
@@ -19,15 +16,10 @@ enum OnboardingRegion {
     }
 
     private static let boxes: [Box] = [
-        // Europe (OPERA composite reach)
         Box(latitudes: 34.5...72.0, longitudes: -25.0...45.0),
-        // Continental US + Canada incl. Alaska
         Box(latitudes: 24.0...84.0, longitudes: -170.0...(-52.0)),
-        // Hawaii
         Box(latitudes: 18.0...23.5, longitudes: -161.0...(-154.0)),
-        // Taiwan (CWA county + typhoon warnings), incl. Penghu/Kinmen/Matsu
         Box(latitudes: 20.5...26.5, longitudes: 118.0...124.0),
-        // Canary Islands (AEMET radar range circles; the Europe box stops at 34.5)
         Box(latitudes: 25.7...30.6, longitudes: -19.4...(-13.0)),
     ]
 

@@ -26,7 +26,6 @@ struct WindSpeedUnitTests {
 
     @Test
     func beaufortReportsKilometersPerHourToTheAPI() {
-        // The API has no Beaufort scale, so .bft must request km/h and convert locally.
         #expect(WindSpeedUnit.bft.apiRawValue == "kmh")
         #expect(WindSpeedUnit.ms.apiRawValue == "ms")
         #expect(WindSpeedUnit.kmh.apiRawValue == "kmh")
@@ -41,7 +40,6 @@ struct WindSpeedUnitTests {
 }
 
 struct BeaufortScaleTests {
-    /// Boundary values straight off `BeaufortScale.force(forKilometersPerHour:)`.
     @Test(arguments: [
         (-5.0, 0), (0.0, 0), (0.99, 0),
         (1.0, 1), (5.99, 1),

@@ -52,9 +52,6 @@ struct InteractiveClimateRibbon: View {
         }
     }
 
-    /// VoiceOver reads the focused year and its high, defaulting to the most recent (today) before
-    /// any scrub. Pairs with the adjustable action so swiping up/down steps through the years — the
-    /// drag-to-scrub gesture itself isn't operable under VoiceOver.
     private var accessibilityValueText: Text {
         guard !stripes.isEmpty else { return Text(verbatim: "") }
         let index = min(max(selectedIndex ?? stripes.count - 1, 0), stripes.count - 1)
@@ -63,7 +60,6 @@ struct InteractiveClimateRibbon: View {
         return Text(verbatim: "\(stripe.year), \(temperature)°")
     }
 
-    /// Only shown while actively scrubbing; clears when the finger lifts.
     @ViewBuilder
     private func callout(width: CGFloat) -> some View {
         if let index = selectedIndex, stripes.indices.contains(index) {

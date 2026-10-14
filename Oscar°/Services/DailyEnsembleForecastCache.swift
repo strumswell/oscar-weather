@@ -77,8 +77,6 @@ actor DailyEnsembleForecastCache {
     }
   }
 
-  /// Entries expire only when their own key is read again, so each new city,
-  /// model and unit combination would otherwise stay on disk forever.
   private func sweepExpiredEntriesOnce() {
     guard !sweptExpiredEntries else { return }
     sweptExpiredEntries = true

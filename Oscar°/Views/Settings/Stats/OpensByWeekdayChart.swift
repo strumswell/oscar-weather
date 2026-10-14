@@ -2,13 +2,10 @@ import Charts
 import SwiftUI
 
 struct OpensByWeekdayChart: View {
-    /// Index 0 = Sunday, like `Calendar.component(.weekday)` minus one.
     let counts: [Int]
 
-    /// Short symbols, not very short: those repeat (S M D M D F S) and collapse categories.
     private static let weekdaySymbols = Calendar.current.shortStandaloneWeekdaySymbols
 
-    /// Weekday indices starting at the locale's first weekday.
     private static let weekdayOrder: [Int] = {
         let first = Calendar.current.firstWeekday - 1
         return (0..<7).map { ($0 + first) % 7 }

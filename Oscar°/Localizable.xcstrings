@@ -2494,7 +2494,6 @@
       }
     },
     "Air" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2786,7 +2785,6 @@
       }
     },
     "Alerts" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -8034,7 +8032,6 @@
       }
     },
     "Forecast" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -9154,28 +9151,6 @@
         }
       }
     },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Größere Zweige und kleine Bäume bewegen sich."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Larger branches and small trees move."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
-          }
-        }
-      }
-    },
     "Großbritannien" : {
       "localizations" : {
         "de" : {
@@ -9194,6 +9169,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Birleşik Krallık"
+          }
+        }
+      }
+    },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Größere Zweige und kleine Bäume bewegen sich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Larger branches and small trees move."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
           }
         }
       }
@@ -11983,7 +11980,6 @@
       }
     },
     "Location" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -18620,7 +18616,6 @@
       }
     },
     "spinner=%@ pending=%@" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

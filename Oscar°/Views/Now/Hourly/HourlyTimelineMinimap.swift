@@ -1,10 +1,5 @@
 import SwiftUI
 
-/// The day rail at the sheet's bottom: 14 days at a glance — white
-/// temperature line, precipitation ticks — with the 48-hour viewport box
-/// around the playhead. Lens-independent: the rail is navigation, not data
-/// display. Dragging the box (or tapping elsewhere) scrubs; the same
-/// grab-offset feel.
 struct HourlyTimelineMinimap: View {
     let model: HourlyTimelineModel
 
@@ -16,8 +11,6 @@ struct HourlyTimelineMinimap: View {
     var body: some View {
         GeometryReader { geometry in
             let width = max(geometry.size.width, 1)
-            // Two layers: the series only redraw when the data changes, the
-            // viewport box alone follows the scrub every frame.
             ZStack {
                 MinimapSeries(model: model)
                 MinimapViewport(model: model)
@@ -54,8 +47,6 @@ struct HourlyTimelineMinimap: View {
     }
 }
 
-/// Everything static in the rail: nights, rain ticks, temperature line, day
-/// rules and labels, the now line. Reads no scrub state.
 private struct MinimapSeries: View {
     let model: HourlyTimelineModel
 
@@ -149,7 +140,6 @@ private struct MinimapSeries: View {
     }
 }
 
-/// The 48-hour viewport box around the playhead.
 private struct MinimapViewport: View {
     let model: HourlyTimelineModel
 

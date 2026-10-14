@@ -9,12 +9,6 @@ import UIKit
 // MARK: Isobars (Großwetterlage overlay)
 
 extension WeatherMapView.Coordinator {
-    /// MSLP isolines + H/T pressure centers (server `/models/{model}/frames/
-    /// {key}/pressure/isolines`) over the active model layer — the classic
-    /// Großwetterlage look on top of the pressure, temperature, or wind fill.
-    /// The per-frame GeoJSON swaps into one shared source while scrubbing (the
-    /// value-bubble pattern); fetched shapes are cached per frame key, so a
-    /// second playback loop is free.
     func syncIsobars(style: MLNStyle, active: Bool,
                              selection: WeatherTileLayer?, frameKey: String?) {
         guard active, let selection, let frameKey else {
@@ -38,8 +32,6 @@ extension WeatherMapView.Coordinator {
                         self.isobarFailures[cacheKey] = Date()
                         return
                     }
-                    // Frame keys are valid-time stable, so day over day the cache
-                    // only grows — reset it before it does.
                     if self.isobarShapes.count > 96 { self.isobarShapes.removeAll() }
                     self.isobarShapes[cacheKey] = shape
                     self.isobarFailures[cacheKey] = nil
@@ -57,9 +49,6 @@ extension WeatherMapView.Coordinator {
         }
         ensureIsobarLayers(in: style)
         guard isobarSyncKey != cacheKey else { return }
-        // The new frame loads into the hidden buffer, then the opacity
-        // transitions swap the two — the same soft frame change the grid
-        // fill gets from its Metal cross-fade.
         let incoming = 1 - isobarActiveBuffer
         (style.source(withIdentifier: WeatherMapView.isobarSourceID(incoming)) as? MLNShapeSource)?
             .shape = shape
@@ -75,7 +64,6 @@ extension WeatherMapView.Coordinator {
         isobarSyncKey = nil
     }
 
-    /// Animated by the transitions set at layer creation; nil hides both buffers.
     private func setIsobarBufferOpacities(in style: MLNStyle, visibleBuffer: Int?) {
         for buffer in 0..<WeatherMapView.isobarBufferCount {
             let visible = buffer == visibleBuffer
@@ -96,9 +84,6 @@ extension WeatherMapView.Coordinator {
         }
     }
 
-    /// Empties the faded-out buffer once the cross-fade is over: its
-    /// zero-opacity line labels would otherwise keep competing with the
-    /// visible buffer's in collision placement.
     private func scheduleRetiredIsobarCleanup(in style: MLNStyle) {
         isobarCleanupGeneration += 1
         let generation = isobarCleanupGeneration
@@ -112,11 +97,6 @@ extension WeatherMapView.Coordinator {
         }
     }
 
-    /// Per buffer: one source; casing + core line pair (readable over both the
-    /// dark low end and the near-white 1013 center of the pressure fill),
-    /// inline hPa labels, and the H/T center letters with their central
-    /// pressure. All opacities start at 0 and carry fade transitions — the
-    /// A/B swap in syncIsobars animates without any per-frame animation code.
     private func ensureIsobarLayers(in style: MLNStyle) {
         guard style.source(withIdentifier: WeatherMapView.isobarSourceID(0)) == nil else { return }
         for buffer in 0..<WeatherMapView.isobarBufferCount {
@@ -130,11 +110,8 @@ extension WeatherMapView.Coordinator {
         style.addSource(source)
 
         let fade = MLNTransition(duration: 0.25, delay: 0)
-        // Lines carry `level`, the H/T points carry `kind` — the predicates keep
-        // each layer to its half of the shared FeatureCollection.
         let isIsobar = NSPredicate(format: "level != NIL")
         let isCenter = NSPredicate(format: "kind != NIL")
-        // Index isobars (multiples of 10/20 hPa) draw bolder.
         func indexWidth(_ index: Double, _ regular: Double) -> NSExpression {
             NSExpression(forConditional: NSPredicate(format: "index == YES"),
                          trueExpression: NSExpression(forConstantValue: index),
@@ -163,7 +140,6 @@ extension WeatherMapView.Coordinator {
         line.lineJoin = NSExpression(forConstantValue: "round")
         insertOverlayLayer(line, in: style)
 
-        // Inline hPa labels along the lines, above the basemap labels.
         let labels = MLNSymbolStyleLayer(
             identifier: WeatherMapView.isobarLabelLayerID(buffer), source: source)
         labels.predicate = isIsobar
@@ -171,7 +147,6 @@ extension WeatherMapView.Coordinator {
         labels.symbolSpacing = NSExpression(forConstantValue: 320)
         labels.maximumTextAngle = NSExpression(forConstantValue: 30)
         labels.text = NSExpression(forKeyPath: "label")
-        // The ONLY font stack the OpenFreeMap styles serve glyphs for.
         labels.textFontNames = NSExpression(forConstantValue: ["Noto Sans Regular"])
         labels.textFontSize = NSExpression(forConstantValue: 10)
         labels.textColor = NSExpression(forConstantValue: UIColor.white)
@@ -181,8 +156,6 @@ extension WeatherMapView.Coordinator {
         labels.textOpacityTransition = fade
         style.addLayer(labels)
 
-        // Neutral pressure-center labels avoid conflicting with the pressure
-        // fill palette, where low pressure is blue and high pressure is red.
         let centerColor = NSExpression(forConstantValue: UIColor.black)
         let centers = MLNSymbolStyleLayer(
             identifier: WeatherMapView.isobarCenterLayerID(buffer), source: source)

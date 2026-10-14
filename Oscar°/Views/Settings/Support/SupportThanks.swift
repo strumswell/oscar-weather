@@ -1,8 +1,5 @@
 import SwiftUI
 
-/// The full-screen win after a purchase: light rays turn behind the bought
-/// treat, copies of it rain down, marquee bulbs chase round the edge, and a
-/// solid plate names what was bought. A tap or six seconds close it.
 struct SupportThanks: View {
     let treat: SupportTreat
     let close: () -> Void
@@ -47,7 +44,6 @@ struct SupportThanks: View {
                         }
                     }
                     .accessibilityHidden(true)
-                // A solid plate: the text never sits on the moving rays and rain.
                 VStack(spacing: 10) {
                     Text("Jackpot!")
                         .font(.system(size: 44, weight: .black, design: .rounded))
@@ -87,7 +83,6 @@ struct SupportThanks: View {
         withAnimation(.easeIn(duration: 0.25)) { visible = false } completion: { close() }
     }
 
-    /// Sixteen slowly turning wedges of light behind the sticker.
     private func drawRays(in canvas: inout GraphicsContext, size: CGSize, time: Double) {
         let center = CGPoint(x: size.width / 2, y: size.height * 0.4)
         let radius = hypot(size.width, size.height)
@@ -105,7 +100,6 @@ struct SupportThanks: View {
         ))
     }
 
-    /// Copies of the treat tumbling down the screen in an endless loop.
     private func drawRain(in canvas: inout GraphicsContext, size: CGSize, time: Double) {
         let sticker = canvas.resolve(Image(treat.image))
         let fall = size.height + 120
@@ -122,7 +116,6 @@ struct SupportThanks: View {
         }
     }
 
-    /// A stable pseudo-random number in 0..<1 for drop `index`, per property `salt`.
     private static func noise(_ index: Int, _ salt: Int) -> Double {
         let value = sin(Double(index * 127 + salt * 311)) * 43_758.5453
         return value - value.rounded(.down)
@@ -134,13 +127,11 @@ struct SupportThanks: View {
     }
 }
 
-/// Bulbs round the screen edge, chasing like a slot machine's marquee.
 private struct MarqueeBulbs: View {
     var body: some View {
         TimelineView(.periodic(from: .now, by: 0.1)) { context in
             let phase = Int(context.date.timeIntervalSinceReferenceDate * 10) % 3
             Canvas { canvas, size in
-                // Inset by the glow radius so no bulb is cut by the canvas edge.
                 let outline = Path(roundedRect: CGRect(origin: .zero, size: size).insetBy(dx: 7, dy: 7), cornerRadius: 40)
                 let count = Int((size.width + size.height) * 2 / 22)
                 for i in 0..<count {

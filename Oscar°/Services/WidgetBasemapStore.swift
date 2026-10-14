@@ -9,38 +9,23 @@
 
 import UIKit
 
-/// One prerendered basemap: PNG in the app group plus the EXACT coordinate
-/// rectangle MapLibre rendered (after bounds fitting), so overlays composite
-/// pixel-exact via plain Web-Mercator math.
 struct WidgetBasemapRecord: Codable {
-    /// Camera center the snapshot was rendered for.
     let latitude: Double
     let longitude: Double
-    /// Actual rendered map rectangle (post-fitting), from the snapshot's own
-    /// corner-point conversion.
     let north: Double
     let south: Double
     let west: Double
     let east: Double
-    /// Logical size (pt) and screen scale of the PNG.
     let width: Double
     let height: Double
     let scale: Double
     let renderedAt: Date
-    /// Basemap style raw value (MapBasemapStyle). nil only in records written
-    /// before styles became per-widget-configurable.
     var style: String?
 }
 
 enum WidgetBasemapStore {
     static let appGroupID = AppGroup.identifier
 
-    /// Canonical logical composite sizes — the app prerenders basemaps at exactly
-    /// these sizes and the widget composites + loads by the same key, so both
-    /// targets MUST agree. The entry view scales up with `.fill`, so only the
-    /// ASPECT has to match the widget family: systemSmall is square, systemLarge
-    /// is near-square (329×345…364×382 pt across devices — a 360×170 landscape
-    /// composite shipped once and got upscaled ~2× and cropped to half its width).
     static let smallCompositeSize = CGSize(width: 170, height: 170)
     static let largeCompositeSize = CGSize(width: 344, height: 360)
     static let compositeSizes = [smallCompositeSize, largeCompositeSize]
@@ -53,13 +38,7 @@ enum WidgetBasemapStore {
 
     // MARK: - Requested styles handshake
 
-    /// Default basemap style for the radar widget (and the fallback for records
-    /// without one). Must equal MapBasemapStyle.fiord.rawValue.
     static let defaultStyle = "fiord"
-    /// App-group defaults key: the styles configured across radar widget
-    /// instances. Written by the widget provider on every timeline render, read
-    /// by WidgetBasemapRenderer to know which basemaps to prerender — the app
-    /// process cannot see per-widget intent configurations directly.
     private static let requestedStylesKey = "radarWidgetRequestedStyles"
 
     static func requestedStyles() -> [String] {
@@ -82,8 +61,6 @@ enum WidgetBasemapStore {
         "\(Int(size.width.rounded()))x\(Int(size.height.rounded()))-\(style)"
     }
 
-    /// Record and PNG travel in ONE file so a widget render can never pair a new
-    /// image with stale bounds.
     private struct BasemapFile: Codable {
         let record: WidgetBasemapRecord
         let png: Data

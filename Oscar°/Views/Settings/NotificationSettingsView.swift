@@ -8,7 +8,6 @@
 import SwiftUI
 import UIKit
 
-/// Rain alerts, the rain Live Activity and official weather warnings.
 @MainActor
 struct NotificationSettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
@@ -19,8 +18,6 @@ struct NotificationSettingsView: View {
     @State private var refusal: Refusal?
 
     var body: some View {
-        // Read in body so @Observable tracks these; the toggles then reflect external
-        // and async changes instead of going stale until the view is recreated.
         let rainAlertsEnabled = manager.rainAlertsEnabled
         let weatherAlertsEnabled = manager.weatherAlertsEnabled
         let liveRainStatusEnabled = manager.liveRainStatusEnabled
@@ -94,7 +91,6 @@ struct NotificationSettingsView: View {
         }
     }
 
-    /// Why switching something on didn't stick.
     private enum Refusal {
         case notifications
         case liveActivities

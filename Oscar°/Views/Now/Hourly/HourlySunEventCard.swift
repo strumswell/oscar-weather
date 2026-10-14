@@ -12,13 +12,8 @@ struct HourlySunEventCard: View {
         .minimumScaleFactor(0.75)
       Text(item.weekday)
         .font(.footnote)
-        // Matches the forecast cards' precipitation line — .secondary's
-        // vibrancy vanishes over a bright sky.
         .foregroundStyle(.white.opacity(0.72))
         .padding(.top, 3)
-      // Same level as the forecast cards' weather icons — not pinned to the
-      // card's bottom edge. Drawn a tad larger than its 35pt layout slot so
-      // the card heights across the strip still match exactly.
       Image(item.kind.imageName)
         .resizable()
         .scaledToFit()
@@ -26,8 +21,6 @@ struct HourlySunEventCard: View {
         .frame(width: 35, height: 35)
         .padding(.top, 1)
         .accessibilityHidden(true)
-      // Invisible stand-in for the forecast cards' temperature line, so both
-      // card types share one natural height at any type size.
       Text(verbatim: "0°")
         .hidden()
     }

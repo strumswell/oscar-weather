@@ -23,7 +23,6 @@ struct MemberCardPlacedStickerView: View {
         Angle(radians: placement.rotation)
     }
 
-    // Peel on card position: lift phase (animates in on press) or settle phase (from external foldProgress)
     private var effectiveFoldProgress: CGFloat {
         max(liftProgress, foldProgress)
     }

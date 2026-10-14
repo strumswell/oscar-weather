@@ -26,8 +26,6 @@ struct AtmosphereSnapshot: Equatable {
     let windSpeed: Float
     let windDirection: Float
     let aqiHaze: Float
-    /// Cover per altitude band (Open-Meteo: low < 3 km, mid 3–8 km, high > 8 km).
-    /// Hand-built snapshots leave these zero; `cloudDeck` then splits the total.
     var cloudLow: Float = 0
     var cloudMid: Float = 0
     var cloudHigh: Float = 0
@@ -53,10 +51,6 @@ struct AtmosphereSnapshot: Equatable {
         aqiHaze: 0
     )
 
-    /// A calm, clear twilight with visible stars. Used as the backdrop before any forecast
-    /// has loaded — first launch, or a cold-start fetch failure — instead of a flat gradient.
-    /// Deep civil twilight (sun ≈ 8° below the horizon): a blue dusk sky with the stars out
-    /// and no clouds, wind, or precipitation.
     static let twilight = AtmosphereSnapshot(
         timestamp: Date.now.timeIntervalSince1970,
         timeOfDay: 0.9,
@@ -85,8 +79,6 @@ extension AtmosphereSnapshot {
         Float, Float, Float, Float, Float, Float, Float, Float, Float, Float, Float
     >
 
-    /// Every continuous field as one animatable vector, so the sim can tween
-    /// between scrubbed hours instead of cutting; `condition` stays discrete.
     var vector: Vector {
         AnimatableValues(
             timestamp, timeOfDay, sunElevation, phase, nightAmount,
@@ -109,10 +101,6 @@ extension AtmosphereSnapshot {
         )
     }
 
-    /// Visibility of the drawn sun DISC: 1 in daylight, fading out as the sun
-    /// approaches the horizon, 0 once it dips below. Distinct from `phase`,
-    /// which deliberately keeps ambient light through twilight — gating the
-    /// disc on `phase` used to float a faint sun in a twilight sky.
     var sunDiscVisibility: Float {
         AtmosphereWeatherMapper.smoothstep(0, 4, sunElevation * 180 / .pi)
     }

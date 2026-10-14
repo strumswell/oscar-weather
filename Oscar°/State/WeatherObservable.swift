@@ -35,16 +35,10 @@ enum WeatherLoadingQuery: String, CaseIterable, Comparable {
     }
 }
 
-/// Coarse load phase used to drive the empty/error UI. Unlike `error` (a string wiped at the
-/// start of every refresh), `.failed` latches until a refresh actually produces content.
 enum WeatherLoadState {
-    /// No refresh has started yet.
     case idle
-    /// A refresh is in flight and there is no content to show yet.
     case loading
-    /// A refresh (or a cached hydrate) produced content.
     case loaded
-    /// A cold-start refresh finished without producing any content (e.g. offline first launch).
     case failed
 }
 
@@ -61,9 +55,7 @@ final class Weather {
     var air: Operations.getAirQuality.Output.Ok.Body.jsonPayload
     var time: Double
     var precipSeries: PrecipSeriesResponse?
-    /// Satellite cloudiness at the location (not persisted — only meaningful fresh).
     var cloudSeries: CloudSeriesResponse?
-    /// Nearest weather stations with fresh readings (not persisted, Europe only).
     var stations: [Components.Schemas.NearbyStation] = []
     var error: String = ""
     var lastUpdated: Date?
@@ -85,7 +77,6 @@ final class Weather {
         precipSeries = nil
     }
     
-    // Update internal clock used for day simulation background
     func updateTime() {
         let dayBegin = self.forecast.hourly?.time.first ?? 0
         self.time = (Date.now.timeIntervalSince1970-dayBegin)/86400.0
@@ -106,18 +97,12 @@ final class Weather {
 
 extension Weather {
     private enum RadarOutcome {
-        /// The fetch completed; the value is the series, or nil for a server-confirmed
-        /// "no coverage here" (204/404). Either way it is safe to assign.
         case fetched(PrecipSeriesResponse?)
-        /// The fetch failed (transport error / cancellation / bad status / decode).
-        /// The previous series must be kept rather than wiped.
         case failed
     }
 
     private enum CloudOutcome {
-        /// Fetch completed; nil is a server-confirmed "no coverage / not ready".
         case fetched(CloudSeriesResponse?)
-        /// Transport/decode failure — keep the previous series.
         case failed
     }
 
@@ -133,10 +118,6 @@ extension Weather {
         client: APIClient = .shared,
         locationService: LocationService = .shared
     ) async {
-        // Guard re-entrancy with a dedicated flag, not `isLoading`: the latter is cleared
-        // early (once the main data lands) so the spinner hides promptly, but the function
-        // keeps running through the trailing alerts fetch — a second refresh must not start
-        // in that window.
         guard !isRefreshing else {
             refreshRequestedWhileBusy = true
             return
@@ -150,8 +131,6 @@ extension Weather {
         }
         isLoading = true
         error = ""
-        // Only show the "loading" phase on the very first attempt; a retry after a failure
-        // keeps `.failed` on screen (so the retry card doesn't flicker away mid-retry).
         if loadState == .idle { loadState = .loading }
         clearLoadingQueries()
         defer {
@@ -163,9 +142,6 @@ extension Weather {
         locationService.update()
         let info = await locationService.getPlacemarkInfo()
         location.coordinates = locationService.getCoordinates()
-        // An empty name means the reverse geocode failed (timeout/offline) — keep
-        // whatever we showed before (snapshot hydration or the last success)
-        // instead of wiping the label until the next attempt.
         if !info.name.isEmpty || location.name.isEmpty {
             location.name = info.name
         }
@@ -192,16 +168,11 @@ extension Weather {
 
                 markLoading(.rainRadar)
                 group.addTask {
-                    // Radar is best-effort: swallow its error here so a radar failure
-                    // never cancels the group (which forecast/air require) and is
-                    // reported as `.failed` so we keep the last-known-good series.
                     do { return .precipSeries(.fetched(try await client.getRadarSeries(coordinates: coordinates))) }
                     catch { return .precipSeries(.failed) }
                 }
 
                 group.addTask {
-                    // Same best-effort contract as radar; no loading query — the
-                    // trend annotation has no loading UI to drive.
                     do { return .cloudSeries(.fetched(try await client.getCloudSeries(coordinates: coordinates))) }
                     catch { return .cloudSeries(.failed) }
                 }
@@ -223,17 +194,12 @@ extension Weather {
                 }
             }
 
-            // precipSeries may legitimately be nil (location outside radar coverage),
-            // so only forecast + air quality are required for a successful refresh.
             guard let forecastResponse, let airQualityResponse else {
                 throw URLError(.badServerResponse)
             }
 
             forecast = forecastResponse
             air = airQualityResponse
-            // Only overwrite radar on a successful fetch. A transient failure or a
-            // cancelled request must not wipe the series the chart + rain animation
-            // depend on — keep the previous value until a real update arrives.
             if case .fetched(let value) = radarOutcome {
                 precipSeries = value
             }
@@ -245,12 +211,6 @@ extension Weather {
             loadState = .loaded
             isLoading = false
 
-            // Persist only when the queried coordinates are genuinely known (a
-            // selected city or a GPS fix). Without either, this refresh ran
-            // against the hardcoded coordinate placeholder — real data for the
-            // wrong place — and saving it would overwrite the last real
-            // location's snapshot, which the next launch's hydration then
-            // rejects on distance and falls back to twilight.
             if locationService.knownCoordinates() != nil {
                 let snapshot = WeatherSnapshot(
                     forecast: forecastResponse,
@@ -274,8 +234,6 @@ extension Weather {
             } catch is CancellationError {
                 throw CancellationError()
             } catch {
-                // Alerts are supplementary. Never retain warnings for the previous
-                // city or turn an otherwise successful forecast refresh into failure.
                 alerts = .oscar(.empty)
             }
             markFinished(.alerts)
@@ -285,29 +243,17 @@ extension Weather {
             } catch is CancellationError {
                 throw CancellationError()
             } catch {
-                // Supplementary like alerts: hide the section rather than show another place's stations.
                 stations = []
             }
         } catch is CancellationError {
-            // A cancelled refresh is not a failure: nothing was actually
-            // attempted and rejected, so leave content, `error`, and
-            // `loadState` untouched for the refresh that superseded this one.
         } catch let error as URLError where error.code == .cancelled {
-            // URLSession surfaces task cancellation as URLError.cancelled.
         } catch {
             self.error = error.localizedDescription
-            // Latch the failure: `error` is wiped at the start of every refresh, so a UI that
-            // keyed off it would lose the failed state as soon as a re-triggered refresh (e.g.
-            // a launch-time location update) cleared it. `loadState` stays `.failed` until a
-            // refresh actually succeeds.
             if !hasContent { loadState = .failed }
         }
     }
 
     func apply(snapshot: WeatherSnapshot, location: Location) {
-        // Cache hydration is the first state, not a transition the user is
-        // watching — apply it without the temperature roll. The following
-        // network refresh animates any genuine change.
         var transaction = Transaction()
         transaction.disablesAnimations = true
         withTransaction(transaction) {
@@ -325,12 +271,10 @@ extension Weather {
     static var mock: Weather {
         let mockWeather = Weather()
         
-        // Generate 36 hours of mock hourly data
-        let hourlyTimeInterval: TimeInterval = 3600 // 1 hour
+        let hourlyTimeInterval: TimeInterval = 3600
         let hourlyStartTime = 1719266400.0
         let hourlyTimes = (0..<36).map { hourlyStartTime + Double($0) * hourlyTimeInterval }
         
-        // Mock forecast data
         mockWeather.forecast = Operations.getForecast.Output.Ok.Body.jsonPayload(
             latitude: 51.34,
             longitude: 12.379999,
@@ -340,16 +284,16 @@ extension Weather {
             timezone_abbreviation: "CEST",
             hourly: Operations.getForecast.Output.Ok.Body.jsonPayload.hourlyPayload(
                 time: hourlyTimes,
-                temperature_2m: (0..<36).map { 18.0 + Double($0 % 24) / 2 }, // Temperature variation
-                relativehumidity_2m: (0..<36).map { 70.0 + Double($0 % 12) }, // Humidity variation
-                apparent_temperature: (0..<36).map { 17.0 + Double($0 % 24) / 2 }, // Apparent temperature variation
-                pressure_msl: (0..<36).map { _ in 1019.0 + Double.random(in: -1...1) }, // Slight pressure variation
-                cloudcover: (0..<36).map { _ in Double.random(in: 0...100) }, // Random cloud cover
-                windspeed_10m: (0..<36).map { _ in Double.random(in: 5...15) }, // Random wind speed
-                winddirection_10m: (0..<36).map { _ in Double.random(in: 0...360) }, // Random wind direction
-                precipitation: (0..<36).map { _ in Double.random(in: 0...0.5) }, // Random light precipitation
-                weathercode: (0..<36).map { _ in Double(Int.random(in: 0...3)) }, // Random weather codes
-                is_day: (0..<36).map { $0 % 24 < 16 ? 1.0 : 0.0 } // Day time between 6am and 10pm
+                temperature_2m: (0..<36).map { 18.0 + Double($0 % 24) / 2 },
+                relativehumidity_2m: (0..<36).map { 70.0 + Double($0 % 12) },
+                apparent_temperature: (0..<36).map { 17.0 + Double($0 % 24) / 2 },
+                pressure_msl: (0..<36).map { _ in 1019.0 + Double.random(in: -1...1) },
+                cloudcover: (0..<36).map { _ in Double.random(in: 0...100) },
+                windspeed_10m: (0..<36).map { _ in Double.random(in: 5...15) },
+                winddirection_10m: (0..<36).map { _ in Double.random(in: 0...360) },
+                precipitation: (0..<36).map { _ in Double.random(in: 0...0.5) },
+                weathercode: (0..<36).map { _ in Double(Int.random(in: 0...3)) },
+                is_day: (0..<36).map { $0 % 24 < 16 ? 1.0 : 0.0 }
             ),
             daily: Components.Schemas.DailyResponse(
                 time: (0..<5).map { hourlyStartTime + Double($0 * 86400) },
@@ -358,8 +302,8 @@ extension Weather {
                 precipitation_sum: [0.0, 2.5, 0.8, 0.0, 5.2],
                 precipitation_probability_max: [0, 30, 20, 10, 60],
                 weathercode: [2.0, 3.0, 1.0, 0.0, 3.0],
-                sunrise: (0..<5).map { hourlyStartTime + 21600 + Double($0 * 86400) }, // Sunrise at 6 AM each day
-                sunset: (0..<5).map { hourlyStartTime + 64800 + Double($0 * 86400) }  // Sunset at 6 PM each day
+                sunrise: (0..<5).map { hourlyStartTime + 21600 + Double($0 * 86400) },
+                sunset: (0..<5).map { hourlyStartTime + 64800 + Double($0 * 86400) }
             ),
             current: Components.Schemas.CurrentWeather(
                 cloudcover: 45.0,
@@ -373,11 +317,10 @@ extension Weather {
             )
         )
         
-        // Set other properties
-        mockWeather.time = 0.5 // Midday
-        mockWeather.alerts = .oscar(.empty) // Empty alerts
+        mockWeather.time = 0.5
+        mockWeather.alerts = .oscar(.empty)
         mockWeather.air = Operations.getAirQuality.Output.Ok.Body.jsonPayload(latitude: 51.34, longitude: 12.379999, hourly: nil)
-        mockWeather.precipSeries = nil // No radar series
+        mockWeather.precipSeries = nil
 
         return mockWeather
     }

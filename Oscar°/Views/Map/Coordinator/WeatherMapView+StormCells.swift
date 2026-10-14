@@ -9,12 +9,6 @@ import UIKit
 // MARK: Storm cells
 
 extension WeatherMapView.Coordinator {
-    /// Tracked precipitation cells (server `/radar/{region}/cells`), SCIT-style:
-    /// the cell's footprint hull, its extrapolated one-hour track with +15-min
-    /// tick marks and an arrowhead, a widening uncertainty cone, and a peak-
-    /// intensity marker (the tap target). Features are rebuilt client-side from
-    /// the GeoJSON properties (`path`/`footprint`), which MapLibre can't draw
-    /// directly.
     func syncStormCells(style: MLNStyle, active: Bool, region: RadarRegion) {
         guard active else {
             removeStormCellLayers(from: style)
@@ -38,8 +32,6 @@ extension WeatherMapView.Coordinator {
                     self.syncAll()
                 } catch {
                     weatherMapLogger.error("Storm cell fetch failed: \(error.localizedDescription, privacy: .public)")
-                    // Record the attempted region too, or a failed region switch
-                    // would re-trigger the fetch on every sync with no backoff.
                     self?.stormCellsFetchedAt = Date()
                     self?.stormCellsRegion = region
                 }
@@ -68,26 +60,21 @@ extension WeatherMapView.Coordinator {
             style.addSource(source)
         }
 
-        // Peak-intensity steps aligned with the radar palette's hue progression
-        // (mirrored in StormCellLegend). Typed constructors — see severityColor.
         let intensityColor = NSExpression(
             forMLNStepping: NSExpression(forKeyPath: "peak_mmh"),
-            from: NSExpression(forConstantValue: UIColor(red: 0, green: 0.79, blue: 0.79, alpha: 1)),  // #00caca
+            from: NSExpression(forConstantValue: UIColor(red: 0, green: 0.79, blue: 0.79, alpha: 1)),
             stops: NSExpression(forConstantValue: [
-                2: UIColor(red: 1, green: 1, blue: 0, alpha: 1),          // moderate: #ffff00
-                10: UIColor(red: 1, green: 0, blue: 0, alpha: 1),         // heavy: #ff0000
-                50: UIColor(red: 0.996, green: 0.2, blue: 1, alpha: 1),   // extreme: #fe33ff
+                2: UIColor(red: 1, green: 1, blue: 0, alpha: 1),
+                10: UIColor(red: 1, green: 0, blue: 0, alpha: 1),
+                50: UIColor(red: 0.996, green: 0.2, blue: 1, alpha: 1),
             ])
         )
 
-        // Uncertainty cone: a faint wash widening along the track (hurricane-cone
-        // visual language) — beneath everything else.
         let cone = MLNFillStyleLayer(identifier: WeatherMapView.cellConeLayerID, source: coneSource)
         cone.fillColor = NSExpression(forConstantValue: UIColor.white)
         cone.fillOpacity = NSExpression(forConstantValue: 0.08)
         insertOverlayLayer(cone, in: style)
 
-        // Actual echo footprint, tinted by peak intensity.
         let footprintFill = MLNFillStyleLayer(
             identifier: WeatherMapView.cellFootprintFillLayerID, source: footprintSource)
         footprintFill.fillColor = intensityColor
@@ -109,7 +96,6 @@ extension WeatherMapView.Coordinator {
         track.lineCap = NSExpression(forConstantValue: "round")
         insertOverlayLayer(track, in: style)
 
-        // +15-min tick dots along the track.
         let ticks = MLNCircleStyleLayer(identifier: WeatherMapView.cellTickLayerID, source: tickSource)
         ticks.circleColor = NSExpression(forConstantValue: UIColor.white)
         ticks.circleRadius = NSExpression(forConstantValue: 2.4)
@@ -131,7 +117,6 @@ extension WeatherMapView.Coordinator {
         circles.circleStrokeWidth = NSExpression(forConstantValue: 1.5)
         insertOverlayLayer(circles, in: style)
 
-        // Arrowhead + tick labels read ABOVE the map labels, like the motion arrows.
         if style.image(forName: WeatherMapView.cellArrowImageName) == nil {
             style.setImage(RadarArrowGeometry.arrowImage(), forName: WeatherMapView.cellArrowImageName)
         }
@@ -148,7 +133,6 @@ extension WeatherMapView.Coordinator {
         let tickLabels = MLNSymbolStyleLayer(
             identifier: WeatherMapView.cellTickLabelLayerID, source: tickSource)
         tickLabels.text = NSExpression(forKeyPath: "label")
-        // The ONLY font stack the OpenFreeMap styles serve glyphs for.
         tickLabels.textFontNames = NSExpression(forConstantValue: ["Noto Sans Regular"])
         tickLabels.textFontSize = NSExpression(forConstantValue: 10)
         tickLabels.textColor = NSExpression(forConstantValue: UIColor.white)
@@ -206,10 +190,6 @@ extension WeatherMapView.Coordinator {
         var heads: [MLNPointFeature] = []
     }
 
-    /// Rebuilds the overlay geometry from the parsed cells: marker points, track
-    /// polylines with +15-min ticks and an end arrowhead, footprint hull polygons
-    /// and the widening uncertainty cone (half-width = footprint radius growing
-    /// ~18% of the distance traveled — honest about extrapolation error).
     private static func buildStormCellFeatures(_ cells: [StormCellInfo]) -> StormCellFeatureSet {
         var set = StormCellFeatureSet()
         for cell in cells {
@@ -230,8 +210,6 @@ extension WeatherMapView.Coordinator {
                 set.footprints.append(footprint)
             }
 
-            // Track features only for cells that actually move — a stationary
-            // cell's "track" would be a dot pile with a random arrowhead.
             var trackPoints = [cell.center] + cell.path
             guard cell.velocityKmh >= 3, trackPoints.count >= 2 else { continue }
 
@@ -243,8 +221,6 @@ extension WeatherMapView.Coordinator {
                 let tick = MLNPointFeature()
                 tick.coordinate = position
                 let minutes = 15 * (index + 1)
-                // Label only +30/+60 — every tick labeled reads as clutter.
-                // ASCII apostrophe: the OpenFreeMap glyph ranges may not carry U+2032.
                 tick.attributes = ["label": minutes % 30 == 0 ? "+\(minutes)'" : ""]
                 set.ticks.append(tick)
             }
@@ -266,8 +242,6 @@ extension WeatherMapView.Coordinator {
         return set
     }
 
-    /// Uncertainty cone around the projected track: left/right offsets whose
-    /// half-width starts at the footprint radius and grows with distance.
     private static func conePolygon(
         for cell: StormCellInfo, trackPoints: [CLLocationCoordinate2D]
     ) -> MLNPolygonFeature? {
@@ -283,7 +257,6 @@ extension WeatherMapView.Coordinator {
                 ? kmVector(from: trackPoints[index], to: trackPoints[index + 1])
                 : incoming
             if index > 0 { traveled += (incoming.x * incoming.x + incoming.y * incoming.y).squareRoot() }
-            // Averaged direction at interior vertices keeps the cone smooth.
             let dx = incoming.x + outgoing.x, dy = incoming.y + outgoing.y
             let length = (dx * dx + dy * dy).squareRoot()
             guard length > 0.01 else { return nil }
@@ -294,13 +267,12 @@ extension WeatherMapView.Coordinator {
             right.append(offset(trackPoints[index], eastKm: -normal.x * halfWidth,
                                 northKm: -normal.y * halfWidth))
         }
-        guard traveled >= baseWidth else { return nil }   // barely moves → no cone
+        guard traveled >= baseWidth else { return nil }
         var ring = left + right.reversed()
         ring.append(ring[0])
         return MLNPolygonFeature(coordinates: &ring, count: UInt(ring.count), interiorPolygons: nil)
     }
 
-    /// Local flat-earth kilometers from `a` to `b` (fine at storm-track scale).
     private static func kmVector(
         from a: CLLocationCoordinate2D, to b: CLLocationCoordinate2D
     ) -> (x: Double, y: Double) {

@@ -15,19 +15,11 @@ import Observation
 @Observable
 final class ModelGridLayerState {
 
-    // Pre-sized when metadata arrives; slots fill in as grids download. Frames are
-    // the server's 8-bit value grids; the map layer colormaps them on the GPU with
-    // the variable's /colormaps palette (see WeatherTileLayer.colormapId).
     private(set) var frames: [RadarGridPayload?] = []
     private(set) var frameTimestamps: [String] = []
     private(set) var frameKeys: [String] = []
     private(set) var bounds: OscarRadarBounds?
-    /// Per-pair motion fields for the precip morph (`/models/{model}/motion`),
-    /// fetched alongside the frame list. Byte-identical wire shape to the radar
-    /// payload, so the radar decoder parses it. nil for temperature/wind layers.
     private(set) var motion: RadarMotionData?
-    /// Selected frame index from the timeline. Rendering may temporarily stay on
-    /// the last ready frame if the selected frame is still warming.
     var currentFrameIndex: Int = 0 {
         didSet {
             guard currentFrameIndex != oldValue else { return }
@@ -38,12 +30,8 @@ final class ModelGridLayerState {
     var isPlaying: Bool = false
     var error: String?
     private(set) var currentLayer: WeatherTileLayer?
-    /// Set when loaded as the radar's continuation: only frames after this time
-    /// are kept, so the timeline starts where the nowcast ends.
     private(set) var startsAfter: Date?
     private(set) var loadingFrameIndices: Set<Int> = []
-    // Stored (not derived from `frames`) — it's read in the per-frame-load hot path
-    // and rebuilding a Set per read made every load O(frame count).
     private(set) var loadedFrameIndices: Set<Int> = []
     private(set) var renderFrameIndex: Int?
     private(set) var interactionState: MapInteractionState = .idle
@@ -58,30 +46,19 @@ final class ModelGridLayerState {
     @ObservationIgnored private var loadSessionID = UUID()
     @ObservationIgnored private var suppressSelectionSideEffects = false
     @ObservationIgnored private var lastMetadataLoad: Date?
-    /// How long loaded metadata counts as fresh for `refreshIfStale` — a full
-    /// reload re-decodes every grid, so this is deliberately coarser than the
-    /// server's 60 s frames max-age. Mirrors the radar metadata cache window.
     private static let metadataStaleAfter: TimeInterval = 10 * 60
 
-    // Same memory-headroom budget and window as the radar (see OscarRadarState).
     private static let gridResidencyBudget = adaptiveCacheBudget(
         fraction: 0.16, floor: 64 * 1024 * 1024, cap: 512 * 1024 * 1024)
 
-    // Shared across instances — survives layer switches. Grids are 1 byte/px, so the
-    // budget is ~4× the frame count the old RGBA cache could hold.
     private static let gridCache: NSCache<NSString, GridPayloadBox> = {
         let cache = NSCache<NSString, GridPayloadBox>()
         cache.totalCostLimit = 64 * 1024 * 1024
         return cache
     }()
 
-    // Live instances (preview + fullscreen come and go with their views) for the
-    // app-level memory-warning purge.
     private static let instances = NSHashTable<ModelGridLayerState>.weakObjects()
 
-    /// App-level memory-warning hook: clears the shared grid cache and drops every
-    /// instance's decoded grids except the displayed pair. Evicted frames reload on
-    /// demand, exactly like not-yet-loaded ones.
     static func purgeDecodedCaches() {
         gridCache.removeAllObjects()
         for state in instances.allObjects {
@@ -113,8 +90,6 @@ final class ModelGridLayerState {
         nextFrameKeyed?.payload
     }
 
-    /// The frame after the rendered one plus its key — the cross-fade target for the
-    /// map layer (keys the layer's texture cache, like the radar path).
     var nextFrameKeyed: (key: String, payload: RadarGridPayload)? {
         guard let anchor = renderFrameIndex ?? (isSelectedFrameReady ? currentFrameIndex : nil) else { return nil }
         let loaded = frames.map { $0 != nil }
@@ -136,8 +111,6 @@ final class ModelGridLayerState {
         return frameKeys[index]
     }
 
-    /// Timestamp for a frame key — the map layer rescales a motion field by the
-    /// actually displayed pair's timestamp gap (progressive loading can skip frames).
     func timestamp(forKey key: String) -> String? {
         guard let index = frameKeys.firstIndex(of: key),
               frameTimestamps.indices.contains(index) else { return nil }
@@ -177,9 +150,6 @@ final class ModelGridLayerState {
         currentFrameIndex = nextIndex
     }
 
-    /// Stops the internal ticker without changing `isPlaying` — the map layer's
-    /// display link owns frame advancement while it runs (same ownership rule as
-    /// the radar layer; both running would double-advance).
     func cancelInternalTimer() {
         playback.stop()
     }
@@ -234,9 +204,6 @@ final class ModelGridLayerState {
         loadTask = Task { [weak self] in
             guard let self else { return }
             do {
-                // 1. Fetch frame list + bounds. The server sends max-age=600 + ETag,
-                // so a revisit within the window is free and after it a 304
-                // revalidation (still true under the generated client's transport).
                 let decoded = try await APIClient.shared.modelFrames(model: layer.windFieldPrefix)
                 guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
 
@@ -247,7 +214,6 @@ final class ModelGridLayerState {
                 let fetchedBounds = decoded.image_bounds?.asDomain ?? decoded.bounds?.asDomain
                     ?? OscarRadarBounds(north: 85.051, south: -85.051, west: -180, east: 180)
 
-                // 2. Pre-size array so the scrubber can render immediately.
                 let timestamps = fetchedFrameInfos.map(\.validTime)
                 let dates = timestamps.map(parseFrameDate)
                 let keys = fetchedFrameInfos.map(\.key)
@@ -265,10 +231,6 @@ final class ModelGridLayerState {
                 self.suppressSelectionSideEffects = false
                 self.lastMetadataLoad = Date()
 
-                // Motion fields load in parallel and are optional — the layer
-                // renders a plain cross-fade until they arrive (mirrors the radar
-                // path). Precipitation only: temperature/wind never warp along
-                // the precip flow, so they skip the fetch entirely.
                 if layer.morphsAlongMotion {
                     let model = layer.windFieldPrefix
                     Task { [weak self] in
@@ -297,10 +259,6 @@ final class ModelGridLayerState {
         await loadTask?.value
     }
 
-    /// Reload the active layer only when its metadata is old enough that the
-    /// server can have new frames (or nothing ever loaded) — the
-    /// foreground/periodic refresh hook. `loadLayer` resets and re-decodes
-    /// everything, so a quick app switch must stay a no-op.
     func refreshIfStale() async {
         guard let layer = currentLayer, !isLoading else { return }
         if hasAnyLoadedFrame, let lastMetadataLoad,
@@ -312,9 +270,6 @@ final class ModelGridLayerState {
 
     // MARK: - Helpers
 
-    /// Fetch + decode `/models/{model}/motion` (best-effort; nil on any failure).
-    /// Byte-identical wire shape to `/radar/{region}/motion`, so the radar decoder
-    /// parses it as-is. Server sends max-age 600 + ETag — refetches are cheap.
     private static func fetchMotionData(model: String) async -> RadarMotionData? {
         guard let payload = try? await APIClient.shared.modelMotion(model: model) else { return nil }
         return RadarMotionData(payload: payload)
@@ -454,9 +409,6 @@ final class ModelGridLayerState {
             if let data = fetched {
                 decoded = await RadarFrameDecodeLane.shared.decodeGrid(data)
             } else {
-                // A dry precip frame has no grid (404) — that's data ("no
-                // precipitation"), not an error. Cache a 1×1 index-0 payload
-                // (renders fully transparent) so scrubbing doesn't refetch it.
                 decoded = RadarGridPayload(indices: [0], width: 1, height: 1)
             }
             guard let decoded else { return false }
@@ -504,8 +456,6 @@ final class ModelGridLayerState {
 // MARK: - Motion morphing (per model)
 
 extension WeatherTileLayer {
-    /// Only precipitation morphs along the server flow field — temperature and
-    /// wind cross-fade in data space (warping them along precip motion is wrong).
     var morphsAlongMotion: Bool {
         self == .iconPrecip || self == .ecmwfPrecip
     }

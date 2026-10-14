@@ -110,8 +110,6 @@ struct ClassicMapChrome: View {
         .background(barGradient.ignoresSafeArea(edges: .bottom))
     }
 
-    /// Manual scrubbing through the frames; the player's own scrub hooks
-    /// pause playback while the thumb is held.
     private var timeSlider: some View {
         let count = player?.frameTimestamps.count ?? 0
         let index = Binding<Double>(
@@ -183,7 +181,6 @@ struct ClassicMapChrome: View {
 
     private func select(_ layer: Layer) {
         // ponytail: no model picker; ICON-D2 covers the DWD radar region,
-        // everywhere else gets the global ECMWF product.
         let global = settingsService.oscarRadarRegion != .germany
         switch layer {
         case .radar: onSelectRadar(settingsService.oscarRadarRegion)
@@ -210,8 +207,6 @@ struct ClassicMapChrome: View {
     }
 }
 
-/// The iOS 6 slider: inset groove, glossy blue fill, silver knob. Snaps to
-/// whole steps; `onEditingChanged` brackets the drag like SwiftUI's Slider.
 struct ClassicSlider: View {
     @Binding var value: Double
     let range: ClosedRange<Double>

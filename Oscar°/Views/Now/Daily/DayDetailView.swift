@@ -1,12 +1,7 @@
 import SwiftUI
 
-/// The open day in the wide 12-day list: the hourly chart for just that day
-/// and a lens picker showing each lens' value at the playhead. Drag sideways
-/// across the chart to scrub, tap to jump; vertical drags keep scrolling the
-/// feed.
 struct DayDetailView: View {
     let day: ClosedRange<Double>
-    /// Where the playhead starts: now for today, noon for later days.
     let startTime: Double
 
     @Environment(Weather.self) private var weather
@@ -45,8 +40,6 @@ struct DayDetailView: View {
     }
 }
 
-/// The hourly strip pinned to the day, with a scrub that leaves vertical
-/// drags to the feed (the strip's own drag would swallow them).
 private struct DayChart: View {
     let model: HourlyTimelineModel
     let lens: HourlyLens
@@ -66,8 +59,6 @@ private struct DayChart: View {
     }
 }
 
-/// A pan that only begins when the drag starts sideways, so the enclosing
-/// ScrollView keeps every vertical drag.
 private struct HorizontalPan: UIGestureRecognizerRepresentable {
     let onChange: (CGFloat) -> Void
 
@@ -96,8 +87,6 @@ private struct HorizontalPan: UIGestureRecognizerRepresentable {
     }
 }
 
-/// Every lens as a tile with its value at the playhead; the selected one
-/// drives the chart. Four across when they fit, else two.
 private struct LensPicker: View {
     let model: HourlyTimelineModel
     @Binding var selection: HourlyLens

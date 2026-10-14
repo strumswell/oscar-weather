@@ -7,9 +7,6 @@
 
 import SwiftUI
 
-/// Pushed from the forecast section headers: one sentence on what a weather model
-/// is, then a short card per model — resolution and what it means in practice.
-/// Deliberately terse; nobody reads paragraphs here.
 struct WeatherModelInfoView: View {
     var body: some View {
         ScrollView {
@@ -41,8 +38,6 @@ struct WeatherModelInfoView: View {
         }
         .navigationTitle("Wettermodelle")
         .navigationBarTitleDisplayMode(.inline)
-        // Keep the navigation layer clear, or it would paint an opaque background
-        // behind this view and kill the sheet's Liquid Glass at the medium detent.
         .containerBackground(.clear, for: .navigation)
     }
 }

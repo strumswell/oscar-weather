@@ -24,8 +24,6 @@ struct RootTabView: View {
 
     var body: some View {
         @Bindable var presentation = presentation
-        // The setter fires on re-taps of the current tab too — a second Orte
-        // tap opens its search.
         let selection = Binding(
             get: { presentation.selectedTab },
             set: { tab in
@@ -52,16 +50,7 @@ struct RootTabView: View {
                             .tint(.primary)
                     }
                 }
-                // On Karten the bar stays full-size: map pans read as scroll-downs
-                // and would collapse it mid-interaction. The iPad top bar doesn't
-                // shrink, it hides, and stayed gone after adding a place.
                 .tabBarMinimizeBehavior(horizontalSizeClass == .regular || presentation.selectedTab == .maps || presentation.isNudgeOut ? .never : .onScrollDown)
-                // Monochrome bar like Apple Weather's bottom controls — the accent
-                // tint on the selected item is unreadable on glass over a bright
-                // sky. Tint cascades into tab content, so the tabs above swap in a
-                // label tint for their own controls — the app has no color accent
-                // (the AccentColor asset is empty, so .accentColor would mean
-                // system blue). NowView stays monochrome.
                 .tint(.white)
                 .layerPickerInspector(isPresented: $presentation.isLayerPickerPresented, settingsService: settingsService) {
                     presentation.selectLayer($0, $1)
@@ -73,8 +62,6 @@ struct RootTabView: View {
                     .padding(.top, 8)
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .task {
-                        // Start the dismiss timer only once the toast is actually on screen
-                        // (e.g. after the settings sheet that triggered the change is closed).
                         try? await Task.sleep(for: .seconds(5))
                         guard !Task.isCancelled else { return }
                         withAnimation(.easeInOut(duration: 0.3)) { modelFallbackToast = nil }
@@ -82,16 +69,11 @@ struct RootTabView: View {
             }
         }
         .sheet(item: $presentation.sheet, content: NowSheetView.init)
-        // The rain Live Activity opens the radar map.
         .onOpenURL { url in
             guard url.scheme == "oscar", url.host == "radar" else { return }
             presentation.selectedTab = .maps
         }
-        // Outermost so the presented sheet content inherits it too — an
-        // environment set inside a .sheet modifier does not reach its
-        // presented content.
         .environment(presentation)
-        // The menu bar commands act on whichever window has focus.
         .focusedSceneValue(presentation)
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             refreshWeatherData(isForeground: true)
@@ -109,11 +91,6 @@ struct RootTabView: View {
         }
     }
 
-    /// The single refresh path for every weather-data input change (foreground return,
-    /// GPS move, city switch, unit/format/model change). The individual steps are cheap
-    /// or self-guarded, so running all of them on every trigger beats five near-identical
-    /// handlers that each forget a different step.
-    /// Every successful refresh feeds the usage statistics (places, extremes).
     private func recordUsageConditions() {
         UsageStatsStore.shared.recordConditions(
             temperature: weather.forecast.current?.temperature,
@@ -125,7 +102,6 @@ struct RootTabView: View {
     }
 
     private func refreshWeatherData(isForeground: Bool = false) {
-        // Clear any stale fallback notice; the refresh re-posts one if it still applies.
         withAnimation(.easeInOut(duration: 0.3)) { modelFallbackToast = nil }
         Task {
             await weather.refresh(location: location)
@@ -138,7 +114,6 @@ struct RootTabView: View {
     }
 }
 
-/// Menu bar commands for iPad and Mac: tabs on ⌘1–3, refresh, settings.
 struct OscarCommands: Commands {
     @FocusedValue(NowPresentationCoordinator.self) private var presentation
 
@@ -152,7 +127,6 @@ struct OscarCommands: Commands {
                 Button("Karten") { presentation?.selectedTab = .maps }
                     .keyboardShortcut("3")
                 Divider()
-                // Pull-to-refresh is awkward with a mouse.
                 Button("Aktualisieren") {
                     NotificationCenter.default.post(name: .weatherRefreshNeeded, object: nil)
                 }

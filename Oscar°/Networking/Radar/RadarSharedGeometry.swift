@@ -12,12 +12,7 @@ import UIKit
 
 // MARK: - Web Mercator
 
-/// Canonical Web-Mercator conversions. Two conventions, both used by the map code:
-/// the tile/world UNIT square [0,1]² where +y grows SOUTH (row 0 = north, matching
-/// tiles and the frame grids), and the raw PROJECTED y in radians where +y grows
-/// NORTH (the ln-tan form) — used where two latitudes are interpolated linearly.
 enum WebMercator {
-    /// Latitude of the square Mercator world's edge (unitY = 0 / 1).
     static let maxLatitude = 85.05112878
 
     // MARK: Unit square [0,1]² (+y = south)
@@ -61,26 +56,15 @@ enum WebMercator {
 
 // MARK: - Motion-arrow geometry
 
-/// Placement and styling math for the paused-radar motion arrows, shared between
-/// the app's MapLibre symbol layer (RadarMotionArrows) and the widget's CPU
-/// compositor (RadarSnapshotRenderer). Both draw one arrow per checkerboarded
-/// motion cell with non-trivial flow; only the precip gate differs per caller
-/// (frame value grid vs. raster-tile alpha).
 enum RadarArrowGeometry {
-    /// One candidate arrow cell (before precip gating).
     struct Cell {
-        /// Cell center in the overview's UV space (y: 0 = north).
         let uvX: Double
         let uvY: Double
         let coordinate: CLLocationCoordinate2D
-        /// Clockwise-from-north degrees (+u = east, +v = south).
         let rotation: Double
-        /// Slightly larger arrows for faster motion (0.6…1.15).
         let scale: Double
     }
 
-    /// UV (0…1, y down from north) → lat/lon through the mercator-aligned
-    /// image bounds — the same mapping the render quad uses.
     static func coordinateMapper(
         bounds: OscarRadarBounds
     ) -> (_ uvX: Double, _ uvY: Double) -> CLLocationCoordinate2D {
@@ -95,9 +79,6 @@ enum RadarArrowGeometry {
         }
     }
 
-    /// Candidate cells of a motion field, in row-major order: checkerboard (half
-    /// the cells, evenly spread — the full cell pitch read as too busy) with
-    /// speed ≥ 0.8 overview px/step. Callers apply their own precip gate.
     static func arrowCells(
         motion: RadarMotionData, fieldIndex: Int, bounds: OscarRadarBounds
     ) -> [Cell] {
@@ -130,17 +111,14 @@ enum RadarArrowGeometry {
         return cells
     }
 
-    /// Thin north-pointing line arrow, black with a thin white border — the look
-    /// of the old server-rendered vector tiles. Drawn as a stroked path twice:
-    /// wider white underneath, thin black on top.
     static func arrowImage() -> UIImage {
         let size = CGSize(width: 13, height: 18)
         let path = UIBezierPath()
-        path.move(to: CGPoint(x: 6.5, y: 16.5))        // tail
-        path.addLine(to: CGPoint(x: 6.5, y: 2))        // tip
-        path.move(to: CGPoint(x: 3.8, y: 5.6))         // head left
+        path.move(to: CGPoint(x: 6.5, y: 16.5))
         path.addLine(to: CGPoint(x: 6.5, y: 2))
-        path.addLine(to: CGPoint(x: 9.2, y: 5.6))      // head right
+        path.move(to: CGPoint(x: 3.8, y: 5.6))
+        path.addLine(to: CGPoint(x: 6.5, y: 2))
+        path.addLine(to: CGPoint(x: 9.2, y: 5.6))
         path.lineCapStyle = .round
         path.lineJoinStyle = .round
         return UIGraphicsImageRenderer(size: size).image { _ in

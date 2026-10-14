@@ -5,9 +5,6 @@
 
 import Foundation
 
-/// The ordered screens of the onboarding flow. Permission steps are skipped
-/// when their decision has already been made (replays, updating users).
-/// String-backed so the screenshot run can name one with `-onboardingStep`.
 enum OnboardingStep: String, Equatable {
     case welcome
     case features
@@ -19,9 +16,6 @@ enum OnboardingStep: String, Equatable {
 }
 
 extension OnboardingStep {
-    /// The step after the feature pages: ask for location only while the system
-    /// prompt can still appear; a denied status routes to manual city selection
-    /// unless a city is already picked.
     @MainActor
     static func afterFeatures(locationService: LocationService) -> OnboardingStep {
         switch locationService.authStatus {
@@ -37,23 +31,17 @@ extension OnboardingStep {
         }
     }
 
-    /// The step once a location source exists (or was explicitly skipped):
-    /// notifications only where oscar-server's alert products have coverage
-    /// and the permission hasn't been decided yet.
     @MainActor
     static func afterLocationResolved(locationService: LocationService) -> OnboardingStep {
         let notifications = NotificationSettingsManager.shared
         if notifications.authorizationStatus == .notDetermined,
            !notifications.enabled,
-           // A fresh install has no fix yet right after the permission prompt;
-           // fall back to the last known or default coordinates instead of skipping.
            OnboardingRegion.hasAlertCoverage(locationService.knownCoordinates() ?? locationService.getCoordinates()) {
             return .notifications
         }
         return afterNotifications
     }
 
-    /// Crash reports are asked once; a replay skips the question.
     static var afterNotifications: OnboardingStep {
         CrashReporting.hasAnswered ? .finale : .crashReports
     }

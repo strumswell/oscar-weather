@@ -13,23 +13,11 @@ enum MoonPhase {
         (1 - cos(phase * 2 * .pi)) / 2
     }
 
-    /// How strongly the moon reads against the current sky, as an opacity multiplier in 0…1.
-    ///
-    /// At night it returns full strength. By day the real moon is only spottable when it
-    /// clears the sun's glare *and* shows enough lit surface: a thin crescent near the sun
-    /// (small elongation, little illuminated area) is effectively invisible, while a quarter
-    /// or gibbous moon far from the sun holds as a pale disc. `nightAmount` (0 by day … 1 at
-    /// night) blends the two continuously through twilight, so a thin crescent that vanishes
-    /// at noon still shows once the sky darkens.
-    ///
-    /// Sun–moon separation comes straight from `phase` — both bodies hug the ecliptic, so the
-    /// geocentric elongation is within a degree or two of the real sky separation. No ephemeris.
     static func skyVisibility(phase: Double, nightAmount: Double, daytimeCeiling: Double = 0.5) -> Double {
-        let separation = 180 - abs(180 - 360 * phase)             // degrees from the sun
-        let elongation = smoothstep(28, 65, separation)           // escape the sun's glare
-        let lit = smoothstep(0.08, 0.42, illumination(for: phase)) // enough bright area to catch the eye
+        let separation = 180 - abs(180 - 360 * phase)
+        let elongation = smoothstep(28, 65, separation)
+        let lit = smoothstep(0.08, 0.42, illumination(for: phase))
         let daytimeVisibility = elongation * lit
-        // Blend day → night: pale-when-visible by day, full at night.
         return daytimeCeiling * daytimeVisibility * (1 - nightAmount) + nightAmount
     }
 
@@ -38,18 +26,10 @@ enum MoonPhase {
         return t * t * (3 - 2 * t)
     }
 
-    /// Fraction of the moon's pass across the sky — 0 at moonrise, 0.5 at transit, 1 at
-    /// moonset — or nil while the moon is below the horizon.
-    ///
-    /// Uses a low-precision lunar ephemeris and the observer's latitude/longitude, so rise
-    /// and set track the real times (within a few minutes). A phase-only approximation can be
-    /// hours off at mid-latitudes because it ignores the moon's declination.
     static func skyProgress(date: Date, latitude: Double, longitude: Double) -> Double? {
         let observed = observation(date: date, latitude: latitude, longitude: longitude)
         guard observed.altitude > 0 else { return nil }
 
-        // Hour angle at rise/set (the semi-diurnal arc). |cos| > 1 ⇒ circumpolar (never sets)
-        // at this latitude/declination — the moon is up, so place it purely by hour angle.
         let cosSemiArc = -tan(latitude * .pi / 180) * tan(observed.declination)
         guard abs(cosSemiArc) <= 1 else {
             return min(max(observed.hourAngle / (2 * .pi) + 0.5, 0), 1)
@@ -58,8 +38,6 @@ enum MoonPhase {
         return min(max(observed.hourAngle / (2 * semiArc) + 0.5, 0), 1)
     }
 
-    /// The next moonrise and moonset after `date` for the given location (each searched up
-    /// to ~26 h ahead; either can be nil on a day the moon doesn't rise or set).
     static func riseAndSet(after date: Date, latitude: Double, longitude: Double) -> (rise: Date?, set: Date?) {
         func altitude(_ t: Double) -> Double {
             observation(date: Date(timeIntervalSince1970: t), latitude: latitude, longitude: longitude).altitude
@@ -86,7 +64,6 @@ enum MoonPhase {
         return (rise, set)
     }
 
-    /// A human-readable phase name for a phase fraction (0 = new, 0.5 = full).
     static func name(for phase: Double) -> String {
         let p = (phase.truncatingRemainder(dividingBy: 1) + 1).truncatingRemainder(dividingBy: 1)
         switch p {
@@ -101,7 +78,6 @@ enum MoonPhase {
         }
     }
 
-    /// Bisects a bracketed horizon crossing to ~second precision.
     private static func refineCrossing(_ lo: Double, _ hi: Double, rising: Bool, altitude: (Double) -> Double) -> Double {
         var lo = lo, hi = hi
         for _ in 0..<18 {
@@ -111,8 +87,6 @@ enum MoonPhase {
         return (lo + hi) / 2
     }
 
-    /// Local horizontal coordinates of the moon at `date`: altitude, hour angle, declination
-    /// (all radians).
     private static func observation(date: Date, latitude: Double, longitude: Double) -> (altitude: Double, hourAngle: Double, declination: Double) {
         let phi = latitude * .pi / 180
         let (rightAscension, declination) = equatorialPosition(date: date)
@@ -122,9 +96,6 @@ enum MoonPhase {
         return (altitude, hourAngle, declination)
     }
 
-    /// Geocentric equatorial position (right ascension, declination) of the moon, in radians.
-    /// Low-precision (~0.1–0.2°) truncation of the standard lunar series — accurate enough for
-    /// rise/set timing to a few minutes.
     private static func equatorialPosition(date: Date) -> (rightAscension: Double, declination: Double) {
         let rad = Double.pi / 180
         let d = julianDaysSinceJ2000(date)
@@ -158,14 +129,12 @@ enum MoonPhase {
         return (rightAscension, declination)
     }
 
-    /// Greenwich Mean Sidereal Time at `date`, in radians (IAU 1982).
     private static func greenwichMeanSiderealTime(date: Date) -> Double {
         let d = julianDaysSinceJ2000(date)
         let degrees = (280.46061837 + 360.98564736629 * d).truncatingRemainder(dividingBy: 360)
         return degrees * Double.pi / 180
     }
 
-    /// Days (including fraction) since the J2000.0 epoch, 2000-01-01 12:00 UTC.
     private static func julianDaysSinceJ2000(_ date: Date) -> Double {
         date.timeIntervalSince1970 / 86_400 - 10_957.5
     }

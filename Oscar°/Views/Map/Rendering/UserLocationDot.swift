@@ -10,15 +10,6 @@ import CoreLocation
 import MapLibre
 import UIKit
 
-/// The blue location dot as circle layers inside the map style. View-based
-/// annotations (incl. every `MLNUserLocationAnnotationView`) are repositioned in
-/// UIKit after each rendered map frame and composite one display frame behind the
-/// Metal basemap — the dot visibly swims against the map during pans. Style layers
-/// render inside the map's own frame, locked to the basemap by construction (the
-/// selected-city marker is a style symbol layer for the same reason).
-///
-/// The dot idles with a soft static halo and pulses via `pulseBeat`
-/// (paint-property transitions); Reduce Motion keeps the static halo.
 @MainActor
 enum UserLocationDot {
     static let sourceID = "oscar-user-location"
@@ -31,9 +22,6 @@ enum UserLocationDot {
     private static let haloRadius: Double = 12
     private static let pulseMaxRadius: Double = 18
 
-    /// Creates the source + layers on first call, then just moves the point.
-    /// Re-appends the layers whenever something else (arrows, value bubbles, a
-    /// fresh overlay layer) landed above them — the dot always reads topmost.
     static func sync(style: MLNStyle, coordinate: CLLocationCoordinate2D?) {
         var shape: MLNShape?
         if let coordinate, CLLocationCoordinate2DIsValid(coordinate),
@@ -79,8 +67,6 @@ enum UserLocationDot {
         }
     }
 
-    /// One pulse beat: snap the ring back to the dot rim, then expand + fade it
-    /// out over an animated paint transition.
     static func pulseBeat(style: MLNStyle) {
         guard let pulse = style.layer(withIdentifier: pulseLayerID) as? MLNCircleStyleLayer else { return }
         let instant = MLNTransition(duration: 0, delay: 0)

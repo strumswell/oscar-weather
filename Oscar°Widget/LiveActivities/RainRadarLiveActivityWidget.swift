@@ -7,9 +7,6 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
-/// The rain card: Lock Screen banner, Dynamic Island and the watch Smart Stack.
-/// The server ships timestamps and mm/h; every line of copy is written here at
-/// render time, in the device's language and time format.
 struct RainRadarLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: RainRadarActivityAttributes.self) { context in
@@ -70,7 +67,6 @@ private struct RainActivityModel {
     typealias ContentState = RainRadarActivityAttributes.ContentState
     typealias Bucket = ContentState.Bucket
 
-    /// The one number the card leads with: the rain right now, or the peak still to come.
     struct Hero {
         let value: Double
         let label: LocalizedStringKey
@@ -96,7 +92,6 @@ private struct RainActivityModel {
     var phase: ContentState.Phase { state.phase }
     var buckets: [Bucket] { state.timeline }
 
-    /// Earlier observations sit left of the "now" marker, greyed out; the newest one is "now".
     var pastCount: Int { buckets.filter { $0.t < state.observedAt }.count }
 
     var nowFraction: Double {
@@ -107,10 +102,8 @@ private struct RainActivityModel {
         buckets.filter { $0.t > state.observedAt }
     }
 
-    /// The newest observed step: what the radar measures right now.
     var nowBucket: Bucket? { buckets.last { $0.t <= state.observedAt } }
 
-    /// Heaviest step from now on.
     var peakAhead: Bucket? {
         let from = nowBucket?.t ?? state.observedAt
         return buckets.filter { $0.t >= from && $0.v > 0 }.max { $0.v < $1.v }
@@ -131,7 +124,6 @@ private struct RainActivityModel {
         }
     }
 
-    /// The peak gets its number written on the bar when it's clearly heavier than the hero.
     var calloutBucket: Bucket? {
         guard !isStale, let peak = peakAhead, peak.id != hero?.bucketID,
               peak.v >= max(1, 1.5 * (hero?.value ?? 0)) else { return nil }
@@ -145,7 +137,6 @@ private struct RainActivityModel {
         return RainIntensity.color(value)
     }
 
-    /// Axis label halfway between the marker and the horizon, as bar-centre fraction.
     var middleBucket: (fraction: Double, date: Date)? {
         guard buckets.count >= 8 else { return nil }
         let index = (pastCount + buckets.count - 1) / 2
@@ -185,7 +176,6 @@ private struct RainActivityModel {
             : String(localized: "\(intensityLabel) · bis ca. \(time(end))")
     }
 
-    /// Dynamic Island, compact: the one time that matters for the phase.
     var trailingStatus: String {
         switch phase {
         case .upcoming:
@@ -201,7 +191,6 @@ private struct RainActivityModel {
         String(localized: "Radar \(time(state.observedDate))")
     }
 
-    /// Same thresholds as the server's push wording.
     var intensityLabel: String {
         let peak = state.peakMmPerHour
         if peak >= 24 { return String(localized: "Starker Regen") }
@@ -221,20 +210,14 @@ private struct RainActivityModel {
     }
 }
 
-/// Bars share the radar map's palette and a fixed scale, so a bar means the same
-/// amount of rain on every update and matches the colour the user saw on the map.
 private enum RainIntensity {
-    /// A full-height bar: heavy rain and above.
     static let ceiling = 20.0
 
     static var isInch: Bool { SettingService.resolvedPrecipitationUnit == "inch" }
     static var unit: String { isInch ? "in/h" : "mm/h" }
 
-    /// Scale lines in mm/h, on round numbers of the display unit.
     static var gridlines: [Double] { isInch ? [1.27, 5.08] : [1, 5] }
 
-    /// Logarithmic, bending at 0.1 mm/h, so the everyday 0.1–1 mm/h drizzle still
-    /// gets distinct heights.
     static func fraction(_ mmPerHour: Double) -> Double {
         guard mmPerHour > 0 else { return 0 }
         let knee = 0.1
@@ -253,7 +236,6 @@ private enum RainIntensity {
         return value.formatted(.number.precision(.fractionLength(0...2)))
     }
 
-    /// The map's plasma colour for a rain rate (Marshall–Palmer back to dBZ).
     static func color(_ mmPerHour: Double) -> Color {
         let stops = ServerColormapStops.radar
         let dbz: Double = 10 * log10(200 * pow(max(mmPerHour, 0.01), 1.6))
@@ -268,8 +250,6 @@ private enum RainIntensity {
 }
 
 private enum RainActivityStyle {
-    /// Oscar's sky, darkened for the Lock Screen: brooding before the rain, deep
-    /// while it falls, lifting once it's over. White text stays legible on any wallpaper.
     static func sky(for phase: RainRadarActivityAttributes.ContentState.Phase) -> LinearGradient {
         LinearGradient(colors: [skyTop(for: phase), skyBottom(for: phase)], startPoint: .top, endPoint: .bottom)
     }
@@ -354,7 +334,6 @@ private struct RainActivityFullCard: View {
     }
 }
 
-/// watchOS Smart Stack: two lines and the bars, no chrome.
 private struct RainActivitySmallCard: View {
     let model: RainActivityModel
 
@@ -383,7 +362,6 @@ private struct RainActivitySmallCard: View {
     }
 }
 
-/// Big number like the temperature on the Wetter tab, with a legend dot in the bar colour.
 private struct RainHeroValue: View {
     let hero: RainActivityModel.Hero
 
@@ -408,7 +386,6 @@ private struct RainHeroValue: View {
     }
 }
 
-/// The hero on one line, for the Dynamic Island and the watch.
 private struct RainInlineValue: View {
     let model: RainActivityModel
     var showsUnit = true
@@ -437,14 +414,10 @@ private struct RainInlineValue: View {
 
 // MARK: - Timeline
 
-/// Capsule bars on a fixed rain scale, coloured like the radar map: earlier
-/// observations greyed out left of a "now" marker, the nowcast to the right, the peak labelled,
-/// mm/h lines on the trailing edge and clock times underneath.
 private struct RainTimelineChart: View {
     let model: RainActivityModel
     let plotHeight: CGFloat
     var compact = false
-    /// Scale lines and the peak label.
     var detailed = true
     var showsAxis = true
 
@@ -472,7 +445,6 @@ private struct RainTimelineChart: View {
         .accessibilityValue(Text(verbatim: model.accessibilityValue))
     }
 
-    /// Room above the plot when the labelled peak bar is nearly full height.
     private var headroom: CGFloat {
         guard detailed, let peak = model.calloutBucket else { return 0 }
         return max(0, barHeight(peak.v) + Self.calloutHeight - plotHeight)
@@ -587,7 +559,6 @@ private struct RainActivityCompactTrailing: View {
                 .monospacedDigit()
                 .foregroundStyle(.white)
         case .raining, .ending:
-            // While it rains the question is "how much longer": the next 40 minutes as bars.
             RainSparkline(buckets: Array(model.forecastBuckets.prefix(8)))
                 .frame(width: 30, height: 12)
         case .ended:
@@ -635,10 +606,6 @@ private struct RainActivityIcon: View {
 }
 
 // MARK: - Previews
-
-// Plain view previews on purpose: the Live Activity preview macro needs a preview
-// host running the whole widget bundle inside the app and keeps timing out here.
-// The debug menu on the Wetter tab starts real sample cards on a device.
 
 private func previewModel(_ phase: RainRadarActivityAttributes.ContentState.Phase, stale: Bool = false) -> RainActivityModel {
     RainActivityModel(state: .sample(phase: phase), locationName: "Leipzig", isStale: stale)

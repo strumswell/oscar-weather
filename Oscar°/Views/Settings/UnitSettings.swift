@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct UnitSettings: View {
-    // Units are plain @Observable properties on the service (mirrored out of Core
-    // Data), so the pickers bind straight to it and persistence lives in the didSets.
     @Bindable private var settingsService = SettingService.shared
 
     var body: some View {

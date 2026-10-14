@@ -4,7 +4,6 @@ enum APNsEnvironment: String, Codable {
     case sandbox
     case production
 
-    /// Read from the embedded provisioning profile; App Store and TestFlight builds carry none and default to production.
     static func current() -> APNsEnvironment {
         if let provisionPath = Bundle.main.path(forResource: "embedded", ofType: "mobileprovision"),
            let profile = try? String(contentsOfFile: provisionPath, encoding: .isoLatin1),

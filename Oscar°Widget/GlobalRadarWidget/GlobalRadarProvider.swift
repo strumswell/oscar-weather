@@ -9,7 +9,6 @@ struct GlobalRadarEntry: TimelineEntry {
 }
 
 struct GlobalRadarProvider: TimelineProvider {
-  /// ≈ zoom level 14 (591657550.5 / 2^14) — the framing the widget always used.
   private static let spanMeters = 591657550.5 / Double(1 << 14)
   private static let snapshotSize = CGSize(width: 300, height: 300)
   private static let overlayAlpha: CGFloat = 0.7
@@ -47,9 +46,6 @@ struct GlobalRadarProvider: TimelineProvider {
       let region = MKCoordinateRegion(
         center: coordinate, latitudinalMeters: Self.spanMeters, longitudinalMeters: Self.spanMeters)
 
-      // Precip overlay from oscar-server: regional radar in coverage, ECMWF elsewhere.
-      // Fetched alongside the basemap; a nil overlay (offline, no frames) degrades
-      // to the plain map instead of an error icon.
       let overlay = await RadarSnapshotRenderer.overlayImage(
         center: coordinate, spanMeters: Self.spanMeters, size: Self.snapshotSize)
 

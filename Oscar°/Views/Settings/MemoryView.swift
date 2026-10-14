@@ -73,7 +73,7 @@ struct MemoryStars: View {
         TimelineView(.animation(paused: reduceMotion)) { timeline in
             Canvas { context, size in
                 let timeInterval = timeline.date.timeIntervalSince1970
-                starField.update(date: timeline.date)
+                starField.update(date: timeline.date, width: size.width)
                 meteorShower.update(date: timeline.date, size: size)
 
                 let rightColors = [.clear, Color(red: 0.8, green: 1, blue: 1), .white]

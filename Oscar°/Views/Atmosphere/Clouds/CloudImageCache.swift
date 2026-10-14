@@ -10,21 +10,12 @@ struct CloudSpriteKey: Hashable {
     let band: Cloud.Band
 }
 
-/// Caches resolved, gradient-shaded cloud bitmaps so the Canvas resolves them
-/// only when the tints or the light angle change, not every frame. Held via
-/// `@State` — mutating its contents inside the draw closure is reference
-/// mutation, not view-state mutation.
 final class CloudImageCache {
-    /// How dark a full lid overhead makes what hangs under it.
     static let lidShadow = 0.18
 
-    /// Tints compared at 8-bit precision, the light angle in 10° steps, the
-    /// per-band lid shadow in 1/16 steps: while the hourly stage tweens the
-    /// sky, the exact values differ every frame but the shaded bitmaps don't.
     private var key: (SIMD4<Int32>, SIMD4<Int32>, Int, SIMD3<Int32>)?
     private var images: [CloudSpriteKey: GraphicsContext.ResolvedImage] = [:]
 
-    /// The deck's sprite set is fixed, so a cache hit needs no membership check.
     func resolvedImages(
         for clouds: [Cloud],
         topTint: Color,
@@ -47,10 +38,6 @@ final class CloudImageCache {
             let sprite = CloudSpriteKey(image: cloud.imageNumber, band: cloud.band)
             guard images[sprite] == nil else { continue }
             var resolved = context.resolve(Image("cloud\(sprite.image)"))
-            // Lit edge (top tint) faces the sun, shadow edge faces away; the
-            // gradient spans the sprite's extent along the light direction and
-            // only goes as dark as the band's shading allows. A lid overhead
-            // darkens the whole sprite so it stays visible against the veil.
             let center = CGPoint(x: resolved.size.width / 2, y: resolved.size.height / 2)
             let reach = (abs(light.dx) * resolved.size.width + abs(light.dy) * resolved.size.height) / 2
             let lit = topTint.mix(with: .black, by: Self.lidShadow * (shadows[sprite.band] ?? 0))

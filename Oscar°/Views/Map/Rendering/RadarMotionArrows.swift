@@ -13,10 +13,6 @@ import MapLibre
 import UIKit
 
 enum RadarMotionArrows {
-    /// One arrow per coarse motion cell whose footprint carries precipitation
-    /// (subsampled 5×5 presence check on the frame grid) and whose flow is
-    /// non-trivial. Cell centers share the overview's UV space with the frame
-    /// grid; UV → lat/lon via the (mercator-aligned) image bounds.
     static func arrowFeatures(
         motion: RadarMotionData, fieldIndex: Int,
         grid: RadarGridPayload, bounds: OscarRadarBounds
@@ -37,8 +33,6 @@ enum RadarMotionArrows {
             }
     }
 
-    /// ≥2 of 25 subsampled points inside the cell footprint carry a nonzero
-    /// grid index (the client analog of the server's block-sum gate).
     private static func cellHasPrecip(
         grid: RadarGridPayload, uvX: Double, uvY: Double, cellW: Double, cellH: Double
     ) -> Bool {

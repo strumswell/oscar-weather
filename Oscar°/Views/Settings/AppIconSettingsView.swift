@@ -21,8 +21,6 @@ struct AppIconSettingsView: View {
                 Section {
                     ForEach(section.icons) { icon in
                         let isSelected = selectedIconName == icon.alternateIconName
-                        // A locked icon that is already set (chosen before the
-                        // lock existed) stays selectable, nobody loses their icon.
                         if icon.isFree || supporter.isSupporter || isSelected {
                             Button {
                                 Task {

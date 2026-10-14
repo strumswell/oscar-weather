@@ -8,9 +8,6 @@ import SwiftUI
 import UIKit
 import UserNotifications
 
-/// The two system permissions as switches: while undetermined the switch
-/// triggers the real prompt, afterwards it deep-links into Settings. Below
-/// them the one thing Oscar itself asks to send: crash reports.
 struct PermissionSettingsView: View {
   @Environment(\.openURL) private var openURL
   private let locationService = LocationService.shared
@@ -20,7 +17,6 @@ struct PermissionSettingsView: View {
   var body: some View {
     Form {
       Section {
-        // Read in body so @Observable tracks the statuses (see NotificationSettingsView).
         let locationAuthorized = locationService.authStatus == .authorizedAlways
           || locationService.authStatus == .authorizedWhenInUse
         let locationUndetermined = locationService.authStatus == .notDetermined

@@ -89,18 +89,12 @@ struct ClassicCardBack: View {
         .listStyle(.plain)
         .listSectionSpacing(0)
         .scrollContentBackground(.hidden)
-        // iOS 6 kept the list permanently in edit mode: delete circles and
-        // reorder grips always visible.
         .environment(\.editMode, .constant(.active))
-        // White card under a dark stage: the list must not follow the dark
-        // scheme the classic view sets.
         .environment(\.colorScheme, .light)
         .background(.white)
         .clipShape(.rect(cornerRadius: 10))
     }
 
-    /// The big two-segment control from the original: the selected unit in
-    /// blue, the other in light gray.
     private var unitSwitch: some View {
         HStack(spacing: 0) {
             unitSegment("°C", tag: "celsius")
@@ -149,7 +143,6 @@ struct ClassicCardBack: View {
     }
 }
 
-/// The glossy iOS 6 bar button, shared by the classic bars.
 func classicBarButton(top: Color, bottom: Color) -> some View {
     RoundedRectangle(cornerRadius: 7)
         .fill(LinearGradient(colors: [top, bottom], startPoint: .top, endPoint: .bottom))

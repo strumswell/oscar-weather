@@ -12,7 +12,6 @@ import WidgetKit
 
 struct UVIndexLockScreenEntry: TimelineEntry {
     let date: Date
-    /// Current UV index, nil when the air quality response carried no usable value.
     let uvIndex: Double?
 }
 
@@ -34,7 +33,6 @@ struct UVIndexProvider: TimelineProvider {
         }
     }
 
-    /// UV index of the hour closest to "now" (times are unixtime like the forecast).
     static func currentUVIndex(
         from air: Operations.getAirQuality.Output.Ok.Body.jsonPayload,
         now: Date
@@ -46,7 +44,6 @@ struct UVIndexProvider: TimelineProvider {
         let nowUnix = now.timeIntervalSince1970
         let closestIndex = times.indices.min { abs(times[$0] - nowUnix) < abs(times[$1] - nowUnix) } ?? 0
 
-        // uv_index can be shorter than the time array, so index defensively.
         guard values.indices.contains(closestIndex) else { return nil }
         return values[closestIndex]
     }
@@ -56,7 +53,6 @@ struct UVIndexLockScreenView: View {
     var entry: UVIndexProvider.Entry
     @Environment(\.widgetFamily) private var family
 
-    /// WHO color bands: 0-2 green, 3-5 yellow, 6-7 orange, 8-10 red, 11+ violet.
     private static let uvBands = Gradient(stops: [
         .init(color: .green, location: 0.0),
         .init(color: .green, location: 2.5 / 11.0),
@@ -105,7 +101,6 @@ struct UVIndexLockScreenView: View {
         return String(localized: "UV \(Int(uvIndex.rounded())) · \(Self.category(for: uvIndex))", comment: "LS Widget UV-Index inline: Wert und WHO-Kategorie")
     }
 
-    /// WHO exposure categories.
     static func category(for uvIndex: Double) -> String {
         UVIndexCategory(uvIndex: uvIndex).localizedTitle
     }
