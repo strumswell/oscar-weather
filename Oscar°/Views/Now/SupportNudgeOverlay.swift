@@ -258,20 +258,22 @@ private struct GravityTilt: ViewModifier {
                 defer { motion.stopDeviceMotionUpdates() }
                 while (try? await Task.sleep(for: .milliseconds(16))) != nil {
                     guard let gravity = motion.deviceMotion?.gravity else { continue }
-                    let target = min(max(-screenX(gravity) * Self.gain, -Self.maxDegrees), Self.maxDegrees)
+                    let target = min(max(-gravity.screenX * Self.gain, -Self.maxDegrees), Self.maxDegrees)
                     degrees += (target - degrees) * Self.smoothing
                 }
             }
     }
 
-    /// Gravity's pull along the screen's horizontal axis.
-    private func screenX(_ gravity: CMAcceleration) -> Double {
+}
+
+extension CMAcceleration {
+    @MainActor var screenX: Double {
         let scene = UIApplication.shared.connectedScenes.first { $0 is UIWindowScene } as? UIWindowScene
         return switch scene?.effectiveGeometry.interfaceOrientation ?? .portrait {
-        case .portraitUpsideDown: -gravity.x
-        case .landscapeLeft: gravity.y
-        case .landscapeRight: -gravity.y
-        default: gravity.x
+        case .portraitUpsideDown: -x
+        case .landscapeLeft: y
+        case .landscapeRight: -y
+        default: x
         }
     }
 }

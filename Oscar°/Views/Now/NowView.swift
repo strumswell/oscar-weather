@@ -124,6 +124,7 @@ struct NowView: View {
                 HeadView()
                     .padding(.top, 35)
                     .debugConsoleTap(countDebugTap)
+                    .headCat()
                 sectionList(sections.prefix(firstPageCount))
             }
             .frame(minHeight: firstPageMinHeight, alignment: .topLeading)
@@ -139,6 +140,7 @@ struct NowView: View {
             HeadView(compact: true)
                 .fixedSize(horizontal: false, vertical: true)
                 .debugConsoleTap(countDebugTap)
+                .headCat()
             sectionList(stageSections[...])
         }
         .padding(.bottom)

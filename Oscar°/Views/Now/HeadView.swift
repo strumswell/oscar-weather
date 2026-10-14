@@ -173,6 +173,7 @@ struct HeadView: View {
           .lineLimit(1)
           .shadow(radius: 15)
           .contentTransition(.numericText())
+          .catPerch()
           .animation(.default, value: weather.forecast.current?.temperature)
           .accessibilityLabel(Text("Temperatur \(roundTemperatureString(temperature: weather.forecast.current?.temperature))"))
 
@@ -194,6 +195,7 @@ struct HeadView: View {
                   .foregroundStyle(Color(uiColor: .label).opacity(0.55))
                 }
               }
+              .catShelf()
               if metric == .measured, let id = weather.headStation?.id {
                 Button { presentation.present(.stations(id)) } label: { item }
                   .buttonStyle(.plain)

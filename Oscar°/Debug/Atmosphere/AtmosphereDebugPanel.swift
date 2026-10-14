@@ -17,6 +17,8 @@ struct AtmosphereDebugPanel: View {
     @State private var moonReferenceDate = Date.now
     @State private var moonRise: Date?
     @State private var moonSet: Date?
+    @Bindable private var cat = CatModel.shared
+    @AppStorage(CatNeeds.fastKey) private var fastCat = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -53,6 +55,18 @@ struct AtmosphereDebugPanel: View {
                 }
             }
 
+            if expanded {
+                sliderRow("Cat food", value: $cat.needs.food, label: percentLabel(cat.needs.food))
+                sliderRow("Cat fun", value: $cat.needs.fun, label: percentLabel(cat.needs.fun))
+                sliderRow("Cat energy", value: $cat.needs.energy, label: percentLabel(cat.needs.energy))
+                Toggle(isOn: $fastCat) {
+                    Text(verbatim: "Fast cat needs")
+                }
+                .font(.caption2.monospaced())
+                .toggleStyle(.switch)
+                .controlSize(.mini)
+            }
+
             if expanded, state.overrideEnabled {
                 HStack {
                     Text("Condition")
@@ -86,6 +100,7 @@ struct AtmosphereDebugPanel: View {
         .padding(12)
         .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 12))
         .task { recomputeMoon() }
+        .onChange(of: cat.mood) { cat.revision += 1 }
     }
 
     /// Current (real, not overridden) moon phase plus the next moonrise/moonset for the
