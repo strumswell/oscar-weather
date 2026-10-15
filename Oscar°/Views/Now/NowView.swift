@@ -107,6 +107,7 @@ struct NowView: View {
         .environment(\.cardBorderOpacity, AtmosphereSampler.cardBorderOpacity(snapshot: atmosphere))
         .environment(\.cardBackgroundStyle, AnyShapeStyle(.ultraThinMaterial.opacity(0.6)))
         .ignoresSafeArea(edges: isTwoColumn ? [] : .top)
+        .simultaneousGesture(SpatialTapGesture(coordinateSpace: .global).onEnded { CatModel.shared.dismissMenu(outside: $0.location) })
         .overlay { SupportNudgeOverlay(isEnabled: weather.hasContent) }
         .onGeometryChange(for: CGSize.self, of: { $0.size }) { size in
             if let old = stageSize, old.width == size.width, abs(old.height - size.height) < 100 {

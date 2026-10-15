@@ -2,68 +2,93 @@ import SwiftUI
 
 struct StatsView: View {
     private let store = UsageStatsStore.shared
+    private let settings = SettingService.shared
 
     var body: some View {
         let stats = store.combined
-        List {
-            Section {
+        ScrollView {
+            VStack(spacing: 16) {
                 StatsOverviewGrid(stats: stats)
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.clear)
-            }
 
-            Section("Wann du Oscar öffnest") {
-                OpensByHourChart(counts: stats.opensByHour)
-                OpensByWeekdayChart(counts: stats.opensByWeekday)
-            }
-
-            if !stats.places.isEmpty {
-                Section("Deine Orte") {
-                    TopPlacesChart(places: stats.places)
+                StatsCard(title: "Deine Aktivität") {
+                    ActivityHeatmap(stats: stats)
                 }
-            }
 
-            Section("Extremwerte") {
-                ExtremeRow(title: "Heißester Moment", extreme: stats.hottest, icon: "thermometer.sun.fill", tint: .orange)
-                ExtremeRow(title: "Kältester Moment", extreme: stats.coldest, icon: "thermometer.snowflake", tint: .cyan)
-                ExtremeRow(title: "Stärkster Wind", extreme: stats.windiest, icon: "wind", tint: .mint)
-                ExtremeRow(title: "Stärkster Regen", extreme: stats.wettest, icon: "cloud.heavyrain.fill", tint: .blue)
-                ExtremeRow(title: "Höchster UV-Index", extreme: stats.highestUV, icon: "sun.max.fill", tint: .yellow)
-            }
+                StatsCard(title: "Wann du Oscar öffnest") {
+                    OpensByHourChart(counts: stats.opensByHour)
+                    Divider()
+                    OpensByWeekdayChart(counts: stats.opensByWeekday)
+                }
 
-            Section("Unterwegs in Oscar") {
-                LabeledContent("Gescrollt") {
-                    Text(Measurement(value: stats.scrolledMeters, unit: UnitLength.meters), format: .measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(0))))
-                }
-                LabeledContent("Längste Sitzung") {
-                    Text(Duration.seconds(stats.longestSessionSeconds), format: .units(allowed: [.hours, .minutes, .seconds], width: .narrow))
-                }
-                LabeledContent("Mitteilungen gesehen") { Text(stats.notificationsShown, format: .number) }
-                LabeledContent("Mitteilungen geöffnet") { Text(stats.notificationsOpened, format: .number) }
-                ForEach(stats.sheets.sorted { $0.value > $1.value }, id: \.key) { sheet, count in
-                    LabeledContent(Self.sheetTitle(sheet)) { Text(count, format: .number) }
-                }
-            }
-
-            if !stats.apiCalls.isEmpty {
-                Section {
-                    ForEach(stats.apiCalls.sorted { $0.value > $1.value }, id: \.key) { host, count in
-                        LabeledContent(Self.serviceTitle(host)) { Text(count, format: .number) }
+                if !stats.places.isEmpty {
+                    StatsCard(title: "Deine Orte") {
+                        TopPlacesChart(places: stats.places)
                     }
-                } header: {
-                    Text("Anfragen an Wetterdienste")
-                } footer: {
+                }
+
+                StatsCard(title: "Extremwerte") {
+                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())], spacing: 10) {
+                        ExtremeTile(title: "Heißester Moment", extreme: stats.hottest?.converted(to: temperatureUnit), tint: .orange)
+                        ExtremeTile(title: "Kältester Moment", extreme: stats.coldest?.converted(to: temperatureUnit), tint: .cyan)
+                        ExtremeTile(title: "Stärkster Wind", extreme: stats.windiest?.converted(to: windUnit), tint: .mint)
+                        ExtremeTile(title: "Stärkster Regen", extreme: stats.wettest?.converted(to: precipitationUnit), tint: .blue)
+                        ExtremeTile(title: "Höchster UV-Index", extreme: stats.highestUV, tint: .yellow)
+                    }
+                }
+
+                if let cat = stats.cat {
+                    CatStatsCard(counts: cat)
+                }
+
+                StatsCard(title: "Unterwegs in Oscar") {
+                    VStack(spacing: 10) {
+                        StatsRow(title: "Gescrollt", value: Text(Measurement(value: stats.scrolledMeters, unit: UnitLength.meters), format: .measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(0)))))
+                        StatsRow(title: "Längste Sitzung", value: Text(Duration.seconds(stats.longestSessionSeconds), format: .units(allowed: [.hours, .minutes, .seconds], width: .narrow)))
+                        StatsRow(title: "Mitteilungen gesehen", value: Text(stats.notificationsShown, format: .number))
+                        StatsRow(title: "Mitteilungen geöffnet", value: Text(stats.notificationsOpened, format: .number))
+                        ForEach(stats.sheets.sorted { $0.value > $1.value }, id: \.key) { sheet, count in
+                            StatsRow(title: Self.sheetTitle(sheet), value: Text(count, format: .number))
+                        }
+                    }
+                }
+
+                if !stats.apiCalls.isEmpty {
+                    StatsCard(title: "Anfragen an Wetterdienste") {
+                        ServicesChart(calls: stats.apiCalls)
+                    }
+                }
+
+                Group {
                     if store.otherInstalls.isEmpty {
                         Text("Alle Zahlen bleiben auf deinem Gerät und in deiner iCloud.")
                     } else {
                         Text("Zusammengezählt über \(store.otherInstalls.count + 1) Geräte. Alle Zahlen bleiben auf deinen Geräten und in deiner iCloud.")
                     }
                 }
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 4)
             }
+            .padding(16)
         }
+        .background(Color(uiColor: .systemGroupedBackground))
         .navigationTitle("Statistik")
         .toolbarTitleDisplayMode(.inline)
         .onAppear { store.flush() }
+    }
+
+    private var temperatureUnit: String {
+        settings.temperatureUnit == "fahrenheit" ? "°F" : "°C"
+    }
+
+    private var windUnit: String {
+        let unit = WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit)
+        return unit == .bft ? "km/h" : unit.displayUnit
+    }
+
+    private var precipitationUnit: String {
+        settings.precipitationUnit == "inch" ? "in" : "mm"
     }
 
     private static func sheetTitle(_ id: String) -> LocalizedStringKey {
@@ -78,18 +103,6 @@ struct StatsView: View {
         case "support": "Oscar unterstützen"
         case let id where id.hasPrefix("environment"): "Umwelt geöffnet"
         default: LocalizedStringKey(id)
-        }
-    }
-
-    private static func serviceTitle(_ host: String) -> LocalizedStringKey {
-        switch host {
-        case "api.open-meteo.com": "Open-Meteo Vorhersage"
-        case "air-quality-api.open-meteo.com": "Open-Meteo Luftqualität"
-        case "geocoding-api.open-meteo.com": "Open-Meteo Ortssuche"
-        case "archive-api.open-meteo.com": "Open-Meteo Klimaarchiv"
-        case let host where host.contains("weather.gc.ca"): "Environment Canada"
-        case let host where host.hasSuffix("oscars.love"): "Oscar Server"
-        default: LocalizedStringKey(host)
         }
     }
 }

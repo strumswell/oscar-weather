@@ -23,4 +23,19 @@ struct CatNeedsTests {
         #expect(CatNeeds(food: 1, fun: 0.1, energy: 1).mood(isSleepTime: false) == .bored)
         #expect(CatNeeds(food: 1, fun: 1, energy: 1).mood(isSleepTime: false) == .happy)
     }
+
+    @Test
+    func furniturePacksTogetherAndDropsWhenTheShelfShrinks() {
+        let placement: [CatFurniture: CGFloat] = [.bed: 0.12, .post: 0.6, .bowl: 0.9]
+        for width in stride(from: CGFloat(400), through: 10, by: -7) {
+            let spots = CatFurniture.layout(placement, width: width)
+            let edges = spots.map { kind, x in (x - kind.pixels.width / 2, x + kind.pixels.width / 2) }.sorted { $0.0 < $1.0 }
+            #expect(edges.allSatisfy { $0.0 >= -0.001 && $0.1 <= width + 0.001 })
+            #expect(zip(edges, edges.dropFirst()).allSatisfy { $0.1 <= $1.0 + 0.001 })
+        }
+        #expect(Set(CatFurniture.layout(placement, width: 120).keys) == [.bowl, .bed, .post])
+        #expect(Set(CatFurniture.layout(placement, width: 100).keys) == [.bowl, .bed])
+        #expect(Set(CatFurniture.layout(placement, width: 60).keys) == [.bowl])
+        #expect(CatFurniture.layout(placement, width: 10).isEmpty)
+    }
 }

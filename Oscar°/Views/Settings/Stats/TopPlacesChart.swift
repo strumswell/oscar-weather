@@ -7,20 +7,20 @@ struct TopPlacesChart: View {
     var body: some View {
         let top = places.sorted { $0.value > $1.value }.prefix(5)
         Chart(top, id: \.key) { place, count in
-            BarMark(x: .value("Abrufe", count), y: .value("Ort", place))
-                .cornerRadius(3)
+            BarMark(x: .value("Abrufe", count), y: .value("Ort", place), height: .fixed(14))
+                .cornerRadius(4)
+                .foregroundStyle(.teal.opacity(place == top.first?.key ? 1 : 0.5))
                 .annotation(position: .trailing, spacing: 6) {
                     Text(count, format: .number)
-                        .font(.caption)
+                        .font(.caption.weight(.medium))
+                        .monospacedDigit()
                         .foregroundStyle(.secondary)
                 }
         }
         .chartXAxis(.hidden)
         .chartYAxis {
-            AxisMarks { AxisValueLabel() }
+            AxisMarks { AxisValueLabel().font(.subheadline) }
         }
-        .foregroundStyle(.teal)
-        .frame(height: Double(top.count) * 32 + 8)
-        .padding(.vertical, 6)
+        .frame(height: Double(top.count) * 34)
     }
 }

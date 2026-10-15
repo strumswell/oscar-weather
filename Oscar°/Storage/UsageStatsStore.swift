@@ -55,6 +55,10 @@ final class UsageStatsStore {
         if unsavedChanges >= 30 { flush() }
     }
 
+    func recordCat(_ stat: CatStat) {
+        record { $0.cat = ($0.cat ?? [:]).merging([stat.rawValue: 1], uniquingKeysWith: +) }
+    }
+
     func sceneDidActivate() {
         guard sessionStart == nil else { return }
         let now = Date.now
@@ -83,17 +87,20 @@ final class UsageStatsStore {
         pendingScroll += points
     }
 
-    func recordConditions(temperature: Double?, wind: Double?, precipitation: Double?, uv: Double?, place: String) {
-        let settings = SettingService.shared
-        let temperatureUnit = settings.temperatureUnit == "fahrenheit" ? "°F" : "°C"
-        let windSetting = WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit)
-        let windUnit = windSetting == .bft ? "km/h" : windSetting.displayUnit
-        let precipitationUnit = settings.precipitationUnit == "inch" ? "in" : "mm"
-
+    func recordConditions(
+        temperature: Double?,
+        temperatureUnit: String?,
+        wind: Double?,
+        windUnit: String?,
+        precipitation: Double?,
+        precipitationUnit: String?,
+        uv: Double?,
+        place: String
+    ) {
         let now = Date.now
-        func extreme(_ value: Double?, _ unit: String) -> UsageStats.Extreme? {
-            guard let value else { return nil }
-            return UsageStats.Extreme(value: value, unit: unit, date: now, place: place)
+        func extreme(_ value: Double?, _ unit: String?) -> UsageStats.Extreme? {
+            guard let value, let unit else { return nil }
+            return UsageStats.Extreme(value: value, unit: unit, date: now, place: place).canonical
         }
 
         record {

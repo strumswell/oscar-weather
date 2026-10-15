@@ -1,226 +1,6 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
-    "Katze" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Katze"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cat"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kedi"
-          }
-        }
-      }
-    },
-    "Tippe auf die Katze, um sie zu füttern oder mit ihr zu spielen." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tippe auf die Katze, um sie zu füttern oder mit ihr zu spielen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap the cat to feed it or play with it."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beslemek veya onunla oynamak için kediye dokunun."
-          }
-        }
-      }
-    },
-    "Streicheln" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Streicheln"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pet"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sev"
-          }
-        }
-      }
-    },
-    "Fisch" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fisch"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fish"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Balık"
-          }
-        }
-      }
-    },
-    "Ball" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ball"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ball"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Top"
-          }
-        }
-      }
-    },
-    "Angel" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Angel"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wand toy"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Olta oyuncağı"
-          }
-        }
-      }
-    },
-    "müde" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "müde"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sleepy"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "uykulu"
-          }
-        }
-      }
-    },
-    "hungrig" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "hungrig"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "hungry"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "aç"
-          }
-        }
-      }
-    },
-    "gelangweilt" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "gelangweilt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "bored"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sıkılmış"
-          }
-        }
-      }
-    },
-    "zufrieden" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "zufrieden"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "content"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "memnun"
-          }
-        }
-      }
-    },
     "" : {
 
     },
@@ -714,6 +494,28 @@
     "%lld %%" : {
 
     },
+    "%lld aktive Tage in den letzten %lld Wochen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld aktive Tage in den letzten %lld Wochen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld active days in the last %lld weeks"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son %2$lld haftada %1$lld aktif gün"
+          }
+        }
+      }
+    },
     "%lld Mitglieder" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -807,6 +609,28 @@
     },
     "%lld°" : {
 
+    },
+    "^[%lld Tag](inflect: true)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "^[%lld Tag](inflect: true)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "^[%lld day](inflect: true)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld gün"
+          }
+        }
+      }
     },
     "°C" : {
       "localizations" : {
@@ -2550,7 +2374,26 @@
       }
     },
     "Abrufe" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrufe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lookups"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorgu"
+          }
+        }
+      }
     },
     "Abschnitte" : {
       "localizations" : {
@@ -2887,6 +2730,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Şu anda baskın kirletici"
+          }
+        }
+      }
+    },
+    "Aktuelle Serie" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuelle Serie"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current streak"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel seri"
           }
         }
       }
@@ -3362,6 +3227,50 @@
         }
       }
     },
+    "Am häufigsten" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Am häufigsten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most often"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En sık"
+          }
+        }
+      }
+    },
+    "Am Kratzbaum gespielt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Am Kratzbaum gespielt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scratching post plays"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tırmalama direğinde oyun"
+          }
+        }
+      }
+    },
     "Ambrosia" : {
       "comment" : "Pollen type name",
       "localizations" : {
@@ -3452,6 +3361,28 @@
         }
       }
     },
+    "Anfragen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anfragen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requests"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İstek"
+          }
+        }
+      }
+    },
     "Anfragen an Wetterdienste" : {
       "localizations" : {
         "de" : {
@@ -3470,6 +3401,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hava durumu servislerine istekler"
+          }
+        }
+      }
+    },
+    "Angel" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Angel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wand toy"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Olta oyuncağı"
+          }
+        }
+      }
+    },
+    "Angel erwischt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Angel erwischt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wand toy catches"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Olta yakalama"
           }
         }
       }
@@ -4195,6 +4170,50 @@
         }
       }
     },
+    "Ball" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ball"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ball"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Top"
+          }
+        }
+      }
+    },
+    "Bälle gekickt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bälle gekickt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Balls kicked"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekmelenen top"
+          }
+        }
+      }
+    },
     "Band" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4660,6 +4679,28 @@
         }
       },
       "shouldTranslate" : false
+    },
+    "Bett" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bett"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bed"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yatak"
+          }
+        }
+      }
     },
     "Bewegungspfeile" : {
       "localizations" : {
@@ -6038,6 +6079,28 @@
         }
       }
     },
+    "Deine Aktivität" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Aktivität"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your activity"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkinliğin"
+          }
+        }
+      }
+    },
     "Deine Orte" : {
       "localizations" : {
         "de" : {
@@ -6500,6 +6563,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "İsteğe bağlı bulut katmanı, Meteosat (MTG) meteoroloji uydusunun gördüğü bulutluluğu gösterir — her 10 dakikada bir güncellenir, Oscar tarafından radarın 5 dakikalık ritmine uyarlanır ve 90 dakikaya kadar ileriye hesaplanır. Contains modified EUMETSAT Meteosat data."
+          }
+        }
+      }
+    },
+    "Dienst" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dienst"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hizmet"
           }
         }
       }
@@ -7405,8 +7490,49 @@
         }
       }
     },
+    "Entfernen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entfernen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaldır"
+          }
+        }
+      }
+    },
     "Environment Canada" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Environment Canada"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Environment Canada"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Environment Canada"
+          }
+        }
+      }
     },
     "Erbsensuppe für eine ganze Regenwoche." : {
       "localizations" : {
@@ -8185,6 +8311,50 @@
         }
       }
     },
+    "Fisch" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fisch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fish"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Balık"
+          }
+        }
+      }
+    },
+    "Fische gefressen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fische gefressen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fish eaten"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yenen balık"
+          }
+        }
+      }
+    },
     "Fläche" : {
       "localizations" : {
         "de" : {
@@ -8744,6 +8914,28 @@
         }
       }
     },
+    "gelangweilt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gelangweilt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bored"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sıkılmış"
+          }
+        }
+      }
+    },
     "GEM - Canadian Weather Service" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -9035,6 +9227,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kaydırılan mesafe"
+          }
+        }
+      }
+    },
+    "Gesperrt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesperrt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locked"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kilitli"
+          }
+        }
+      }
+    },
+    "Gestreichelt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gestreichelt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pets"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sevilme"
           }
         }
       }
@@ -9393,28 +9629,6 @@
         }
       }
     },
-    "Größere Zweige und kleine Bäume bewegen sich." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Größere Zweige und kleine Bäume bewegen sich."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Larger branches and small trees move."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
-          }
-        }
-      }
-    },
     "Große Bäume bewegen sich, Zweige können brechen." : {
       "localizations" : {
         "de" : {
@@ -9433,6 +9647,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Büyük ağaçlar hareket eder, dallar kırılabilir."
+          }
+        }
+      }
+    },
+    "Größere Zweige und kleine Bäume bewegen sich." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Größere Zweige und kleine Bäume bewegen sich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Larger branches and small trees move."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daha büyük dallar ve küçük ağaçlar hareket eder."
           }
         }
       }
@@ -10114,6 +10350,28 @@
     },
     "Hour" : {
 
+    },
+    "hungrig" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hungrig"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hungry"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "aç"
+          }
+        }
+      }
     },
     "Ich bin Philipp und entwickle Oscar allein. Ich zahle den Apple-Entwickleraccount und den Server, der die Kartenebenen, Wetterwarnungen und Mitteilungen liefert. Ob Oscar weiterläuft, hängt von euch ab." : {
       "extractionState" : "stale",
@@ -10968,6 +11226,28 @@
         }
       }
     },
+    "Katze" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Katze"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cat"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kedi"
+          }
+        }
+      }
+    },
     "Käufe wiederherstellen" : {
       "localizations" : {
         "de" : {
@@ -11586,6 +11866,28 @@
         }
       }
     },
+    "Klimaarchiv" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klimaarchiv"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Climate archive"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İklim arşivi"
+          }
+        }
+      }
+    },
     "Klimakatastrophe" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11682,6 +11984,28 @@
         }
       }
     },
+    "Kratzbaum" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kratzbaum"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scratching post"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tırmalama direği"
+          }
+        }
+      }
+    },
     "kühler als normal" : {
       "localizations" : {
         "de" : {
@@ -11739,6 +12063,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kısa vadeli tahmin"
+          }
+        }
+      }
+    },
+    "Längste Serie" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Längste Serie"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Longest streak"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En uzun seri"
           }
         }
       }
@@ -13556,6 +13902,28 @@
     "mm/h" : {
       "shouldTranslate" : false
     },
+    "Möbel" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Möbel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Furniture"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mobilya"
+          }
+        }
+      }
+    },
     "Moderate" : {
       "localizations" : {
         "de" : {
@@ -13670,6 +14038,28 @@
         }
       },
       "shouldTranslate" : false
+    },
+    "müde" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "müde"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sleepy"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uykulu"
+          }
+        }
+      }
     },
     "N_compass" : {
       "extractionState" : "manual",
@@ -13850,6 +14240,28 @@
         }
       }
     },
+    "Napf" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napf"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food bowl"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mama kabı"
+          }
+        }
+      }
+    },
     "Nationale Wetterdienste" : {
       "localizations" : {
         "de" : {
@@ -14002,6 +14414,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Şimdi değil"
+          }
+        }
+      }
+    },
+    "Nickerchen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nickerchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naps"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şekerleme"
           }
         }
       }
@@ -14869,7 +15303,48 @@
       }
     },
     "Öffnungen" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açılış"
+          }
+        }
+      }
+    },
+    "Ohne Aufschlüsselung" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne Aufschlüsselung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not broken down"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayrıntısız"
+          }
+        }
+      }
     },
     "OK" : {
       "localizations" : {
@@ -14982,7 +15457,6 @@
       }
     },
     "Open-Meteo" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -15023,6 +15497,7 @@
       }
     },
     "Open-Meteo Klimaarchiv" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -15045,6 +15520,7 @@
       }
     },
     "Open-Meteo Luftqualität" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -15067,6 +15543,7 @@
       }
     },
     "Open-Meteo Ortssuche" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -15089,6 +15566,7 @@
       }
     },
     "Open-Meteo Vorhersage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -15465,6 +15943,28 @@
         }
       }
     },
+    "Ortssuche" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ortssuche"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Place search"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yer arama"
+          }
+        }
+      }
+    },
     "Ortswerte" : {
       "localizations" : {
         "de" : {
@@ -15669,7 +16169,26 @@
       }
     },
     "Oscar Server" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar Server"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar Server"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar Server"
+          }
+        }
+      }
     },
     "Oscar sticker" : {
       "localizations" : {
@@ -18745,7 +19264,6 @@
       }
     },
     "Sonstiges" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -19412,6 +19930,28 @@
         }
       }
     },
+    "Streicheln" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Streicheln"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pet"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sev"
+          }
+        }
+      }
+    },
     "Stufe %@" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -19458,7 +19998,26 @@
       }
     },
     "Stunde" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stunde"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hour"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saat"
+          }
+        }
+      }
     },
     "Stunde für Stunde, bis zu 14 Tage im Voraus – mit den besten Wettermodellen für deinen Ort." : {
       "extractionState" : "stale",
@@ -20465,6 +21024,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bir konum eklemek için haritaya dokunun."
+          }
+        }
+      }
+    },
+    "Tippe auf die Katze, um sie zu füttern oder mit ihr zu spielen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf die Katze, um sie zu füttern oder mit ihr zu spielen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the cat to feed it or play with it."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beslemek veya onunla oynamak için kediye dokunun."
           }
         }
       }
@@ -21880,6 +22461,28 @@
         }
       }
     },
+    "Warnungen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warnungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alerts"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uyarılar"
+          }
+        }
+      }
+    },
     "Warnungen geöffnet" : {
       "localizations" : {
         "de" : {
@@ -22255,6 +22858,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Küresel model. 36 saate kadar saatlik, ardından 3,5 güne kadar 4 saatlik adımlarla. Her 6 saatte bir yeni çalıştırma."
+          }
+        }
+      }
+    },
+    "Weniger" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weniger"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Less"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Az"
           }
         }
       }
@@ -22908,7 +23533,26 @@
       }
     },
     "Wochentag" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wochentag"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weekday"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gün"
+          }
+        }
+      }
     },
     "Wolken" : {
       "extractionState" : "manual",
@@ -23269,6 +23913,28 @@
         }
       }
     },
+    "zufrieden" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zufrieden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "content"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "memnun"
+          }
+        }
+      }
+    },
     "Zugbahnen kräftiger Schauer" : {
       "localizations" : {
         "de" : {
@@ -23421,6 +24087,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tahminimi göster"
+          }
+        }
+      }
+    },
+    "Zurück" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurück"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geri"
           }
         }
       }
