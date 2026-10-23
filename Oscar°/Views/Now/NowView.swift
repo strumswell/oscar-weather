@@ -21,6 +21,7 @@ struct NowView: View {
     @Environment(NowPresentationCoordinator.self) private var presentation
     @Environment(\.scenePhase) private var scenePhase
     @State private var tapCount = 0
+    private let onboarding = OnboardingCoordinator.shared
     @State private var atmosphereDebug = AtmosphereDebugState()
     @State private var snapshotCache = AtmosphereSnapshotCache()
     @State private var manualRefreshInFlight = false
@@ -58,7 +59,7 @@ struct NowView: View {
         let cardFill = AtmosphereSampler.cardFill(snapshot: atmosphere)
 
         ZStack {
-            WeatherSimulationView(isOffTab: presentation.selectedTab != .forecast)
+            WeatherSimulationView(isOffTab: presentation.selectedTab != .forecast || onboarding.frosted)
                 .ignoresSafeArea()
             if weather.hasContent {
                 Group {

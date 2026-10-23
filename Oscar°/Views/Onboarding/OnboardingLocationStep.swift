@@ -14,15 +14,16 @@ struct OnboardingLocationStep: View {
 
     var body: some View {
         OnboardingQuestionStep(
-            icon: OnboardingStepIcon(systemImage: "location.fill", tint: .blue),
-            title: "Darf Oscar deinen Standort nutzen?",
-            copy: "Dann siehst du immer das Wetter da, wo du gerade bist, und Oscar kann dich warnen, bevor es bei dir regnet.",
+            symbol: "location.fill",
+            tint: .blue,
+            title: "Wo bist du gerade?",
+            copy: "Dann zeigt Oscar das Wetter genau hier und sagt Bescheid, bevor es regnet.",
             primaryTitle: "Standort freigeben",
             primaryAction: requestPermission,
             secondaryTitle: "Ort selbst suchen",
             secondaryAction: { onResolved(false) }
         ) {
-            Text("Dein Standort wird auf etwa 100 Meter gerundet und nur fürs Wetter genutzt.")
+            Text("Auf etwa 100 Meter gerundet. Nur fürs Wetter.")
                 .font(.footnote)
                 .foregroundStyle(.tertiary)
         }
@@ -40,16 +41,14 @@ struct OnboardingLocationStep: View {
     }
 
     private func requestPermission() {
-        requested = true
-        locationService.requestAuthorization()
+        switch locationService.authStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            onResolved(true)
+        case .denied, .restricted:
+            onResolved(false)
+        default:
+            requested = true
+            locationService.requestAuthorization()
+        }
     }
-}
-
-#Preview {
-    ZStack {
-        OnboardingSceneView(scene: .night)
-        OnboardingStage()
-        OnboardingLocationStep { _ in }
-    }
-    .environment(Weather.mock)
 }

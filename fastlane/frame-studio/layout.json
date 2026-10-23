@@ -245,6 +245,9 @@
     "32_onboarding_notifications": {
       "hidden": true
     },
+    "32b_onboarding_crash_reports": {
+      "hidden": true
+    },
     "33_onboarding_finale": {
       "hidden": true
     },

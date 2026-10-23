@@ -57,7 +57,7 @@ final class ScreenshotTests: XCTestCase {
         waitForNowContent(app)
         let entry = app.descendants(matching: .any)["now.settings"].firstMatch
         for _ in 0..<14 {
-            app.swipeUp(velocity: .fast)
+            swipeUp(app)
             usleep(350_000)
         }
         XCTAssertTrue(entry.exists, "Settings entry never reached the bottom of the scroll")
@@ -131,6 +131,10 @@ final class ScreenshotTests: XCTestCase {
             "-cloudLayerActive", "YES",
         ] : [])
         waitForNowContent(app)
+        if isPad {
+            sleep(4)
+            return snapshot("02_forecast", timeWaitingForIdle: 0)
+        }
         let hourly = app.descendants(matching: .any)["now.hourly"].firstMatch
         scrollTo(hourly, in: app)
         let targetY: CGFloat = 150
@@ -163,7 +167,7 @@ final class ScreenshotTests: XCTestCase {
             "-oscarRadarLayer", "NO",
             "-activeTileLayer", "icon_temp",
             "-showIsobars", "YES",
-            "-mapInitialZoom", "6",
+            "-mapInitialZoom", isPad ? "6.4" : "6",
         ])
         _ = app.wait(for: .runningForeground, timeout: 30)
         sleep(7)
@@ -202,9 +206,16 @@ final class ScreenshotTests: XCTestCase {
         let daily = app.descendants(matching: .any)["now.daily"].firstMatch
         scrollTo(daily, in: app)
         tapVisible(app.buttons["now.daily"].firstMatch, in: app)
-        let ensemble = app.buttons["hourly.ensemble"].firstMatch
-        _ = ensemble.waitForExistence(timeout: 10)
-        ensemble.tap()
+        if isPad {
+            XCTAssertTrue(
+                app.descendants(matching: .any)["ensemble.detail"].waitForExistence(timeout: 10),
+                "Ensemble sheet never opened"
+            )
+        } else {
+            let ensemble = app.buttons["hourly.ensemble"].firstMatch
+            _ = ensemble.waitForExistence(timeout: 10)
+            ensemble.tap()
+        }
         sleep(5)
         snapshot("05_ensemble", timeWaitingForIdle: 0)
     }
@@ -245,7 +256,6 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func test08NowClear() throws {
-        try skipOnPad()
         let app = launch(scene: "nowClear")
         waitForNowContent(app)
         sleep(4)
@@ -266,12 +276,19 @@ final class ScreenshotTests: XCTestCase {
     func test20HourlyDetail() {
         let app = launch(scene: "hourlyDetail")
         waitForNowContent(app)
-        let header = app.descendants(matching: .any)["now.hourly"].firstMatch
-        scrollTo(header, in: app)
-        let x = isPad ? header.frame.midX : app.windows.firstMatch.frame.midX
-        app.coordinate(withNormalizedOffset: .zero)
-            .withOffset(CGVector(dx: x, dy: header.frame.maxY + 80))
-            .tap()
+        if isPad {
+            let hourly = app.buttons.matching(NSPredicate(
+                format: "label BEGINSWITH 'Stündlich' OR label BEGINSWITH 'Hourly'"
+            )).firstMatch
+            XCTAssertTrue(hourly.waitForExistence(timeout: 10), "Day chart never opened")
+            tapVisible(hourly, in: app)
+        } else {
+            let header = app.descendants(matching: .any)["now.hourly"].firstMatch
+            scrollTo(header, in: app)
+            app.coordinate(withNormalizedOffset: .zero)
+                .withOffset(CGVector(dx: app.windows.firstMatch.frame.midX, dy: header.frame.maxY + 80))
+                .tap()
+        }
         XCTAssertTrue(
             app.descendants(matching: .any)["hourly.detail"].waitForExistence(timeout: 10),
             "Hourly detail sheet never opened"
@@ -321,7 +338,6 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func test23AlertDetail() throws {
-        try skipOnPad()
         let app = launch(scene: "nowRain")
         waitForNowContent(app)
         let badge = app.descendants(matching: .any)["now.alert"].firstMatch
@@ -332,7 +348,6 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func test24Settings() throws {
-        try skipOnPad()
         let app = launch(scene: "customization")
         openSettings(app)
         sleep(2)
@@ -340,7 +355,6 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func test25SettingsNotifications() throws {
-        try skipOnPad()
         let app = launch(scene: "settingsNotifications")
         openSettings(app)
         let alerts = app.descendants(matching: .any)["settings.alerts"].firstMatch
@@ -354,7 +368,6 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func test26SettingsForecast() throws {
-        try skipOnPad()
         let app = launch(scene: "settingsForecast")
         openSettings(app)
         let entry = app.descendants(matching: .any)["settings.forecast"].firstMatch
@@ -369,7 +382,6 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func test27MemberCardDock() throws {
-        try skipOnPad()
         let app = launch(scene: "customization")
         let card = openSettings(app)
         tapVisible(card, in: app)
@@ -378,17 +390,19 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func test28Onboarding() throws {
-        try skipOnPad()
         let steps = [
-            ("welcome", "28_onboarding_welcome"),
-            ("features", "29_onboarding_features"),
-            ("location", "30_onboarding_location"),
-            ("notifications", "32_onboarding_notifications"),
-            ("crashReports", "32b_onboarding_crash_reports"),
-            ("finale", "33_onboarding_finale"),
+            (["welcome"], "28_onboarding_welcome"),
+            (["tour", "-onboardingTourPage", "forecast"], "29a_onboarding_tour_forecast"),
+            (["tour", "-onboardingTourPage", "map"], "29b_onboarding_tour_map"),
+            (["tour", "-onboardingTourPage", "ensemble"], "29c_onboarding_tour_ensemble"),
+            (["tour", "-onboardingTourPage", "more"], "29d_onboarding_tour_more"),
+            (["location"], "30_onboarding_location"),
+            (["notifications"], "32_onboarding_notifications"),
+            (["crashReports"], "32b_onboarding_crash_reports"),
+            (["finale"], "33_onboarding_finale"),
         ]
-        for (step, name) in steps {
-            let app = launch(scene: "onboarding", extraArguments: ["-onboardingStep", step])
+        for (arguments, name) in steps {
+            let app = launch(scene: "onboarding", extraArguments: ["-onboardingStep"] + arguments)
             _ = app.wait(for: .runningForeground, timeout: 30)
             sleep(5)
             snapshot(name, timeWaitingForIdle: 0)
@@ -410,10 +424,13 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func test34Places() throws {
-        try skipOnPad()
         let app = launch(scene: "places")
         waitForNowContent(app)
-        app.tabBars.buttons.element(boundBy: 0).tap()
+        if isPad {
+            app.buttons.matching(NSPredicate(format: "label IN {'Orte', 'Locations'}")).firstMatch.tap()
+        } else {
+            app.tabBars.buttons.element(boundBy: 0).tap()
+        }
         XCTAssertTrue(
             app.staticTexts["Essen"].waitForExistence(timeout: 30), "Orte list stayed empty"
         )

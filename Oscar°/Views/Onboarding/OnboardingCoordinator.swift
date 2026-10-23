@@ -17,6 +17,8 @@ final class OnboardingCoordinator {
     }
 
     var isPresented: Bool
+    var frosted = false
+    var replaying = false
 
     private init() {
         isPresented = !Self.hasCompleted || Self.completionIsStale
@@ -32,9 +34,12 @@ final class OnboardingCoordinator {
     func complete() {
         UserDefaults.standard.set(true, forKey: Self.hasCompletedDefaultsKey)
         isPresented = false
+        frosted = false
+        replaying = false
     }
 
     func replay() {
+        replaying = true
         isPresented = true
     }
 }

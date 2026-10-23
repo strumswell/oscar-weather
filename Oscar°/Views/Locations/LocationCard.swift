@@ -213,14 +213,14 @@ struct LocationCardButtonStyle: ButtonStyle {
             detail: "Gewitter",
             mark: .locationGlyph,
             temperature: 17.2,
-            snapshot: .onboardingStorm
+            snapshot: .fallback
         )
         LocationCard(
             title: "Oma",
             detail: "Hessen",
             mark: .emoji("👵"),
             temperature: nil,
-            snapshot: .onboardingNight
+            snapshot: .fallback
         )
     }
     .padding()

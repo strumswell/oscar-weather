@@ -13,7 +13,7 @@ struct OnboardingButtonStack: View {
     var secondaryAction: (() -> Void)? = nil
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 6) {
             Button(action: primaryAction) {
                 Text(primaryTitle)
                     .font(.headline)
@@ -22,23 +22,20 @@ struct OnboardingButtonStack: View {
             }
             .buttonStyle(.glassProminent)
             .disabled(primaryDisabled)
+            .catDash()
 
             if let secondaryTitle, let secondaryAction {
                 Button(action: secondaryAction) {
                     Text(secondaryTitle)
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
                         .padding(.vertical, 6)
-                        .padding(.horizontal, 16)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .frame(minHeight: 44)
             }
         }
-        .padding(.horizontal, OnboardingStage.edgePadding)
-        .frame(maxWidth: OnboardingStage.contentMaxWidth)
-        .padding(.top, 12)
-        .padding(.bottom, 6)
     }
 }

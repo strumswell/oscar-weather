@@ -12,12 +12,10 @@ struct OnboardingMapStage: View {
     @State private var radar = OscarRadarState()
     @State private var model = ModelGridLayerState()
     @State private var selection = 0
-    @State private var countingSelection: Int?
 
     private static let leipzig = CLLocationCoordinate2D(latitude: 51.3397, longitude: 12.3731)
     private static let layers: [WeatherTileLayer?] = [nil, .iconTemp, .iconWind, .iconPressure]
     private static let titles: [LocalizedStringKey] = ["Regenradar", "Temperatur", "Wind", "Luftdruck"]
-    private static let secondsPerLayer = 10.0
 
     private var tileLayer: WeatherTileLayer? { Self.layers[selection] }
 
@@ -43,7 +41,8 @@ struct OnboardingMapStage: View {
             oscarRadarState: radar,
             modelGridState: model,
             cloudLayerState: nil,
-            layerOverride: MapLayerOverride(radar: tileLayer == nil, tileLayer: tileLayer)
+            layerOverride: MapLayerOverride(radar: tileLayer == nil, tileLayer: tileLayer),
+            startZoom: 5.5
         )
         .allowsHitTesting(false)
         .overlay(alignment: .bottomLeading) {
@@ -52,12 +51,7 @@ struct OnboardingMapStage: View {
         }
         .clipShape(.rect(cornerRadius: 24))
         .overlay(alignment: .top) {
-            LayerTabs(
-                titles: Self.titles,
-                current: selection,
-                isCounting: countingSelection == selection,
-                duration: Self.secondsPerLayer
-            ) { index in
+            LayerTabs(titles: Self.titles, current: selection) { index in
                 selection = index
             }
             .padding(10)
@@ -80,24 +74,12 @@ struct OnboardingMapStage: View {
     }
 
     private func show(_ layer: WeatherTileLayer?) async {
-        countingSelection = nil
         if let layer {
             radar.pause()
             await model.loadLayer(layer)
-            guard !Task.isCancelled else { return }
-            model.play()
         } else {
             model.pause()
-            while !radar.hasAnyLoadedFrame {
-                try? await Task.sleep(for: .milliseconds(100))
-                if Task.isCancelled { return }
-            }
-            radar.play()
         }
-        countingSelection = selection
-        try? await Task.sleep(for: .seconds(Self.secondsPerLayer))
-        guard !Task.isCancelled else { return }
-        selection = (selection + 1) % Self.layers.count
     }
 
     nonisolated static func buildGrids() async -> [[UInt8]] {
@@ -158,8 +140,6 @@ struct OnboardingMapStage: View {
 private struct LayerTabs: View {
     let titles: [LocalizedStringKey]
     let current: Int
-    let isCounting: Bool
-    let duration: Double
     let onSelect: (Int) -> Void
 
     var body: some View {
@@ -182,14 +162,6 @@ private struct LayerTabs: View {
                                 Capsule().fill(.white)
                             }
                         }
-                        .overlay(alignment: .bottom) {
-                            if isCurrent && isCounting {
-                                Countdown(duration: duration)
-                                    .id(current)
-                                    .padding(.horizontal, 14)
-                                    .padding(.bottom, 3)
-                            }
-                        }
                         .contentShape(.capsule)
                 }
                 .buttonStyle(.plain)
@@ -198,27 +170,5 @@ private struct LayerTabs: View {
         .padding(3)
         .glassEffect(in: .capsule)
         .animation(.snappy, value: current)
-    }
-}
-
-private struct Countdown: View {
-    let duration: Double
-
-    @State private var filled = false
-
-    var body: some View {
-        Capsule()
-            .fill(.black.opacity(0.12))
-            .frame(height: 2)
-            .overlay(alignment: .leading) {
-                Capsule()
-                    .fill(.black.opacity(0.45))
-                    .scaleEffect(x: filled ? 1 : 0, anchor: .leading)
-            }
-            .onAppear {
-                withAnimation(.linear(duration: duration)) {
-                    filled = true
-                }
-            }
     }
 }

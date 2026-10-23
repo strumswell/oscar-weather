@@ -55,6 +55,7 @@ struct WeatherMapView: UIViewRepresentable {
     var onCellTapped: ((StormCellInfo) -> Void)? = nil
     var onWebcamTapped: ((Components.Schemas.Webcam) -> Void)? = nil
     var layerOverride: MapLayerOverride? = nil
+    var startZoom: Double? = nil
 
     static let radarLayerID = "oscar-radar-layer"
     static let modelLayerID = "oscar-model-image"
@@ -112,7 +113,7 @@ struct WeatherMapView: UIViewRepresentable {
         weatherMapLogger.info("map view created")
         mapView.delegate = context.coordinator
         mapView.setCenter(Self.initialCenterOverride ?? coordinates,
-                          zoomLevel: Self.initialZoom, animated: false)
+                          zoomLevel: startZoom ?? Self.initialZoom, animated: false)
         mapView.allowsTilting = false
         mapView.showsUserLocation = Self.locationAuthorized
         mapView.logoView.isHidden = true

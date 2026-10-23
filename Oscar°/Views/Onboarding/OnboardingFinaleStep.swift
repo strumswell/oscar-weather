@@ -23,55 +23,35 @@ struct OnboardingFinaleStep: View {
 
             Text("Alles bereit.")
                 .font(.title3)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white.opacity(0.8))
                 .padding(.top, 12)
                 .opacity(showsSubtitle ? 1 : 0)
 
             Spacer()
 
             OnboardingButtonStack(primaryTitle: "Zum Wetter", primaryAction: onFinish)
+                .padding(.horizontal, OnboardingMetrics.edgePadding)
+                .frame(maxWidth: OnboardingMetrics.contentMaxWidth)
+                .padding(.bottom, 6)
                 .opacity(showsSubtitle ? 1 : 0)
         }
         .sensoryFeedback(.success, trigger: appeared)
         .onAppear {
-            withAnimation(.spring(duration: 0.9, bounce: 0.3).delay(0.25)) {
+            withAnimation(.spring(duration: 0.9, bounce: 0.3).delay(0.35)) {
                 appeared = true
             }
-            withAnimation(.easeOut(duration: 0.6).delay(0.7)) {
+            withAnimation(.easeOut(duration: 0.6).delay(0.8)) {
                 showsSubtitle = true
             }
         }
     }
 }
 
-struct OnboardingLockup: View {
-    var onSky = false
-
-    var body: some View {
-        VStack(spacing: 24) {
-            Image("AppIconOriginalPreview")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 108, height: 108)
-                .clipShape(.rect(cornerRadius: 24))
-                .shadow(color: .black.opacity(0.25), radius: 18, y: 10)
-
-            VStack(spacing: 2) {
-                Text("Willkommen bei")
-                    .font(.title3.weight(.medium))
-                    .foregroundStyle(onSky ? AnyShapeStyle(.white.opacity(0.92)) : AnyShapeStyle(.secondary))
-                Text(verbatim: "Oscar°")
-                    .font(.system(size: 44, weight: .bold, design: .rounded))
-                    .foregroundStyle(onSky ? AnyShapeStyle(.white) : AnyShapeStyle(.primary))
-            }
-            .shadow(color: .black.opacity(onSky ? 0.18 : 0), radius: 10, y: 4)
-        }
-        .accessibilityElement(children: .combine)
-    }
-}
-
 #Preview {
-    OnboardingFinaleStep {}
-        .background(.ultraThinMaterial)
-        .preferredColorScheme(.dark)
+    ZStack {
+        Color.blue.ignoresSafeArea()
+        Rectangle().fill(.ultraThinMaterial).ignoresSafeArea()
+        OnboardingFinaleStep {}
+    }
+    .preferredColorScheme(.dark)
 }

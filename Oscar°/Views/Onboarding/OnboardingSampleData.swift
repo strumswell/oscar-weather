@@ -5,8 +5,6 @@
 
 import Foundation
 
-/// Deterministic fake data behind the feature pages: real components,
-/// staged values that never change between launches.
 @MainActor
 enum OnboardingSampleData {
     static let hourlyItems: [HourlyForecastItem] = [
@@ -67,8 +65,6 @@ enum OnboardingSampleData {
         EnvironmentMetric.forAQI(id: "no2", label: "NO", subscript_: "2", value: 9),
     ].compactMap { $0 }
 
-    /// A warming-stripes series with the familiar cool-then-hot arc, pinned so
-    /// the stage never changes. Jitter is a fixed hash of the year.
     static let climateStripes: [ClimateStripe] = (1940...2026).map { year in
         let progress = Double(year - 1940) / 86.0
         let trend = -0.55 + pow(progress, 2.1) * 2.3
@@ -95,8 +91,6 @@ enum OnboardingSampleData {
 
     static let dailyTemperatureBounds = (min: 10.0, max: 30.0)
 
-    /// Sixteen days of a 30-run ensemble: close together at first, fanning out
-    /// over the second week, rain today. Same shape as the screenshot fixture.
     static let ensembleDays: [EnsembleDay] = {
         let highs: [Double] = [16, 19, 22, 24, 26, 25, 21, 24, 27, 25, 23, 22, 24, 26, 27, 25]
         let lows: [Double] = [13, 12, 13, 14, 15, 16, 14, 13, 15, 16, 14, 13, 14, 15, 16, 15]
@@ -106,7 +100,6 @@ enum OnboardingSampleData {
         let today = Calendar.current.startOfDay(for: .now)
 
         return highs.indices.map { day in
-            /// Each run wobbles around the day's value; wider the further out.
             func spread(_ base: Double, _ width: Double) -> [Double] {
                 runs.map { run in base + sin(Double(run) * 1.7 + Double(day) * 0.9) * width }
             }
@@ -133,13 +126,11 @@ enum OnboardingSampleData {
         }
     }()
 
-    /// Now, on a ten-minute mark, so staged times read like real ones.
     private static let stagedNow: Date = {
         let tenMinutes = 10.0 * 60
         return Date(timeIntervalSinceReferenceDate: (Date.now.timeIntervalSinceReferenceDate / tenMinutes).rounded(.down) * tenMinutes)
     }()
 
-    /// A shower passing through over the next two hours.
     static let showerPoints: [PrecipChartPoint] = (0...24).map { step in
         let progress = Double(step) / 24
         return PrecipChartPoint(
@@ -148,7 +139,6 @@ enum OnboardingSampleData {
         )
     }
 
-    /// Three stations around a mild day: cool night, warm afternoon.
     static let stations: [Components.Schemas.NearbyStation] = [
         ("Leipzig/Halle", 14.2, 302.0, 0.0),
         ("Leipzig-Holzhausen", 6.1, 118.0, -1.1),

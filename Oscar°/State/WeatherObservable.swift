@@ -272,7 +272,7 @@ extension Weather {
         let mockWeather = Weather()
         
         let hourlyTimeInterval: TimeInterval = 3600
-        let hourlyStartTime = 1719266400.0
+        let hourlyStartTime = Calendar.current.startOfDay(for: .now).timeIntervalSince1970
         let hourlyTimes = (0..<36).map { hourlyStartTime + Double($0) * hourlyTimeInterval }
         
         mockWeather.forecast = Operations.getForecast.Output.Ok.Body.jsonPayload(
@@ -284,9 +284,9 @@ extension Weather {
             timezone_abbreviation: "CEST",
             hourly: Operations.getForecast.Output.Ok.Body.jsonPayload.hourlyPayload(
                 time: hourlyTimes,
-                temperature_2m: (0..<36).map { 18.0 + Double($0 % 24) / 2 },
+                temperature_2m: (0..<36).map { 22 - 6 * cos(Double($0 - 2) / 24 * 2 * .pi) },
                 relativehumidity_2m: (0..<36).map { 70.0 + Double($0 % 12) },
-                apparent_temperature: (0..<36).map { 17.0 + Double($0 % 24) / 2 },
+                apparent_temperature: (0..<36).map { 21 - 6 * cos(Double($0 - 2) / 24 * 2 * .pi) },
                 pressure_msl: (0..<36).map { _ in 1019.0 + Double.random(in: -1...1) },
                 cloudcover: (0..<36).map { _ in Double.random(in: 0...100) },
                 windspeed_10m: (0..<36).map { _ in Double.random(in: 5...15) },
@@ -296,14 +296,14 @@ extension Weather {
                 is_day: (0..<36).map { $0 % 24 < 16 ? 1.0 : 0.0 }
             ),
             daily: Components.Schemas.DailyResponse(
-                time: (0..<5).map { hourlyStartTime + Double($0 * 86400) },
-                temperature_2m_max: [28.0, 29.5, 27.8, 26.3, 30.1],
-                temperature_2m_min: [14.8, 16.2, 15.5, 13.9, 17.3],
-                precipitation_sum: [0.0, 2.5, 0.8, 0.0, 5.2],
-                precipitation_probability_max: [0, 30, 20, 10, 60],
-                weathercode: [2.0, 3.0, 1.0, 0.0, 3.0],
-                sunrise: (0..<5).map { hourlyStartTime + 21600 + Double($0 * 86400) },
-                sunset: (0..<5).map { hourlyStartTime + 64800 + Double($0 * 86400) }
+                time: (0..<12).map { hourlyStartTime + Double($0 * 86400) },
+                temperature_2m_max: [28.0, 29.5, 27.8, 26.3, 30.1, 24.6, 22.9, 25.4, 27.2, 28.8, 26.1, 23.7],
+                temperature_2m_min: [14.8, 16.2, 15.5, 13.9, 17.3, 15.1, 12.8, 13.6, 15.9, 16.4, 14.2, 12.5],
+                precipitation_sum: [0.0, 2.5, 0.8, 0.0, 5.2, 7.4, 1.1, 0.0, 0.0, 0.3, 3.9, 6.0],
+                precipitation_probability_max: [0, 30, 20, 10, 60, 80, 35, 5, 0, 15, 55, 70],
+                weathercode: [2.0, 3.0, 1.0, 0.0, 3.0, 61.0, 2.0, 0.0, 1.0, 2.0, 61.0, 63.0],
+                sunrise: (0..<12).map { hourlyStartTime + 21600 + Double($0 * 86400) },
+                sunset: (0..<12).map { hourlyStartTime + 64800 + Double($0 * 86400) }
             ),
             current: Components.Schemas.CurrentWeather(
                 cloudcover: 45.0,

@@ -22,43 +22,18 @@ struct OnboardingManualLocationStep: View {
     }
 
     var body: some View {
-        OnboardingStageLayout {
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(spacing: 16) {
-                        VStack(spacing: 8) {
-                            Text(title)
-                                .font(.onboardingTitle)
-                                .contentTransition(.opacity)
-                            Text(subtitle)
-                                .font(.callout)
-                                .foregroundStyle(.secondary)
-                                .contentTransition(.opacity)
-                        }
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-                        .onboardingEntrance(appeared, delay: 0.1)
-
-                        searchField
-                            .onboardingEntrance(appeared, delay: 0.2)
-
-                        resultsList
-                    }
-                    .padding(.horizontal, OnboardingStage.edgePadding)
-                    .padding(.top, OnboardingStage.canvasInset)
-                }
-                .scrollBounceBehavior(.basedOnSize)
-                .scrollIndicators(.hidden)
-
-                if !searchFocused {
-                    OnboardingButtonStack(
-                        primaryTitle: "Weiter",
-                        primaryDisabled: selectedCity == nil,
-                        primaryAction: onContinue
-                    )
-                    .onboardingEntrance(appeared, delay: 0.3)
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-                }
+        OnboardingPage {
+            EmptyView()
+        } content: {
+            page
+        } buttons: {
+            if !searchFocused {
+                OnboardingButtonStack(
+                    primaryTitle: "Weiter",
+                    primaryDisabled: selectedCity == nil,
+                    primaryAction: onContinue
+                )
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
             }
         }
         .animation(.smooth(duration: 0.3), value: searchFocused)
@@ -66,23 +41,51 @@ struct OnboardingManualLocationStep: View {
         .animation(.smooth(duration: 0.4), value: selectedCity?.objectID)
         .sensoryFeedback(.selection, trigger: selectedCity?.objectID)
         .onAppear { appeared = true }
+        .task {
+            guard selectedCity == nil else { return }
+            try? await Task.sleep(for: .milliseconds(450))
+            searchFocused = true
+        }
         .task(id: searchText) {
             await search()
         }
+    }
+
+    private var page: some View {
+        VStack(spacing: 16) {
+            VStack(spacing: 6) {
+                Text(title)
+                    .font(.onboardingTitle)
+                    .contentTransition(.opacity)
+                Text(subtitle)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .contentTransition(.opacity)
+            }
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .onboardingEntrance(appeared, delay: 0.05)
+
+            searchField
+                .onboardingEntrance(appeared, delay: 0.15)
+
+            resultsList
+        }
+        .padding(.top, 40)
     }
 
     private var title: String {
         if let name = selectedCity?.label, !name.isEmpty {
             return name
         }
-        return String(localized: "Wähle deinen Ort")
+        return String(localized: "Welcher Ort?")
     }
 
     private var subtitle: String {
         if selectedCity != nil {
-            return String(localized: "Du kannst den Ort jederzeit wechseln oder weitere hinzufügen.")
+            return String(localized: "Später kannst du wechseln oder weitere dazunehmen.")
         }
-        return String(localized: "Such nach deinem Ort. Weitere kannst du später hinzufügen.")
+        return String(localized: "Mehr Orte kannst du später dazunehmen.")
     }
 
     private var searchField: some View {
@@ -133,8 +136,8 @@ struct OnboardingManualLocationStep: View {
                     .modifier(StaggeredRowAppearModifier(index: index))
                 }
             }
-            .background(Color(.secondarySystemBackground))
-            .clipShape(.rect(cornerRadius: 16))
+            .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 16))
+            .catDash()
             .transition(.opacity)
         }
     }
@@ -194,13 +197,4 @@ private struct StaggeredRowAppearModifier: ViewModifier {
                 }
             }
     }
-}
-
-#Preview {
-    ZStack {
-        OnboardingSceneView(scene: .night)
-        OnboardingStage()
-        OnboardingManualLocationStep {}
-    }
-    .environment(Weather.mock)
 }

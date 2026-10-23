@@ -89,6 +89,9 @@ final class ScreenshotFixtureServer: URLProtocol {
         if path.hasPrefix("/radar/series") {
             return json { url in ScreenshotFixtures.precipSeriesJSON(for: url) }
         }
+        if path.hasPrefix("/stations/nearby") {
+            return json { _ in ScreenshotFixtures.stationsJSON() }
+        }
         if path.hasPrefix("/webcams") {
             return json { _ in ["webcams": [Any]()] }
         }

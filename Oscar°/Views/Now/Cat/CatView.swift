@@ -652,7 +652,7 @@ private struct CatItemIcon: View {
     }
 }
 
-private struct PixelSprite: View {
+struct PixelSprite: View {
     let sheet: String
     let frames: Int
     let frame: Int

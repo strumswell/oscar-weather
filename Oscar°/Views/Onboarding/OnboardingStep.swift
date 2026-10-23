@@ -7,7 +7,7 @@ import Foundation
 
 enum OnboardingStep: String, Equatable {
     case welcome
-    case features
+    case tour
     case location
     case manualLocation
     case notifications
@@ -17,7 +17,8 @@ enum OnboardingStep: String, Equatable {
 
 extension OnboardingStep {
     @MainActor
-    static func afterFeatures(locationService: LocationService) -> OnboardingStep {
+    static func afterTour(locationService: LocationService) -> OnboardingStep {
+        guard !OnboardingCoordinator.shared.replaying else { return .location }
         switch locationService.authStatus {
         case .authorizedAlways, .authorizedWhenInUse:
             return afterLocationResolved(locationService: locationService)
@@ -33,6 +34,7 @@ extension OnboardingStep {
 
     @MainActor
     static func afterLocationResolved(locationService: LocationService) -> OnboardingStep {
+        guard !OnboardingCoordinator.shared.replaying else { return .notifications }
         let notifications = NotificationSettingsManager.shared
         if notifications.authorizationStatus == .notDetermined,
            !notifications.enabled,
@@ -42,7 +44,9 @@ extension OnboardingStep {
         return afterNotifications
     }
 
+    @MainActor
     static var afterNotifications: OnboardingStep {
-        CrashReporting.hasAnswered ? .finale : .crashReports
+        guard !OnboardingCoordinator.shared.replaying else { return .crashReports }
+        return CrashReporting.hasAnswered ? .finale : .crashReports
     }
 }

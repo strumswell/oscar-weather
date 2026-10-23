@@ -37,6 +37,11 @@ enum ScreenshotFixtures {
         return ScreenshotMode.scene == .hourlyDetail
     }
 
+    private static var approachingStory: Bool {
+        if let story = override("screenshotStory") { return story == "approaching" }
+        return ScreenshotMode.scene == .nowRain
+    }
+
     private static func byStory<T>(rain: T, sunny: T, showers: T) -> T {
         if sunnyStory { return sunny }
         if showersStory { return showers }
@@ -74,6 +79,7 @@ enum ScreenshotFixtures {
                 default: 0
                 }
             }
+            if approachingStory && dt <= 0 { return 0 }
             return switch dt {
             case ..<0: 4.2
             case 0: 8.6
@@ -103,6 +109,7 @@ enum ScreenshotFixtures {
                 default: 1
                 }
             }
+            if approachingStory && dt <= 0 { return 2 }
             return switch dt {
             case ..<2: 65
             case 2...3: 63
@@ -148,7 +155,7 @@ enum ScreenshotFixtures {
             },
             "cloudcover": dts.map { dt -> Double in
                 byStory(
-                    rain: min(100, max(15, 100 - max(Double(dt) - 5, 0) * 7)),
+                    rain: approachingStory && dt <= 0 ? 55 : min(100, max(15, 100 - max(Double(dt) - 5, 0) * 7)),
                     sunny: 22,
                     showers: (3...7).contains(dt) ? 85 : 45
                 )
@@ -252,13 +259,13 @@ enum ScreenshotFixtures {
                 "weathercode": "wmo code",
             ],
             "current": [
-                "cloudcover": byStory(rain: 100, sunny: 20, showers: 45),
+                "cloudcover": approachingStory ? 55 : byStory(rain: 100, sunny: 20, showers: 45),
                 "time": dayStart.timeIntervalSince1970 + Double(hourIndex) * 3600,
                 "temperature": temperatureNow + temperatureShift,
                 "windspeed": byStory(rain: 32, sunny: 11, showers: 15),
                 "wind_direction_10m": 245,
-                "weathercode": weathercodeNow ?? byStory(rain: 65, sunny: weathercode(0), showers: 2),
-                "precipitation": byStory(rain: 8.6, sunny: 0, showers: 0),
+                "weathercode": weathercodeNow ?? byStory(rain: weathercode(0), sunny: weathercode(0), showers: 2),
+                "precipitation": precipitation(0),
                 "is_day": isDayNow,
             ],
         ]
@@ -376,8 +383,10 @@ enum ScreenshotFixtures {
             : byStory(rain: 7.4, sunny: 0, showers: 0)
         let series = stride(from: -30, through: 105, by: 5).map { minutes -> [String: Any] in
             let t = Double(minutes)
-            let value = peak * exp(-pow((t - 10) / 48, 2))
-                + (peak > 0 ? 1.9 : 0) * exp(-pow((t - 90) / 22, 2))
+            let value = approachingStory
+                ? (minutes < 15 ? 0 : peak * exp(-pow((t - 60) / 30, 2)))
+                : peak * exp(-pow((t - 10) / 48, 2))
+                    + (peak > 0 ? 1.9 : 0) * exp(-pow((t - 90) / 22, 2))
             return [
                 "timestamp": formatter.string(from: now.addingTimeInterval(t * 60)),
                 "precipitation": (value * 10).rounded() / 10,
@@ -390,6 +399,57 @@ enum ScreenshotFixtures {
             "latitude": latitude,
             "longitude": longitude,
             "series": series,
+        ]
+    }
+
+    // MARK: - Stations (oscar-server /stations/nearby)
+
+    static func stationsJSON() -> [String: Any] {
+        let formatter = ISO8601DateFormatter()
+        let now = storyNow.addingTimeInterval(-10 * 60)
+        let temperatureNow = byStory(rain: 14.3, sunny: 27.0, showers: 21.4)
+        let amplitude = byStory(rain: 3.0, sunny: 9.0, showers: 6.0)
+        let code = byStory(rain: approachingStory ? 3 : 61, sunny: 0, showers: 2)
+        func curve(_ date: Date) -> Double {
+            let hour = Double(Calendar.current.component(.hour, from: date))
+            return amplitude * exp(-pow((hour - 15) / 4.5, 2))
+        }
+        let stations: [(id: String, name: String, lat: Double, lon: Double, km: Double, bearing: Double, offset: Double)] = [
+            ("10471", "Leipzig/Holzhausen", 51.3151, 12.4462, 5.8, 120, -0.4),
+            ("10469", "Leipzig/Halle", 51.4347, 12.2396, 14.0, 315, 0.3),
+            ("10466", "Bad Lauchstädt", 51.3907, 11.8760, 34.8, 280, -0.8),
+        ]
+        return [
+            "generated_at": formatter.string(from: storyNow),
+            "stations": stations.map { station -> [String: Any] in
+                func reading(_ date: Date) -> [String: Any] {
+                    let temperature = temperatureNow + station.offset + curve(date) - curve(now)
+                    return [
+                        "time": formatter.string(from: date),
+                        "temperature_c": (temperature * 10).rounded() / 10,
+                        "humidity_pct": byStory(rain: 88, sunny: 45, showers: 62),
+                        "wind_speed_ms": byStory(rain: 8.4, sunny: 3.1, showers: 4.2),
+                        "wind_direction_deg": 245,
+                        "pressure_hpa": byStory(rain: 1002, sunny: 1022, showers: 1013),
+                    ]
+                }
+                var current = reading(now)
+                current["weather_code"] = code
+                return [
+                    "id": station.id,
+                    "name": station.name,
+                    "source": "dwd",
+                    "latitude": station.lat,
+                    "longitude": station.lon,
+                    "distance_km": station.km,
+                    "bearing_deg": station.bearing,
+                    "last_report_at": formatter.string(from: now),
+                    "current": current,
+                    "history": stride(from: -24, through: 0, by: 1).map {
+                        reading(now.addingTimeInterval(Double($0) * 3600))
+                    },
+                ]
+            },
         ]
     }
 

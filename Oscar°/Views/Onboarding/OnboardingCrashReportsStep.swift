@@ -10,7 +10,8 @@ struct OnboardingCrashReportsStep: View {
 
     var body: some View {
         OnboardingQuestionStep(
-            icon: OnboardingStepIcon(systemImage: "wrench.and.screwdriver.fill", tint: .mint),
+            symbol: "checkmark",
+            tint: .green,
             title: "Darf ich Fehlerberichte bekommen?",
             copy: "Stürzt Oscar ab oder hakt, bekomme ich einen Bericht und kann den Fehler beheben. Gespeichert bei Sentry in der EU.",
             primaryTitle: "Ja, gerne",
@@ -27,13 +28,4 @@ struct OnboardingCrashReportsStep: View {
         CrashReporting.answer(enabled)
         onContinue()
     }
-}
-
-#Preview {
-    ZStack {
-        OnboardingSceneView(scene: .storm)
-        OnboardingStage()
-        OnboardingCrashReportsStep {}
-    }
-    .environment(Weather.mock)
 }

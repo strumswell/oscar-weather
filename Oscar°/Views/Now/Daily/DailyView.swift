@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DailyView: View {
   var expandsDays = false
+  var fadesInScroll = true
 
   @Environment(Weather.self) private var weather: Weather
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -77,10 +78,10 @@ struct DailyView: View {
 
     }
     .accessibilityIdentifier("now.daily")
-    .scrollTransition { [reduceMotion] content, phase in
+    .scrollTransition { [reduceMotion, fadesInScroll] content, phase in
       content
-        .opacity(phase.isIdentity ? 1 : 0.8)
-        .scaleEffect(reduceMotion || phase.isIdentity ? 1 : 0.99)
+        .opacity(phase.isIdentity || !fadesInScroll ? 1 : 0.8)
+        .scaleEffect(reduceMotion || phase.isIdentity || !fadesInScroll ? 1 : 0.99)
     }
   }
 }

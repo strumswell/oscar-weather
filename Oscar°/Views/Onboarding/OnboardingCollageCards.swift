@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Compact block of up to five staged days built from the real temperature-range bars.
+let stagedCardFill = AnyShapeStyle(Color(uiColor: .systemBackground).opacity(0.78))
+
 struct CollageDailyCard: View {
     var dayCount = 5
 
@@ -45,7 +46,6 @@ struct CollageDailyCard: View {
     }
 }
 
-/// Warming stripes with a small title, like the Klima section's ribbon.
 struct CollageClimateCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

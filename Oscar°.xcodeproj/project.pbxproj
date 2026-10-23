@@ -382,7 +382,6 @@
 		A37E86A46B949A97DFCD0AE4 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F51BD4DD369C06E0105C6DF9 /* StatsView.swift */; };
 		A4C74C682AF121BCB1BFBAAC /* AtmosphereSampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E1521A5B0316B2D24B6643 /* AtmosphereSampler.swift */; };
 		A4EEAFB9BDB5C695FFC3E53B /* EmojiKeyboardField.swift in Sources */ = {isa = PBXBuildFile; fileRef = C91571E402BB124C98E222CE /* EmojiKeyboardField.swift */; };
-		A50C1FF47879E1CBDE1EBAAD /* OnboardingCollageCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221C7BB6C8216B9BB371AFAA /* OnboardingCollageCards.swift */; };
 		A54D8BB63288B46EFF84BB14 /* HeadMetric.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2E3A5C6BA600CCB65F1F7D /* HeadMetric.swift */; };
 		A56299A17F03A6925C4697AC /* RadarCustomStyleLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1B02D185DE309AE3B759EA5 /* RadarCustomStyleLayer.swift */; };
 		A565658C0E813BDF745B9A53 /* SimulationPacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9F1273298E7A6D866068BEB /* SimulationPacing.swift */; };
@@ -413,6 +412,7 @@
 		AC1000042FAA200000000001 /* RainRadarActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1000012FAA200000000001 /* RainRadarActivityAttributes.swift */; };
 		AC1000052FAA200000000001 /* RainRadarLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1000022FAA200000000001 /* RainRadarLiveActivityManager.swift */; };
 		AC1000062FAA200000000001 /* RainRadarLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1000072FAA200000000001 /* RainRadarLiveActivityWidget.swift */; };
+		AC1000082FAA200000000001 /* RainRadarLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1000072FAA200000000001 /* RainRadarLiveActivityWidget.swift */; };
 		AD0000192FAA100000000001 /* HourlyChartUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000182FAA100000000001 /* HourlyChartUtilities.swift */; };
 		AD00001F2FAA100000000001 /* SynchronizedChartScroll.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD00001E2FAA100000000001 /* SynchronizedChartScroll.swift */; };
 		AD0000212FAA100000000001 /* ChartScrollSynchronizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0000202FAA100000000001 /* ChartScrollSynchronizer.swift */; };
@@ -459,28 +459,27 @@
 		AF30000000000000000000B8 /* PermissionSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF30000000000000000000B7 /* PermissionSettingsView.swift */; };
 		AF84DC1E05D319C4A4971635 /* WeatherMapView+Annotations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC493527D95A0A828B25DD0 /* WeatherMapView+Annotations.swift */; };
 		B03AAA029AD2F41C0E60196A /* NowLayoutPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8826B7F9387594FA9E0DCFE0 /* NowLayoutPreview.swift */; };
+		A50C1FF47879E1CBDE1EBAAD /* OnboardingCollageCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221C7BB6C8216B9BB371AFAA /* OnboardingCollageCards.swift */; };
+		B0AD00123007000000000002 /* OnboardingFinaleStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00123007000000000001 /* OnboardingFinaleStep.swift */; };
+		B0AD00073007000000000002 /* OnboardingSceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00073007000000000001 /* OnboardingSceneView.swift */; };
 		B0AD00013007000000000002 /* OnboardingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00013007000000000001 /* OnboardingCoordinator.swift */; };
 		B0AD00023007000000000002 /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00023007000000000001 /* OnboardingStep.swift */; };
 		B0AD00033007000000000002 /* OnboardingRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00033007000000000001 /* OnboardingRegion.swift */; };
 		B0AD00043007000000000002 /* OnboardingGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00043007000000000001 /* OnboardingGate.swift */; };
 		B0AD00053007000000000002 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00053007000000000001 /* OnboardingView.swift */; };
-		B0AD00063007000000000002 /* OnboardingBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00063007000000000001 /* OnboardingBackgroundView.swift */; };
-		B0AD00073007000000000002 /* OnboardingSceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00073007000000000001 /* OnboardingSceneView.swift */; };
 		B0AD00083007000000000002 /* OnboardingButtonStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00083007000000000001 /* OnboardingButtonStack.swift */; };
-		B0AD000A3007000000000002 /* OnboardingStepIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000A3007000000000001 /* OnboardingStepIcon.swift */; };
 		B0AD000A3100000000000002 /* OnboardingCrashReportsStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000A3100000000000001 /* OnboardingCrashReportsStep.swift */; };
-		B0AD000A3101000000000002 /* OnboardingMapStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000A3101000000000001 /* OnboardingMapStage.swift */; };
 		B0AD000B3007000000000002 /* OnboardingWelcomeStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000B3007000000000001 /* OnboardingWelcomeStep.swift */; };
-		B0AD000C3007000000000002 /* OnboardingFeaturesStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000C3007000000000001 /* OnboardingFeaturesStep.swift */; };
+		B0AD000C3007000000000002 /* OnboardingTourStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000C3007000000000001 /* OnboardingTourStep.swift */; };
+		B0AD000A3101000000000002 /* OnboardingMapStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000A3101000000000001 /* OnboardingMapStage.swift */; };
 		B0AD000D3007000000000002 /* OnboardingFeatureStages.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000D3007000000000001 /* OnboardingFeatureStages.swift */; };
+		B0AD00153007000000000002 /* OnboardingExtrasStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00153007000000000001 /* OnboardingExtrasStage.swift */; };
 		B0AD000E3007000000000002 /* OnboardingSampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000E3007000000000001 /* OnboardingSampleData.swift */; };
 		B0AD000F3007000000000002 /* OnboardingLocationStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD000F3007000000000001 /* OnboardingLocationStep.swift */; };
 		B0AD00103007000000000002 /* OnboardingManualLocationStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00103007000000000001 /* OnboardingManualLocationStep.swift */; };
 		B0AD00113007000000000002 /* OnboardingNotificationsStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00113007000000000001 /* OnboardingNotificationsStep.swift */; };
-		B0AD00123007000000000002 /* OnboardingFinaleStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00123007000000000001 /* OnboardingFinaleStep.swift */; };
-		B0AD00133007000000000002 /* OnboardingStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00133007000000000001 /* OnboardingStage.swift */; };
+		B0AD00133007000000000002 /* OnboardingStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00133007000000000001 /* OnboardingStyle.swift */; };
 		B0AD00143007000000000002 /* OnboardingQuestionStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00143007000000000001 /* OnboardingQuestionStep.swift */; };
-		B0AD00153007000000000002 /* OnboardingExtrasStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00153007000000000001 /* OnboardingExtrasStage.swift */; };
 		B0AD00203007000000000002 /* CardBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AD00203007000000000001 /* CardBackground.swift */; };
 		B1246EE51F71DB82B2D25BB4 /* Storm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AAFD4F5C48494170378468A /* Storm.swift */; };
 		B3E366E2FC62060085275CFD /* ForecastDaytimeTemperatureRangeMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C8851BF62302DF5A58F141 /* ForecastDaytimeTemperatureRangeMode.swift */; };
@@ -731,7 +730,6 @@
 		2019F20EF227A6874F0CB6FC /* WeatherMapView+ModelLayer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "WeatherMapView+ModelLayer.swift"; sourceTree = "<group>"; };
 		206C73393513CE08B65A4655 /* WeatherSeriesDTOs.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeatherSeriesDTOs.swift; sourceTree = "<group>"; };
 		2208B49D650C8AF620464D93 /* RadarStormCellOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarStormCellOverlay.swift; sourceTree = "<group>"; };
-		221C7BB6C8216B9BB371AFAA /* OnboardingCollageCards.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingCollageCards.swift; sourceTree = "<group>"; };
 		2221B8A9B84BEA3F11D9E03D /* RadarTimestampBadge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarTimestampBadge.swift; sourceTree = "<group>"; };
 		2242F01C2699CA56805A5F84 /* EnsembleRail.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EnsembleRail.swift; sourceTree = "<group>"; };
 		22C46809BC6EC37EEF8E3932 /* HourlyTimelineModel+Derivations.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "HourlyTimelineModel+Derivations.swift"; sourceTree = "<group>"; };
@@ -1010,28 +1008,27 @@
 		AFE3436AC91FC720B08CFC48 /* ScreenshotMode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotMode.swift; sourceTree = "<group>"; };
 		AFED3B11BF326A3299476BFA /* StationDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StationDetailView.swift; sourceTree = "<group>"; };
 		B00933209D1ABC44CD26DB82 /* StarsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StarsView.swift; sourceTree = "<group>"; };
+		221C7BB6C8216B9BB371AFAA /* OnboardingCollageCards.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingCollageCards.swift; sourceTree = "<group>"; };
+		B0AD00123007000000000001 /* OnboardingFinaleStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFinaleStep.swift; sourceTree = "<group>"; };
+		B0AD00073007000000000001 /* OnboardingSceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSceneView.swift; sourceTree = "<group>"; };
 		B0AD00013007000000000001 /* OnboardingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCoordinator.swift; sourceTree = "<group>"; };
 		B0AD00023007000000000001 /* OnboardingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep.swift; sourceTree = "<group>"; };
 		B0AD00033007000000000001 /* OnboardingRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingRegion.swift; sourceTree = "<group>"; };
 		B0AD00043007000000000001 /* OnboardingGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingGate.swift; sourceTree = "<group>"; };
 		B0AD00053007000000000001 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
-		B0AD00063007000000000001 /* OnboardingBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingBackgroundView.swift; sourceTree = "<group>"; };
-		B0AD00073007000000000001 /* OnboardingSceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSceneView.swift; sourceTree = "<group>"; };
 		B0AD00083007000000000001 /* OnboardingButtonStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingButtonStack.swift; sourceTree = "<group>"; };
-		B0AD000A3007000000000001 /* OnboardingStepIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStepIcon.swift; sourceTree = "<group>"; };
 		B0AD000A3100000000000001 /* OnboardingCrashReportsStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCrashReportsStep.swift; sourceTree = "<group>"; };
-		B0AD000A3101000000000001 /* OnboardingMapStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingMapStage.swift; sourceTree = "<group>"; };
 		B0AD000B3007000000000001 /* OnboardingWelcomeStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWelcomeStep.swift; sourceTree = "<group>"; };
-		B0AD000C3007000000000001 /* OnboardingFeaturesStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFeaturesStep.swift; sourceTree = "<group>"; };
+		B0AD000C3007000000000001 /* OnboardingTourStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTourStep.swift; sourceTree = "<group>"; };
+		B0AD000A3101000000000001 /* OnboardingMapStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingMapStage.swift; sourceTree = "<group>"; };
 		B0AD000D3007000000000001 /* OnboardingFeatureStages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFeatureStages.swift; sourceTree = "<group>"; };
+		B0AD00153007000000000001 /* OnboardingExtrasStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingExtrasStage.swift; sourceTree = "<group>"; };
 		B0AD000E3007000000000001 /* OnboardingSampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSampleData.swift; sourceTree = "<group>"; };
 		B0AD000F3007000000000001 /* OnboardingLocationStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLocationStep.swift; sourceTree = "<group>"; };
 		B0AD00103007000000000001 /* OnboardingManualLocationStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingManualLocationStep.swift; sourceTree = "<group>"; };
 		B0AD00113007000000000001 /* OnboardingNotificationsStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingNotificationsStep.swift; sourceTree = "<group>"; };
-		B0AD00123007000000000001 /* OnboardingFinaleStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFinaleStep.swift; sourceTree = "<group>"; };
-		B0AD00133007000000000001 /* OnboardingStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStage.swift; sourceTree = "<group>"; };
+		B0AD00133007000000000001 /* OnboardingStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStyle.swift; sourceTree = "<group>"; };
 		B0AD00143007000000000001 /* OnboardingQuestionStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingQuestionStep.swift; sourceTree = "<group>"; };
-		B0AD00153007000000000001 /* OnboardingExtrasStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingExtrasStage.swift; sourceTree = "<group>"; };
 		B0AD00203007000000000001 /* CardBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardBackground.swift; sourceTree = "<group>"; };
 		B43EA5EFCFFE6B22B08E7C1F /* StormCellInfoSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StormCellInfoSheet.swift; sourceTree = "<group>"; };
 		B45732058AA9033ED7D07A0F /* RadarPalettes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarPalettes.swift; sourceTree = "<group>"; };
@@ -1947,29 +1944,27 @@
 		B0AD00003007000000000003 /* Onboarding */ = {
 			isa = PBXGroup;
 			children = (
-				B0AD00133007000000000001 /* OnboardingStage.swift */,
+				B0AD00133007000000000001 /* OnboardingStyle.swift */,
 				B0AD00013007000000000001 /* OnboardingCoordinator.swift */,
+				B0AD00073007000000000001 /* OnboardingSceneView.swift */,
+				B0AD00123007000000000001 /* OnboardingFinaleStep.swift */,
+				221C7BB6C8216B9BB371AFAA /* OnboardingCollageCards.swift */,
 				B0AD00023007000000000001 /* OnboardingStep.swift */,
 				B0AD00033007000000000001 /* OnboardingRegion.swift */,
 				B0AD00043007000000000001 /* OnboardingGate.swift */,
 				B0AD00053007000000000001 /* OnboardingView.swift */,
-				B0AD00063007000000000001 /* OnboardingBackgroundView.swift */,
-				B0AD00073007000000000001 /* OnboardingSceneView.swift */,
 				B0AD00083007000000000001 /* OnboardingButtonStack.swift */,
-				B0AD000A3007000000000001 /* OnboardingStepIcon.swift */,
 				B0AD00143007000000000001 /* OnboardingQuestionStep.swift */,
-				B0AD00153007000000000001 /* OnboardingExtrasStage.swift */,
 				B0AD000A3100000000000001 /* OnboardingCrashReportsStep.swift */,
-				B0AD000A3101000000000001 /* OnboardingMapStage.swift */,
 				B0AD000B3007000000000001 /* OnboardingWelcomeStep.swift */,
-				B0AD000C3007000000000001 /* OnboardingFeaturesStep.swift */,
+				B0AD000C3007000000000001 /* OnboardingTourStep.swift */,
+				B0AD000A3101000000000001 /* OnboardingMapStage.swift */,
 				B0AD000D3007000000000001 /* OnboardingFeatureStages.swift */,
+				B0AD00153007000000000001 /* OnboardingExtrasStage.swift */,
 				B0AD000E3007000000000001 /* OnboardingSampleData.swift */,
 				B0AD000F3007000000000001 /* OnboardingLocationStep.swift */,
 				B0AD00103007000000000001 /* OnboardingManualLocationStep.swift */,
 				B0AD00113007000000000001 /* OnboardingNotificationsStep.swift */,
-				B0AD00123007000000000001 /* OnboardingFinaleStep.swift */,
-				221C7BB6C8216B9BB371AFAA /* OnboardingCollageCards.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -2556,28 +2551,27 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B0AD00133007000000000002 /* OnboardingStage.swift in Sources */,
+				B0AD00133007000000000002 /* OnboardingStyle.swift in Sources */,
 				B0AD00013007000000000002 /* OnboardingCoordinator.swift in Sources */,
+				B0AD00073007000000000002 /* OnboardingSceneView.swift in Sources */,
+				B0AD00123007000000000002 /* OnboardingFinaleStep.swift in Sources */,
+				A50C1FF47879E1CBDE1EBAAD /* OnboardingCollageCards.swift in Sources */,
 				B0AD00023007000000000002 /* OnboardingStep.swift in Sources */,
 				B0AD00033007000000000002 /* OnboardingRegion.swift in Sources */,
 				B0AD00043007000000000002 /* OnboardingGate.swift in Sources */,
 				B0AD00053007000000000002 /* OnboardingView.swift in Sources */,
-				B0AD00063007000000000002 /* OnboardingBackgroundView.swift in Sources */,
-				B0AD00073007000000000002 /* OnboardingSceneView.swift in Sources */,
 				B0AD00083007000000000002 /* OnboardingButtonStack.swift in Sources */,
-				B0AD000A3007000000000002 /* OnboardingStepIcon.swift in Sources */,
 				B0AD00143007000000000002 /* OnboardingQuestionStep.swift in Sources */,
-				B0AD00153007000000000002 /* OnboardingExtrasStage.swift in Sources */,
 				B0AD000A3100000000000002 /* OnboardingCrashReportsStep.swift in Sources */,
-				B0AD000A3101000000000002 /* OnboardingMapStage.swift in Sources */,
 				B0AD000B3007000000000002 /* OnboardingWelcomeStep.swift in Sources */,
-				B0AD000C3007000000000002 /* OnboardingFeaturesStep.swift in Sources */,
+				B0AD000C3007000000000002 /* OnboardingTourStep.swift in Sources */,
+				B0AD000A3101000000000002 /* OnboardingMapStage.swift in Sources */,
 				B0AD000D3007000000000002 /* OnboardingFeatureStages.swift in Sources */,
+				B0AD00153007000000000002 /* OnboardingExtrasStage.swift in Sources */,
 				B0AD000E3007000000000002 /* OnboardingSampleData.swift in Sources */,
 				B0AD000F3007000000000002 /* OnboardingLocationStep.swift in Sources */,
 				B0AD00103007000000000002 /* OnboardingManualLocationStep.swift in Sources */,
 				B0AD00113007000000000002 /* OnboardingNotificationsStep.swift in Sources */,
-				B0AD00123007000000000002 /* OnboardingFinaleStep.swift in Sources */,
 				AD80000E2FE6000000000001 /* WeatherMapDetailView.swift in Sources */,
 				ADA300712FF8000000000001 /* AttributionViews.swift in Sources */,
 				AD8000162FE6000000000001 /* RadarRegion.swift in Sources */,
@@ -2625,6 +2619,7 @@
 				AC0000022FAA000000000001 /* NotificationSettingsManager.swift in Sources */,
 				AC1000032FAA200000000001 /* RainRadarActivityAttributes.swift in Sources */,
 				AC1000052FAA200000000001 /* RainRadarLiveActivityManager.swift in Sources */,
+				AC1000082FAA200000000001 /* RainRadarLiveActivityWidget.swift in Sources */,
 				25A1C0062F8D000100000001 /* NotificationSettingsView.swift in Sources */,
 				AA0000132F9A00000000001A /* AQIChart.swift in Sources */,
 				AA0000152F9A00000000001A /* UVChart.swift in Sources */,
@@ -2684,7 +2679,6 @@
 				1E5631EE85DB09EF0B432959 /* LocationRowCards.swift in Sources */,
 				00C250F442A1BE7A7AFBC942 /* LocationMapSheet.swift in Sources */,
 				A4EEAFB9BDB5C695FFC3E53B /* EmojiKeyboardField.swift in Sources */,
-				A50C1FF47879E1CBDE1EBAAD /* OnboardingCollageCards.swift in Sources */,
 				E90AB5C5B4ABBCD715A93FC5 /* ClimateModel.swift in Sources */,
 				53C8FD817CAFACA6C56007E5 /* ClimateSummaryCard.swift in Sources */,
 				006AAF38E61679E6E2BFEE9F /* WarmingStripesRibbon.swift in Sources */,
