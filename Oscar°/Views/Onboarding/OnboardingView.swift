@@ -112,7 +112,6 @@ private struct OnboardingSky<Stage: View>: View {
             .frame(width: frame.width, height: frame.height)
             .clipShape(.rect(cornerRadius: shrinks ? OnboardingMetrics.cornerRadius : 0))
             .shadow(color: .black.opacity(shrinks ? 0.3 : 0), radius: 24, y: 12)
-            .catDash()
             .position(x: frame.midX, y: frame.midY)
             .animation(.smooth(duration: 0.7), value: isWindowed)
 
@@ -135,7 +134,6 @@ private struct OnboardingSky<Stage: View>: View {
                 .frame(width: window.width, height: window.height, alignment: .top)
                 .clipShape(.rect(cornerRadius: OnboardingMetrics.cornerRadius))
                 .shadow(color: .black.opacity(0.3), radius: 24, y: 12)
-                .catDash()
                 .position(x: window.midX, y: window.midY)
                 .transition(.opacity)
             }

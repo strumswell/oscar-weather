@@ -137,7 +137,6 @@ struct OnboardingManualLocationStep: View {
                 }
             }
             .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 16))
-            .catDash()
             .transition(.opacity)
         }
     }

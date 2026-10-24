@@ -99,6 +99,22 @@ final class APIClient: Sendable {
     forecastDays: Operations.getForecast.Input.Query.forecast_daysPayload? = ._14,
     hourly: [Operations.getForecast.Input.Query.hourlyPayloadPayload]? = nil
   ) async throws -> Operations.getForecast.Output.Ok.Body.jsonPayload {
+    var forecast = try await fetchForecast(coordinates: coordinates, forecastDays: forecastDays, hourly: hourly)
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = forecast.locationTimeZone
+    if let times = forecast.daily?.time {
+      forecast.daily?.time = times.map {
+        calendar.startOfDay(for: Date(timeIntervalSince1970: $0 + 43_200)).timeIntervalSince1970
+      }
+    }
+    return forecast
+  }
+
+  private func fetchForecast(
+    coordinates: CLLocationCoordinate2D,
+    forecastDays: Operations.getForecast.Input.Query.forecast_daysPayload?,
+    hourly: [Operations.getForecast.Input.Query.hourlyPayloadPayload]?
+  ) async throws -> Operations.getForecast.Output.Ok.Body.jsonPayload {
     let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
 
     let temperatureUnit = SettingService.resolvedTemperatureUnit

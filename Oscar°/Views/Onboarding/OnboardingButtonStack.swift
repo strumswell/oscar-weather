@@ -22,7 +22,7 @@ struct OnboardingButtonStack: View {
             }
             .buttonStyle(.glassProminent)
             .disabled(primaryDisabled)
-            .catDash()
+            .buttonCat()
 
             if let secondaryTitle, let secondaryAction {
                 Button(action: secondaryAction) {

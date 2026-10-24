@@ -38,7 +38,6 @@ struct OnboardingNotificationsStep: View {
                     }
                 }
                 .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 16))
-                .catDash()
                 .onboardingEntrance(appeared, delay: 0.25)
             }
         } buttons: {

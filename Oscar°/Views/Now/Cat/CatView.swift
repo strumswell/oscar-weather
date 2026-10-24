@@ -588,7 +588,7 @@ private struct FurnitureIcon: View {
     }
 }
 
-private struct CatBubble<Content: View>: View {
+struct CatBubble<Content: View>: View {
     let tailOnRight: Bool
     @ViewBuilder let content: Content
     @State private var shown = false

@@ -6,6 +6,7 @@ struct HourlyTimelineStrip: View {
 
     @State private var isDragging = false
     @State private var readoutSize: CGSize = .zero
+    @State private var readoutOnLeft = false
 
     private static let axisHeight: CGFloat = 16
 
@@ -53,10 +54,14 @@ struct HourlyTimelineStrip: View {
                 if model.dayWindow == nil {
                     HourlyReadoutBox(model: model, layout: layout)
                         .onGeometryChange(for: CGSize.self, of: { $0.size }) { readoutSize = $0 }
-                        .offset(x: readoutX(width: width, layout: layout), y: 22)
+                        .offset(x: readoutX(width: width), y: 22)
+                        .animation(.snappy(duration: 0.25), value: readoutOnLeft)
                         .allowsHitTesting(false)
                 }
             }
+        }
+        .onChange(of: model.scrubTime) { old, new in
+            if new != old { readoutOnLeft = new > old }
         }
         .sensoryFeedback(.impact(weight: .light, intensity: 0.3), trigger: model.hourTick)
         .accessibilityElement(children: .ignore)
@@ -67,12 +72,8 @@ struct HourlyTimelineStrip: View {
         }
     }
 
-    private func readoutX(width: CGFloat, layout: HourlyLensLayout) -> CGFloat {
-        let trailing = width / 2 + 10
-        guard layout.bands.isEmpty else { return trailing }
-        let reserved = CGFloat(layout.extremeFormat(layout.domain.upperBound).count) * 5.5 + 12
-        guard trailing + readoutSize.width > width - reserved else { return trailing }
-        return max(width / 2 - 10 - readoutSize.width, 2)
+    private func readoutX(width: CGFloat) -> CGFloat {
+        readoutOnLeft ? max(width / 2 - 10 - readoutSize.width, 2) : width / 2 + 10
     }
 
     // MARK: - Drawing

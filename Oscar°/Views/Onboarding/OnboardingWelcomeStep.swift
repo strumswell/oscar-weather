@@ -60,7 +60,6 @@ struct OnboardingWelcomeStep: View {
             .shadow(color: .black.opacity(0.28), radius: 22, y: 16)
             .blur(radius: letterFlownAway ? 5 : 0)
             .scaleEffect(gustScale)
-            .catDash()
             .opacity(showsLetter ? 1 : 0)
             .accessibilityLabel(Text("Danke, dass Du Oscar ausprobierst. Viele Jahre und viel Herzblut sind hier reingeflossen. Ich hoffe, es gefällt Dir mindestens so viel wie mir! - Philipp. Für Oscar, Daniela, Ursel, Werner, Reinhard & Sammy"))
     }
