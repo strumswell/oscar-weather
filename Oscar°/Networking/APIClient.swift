@@ -78,9 +78,11 @@ final class APIClient: Sendable {
   nonisolated(unsafe) static var stagedFetch: (@Sendable (URLRequest) -> (Data, HTTPURLResponse)?)?
 
   class func get(url: URL, prepending middlewares: [any ClientMiddleware] = []) -> Client {
+    let configuration = URLSessionConfiguration.default
+    configuration.timeoutIntervalForRequest = OpenMeteoCustomer.timeout
     return Client(
       serverURL: url,
-      transport: URLSessionTransport(),
+      transport: URLSessionTransport(configuration: .init(session: URLSession(configuration: configuration))),
       middlewares: Self.stagingMiddlewares + middlewares + [
         CachingMiddleware(cacheTime: 60),
         UsageCountingMiddleware(),
@@ -90,6 +92,7 @@ final class APIClient: Sendable {
           policy: .upToAttempts(count: 3),
           delay: .exponentialWithJitter(base: 0.5, maxSeconds: 8)
         ),
+        OpenMeteoCustomerMiddleware(),
       ]
     )
   }
@@ -412,7 +415,7 @@ final class APIClient: Sendable {
         try await Task.sleep(for: .seconds(min(8, base) * Double.random(in: 0.5...1.5)))
       }
       do {
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await OpenMeteoCustomer.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
         if http.statusCode == 429 || (500..<600).contains(http.statusCode) {
           lastError = URLError(.badServerResponse)

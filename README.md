@@ -102,6 +102,8 @@ A four-page vertical stack: an animated current-conditions scene, a rain nowcast
 3. Select your development team in the project signing settings
 4. Build and run on a device or simulator running iOS 26 or watchOS 26
 
+Optional: to use the Open-Meteo customer API, create `Config/Secrets.xcconfig` (gitignored) with `OPEN_METEO_API_KEY = <key>`. Without it the app uses the free endpoints. Xcode Cloud writes this file from the `OPEN_METEO_API_KEY` secret in `ci_scripts/ci_post_clone.sh`.
+
 ---
 
 ## Join the Beta

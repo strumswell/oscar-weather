@@ -30,3 +30,6 @@ fastlane/Preview.html
 # Social Studio captures
 fastlane/social-studio/out/
 fastlane/social-studio/compositions/
+
+# Open-Meteo customer API key (written by ci_scripts/ci_post_clone.sh on Xcode Cloud)
+Config/Secrets.xcconfig

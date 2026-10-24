@@ -8,7 +8,7 @@ enum APIContactIdentity {
   static var userAgent: String {
     let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
     let versionSuffix = version.map { "/\($0)" } ?? ""
-    return "OscarWeather\(versionSuffix) (non-commercial OSS; +https://bolte.id; mailto:\(contactEmail))"
+    return "OscarWeather\(versionSuffix) (OSS; +https://oscars.love; mailto:\(contactEmail))"
   }
 
   static func apply(to request: inout HTTPRequest) {

@@ -100,7 +100,31 @@ enum CrashReporting {
             options.enableMetricKit = true
             options.enableTimeToFullDisplayTracing = true
             options.swiftAsyncStacktraces = true
+
+            options.beforeBreadcrumb = { crumb in
+                crumb.data = crumb.data?.mapValues { value -> Any in
+                    guard let text = value as? String else { return value }
+                    return redactingAPIKey(text)
+                }
+                return crumb
+            }
+            options.beforeSendSpan = { span in
+                if let query = span.data["http.query"] as? String {
+                    span.setData(value: redactingAPIKey(query), key: "http.query")
+                }
+                return span
+            }
+            options.beforeSend = { event in
+                event.request?.queryString = event.request?.queryString.map(redactingAPIKey)
+                event.request?.url = event.request?.url.map(redactingAPIKey)
+                return event
+            }
         }
+    }
+
+    private static func redactingAPIKey(_ text: String) -> String {
+        guard let key = OpenMeteoCustomer.apiKey else { return text }
+        return text.replacingOccurrences(of: key, with: "[redacted]")
     }
 
     static func stop() {

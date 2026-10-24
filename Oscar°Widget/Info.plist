@@ -37,5 +37,7 @@
 	<string>Oscar zeigt dir damit das Wetter da, wo du gerade bist. Für Vorhersage und Radar wird dein Standort auf ca. 100 m gerundet an Open-Meteo und Oscars Server gesendet, den Ortsnamen ermittelt Apple. Mehr unter oscars.love/privacy.</string>
 	<key>NSWidgetWantsLocation</key>
 	<true/>
+	<key>OpenMeteoAPIKey</key>
+	<string>$(OPEN_METEO_API_KEY)</string>
 </dict>
 </plist>
