@@ -97,7 +97,7 @@ struct LocationPreviewSheet: View {
                 .foregroundStyle(Color(uiColor: .label))
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
-            Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
+            Text(SettingService.shared.units.temperatureString(weather.forecast.current?.temperature))
                 .font(.system(size: temperatureFontSize))
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)

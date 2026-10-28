@@ -19,6 +19,7 @@ struct Oscar_Watch_Watch_AppApp: App {
     init() {
         let location = Location()
         let weather = MainActor.assumeIsolated {
+            UnitSync.shared.start()
             let weather = Weather()
             #if DEBUG
             if ScreenshotMode.bootstrap() {

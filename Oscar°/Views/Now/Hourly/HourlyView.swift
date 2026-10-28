@@ -17,6 +17,7 @@ struct HourlyView: View {
     HourlyForecastBuilder.makeItems(
       forecast: weather.forecast,
       precipSeries: weather.precipSeries,
+      units: SettingService.shared.units,
       isLoading: weather.isLoading
     )
   }

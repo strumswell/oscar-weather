@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ClimateSummaryCard: View {
     let summary: ClimateSummary
-    let unit: ClimateTemperatureUnit
+    let unit: TemperatureUnit
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {

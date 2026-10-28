@@ -16,6 +16,7 @@ struct WatchHourlyView: View {
         let items = HourlyForecastBuilder.makeItems(
             forecast: weather.forecast,
             precipSeries: weather.precipSeries,
+            units: SettingService.shared.units,
             isLoading: weather.isLoading
         ).prefix(Self.maxRows)
 

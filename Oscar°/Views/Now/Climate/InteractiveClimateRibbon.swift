@@ -3,7 +3,7 @@ import SwiftUI
 struct InteractiveClimateRibbon: View {
     let stripes: [ClimateStripe]
     let sigma: Double
-    let unit: ClimateTemperatureUnit
+    let unit: TemperatureUnit
     var height: CGFloat = 96
 
     @State private var selectedIndex: Int?

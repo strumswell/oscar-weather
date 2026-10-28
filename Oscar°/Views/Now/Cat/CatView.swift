@@ -60,22 +60,9 @@ private struct HeadCat: View {
             rain: now.precipitation ?? 0,
             isSnowing: (71...77).contains(code) || (85...86).contains(code),
             isStormy: code >= 95,
-            isHotAndSunny: celsius(now.temperature) >= 25 && now.cloudcover < 30 && (now.is_day ?? 1) == 1,
-            windPush: towardEast * min(kmh(now.windspeed) / 40, 1)
+            isHotAndSunny: now.temperature >= 25 && now.cloudcover < 30 && (now.is_day ?? 1) == 1,
+            windPush: towardEast * min(now.windspeed / 40, 1)
         )
-    }
-
-    private func celsius(_ value: Double) -> Double {
-        SettingService.resolvedTemperatureUnit == "fahrenheit" ? (value - 32) * 5 / 9 : value
-    }
-
-    private func kmh(_ value: Double) -> Double {
-        switch WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit) {
-        case .ms: value * 3.6
-        case .mph: value * 1.609
-        case .kn: value * 1.852
-        case .kmh, .bft: value
-        }
     }
 
     private func shelf(in proxy: GeometryProxy) -> CGRect? {

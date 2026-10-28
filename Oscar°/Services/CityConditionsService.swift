@@ -159,12 +159,6 @@ final class CityConditionsStore {
                 value: "temperature,weathercode,cloudcover,windspeed,wind_direction_10m,precipitation,is_day,"
                     + "relativehumidity_2m,pressure_msl"
             ),
-            URLQueryItem(name: "temperature_unit", value: SettingService.resolvedTemperatureUnit),
-            URLQueryItem(
-                name: "windspeed_unit",
-                value: WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit).apiRawValue
-            ),
-            URLQueryItem(name: "precipitation_unit", value: SettingService.resolvedPrecipitationUnit),
             URLQueryItem(name: "timeformat", value: "unixtime"),
             URLQueryItem(name: "timezone", value: "auto"),
         ]

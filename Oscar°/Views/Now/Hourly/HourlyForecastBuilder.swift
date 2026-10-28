@@ -4,6 +4,7 @@ enum HourlyForecastBuilder {
   static func makeItems(
     forecast: Operations.getForecast.Output.Ok.Body.jsonPayload,
     precipSeries: PrecipSeriesResponse? = nil,
+    units: Units,
     isLoading: Bool
   ) -> [HourlyTimelineItem] {
     guard let hourly = forecast.hourly else {
@@ -23,14 +24,13 @@ enum HourlyForecastBuilder {
     }
 
     let timeZone = forecast.locationTimeZone
-    let precipitationUnit = forecast.hourly_units?.precipitation ?? "mm"
     let sunEvents = SunEventIndex(daily: forecast.daily, timeZone: timeZone)
 
     if let current = forecast.current,
        let firstFutureIndex = hourly.time.firstIndex(where: { $0 > current.time }),
        firstFutureIndex < availableCount {
       var items: [HourlyTimelineItem] = [
-        .forecast(nowItem(current: current, precipSeries: precipSeries, precipitationUnit: precipitationUnit))
+        .forecast(nowItem(current: current, precipSeries: precipSeries, units: units))
       ]
 
       if !isLoading, firstFutureIndex > 0,
@@ -42,7 +42,7 @@ enum HourlyForecastBuilder {
       items += hourlyItems(
         range: firstFutureIndex...min(firstFutureIndex + 47, availableCount - 1),
         hourly: hourly,
-        precipitationUnit: precipitationUnit,
+        units: units,
         timeZone: timeZone,
         sunEvents: sunEvents,
         isLoading: isLoading
@@ -54,7 +54,7 @@ enum HourlyForecastBuilder {
     return hourlyItems(
       range: startIndex...min(startIndex + 48, availableCount - 1),
       hourly: hourly,
-      precipitationUnit: precipitationUnit,
+      units: units,
       timeZone: timeZone,
       sunEvents: sunEvents,
       isLoading: isLoading
@@ -64,7 +64,7 @@ enum HourlyForecastBuilder {
   private static func hourlyItems(
     range: ClosedRange<Int>,
     hourly: Operations.getForecast.Output.Ok.Body.jsonPayload.hourlyPayload,
-    precipitationUnit: String,
+    units: Units,
     timeZone: TimeZone,
     sunEvents: SunEventIndex,
     isLoading: Bool
@@ -75,15 +75,12 @@ enum HourlyForecastBuilder {
       let forecastItem = HourlyForecastItem(
         timestamp: timestamp,
         hour: HourlyFormatting.hourString(timestamp: timestamp, timeZone: timeZone),
-        precipitation: HourlyFormatting.precipitationString(
-          value: hourly.precipitation?[index] ?? 0,
-          unit: precipitationUnit
-        ),
+        precipitation: units.precipitationString(hourly.precipitation?[index] ?? 0),
         iconName: HourlyFormatting.weatherIconName(
           weatherCode: hourly.weathercode?[index] ?? 0,
           isDay: hourly.is_day?[index] ?? 0
         ),
-        temperature: HourlyFormatting.temperatureString(hourly.temperature_2m?[index]),
+        temperature: units.temperatureString(hourly.temperature_2m?[index]),
         precipitationValue: hourly.precipitation?[index] ?? 0
       )
 
@@ -100,31 +97,24 @@ enum HourlyForecastBuilder {
   private static func nowItem(
     current: Components.Schemas.CurrentWeather,
     precipSeries: PrecipSeriesResponse?,
-    precipitationUnit: String
+    units: Units
   ) -> HourlyForecastItem {
-    let radarRate = precipSeries?.currentRate
-    let forecastPrecipitation = current.precipitation ?? 0
-    let precipitation = radarRate.map { HourlyFormatting.displayRate(fromMillimeters: $0, unit: precipitationUnit) }
-      ?? forecastPrecipitation
-    let isRaining = (radarRate ?? forecastPrecipitation) > 0
+    let precipitation = precipSeries?.currentRate ?? current.precipitation ?? 0
 
     var weatherCode = current.weathercode
-    if isRaining, weatherCode < 51 {
-      weatherCode = (radarRate ?? forecastPrecipitation) >= 2.5 ? 61 : 51
+    if precipitation > 0, weatherCode < 51 {
+      weatherCode = precipitation >= 2.5 ? 61 : 51
     }
 
     return HourlyForecastItem(
       timestamp: current.time,
       hour: String(localized: "Jetzt"),
-      precipitation: HourlyFormatting.precipitationString(
-        value: precipitation,
-        unit: precipitationUnit
-      ),
+      precipitation: units.precipitationString(precipitation),
       iconName: HourlyFormatting.weatherIconName(
         weatherCode: weatherCode,
         isDay: current.is_day ?? 1
       ),
-      temperature: HourlyFormatting.temperatureString(current.temperature),
+      temperature: units.temperatureString(current.temperature),
       isNow: true,
       precipitationValue: precipitation
     )

@@ -41,7 +41,7 @@ struct PreviewHead: View {
             Text(location.name)
                 .font(.title3.weight(.medium))
                 .lineLimit(1)
-            Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
+            Text(SettingService.shared.units.temperatureString(weather.forecast.current?.temperature))
                 .font(.system(size: 88, weight: .thin))
             HStack(spacing: 18) {
                 ForEach(settingsService.headMetrics) { metric in

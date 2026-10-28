@@ -57,9 +57,9 @@ private struct StationRow: View {
     let onSelect: () -> Void
 
     var body: some View {
-        let units = StationUnits()
+        let units = SettingService.shared.units
         let rain = station.precipitation_24h_mm.flatMap { $0 >= 0.05 ? units.precipitationString($0) : nil }
-        let detail = [stationSubtitle(station, timeZone: timeZone), rain].compactMap(\.self).joined(separator: " · ")
+        let detail = [stationSubtitle(station, timeZone: timeZone, units: units), rain].compactMap(\.self).joined(separator: " · ")
         let condition = station.current.weather_code.map(WeatherConditionLabel.text(for:))
         Button(action: onSelect) {
             HStack(spacing: 12) {
@@ -86,7 +86,7 @@ private struct StationRow: View {
                 StationSparkline(history: station.history)
                     .frame(width: 76, height: 42)
 
-                Text(verbatim: units.temperatureString(station.current.temperature_c))
+                Text(verbatim: units.preciseTemperatureString(station.current.temperature_c))
                     .font(.title3.weight(.medium))
                     .monospacedDigit()
                     .frame(minWidth: 58, alignment: .trailing)
@@ -100,7 +100,7 @@ private struct StationRow: View {
             if !isFirst { Divider().padding(.horizontal, 14) }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text(verbatim: [station.name, condition, detail, units.temperatureString(station.current.temperature_c)]
+        .accessibilityLabel(Text(verbatim: [station.name, condition, detail, units.preciseTemperatureString(station.current.temperature_c)]
             .compactMap(\.self).joined(separator: ", ")))
         .accessibilityHint(Text("Öffnet Stationsdetails"))
     }
@@ -112,7 +112,7 @@ private struct StationSparkline: View {
     private static let labelBand: CGFloat = 11
 
     var body: some View {
-        let units = StationUnits()
+        let temperatureUnit = SettingService.shared.temperatureUnit
         Canvas { context, size in
             let points = history.compactMap { reading in
                 reading.temperature_c.map { (reading.time.timeIntervalSince1970, $0) }
@@ -140,7 +140,7 @@ private struct StationSparkline: View {
             guard highPoint.1 > low else { return }
             for (point, isHigh) in [(highPoint, true), (lowPoint, false)] {
                 let label = context.resolve(
-                    Text(verbatim: "\(Int(units.temperature(point.1).rounded()))°")
+                    Text(verbatim: temperatureUnit.string(point.1))
                         .font(.system(size: 9, weight: .medium))
                         .foregroundStyle(.white.opacity(0.6)))
                 let labelSize = label.measure(in: size)
@@ -162,45 +162,7 @@ extension Weather {
     }
 }
 
-func stationSubtitle(_ station: Components.Schemas.NearbyStation, timeZone: TimeZone) -> String {
-    let distance = station.distance_km.formatted(.number.precision(.fractionLength(1)))
+func stationSubtitle(_ station: Components.Schemas.NearbyStation, timeZone: TimeZone, units: Units) -> String {
     let time = station.last_report_at.formatted(Date.FormatStyle(date: .omitted, time: .shortened, timeZone: timeZone))
-    return "\(distance) km \(compassDirection(station.bearing_deg)) · \(time)"
-}
-
-@MainActor
-struct StationUnits {
-    let temperatureUnit = ClimateTemperatureUnit(settingValue: SettingService.shared.temperatureUnit)
-    let windUnit = WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit)
-    let inches = SettingService.shared.precipitationUnit.lowercased() == "inch"
-
-    var precipitationUnit: String { inches ? "inch" : "mm" }
-
-    func temperature(_ celsius: Double) -> Double { temperatureUnit.value(fromCelsius: celsius) }
-
-    func temperatureString(_ celsius: Double?) -> String {
-        guard let celsius else { return "–" }
-        return "\(temperature(celsius).formatted(.number.precision(.fractionLength(1))))°"
-    }
-
-    func wind(_ metersPerSecond: Double) -> Double {
-        switch windUnit {
-        case .ms: metersPerSecond
-        case .kmh: metersPerSecond * 3.6
-        case .mph: metersPerSecond * 2.23694
-        case .kn: metersPerSecond * 1.94384
-        case .bft: Double(BeaufortScale.force(forKilometersPerHour: metersPerSecond * 3.6))
-        }
-    }
-
-    func windString(_ metersPerSecond: Double?) -> String {
-        WindSpeedFormatter.string(metersPerSecond.map(wind), unit: windUnit.displayUnit)
-    }
-
-    func precipitation(_ millimeters: Double) -> Double { inches ? millimeters / 25.4 : millimeters }
-
-    func precipitationString(_ millimeters: Double?) -> String {
-        guard let millimeters else { return "–" }
-        return HourlyFormatting.precipitationString(value: precipitation(millimeters), unit: precipitationUnit)
-    }
+    return "\(units.distanceString(station.distance_km)) \(compassDirection(station.bearing_deg)) · \(time)"
 }

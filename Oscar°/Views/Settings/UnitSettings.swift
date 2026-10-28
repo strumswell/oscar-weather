@@ -14,23 +14,20 @@ struct UnitSettings: View {
         Form {
             Section {
                 Picker("Temperatur", selection: $settingsService.temperatureUnit) {
-                    Text("°C").tag("celsius")
-                    Text("°F").tag("fahrenheit")
+                    ForEach(TemperatureUnit.allCases) { Text(verbatim: $0.symbol).tag($0) }
                 }
-
                 Picker("Windgeschwindigkeit", selection: $settingsService.windSpeedUnit) {
-                    Text("km/h").tag("kmh")
-                    Text("m/s").tag("ms")
-                    Text("mph").tag("mph")
-                    Text("kn").tag("kn")
-                    Text("Bft").tag("bft")
+                    ForEach(WindSpeedUnit.allCases) { Text(verbatim: $0.symbol).tag($0) }
                 }
-
                 Picker("Niederschlag", selection: $settingsService.precipitationUnit) {
-                    Text("mm").tag("mm")
-                    Text("inch").tag("inch")
+                    ForEach(PrecipitationUnit.allCases) { Text(verbatim: $0.symbol).tag($0) }
                 }
-
+                Picker("Luftdruck", selection: $settingsService.pressureUnit) {
+                    ForEach(PressureUnit.allCases) { Text(verbatim: $0.symbol).tag($0) }
+                }
+                Picker("Entfernung", selection: $settingsService.distanceUnit) {
+                    ForEach(DistanceUnit.allCases) { Text(verbatim: $0.symbol).tag($0) }
+                }
                 Picker("Zeitformat", selection: $settingsService.timeFormatPreference) {
                     ForEach(TimeFormatPreference.allCases) { preference in
                         Text(preference.label).tag(preference)

@@ -20,8 +20,7 @@ struct DailyView: View {
     let dayNumber = showsPlaceholders ? placeholderDayCount : dailyDisplayCount
     let temperatureScale = displayedTemperatureScale
     let heading = String(localized: "\(dayNumber)-Tage", comment: "Headline for Daily View")
-    let temperatureUnit = weather.forecast.daily_units?.temperature_2m_min ?? "°C"
-    let precipitationUnit = weather.forecast.daily_units?.precipitation_sum ?? "mm"
+    let units = settingsService.units
 
     VStack(alignment: .leading) {
       NowSectionHeader(showMore: hasDays ? { expandsDays ? presentation.present(.ensemble) : presentDetails(day: 0) } : nil) {
@@ -50,8 +49,7 @@ struct DailyView: View {
               dayRow(
                 dayPos,
                 scale: temperatureScale,
-                temperatureUnit: temperatureUnit,
-                precipitationUnit: precipitationUnit,
+                units: units,
                 isExpanded: expandsDays ? isExpanded : nil
               )
             }
@@ -90,8 +88,7 @@ extension DailyView {
   private func dayRow(
     _ dayPos: Int,
     scale: (min: Double, max: Double),
-    temperatureUnit: String,
-    precipitationUnit: String,
+    units: Units,
     isExpanded: Bool? = nil
   ) -> some View {
     let rowTemperatures = temperatureRow(for: dayPos)
@@ -104,21 +101,21 @@ extension DailyView {
         .resizable()
         .scaledToFit()
         .frame(width: dayIconSize, height: dayIconSize)
-      Text("\(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0, specifier: "%.1f") \(precipitationUnit)")
+      Text(units.precipitationString(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0))
         .font(.caption)
         .foregroundStyle(Color(uiColor: .label))
         .frame(width: precipitationColumnWidth)
-      Text(roundTemperatureString(temperature: rowTemperatures.labelLow))
+      Text(units.temperatureString(rowTemperatures.labelLow))
         .frame(width: temperatureColumnWidth, alignment: .trailing)
       TemperatureRangeView(
         low: rowTemperatures.barLow, high: rowTemperatures.barHigh,
         focusLow: rowTemperatures.focusLow,
         focusHigh: rowTemperatures.focusHigh,
         minTemp: scale.min, maxTemp: scale.max,
-        unit: temperatureUnit
+        unit: units.temperature
       )
       .frame(height: rowTemperatures.focusLow == nil ? 5 : 28)
-      Text(roundTemperatureString(temperature: rowTemperatures.labelHigh))
+      Text(units.temperatureString(rowTemperatures.labelHigh))
         .frame(width: temperatureColumnWidth, alignment: .leading)
       if let isExpanded {
         Image(systemName: "chevron.down")

@@ -94,8 +94,6 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
             days: days,
             minTemp: lows.min() ?? 0,
             maxTemp: highs.max() ?? 40,
-            temperatureUnit: weather.daily_units?.temperature_2m_min ?? "°C",
-            precipitationUnit: weather.daily_units?.precipitation_sum ?? "mm",
             backgroundGradient: gradient
         )
     }

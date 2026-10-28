@@ -59,9 +59,8 @@ extension EnsembleSky {
 enum EnsembleConfidence {
     case sure, fairlySure, fairlyUnsure, unsure
 
-    init(day: EnsembleDay, fahrenheit: Bool) {
-        let degrees = fahrenheit ? 1 / 1.8 : 1
-        let spreads = [day.high, day.low].compactMap { $0.map { ($0.high - $0.low) * degrees } }
+    init(day: EnsembleDay) {
+        let spreads = [day.high, day.low].compactMap { $0.map { $0.high - $0.low } }
         let temperatureDoubt = spreads.isEmpty ? 0 : spreads.reduce(0, +) / Double(spreads.count) / 8
         let skyDoubt = day.sky.dominant.map { (1 - day.sky.share(of: $0)) / 0.8 } ?? 0
         switch max(temperatureDoubt, skyDoubt) {

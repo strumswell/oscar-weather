@@ -47,13 +47,8 @@ final class HourlyTimelineModel {
     private(set) var nightRanges: [ClosedRange<Double>] = []
     private(set) var dayMarks: [DayMark] = []
     private(set) var timeZone: TimeZone = .current
-    private(set) var precipitationUnit = "mm"
-    private(set) var windUnitString = "km/h"
-    private(set) var temperatureUnit = "°C"
-    private(set) var soilMoistureUnit = "m³/m³"
-    private(set) var et0Unit = "mm"
-
     @ObservationIgnored private var layoutCache: [HourlyLens: HourlyLensLayout] = [:]
+    @ObservationIgnored private var layoutUnits = Units.metric
 
     var hasData: Bool { times.count > 1 }
     var domain: ClosedRange<Double> { (times.first ?? 0)...(times.last ?? 1) }
@@ -130,11 +125,6 @@ final class HourlyTimelineModel {
             Self.filled(hourly?.soil_moisture_0_1cm),
         ]
         et0 = hourly?.et0_fao_evapotranspiration ?? []
-        precipitationUnit = weather.forecast.hourly_units?.precipitation ?? "mm"
-        windUnitString = weather.forecast.hourly_units?.windspeed_10m ?? "km/h"
-        temperatureUnit = weather.forecast.hourly_units?.temperature_2m ?? "°C"
-        soilMoistureUnit = weather.forecast.hourly_units?.soil_moisture_0_1cm ?? "m³/m³"
-        et0Unit = weather.forecast.hourly_units?.et0_fao_evapotranspiration ?? "mm"
         layoutCache = [:]
         timeZone = weather.forecast.locationTimeZone
 
@@ -174,11 +164,18 @@ final class HourlyTimelineModel {
 
     // MARK: - Lens layouts
 
+    var units: Units { SettingService.shared.units }
+
     func layout(for lens: HourlyLens) -> HourlyLensLayout {
+        let units = units
+        if units != layoutUnits {
+            layoutCache = [:]
+            layoutUnits = units
+        }
         if let cached = layoutCache[lens] {
             return cached
         }
-        let layout = buildLayout(for: lens)
+        let layout = buildLayout(for: lens, units: units)
         layoutCache[lens] = layout
         return layout
     }

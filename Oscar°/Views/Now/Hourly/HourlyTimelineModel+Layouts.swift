@@ -1,13 +1,16 @@
 import SwiftUI
 
 extension HourlyTimelineModel {
-    func buildLayout(for lens: HourlyLens) -> HourlyLensLayout {
-        let temperatureUnit = self.temperatureUnit
-        let temperatureFormat: (Double) -> String = { "\(Int($0.rounded()))\(temperatureUnit)" }
+    func buildLayout(for lens: HourlyLens, units: Units) -> HourlyLensLayout {
+        let temperatureSymbol = units.temperature.symbol
+        let temperatureFormat: (Double) -> String = { "\(Int($0.rounded()))\(temperatureSymbol)" }
+        let temperatures = { (values: [Double]) in values.map(units.temperature.value(fromCelsius:)) }
         let percentFormat: (Double) -> String = { "\(Int($0.rounded()))%" }
 
         switch lens {
         case .overview:
+            let temperature = temperatures(temperature)
+            let apparentTemperature = temperatures(apparentTemperature)
             return HourlyLensLayout(
                 lines: [line(apparentTemperature, .red, width: 3.5,
                              label: String(localized: "Gefühlt")),
@@ -21,17 +24,14 @@ extension HourlyTimelineModel {
                 barsLabel: String(localized: "Regen")
             )
         case .wind:
-            let unit = WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit)
-            let displayed: ([Double]) -> [Double] = unit.usesBeaufortDisplay
-                ? BeaufortScale.convertedValues(fromKilometersPerHour:)
-                : { $0 }
+            let displayed = { (values: [Double]) in values.map(units.windValue) }
             let heights = [windspeed180, windspeed120, windspeed80].map(displayed)
             let heightColors: [Color] = [.teal.mix(with: .black, by: 0.55),
                                          .teal.mix(with: .black, by: 0.4),
                                          .teal.mix(with: .black, by: 0.25)]
             let heightLabels = ["180 m", "120 m", "80 m"]
             let speeds = displayed(windspeed)
-            let windUnit = unit.usesBeaufortDisplay ? unit.displayUnit : windUnitString
+            let windUnit = units.wind.symbol
             return HourlyLensLayout(
                 lines: zip(zip(heights, heightColors), heightLabels).map { pair, label in
                     line(pair.0, pair.1, width: 2.5, label: label)
@@ -45,13 +45,15 @@ extension HourlyTimelineModel {
                 showsDirectionArrows: true
             )
         case .pressure:
+            let pressure = pressure.map(units.pressure.value(fromHectopascals:))
+            let pressureUnit = units.pressure
             return HourlyLensLayout(
                 lines: [line(pressure, .purple)],
-                domain: paddedDomain([pressure], minimumPad: 2),
+                domain: paddedDomain([pressure], minimumPad: pressureUnit.value(fromHectopascals: 2)),
                 showsBars: false,
                 barsAlpha: 0,
                 extremes: extremeMarks(for: pressure),
-                extremeFormat: { "\(Int($0.rounded())) hPa" },
+                extremeFormat: { "\($0.formatted(.number.grouping(.never).precision(.fractionLength(pressureUnit.fractionDigits)))) \(pressureUnit.symbol)" },
                 primaryColor: .purple
             )
         case .humidity:
@@ -78,6 +80,10 @@ extension HourlyTimelineModel {
                         .init(values: cloudLow, centerFraction: 0.76, label: String(localized: "Tiefe Wolken"))]
             )
         case .soilTemperature:
+            let soilTemperature0 = temperatures(soilTemperature0)
+            let soilTemperature6 = temperatures(soilTemperature6)
+            let soilTemperature18 = temperatures(soilTemperature18)
+            let soilTemperature54 = temperatures(soilTemperature54)
             return HourlyLensLayout(
                 lines: [line(soilTemperature54, .brown.mix(with: .black, by: 0.55), width: 2.5, label: "54 cm"),
                         line(soilTemperature18, .brown.mix(with: .black, by: 0.4), width: 2.8, label: "18 cm"),
@@ -106,21 +112,20 @@ extension HourlyTimelineModel {
                 showsBars: false,
                 barsAlpha: 0,
                 extremes: [],
-                extremeFormat: { [moistureUnit = compactMoistureUnit] in
-                    "\($0.formatted(.number.precision(.fractionLength(2)))) \(moistureUnit)"
-                },
+                extremeFormat: { "\($0.formatted(.number.precision(.fractionLength(2)))) m³⁄m³" },
                 primaryColor: .blue
             )
         case .evapotranspiration:
+            let precipitationUnit = units.precipitation
+            let et0 = et0.map(precipitationUnit.value(fromMillimeters:))
+            let floor = precipitationUnit.value(fromMillimeters: 0.05)
             return HourlyLensLayout(
                 lines: [line(et0, .hourlyRain)],
-                domain: paddedDomain([et0], from: 0, minimumPad: 0.05),
+                domain: paddedDomain([et0], from: 0, minimumPad: floor),
                 showsBars: false,
                 barsAlpha: 0,
-                extremes: extremeMarks(for: et0, highsOnly: true, atLeast: 0.05),
-                extremeFormat: { [unit = et0Unit] in
-                    "\($0.formatted(.number.precision(.fractionLength(2)))) \(unit)"
-                },
+                extremes: extremeMarks(for: et0, highsOnly: true, atLeast: floor),
+                extremeFormat: { "\($0.formatted(.number.precision(.fractionLength(precipitationUnit.fractionDigits + 1)))) \(precipitationUnit.symbol)" },
                 primaryColor: .hourlyRain
             )
         }

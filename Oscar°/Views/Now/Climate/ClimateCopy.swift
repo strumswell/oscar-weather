@@ -23,7 +23,7 @@ enum ClimateCopy {
         return String(localized: "Kälter als \(pct) aller \(day) seit \(year).")
     }
 
-    static func analog(_ summary: ClimateSummary, _ unit: ClimateTemperatureUnit) -> (year: Int, value: Double)? {
+    static func analog(_ summary: ClimateSummary, _ unit: TemperatureUnit) -> (year: Int, value: Double)? {
         guard !summary.pastStripes.isEmpty else { return nil }
         let todayDisplay = Int(unit.value(fromCelsius: summary.todayHigh).rounded())
         let sameDisplay = summary.pastStripes.filter {
@@ -40,7 +40,7 @@ enum ClimateCopy {
         return nearest.map { ($0.year, $0.value) }
     }
 
-    static func analogLine(_ summary: ClimateSummary, _ unit: ClimateTemperatureUnit) -> String? {
+    static func analogLine(_ summary: ClimateSummary, _ unit: TemperatureUnit) -> String? {
         let day = summary.dayLabel
         let firstYear = String(summary.firstYear)
         if summary.warmerRank == 1 {
@@ -77,7 +77,7 @@ enum ClimateCopy {
         return String(localized: "Das ist der \(rank). kälteste \(day) seit \(year).")
     }
 
-    static func statLine(_ summary: ClimateSummary, _ unit: ClimateTemperatureUnit) -> String {
+    static func statLine(_ summary: ClimateSummary, _ unit: TemperatureUnit) -> String {
         let today = summary.anomalyString(unit)
         let normal = summary.normalString(unit)
         let record = summary.previousWarmRecordString(unit)

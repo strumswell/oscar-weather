@@ -10,10 +10,7 @@ final class EnsembleState {
     private(set) var isLoading = true
     private(set) var timeZone: TimeZone = .current
     private(set) var utcOffsetSeconds = 0
-    private(set) var isFahrenheit = false
-    private(set) var precipitationUnit = "mm"
-    private(set) var windUnit = "km/h"
-    private(set) var usesBeaufort = false
+    var units: Units { SettingService.shared.units }
 
     @ObservationIgnored private var loadGeneration = 0
 
@@ -49,13 +46,8 @@ final class EnsembleState {
     }
 
     private func apply(_ response: DailyEnsembleForecastResponse, anchorTime: Double) {
-        let windSetting = WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit)
         timeZone = response.timeZone
         utcOffsetSeconds = response.utcOffsetSeconds
-        isFahrenheit = response.dailyUnits["temperature_2m_max"]?.contains("F") ?? false
-        precipitationUnit = response.dailyUnits["precipitation_sum"] ?? "mm"
-        usesBeaufort = windSetting.usesBeaufortDisplay
-        windUnit = usesBeaufort ? windSetting.displayUnit : response.dailyUnits["wind_speed_10m_max"] ?? "km/h"
         days = response.days
         selectedIndex = days.indices.min { abs(days[$0].noon - anchorTime) < abs(days[$1].noon - anchorTime) } ?? 0
     }
@@ -74,17 +66,17 @@ final class EnsembleState {
     func spread(_ lens: EnsembleLens, of day: EnsembleDay) -> EnsembleSpread? {
         switch lens {
         case .sky: nil
-        case .high: day.high
-        case .low: day.low
-        case .precipitation: day.precipitation
-        case .wind: usesBeaufort ? day.wind?.map { BeaufortScale.value(forKilometersPerHour: $0) ?? 0 } : day.wind
+        case .high: day.high?.map(units.temperature.value(fromCelsius:))
+        case .low: day.low?.map(units.temperature.value(fromCelsius:))
+        case .precipitation: day.precipitation?.map(units.precipitation.value(fromMillimeters:))
+        case .wind: day.wind?.map(units.windValue)
         }
     }
 
     func number(_ value: Double, for lens: EnsembleLens) -> String {
         switch lens {
         case .precipitation:
-            let digits = precipitationUnit == "inch" ? 0...2 : (value < 10 ? 0...1 : 0...0)
+            let digits = units.precipitation == .inch ? 0...2 : (value < 10 ? 0...1 : 0...0)
             return value.formatted(.number.precision(.fractionLength(digits)))
         default:
             let rounded = Int(value.rounded())
@@ -106,8 +98,8 @@ final class EnsembleState {
         switch lens {
         case .sky: ""
         case .high, .low: "°"
-        case .precipitation: " " + precipitationUnit
-        case .wind: " " + windUnit
+        case .precipitation: " " + units.precipitation.symbol
+        case .wind: " " + units.wind.symbol
         }
     }
 
@@ -130,7 +122,7 @@ final class EnsembleState {
 
     var titleLabel: String {
         guard let day = selectedDay else { return "" }
-        return EnsembleConfidence(day: day, fahrenheit: isFahrenheit).title
+        return EnsembleConfidence(day: day).title
     }
 
     var footnote: String {

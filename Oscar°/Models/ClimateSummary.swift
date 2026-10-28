@@ -10,43 +10,6 @@
 
 import Foundation
 
-enum ClimateTemperatureUnit {
-    case celsius
-    case fahrenheit
-
-    init(settingValue: String) {
-        self = settingValue == "fahrenheit" ? .fahrenheit : .celsius
-    }
-
-    var symbol: String {
-        switch self {
-        case .celsius: "°C"
-        case .fahrenheit: "°F"
-        }
-    }
-
-    func value(fromCelsius celsius: Double) -> Double {
-        switch self {
-        case .celsius: celsius
-        case .fahrenheit: celsius * 9 / 5 + 32
-        }
-    }
-
-    func celsius(fromValue value: Double) -> Double {
-        switch self {
-        case .celsius: value
-        case .fahrenheit: (value - 32) * 5 / 9
-        }
-    }
-
-    func delta(fromCelsius delta: Double) -> Double {
-        switch self {
-        case .celsius: delta
-        case .fahrenheit: delta * 9 / 5
-        }
-    }
-}
-
 struct ClimateStripe: Identifiable, Sendable {
     let year: Int
     let value: Double
@@ -247,45 +210,45 @@ extension ClimateSummary {
         return Int((fraction * 100).rounded())
     }
 
-    func todayHighString(_ unit: ClimateTemperatureUnit) -> String {
+    func todayHighString(_ unit: TemperatureUnit) -> String {
         Self.tempString(todayHigh, unit)
     }
 
-    func normalString(_ unit: ClimateTemperatureUnit) -> String {
+    func normalString(_ unit: TemperatureUnit) -> String {
         Self.tempString(normal, unit)
     }
 
-    func recordMaxString(_ unit: ClimateTemperatureUnit) -> String {
+    func recordMaxString(_ unit: TemperatureUnit) -> String {
         Self.tempString(recordMax.value, unit)
     }
 
-    func previousWarmRecordString(_ unit: ClimateTemperatureUnit) -> String {
+    func previousWarmRecordString(_ unit: TemperatureUnit) -> String {
         Self.tempString(previousWarmRecord.value, unit)
     }
 
-    func recordMinString(_ unit: ClimateTemperatureUnit) -> String {
+    func recordMinString(_ unit: TemperatureUnit) -> String {
         Self.tempString(recordMin.value, unit)
     }
 
-    func typicalRangeString(_ unit: ClimateTemperatureUnit) -> String {
+    func typicalRangeString(_ unit: TemperatureUnit) -> String {
         let low = Int(unit.value(fromCelsius: typicalLow).rounded())
         let high = Int(unit.value(fromCelsius: typicalHigh).rounded())
         return "\(low)–\(high)°"
     }
 
-    func hotThresholdLabel(_ unit: ClimateTemperatureUnit) -> String {
+    func hotThresholdLabel(_ unit: TemperatureUnit) -> String {
         "≥ \(Int(unit.value(fromCelsius: 30).rounded()))°"
     }
 
-    func frostThresholdLabel(_ unit: ClimateTemperatureUnit) -> String {
+    func frostThresholdLabel(_ unit: TemperatureUnit) -> String {
         "< \(Int(unit.value(fromCelsius: 0).rounded()))°"
     }
 
-    func lastRecordString(_ unit: ClimateTemperatureUnit) -> String {
+    func lastRecordString(_ unit: TemperatureUnit) -> String {
         "\(Self.tempString(lastRecordValue, unit)) · \(lastRecordYear)"
     }
 
-    func trendString(_ unit: ClimateTemperatureUnit) -> String? {
+    func trendString(_ unit: TemperatureUnit) -> String? {
         guard let trend = decadalTrendCelsius else { return nil }
         let value = unit.delta(fromCelsius: trend)
         let formatted = value.formatted(
@@ -293,7 +256,7 @@ extension ClimateSummary {
         return String(localized: "\(formatted)°/Jahrzehnt")
     }
 
-    func anomalyString(_ unit: ClimateTemperatureUnit) -> String {
+    func anomalyString(_ unit: TemperatureUnit) -> String {
         let value = unit.delta(fromCelsius: anomaly)
         let formatted = value.formatted(
             .number.precision(.fractionLength(1)).sign(strategy: .always(includingZero: false))
@@ -301,7 +264,7 @@ extension ClimateSummary {
         return "\(formatted)°"
     }
 
-    private static func tempString(_ celsius: Double, _ unit: ClimateTemperatureUnit) -> String {
+    private static func tempString(_ celsius: Double, _ unit: TemperatureUnit) -> String {
         "\(Int(unit.value(fromCelsius: celsius).rounded()))°"
     }
 }

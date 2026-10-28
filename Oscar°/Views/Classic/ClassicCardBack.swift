@@ -97,8 +97,8 @@ struct ClassicCardBack: View {
 
     private var unitSwitch: some View {
         HStack(spacing: 0) {
-            unitSegment("°C", tag: "celsius")
-            unitSegment("°F", tag: "fahrenheit")
+            unitSegment(.celsius)
+            unitSegment(.fahrenheit)
         }
         .frame(height: 50)
         .clipShape(.rect(cornerRadius: 10))
@@ -107,12 +107,12 @@ struct ClassicCardBack: View {
         .accessibilityLabel(Text("Temperatur"))
     }
 
-    private func unitSegment(_ label: String, tag: String) -> some View {
-        let selected = settingsService.temperatureUnit == tag
+    private func unitSegment(_ unit: TemperatureUnit) -> some View {
+        let selected = settingsService.temperatureUnit == unit
         return Button {
-            settingsService.temperatureUnit = tag
+            settingsService.temperatureUnit = unit
         } label: {
-            Text(verbatim: label)
+            Text(verbatim: unit.symbol)
                 .font(.custom("HelveticaNeue-Bold", fixedSize: 22))
                 .foregroundStyle(selected ? .white : Color(white: 0.45))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

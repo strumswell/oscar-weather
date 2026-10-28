@@ -11,14 +11,29 @@ final class SettingService {
         subsystem: Bundle.main.bundleIdentifier ?? "Oscar",
         category: "Storage"
     )
-    var temperatureUnit: String {
-        didSet { unitDidChange(key: Self.temperatureUnitKey, value: temperatureUnit) }
+    var temperatureUnit: TemperatureUnit {
+        didSet { unitDidChange(key: Self.temperatureUnitKey, value: temperatureUnit.rawValue) }
     }
-    var windSpeedUnit: String {
-        didSet { unitDidChange(key: Self.windSpeedUnitKey, value: windSpeedUnit) }
+    var windSpeedUnit: WindSpeedUnit {
+        didSet { unitDidChange(key: Self.windSpeedUnitKey, value: windSpeedUnit.rawValue) }
     }
-    var precipitationUnit: String {
-        didSet { unitDidChange(key: Self.precipitationUnitKey, value: precipitationUnit) }
+    var precipitationUnit: PrecipitationUnit {
+        didSet { unitDidChange(key: Self.precipitationUnitKey, value: precipitationUnit.rawValue) }
+    }
+    var pressureUnit: PressureUnit {
+        didSet { unitDidChange(key: Self.pressureUnitKey, value: pressureUnit.rawValue) }
+    }
+    var distanceUnit: DistanceUnit {
+        didSet { unitDidChange(key: Self.distanceUnitKey, value: distanceUnit.rawValue) }
+    }
+    var units: Units {
+        Units(
+            temperature: temperatureUnit,
+            wind: windSpeedUnit,
+            precipitation: precipitationUnit,
+            pressure: pressureUnit,
+            distance: distanceUnit
+        )
     }
     var oscarRadarLayer: Bool {
         didSet { UserDefaults.standard.set(oscarRadarLayer, forKey: "oscarRadarLayer") }
@@ -157,13 +172,21 @@ final class SettingService {
     nonisolated private static let temperatureUnitKey = "temperatureUnit"
     nonisolated private static let windSpeedUnitKey = "windSpeedUnit"
     nonisolated private static let precipitationUnitKey = "precipitationUnit"
+    nonisolated private static let pressureUnitKey = "pressureUnit"
+    nonisolated private static let distanceUnitKey = "distanceUnit"
     nonisolated private static var defaults: UserDefaults { AppGroup.defaults }
 
     private init() {
+        #if !os(watchOS)
         Self.migrateUnitsFromCoreDataIfNeeded()
-        temperatureUnit = Self.resolvedTemperatureUnit
-        windSpeedUnit = Self.resolvedWindSpeedUnit
-        precipitationUnit = Self.resolvedPrecipitationUnit
+        Self.keepMetricForExistingInstallIfNeeded()
+        #endif
+        let units = Self.resolvedUnits
+        temperatureUnit = units.temperature
+        windSpeedUnit = units.wind
+        precipitationUnit = units.precipitation
+        pressureUnit = units.pressure
+        distanceUnit = units.distance
         oscarRadarLayer = UserDefaults.standard.bool(forKey: "oscarRadarLayer")
         activeTileLayerRaw = UserDefaults.standard.string(forKey: "activeTileLayer")
         let resolvedRadarRegion = Self.defaults.string(forKey: "oscarRadarRegion")
@@ -231,7 +254,7 @@ final class SettingService {
 
     private func unitDidChange(key: String, value: String) {
         Self.defaults.set(value, forKey: key)
-        nc.post(name: .weatherRefreshNeeded, object: nil)
+        nc.post(name: .unitsDidChange, object: nil)
         WidgetCenter.shared.reloadAllTimelines()
     }
 
@@ -242,6 +265,18 @@ final class SettingService {
         defaults.set(stored.temperatureUnit ?? "celsius", forKey: temperatureUnitKey)
         defaults.set(stored.windSpeedUnit ?? "kmh", forKey: windSpeedUnitKey)
         defaults.set(stored.precipitationUnit ?? "mm", forKey: precipitationUnitKey)
+    }
+
+    private static func keepMetricForExistingInstallIfNeeded() {
+        let doneKey = "unitsLocaleDefaultsMigrated"
+        guard Bundle.main.bundleURL.pathExtension == "app", !defaults.bool(forKey: doneKey) else { return }
+        defaults.set(true, forKey: doneKey)
+        guard UserDefaults.standard.bool(forKey: "hasCompletedOnboarding"),
+              defaults.string(forKey: temperatureUnitKey) == nil else { return }
+        defaults.set(TemperatureUnit.celsius.rawValue, forKey: temperatureUnitKey)
+        defaults.set(WindSpeedUnit.kmh.rawValue, forKey: windSpeedUnitKey)
+        defaults.set(PrecipitationUnit.mm.rawValue, forKey: precipitationUnitKey)
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     nonisolated static var resolvedTimeFormatAPIValue: String {
@@ -258,16 +293,37 @@ final class SettingService {
         return ForecastModelPreference(rawValue: rawValue ?? "") ?? .bestMatch
     }
 
-    nonisolated static var resolvedTemperatureUnit: String {
-        defaults.string(forKey: temperatureUnitKey) ?? "celsius"
+    nonisolated static var resolvedUnits: Units {
+        Units(
+            temperature: stored(temperatureUnitKey) ?? .localeDefault,
+            wind: stored(windSpeedUnitKey) ?? .localeDefault,
+            precipitation: stored(precipitationUnitKey) ?? .localeDefault,
+            pressure: stored(pressureUnitKey) ?? .localeDefault,
+            distance: stored(distanceUnitKey) ?? .localeDefault
+        )
     }
 
-    nonisolated static var resolvedWindSpeedUnit: String {
-        defaults.string(forKey: windSpeedUnitKey) ?? "kmh"
+    nonisolated private static func stored<Unit: RawRepresentable<String>>(_ key: String) -> Unit? {
+        defaults.string(forKey: key).flatMap(Unit.init(rawValue:))
     }
 
-    nonisolated static var resolvedPrecipitationUnit: String {
-        defaults.string(forKey: precipitationUnitKey) ?? "mm"
+    nonisolated static var unitStorageValues: [String: String] {
+        let units = resolvedUnits
+        return [
+            temperatureUnitKey: units.temperature.rawValue,
+            windSpeedUnitKey: units.wind.rawValue,
+            precipitationUnitKey: units.precipitation.rawValue,
+            pressureUnitKey: units.pressure.rawValue,
+            distanceUnitKey: units.distance.rawValue,
+        ]
+    }
+
+    func apply(unitValues values: [String: String]) {
+        if let unit = values[Self.temperatureUnitKey].flatMap(TemperatureUnit.init), unit != temperatureUnit { temperatureUnit = unit }
+        if let unit = values[Self.windSpeedUnitKey].flatMap(WindSpeedUnit.init), unit != windSpeedUnit { windSpeedUnit = unit }
+        if let unit = values[Self.precipitationUnitKey].flatMap(PrecipitationUnit.init), unit != precipitationUnit { precipitationUnit = unit }
+        if let unit = values[Self.pressureUnitKey].flatMap(PressureUnit.init), unit != pressureUnit { pressureUnit = unit }
+        if let unit = values[Self.distanceUnitKey].flatMap(DistanceUnit.init), unit != distanceUnit { distanceUnit = unit }
     }
 
     private static func clampedHour(_ hour: Int) -> Int {

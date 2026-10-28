@@ -14,6 +14,8 @@ struct ScreenshotWidgetGallery: View {
 
     @State private var radar: RadarSnapshotRenderer.Rendered?
 
+    private var units: Units { SettingService.resolvedUnits }
+
     var body: some View {
         ZStack {
             LinearGradient(
@@ -107,7 +109,7 @@ struct ScreenshotWidgetGallery: View {
                         .font(.body)
                         .frame(width: 30, height: 22)
 
-                    Text(roundTemperatureString(temperature: day.low))
+                    Text(units.temperatureString(day.low))
                         .font(.subheadline)
                         .monospacedDigit()
                         .foregroundStyle(.white.opacity(0.75))
@@ -120,11 +122,11 @@ struct ScreenshotWidgetGallery: View {
                         focusHigh: nil,
                         minTemp: minTemp,
                         maxTemp: maxTemp,
-                        unit: "°C"
+                        unit: units.temperature
                     )
                     .frame(height: 6)
 
-                    Text(roundTemperatureString(temperature: day.high))
+                    Text(units.temperatureString(day.high))
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .monospacedDigit()

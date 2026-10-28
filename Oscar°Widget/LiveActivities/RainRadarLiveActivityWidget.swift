@@ -213,8 +213,8 @@ private struct RainActivityModel {
 private enum RainIntensity {
     static let ceiling = 20.0
 
-    static var isInch: Bool { SettingService.resolvedPrecipitationUnit == "inch" }
-    static var unit: String { isInch ? "in/h" : "mm/h" }
+    static var isInch: Bool { SettingService.resolvedUnits.precipitation == .inch }
+    static var unit: String { SettingService.resolvedUnits.precipitation.rateSymbol }
 
     static var gridlines: [Double] { isInch ? [1.27, 5.08] : [1, 5] }
 

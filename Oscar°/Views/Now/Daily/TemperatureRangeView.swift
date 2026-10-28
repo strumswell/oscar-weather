@@ -7,7 +7,7 @@ struct TemperatureRangeView: View {
   let focusHigh: Double?
   let minTemp: Double
   let maxTemp: Double
-  let unit: String
+  let unit: TemperatureUnit
 
   var body: some View {
     GeometryReader { geometry in
@@ -103,7 +103,7 @@ struct TemperatureRangeView: View {
     let dotOffset = min(max(xPosition - dotSize / 2, 0), max(availableWidth - dotSize, 0))
 
     return ZStack(alignment: .leading) {
-      Text(roundTemperatureString(temperature: temperature))
+      Text(unit.string(temperature))
         .font(.caption2.weight(.semibold))
         .lineLimit(1)
         .minimumScaleFactor(0.7)
@@ -154,13 +154,8 @@ struct TemperatureRangeView: View {
   }
 
   private func shouldShowFocusMarker(for temperature: Double) -> Bool {
-    let roundedTemperature = roundedDisplayTemperature(temperature)
-    return roundedTemperature != roundedDisplayTemperature(low)
-      && roundedTemperature != roundedDisplayTemperature(high)
-  }
-
-  private func roundedDisplayTemperature(_ temperature: Double) -> Int {
-    Int(temperature.rounded())
+    let roundedTemperature = unit.rounded(temperature)
+    return roundedTemperature != unit.rounded(low) && roundedTemperature != unit.rounded(high)
   }
 
   private var globalGradient: LinearGradient {
@@ -182,43 +177,33 @@ struct TemperatureRangeView: View {
   }
 
   private func gradientStops() -> [Gradient.Stop] {
-    let thresholds = temperatureThresholds(for: unit)
     let range = maxTemp - minTemp
 
     guard range > 0 else {
       return [
-        .init(color: color(for: minTemp, unit: unit), location: 0),
-        .init(color: color(for: minTemp, unit: unit), location: 1)
+        .init(color: color(for: minTemp), location: 0),
+        .init(color: color(for: minTemp), location: 1)
       ]
     }
 
     var stops: [Gradient.Stop] = [
-      .init(color: color(for: minTemp, unit: unit), location: 0)
+      .init(color: color(for: minTemp), location: 0)
     ]
 
-    for threshold in thresholds where threshold > minTemp && threshold < maxTemp {
+    for threshold in Self.thresholds where threshold > minTemp && threshold < maxTemp {
       let location = (threshold - minTemp) / range
-      stops.append(.init(color: color(for: threshold, unit: unit), location: location))
+      stops.append(.init(color: color(for: threshold), location: location))
     }
 
-    stops.append(.init(color: color(for: maxTemp, unit: unit), location: 1))
+    stops.append(.init(color: color(for: maxTemp), location: 1))
     return stops
   }
 
-  private func temperatureThresholds(for unit: String) -> [Double] {
-    switch unit {
-    case "°F":
-      return [32, 50, 68, 86]
-    case "K":
-      return [273, 283, 293, 303]
-    default:
-      return [0, 10, 20, 30]
-    }
-  }
+  private static let thresholds: [Double] = [0, 10, 20, 30]
+  private static let bands: [Color] = [.blue, .green, .yellow, .orange, .red]
 
-  private func color(for temperature: Double, unit: String) -> Color {
-    let bands: [Color] = [.blue, .green, .yellow, .orange, .red]
-    return bands[temperatureThresholds(for: unit).filter { temperature >= $0 }.count]
+  private func color(for temperature: Double) -> Color {
+    Self.bands[Self.thresholds.filter { temperature >= $0 }.count]
   }
 }
 

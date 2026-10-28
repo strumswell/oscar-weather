@@ -3,6 +3,8 @@ import SwiftUI
 let stagedCardFill = AnyShapeStyle(Color(uiColor: .systemBackground).opacity(0.78))
 
 struct CollageDailyCard: View {
+    private var units: Units { SettingService.shared.units }
+
     var dayCount = 5
 
     var body: some View {
@@ -17,7 +19,7 @@ struct CollageDailyCard: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 20, height: 20)
-                    Text(verbatim: "\(Int(row.low))°")
+                    Text(verbatim: units.temperature.string(row.low))
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                     TemperatureRangeView(
@@ -27,10 +29,10 @@ struct CollageDailyCard: View {
                         focusHigh: nil,
                         minTemp: OnboardingSampleData.dailyTemperatureBounds.min,
                         maxTemp: OnboardingSampleData.dailyTemperatureBounds.max,
-                        unit: "°C"
+                        unit: units.temperature
                     )
                     .frame(height: 5)
-                    Text(verbatim: "\(Int(row.high))°")
+                    Text(verbatim: units.temperature.string(row.high))
                         .font(.footnote)
                 }
             }

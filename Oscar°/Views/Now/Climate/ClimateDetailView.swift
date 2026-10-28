@@ -13,9 +13,7 @@ struct ClimateDetailView: View {
     @Environment(\.dismiss) private var dismiss
     let summary: ClimateSummary
 
-    private var unit: ClimateTemperatureUnit {
-        ClimateTemperatureUnit(settingValue: SettingService.resolvedTemperatureUnit)
-    }
+    private var unit: TemperatureUnit { SettingService.shared.temperatureUnit }
 
     private var isRecord: Bool {
         summary.warmerRank == 1 || summary.warmerRank == summary.totalYears

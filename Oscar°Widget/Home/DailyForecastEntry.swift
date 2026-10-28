@@ -18,8 +18,6 @@ struct DailyForecastEntry: TimelineEntry {
     let days: [DayForecast]
     let minTemp: Double
     let maxTemp: Double
-    let temperatureUnit: String
-    let precipitationUnit: String
     let backgroundGradient: LinearGradient
 
     static var placeholder: DailyForecastEntry {
@@ -49,8 +47,6 @@ struct DailyForecastEntry: TimelineEntry {
             days: days,
             minTemp: 11,
             maxTemp: 26,
-            temperatureUnit: "°C",
-            precipitationUnit: "mm",
             backgroundGradient: LinearGradient(
                 colors: [.sunriseStart, .sunnyDayEnd], startPoint: .top, endPoint: .bottom)
         )
@@ -63,8 +59,6 @@ struct DailyForecastEntry: TimelineEntry {
             days: [],
             minTemp: 0,
             maxTemp: 40,
-            temperatureUnit: "°C",
-            precipitationUnit: "mm",
             backgroundGradient: LinearGradient(
                 colors: [.sunriseStart, .sunnyDayEnd], startPoint: .top, endPoint: .bottom)
         )

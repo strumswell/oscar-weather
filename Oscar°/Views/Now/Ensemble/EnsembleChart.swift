@@ -123,7 +123,7 @@ struct EnsembleChart: View {
         let fromZero = lens == .precipitation || lens == .wind
         let bottom = fromZero ? 0 : lowest
         let top = lens == .precipitation ? highestBand * 1.3 : highest
-        let span = max(top - bottom, lens == .precipitation ? 2 : 4)
+        let span = max(top - bottom, lens == .precipitation ? state.units.precipitation.value(fromMillimeters: 2) : 4)
         let lower = fromZero ? 0 : bottom - span * 0.08
         let upper = bottom + span * 1.08
         func y(_ value: Double) -> CGFloat {
@@ -199,7 +199,8 @@ struct EnsembleChart: View {
 
         let every = max(1, Int((26 / column).rounded(.up)))
         for index in stride(from: 0, to: spreads.count, by: every) where index != selected {
-            guard let spread = spreads[index], lens != .precipitation || spread.median >= 0.1 else { continue }
+            guard let spread = spreads[index],
+                  lens != .precipitation || spread.median >= state.units.precipitation.value(fromMillimeters: 0.1) else { continue }
             let label = labelContext.resolve(
                 Text(verbatim: state.number(spread.median, for: lens) + (lens == .high || lens == .low ? "°" : ""))
                     .font(.system(size: 10.5, weight: .semibold))

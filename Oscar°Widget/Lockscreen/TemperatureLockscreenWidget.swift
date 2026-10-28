@@ -11,6 +11,7 @@ import SwiftUI
 struct TemperatureLockScreenView: View {
     var entry: LockscreenProvider.Entry
     @Environment(\.widgetFamily) private var family
+    private var units: Units { SettingService.resolvedUnits }
 
     private static let temperatureTint = Gradient(colors: [.cyan, .green, .yellow, .orange, .red])
 
@@ -20,32 +21,32 @@ struct TemperatureLockScreenView: View {
             case .accessoryCircular:
                 Gauge(value: entry.temperatureNow, in: entry.temperatureMin...entry.temperatureMax) {
                 } currentValueLabel: {
-                    Text("\(Int(round(entry.temperatureNow)))°")
+                    Text(units.temperatureString(entry.temperatureNow))
                 } minimumValueLabel: {
-                    Text("\(Int(round(entry.temperatureMin)))")
+                    Text("\(units.temperature.rounded(entry.temperatureMin))")
                 } maximumValueLabel: {
-                    Text("\(Int(round(entry.temperatureMax)))")
+                    Text("\(units.temperature.rounded(entry.temperatureMax))")
                 }
                 .gaugeStyle(.accessoryCircular)
                 .tint(Self.temperatureTint)
             case .accessoryInline:
                 HStack {
                     Image(systemName: entry.icon)
-                    Text("\(Int(round(entry.temperatureNow)))°")
+                    Text(units.temperatureString(entry.temperatureNow))
                 }
             case .accessoryCorner:
-                Text("\(Int(round(entry.temperatureNow)))°")
+                Text(units.temperatureString(entry.temperatureNow))
                     .font(.system(size: 22, weight: .semibold, design: .rounded))
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
                     .widgetLabel {
                        Gauge(value: entry.temperatureNow, in: entry.temperatureMin...entry.temperatureMax) {
                        } currentValueLabel: {
-                           Text("\(Int(round(entry.temperatureNow)))")
+                           Text("\(units.temperature.rounded(entry.temperatureNow))")
                        } minimumValueLabel: {
-                           Text("\(Int(round(entry.temperatureMin)))")
+                           Text("\(units.temperature.rounded(entry.temperatureMin))")
                        } maximumValueLabel: {
-                           Text("\(Int(round(entry.temperatureMax)))")
+                           Text("\(units.temperature.rounded(entry.temperatureMax))")
                        }
                       .gaugeStyle(LinearCapacityGaugeStyle())
                       .tint(Self.temperatureTint)

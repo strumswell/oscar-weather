@@ -138,6 +138,8 @@ private struct RadarWidgetTile: View {
 }
 
 private struct DailyWidgetTile: View {
+    private var units: Units { SettingService.shared.units }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(verbatim: "Leipzig")
@@ -151,7 +153,7 @@ private struct DailyWidgetTile: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 18, height: 18)
-                    Text(verbatim: "\(Int(row.low))°")
+                    Text(verbatim: units.temperature.string(row.low))
                         .font(.footnote)
                         .foregroundStyle(.white.opacity(0.7))
                     TemperatureRangeView(
@@ -161,10 +163,10 @@ private struct DailyWidgetTile: View {
                         focusHigh: nil,
                         minTemp: OnboardingSampleData.dailyTemperatureBounds.min,
                         maxTemp: OnboardingSampleData.dailyTemperatureBounds.max,
-                        unit: "°C"
+                        unit: units.temperature
                     )
                     .frame(height: 4)
-                    Text(verbatim: "\(Int(row.high))°")
+                    Text(verbatim: units.temperature.string(row.high))
                         .font(.footnote.weight(.semibold))
                 }
             }
@@ -183,6 +185,8 @@ private struct DailyWidgetTile: View {
 }
 
 private struct WatchTile: View {
+    private var units: Units { SettingService.shared.units }
+
     enum Face { case now, radar }
 
     let face: Face
@@ -281,15 +285,15 @@ private struct WatchTile: View {
             Text(verbatim: "Leipzig")
                 .font(.system(size: 16, weight: .semibold, design: .rounded))
             Spacer()
-            Text(verbatim: "21°")
+            Text(verbatim: units.temperature.string(21))
                 .font(.system(size: 64, weight: .thin, design: .rounded))
             Text(WeatherConditionLabel.text(for: 0))
                 .font(.system(size: 16, weight: .medium, design: .rounded))
                 .padding(.top, -2)
             Spacer()
             HStack(spacing: 14) {
-                rangeLabel("arrow.up", "27°")
-                rangeLabel("arrow.down", "14°")
+                rangeLabel("arrow.up", units.temperature.string(27))
+                rangeLabel("arrow.down", units.temperature.string(14))
             }
             .font(.system(size: 15, weight: .medium, design: .rounded))
         }

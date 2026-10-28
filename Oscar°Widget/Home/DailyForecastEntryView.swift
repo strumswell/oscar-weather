@@ -27,8 +27,7 @@ struct DailyForecastEntryView: View {
                     DailyForecastRow(
                         day: day,
                         minTemp: entry.minTemp,
-                        maxTemp: entry.maxTemp,
-                        temperatureUnit: entry.temperatureUnit
+                        maxTemp: entry.maxTemp
                     )
                     .frame(maxHeight: family == .systemLarge ? .infinity : nil)
                 }
@@ -48,7 +47,7 @@ struct DailyForecastRow: View {
     let day: DayForecast
     let minTemp: Double
     let maxTemp: Double
-    let temperatureUnit: String
+    private var units: Units { SettingService.resolvedUnits }
 
     var body: some View {
         HStack(spacing: 10) {
@@ -64,7 +63,7 @@ struct DailyForecastRow: View {
                 .font(.body)
                 .frame(width: 30, height: 22)
 
-            Text(roundTemperatureString(temperature: day.low))
+            Text(units.temperatureString(day.low))
                 .font(.subheadline)
                 .monospacedDigit()
                 .foregroundStyle(.white.opacity(0.75))
@@ -77,11 +76,11 @@ struct DailyForecastRow: View {
                 focusHigh: nil,
                 minTemp: minTemp,
                 maxTemp: maxTemp,
-                unit: temperatureUnit
+                unit: units.temperature
             )
             .frame(height: 6)
 
-            Text(roundTemperatureString(temperature: day.high))
+            Text(units.temperatureString(day.high))
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .monospacedDigit()
@@ -89,13 +88,14 @@ struct DailyForecastRow: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
-            Text("\(day.weekday): \(roundTemperatureString(temperature: day.low)) bis \(roundTemperatureString(temperature: day.high))")
+            Text("\(day.weekday): \(units.temperatureString(day.low)) bis \(units.temperatureString(day.high))")
         )
     }
 }
 
 struct DailyForecastCompactRow: View {
     let day: DayForecast
+    private var units: Units { SettingService.resolvedUnits }
 
     var body: some View {
         HStack(spacing: 6) {
@@ -113,19 +113,19 @@ struct DailyForecastCompactRow: View {
 
             Spacer(minLength: 2)
 
-            Text(roundTemperatureString(temperature: day.high))
+            Text(units.temperatureString(day.high))
                 .font(.footnote)
                 .fontWeight(.semibold)
                 .monospacedDigit()
 
-            Text(roundTemperatureString(temperature: day.low))
+            Text(units.temperatureString(day.low))
                 .font(.footnote)
                 .monospacedDigit()
                 .foregroundStyle(.white.opacity(0.7))
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
-            Text("\(day.weekday): \(roundTemperatureString(temperature: day.low)) bis \(roundTemperatureString(temperature: day.high))")
+            Text("\(day.weekday): \(units.temperatureString(day.low)) bis \(units.temperatureString(day.high))")
         )
     }
 }

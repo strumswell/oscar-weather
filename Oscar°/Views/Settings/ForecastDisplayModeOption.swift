@@ -73,8 +73,9 @@ struct ForecastDisplayModeOption: View {
     focusHigh: Double?,
     height: CGFloat
   ) -> some View {
-    HStack(spacing: 5) {
-      Text(roundTemperatureString(temperature: labelLow))
+    let unit = SettingService.shared.temperatureUnit
+    return HStack(spacing: 5) {
+      Text(unit.string(labelLow))
         .font(.footnote.weight(.medium))
         .frame(width: 26, alignment: .trailing)
         .offset(y: height > 8 ? 9 : 0)
@@ -85,10 +86,10 @@ struct ForecastDisplayModeOption: View {
         focusHigh: focusHigh,
         minTemp: 6,
         maxTemp: 27,
-        unit: "°C"
+        unit: unit
       )
       .frame(height: height)
-      Text(roundTemperatureString(temperature: labelHigh))
+      Text(unit.string(labelHigh))
         .font(.footnote.weight(.medium))
         .frame(width: 26, alignment: .leading)
         .offset(y: height > 8 ? 9 : 0)

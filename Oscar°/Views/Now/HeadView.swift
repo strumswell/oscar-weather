@@ -166,7 +166,7 @@ struct HeadView: View {
       VStack(spacing: 0) {
         Spacer(minLength: compact ? 8 : Self.temperatureGapMinHeight)
 
-        Text(roundTemperatureString(temperature: weather.forecast.current?.temperature))
+        Text(SettingService.shared.units.temperatureString(weather.forecast.current?.temperature))
           .foregroundStyle(Color(uiColor: .label))
           .font(.system(size: temperatureFontSize))
           .minimumScaleFactor(0.5)
@@ -175,7 +175,7 @@ struct HeadView: View {
           .contentTransition(.numericText())
           .catPerch()
           .animation(.default, value: weather.forecast.current?.temperature)
-          .accessibilityLabel(Text("Temperatur \(roundTemperatureString(temperature: weather.forecast.current?.temperature))"))
+          .accessibilityLabel(Text("Temperatur \(SettingService.shared.units.temperatureString(weather.forecast.current?.temperature))"))
 
         Spacer(minLength: compact ? 16 : Self.metricsGapMinHeight)
 

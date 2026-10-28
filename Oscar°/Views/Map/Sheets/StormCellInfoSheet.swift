@@ -39,7 +39,7 @@ struct StormCellInfoSheet: View {
             Text(intensity.label)
                 .font(.headline)
             Spacer()
-            Text("\(formatted(cell.peakMmh)) mm/h")
+            Text(units.rateString(cell.peakMmh))
                 .font(.headline.monospacedDigit())
                 .foregroundStyle(.secondary)
         }
@@ -49,9 +49,9 @@ struct StormCellInfoSheet: View {
 
     private var detailRows: some View {
         VStack(spacing: 0) {
-            row(label: "Mittlere Intensität", value: "\(formatted(cell.meanMmh)) mm/h")
+            row(label: "Mittlere Intensität", value: units.rateString(cell.meanMmh))
             Divider().padding(.leading, 16)
-            row(label: "Fläche", value: "\(Int(cell.areaKm2.rounded())) km²")
+            row(label: "Fläche", value: units.areaString(cell.areaKm2))
             Divider().padding(.leading, 16)
             row(label: "Zugrichtung", value: movement)
         }
@@ -98,34 +98,33 @@ struct StormCellInfoSheet: View {
 
     private var movement: String {
         guard cell.velocityKmh >= 3 else { return String(localized: "nahezu stationär") }
-        return "\(compassDirection) · \(Int(cell.velocityKmh.rounded())) km/h"
-    }
-
-    private var compassDirection: String {
-        let names = ["N", "NO", "O", "SO", "S", "SW", "W", "NW"]
-        let normalizedBearing = cell.bearingDeg.truncatingRemainder(dividingBy: 360) + 360
-        let index = Int(((normalizedBearing.truncatingRemainder(dividingBy: 360) + 22.5) / 45).rounded(.down)) % 8
-        return names[index]
+        let bearing = (cell.bearingDeg.truncatingRemainder(dividingBy: 360) + 360).truncatingRemainder(dividingBy: 360)
+        return "\(compassDirection(bearing)) · \(units.windString(cell.velocityKmh))"
     }
 
     private var arrival: String? {
         guard let referenceCoordinate,
               let approach = cell.closestApproach(to: referenceCoordinate),
               cell.velocityKmh >= 3 else { return nil }
-        let name = referenceName ?? String(localized: "deinen Standort")
         guard approach.distanceKm <= cell.radiusKm + 5 else {
-            return String(localized: "Zieht voraussichtlich an \(name) vorbei.")
+            guard approach.distanceKm <= cell.radiusKm + 30 else { return nil }
+            if let referenceName {
+                return String(localized: "Zieht voraussichtlich an \(referenceName) vorbei.")
+            }
+            return String(localized: "Zieht voraussichtlich an deinem Standort vorbei.")
         }
-        let eta = Date().addingTimeInterval(approach.minutes * 60)
         guard approach.minutes > 1 else {
-            return String(localized: "Befindet sich etwa über \(name).")
+            if let referenceName {
+                return String(localized: "Befindet sich etwa über \(referenceName).")
+            }
+            return String(localized: "Befindet sich etwa über deinem Standort.")
         }
-        return String(localized: "Erreicht \(name) gegen \(SettingService.formattedTime(eta)).")
+        let eta = SettingService.formattedTime(Date().addingTimeInterval(approach.minutes * 60))
+        if let referenceName {
+            return String(localized: "Erreicht \(referenceName) gegen \(eta).")
+        }
+        return String(localized: "Erreicht deinen Standort gegen \(eta).")
     }
 
-    private func formatted(_ value: Double) -> String {
-        value >= 10
-            ? String(Int(value.rounded()))
-            : value.formatted(.number.precision(.fractionLength(1)))
-    }
+    private var units: Units { SettingService.shared.units }
 }

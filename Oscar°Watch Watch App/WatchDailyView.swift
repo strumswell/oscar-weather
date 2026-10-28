@@ -14,7 +14,7 @@ struct WatchDailyView: View {
         let daily = weather.forecast.daily
         let count = dayCount(daily)
         let scale = temperatureScale(daily, count: count)
-        let unit = weather.forecast.daily_units?.temperature_2m_min ?? "°C"
+        let units = SettingService.shared.units
         let timeZone = weather.forecast.locationTimeZone
         let weekdayFormatter = Self.weekdayFormatter(timeZone: timeZone)
 
@@ -34,7 +34,7 @@ struct WatchDailyView: View {
                             day: day,
                             daily: daily,
                             scale: scale,
-                            unit: unit,
+                            units: units,
                             weekdayFormatter: weekdayFormatter
                         )
                     }
@@ -48,7 +48,7 @@ struct WatchDailyView: View {
         day: Int,
         daily: Components.Schemas.DailyResponse?,
         scale: (min: Double, max: Double),
-        unit: String,
+        units: Units,
         weekdayFormatter: DateFormatter
     ) -> some View {
         let low = daily?.temperature_2m_min?[day] ?? 0
@@ -67,7 +67,7 @@ struct WatchDailyView: View {
                 .scaledToFit()
                 .frame(width: 22, height: 22)
 
-            Text(roundTemperatureString(temperature: low))
+            Text(units.temperatureString(low))
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundStyle(.secondary)
                 .frame(width: 30, alignment: .trailing)
@@ -79,11 +79,11 @@ struct WatchDailyView: View {
                 focusHigh: nil,
                 minTemp: scale.min,
                 maxTemp: scale.max,
-                unit: unit
+                unit: units.temperature
             )
             .frame(height: 5)
 
-            Text(roundTemperatureString(temperature: high))
+            Text(units.temperatureString(high))
                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                 .frame(width: 30, alignment: .leading)
         }

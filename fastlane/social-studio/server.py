@@ -24,7 +24,7 @@ import time
 import webbrowser
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import unquote
+from urllib.parse import quote, unquote
 
 STUDIO = Path(__file__).resolve().parent
 ROOT = STUDIO.parent.parent
@@ -35,6 +35,7 @@ STATIC = {
     "out": OUT,
     "compositions": COMPOSITIONS,
     "frames": FRAME_STUDIO / "frames",
+    "devices": STUDIO / "frames",
     "shots": ROOT / "fastlane" / "screenshots",
     "fonts": ROOT / "fastlane" / "screenshots" / "fonts",
 }
@@ -45,6 +46,7 @@ MEDIA = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".mov", ".mp4", ".m4v")
 FFMPEG = shutil.which("ffmpeg")
 
 recording = None  # (Popen, Path)
+progress = {"done": None}  # the running encode, polled by the editor's progress bar
 
 
 class Fail(Exception):
@@ -109,12 +111,23 @@ def state(_):
             f"{p.parent.name}/{p.name}" for p in shots.glob("*/*.png") if "_framed" not in p.name
         ) if shots.is_dir() else [],
         "compositions": sorted(p.stem for p in COMPOSITIONS.glob("*.json")),
-        "frames": sorted(p.name for p in STATIC["frames"].glob("*.png")),
-        "frameGeometry": json.loads((FRAME_STUDIO / "layout.json").read_text())["device"],
+        "frames": frames(),
         "fonts": sorted(p.name for p in STATIC["fonts"].glob("*.[ot]tf")) if STATIC["fonts"].is_dir() else [],
         "ffmpeg": bool(FFMPEG),
         "recording": recording is not None,
     }
+
+
+def frames():
+    """Frame art by file name: its URL, the screen rect inside it (portrait) and the screen's corner radius or mask."""
+    d = json.loads((FRAME_STUDIO / "layout.json").read_text())["device"]
+    phone = {"x": d["screenOffsetX"], "y": d["screenOffsetY"], "w": d["screenWidth"], "h": 2868, "r": d["screenCornerRadius"]}
+    result = {p.name: {**phone, "src": "/frames/" + quote(p.name)} for p in sorted(STATIC["frames"].glob("*.png"))}
+    for name, g in json.loads((STATIC["devices"] / "frames.json").read_text()).items():
+        result[name] = {**g, "src": "/devices/" + quote(name)}
+        if "mask" in g:
+            result[name]["mask"] = "/devices/" + quote(g["mask"])
+    return result
 
 
 def simulator_app():
@@ -269,10 +282,34 @@ def data_url_file(data, directory, name):
     return path
 
 
+def ffmpeg(cmd, length, part, parts):
+    process = subprocess.Popen([cmd[0], "-progress", "pipe:1", "-nostats", *cmd[1:]],
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    for line in process.stdout:
+        key, _, value = line.strip().partition("=")
+        if key == "out_time_us" and value.isdigit():
+            progress.update(done=(part + min(1, int(value) / 1e6 / length)) / parts, part=part + 1, parts=parts)
+    error = process.stderr.read()
+    if process.wait():
+        raise Fail(error.strip() or "ffmpeg failed")
+
+
+def encode_progress(_):
+    return progress
+
+
 def encode(body):
     """Composites under.png + the scaled recording + over.png (both rendered by
-    the editor) into an H.264 mp4. `crf` for constant quality, `targetMB` for a
-    two-pass fit to a size budget."""
+    the editor) into an H.264 mp4 or a GIF. `crf` for constant quality,
+    `targetMB` for a two-pass fit to a size budget, `loop` for the GIF."""
+    progress.update(done=0, part=1, parts=2 if body.get("targetMB") or body.get("format") == "gif" else 1)
+    try:
+        return encode_now(body)
+    finally:
+        progress["done"] = None
+
+
+def encode_now(body):
     if not FFMPEG:
         raise Fail("ffmpeg not found (brew install ffmpeg)")
     source = out_file(body["name"])
@@ -280,32 +317,47 @@ def encode(body):
     width, height = even(body["width"]), even(body["height"])
     x, y, w, h = (int(round(float(body[k]))) for k in ("x", "y", "w", "h"))
     fps = min(60, max(5, int(body.get("fps", 30))))
+    speed = min(16, max(0.1, float(body.get("speed") or 1)))
+    gif = body.get("format") == "gif"
     start, end = float(body.get("start") or 0), float(body.get("end") or 0)
     trim = ["-ss", str(start)] + (["-to", str(end)] if end > start else [])
-    length = (end if end > start else duration(source)) - start
-    target = out_file(body["name"]).with_name(f"{source.stem}-{time.strftime('%H%M%S')}.mp4")
+    length = ((end if end > start else duration(source)) - start) / speed
+    target = out_file(body["name"]).with_name(f"{source.stem}-{time.strftime('%H%M%S')}.{'gif' if gif else 'mp4'}")
 
     with tempfile.TemporaryDirectory() as tmp:
         under = data_url_file(body["under"], tmp, "under.png")
         over = data_url_file(body["over"], tmp, "over.png")
         graph = (
-            f"[1:v]scale={width}:{height}[u];[0:v]fps={fps},scale={even(w)}:{even(h)}[v];"
+            f"[1:v]scale={width}:{height}[u];"
+            f"[0:v]setpts=(PTS-STARTPTS)/{speed},fps={fps},scale={even(w)}:{even(h)}[v];"
             f"[u][v]overlay={x}:{y}:shortest=1[a];[2:v]scale={width}:{height}[o];"
-            "[a][o]overlay=0:0:shortest=1,format=yuv420p[out]"
+            f"[a][o]overlay=0:0:shortest=1,format={'gbrp' if gif else 'yuv420p'}[out]"
         )
         base = [FFMPEG, "-y", "-v", "error", *trim, "-i", str(source),
                 "-loop", "1", "-framerate", str(fps), "-i", str(under),
                 "-loop", "1", "-framerate", str(fps), "-i", str(over),
-                "-filter_complex", graph, "-map", "[out]", "-c:v", "libx264",
-                "-preset", "slow", "-movflags", "+faststart", "-an"]
+                "-filter_complex", graph, "-map", "[out]", "-an"]
+        length = max(length, 0.1)
+        if gif:
+            # Composite losslessly first: one palette for the whole clip, built
+            # from what moves, needs every frame before the GIF can start.
+            mid, palette = Path(tmp) / "mid.mkv", Path(tmp) / "palette.png"
+            ffmpeg([*base, "-c:v", "ffv1", str(mid)], length, 0, 2)
+            run(FFMPEG, "-y", "-v", "error", "-i", str(mid), "-vf", "palettegen=stats_mode=diff", str(palette), timeout=900)
+            # -loop: 0 forever, -1 plays once, n repeats n more times.
+            ffmpeg([FFMPEG, "-y", "-v", "error", "-i", str(mid), "-i", str(palette),
+                    "-lavfi", "paletteuse=dither=sierra2_4a:diff_mode=rectangle",
+                    "-loop", str(int(body.get("loop", 0))), str(target)], length, 1, 2)
+            return {"name": target.name, "bytes": target.stat().st_size}
+        base += ["-c:v", "libx264", "-preset", "slow", "-movflags", "+faststart"]
         if body.get("targetMB"):
             # 3 % headroom for the container.
-            kbps = max(80, int(float(body["targetMB"]) * 8192 * 0.97 / max(length, 0.1)))
+            kbps = max(80, int(float(body["targetMB"]) * 8192 * 0.97 / length))
             rate = ["-b:v", f"{kbps}k", "-passlogfile", str(Path(tmp) / "pass")]
-            run(*base, *rate, "-pass", "1", "-f", "null", "/dev/null", timeout=900)
-            run(*base, *rate, "-pass", "2", str(target), timeout=900)
+            ffmpeg([*base, *rate, "-pass", "1", "-f", "null", "/dev/null"], length, 0, 2)
+            ffmpeg([*base, *rate, "-pass", "2", str(target)], length, 1, 2)
         else:
-            run(*base, "-crf", str(int(body.get("crf", 23))), str(target), timeout=900)
+            ffmpeg([*base, "-crf", str(int(body.get("crf", 23))), str(target)], length, 0, 1)
     return {"name": target.name, "bytes": target.stat().st_size}
 
 
@@ -337,7 +389,7 @@ def reveal(body):
 
 ACTIONS = {f.__name__: f for f in (
     boot, launch, terminate, statusbar, appearance, push, menu, shot,
-    record_start, record_stop, encode, delete, reveal, comp_save, comp_delete,
+    record_start, record_stop, encode, encode_progress, delete, reveal, comp_save, comp_delete,
 )}
 
 

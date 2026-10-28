@@ -166,6 +166,7 @@ struct WeatherApp: App {
 
         locationService.city.applyDefaultSelectionOnLaunch()
         hydrateFromCache()
+        UnitSync.shared.start()
     }
     
     @State private var weather = Weather()

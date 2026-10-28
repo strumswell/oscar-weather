@@ -26,10 +26,15 @@ enum WeatherSnapshotStore {
         guard let url,
               let data = try? Data(contentsOf: url),
               let snapshot = try? JSONDecoder().decode(WeatherSnapshot.self, from: data),
-              Date().timeIntervalSince(snapshot.savedAt) < maxAge else {
+              Date().timeIntervalSince(snapshot.savedAt) < maxAge,
+              isMetric(snapshot.forecast.hourly_units) else {
             return nil
         }
         return snapshot
+    }
+
+    private static func isMetric(_ units: Components.Schemas.HourlyUnits?) -> Bool {
+        units?.temperature_2m != "°F" && units?.precipitation != "inch" && (units?.windspeed_10m ?? "km/h") == "km/h"
     }
 
     private static let maxSnapshotDistance: CLLocationDistance = 50_000

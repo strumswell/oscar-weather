@@ -38,7 +38,7 @@
   }
   summary::after { content: "+"; float: right; font-weight: 400; }
   details[open] summary::after { content: "–"; }
-  details > div { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-bottom: 14px; }
+  details > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding-bottom: 14px; }
   label { display: grid; gap: 3px; color: var(--dim); font-size: 11px; min-width: 0; }
   label.wide, .wide { grid-column: 1 / -1; }
   label.check { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text); }
@@ -59,7 +59,7 @@
   button[disabled] { opacity: .5; cursor: progress; }
   .hint { color: var(--dim); font-size: 11px; margin: 0; }
 
-  main { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; min-height: 0; height: 100vh; }
+  main { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto auto; min-width: 0; min-height: 0; height: 100vh; }
   #bar { display: flex; gap: 8px; align-items: center; padding: 10px 14px; flex-wrap: wrap; }
   #bar select, #bar input, #bar button { width: auto; }
   #bar input[type=number] { width: 72px; }
@@ -74,6 +74,19 @@
     overflow: hidden; white-space: pre; outline: 1px dashed var(--accent); outline-offset: 4px;
   }
   #empty { position: absolute; color: var(--dim); text-align: center; pointer-events: none; }
+  #timeline { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding: 8px 14px; border-top: 1px solid var(--line); background: var(--panel); }
+  #timeline button { width: 34px; flex: none; }
+  #timeline .num { font-variant-numeric: tabular-nums; color: var(--dim); font-size: 11px; white-space: nowrap; }
+  #timeline label { display: flex; align-items: center; gap: 6px; flex: none; }
+  #t-speed { width: 64px; } #t-trim { flex: 1; } #t-speedr { width: 110px; }
+  #t-track { position: relative; order: -1; flex: 1 0 100%; height: 52px; border-radius: 6px; overflow: hidden; background: var(--field); touch-action: none; cursor: pointer; }
+  #t-film { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #t-range {
+    position: absolute; top: 0; bottom: 0; min-width: 20px; border: solid #ffc53d; border-width: 2px 10px; border-radius: 6px;
+    box-shadow: 0 0 0 999px #000a; cursor: ew-resize; pointer-events: none;
+  }
+  #t-head { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 3px #000; pointer-events: none; }
+  progress { width: 100%; accent-color: var(--accent); }
   #library { border-top: 1px solid var(--line); background: var(--panel); }
   #tabs { display: flex; gap: 4px; padding: 8px 14px 0; align-items: center; }
   #tabs button { width: auto; border: 0; background: none; color: var(--dim); padding: 4px 8px; }
@@ -89,7 +102,7 @@
   }
   .thumb:hover i { opacity: 1; }
   #live { width: 100%; max-height: 52vh; object-fit: contain; border-radius: 10px; background: #000; }
-  #layers { display: grid; gap: 2px; }
+  #layers { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
   #layers div { display: flex; align-items: center; gap: 4px; padding: 3px 6px; border-radius: 6px; cursor: default; }
   #layers div.on { background: var(--field); }
   #layers span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -197,6 +210,14 @@
   </div>
   <div id="stage"><canvas id="canvas"></canvas><textarea id="inline" hidden spellcheck="false"></textarea>
     <div id="empty">Capture a screenshot, pick one from the library,<br>or drop images and videos here.</div></div>
+  <div id="timeline" hidden>
+    <button id="t-play" title="Play or pause (space)">▶</button>
+    <span class="num" id="t-time"></span>
+    <div id="t-track" title="Drag the yellow edges to trim (or press I and O at the playhead), anywhere else to scrub">
+      <canvas id="t-film"></canvas><div id="t-range"></div><div id="t-head"></div></div>
+    <span class="num" id="t-trim"></span>
+    <label class="num">Speed<input id="t-speedr" type="range" min="-2" max="4" step="0.01"><input id="t-speed" type="number" min="0.1" max="16" step="0.25">×</label>
+  </div>
   <div id="library">
     <div id="tabs"><button data-tab="captures" class="on">Captures</button><button data-tab="appStore">App Store set</button>
       <span style="flex:1"></span><button id="reveal">Show in Finder</button></div>
@@ -251,15 +272,18 @@
   </div></details>
 
   <details open id="videxport" hidden><summary>Export video</summary><div>
-    <label>Width<select id="v-width"><option>720</option><option selected>1080</option><option>1440</option><option>2160</option></select></label>
-    <label>Frame rate<select id="v-fps"><option>30</option><option>60</option><option>24</option></select></label>
-    <label>Trim from (s)<input id="v-start" type="number" min="0" step="0.1" value="0"></label>
-    <label>to (s)<input id="v-end" type="number" min="0" step="0.1" placeholder="end"></label>
-    <label class="wide">Compression<select id="v-mode"><option value="crf">Constant quality</option><option value="size">Fit a file size</option></select></label>
-    <label class="wide" id="v-crfl">Quality <output></output><input id="v-crf" type="range" min="16" max="36" value="23"></label>
-    <label class="wide" id="v-mbl" hidden>Target MB<input id="v-mb" type="number" min="0.2" step="0.1" value="10"></label>
-    <button class="primary wide" id="v-go">Encode MP4</button>
+    <label class="wide">Format<select id="v-format"><option value="mp4">MP4</option><option value="gif">GIF</option></select></label>
+    <label>Width<select id="v-width"><option>480</option><option>720</option><option selected>1080</option><option>1440</option><option>2160</option></select></label>
+    <label>Frame rate<select id="v-fps"><option>30</option><option>60</option><option>24</option><option>15</option><option>12</option></select></label>
+    <label class="wide" data-format="gif">Loop<select id="v-loop"><option value="0">Forever</option><option value="-1">Play once</option>
+      <option value="1">Play twice</option><option value="2">Play three times</option></select></label>
+    <label class="wide" data-format="mp4">Compression<select id="v-mode"><option value="crf">Constant quality</option><option value="size">Fit a file size</option></select></label>
+    <label class="wide" id="v-crfl" data-format="mp4">Quality <output></output><input id="v-crf" type="range" min="16" max="36" value="23"></label>
+    <label class="wide" id="v-mbl" data-format="mp4" hidden>Target MB<input id="v-mb" type="number" min="0.2" step="0.1" value="10"></label>
+    <button class="primary wide" id="v-go">Encode</button>
+    <progress class="wide" id="v-progress" max="1" hidden></progress>
     <p class="wide hint" id="v-result"></p>
+    <p class="wide hint">Trim and speed are set in the timeline under the canvas.</p>
   </div></details>
 </aside>
 
@@ -336,7 +360,28 @@ function select(id, extend = false) {
   if (id === selected) { selected = [...also][0] ?? null; also.delete(selected); }
   else if (!also.delete(id)) { if (selected) also.add(selected); selected = id; }
 }
-const frameSrc = name => '/frames/' + encodeURIComponent(name);
+const frameOf = name => server?.frames?.[name];
+const loadFrame = name => {
+  const g = frameOf(name);
+  return g ? Promise.all([load(g.src), g.mask && load(g.mask)]) : Promise.reject(new Error('Unknown frame ' + name));
+};
+
+// Frame art is portrait; a landscape shot gets it turned a quarter counterclockwise.
+const arts = new Map();
+function frameArt(name, landscape) {
+  const g = frameOf(name), f = g && assets.get(g.src), m = g?.mask && assets.get(g.mask);
+  if (!f || (g.mask && !m)) return null;
+  const key = name + landscape;
+  if (!arts.has(key)) arts.set(key, landscape
+    ? { el: turn(f), w: f.h, h: f.w, sx: g.y, sy: f.w - g.x - g.w, sw: g.h, sh: g.w, r: g.r ?? 0, mask: m && turn(m) }
+    : { el: f.el, w: f.w, h: f.h, sx: g.x, sy: g.y, sw: g.w, sh: g.h, r: g.r ?? 0, mask: m?.el });
+  return arts.get(key);
+}
+function turn(a) {
+  const canvas = canvasOf(a.h, a.w), ctx = canvas.getContext('2d');
+  ctx.translate(0, a.w); ctx.rotate(-Math.PI / 2); ctx.drawImage(a.el, 0, 0);
+  return canvas;
+}
 
 function commit(save = true) {
   if (save) {
@@ -357,10 +402,11 @@ function undo() {
 
 async function addMedia(src, kind, name) {
   const a = await load(src, kind);
-  // The frame art is the Pro Max; every current iPhone shares its 2.17 aspect.
-  const phone = a.h / a.w > 1.8, fits = Math.abs(a.h / a.w - 2.173) < 0.03;
-  const frame = fits && server ? $('#newframe').value : '';
-  if (frame) await load(frameSrc(frame));
+  // A frame whose screen has the capture's aspect: the chosen one if it fits, else the first that does.
+  const phone = a.h / a.w > 1.8, ratio = Math.max(a.w, a.h) / Math.min(a.w, a.h), preferred = $('#newframe').value;
+  const fitting = Object.keys(server?.frames ?? {}).filter(n => Math.abs(frameOf(n).h / frameOf(n).w - ratio) < 0.008);
+  const frame = !preferred ? '' : fitting.includes(preferred) ? preferred : fitting[0] ?? '';
+  if (frame) await loadFrame(frame);
   const it = {
     id: crypto.randomUUID(), kind, src, name, x: doc.w / 2, y: doc.h / 2, scale: 1, rot: 0,
     frame, radius: phone ? 13.6 : 0, shadow: 40,
@@ -399,10 +445,9 @@ function box(it) {
     return { w, h: lines.length * it.size * lh(it), lines };
   }
   const a = assets.get(it.src) ?? { w: 100, h: 100 };
-  const f = it.frame && assets.get(frameSrc(it.frame));
+  const f = it.frame && frameArt(it.frame, a.w > a.h);
   if (!f) return { w: a.w, h: a.h, sx: 0, sy: 0, sw: a.w, sh: a.h, r: a.w * it.radius / 100 };
-  const g = server.frameGeometry, sw = g.screenWidth;
-  return { w: f.w, h: f.h, sx: g.screenOffsetX, sy: g.screenOffsetY, sw, sh: sw * a.h / a.w, r: g.screenCornerRadius, f };
+  return { w: f.w, h: f.h, sx: f.sx, sy: f.sy, sw: f.sw, sh: f.sh, r: f.r, mask: f.mask, f };
 }
 
 const fontOf = it => `${it.weight} ${it.size}px ${it.font}`;
@@ -418,6 +463,10 @@ function sprite(it) {
   ctx.clearRect(0, 0, b.w, b.h);
   ctx.save(); ctx.beginPath(); ctx.roundRect(b.sx, b.sy, b.sw, b.sh, b.r); ctx.clip();
   ctx.drawImage(a.el, b.sx, b.sy, b.sw, b.sh); ctx.restore();
+  if (b.mask) {
+    ctx.globalCompositeOperation = 'destination-in'; ctx.drawImage(b.mask, b.sx, b.sy, b.sw, b.sh);
+    ctx.globalCompositeOperation = 'source-over';
+  }
   if (b.f) ctx.drawImage(b.f.el, 0, 0);
   sprites.set(it, { key, canvas });
   return canvas;
@@ -606,6 +655,12 @@ addEventListener('keydown', e => {
     e.preventDefault(); also.clear(); doc.items.forEach(i => also.add(i.id));
     selected = doc.items.at(-1)?.id ?? null; also.delete(selected); syncUI(); return draw();
   }
+  const m = movie();
+  if (m && assets.has(m.src) && !e.metaKey && !e.ctrlKey) {
+    if (e.key === ' ') { e.preventDefault(); return playPause(); }
+    const edge = { i: 'start', o: 'end' }[e.key.toLowerCase()];
+    if (edge) { setTrim(edge, assets.get(m.src).el.currentTime); return commit(); }
+  }
   if (!it) return;
   if ((e.metaKey || e.ctrlKey) && e.key === 'd') { e.preventDefault(); return $('#i-dup').click(); }
   const move = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
@@ -614,7 +669,7 @@ addEventListener('keydown', e => {
   if (e.key === 'Escape') { select(null); syncUI(); draw(); }
 });
 
-addEventListener('resize', draw);
+addEventListener('resize', () => { draw(); syncTimeline(); });
 
 // Drop files anywhere.
 addEventListener('dragover', e => e.preventDefault());
@@ -743,6 +798,7 @@ function syncUI() {
   const video = doc.items.find(i => i.kind === 'video');
   $('#videxport').hidden = !video || !server?.ffmpeg || video.src.startsWith('blob:');
   for (const output of $$('label output')) output.textContent = output.parentElement.querySelector('input').value;
+  syncTimeline();
 }
 
 function bind(id, apply, event = 'input') {
@@ -780,7 +836,7 @@ bind('#i-rot', v => item().rot = +v); bind('#i-radius', v => item().radius = +v)
 bind('#i-opacity', v => item().opacity = v / 100);
 $('#i-frame').onchange = async e => {
   const it = item(), before = box(it).h * it.scale;
-  if (e.target.value) await load(frameSrc(e.target.value));
+  if (e.target.value) await loadFrame(e.target.value);
   it.frame = e.target.value;
   it.scale = before / box(it).h;  // keep the on-canvas height
   commit();
@@ -888,21 +944,146 @@ $('#v-go').onclick = e => busy(e.target, async () => {
   ctx.save(); ctx.beginPath();
   ctx.rect(rect.x - 1, rect.y - 1, rect.w + 2, rect.h + 2); ctx.roundRect(rect.x, rect.y, rect.w, rect.h, b.r * s);
   ctx.clip('evenodd'); ctx.drawImage(under, 0, 0); ctx.restore();
+  if (b.mask) {
+    // What the screen mask leaves out of the rect (camera cutout, odd corners) stays on top too.
+    const cut = canvasOf(W, H), c = cut.getContext('2d');
+    c.drawImage(under, rect.x, rect.y, rect.w, rect.h, rect.x, rect.y, rect.w, rect.h);
+    c.globalCompositeOperation = 'destination-out'; c.drawImage(b.mask, rect.x, rect.y, rect.w, rect.h);
+    ctx.drawImage(cut, 0, 0);
+  }
   if (b.f) { ctx.save(); transform(ctx, video, k); ctx.drawImage(b.f.el, -b.w / 2, -b.h / 2); ctx.restore(); }
   for (const it of doc.items.slice(index + 1)) drawItem(ctx, it, k);
 
   $('#v-result').textContent = 'Encoding…';
-  const size = $('#v-mode').value === 'size';
+  const bar = $('#v-progress'), began = Date.now();
+  bar.hidden = false; bar.value = 0;
+  const poll = setInterval(async () => {
+    const p = await api('encode_progress').catch(() => ({}));
+    if (p.done == null) return;
+    const left = p.done > 0.03 && Math.round((Date.now() - began) / 1000 * (1 - p.done) / p.done);
+    bar.value = p.done;
+    $('#v-result').textContent = (p.parts > 1 ? `Pass ${p.part} of ${p.parts} · ` : '') + Math.round(p.done * 100) + ' %'
+      + (left !== false ? ` · about ${left} s left` : '');
+  }, 400);
+  const gif = $('#v-format').value === 'gif', size = !gif && $('#v-mode').value === 'size', [start, end, length] = clip(video);
   const result = await api('encode', {
     name: decodeURIComponent(video.src.split('/').pop()), width: W, height: H, ...rect,
     under: under.toDataURL('image/png'), over: over.toDataURL('image/png'),
-    fps: +$('#v-fps').value, start: +$('#v-start').value, end: +$('#v-end').value,
+    fps: +$('#v-fps').value, start, end: end < length ? end : 0, speed: video.speed ?? 1,
+    format: gif ? 'gif' : 'mp4', loop: +$('#v-loop').value,
     crf: size ? null : +$('#v-crf').value, targetMB: size ? +$('#v-mb').value : null,
-  }).catch(error => { $('#v-result').textContent = ''; throw error; });
-  $('#v-result').innerHTML = `<a href="/out/${result.name}" download>${result.name}</a> · ${kb(result.bytes)} · ${W} × ${H}`;
+  }).catch(error => { $('#v-result').textContent = ''; throw error; })
+    .finally(() => { clearInterval(poll); bar.hidden = true; });
+  $('#v-result').innerHTML = `<a href="/out/${result.name}" download>${result.name}</a> · ${kb(result.bytes)} · ${W} × ${H}`
+    + ` · ${((Date.now() - began) / 1000).toFixed(0)} s to encode`;
   refresh();
 });
-$('#v-mode').onchange = e => { $('#v-mbl').hidden = e.target.value !== 'size'; $('#v-crfl').hidden = !$('#v-mbl').hidden; };
+function syncVideoExport() {
+  const gif = $('#v-format').value === 'gif';
+  for (const el of $$('#videxport [data-format]')) el.hidden = el.dataset.format !== $('#v-format').value;
+  if (!gif) { $('#v-mbl').hidden = $('#v-mode').value !== 'size'; $('#v-crfl').hidden = !$('#v-mbl').hidden; }
+  $('#v-go').textContent = gif ? 'Encode GIF' : 'Encode MP4';
+}
+$('#v-mode').onchange = $('#v-format').onchange = syncVideoExport;
+syncVideoExport();
+
+// ---------------------------------------------------------------- video timeline
+
+// The first video on the canvas is the moving one (see video export). Trim and
+// speed live on the item, so they save with the composition.
+const movie = () => doc.items.find(i => i.kind === 'video');
+const clip = it => {
+  const d = assets.get(it.src)?.el.duration;
+  const length = Number.isFinite(d) ? d : 0;
+  return [Math.min(it.start ?? 0, length), Math.min(it.end || length, length), length];
+};
+const secs = t => t.toFixed(1) + ' s';
+
+function syncTimeline() {
+  const it = movie(), v = it && assets.get(it.src)?.el;
+  $('#timeline').hidden = !v;
+  if (!v) return;
+  const [start, end, length] = clip(it), pct = t => (length ? t / length * 100 : 0) + '%', speed = it.speed ?? 1;
+  Object.assign($('#t-range').style, { left: pct(start), width: pct(end - start) });
+  $('#t-head').style.left = pct(v.currentTime);
+  $('#t-play').textContent = v.paused ? '▶' : '❚❚';
+  $('#t-time').textContent = secs(v.currentTime);
+  $('#t-trim').textContent = `${secs(start)} – ${secs(end)} → ${secs((end - start) / speed)}`;
+  if (document.activeElement !== $('#t-speed')) $('#t-speed').value = speed;
+  $('#t-speedr').value = Math.log2(speed);
+  filmstrip(it.src);
+}
+
+function tick() {
+  const it = movie(), v = it && assets.get(it.src)?.el;
+  if (v && !v.paused) {
+    const [start, end] = clip(it);
+    if (v.currentTime >= end) v.currentTime = start;
+    draw();
+    requestAnimationFrame(tick);
+  }
+  syncTimeline();
+}
+
+function playPause() {
+  const it = movie(), v = assets.get(it.src).el, [start, end] = clip(it);
+  if (!v.paused) return v.pause();
+  if (v.currentTime < start || v.currentTime >= end - 0.05) v.currentTime = start;
+  v.playbackRate = it.speed ?? 1;
+  v.play().then(tick);
+}
+$('#t-play').onclick = e => { e.currentTarget.blur(); playPause(); };
+
+function setTrim(edge, t) {
+  const it = movie(), [start, end] = clip(it);
+  t = Math.round(t * 100) / 100;
+  if (edge === 'start') it.start = Math.max(0, Math.min(t, end - 0.1));
+  else it.end = Math.max(t, start + 0.1);
+  assets.get(it.src).el.currentTime = it[edge];
+}
+
+// Within 14 px of a trim edge drags that edge, anywhere else scrubs.
+$('#t-track').onpointerdown = e => {
+  const it = movie(), v = assets.get(it.src).el, track = e.currentTarget, r = track.getBoundingClientRect();
+  const [start, end, length] = clip(it), at = m => Math.min(length, Math.max(0, (m.clientX - r.left) / r.width * length));
+  const dist = t => Math.abs(t / length * r.width - (e.clientX - r.left));
+  const edge = Math.min(dist(start), dist(end)) < 14 ? (dist(start) < dist(end) ? 'start' : 'end') : null;
+  v.pause(); track.setPointerCapture(e.pointerId);
+  const move = m => { edge ? setTrim(edge, at(m)) : v.currentTime = at(m); syncTimeline(); };
+  move(e);
+  track.onpointermove = move;
+  track.onpointerup = () => { track.onpointermove = track.onpointerup = null; if (edge) commit(); };
+};
+
+function setSpeed(value) {
+  const it = movie();
+  it.speed = Math.min(16, Math.max(0.1, +value || 1));
+  assets.get(it.src).el.playbackRate = it.speed;
+  syncTimeline();
+}
+$('#t-speedr').oninput = e => setSpeed(Math.round(2 ** e.target.value * 100) / 100);
+$('#t-speedr').onchange = () => commit();
+$('#t-speed').onchange = e => { setSpeed(e.target.value); commit(); };
+
+// Thumbnails along the track, from a second element so the canvas keeps its frame.
+let stripKey = '';
+async function filmstrip(src) {
+  const film = $('#t-film'), w = Math.round(film.clientWidth * devicePixelRatio), h = Math.round(film.clientHeight * devicePixelRatio);
+  const key = src + w;
+  if (!w || key === stripKey) return;
+  stripKey = key;
+  const v = Object.assign(document.createElement('video'), { muted: true, preload: 'auto', src });
+  await new Promise(done => { v.onloadeddata = v.onerror = done; });
+  if (!v.videoWidth || !Number.isFinite(v.duration)) return;
+  film.width = w; film.height = h;
+  const ctx = film.getContext('2d'), tw = h * v.videoWidth / v.videoHeight;
+  for (let x = 0; x < w && stripKey === key; x += tw) {
+    v.currentTime = (x + tw / 2) / w * v.duration;
+    await new Promise(done => { v.onseeked = done; });
+    ctx.drawImage(v, x, 0, tw, h);
+  }
+  v.removeAttribute('src'); v.load();
+}
 
 // ---------------------------------------------------------------- saved compositions
 
@@ -1046,7 +1227,7 @@ $('#livego').onclick = async e => {
 
 // Items whose media is gone (deleted capture) are dropped instead of breaking the canvas.
 async function loadAssets() {
-  const loads = doc.items.flatMap(it => it.kind === 'text' ? [] : [load(it.src, it.kind), it.frame ? load(frameSrc(it.frame)) : null]);
+  const loads = doc.items.flatMap(it => it.kind === 'text' ? [] : [load(it.src, it.kind), it.frame ? loadFrame(it.frame) : null]);
   const missing = (await Promise.allSettled(loads)).some(r => r.status === 'rejected');
   if (!missing) return;
   doc.items = doc.items.filter(it => it.kind === 'text' || assets.has(it.src));
@@ -1072,9 +1253,10 @@ async function start() {
     toast('Editor only. Run bin/social-studio.sh for simulator control, the library and video export.', 9000);
   }
   $('#i-font').replaceChildren(...fonts.map(([label, value]) => new Option(label, value)));
-  for (const id of ['#i-frame', '#newframe']) $(id).replaceChildren(new Option('none', ''), ...(server?.frames ?? []).map(f =>
-    new Option(f.replace(/^Apple |\.png$/g, ''), f)));
-  $('#newframe').value = store.get('newframe', server?.frames[0] ?? '');
+  const frames = Object.keys(server?.frames ?? {});
+  for (const id of ['#i-frame', '#newframe']) $(id).replaceChildren(new Option('none', ''), ...frames.map(f =>
+    new Option(f.replace(/^Apple |\.png$| \(2019\)| \(4th generation\)| Portrait/g, ''), f)));
+  $('#newframe').value = store.get('newframe', frames[0] ?? '');
   $('#newframe').onchange = e => store.set('newframe', e.target.value);
 
   for (const form of ['launch', 'statusbar', 'push']) {

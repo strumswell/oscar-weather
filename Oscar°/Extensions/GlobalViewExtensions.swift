@@ -10,15 +10,6 @@ import CoreLocation
 import Foundation
 import SwiftUI
 
-extension View {
-  public func roundTemperatureString(temperature: Double?) -> String {
-    guard let temperature = temperature else {
-      return ""
-    }
-    return "\(Int(temperature.rounded()))°"
-  }
-}
-
 extension CLLocationCoordinate2D {
   enum Country {
     case spain

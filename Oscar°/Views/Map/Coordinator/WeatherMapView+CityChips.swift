@@ -24,7 +24,7 @@ extension WeatherMapView.Coordinator {
                 .joined(separator: " ")
             let iconName: String
             if let conditions = store.conditions(for: coordinate) {
-                let temperatureText = "\(Int(conditions.temperature.rounded()))°"
+                let temperatureText = SettingService.shared.units.temperature.string(conditions.temperature)
                 iconName = "oscar-city-chip-\(conditions.iconAssetName)-\(temperatureText)-\(identityLine)"
                 if !registeredCityChipImages.contains(iconName) {
                     style.setImage(

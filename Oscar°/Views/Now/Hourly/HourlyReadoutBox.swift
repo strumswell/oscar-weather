@@ -59,7 +59,7 @@ struct HourlyReadoutBox: View {
                 id: rows.count,
                 color: isSnow ? .cyan : .hourlyRain,
                 label: barsLabel,
-                value: "\(rate.formatted(.number.precision(.fractionLength(1)))) \(model.precipitationUnit)"
+                value: model.units.precipitationString(rate)
             ))
         }
         for band in layout.bands {

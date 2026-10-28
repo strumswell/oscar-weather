@@ -9,13 +9,10 @@ struct ClimateView: View {
     private var latitude: Double { weather.forecast.latitude ?? 0 }
     private var longitude: Double { weather.forecast.longitude ?? 0 }
 
-    private var unit: ClimateTemperatureUnit {
-        ClimateTemperatureUnit(settingValue: SettingService.resolvedTemperatureUnit)
-    }
+    private var unit: TemperatureUnit { SettingService.shared.temperatureUnit }
 
     private var todayHighCelsius: Double? {
-        guard let high = weather.forecast.daily?.temperature_2m_max?.first else { return nil }
-        return unit.celsius(fromValue: high)
+        weather.forecast.daily?.temperature_2m_max?.first
     }
 
     private var loadIdentity: String {

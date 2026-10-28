@@ -55,6 +55,7 @@ enum HeadMetric: String, CaseIterable, Identifiable {
 
     @MainActor
     func value(in weather: Weather) -> String? {
+        let units = SettingService.shared.units
         let current = weather.forecast.current
         let hourly = weather.forecast.hourly
         let time = hourly?.time ?? []
@@ -62,12 +63,12 @@ enum HeadMetric: String, CaseIterable, Identifiable {
         case .cloudCover:
             return current.map { "\(Int($0.cloudcover.rounded())) %" }
         case .wind:
-            return current.map { Self.windString($0.windspeed, weather: weather) }
+            return current.map { units.windString($0.windspeed) }
         case .windDirection:
             return current?.getWindDirection()
         case .feelsLike:
             return environmentValue(from: hourly?.apparent_temperature, time: time)
-                .map { HourlyFormatting.temperatureString($0) }
+                .map { units.temperatureString($0) }
         case .humidity:
             return environmentValue(from: hourly?.relativehumidity_2m, time: time)
                 .map { "\(Int($0.rounded())) %" }
@@ -76,25 +77,16 @@ enum HeadMetric: String, CaseIterable, Identifiable {
                 .map { "UV \(Int($0.rounded()))" }
         case .pressure:
             return environmentValue(from: hourly?.pressure_msl, time: time)
-                .map { "\(Int($0.rounded())) hPa" }
+                .map { units.pressureString($0) }
         case .precipitationChance:
             return (environmentValue(from: hourly?.precipitation_probability, time: time) ?? nil)
                 .map { "\(Int($0.rounded())) %" }
         case .gusts:
             return (environmentValue(from: hourly?.windgusts_10m, time: time) ?? nil)
-                .map { Self.windString($0, weather: weather) }
+                .map { units.windString($0) }
         case .measured:
-            return weather.headStation?.current.temperature_c.map { StationUnits().temperatureString($0) }
+            return weather.headStation?.current.temperature_c.map { units.preciseTemperatureString($0) }
         }
-    }
-
-    @MainActor
-    private static func windString(_ speed: Double, weather: Weather) -> String {
-        let unit = WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit)
-        if unit.usesBeaufortDisplay {
-            return WindSpeedFormatter.string(BeaufortScale.value(forKilometersPerHour: speed), unit: unit.displayUnit)
-        }
-        return WindSpeedFormatter.string(speed, unit: weather.forecast.hourly_units?.windspeed_10m ?? "km/h")
     }
 }
 

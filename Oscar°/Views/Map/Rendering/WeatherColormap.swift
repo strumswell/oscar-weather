@@ -62,55 +62,30 @@ enum WeatherColormap {
         }
     }
 
-    var verticalLabels: [(Double, LocalizedStringKey)] {
+    func verticalLabels(_ units: Units) -> [(Double, Text)] {
         switch self {
         case .radar:
             return [
-                (0.00, "Niesel"),
-                (0.25, "Leicht"),
-                (0.50, "Mäßig"),
-                (0.75, "Stark"),
-                (1.00, "Extrem"),
+                (0.00, Text("Niesel")),
+                (0.25, Text("Leicht")),
+                (0.50, Text("Mäßig")),
+                (0.75, Text("Stark")),
+                (1.00, Text("Extrem")),
             ]
         case .temperature:
-            return [
-                (0.000, "−40 °C"),
-                (0.111, "−30 °C"),
-                (0.222, "−20 °C"),
-                (0.333, "−10 °C"),
-                (0.444,   "0 °C"),
-                (0.556, "+10 °C"),
-                (0.667, "+20 °C"),
-                (0.778, "+30 °C"),
-                (0.889, "+40 °C"),
-                (1.000, "+50 °C"),
-            ]
+            return (0...9).map { step in
+                let value = units.temperature.rounded(Double(step * 10 - 40))
+                let sign = value > 0 ? "+" : ""
+                return (Double(step) / 9, Text(verbatim: "\(sign)\(value) \(units.temperature.symbol)"))
+            }
         case .wind:
-            return [
-                (0.00, "0 m/s"),
-                (0.25, "2 m/s"),
-                (0.50, "4 m/s"),
-                (0.75, "6 m/s"),
-                (1.00, "≥8 m/s"),
-            ]
+            return (0...4).map { step in
+                let prefix = step == 4 ? "≥" : ""
+                return (Double(step) / 4, Text(verbatim: "\(prefix)\(units.windNumber(Double(step) * 2 * 3.6)) \(units.wind.symbol)"))
+            }
         case .pressure:
-            return [
-                (0.000, "950"),
-                (0.182, "970"),
-                (0.364, "990"),
-                (0.545, "1010"),
-                (0.727, "1030"),
-                (1.000, "1060"),
-            ]
-        }
-    }
-
-    var unit: String {
-        switch self {
-        case .radar:       return "mm/h"
-        case .temperature: return "°C"
-        case .wind:        return "m/s"
-        case .pressure:    return "hPa"
+            return [(0.000, 950), (0.182, 970), (0.364, 990), (0.545, 1010), (0.727, 1030), (1.000, 1060)]
+                .map { ($0.0, Text(verbatim: units.pressureNumber($0.1))) }
         }
     }
 
@@ -172,7 +147,8 @@ struct StormCellLegend: View {
 struct ColormapVerticalLegend: View {
     let colormap: WeatherColormap
     private let barWidth: CGFloat = 10
-    private var barHeight: CGFloat { CGFloat(colormap.verticalLabels.count) * 20 }
+    private var labels: [(Double, Text)] { colormap.verticalLabels(SettingService.shared.units) }
+    private var barHeight: CGFloat { CGFloat(labels.count) * 20 }
 
     var body: some View {
         HStack(alignment: .top, spacing: 5) {
@@ -182,9 +158,9 @@ struct ColormapVerticalLegend: View {
 
             ZStack(alignment: .topLeading) {
                 Color.clear.frame(width: 52, height: barHeight)
-                ForEach(colormap.verticalLabels.enumerated(), id: \.offset) { _, entry in
+                ForEach(labels.enumerated(), id: \.offset) { _, entry in
                     let inset = barWidth / 2
-                    Text(entry.1)
+                    entry.1
                         .font(.system(size: 9, weight: .medium))
                         .foregroundStyle(.secondary)
                         .offset(y: inset + (barHeight - barWidth) * (1 - entry.0) - 6)

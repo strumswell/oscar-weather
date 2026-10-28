@@ -92,14 +92,13 @@ struct RootTabView: View {
     }
 
     private func recordUsageConditions() {
-        let units = weather.forecast.hourly_units
         UsageStatsStore.shared.recordConditions(
             temperature: weather.forecast.current?.temperature,
-            temperatureUnit: units?.temperature_2m,
+            temperatureUnit: "°C",
             wind: weather.forecast.current?.windspeed,
-            windUnit: units?.windspeed_10m,
+            windUnit: "km/h",
             precipitation: weather.forecast.current?.precipitation,
-            precipitationUnit: units?.precipitation,
+            precipitationUnit: "mm",
             uv: environmentValue(from: weather.air.hourly?.uv_index, time: weather.air.hourly?.time ?? []),
             place: location.name
         )

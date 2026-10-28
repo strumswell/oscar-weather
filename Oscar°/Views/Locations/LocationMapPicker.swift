@@ -82,7 +82,7 @@ struct MapLibreLocationPicker: UIViewRepresentable {
             let signature = parent.chips
                 .map {
                     "\($0.latitude)|\($0.longitude)|\($0.emoji ?? "")|\($0.title)"
-                        + "|\($0.temperature.map { Int($0.rounded()) } ?? .min)|\($0.iconAsset ?? "")"
+                        + "|\($0.temperature.map { SettingService.shared.units.temperature.string($0) } ?? "")|\($0.iconAsset ?? "")"
                 }
                 .joined(separator: ";")
             guard signature != citySignature else { return }
@@ -134,7 +134,7 @@ struct MapLibreLocationPicker: UIViewRepresentable {
                     .filter { !$0.isEmpty }
                     .joined(separator: " ")
                 if let temperature = chip.temperature, let iconAsset = chip.iconAsset {
-                    let temperatureText = "\(Int(temperature.rounded()))°"
+                    let temperatureText = SettingService.shared.units.temperature.string(temperature)
                     let reuseID = "city-chip-\(iconAsset)-\(temperatureText)-\(identity)"
                     result = mapView.dequeueReusableAnnotationImage(withIdentifier: reuseID)
                         ?? MLNAnnotationImage(

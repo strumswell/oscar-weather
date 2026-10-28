@@ -9,16 +9,6 @@
 import UIKit
 
 enum MapValueBubbles {
-    static func windLabel(metersPerSecond: Double, unit: String) -> String {
-        switch WindSpeedUnit(settingValue: unit) {
-        case .kmh: return "\(Int((metersPerSecond * 3.6).rounded()))"
-        case .ms:  return "\(Int(metersPerSecond.rounded()))"
-        case .mph: return "\(Int((metersPerSecond * 2.23694).rounded()))"
-        case .kn:  return "\(Int((metersPerSecond * 1.94384).rounded()))"
-        case .bft: return "\(BeaufortScale.force(forKilometersPerHour: metersPerSecond * 3.6))"
-        }
-    }
-
     static func sampleGridIndex(
         payload: RadarGridPayload, bounds: OscarRadarBounds, lat: Double, lon: Double
     ) -> UInt8? {

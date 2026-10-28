@@ -72,8 +72,14 @@ struct PrecipitationSeriesChart: View {
 
     @State private var rawSelectedDate: Date?
 
+    private var units: Units { SettingService.shared.units }
+
+    private func displayValue(_ value: Double) -> Double {
+        units.precipitation.value(fromMillimeters: value)
+    }
+
     private var maxValue: Double {
-        max(points.map(\.value).max() ?? 0, 1)
+        max(displayValue(points.map(\.value).max() ?? 0), displayValue(1))
     }
 
     private var yAxisValues: [Double] {
@@ -94,7 +100,7 @@ struct PrecipitationSeriesChart: View {
             ForEach(points) { point in
                 AreaMark(
                     x: .value("Time", point.date),
-                    y: .value("Precipitation", point.value)
+                    y: .value("Precipitation", displayValue(point.value))
                 )
                 .interpolationMethod(.catmullRom)
                 .foregroundStyle(
@@ -119,7 +125,7 @@ struct PrecipitationSeriesChart: View {
                             VStack {
                                 Text(nearestPrecipitation(for: rawSelectedDate))
                                     .bold().foregroundStyle(.white)
-                                Text("mm/h").font(.caption2).foregroundStyle(.white.opacity(0.72))
+                                Text(verbatim: units.precipitation.rateSymbol).font(.caption2).foregroundStyle(.white.opacity(0.72))
                                     .padding(.top, -12)
                             }
                         }
@@ -146,7 +152,7 @@ struct PrecipitationSeriesChart: View {
                 AxisGridLine().foregroundStyle(.gray.opacity(0.3))
                 AxisValueLabel() {
                     if let value = value.as(Double.self) {
-                        Text("\(value, specifier: "%.1f") mm/h")
+                        Text(verbatim: "\(value.formatted(.number.precision(.fractionLength(units.precipitation.fractionDigits)))) \(units.precipitation.rateSymbol)")
                             .foregroundStyle(.white.opacity(0.72))
                     }
                 }
@@ -163,6 +169,6 @@ struct PrecipitationSeriesChart: View {
         }) else {
             return String(localized: "Keine Daten")
         }
-        return nearest.value.formatted(.number.precision(.fractionLength(1)))
+        return units.precipitationNumber(nearest.value)
     }
 }

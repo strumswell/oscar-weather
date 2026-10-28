@@ -58,7 +58,7 @@ struct LocationCard: View {
 
                 Spacer(minLength: 8)
 
-                Text(temperature.map { "\(Int($0.rounded()))°" } ?? "--°")
+                Text(SettingService.shared.units.temperatureString(temperature, placeholder: "--°"))
                     .font(.system(size: temperatureFontSize, weight: .medium, design: .rounded))
                     .foregroundStyle(.white.opacity(temperature == nil ? 0.4 : 1))
                     .contentTransition(.numericText())
@@ -131,7 +131,7 @@ struct LocationCard: View {
     private var accessibilityText: Text {
         var parts = [title]
         if let detail { parts.append(detail) }
-        if let temperature { parts.append("\(Int(temperature.rounded())) Grad") }
+        if let temperature { parts.append(SettingService.shared.units.temperature.string(temperature)) }
         if isDefault { parts.append(String(localized: "Standardort")) }
         return Text(parts.joined(separator: ", "))
     }

@@ -45,7 +45,7 @@ extension HourlyTimelineModel {
     }
 
     var temperatureLabel: String {
-        HourlyFormatting.temperatureString(sample(temperature))
+        units.temperatureString(sample(temperature))
     }
 
     var conditionLabel: String {
@@ -64,11 +64,7 @@ extension HourlyTimelineModel {
 
     var windLabel: String {
         guard let speed = sample(windspeed) else { return "--" }
-        return HourlyFormatting.windString(
-            speed,
-            unit: WindSpeedUnit(settingValue: SettingService.shared.windSpeedUnit),
-            unitString: windUnitString
-        )
+        return units.windString(speed)
     }
 
     func rowValue(for lens: HourlyLens) -> String? {
@@ -76,17 +72,13 @@ extension HourlyTimelineModel {
         let layout = layout(for: lens)
         switch lens {
         case .overview:
-            return HourlyFormatting.temperatureString(sample(temperature))
+            return units.temperatureString(sample(temperature))
         case .clouds:
             return layout.extremeFormat(sample(cloudcover) ?? 0)
         default:
             guard let primary = layout.primary, let value = sample(primary.values) else { return nil }
             return layout.extremeFormat(value)
         }
-    }
-
-    var compactMoistureUnit: String {
-        soilMoistureUnit.replacingOccurrences(of: "/", with: "\u{2044}")
     }
 
     var accessibilityValue: String {

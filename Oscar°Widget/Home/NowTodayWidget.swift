@@ -11,6 +11,7 @@ struct NowTodayEntryView: View {
     var entry: HomeProvider.Entry
     @Environment(\.widgetFamily) var family
     @Environment(\.widgetRenderingMode) var widgetRenderingMode
+    private var units: Units { SettingService.resolvedUnits }
     
     var body: some View {
         VStack {
@@ -21,7 +22,7 @@ struct NowTodayEntryView: View {
                 Spacer()
             }
             HStack {
-                Text(roundTemperatureString(temperature: entry.temperatureNow))
+                Text(units.temperatureString(entry.temperatureNow))
                     .font(.system(size: 45))
                     .fontWeight(.regular)
                 Spacer()
@@ -32,10 +33,10 @@ struct NowTodayEntryView: View {
             }
             .padding(.bottom, 1)
             HStack {
-                Text("H: \(roundTemperatureString(temperature: entry.temperatureMax))", comment: "Höchste Temperatur")
+                Text("H: \(units.temperatureString(entry.temperatureMax))", comment: "Höchste Temperatur")
                     .font(.footnote)
                     .fontWeight(.bold)
-                Text("T: \(roundTemperatureString(temperature: entry.temperatureMin))", comment: "Niedrigste Temperatur")
+                Text("T: \(units.temperatureString(entry.temperatureMin))", comment: "Niedrigste Temperatur")
                     .font(.footnote)
                     .fontWeight(.bold)
                 Spacer()

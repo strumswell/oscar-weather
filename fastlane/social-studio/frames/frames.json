@@ -1,0 +1,10 @@
+{
+  "Apple iPad Pro (12.9-inch) (4th generation) Space Gray.png": { "x": 96, "y": 102, "w": 2048, "h": 2732, "r": 36 },
+  "Apple iPad Pro (12.9-inch) (4th generation) Silver.png": { "x": 96, "y": 102, "w": 2048, "h": 2732, "r": 36 },
+  "Apple iPad Air (2019) 2020 Space Gray Portrait.png": { "x": 110, "y": 114, "w": 1640, "h": 2360, "r": 36 },
+  "Apple iPad Air (2019) 2020 Silver Portrait.png": { "x": 110, "y": 114, "w": 1640, "h": 2360, "r": 36 },
+  "Apple iPhone Duo Inner Night Sky.png": { "x": 120, "y": 120, "w": 2007, "h": 2853, "mask": "Apple iPhone Duo Inner Screen Mask.png" },
+  "Apple iPhone Duo Inner Star White.png": { "x": 120, "y": 120, "w": 2007, "h": 2853, "mask": "Apple iPhone Duo Inner Screen Mask.png" },
+  "Apple iPhone Duo Outer Night Sky.png": { "x": 88, "y": 80, "w": 1398, "h": 2034, "mask": "Apple iPhone Duo Outer Screen Mask.png" },
+  "Apple iPhone Duo Outer Star White.png": { "x": 88, "y": 80, "w": 1398, "h": 2034, "mask": "Apple iPhone Duo Outer Screen Mask.png" }
+}

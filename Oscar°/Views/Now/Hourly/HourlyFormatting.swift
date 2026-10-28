@@ -12,13 +12,6 @@ enum HourlyFormatting {
     return SettingService.formattedTime(date, timeZone: timeZone, showsMinutes: false)
   }
 
-  static func windString(_ value: Double, unit: WindSpeedUnit, unitString: String) -> String {
-    if unit.usesBeaufortDisplay {
-      return "\(BeaufortScale.force(forKilometersPerHour: value)) \(unit.displayUnit)"
-    }
-    return "\(Int(value.rounded())) \(unitString)"
-  }
-
   static func timeString(timestamp: Double, timeZone: TimeZone) -> String {
     let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
 
@@ -45,22 +38,6 @@ enum HourlyFormatting {
       return String(localized: "Morgen")
     }
     return SettingService.formattedWeekday(date, timeZone: timeZone)
-  }
-
-  static func temperatureString(_ temperature: Double?) -> String {
-    guard let temperature else {
-      return ""
-    }
-
-    return "\(Int(temperature.rounded()))°"
-  }
-
-  static func precipitationString(value: Double, unit: String) -> String {
-    "\(value.formatted(.number.precision(.fractionLength(1)))) \(unit)"
-  }
-
-  static func displayRate(fromMillimeters value: Double, unit: String) -> Double {
-    unit.lowercased() == "inch" ? value / 25.4 : value
   }
 
   static func weatherIconName(weatherCode: Double, isDay: Double) -> String {

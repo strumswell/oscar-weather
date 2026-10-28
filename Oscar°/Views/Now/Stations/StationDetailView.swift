@@ -25,7 +25,7 @@ struct StationDetailView: View {
                             id: station.id,
                             name: station.name,
                             subtitle: [station.current.weather_code.map(WeatherConditionLabel.text(for:)),
-                                       stationSubtitle(station, timeZone: weather.forecast.locationTimeZone),
+                                       stationSubtitle(station, timeZone: weather.forecast.locationTimeZone, units: SettingService.shared.units),
                                        reportingInterval(station.history)].compactMap(\.self).joined(separator: " · "))
                         StationValueGrid(station: station)
                         Text("Letzte 24h")
@@ -87,7 +87,7 @@ private struct StationChips: View {
                     Button {
                         selectedID = station.id
                     } label: {
-                        Text(verbatim: "\(station.name) · \(station.distance_km.formatted(.number.precision(.fractionLength(1)))) km")
+                        Text(verbatim: "\(station.name) · \(SettingService.shared.units.distanceString(station.distance_km))")
                             .font(.subheadline.weight(.semibold))
                             .monospacedDigit()
                             .padding(.horizontal, 12)
@@ -318,17 +318,17 @@ private struct StationValueGrid: View {
     let station: Components.Schemas.NearbyStation
 
     var body: some View {
-        let units = StationUnits()
+        let units = SettingService.shared.units
         let current = station.current
         let direction = current.wind_direction_deg.map { " \(compassDirection($0))" } ?? ""
         DetailCard {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), alignment: .leading), count: 3), alignment: .leading, spacing: 14) {
-                StationValue(label: "Temperatur", value: units.temperatureString(current.temperature_c))
-                StationValue(label: "Taupunkt", value: units.temperatureString(current.dew_point_c))
+                StationValue(label: "Temperatur", value: units.preciseTemperatureString(current.temperature_c))
+                StationValue(label: "Taupunkt", value: units.preciseTemperatureString(current.dew_point_c))
                 StationValue(label: "Luftfeuchtigkeit", value: current.humidity_pct.map { "\(Int($0.rounded())) %" } ?? "–")
-                StationValue(label: "Wind", value: units.windString(current.wind_speed_ms) + direction)
-                StationValue(label: "Böen", value: units.windString(current.wind_gust_ms))
-                StationValue(label: "Luftdruck", value: current.pressure_hpa.map { "\(Int($0.rounded())) hPa" } ?? "–")
+                StationValue(label: "Wind", value: units.windString(current.wind_speed_ms.map { $0 * 3.6 }) + direction)
+                StationValue(label: "Böen", value: units.windString(current.wind_gust_ms.map { $0 * 3.6 }))
+                StationValue(label: "Luftdruck", value: units.pressureString(current.pressure_hpa))
             }
         }
     }
@@ -440,12 +440,12 @@ private struct StationTemperatureChart: View {
     let frame: StationChartFrame
 
     var body: some View {
-        let units = StationUnits()
-        let symbol = units.temperatureUnit.symbol
+        let unit = SettingService.shared.temperatureUnit
+        let symbol = unit.symbol
         let lines = [
-            StationChart.Line(points: points(history) { $0.dew_point_c.map(units.temperature) }, color: .mint, width: 1.5,
+            StationChart.Line(points: points(history) { $0.dew_point_c.map(unit.value(fromCelsius:)) }, color: .mint, width: 1.5,
                               label: String(localized: "Taupunkt")),
-            StationChart.Line(points: points(history) { $0.temperature_c.map(units.temperature) }, color: .orange,
+            StationChart.Line(points: points(history) { $0.temperature_c.map(unit.value(fromCelsius:)) }, color: .orange,
                               label: String(localized: "Temperatur")),
         ]
         StationChartCard(title: "Temperatur und Taupunkt", legend: lines) {
@@ -462,12 +462,13 @@ private struct StationWindChart: View {
     let frame: StationChartFrame
 
     var body: some View {
-        let units = StationUnits()
-        let unit = units.windUnit.displayUnit
+        let units = SettingService.shared.units
+        let unit = units.wind.symbol
+        let wind = { (metersPerSecond: Double) in units.windValue(metersPerSecond * 3.6) }
         let lines = [
-            StationChart.Line(points: points(history) { $0.wind_gust_ms.map(units.wind) }, color: .teal.mix(with: .black, by: 0.4),
+            StationChart.Line(points: points(history) { $0.wind_gust_ms.map(wind) }, color: .teal.mix(with: .black, by: 0.4),
                               width: 1.5, label: String(localized: "Böen")),
-            StationChart.Line(points: points(history) { $0.wind_speed_ms.map(units.wind) }, color: .teal,
+            StationChart.Line(points: points(history) { $0.wind_speed_ms.map(wind) }, color: .teal,
                               label: String(localized: "Wind")),
         ]
         let arrows = history.compactMap { reading -> StationChart.Point? in
@@ -491,22 +492,22 @@ private struct StationPrecipitationChart: View {
     let total: Double?
 
     var body: some View {
-        let units = StationUnits()
-        let unit = units.precipitationUnit
-        let bars = hourlyBars(units)
-        let peak = max(bars.map(\.value).max() ?? 0, units.precipitation(1))
+        let units = SettingService.shared.units
+        let unit = units.precipitation
+        let bars = hourlyBars(unit)
+        let peak = max(bars.map(\.value).max() ?? 0, unit.value(fromMillimeters: 1))
         StationChartCard(title: "Niederschlag", summary: String(localized: "\(units.precipitationString(total)) in 24h")) {
             StationChart(
                 frame: frame, lines: [], bars: bars, yDomain: 0...(peak * 1.08),
-                valueFormat: { "\($0.formatted(.number.precision(.fractionLength(1)))) \(unit)" })
+                valueFormat: { "\($0.formatted(.number.precision(.fractionLength(unit.fractionDigits)))) \(unit.symbol)" })
         }
     }
 
-    private func hourlyBars(_ units: StationUnits) -> [StationChart.Bar] {
+    private func hourlyBars(_ unit: PrecipitationUnit) -> [StationChart.Bar] {
         var bars: [StationChart.Bar] = []
         for reading in history {
             guard let mm = reading.precipitation_mm else { continue }
-            let value = units.precipitation(mm)
+            let value = unit.value(fromMillimeters: mm)
             let minutes = reading.precipitation_period_min ?? 60
             guard minutes < 60 else {
                 bars.append(.init(start: reading.time.addingTimeInterval(-TimeInterval(minutes * 60)), end: reading.time,
@@ -529,24 +530,28 @@ private struct StationPressureChart: View {
     let frame: StationChartFrame
 
     var body: some View {
-        let lines = [StationChart.Line(points: points(history) { $0.pressure_hpa }, color: .purple, label: String(localized: "Luftdruck"))]
+        let unit = SettingService.shared.pressureUnit
+        let lines = [StationChart.Line(points: points(history) { $0.pressure_hpa.map(unit.value(fromHectopascals:)) },
+                                       color: .purple, label: String(localized: "Luftdruck"))]
         if !lines[0].points.isEmpty {
-            StationChartCard(title: "Luftdruck", summary: threeHourTrend(lines[0].points)) {
+            StationChartCard(title: "Luftdruck", summary: threeHourTrend(lines[0].points, unit: unit)) {
                 StationChart(
-                    frame: frame, lines: lines, yDomain: paddedDomain(lines, minimumPad: 2),
-                    valueFormat: { "\($0.formatted(.number.grouping(.never).precision(.fractionLength(1)))) hPa" },
-                    extremeFormat: { "\(Int($0.rounded()))" }, showsExtremes: true)
+                    frame: frame, lines: lines, yDomain: paddedDomain(lines, minimumPad: unit.value(fromHectopascals: 2)),
+                    valueFormat: { "\($0.formatted(.number.grouping(.never).precision(.fractionLength(unit.fractionDigits + 1)))) \(unit.symbol)" },
+                    extremeFormat: { $0.formatted(.number.grouping(.never).precision(.fractionLength(unit.fractionDigits))) },
+                    showsExtremes: true)
             }
         }
     }
 
-    private func threeHourTrend(_ pressures: [StationChart.Point]) -> String? {
+    private func threeHourTrend(_ pressures: [StationChart.Point], unit: PressureUnit) -> String? {
         guard let last = pressures.last else { return nil }
         let target = last.time.addingTimeInterval(-3 * 3600)
         guard let earlier = pressures.min(by: { abs($0.time.timeIntervalSince(target)) < abs($1.time.timeIntervalSince(target)) }),
               abs(earlier.time.timeIntervalSince(target)) <= 1800 else { return nil }
-        let delta = (last.value - earlier.value).formatted(.number.precision(.fractionLength(1)).sign(strategy: .always(includingZero: false)))
-        return String(localized: "\(delta) hPa in 3h")
+        let delta = (last.value - earlier.value).formatted(
+            .number.precision(.fractionLength(unit.fractionDigits + 1)).sign(strategy: .always(includingZero: false)))
+        return String(localized: "\(delta) \(unit.symbol) in 3h")
     }
 }
 

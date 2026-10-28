@@ -20,6 +20,7 @@ struct WatchNowView: View {
     }
 
     private var conditions: some View {
+        let units = SettingService.shared.units
         let current = weather.forecast.current
         let daily = weather.forecast.daily
         let radarRate = weather.precipSeries?.currentRate
@@ -35,7 +36,7 @@ struct WatchNowView: View {
 
             Spacer()
 
-            Text(roundTemperatureString(temperature: current?.temperature))
+            Text(units.temperatureString(current?.temperature))
                 .font(.system(size: 64, weight: .thin, design: .rounded))
                 .contentTransition(.numericText())
 
@@ -49,16 +50,16 @@ struct WatchNowView: View {
 
             HStack(spacing: 14) {
                 Label(
-                    roundTemperatureString(temperature: daily?.temperature_2m_max?.first),
+                    units.temperatureString(daily?.temperature_2m_max?.first),
                     systemImage: "arrow.up"
                 )
                 Label(
-                    roundTemperatureString(temperature: daily?.temperature_2m_min?.first),
+                    units.temperatureString(daily?.temperature_2m_min?.first),
                     systemImage: "arrow.down"
                 )
                 if rainRate > 0 {
                     Label(
-                        "\(rainRate.formatted(.number.precision(.fractionLength(1)))) mm/h",
+                        units.rateString(rainRate),
                         systemImage: "cloud.rain.fill"
                     )
                 }

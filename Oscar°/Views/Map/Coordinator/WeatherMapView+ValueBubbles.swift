@@ -30,9 +30,8 @@ extension WeatherMapView.Coordinator {
         }
 
         let isWind = selection == .iconWind || selection == .ecmwfWind
-        let unit = isWind
-            ? parent.settingsService.windSpeedUnit
-            : parent.settingsService.temperatureUnit
+        let units = parent.settingsService.units
+        let unit = isWind ? units.wind.rawValue : units.temperature.rawValue
 
         var indicatorAnchors = [parent.coordinates]
         if let userCoordinate = mapView?.userLocation?.location?.coordinate {
@@ -61,11 +60,9 @@ extension WeatherMapView.Coordinator {
             let label: String
             if isWind {
                 let mps = (Double(index) - 1) / 254 * 50
-                label = MapValueBubbles.windLabel(metersPerSecond: mps, unit: unit)
+                label = units.windNumber(mps * 3.6)
             } else {
-                let celsius = (Double(index) - 1) / 254 * 90 - 40
-                let shown = unit == "fahrenheit" ? celsius * 9 / 5 + 32 : celsius
-                label = "\(Int(shown.rounded()))°"
+                label = units.temperature.string((Double(index) - 1) / 254 * 90 - 40)
             }
 
             let bucket = min(255, (Int(index) / 6) * 6 + 3)

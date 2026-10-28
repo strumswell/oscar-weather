@@ -11,6 +11,7 @@ import SwiftUI
 struct PrecipitationLockScreenView: View {
     var entry: LockscreenProvider.Entry
     @Environment(\.widgetFamily) private var family
+    private var units: Units { SettingService.resolvedUnits }
     
     var body: some View {
         Group {
@@ -18,7 +19,7 @@ struct PrecipitationLockScreenView: View {
             case .accessoryInline:
                 HStack {
                     Image(systemName: "umbrella.fill")
-                    Text("\(entry.precipitationProbability) % • \(entry.precipitation, specifier: "%.1f") mm")
+                    Text("\(entry.precipitationProbability) % • \(units.precipitationString(entry.precipitation))")
                 }
             case .accessoryCorner:
                 Image(systemName: "umbrella.fill")
@@ -26,7 +27,7 @@ struct PrecipitationLockScreenView: View {
                     .symbolRenderingMode(.hierarchical)
                     .widgetAccentable()
                     .widgetLabel {
-                        Text("\(entry.precipitationProbability) % · \(entry.precipitation, specifier: "%.1f") mm")
+                        Text("\(entry.precipitationProbability) % · \(units.precipitationString(entry.precipitation))")
                     }
             default:
                 EmptyView()

@@ -79,16 +79,20 @@ struct StatsView: View {
     }
 
     private var temperatureUnit: String {
-        settings.temperatureUnit == "fahrenheit" ? "°F" : "°C"
+        settings.temperatureUnit.symbol
     }
 
     private var windUnit: String {
-        let unit = WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit)
-        return unit == .bft ? "km/h" : unit.displayUnit
+        switch settings.windSpeedUnit {
+        case .kmh, .bft: "km/h"
+        case .ms: "m/s"
+        case .mph: "mph"
+        case .kn: "kn"
+        }
     }
 
     private var precipitationUnit: String {
-        settings.precipitationUnit == "inch" ? "in" : "mm"
+        settings.precipitationUnit == .inch ? "in" : "mm"
     }
 
     private static func sheetTitle(_ id: String) -> LocalizedStringKey {

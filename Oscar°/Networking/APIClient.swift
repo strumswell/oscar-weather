@@ -120,9 +120,6 @@ final class APIClient: Sendable {
   ) async throws -> Operations.getForecast.Output.Ok.Body.jsonPayload {
     let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
 
-    let temperatureUnit = SettingService.resolvedTemperatureUnit
-    let precipitationUnit = SettingService.resolvedPrecipitationUnit
-    let windSpeedUnit = WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit)
     let hourlyFields = hourly ?? [
       .temperature_2m, .apparent_temperature, .precipitation, .snowfall, .weathercode,
       .cloudcover,
@@ -146,12 +143,6 @@ final class APIClient: Sendable {
         .cloudcover, .cloudcover_low, .cloudcover_mid, .cloudcover_high, .temperature,
         .wind_direction_10m, .weathercode, .windspeed, .precipitation, .is_day,
       ],
-      temperature_unit: Operations.getForecast.Input.Query.temperature_unitPayload(
-        rawValue: temperatureUnit),
-      windspeed_unit: Operations.getForecast.Input.Query.windspeed_unitPayload(
-        rawValue: windSpeedUnit.apiRawValue),
-      precipitation_unit: Operations.getForecast.Input.Query.precipitation_unitPayload(
-        rawValue: precipitationUnit),
       timeformat: .unixtime,
       timezone: "auto",
       forecast_days: forecastDays
@@ -305,7 +296,6 @@ final class APIClient: Sendable {
     model: DailyEnsembleModel = .ecmwfAIFS025Ensemble
   ) async throws -> DailyEnsembleForecastResponse {
     let outboundCoordinates = LocationService.outboundCoordinate(coordinates)
-    let windSpeedUnit = WindSpeedUnit(settingValue: SettingService.resolvedWindSpeedUnit)
     var components = URLComponents(string: "https://ensemble-api.open-meteo.com/v1/ensemble")!
     components.queryItems = [
       URLQueryItem(name: "latitude", value: String(outboundCoordinates.latitude)),
@@ -323,9 +313,6 @@ final class APIClient: Sendable {
         ].joined(separator: ",")
       ),
       URLQueryItem(name: "models", value: model.rawValue),
-      URLQueryItem(name: "temperature_unit", value: SettingService.resolvedTemperatureUnit),
-      URLQueryItem(name: "wind_speed_unit", value: windSpeedUnit.apiRawValue),
-      URLQueryItem(name: "precipitation_unit", value: SettingService.resolvedPrecipitationUnit),
       URLQueryItem(name: "timezone", value: "auto"),
       URLQueryItem(name: "forecast_days", value: "35"),
     ]

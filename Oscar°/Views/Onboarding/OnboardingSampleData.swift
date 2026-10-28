@@ -7,53 +7,28 @@ import Foundation
 
 @MainActor
 enum OnboardingSampleData {
-    static let hourlyItems: [HourlyForecastItem] = [
-        HourlyForecastItem(
-            timestamp: 0,
-            hour: String(localized: "Jetzt"),
-            precipitation: "0 mm",
-            iconName: "01d",
-            temperature: "23°",
-            isNow: true
-        ),
-        HourlyForecastItem(
-            timestamp: 1,
-            hour: String(localized: "15 Uhr"),
-            precipitation: "0 mm",
-            iconName: "02d",
-            temperature: "24°"
-        ),
-        HourlyForecastItem(
-            timestamp: 2,
-            hour: String(localized: "16 Uhr"),
-            precipitation: "0,2 mm",
-            iconName: "10d",
-            temperature: "22°",
-            precipitationValue: 0.2
-        ),
-        HourlyForecastItem(
-            timestamp: 3,
-            hour: String(localized: "17 Uhr"),
-            precipitation: "0,8 mm",
-            iconName: "09d",
-            temperature: "20°",
-            precipitationValue: 0.8
-        ),
-        HourlyForecastItem(
-            timestamp: 4,
-            hour: String(localized: "18 Uhr"),
-            precipitation: "0 mm",
-            iconName: "02d",
-            temperature: "21°"
-        ),
-        HourlyForecastItem(
-            timestamp: 5,
-            hour: String(localized: "22 Uhr"),
-            precipitation: "0 mm",
-            iconName: "01n",
-            temperature: "17°"
-        ),
-    ]
+    static var hourlyItems: [HourlyForecastItem] {
+        let units = SettingService.shared.units
+        let samples: [(hour: String, icon: String, celsius: Double, mm: Double)] = [
+            (String(localized: "Jetzt"), "01d", 23, 0),
+            (String(localized: "15 Uhr"), "02d", 24, 0),
+            (String(localized: "16 Uhr"), "10d", 22, 0.2),
+            (String(localized: "17 Uhr"), "09d", 20, 0.8),
+            (String(localized: "18 Uhr"), "02d", 21, 0),
+            (String(localized: "22 Uhr"), "01n", 17, 0),
+        ]
+        return samples.enumerated().map { index, sample in
+            HourlyForecastItem(
+                timestamp: Double(index),
+                hour: sample.hour,
+                precipitation: units.precipitationString(sample.mm),
+                iconName: sample.icon,
+                temperature: units.temperatureString(sample.celsius),
+                isNow: index == 0,
+                precipitationValue: sample.mm
+            )
+        }
+    }
 
     static let gauges: [EnvironmentMetric] = [
         EnvironmentMetric.forAQI(id: "aqi", label: "AQI", value: 18),

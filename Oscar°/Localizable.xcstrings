@@ -197,6 +197,28 @@
         }
       }
     },
+    "%@ %@ in 3h" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ in 3h"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ in 3h"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 saatte %1$@ %2$@"
+          }
+        }
+      }
+    },
     "%@ %@, %lld" : {
       "localizations" : {
         "de" : {
@@ -250,28 +272,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ ile %@ arası"
-          }
-        }
-      }
-    },
-    "%@ hPa in 3h" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ hPa in 3h"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ hPa in 3h"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "3 saatte %@ hPa"
           }
         }
       }
@@ -4436,6 +4436,28 @@
         }
       }
     },
+    "Befindet sich etwa über deinem Standort." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Befindet sich etwa über deinem Standort."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Currently right over your location."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu anda yaklaşık konumunun üzerinde."
+          }
+        }
+      }
+    },
     "Befindet sich etwa über %@." : {
       "localizations" : {
         "de" : {
@@ -6303,28 +6325,6 @@
         }
       }
     },
-    "deinen Standort" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "deinen Standort"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "your location"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "bulunduğun yer"
-          }
-        }
-      }
-    },
     "Der kälteste %@ seit %@." : {
       "localizations" : {
         "de" : {
@@ -7694,6 +7694,28 @@
         }
       }
     },
+    "Entfernung" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entfernung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distance"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mesafe"
+          }
+        }
+      }
+    },
     "Environment Canada" : {
       "localizations" : {
         "de" : {
@@ -7902,6 +7924,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yeniden dene"
+          }
+        }
+      }
+    },
+    "Erreicht deinen Standort gegen %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreicht deinen Standort gegen %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reaches your location around %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konumuna %@ civarında ulaşacak."
           }
         }
       }
@@ -24371,6 +24415,28 @@
         }
       }
     },
+    "Zieht voraussichtlich an deinem Standort vorbei." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zieht voraussichtlich an deinem Standort vorbei."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Will likely pass near your location."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muhtemelen konumunun yakınından geçecek."
+          }
+        }
+      }
+    },
     "Zieht voraussichtlich an %@ vorbei." : {
       "localizations" : {
         "de" : {
@@ -24382,7 +24448,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Will likely pass by %@."
+            "value" : "Will likely pass near %@."
           }
         },
         "tr" : {

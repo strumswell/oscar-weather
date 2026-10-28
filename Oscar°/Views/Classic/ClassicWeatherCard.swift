@@ -264,12 +264,12 @@ struct ClassicWeatherCard: View {
 
     private func degrees(_ value: Double?, size: CGFloat, weight: String) -> Text {
         guard let value else { return Text(verbatim: "–").font(.custom(weight, fixedSize: size)) }
-        return Text(verbatim: "\(Int(value.rounded()))").font(.custom(weight, fixedSize: size))
+        return Text(verbatim: "\(SettingService.shared.temperatureUnit.rounded(value))").font(.custom(weight, fixedSize: size))
             + Text(verbatim: "°").font(.custom(weight, fixedSize: size * 0.55)).baselineOffset(size * 0.45)
     }
 
     private func rounded(_ value: Double?) -> String {
-        value.map { "\(Int($0.rounded()))°" } ?? "–"
+        SettingService.shared.units.temperatureString(value, placeholder: "–")
     }
 }
 
