@@ -39,6 +39,7 @@ struct ClubVoucherView: View {
             .padding(.bottom, 24)
         }
         .scrollDismissesKeyboard(.never)
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .safeAreaInset(edge: .bottom) {
             if phase == .redeemed {
                 Button {
@@ -57,7 +58,10 @@ struct ClubVoucherView: View {
         .background(alignment: .topLeading) { field }
         .navigationTitle(Text("Gutschein"))
         .toolbarTitleDisplayMode(.inline)
-        .onAppear { isFocused = true }
+        .task {
+            try? await Task.sleep(for: .milliseconds(400))
+            isFocused = true
+        }
         .onChange(of: input) {
             if input != code { input = code }
             if phase == .invalid || phase == .duplicate { phase = .entry }

@@ -94,6 +94,9 @@ struct MemberCardEditor: View {
         .onChange(of: tab) {
             Haptics.tick()
         }
+        .task {
+            try? await ShaderLibrary.memberCardPaper().compile(as: .colorEffect)
+        }
         .onChange(of: showsVoucher) {
             guard !showsVoucher else { return }
             status = .current()

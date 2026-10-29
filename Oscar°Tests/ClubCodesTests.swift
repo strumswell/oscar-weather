@@ -27,6 +27,9 @@ struct ClubCodesTests {
         #expect(status.years == 5)
         #expect(status.title == "A")
 
+        let redeemed = Date.now.addingTimeInterval(-2.1 * 365 * 86_400)
+        #expect(ClubUnlocks([ClubReward(years: 3, redeemedAt: redeemed)]).years == 5)
+
         stats.firstLaunch = .now.addingTimeInterval(-7.2 * 365 * 86_400)
         #expect(MemberStatus(stats: stats, isSupporter: false, chosenTitle: nil, unlocks: unlocks).years == 7)
     }

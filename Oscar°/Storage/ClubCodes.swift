@@ -9,6 +9,7 @@ struct ClubReward: Codable, Equatable {
     var stickers: [String]?
     var icons: Bool?
     var pet: Bool?
+    var redeemedAt: Date?
 }
 
 struct ClubUnlocks: Equatable {
@@ -24,11 +25,15 @@ struct ClubUnlocks: Equatable {
 
     init() {}
 
-    init(_ rewards: [ClubReward]) {
+    init(_ rewards: [ClubReward], now: Date = .now) {
         for reward in rewards {
             founder = founder || reward.tier == "founder"
             supporter = supporter || reward.tier == "supporter"
-            if let years = reward.years { self.years = max(self.years ?? 0, years) }
+            if let years = reward.years {
+                let since = reward.redeemedAt ?? now
+                let elapsed = max(0, Calendar.current.dateComponents([.year], from: since, to: now).year ?? 0)
+                self.years = max(self.years ?? 0, years + elapsed)
+            }
             titles += (reward.titles ?? []).filter { !titles.contains($0) }
             stickers.formUnion(reward.stickers ?? [])
             icons = icons || reward.icons == true
@@ -129,10 +134,12 @@ final class ClubRewardStore {
     func redeem(_ code: String) async throws -> ClubReward {
         let result = try await Task.detached(priority: .userInitiated) { try ClubCodes.open(code) }.value
         guard redeemed[result.id] == nil else { throw ClubCodes.Failure.alreadyRedeemed }
-        redeemed[result.id] = result.reward
-        guard let data = try? JSONEncoder().encode(redeemed) else { return result.reward }
+        var reward = result.reward
+        reward.redeemedAt = .now
+        redeemed[result.id] = reward
+        guard let data = try? JSONEncoder().encode(redeemed) else { return reward }
         AppGroup.defaults.set(data, forKey: Self.key)
         cloud.set(data, forKey: Self.key)
-        return result.reward
+        return reward
     }
 }
