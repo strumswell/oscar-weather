@@ -449,7 +449,7 @@ private struct CatMenu: View {
     }
 
     private func furnitureTile(_ kind: CatFurniture, index: Int) -> some View {
-        let isLocked = !supporter.isSupporter
+        let isLocked = !supporter.unlocksPet
         let isPlaced = cat.placement[kind] != nil
         return tile(index) { open(kind, isLocked: isLocked) } label: {
             FurnitureIcon(kind: kind, variant: isPlaced ? cat.variant(of: kind) : 0)

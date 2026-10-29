@@ -1,535 +1,140 @@
 import SwiftUI
-import UIKit
 
 struct MemberCard: View {
-    static let cardHeight: CGFloat = 200
-    static let cornerRadius: CGFloat = 24
-    static let dockHeight: CGFloat = 112
-    static let dockSpacing: CGFloat = 14
-    static let dockBinSize = CGSize(width: 88, height: 88)
-    static let dockStickerTouchSize: CGFloat = 86
-    static let dockPickupHoldDuration: TimeInterval = 0.22
-    static let dockPickupAllowableMovement: CGFloat = 12
-    static let minimumStickerVisibleRatio: CGFloat = 0.65
-
-    private let os = UIDevice.current.systemName
-    private let version = UIDevice.current.systemVersion
-    private let stickerStore = MemberCardStickerStore()
+    static let maxCardWidth: CGFloat = 460
+    static let seenTierKey = "memberCardSeenTier"
+    static let seenYearsKey = "memberCardSeenYears"
+    static let signatureKey = "memberCardSignature"
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isEditing = false
-    @State private var dockRevealProgress: CGFloat = 0
-    @State private var placements: [MemberCardStickerPlacement]
-    @State private var selectedStickerID: UUID?
-    @State private var activeDrag: ActiveDrag?
-    @State private var inFlightScaleMultiplier: Double = 1.0
-    @State private var inFlightRotationDelta: Angle = .zero
-    @State private var settlingStickerID: UUID?
-    @State private var settlingStickerFoldProgress: CGFloat = 0
+    @State private var placements: [MemberCardStickerPlacement] = []
+    @State private var cardWidth: CGFloat = 340
+    @State private var status: MemberStatus
+    @State private var backStats: [MemberCardBackStat]
+    @State private var show: MemberCardShow
+    @Binding var editorTab: MemberCardEditor.Tab?
+    @State private var showsLab = UserDefaults.standard.bool(forKey: "memberCardLab")
+    @AppStorage(MemberCard.signatureKey) private var signatureData = Data()
 
-    init() {
-        _placements = State(initialValue: MemberCardStickerStore().load().filter { MemberCardStickerCatalog.assets.contains($0.assetName) })
+    init(editorTab: Binding<MemberCardEditor.Tab?>) {
+        _editorTab = editorTab
+        let status = MemberStatus.current()
+        _status = State(initialValue: status)
+        _backStats = State(initialValue: MemberCardBackStat.all(for: status))
+        let show = MemberCardShow()
+        show.stampHidden = Self.hasUnseenStamp(status)
+        show.revealFrom = Self.unseenTierUp(status)
+        _show = State(initialValue: show)
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            cardBody
-                .frame(height: Self.cardHeight)
-
-            dockSpacer
-        }
-        .frame(height: Self.cardHeight + dockOccupiedHeight)
-        .overlay(alignment: .topLeading) {
-            overlayLayer
-        }
-        .coordinateSpace(.named(Self.coordinateSpaceName))
-        .simultaneousGesture(
-            MagnifyGesture()
-                .simultaneously(with: RotateGesture())
-                .onChanged { value in
-                    guard activeDrag != nil else { return }
-                    inFlightScaleMultiplier = Double(value.first?.magnification ?? 1)
-                    inFlightRotationDelta = value.second?.rotation ?? .zero
-                }
-                .onEnded { value in
-                    guard activeDrag != nil else { return }
-                    inFlightScaleMultiplier = Double(value.first?.magnification ?? 1)
-                    inFlightRotationDelta = value.second?.rotation ?? .zero
-                }
-        )
-    }
-
-    private var cardBody: some View {
-        GeometryReader { proxy in
-            let cardSize = CGSize(width: max(proxy.size.width, 1), height: Self.cardHeight)
-
-            MemberCardSurface(
-                osName: os,
-                osVersion: version,
-                placements: placements,
-                activeStickerID: activeDrag?.existingStickerID,
-                activeStickerCenter: activeExistingStickerCenter,
-                activeStickerScale: activeExistingStickerScale,
-                activeStickerRotation: activeExistingStickerRotation,
-                settlingStickerID: settlingStickerID,
-                settlingStickerFoldProgress: settlingStickerFoldProgress,
-                isEditing: isEditing,
-                onCardTap: openDock,
-                onApplyChanges: closeDock,
-                onStickerTap: selectSticker,
-                onStickerPressChanged: { placement, isPressed in
-                    updateExistingStickerPress(placement: placement, isPressed: isPressed, in: cardSize)
-                },
-                onStickerDragChanged: { placement, translation in
-                    updateExistingStickerDrag(placement: placement, translation: translation, in: cardSize)
-                },
-                onStickerDragEnded: { placement, translation in
-                    finishExistingStickerDrag(
-                        placement: placement,
-                        translation: translation,
-                        in: cardSize,
-                        removeBinFrame: removeBinFrame(for: cardSize.width).insetBy(dx: -20, dy: -24)
-                    )
-                }
+        MemberCardStage(show: show, tier: status.style, width: cardWidth, tiltActive: editorTab == nil) { style in
+            surface(style: style)
+        } back: {
+            MemberCardBack(
+                tier: status.style,
+                stats: backStats,
+                signature: MemberCardSignature.decode(signatureData),
+                width: cardWidth,
+                motion: show.motion,
+                onSignatureTap: { openEditor(.signature) }
             )
         }
-    }
-
-    @ViewBuilder
-    private var overlayLayer: some View {
-        GeometryReader { proxy in
-            let cardSize = CGSize(width: max(proxy.size.width, 1), height: Self.cardHeight)
-            let layoutFrame = proxy.frame(in: .global)
-            let removeTargetFrame = removeBinFrame(for: cardSize.width).insetBy(dx: -20, dy: -24)
-            let isHoveringRemoveBin = activeDrag.map { $0.isExisting && removeTargetFrame.contains($0.center) } ?? false
-
-            dockSlot(layoutFrame: layoutFrame, cardSize: cardSize, isHoveringRemoveBin: isHoveringRemoveBin)
-                .offset(y: Self.cardHeight)
-                .zIndex(10)
-
-            if let activeDrag, activeDrag.isExisting {
-                stickerPreview(for: activeDrag)
-                    .position(activeDrag.center)
-                    .opacity(activeDrag.center.y > Self.cardHeight - 12 ? 1 : 0)
-                    .allowsHitTesting(false)
-                    .zIndex(300)
-            }
-
-            if let activeDrag, activeDrag.isPalette {
-                stickerPreview(for: activeDrag)
-                    .position(activeDrag.center)
-                    .transition(.opacity)
-                    .allowsHitTesting(false)
-                    .zIndex(300)
-            }
+        .frame(width: cardWidth, height: cardWidth / MemberCardPalette.aspect)
+        .contentShape(.rect)
+        .onTapGesture { show.flip(reduceMotion: reduceMotion) }
+        .onLongPressGesture(minimumDuration: 0.4) { openEditor(.stickers) }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Mitgliedskarte"))
+        .accessibilityValue(Text(verbatim: MemberCardFace.summary(status: status)))
+        .accessibilityHint(Text("Tippen, um die Karte umzudrehen. Lange drücken zum Bearbeiten."))
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction { show.flip(reduceMotion: reduceMotion) }
+        .accessibilityAction(named: Text("Karte bearbeiten")) { openEditor(.stickers) }
+        .accessibilityAction(named: Text("Unterschreiben")) { openEditor(.signature) }
+        .accessibilityIdentifier("settings.memberCard")
+        .frame(maxWidth: .infinity)
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+            cardWidth = max(min(Self.maxCardWidth, width), 1)
+        }
+        .task(id: editorTab == nil) {
+            guard editorTab == nil else { return }
+            await show.motion.run(reduceMotion: reduceMotion)
+        }
+        .task {
+            loadPlacements()
+            await playPendingMoments()
+        }
+        .onChange(of: SupporterStore.shared.isSupporter) { if editorTab == nil { refresh() } }
+        .sheet(item: $editorTab, onDismiss: refresh) { tab in
+            MemberCardEditor(initialTab: tab, status: status, backStats: backStats)
+        }
+        .sheet(isPresented: $showsLab) {
+            MemberCardLab()
         }
     }
 
-    @ViewBuilder
-    private func dockSlot(layoutFrame: CGRect, cardSize: CGSize, isHoveringRemoveBin: Bool) -> some View {
-        if isEditing {
-            MemberCardStickerDock(
-                assetNames: MemberCardStickerCatalog.assets,
-                activeDragAssetName: activeDrag?.isPalette == true ? activeDrag?.assetName : nil,
-                isRemoveTargeted: isHoveringRemoveBin,
-                canRemoveSelection: selectedStickerID != nil || activeDrag?.isExisting == true,
-                onPickupStarted: { assetName, globalCenter in
-                    beginPaletteStickerDrag(assetName: assetName, globalCenter: globalCenter, in: layoutFrame)
-                },
-                onPickupMoved: { globalCenter in
-                    updatePaletteStickerDrag(globalCenter: globalCenter, in: layoutFrame)
-                },
-                onPickupEnded: { globalCenter in
-                    finishPaletteStickerDrag(globalCenter: globalCenter, in: cardSize, layoutFrame: layoutFrame)
-                },
-                onAccessibleAdd: { assetName in
-                    addSticker(assetName: assetName, in: cardSize)
-                },
-                onRemoveSelection: removeSelectedSticker
-            )
-            .frame(height: Self.dockHeight)
-            .padding(.top, Self.dockSpacing)
-            .opacity(dockRevealProgress)
-            .scaleEffect(dockRevealScale, anchor: .top)
-            .offset(y: closedDockOffset)
-            .allowsHitTesting(dockRevealProgress > 0.99)
-            .onAppear {
-                withAnimation(dockOpenAnimation) {
-                    dockRevealProgress = 1
-                }
-            }
-        }
+    private static func unseenTierUp(_ status: MemberStatus) -> MemberTier? {
+        let seen = UserDefaults.standard.string(forKey: seenTierKey).flatMap(MemberTier.init) ?? .member
+        return !ScreenshotMode.active && status.tier > seen ? seen : nil
     }
 
-    private func openDock() {
-        guard !isEditing else { return }
-        var instant = Transaction()
-        instant.disablesAnimations = true
-        withTransaction(instant) {
-            isEditing = true
-        }
+    private static func hasUnseenStamp(_ status: MemberStatus) -> Bool {
+        !ScreenshotMode.active && status.years > UserDefaults.standard.integer(forKey: seenYearsKey)
     }
 
-    private func closeDock() {
-        selectedStickerID = nil
-        withAnimation(dockAnimation) {
-            dockRevealProgress = 0
-            activeDrag = nil
-        } completion: {
-            guard dockRevealProgress == 0 else { return }
-            var instant = Transaction()
-            instant.disablesAnimations = true
-            withTransaction(instant) {
-                isEditing = false
-            }
-        }
+    private func openEditor(_ tab: MemberCardEditor.Tab) {
+        Haptics.land()
+        editorTab = tab
     }
 
-    private var dockOpenAnimation: Animation {
-        reduceMotion ? .easeOut(duration: 0.12) : .spring(duration: 0.38, bounce: 0.22)
+    private func refresh() {
+        loadPlacements()
+        let previous = status
+        status = .current()
+        backStats = MemberCardBackStat.all(for: status)
+        guard status.tier != previous.tier || status.years != previous.years else { return }
+        show.stampHidden = Self.hasUnseenStamp(status)
+        show.revealFrom = Self.unseenTierUp(status)
+        Task { await playPendingMoments() }
     }
 
-    private var dockAnimation: Animation {
-        .easeOut(duration: dockAnimationDuration)
+    private func loadPlacements() {
+        placements = MemberCardStickerStore().load().filter { MemberCardStickerCatalog.assets.contains($0.assetName) }
     }
 
-    private var dockAnimationDuration: Double {
-        reduceMotion ? 0.12 : 0.2
-    }
-
-    private var dockRevealScale: CGFloat {
-        reduceMotion ? 1 : 0.9 + 0.1 * dockRevealProgress
-    }
-
-    private var dockOccupiedHeight: CGFloat {
-        isEditing ? Self.dockSpacing + Self.dockHeight : 0
-    }
-
-    private var dockSpacer: some View {
-        Color.clear
-            .frame(height: dockOccupiedHeight)
-    }
-
-    private var closedDockOffset: CGFloat {
-        reduceMotion ? 0 : -18 * (1 - dockRevealProgress)
-    }
-
-    private func selectSticker(_ stickerID: UUID) {
-        selectedStickerID = stickerID
-        bringStickerToFront(stickerID)
-    }
-
-    private var activeExistingStickerCenter: CGPoint? {
-        guard let activeDrag, activeDrag.isExisting else { return nil }
-        return activeDrag.center
-    }
-
-    private var activeExistingStickerScale: Double? {
-        guard let activeDrag, activeDrag.isExisting else { return nil }
-        return clampedScale(activeDrag.baseScale * inFlightScaleMultiplier)
-    }
-
-    private var activeExistingStickerRotation: Angle? {
-        guard let activeDrag, activeDrag.isExisting else { return nil }
-        return Angle(radians: activeDrag.baseRotation) + inFlightRotationDelta
-    }
-
-    private func beginPaletteStickerDrag(assetName: String, globalCenter: CGPoint, in layoutFrame: CGRect) {
-        settlingStickerID = nil
-        settlingStickerFoldProgress = 0
-        inFlightScaleMultiplier = 1.0
-        inFlightRotationDelta = .zero
-        activeDrag = ActiveDrag(
-            source: .palette,
-            assetName: assetName,
-            baseScale: 1.0,
-            baseRotation: 0,
-            center: localPoint(from: globalCenter, in: layoutFrame)
+    private func surface(style: MemberTier) -> some View {
+        var shown = status
+        shown.style = style
+        return MemberCardSurface(
+            status: shown,
+            hidesNewestStamp: show.stampHidden && style == status.style,
+            slamTrigger: show.slamTrigger,
+            width: cardWidth,
+            motion: show.motion,
+            placements: placements
         )
     }
 
-    private func updatePaletteStickerDrag(globalCenter: CGPoint, in layoutFrame: CGRect) {
-        guard let activeDrag, activeDrag.isPalette else { return }
-        self.activeDrag = ActiveDrag(
-            source: activeDrag.source,
-            assetName: activeDrag.assetName,
-            baseScale: activeDrag.baseScale,
-            baseRotation: activeDrag.baseRotation,
-            center: localPoint(from: globalCenter, in: layoutFrame)
-        )
-    }
-
-    private func finishPaletteStickerDrag(globalCenter: CGPoint, in cardSize: CGSize, layoutFrame: CGRect) {
-        defer {
-            activeDrag = nil
-            inFlightScaleMultiplier = 1.0
-            inFlightRotationDelta = .zero
+    private func playPendingMoments() async {
+        let defaults = UserDefaults.standard
+        let tierUpFrom = Self.unseenTierUp(status)
+        let needsTierUp = tierUpFrom != nil
+        let needsStamp = show.stampHidden
+        if !needsTierUp { defaults.set(status.tier.rawValue, forKey: Self.seenTierKey) }
+        if !needsStamp { defaults.set(status.years, forKey: Self.seenYearsKey) }
+        guard needsTierUp || needsStamp else { return }
+        try? await Task.sleep(for: .milliseconds(650))
+        if let tierUpFrom {
+            defaults.removeObject(forKey: MemberStatus.styleKey)
+            status.style = status.tier
+            await show.playTierUp(from: tierUpFrom, reduceMotion: reduceMotion)
+            defaults.set(status.tier.rawValue, forKey: Self.seenTierKey)
+            try? await Task.sleep(for: .milliseconds(250))
         }
-
-        guard let activeDrag, activeDrag.isPalette else { return }
-
-        let proposedCenter = localPoint(from: globalCenter, in: layoutFrame)
-        let finalScale = clampedScale(inFlightScaleMultiplier)
-        let allowedCenterBounds = stickerCenterBounds(for: finalScale, in: cardSize)
-
-        guard allowedCenterBounds.contains(proposedCenter) else { return }
-
-        let center = clampedStickerCenter(for: proposedCenter, scale: finalScale, in: cardSize)
-        var updatedPlacements = placements
-        let nextZIndex = (updatedPlacements.map(\.zIndex).max() ?? 0) + 1
-        let sticker = MemberCardStickerPlacement(
-            assetName: activeDrag.assetName,
-            xRatio: center.x / cardSize.width,
-            yRatio: center.y / cardSize.height,
-            scale: finalScale,
-            rotation: inFlightRotationDelta.radians,
-            zIndex: nextZIndex
-        )
-
-        updatedPlacements.append(sticker)
-        persist(updatedPlacements)
-        selectedStickerID = nil
-        Haptics.impact()
-    }
-
-    private func addSticker(assetName: String, in cardSize: CGSize) {
-        let center = CGPoint(x: cardSize.width / 2, y: cardSize.height / 2)
-        var updatedPlacements = placements
-        let nextZIndex = (updatedPlacements.map(\.zIndex).max() ?? 0) + 1
-        let sticker = MemberCardStickerPlacement(
-            assetName: assetName,
-            xRatio: center.x / cardSize.width,
-            yRatio: center.y / cardSize.height,
-            scale: 1,
-            rotation: 0,
-            zIndex: nextZIndex
-        )
-        updatedPlacements.append(sticker)
-        persist(updatedPlacements)
-        selectedStickerID = sticker.id
-    }
-
-    private func updateExistingStickerPress(placement: MemberCardStickerPlacement, isPressed: Bool, in cardSize: CGSize) {
-        guard isPressed else { return }
-        updateExistingStickerDrag(placement: placement, translation: .zero, in: cardSize)
-    }
-
-    private func updateExistingStickerDrag(placement: MemberCardStickerPlacement, translation: CGSize, in cardSize: CGSize) {
-        let origin = stickerCenter(for: placement, in: cardSize)
-        let center = CGPoint(x: origin.x + translation.width, y: origin.y + translation.height)
-
-        var transaction = Transaction()
-        transaction.animation = nil
-        withTransaction(transaction) {
-            settlingStickerID = nil
-            settlingStickerFoldProgress = 0
-            activeDrag = ActiveDrag(source: .existing(placement.id), assetName: placement.assetName, baseScale: placement.scale, baseRotation: placement.rotation, center: center)
+        if needsStamp {
+            await show.playStamp(reduceMotion: reduceMotion)
+            defaults.set(status.years, forKey: Self.seenYearsKey)
         }
     }
-
-    private func finishExistingStickerDrag(
-        placement: MemberCardStickerPlacement,
-        translation: CGSize,
-        in cardSize: CGSize,
-        removeBinFrame: CGRect
-    ) {
-        guard activeDrag?.existingStickerID == placement.id else { return }
-
-        if abs(translation.width) < 4 && abs(translation.height) < 4 && inFlightScaleMultiplier == 1.0 && inFlightRotationDelta == .zero {
-            activeDrag = nil
-            inFlightScaleMultiplier = 1.0
-            inFlightRotationDelta = .zero
-            return
-        }
-
-        let origin = stickerCenter(for: placement, in: cardSize)
-        let proposedCenter = CGPoint(x: origin.x + translation.width, y: origin.y + translation.height)
-
-        if removeBinFrame.contains(proposedCenter) {
-            activeDrag = nil
-            inFlightScaleMultiplier = 1.0
-            inFlightRotationDelta = .zero
-            removeSticker(placement.id)
-            Haptics.impact()
-            return
-        }
-
-        let finalScale = clampedScale(placement.scale * inFlightScaleMultiplier)
-        let allowedCenterBounds = stickerCenterBounds(for: placement.scale, in: cardSize)
-
-        guard allowedCenterBounds.contains(proposedCenter) else {
-            activeDrag = nil
-            inFlightScaleMultiplier = 1.0
-            inFlightRotationDelta = .zero
-            return
-        }
-
-        let clampedCenter = clampedStickerCenter(for: proposedCenter, scale: finalScale, in: cardSize)
-        let finalRotation = placement.rotation + inFlightRotationDelta.radians
-        let topZIndex = (placements.map(\.zIndex).max() ?? placement.zIndex) + 1
-        var updatedPlacements = placements
-
-        guard let index = updatedPlacements.firstIndex(where: { $0.id == placement.id }) else {
-            activeDrag = nil
-            inFlightScaleMultiplier = 1.0
-            inFlightRotationDelta = .zero
-            return
-        }
-
-        updatedPlacements[index].xRatio = clampedCenter.x / cardSize.width
-        updatedPlacements[index].yRatio = clampedCenter.y / cardSize.height
-        updatedPlacements[index].zIndex = topZIndex
-        updatedPlacements[index].scale = finalScale
-        updatedPlacements[index].rotation = finalRotation
-
-        activeDrag = nil
-        persist(updatedPlacements)
-        animateStickerFoldDown(for: placement.id)
-        selectedStickerID = nil
-        inFlightScaleMultiplier = 1.0
-        inFlightRotationDelta = .zero
-    }
-
-    private func removeSelectedSticker() {
-        guard let selectedStickerID else { return }
-        removeSticker(selectedStickerID)
-        Haptics.impact()
-    }
-
-    private func removeSticker(_ stickerID: UUID) {
-        let updatedPlacements = placements.filter { $0.id != stickerID }
-        persist(updatedPlacements)
-
-        if selectedStickerID == stickerID {
-            selectedStickerID = nil
-        }
-    }
-
-    private func bringStickerToFront(_ stickerID: UUID) {
-        var updatedPlacements = placements
-
-        guard let index = updatedPlacements.firstIndex(where: { $0.id == stickerID }) else { return }
-
-        let highestZIndex = updatedPlacements.map(\.zIndex).max() ?? 0
-        guard updatedPlacements[index].zIndex < highestZIndex else { return }
-
-        updatedPlacements[index].zIndex = highestZIndex + 1
-        persist(updatedPlacements)
-    }
-
-    private func persist(_ updatedPlacements: [MemberCardStickerPlacement]) {
-        placements = updatedPlacements
-        stickerStore.save(updatedPlacements)
-    }
-
-    private func removeBinFrame(for cardWidth: CGFloat) -> CGRect {
-        let binX = max(0, cardWidth - Self.dockBinSize.width)
-        let binY = Self.cardHeight + Self.dockSpacing + ((Self.dockHeight - Self.dockBinSize.height) / 2)
-
-        return CGRect(origin: CGPoint(x: binX, y: binY), size: Self.dockBinSize)
-    }
-
-    private func stickerCenter(for placement: MemberCardStickerPlacement, in size: CGSize) -> CGPoint {
-        CGPoint(x: placement.xRatio * size.width, y: placement.yRatio * size.height)
-    }
-
-    private func localPoint(from globalPoint: CGPoint, in frame: CGRect) -> CGPoint {
-        CGPoint(x: globalPoint.x - frame.minX, y: globalPoint.y - frame.minY)
-    }
-
-    private func clampedStickerCenter(for point: CGPoint, scale: Double, in size: CGSize) -> CGPoint {
-        let bounds = stickerCenterBounds(for: scale, in: size)
-
-        return CGPoint(
-            x: min(max(point.x, bounds.minX), bounds.maxX),
-            y: min(max(point.y, bounds.minY), bounds.maxY)
-        )
-    }
-
-    private func clampedScale(_ scale: Double) -> Double {
-        MemberCardStickerCatalog.clampedScale(scale)
-    }
-
-    private func stickerCenterBounds(for scale: Double, in size: CGSize) -> CGRect {
-        let stickerSize = MemberCardStickerCatalog.imageSize(for: scale)
-        let imageHalfSize = stickerSize / 2
-        let minimumVisibleExtent = min(stickerSize * Self.minimumStickerVisibleRatio, min(size.width, size.height))
-        let inset = minimumVisibleExtent - imageHalfSize
-        let width = max(0, size.width - (inset * 2))
-        let height = max(0, size.height - (inset * 2))
-
-        return CGRect(
-            x: inset,
-            y: inset,
-            width: width,
-            height: height
-        )
-    }
-
-    private func stickerPreview(for drag: ActiveDrag) -> some View {
-        let displayScale = drag.baseScale * inFlightScaleMultiplier
-        let displayRotation = Angle(radians: drag.baseRotation) + inFlightRotationDelta
-        let size = MemberCardStickerCatalog.imageSize(for: displayScale)
-
-        return MemberCardStickerArtworkView(
-            assetName: drag.assetName,
-            size: size,
-            foldProgress: drag.isExisting ? 1 : 0
-        )
-            .rotationEffect(displayRotation)
-            .offset(y: reduceMotion ? 0 : -12)
-            .shadow(color: .black.opacity(0.28), radius: 20, x: 2, y: 14)
-            .scaleEffect(reduceMotion ? 1 : 1.05)
-            .accessibilityHidden(true)
-    }
-
-    private func animateStickerFoldDown(for stickerID: UUID) {
-        settlingStickerID = stickerID
-        settlingStickerFoldProgress = 1
-
-        withAnimation(.easeOut(duration: reduceMotion ? 0.14 : 0.22)) {
-            settlingStickerFoldProgress = 0
-        } completion: {
-            if settlingStickerID == stickerID {
-                settlingStickerID = nil
-            }
-        }
-    }
-
-    static var coordinateSpaceName: String {
-        "MemberCardLayoutSpace"
-    }
-}
-
-private extension MemberCard {
-    struct ActiveDrag: Equatable {
-        enum Source: Equatable {
-            case palette
-            case existing(UUID)
-        }
-
-        let source: Source
-        let assetName: String
-        let baseScale: Double
-        let baseRotation: Double
-        let center: CGPoint
-
-        var existingStickerID: UUID? {
-            guard case let .existing(stickerID) = source else { return nil }
-            return stickerID
-        }
-
-        var isExisting: Bool {
-            existingStickerID != nil
-        }
-
-        var isPalette: Bool {
-            !isExisting
-        }
-    }
-}
-
-#Preview(traits: .sizeThatFitsLayout) {
-    MemberCard()
-        .padding()
 }

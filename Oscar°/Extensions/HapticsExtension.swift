@@ -26,6 +26,14 @@ enum Haptics {
         }
     }
 
+    @MainActor static func stamp() {
+        UIImpactFeedbackGenerator(style: .heavy).impactOccurred(intensity: 1)
+    }
+
+    @MainActor static func error() {
+        UINotificationFeedbackGenerator().notificationOccurred(.error)
+    }
+
     @MainActor static func success() {
         UINotificationFeedbackGenerator().notificationOccurred(.success)
     }

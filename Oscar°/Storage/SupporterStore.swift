@@ -32,6 +32,9 @@ final class SupporterStore {
 
     private init() {}
 
+    var unlocksIcons: Bool { isSupporter || ClubRewardStore.shared.unlocks.icons }
+    var unlocksPet: Bool { isSupporter || ClubRewardStore.shared.unlocks.pet }
+
     func start() async {
         Task {
             for await result in Transaction.updates {

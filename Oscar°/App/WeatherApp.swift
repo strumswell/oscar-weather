@@ -204,6 +204,9 @@ struct WeatherApp: App {
                     await WidgetBasemapRenderer.refreshIfNeeded()
                 }
                 .task {
+                    await TestFlightMembership.stampIfNeeded()
+                }
+                .task {
                     await SupporterStore.shared.start()
                 }
                 .onChange(of: scenePhase) { _, phase in

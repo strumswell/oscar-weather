@@ -34,7 +34,7 @@ struct CatSettingsView: View {
             .disabled(!catEnabled)
 
             Section {
-                if supporter.isSupporter {
+                if supporter.unlocksPet {
                     furnitureRow
                 } else {
                     NavigationLink {
@@ -45,7 +45,7 @@ struct CatSettingsView: View {
                     .accessibilityValue(Text("Für Unterstützer:innen"))
                 }
             } footer: {
-                if !supporter.isSupporter {
+                if !supporter.unlocksPet {
                     Text("Möbel gibt es für Unterstützer:innen.")
                 }
             }

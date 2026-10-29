@@ -276,6 +276,16 @@ extension CMAcceleration {
         default: x
         }
     }
+
+    @MainActor var screenY: Double {
+        let scene = UIApplication.shared.connectedScenes.first { $0 is UIWindowScene } as? UIWindowScene
+        return switch scene?.effectiveGeometry.interfaceOrientation ?? .portrait {
+        case .portraitUpsideDown: -y
+        case .landscapeLeft: -x
+        case .landscapeRight: x
+        default: y
+        }
+    }
 }
 
 /// Solid plate over the animated sky, inked like the cat's outlines.

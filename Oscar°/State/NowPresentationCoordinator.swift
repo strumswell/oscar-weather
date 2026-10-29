@@ -10,7 +10,7 @@ enum AppTab: Hashable {
 @MainActor
 @Observable
 final class NowPresentationCoordinator {
-    var sheet: NowSheet? {
+    var sheet: NowSheet? = UserDefaults.standard.bool(forKey: "autoPresentSettings") ? .settings : nil {
         didSet {
             guard let sheet else { return }
             UsageStatsStore.shared.record { $0.sheets[sheet.id, default: 0] += 1 }

@@ -24,7 +24,7 @@ enum MemberCardStickerCatalog {
 
     @MainActor
     static func isLocked(_ assetName: String) -> Bool {
-        if freeAssets.contains(assetName) { return false }
+        if freeAssets.contains(assetName) || ClubRewardStore.shared.unlocks.unlocksSticker(assetName) { return false }
         return !SupporterStore.shared.isSupporter
     }
 

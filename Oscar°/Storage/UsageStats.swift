@@ -68,6 +68,7 @@ struct UsageStats: Codable {
     var wettest: Extreme?
     var highestUV: Extreme?
     var supporterSince: Date?
+    var betaSince: Date?
     var cat: [String: Int]?
 
     var activeDays: Int { dailyOpens.count }
@@ -119,6 +120,9 @@ struct UsageStats: Codable {
         highestUV = Self.higher(highestUV, other.highestUV)
         if let theirs = other.supporterSince {
             supporterSince = min(supporterSince ?? theirs, theirs)
+        }
+        if let theirs = other.betaSince {
+            betaSince = min(betaSince ?? theirs, theirs)
         }
     }
 

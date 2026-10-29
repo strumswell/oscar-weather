@@ -13,17 +13,20 @@ struct SettingsView: View {
   @Bindable private var settingsService = SettingService.shared
   private let supporter = SupporterStore.shared
   @State private var showsMemory = false
+  @State private var cardEditorTab: MemberCardEditor.Tab?
   @AppStorage(CatNeeds.enabledKey) private var catEnabled = true
 
   var body: some View {
     NavigationStack {
       List {
         Section {
-          MemberCard()
+        } header: {
+          MemberCard(editorTab: $cardEditorTab)
+            .padding(.top, 18)
+            .textCase(nil)
+            .listRowInsets(EdgeInsets())
         }
-        .listRowInsets(EdgeInsets())
-        .listRowBackground(Color.clear)
-        .listRowSeparator(.hidden)
+        .listSectionMargins(.top, 0)
 
         Section {
           NavigationLink {
@@ -181,6 +184,16 @@ struct SettingsView: View {
       .navigationTitle("Einstellungen")
       .toolbarTitleDisplayMode(.inline)
       .toolbar {
+        ToolbarItem(placement: .topBarLeading) {
+          Button {
+            Haptics.land()
+            cardEditorTab = .stickers
+          } label: {
+            Image(systemName: "creditcard.rewards")
+          }
+          .accessibilityLabel(Text("Karte bearbeiten"))
+          .accessibilityIdentifier("settings.memberCard.edit")
+        }
         ToolbarItem(placement: .topBarTrailing) {
           Button(role: .close) {
             dismiss()

@@ -383,8 +383,10 @@ final class ScreenshotTests: XCTestCase {
 
     func test27MemberCardDock() throws {
         let app = launch(scene: "customization")
-        let card = openSettings(app)
-        tapVisible(card, in: app)
+        openSettings(app)
+        let edit = app.descendants(matching: .any)["settings.memberCard.edit"].firstMatch
+        XCTAssertTrue(edit.waitForExistence(timeout: 5), "Card edit button missing")
+        edit.tap()
         sleep(3)
         snapshot("27_member_card_dock", timeWaitingForIdle: 0)
     }
