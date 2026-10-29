@@ -1,13 +1,15 @@
 import SwiftUI
 
 struct StatsCard<Content: View>: View {
-    let title: LocalizedStringKey
+    var title: LocalizedStringKey?
     @ViewBuilder let content: Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(title)
-                .font(.headline)
+            if let title {
+                Text(title)
+                    .font(.headline)
+            }
             content
         }
         .frame(maxWidth: .infinity, alignment: .leading)

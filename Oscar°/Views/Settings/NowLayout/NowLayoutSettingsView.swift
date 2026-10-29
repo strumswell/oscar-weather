@@ -8,7 +8,6 @@ struct NowLayoutSettingsView: View {
     @Environment(Weather.self) private var weather
     private let settingsService = SettingService.shared
     @State private var part: Part = .metrics
-    @AppStorage(CatNeeds.enabledKey) private var catEnabled = true
 
     private var isDefault: Bool {
         settingsService.arrangementsAreDefault
@@ -75,11 +74,6 @@ struct NowLayoutSettingsView: View {
                     Spacer()
                     Text("\(settingsService.headMetrics.count) von \(HeadMetric.maxShown)")
                 }
-            }
-            Section {
-                Toggle("Katze", isOn: $catEnabled)
-            } footer: {
-                Text("Tippe auf die Katze, um sie zu füttern oder mit ihr zu spielen.")
             }
         }
     }

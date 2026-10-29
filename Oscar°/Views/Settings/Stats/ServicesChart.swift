@@ -1,4 +1,3 @@
-import Charts
 import SwiftUI
 
 struct ServicesChart: View {
@@ -17,7 +16,7 @@ struct ServicesChart: View {
 
         VStack(alignment: .leading, spacing: 18) {
             ForEach(providers) { provider in
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 10) {
                     HStack(alignment: .firstTextBaseline) {
                         Text(provider.name)
                             .font(.subheadline.weight(.semibold))
@@ -27,25 +26,14 @@ struct ServicesChart: View {
                             .monospacedDigit()
                             .foregroundStyle(.secondary)
                     }
-                    Chart(provider.rows, id: \.key) { row in
-                        BarMark(x: .value("Anfragen", row.count), y: .value("Dienst", Self.title(row.key)), height: .fixed(10))
-                            .cornerRadius(4)
-                            .foregroundStyle(.blue.opacity(0.85))
-                            .annotation(position: .trailing, spacing: 6) {
-                                Text(row.count, format: .number)
-                                    .font(.caption)
-                                    .monospacedDigit()
-                                    .foregroundStyle(.secondary)
-                            }
+                    ForEach(provider.rows, id: \.key) { row in
+                        StatsBarRow(title: Self.title(row.key), count: row.count, most: busiest, tint: .blue)
                     }
-                    .chartXScale(domain: 0...Double(busiest) * 1.15)
-                    .chartXAxis(.hidden)
-                    .chartYAxis {
-                        AxisMarks { AxisValueLabel().font(.caption) }
-                    }
-                    .frame(height: Double(provider.rows.count) * 26)
                 }
             }
+            Text("Jede einzelne Netzwerkanfrage zählt. Karten laden viele kleine Kacheln, deshalb steigen diese Werte schnell.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
         }
     }
 

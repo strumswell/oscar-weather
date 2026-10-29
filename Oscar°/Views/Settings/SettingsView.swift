@@ -13,6 +13,7 @@ struct SettingsView: View {
   @Bindable private var settingsService = SettingService.shared
   private let supporter = SupporterStore.shared
   @State private var showsMemory = false
+  @AppStorage(CatNeeds.enabledKey) private var catEnabled = true
 
   var body: some View {
     NavigationStack {
@@ -97,6 +98,20 @@ struct SettingsView: View {
                 .labelStyle(.settingsIcon(.blue))
             }
           }
+
+          NavigationLink {
+            CatSettingsView()
+          } label: {
+            LabeledContent {
+              if !catEnabled {
+                Text("Aus")
+              }
+            } label: {
+              Label("Kater", systemImage: "cat.fill")
+                .labelStyle(.settingsIcon(.brown))
+            }
+          }
+          .accessibilityIdentifier("settings.cat")
 
           if supporter.isSupporter || settingsService.classicTheme {
             Toggle(isOn: $settingsService.classicTheme) {

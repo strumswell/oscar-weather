@@ -4,7 +4,7 @@ struct CatStatsCard: View {
     let counts: [String: Int]
 
     var body: some View {
-        StatsCard(title: "Katze") {
+        StatsCard {
             HStack(alignment: .bottom, spacing: 12) {
                 Image("cat_sit")
                     .resizable()

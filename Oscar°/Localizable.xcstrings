@@ -1,6 +1,358 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "Kater" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kater"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cat"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kedi"
+          }
+        }
+      }
+    },
+    "Aus" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Off"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kapalı"
+          }
+        }
+      }
+    },
+    "Oscar anzeigen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar anzeigen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Oscar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar'ı göster"
+          }
+        }
+      }
+    },
+    "Oscar sitzt im Wetter-Tab auf den Werten unter der Temperatur." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar sitzt im Wetter-Tab auf den Werten unter der Temperatur."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar sits on the values below the temperature in the Weather tab."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, Hava Durumu sekmesinde sıcaklığın altındaki değerlerin üzerinde oturur."
+          }
+        }
+      }
+    },
+    "So spielst du mit ihm" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So spielst du mit ihm"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How to play with him"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onunla nasıl oynanır"
+          }
+        }
+      }
+    },
+    "Antippen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antippen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dokunun"
+          }
+        }
+      }
+    },
+    "Öffnet sein Menü mit Fisch, Ball und Angel." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet sein Menü mit Fisch, Ball und Angel."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens his menu with fish, ball and wand toy."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Balık, top ve olta oyuncağıyla menüsünü açar."
+          }
+        }
+      }
+    },
+    "Streich mit dem Finger über ihn, dann schnurrt er." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Streich mit dem Finger über ihn, dann schnurrt er."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stroke him with your finger and he purrs."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parmağınızla onu okşayın, mırlar."
+          }
+        }
+      }
+    },
+    "Doppeltippen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doppeltippen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Double-tap"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çift dokunun"
+          }
+        }
+      }
+    },
+    "Er springt vor Freude." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Er springt vor Freude."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "He jumps for joy."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sevinçle zıplar."
+          }
+        }
+      }
+    },
+    "Wecken" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wecken"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wake up"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uyandırın"
+          }
+        }
+      }
+    },
+    "Schläft er, weckt ihn ein Tipp." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schläft er, weckt ihn ein Tipp."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If he is asleep, a tap wakes him."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uyuyorsa bir dokunuş onu uyandırır."
+          }
+        }
+      }
+    },
+    "Bett, Napf und Kratzbaum stellst du über sein Menü auf. Lange drücken und ziehen verschiebt sie." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bett, Napf und Kratzbaum stellst du über sein Menü auf. Lange drücken und ziehen verschiebt sie."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Place a bed, food bowl and scratching post from his menu. Press and hold, then drag to move them."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yatak, mama kabı ve tırmalama direğini menüsünden yerleştirin. Taşımak için basılı tutup sürükleyin."
+          }
+        }
+      }
+    },
+    "Möbel gibt es für Unterstützer:innen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Möbel gibt es für Unterstützer:innen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Furniture is available to supporters."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mobilyalar destekçilere özeldir."
+          }
+        }
+      }
+    },
+    "So oft hat Oscar das Wetter für den Ort geladen, beim Öffnen und bei jeder Aktualisierung." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So oft hat Oscar das Wetter für den Ort geladen, beim Öffnen und bei jeder Aktualisierung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How often Oscar loaded the weather for each place, on opening and on every refresh."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar'ın her yer için hava durumunu kaç kez yüklediği, açılışta ve her yenilemede."
+          }
+        }
+      }
+    },
+    "Jede einzelne Netzwerkanfrage zählt. Karten laden viele kleine Kacheln, deshalb steigen diese Werte schnell." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jede einzelne Netzwerkanfrage zählt. Karten laden viele kleine Kacheln, deshalb steigen diese Werte schnell."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every single network request counts. Maps load many small tiles, so these numbers climb fast."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her ağ isteği sayılır. Haritalar çok sayıda küçük karo yüklediği için bu değerler hızla artar."
+          }
+        }
+      }
+    },
     "" : {
 
     },
