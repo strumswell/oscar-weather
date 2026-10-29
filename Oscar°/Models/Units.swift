@@ -61,7 +61,7 @@ enum WindSpeedUnit: String, CaseIterable, Identifiable {
     private static let symbols: [WindSpeedUnit: String] = [
         .kmh: localizedSymbol(UnitSpeed.kilometersPerHour),
         .ms: localizedSymbol(UnitSpeed.metersPerSecond),
-        .mph: localizedSymbol(UnitSpeed.milesPerHour),
+        .mph: "mph",
         .kn: localizedSymbol(UnitSpeed.knots),
         .bft: "Bft",
     ]
@@ -135,7 +135,7 @@ enum PrecipitationUnit: String, CaseIterable, Identifiable {
 
     private static let millimeters = localizedSymbol(UnitLength.millimeters)
     private static let centimeters = localizedSymbol(UnitLength.centimeters)
-    private static let inches = localizedSymbol(UnitLength.inches)
+    private static let inches = "in"
 }
 
 enum PressureUnit: String, CaseIterable, Identifiable {
@@ -253,7 +253,12 @@ struct Units: Equatable {
     }
 
     func precipitationNumber(_ millimeters: Double) -> String {
-        number(precipitation.value(fromMillimeters: millimeters), digits: precipitation.fractionDigits)
+        let value = precipitation.value(fromMillimeters: millimeters)
+        let smallest = pow(10, -Double(precipitation.fractionDigits))
+        guard value <= 0 || value >= smallest / 2 else {
+            return "<\(number(smallest, digits: precipitation.fractionDigits))"
+        }
+        return number(value, digits: precipitation.fractionDigits)
     }
 
     func precipitationString(_ millimeters: Double?) -> String {
@@ -295,9 +300,11 @@ struct Units: Equatable {
     }
 }
 
+private let appLocale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? "en")
+
 private func localizedSymbol<UnitType: Dimension>(_ unit: UnitType) -> String {
     let text = Measurement(value: 1, unit: unit)
-        .formatted(.measurement(width: .abbreviated, usage: .asProvided).attributed)
+        .formatted(.measurement(width: .abbreviated, usage: .asProvided).locale(appLocale).attributed)
     let symbol = text.runs
         .filter { $0.measurement == .unit }
         .map { String(text[$0.range].characters) }

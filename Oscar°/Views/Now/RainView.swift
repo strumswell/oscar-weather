@@ -136,6 +136,7 @@ struct PrecipitationSeriesChart: View {
                     }
             }
         }
+        .chartYScale(domain: 0...maxValue)
         .chartXAxis {
             AxisMarks(position: .bottom, values: xAxisValues) { value in
                 AxisTick()

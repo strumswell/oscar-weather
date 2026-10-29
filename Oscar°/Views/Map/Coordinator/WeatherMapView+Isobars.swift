@@ -43,19 +43,31 @@ extension WeatherMapView.Coordinator {
             }
         }
 
+        let units = parent.settingsService.units
+        let syncKey = "\(cacheKey)/\(units.pressure.rawValue)"
         guard let shape = isobarShapes[cacheKey] else {
-            clearIsobarSourceIfNeeded(in: style, nextKey: cacheKey)
+            clearIsobarSourceIfNeeded(in: style, nextKey: syncKey)
             return
         }
         ensureIsobarLayers(in: style)
-        guard isobarSyncKey != cacheKey else { return }
+        guard isobarSyncKey != syncKey else { return }
+        relabelIsobars(shape, units: units)
         let incoming = 1 - isobarActiveBuffer
         (style.source(withIdentifier: WeatherMapView.isobarSourceID(incoming)) as? MLNShapeSource)?
             .shape = shape
         setIsobarBufferOpacities(in: style, visibleBuffer: incoming)
         isobarActiveBuffer = incoming
-        isobarSyncKey = cacheKey
+        isobarSyncKey = syncKey
         scheduleRetiredIsobarCleanup(in: style)
+    }
+
+    private func relabelIsobars(_ shape: MLNShape, units: Units) {
+        guard let collection = shape as? MLNShapeCollectionFeature else { return }
+        for case let feature as MLNFeature in collection.shapes {
+            guard let hectopascals = (feature.attribute(forKey: "level") ?? feature.attribute(forKey: "value")) as? NSNumber
+            else { continue }
+            feature.attributes["label"] = units.pressureNumber(hectopascals.doubleValue)
+        }
     }
 
     private func clearIsobarSourceIfNeeded(in style: MLNStyle, nextKey: String) {

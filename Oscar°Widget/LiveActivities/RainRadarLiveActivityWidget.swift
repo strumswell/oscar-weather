@@ -226,7 +226,7 @@ private enum RainIntensity {
 
     static func format(_ mmPerHour: Double) -> String {
         if isInch {
-            return (mmPerHour / 25.4).formatted(.number.precision(.fractionLength(2)))
+            return SettingService.resolvedUnits.precipitationNumber(mmPerHour)
         }
         return mmPerHour.formatted(.number.precision(.fractionLength(mmPerHour < 10 ? 1 : 0)))
     }

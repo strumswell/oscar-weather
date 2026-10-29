@@ -58,6 +58,18 @@ struct UnitsTests {
     }
 
     @Test
+    func tinyPrecipitationNeverReadsAsZero() {
+        var units = Units.metric
+        units.precipitation = .inch
+        #expect(units.precipitationNumber(0.1).hasPrefix("<"))
+        #expect(!units.precipitationNumber(0).hasPrefix("<"))
+        #expect(!units.precipitationNumber(25.4).hasPrefix("<"))
+        #expect(Units.metric.precipitationNumber(0.04).hasPrefix("<"))
+        #expect(PrecipitationUnit.inch.symbol == "in")
+        #expect(WindSpeedUnit.mph.symbol == "mph")
+    }
+
+    @Test
     func symbolsAreNeverEmpty() {
         #expect(WindSpeedUnit.allCases.allSatisfy { !$0.symbol.isEmpty })
         #expect(PrecipitationUnit.allCases.allSatisfy { !$0.symbol.isEmpty && !$0.snowSymbol.isEmpty })

@@ -6,6 +6,10 @@ extension HourlyTimelineModel {
         let temperatureFormat: (Double) -> String = { "\(Int($0.rounded()))\(temperatureSymbol)" }
         let temperatures = { (values: [Double]) in values.map(units.temperature.value(fromCelsius:)) }
         let percentFormat: (Double) -> String = { "\(Int($0.rounded()))%" }
+        let depthSymbol = units.precipitation.snowSymbol
+        let depth = { (centimeters: Double) in
+            units.precipitation.snow(fromCentimeters: centimeters).formatted(.number.precision(.fractionLength(0...1)))
+        }
 
         switch lens {
         case .overview:
@@ -85,10 +89,10 @@ extension HourlyTimelineModel {
             let soilTemperature18 = temperatures(soilTemperature18)
             let soilTemperature54 = temperatures(soilTemperature54)
             return HourlyLensLayout(
-                lines: [line(soilTemperature54, .brown.mix(with: .black, by: 0.55), width: 2.5, label: "54 cm"),
-                        line(soilTemperature18, .brown.mix(with: .black, by: 0.4), width: 2.8, label: "18 cm"),
-                        line(soilTemperature6, .brown.mix(with: .black, by: 0.25), width: 3.1, label: "6 cm"),
-                        line(soilTemperature0, .brown, label: "0 cm")],
+                lines: [line(soilTemperature54, .brown.mix(with: .black, by: 0.55), width: 2.5, label: "\(depth(54)) \(depthSymbol)"),
+                        line(soilTemperature18, .brown.mix(with: .black, by: 0.4), width: 2.8, label: "\(depth(18)) \(depthSymbol)"),
+                        line(soilTemperature6, .brown.mix(with: .black, by: 0.25), width: 3.1, label: "\(depth(6)) \(depthSymbol)"),
+                        line(soilTemperature0, .brown, label: "\(depth(0)) \(depthSymbol)")],
                 domain: paddedDomain([soilTemperature0, soilTemperature6, soilTemperature18, soilTemperature54]),
                 showsBars: false,
                 barsAlpha: 0,
@@ -102,12 +106,12 @@ extension HourlyTimelineModel {
                                         .blue.mix(with: .black, by: 0.48),
                                         .blue.mix(with: .black, by: 0.35),
                                         .blue.mix(with: .black, by: 0.2)]
-            let depthLabels = ["27–81 cm", "9–27 cm", "3–9 cm", "1–3 cm"]
+            let depthLabels = [(27.0, 81.0), (9, 27), (3, 9), (1, 3)].map { "\(depth($0.0))–\(depth($0.1)) \(depthSymbol)" }
             let secondaries = zip(zip(depths.dropLast(), depthColors), depthLabels).map { pair, label in
                 line(pair.0, pair.1, width: 2.5, label: label)
             }
             return HourlyLensLayout(
-                lines: secondaries + [line(depths.last ?? [], .blue, label: "0–1 cm")],
+                lines: secondaries + [line(depths.last ?? [], .blue, label: "\(depth(0))–\(depth(1)) \(depthSymbol)")],
                 domain: paddedDomain(depths, minimumPad: 0.02),
                 showsBars: false,
                 barsAlpha: 0,

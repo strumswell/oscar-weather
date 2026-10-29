@@ -2,10 +2,10 @@ import SwiftUI
 
 struct StatsView: View {
     private let store = UsageStatsStore.shared
-    private let settings = SettingService.shared
 
     var body: some View {
         let stats = store.combined
+        let units = SettingService.shared.units
         ScrollView {
             VStack(spacing: 16) {
                 StatsOverviewGrid(stats: stats)
@@ -28,10 +28,10 @@ struct StatsView: View {
 
                 StatsCard(title: "Extremwerte") {
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible())], spacing: 10) {
-                        ExtremeTile(title: "Heißester Moment", extreme: stats.hottest?.converted(to: temperatureUnit), tint: .orange)
-                        ExtremeTile(title: "Kältester Moment", extreme: stats.coldest?.converted(to: temperatureUnit), tint: .cyan)
-                        ExtremeTile(title: "Stärkster Wind", extreme: stats.windiest?.converted(to: windUnit), tint: .mint)
-                        ExtremeTile(title: "Stärkster Regen", extreme: stats.wettest?.converted(to: precipitationUnit), tint: .blue)
+                        ExtremeTile(title: "Heißester Moment", extreme: stats.hottest?.canonical, tint: .orange, format: units.preciseTemperatureString)
+                        ExtremeTile(title: "Kältester Moment", extreme: stats.coldest?.canonical, tint: .cyan, format: units.preciseTemperatureString)
+                        ExtremeTile(title: "Stärkster Wind", extreme: stats.windiest?.canonical, tint: .mint, format: units.windString)
+                        ExtremeTile(title: "Stärkster Regen", extreme: stats.wettest?.canonical, tint: .blue, format: units.precipitationString)
                         ExtremeTile(title: "Höchster UV-Index", extreme: stats.highestUV, tint: .yellow)
                     }
                 }
@@ -76,23 +76,6 @@ struct StatsView: View {
         .navigationTitle("Statistik")
         .toolbarTitleDisplayMode(.inline)
         .onAppear { store.flush() }
-    }
-
-    private var temperatureUnit: String {
-        settings.temperatureUnit.symbol
-    }
-
-    private var windUnit: String {
-        switch settings.windSpeedUnit {
-        case .kmh, .bft: "km/h"
-        case .ms: "m/s"
-        case .mph: "mph"
-        case .kn: "kn"
-        }
-    }
-
-    private var precipitationUnit: String {
-        settings.precipitationUnit == .inch ? "in" : "mm"
     }
 
     private static func sheetTitle(_ id: String) -> LocalizedStringKey {

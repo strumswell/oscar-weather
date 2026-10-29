@@ -4,6 +4,7 @@ struct ExtremeTile: View {
     let title: LocalizedStringKey
     let extreme: UsageStats.Extreme?
     let tint: Color
+    var format: (Double) -> String = { $0.formatted(.number.precision(.fractionLength(0...1))) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -18,7 +19,7 @@ struct ExtremeTile: View {
                     .minimumScaleFactor(0.8)
             }
             if let extreme {
-                Text(verbatim: value(extreme))
+                Text(verbatim: format(extreme.value))
                     .font(.title2.weight(.bold))
                     .fontDesign(.rounded)
                     .monospacedDigit()
@@ -38,11 +39,6 @@ struct ExtremeTile: View {
         .padding(12)
         .background(.quaternary.opacity(0.5), in: .rect(cornerRadius: 16))
         .accessibilityElement(children: .combine)
-    }
-
-    private func value(_ extreme: UsageStats.Extreme) -> String {
-        let number = extreme.value.formatted(.number.precision(.fractionLength(0...1)))
-        return extreme.unit.isEmpty ? number : "\(number) \(extreme.unit)"
     }
 
     private func whereAndWhen(_ extreme: UsageStats.Extreme) -> String {
