@@ -15,7 +15,7 @@ struct MemberStatusTests {
         var plain = stats()
         #expect(MemberStatus(stats: plain, isSupporter: false, chosenTitle: nil, now: now).tier == .member)
         #expect(MemberStatus(stats: plain, isSupporter: true, chosenTitle: nil, now: now).tier == .supporter)
-        plain.betaSince = now.addingTimeInterval(-86_400)
+        plain.testFlightSince = now.addingTimeInterval(-86_400)
         #expect(MemberStatus(stats: plain, isSupporter: false, chosenTitle: nil, now: now).tier == .founder)
         plain.supporterSince = now
         #expect(MemberStatus(stats: plain, isSupporter: false, chosenTitle: nil, now: now).tier == .founderSupporter)
@@ -23,23 +23,23 @@ struct MemberStatusTests {
 
     @Test func yearsCountFromEarliestDate() {
         var stats = stats()
-        stats.betaSince = now.addingTimeInterval(-3.2 * 365 * 86_400)
+        stats.testFlightSince = now.addingTimeInterval(-3.2 * 365 * 86_400)
         let status = MemberStatus(stats: stats, isSupporter: false, chosenTitle: nil, now: now)
         #expect(status.years == 3)
-        #expect(status.since == stats.betaSince)
+        #expect(status.since == stats.testFlightSince)
     }
 
-    @Test func betaSinceMergesToEarliest() {
+    @Test func testFlightSinceMergesToEarliest() {
         var mine = stats()
         var other = stats()
-        mine.betaSince = now
-        other.betaSince = now.addingTimeInterval(-100)
+        mine.testFlightSince = now
+        other.testFlightSince = now.addingTimeInterval(-100)
         mine.merge(other)
-        #expect(mine.betaSince == now.addingTimeInterval(-100))
+        #expect(mine.testFlightSince == now.addingTimeInterval(-100))
 
         var empty = stats()
         empty.merge(other)
-        #expect(empty.betaSince == other.betaSince)
+        #expect(empty.testFlightSince == other.testFlightSince)
     }
 
     @Test func titlesFollowStatsAndChoice() {
@@ -62,7 +62,7 @@ struct MemberStatusTests {
 
         var stats = stats()
         #expect(MemberStatus(stats: stats, isSupporter: false, chosenTitle: nil, chosenStyle: .founder, now: now).style == .member)
-        stats.betaSince = now
+        stats.testFlightSince = now
         let founder = MemberStatus(stats: stats, isSupporter: false, chosenTitle: nil, chosenStyle: .member, now: now)
         #expect(founder.tier == .founder)
         #expect(founder.style == .member)

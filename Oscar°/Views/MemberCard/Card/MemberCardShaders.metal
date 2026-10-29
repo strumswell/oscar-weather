@@ -46,9 +46,9 @@ static float memberCardFbm(float2 p) {
 [[ stitchable ]] half4 memberCardInk(float2 position, SwiftUI::Layer layer, float seed, float scale) {
     float2 p = position / max(scale, 0.01);
     float2 wobble = float2(memberCardNoise(p * 0.9 + seed), memberCardNoise(p * 0.9 + seed + 17.0)) - 0.5;
-    half4 ink = layer.sample(position + wobble * 1.1 * scale);
-    float speck = saturate(memberCardFbm(p * 0.95 + seed * 3.1) * 3.6 - 0.85);
-    float press = saturate(memberCardFbm(p * 0.05 + seed * 0.7) * 2.4 - 0.15);
+    half4 ink = layer.sample(position + wobble * 0.7 * scale);
+    float speck = saturate(memberCardFbm(p * 0.95 + seed * 3.1) * 3.6 - 0.55);
+    float press = mix(0.6, 1.0, saturate(memberCardFbm(p * 0.05 + seed * 0.7) * 2.4 - 0.15));
     return ink * half(speck * press);
 }
 

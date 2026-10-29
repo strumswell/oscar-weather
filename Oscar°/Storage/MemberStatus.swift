@@ -104,14 +104,14 @@ struct MemberStatus: Equatable {
 
     init(stats: UsageStats, isSupporter: Bool, chosenTitle: String?, chosenStyle: MemberTier? = nil, unlocks: ClubUnlocks = .none, now: Date = .now) {
         let supporter = isSupporter || stats.supporterSince != nil || unlocks.supporter
-        let tier: MemberTier = if stats.betaSince != nil || unlocks.founder {
+        let tier: MemberTier = if stats.testFlightSince != nil || unlocks.founder {
             supporter ? .founderSupporter : .founder
         } else {
             supporter ? .supporter : .member
         }
         self.tier = tier
         style = chosenStyle.flatMap { tier.allows($0) ? $0 : nil } ?? tier
-        since = [stats.firstLaunch, stats.betaSince, stats.supporterSince].compactMap { $0 }.min() ?? now
+        since = [stats.firstLaunch, stats.testFlightSince, stats.supporterSince].compactMap { $0 }.min() ?? now
         let natural = max(0, Calendar.current.dateComponents([.year], from: since, to: now).year ?? 0)
         years = max(unlocks.years ?? 0, natural)
         earnedTitles = MemberTitle.earned(in: stats).map(\.id) + unlocks.titles
@@ -149,9 +149,9 @@ enum TestFlightMembership {
               transaction.environment == .sandbox else { return }
         isTestFlight = true
         if let publicReleaseDate, Date.now >= publicReleaseDate { return }
-        let joined = min(transaction.originalPurchaseDate, .now)
-        if let known = UsageStatsStore.shared.stats.betaSince, known <= joined { return }
-        UsageStatsStore.shared.record { $0.betaSince = joined }
+        let joined = UsageStatsStore.shared.combined.firstLaunch
+        if let known = UsageStatsStore.shared.stats.testFlightSince, known <= joined { return }
+        UsageStatsStore.shared.record { $0.testFlightSince = joined }
         UsageStatsStore.shared.flush()
     }
 }

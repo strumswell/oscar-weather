@@ -93,36 +93,25 @@ struct MemberCardGlare: View {
 
     var body: some View {
         let tilt = motion.tilt
-        GeometryReader { proxy in
-            ZStack {
-                RadialGradient(
-                    colors: [.white.opacity(tier.isFounder ? 0.16 : 0.32), .clear],
-                    center: UnitPoint(x: 0.32 + tilt.width * 0.45, y: 0.22 + tilt.height * 0.45),
-                    startRadius: 0,
-                    endRadius: proxy.size.width * 0.55
-                )
+        ZStack {
+            EllipticalGradient(
+                colors: [.white.opacity(tier.isFounder ? 0.12 : 0.22), .clear],
+                center: UnitPoint(x: 0.32 + tilt.width * 0.45, y: 0.22 + tilt.height * 0.45),
+                endRadiusFraction: 0.75
+            )
+            if motion.glint >= 0 {
+                let offset = -1.2 + motion.glint * 2.4
                 LinearGradient(
                     stops: [
-                        .init(color: .clear, location: 0.38),
-                        .init(color: .white.opacity(0.1), location: 0.47),
-                        .init(color: .clear, location: 0.56)
+                        .init(color: .clear, location: 0.4),
+                        .init(color: .white.opacity(0.2), location: 0.5),
+                        .init(color: .clear, location: 0.6)
                     ],
-                    startPoint: UnitPoint(x: tilt.width * 0.3, y: 0),
-                    endPoint: UnitPoint(x: 1 + tilt.width * 0.3, y: 1)
+                    startPoint: UnitPoint(x: offset, y: 0),
+                    endPoint: UnitPoint(x: offset + 1, y: 1)
                 )
-                if motion.glint >= 0 {
-                    LinearGradient(
-                        colors: [.clear, .white.opacity(0.24), .clear],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    .frame(width: proxy.size.width * 0.22, height: proxy.size.height * 1.6)
-                    .rotationEffect(.degrees(20))
-                    .position(x: proxy.size.width * (-0.25 + motion.glint * 1.5), y: proxy.size.height / 2)
-                }
             }
         }
-        .blendMode(.screen)
         .allowsHitTesting(false)
     }
 }
@@ -146,7 +135,6 @@ struct MemberCardSheen: View {
             startPoint: UnitPoint(x: -0.4 + shift, y: -0.2),
             endPoint: UnitPoint(x: 1.0 + shift, y: 1.2)
         )
-        .blendMode(.screen)
         .opacity(tier.isFounder ? 0.22 : tier == .supporter ? 0.14 : 0.07)
         .allowsHitTesting(false)
     }

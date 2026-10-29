@@ -68,7 +68,7 @@ struct UsageStats: Codable {
     var wettest: Extreme?
     var highestUV: Extreme?
     var supporterSince: Date?
-    var betaSince: Date?
+    var testFlightSince: Date?
     var cat: [String: Int]?
 
     var activeDays: Int { dailyOpens.count }
@@ -121,8 +121,8 @@ struct UsageStats: Codable {
         if let theirs = other.supporterSince {
             supporterSince = min(supporterSince ?? theirs, theirs)
         }
-        if let theirs = other.betaSince {
-            betaSince = min(betaSince ?? theirs, theirs)
+        if let theirs = other.testFlightSince {
+            testFlightSince = min(testFlightSince ?? theirs, theirs)
         }
     }
 

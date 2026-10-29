@@ -47,11 +47,12 @@ final class MemberCardMotion {
             } else {
                 target = .zero
             }
-            tilt = CGSize(
-                width: tilt.width + (target.width - tilt.width) * 0.15,
-                height: tilt.height + (target.height - tilt.height) * 0.15
-            )
-            glint = glintPhase()
+            let step = CGSize(width: (target.width - tilt.width) * 0.15, height: (target.height - tilt.height) * 0.15)
+            if abs(step.width) > 0.0005 || abs(step.height) > 0.0005 {
+                tilt = CGSize(width: tilt.width + step.width, height: tilt.height + step.height)
+            }
+            let phase = glintPhase()
+            if phase != glint { glint = phase }
         }
     }
 
@@ -151,18 +152,12 @@ struct MemberCardFlip<Front: View, Back: View>: View {
     }
 
     var body: some View {
-        let showsBack = angle >= 90
-        ZStack(alignment: .top) {
+        if angle < 90 {
             front
                 .rotation3DEffect(.degrees(angle), axis: (x: 0, y: 1, z: 0), perspective: perspective)
-                .opacity(showsBack ? 0 : 1)
-                .allowsHitTesting(!showsBack)
-                .accessibilityHidden(showsBack)
+        } else {
             back
                 .rotation3DEffect(.degrees(angle - 180), axis: (x: 0, y: 1, z: 0), perspective: perspective)
-                .opacity(showsBack ? 1 : 0)
-                .allowsHitTesting(showsBack)
-                .accessibilityHidden(!showsBack)
         }
     }
 }

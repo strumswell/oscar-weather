@@ -88,7 +88,7 @@ struct MemberCardStamp: View {
         }
         .foregroundStyle(ink)
         .frame(width: diameter, height: diameter)
-        .opacity(0.93)
+        .opacity(0.96)
         .compositingGroup()
         .layerEffect(
             ShaderLibrary.memberCardInk(.float(spec.seed), .float(Float(u))),
@@ -122,19 +122,23 @@ struct MemberCardStamp: View {
                     .inset(by: 25 * u)
                     .stroke(lineWidth: 0.8 * u)
             }
-            ForEach(letters.indices, id: \.self) { index in
-                Text(verbatim: String(letters[index]))
-                    .font(.system(size: 7.4 * u, weight: .heavy))
-                    .offset(y: -34.5 * u)
-                    .rotationEffect(.degrees(Double(index) * step))
+            Canvas { context, size in
+                context.translateBy(x: size.width / 2, y: size.height / 2)
+                for letter in letters {
+                    context.draw(
+                        Text(verbatim: String(letter)).font(.system(size: 7.8 * u, weight: .heavy)).foregroundStyle(ink),
+                        at: CGPoint(x: 0, y: -34.5 * u)
+                    )
+                    context.rotate(by: .degrees(step))
+                }
             }
             VStack(spacing: 1 * u) {
                 Text(verbatim: spec.big)
                     .font(.system(size: (spec.big.count > 1 ? 22 : 27) * u, weight: .black))
                     .tracking(-0.4 * u)
                 Text(verbatim: spec.bottom)
-                    .font(.system(size: 6.5 * u, weight: .heavy))
-                    .tracking(1.5 * u)
+                    .font(.system(size: 7.2 * u, weight: .heavy))
+                    .tracking(1.3 * u)
             }
         }
     }
@@ -150,13 +154,13 @@ struct MemberCardStamp: View {
             .overlay {
                 VStack(spacing: 2 * u) {
                     Text(verbatim: spec.top)
-                        .font(.system(size: 7 * u, weight: .heavy))
-                        .tracking(1.1 * u)
+                        .font(.system(size: 7.6 * u, weight: .heavy))
+                        .tracking(1 * u)
                     Text(verbatim: spec.big)
                         .font(.system(size: 13 * u, weight: .black))
                     Text(verbatim: spec.bottom)
-                        .font(.system(size: 7 * u, weight: .heavy))
-                        .tracking(1.1 * u)
+                        .font(.system(size: 7.6 * u, weight: .heavy))
+                        .tracking(1 * u)
                 }
                 .lineLimit(1)
                 .fixedSize()
