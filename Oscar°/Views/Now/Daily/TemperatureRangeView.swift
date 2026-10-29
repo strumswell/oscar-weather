@@ -8,6 +8,7 @@ struct TemperatureRangeView: View {
   let minTemp: Double
   let maxTemp: Double
   let unit: TemperatureUnit
+  @ScaledMetric(relativeTo: .caption2) var labelGlyphWidth: CGFloat = 6
 
   var body: some View {
     GeometryReader { geometry in
@@ -57,6 +58,7 @@ struct TemperatureRangeView: View {
             lowPosition: focusLowPosition,
             highPosition: focusHighPosition,
             width: width,
+            minGap: labelGap(focusLowValue, focusHighValue),
             separate: shouldShowFocusMarker(for: focusLowValue)
               && shouldShowFocusMarker(for: focusHighValue)
               && focusLowValue != focusHighValue
@@ -90,7 +92,6 @@ struct TemperatureRangeView: View {
   }
 
   private static let focusLabelWidth: CGFloat = 28
-  private static let focusLabelMinGap: CGFloat = focusLabelWidth + 2
 
   private func focusMarker(
     temperature: Double,
@@ -126,6 +127,7 @@ struct TemperatureRangeView: View {
     lowPosition: CGFloat,
     highPosition: CGFloat,
     width: CGFloat,
+    minGap: CGFloat,
     separate: Bool
   ) -> (low: CGFloat, high: CGFloat) {
     let maxOffset = max(width - Self.focusLabelWidth, 0)
@@ -135,13 +137,13 @@ struct TemperatureRangeView: View {
 
     let low = centered(lowPosition)
     let high = centered(highPosition)
-    guard separate, high - low < Self.focusLabelMinGap else {
+    guard separate, high - low < minGap else {
       return (low, high)
     }
 
     let mid = (low + high) / 2
-    var newLow = mid - Self.focusLabelMinGap / 2
-    var newHigh = mid + Self.focusLabelMinGap / 2
+    var newLow = mid - minGap / 2
+    var newHigh = mid + minGap / 2
     if newLow < 0 {
       newHigh -= newLow
       newLow = 0
@@ -151,6 +153,11 @@ struct TemperatureRangeView: View {
       newHigh = maxOffset
     }
     return (max(newLow, 0), newHigh)
+  }
+
+  private func labelGap(_ low: Double, _ high: Double) -> CGFloat {
+    let glyphs = unit.string(low).count + unit.string(high).count
+    return min(CGFloat(glyphs) * labelGlyphWidth / 2 + 3, Self.focusLabelWidth + 2)
   }
 
   private func shouldShowFocusMarker(for temperature: Double) -> Bool {
