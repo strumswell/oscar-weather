@@ -20,7 +20,7 @@ struct ClubVoucherView: View {
     static let stampInk = Color(hex: 0x2B5BD7)
 
     private var code: String {
-        ClubCodes.normalized(input)
+        String(input.uppercased().filter { $0.isASCII && ($0.isLetter || $0.isNumber) }.prefix(ClubCodes.length))
     }
 
     var body: some View {
@@ -78,6 +78,14 @@ struct ClubVoucherView: View {
         .autocorrectionDisabled()
         .submitLabel(.go)
         .onSubmit(submit)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                PasteButton(payloadType: String.self) { strings in
+                    Task { @MainActor in paste(strings.first ?? "") }
+                }
+            }
+        }
         .disabled(phase == .checking || phase == .redeemed)
         .frame(width: 1, height: 1)
         .opacity(0.01)
@@ -135,9 +143,6 @@ struct ClubVoucherView: View {
         }
         .contentShape(.rect)
         .onTapGesture { isFocused = true }
-        .contextMenu {
-            Button("Einfügen", systemImage: "doc.on.clipboard", action: paste)
-        }
         .accessibilityHidden(true)
     }
 
@@ -173,7 +178,7 @@ struct ClubVoucherView: View {
     @ViewBuilder
     private var caption: some View {
         switch phase {
-        case .entry: Text("Code eintippen oder lange drücken zum Einfügen").opacity(0.6)
+        case .entry: Text("Code eintippen oder einsetzen").opacity(0.6)
         case .checking: Text("Wird geprüft …").opacity(0.6)
         case .invalid: Text("Ungültiger Code").foregroundStyle(.red)
         case .duplicate: Text("Schon eingelöst").foregroundStyle(.red)
@@ -230,6 +235,7 @@ struct ClubVoucherView: View {
         var lines: [String] = []
         if reward.tier == "founder" { lines.append(String(localized: "Founder-Karte")) }
         if reward.tier == "supporter" { lines.append(String(localized: "Supporter-Karte")) }
+        if reward.styles?.contains(MemberTier.atmosphere.rawValue) == true { lines.append(String(localized: "ATmosphere-Karte")) }
         if let years = reward.years { lines.append(String(localized: "Stempel: \(years) Jahre")) }
         for title in reward.titles ?? [] { lines.append(String(localized: "Titel: \(title)")) }
         if let stickers = reward.stickers {
@@ -240,20 +246,23 @@ struct ClubVoucherView: View {
         return lines
     }
 
-    private func paste() {
-        let pasted = ClubCodes.normalized(UIPasteboard.general.string ?? "")
-        guard !pasted.isEmpty else {
-            Haptics.error()
-            shake += 1
-            return
-        }
-        input = pasted
+    private func paste(_ text: String) {
+        input = text
+        guard code.isEmpty else { return }
+        Haptics.error()
+        shake += 1
     }
 
     private func submit() {
         guard phase != .checking, phase != .redeemed else { return }
         guard code.count == ClubCodes.length else {
             Haptics.error()
+            shake += 1
+            return
+        }
+        guard code.allSatisfy(\.isHexDigit) else {
+            Haptics.error()
+            phase = .invalid
             shake += 1
             return
         }

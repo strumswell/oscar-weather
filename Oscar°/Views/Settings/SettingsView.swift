@@ -14,6 +14,7 @@ struct SettingsView: View {
   private let supporter = SupporterStore.shared
   @State private var showsMemory = false
   @State private var cardEditorTab: MemberCardEditor.Tab?
+  @State private var cardStyle = MemberStatus.current().style
   @AppStorage(CatNeeds.enabledKey) private var catEnabled = true
 
   var body: some View {
@@ -21,14 +22,14 @@ struct SettingsView: View {
       List {
         Section {
         } header: {
-          MemberCard(editorTab: $cardEditorTab)
+          MemberCard(editorTab: $cardEditorTab, style: $cardStyle)
             .padding(.top, 18)
             .textCase(nil)
             .listRowInsets(EdgeInsets())
         }
         .listSectionMargins(.top, 0)
 
-        Section {
+        Section("Club") {
           NavigationLink {
             SupportView()
           } label: {
@@ -50,6 +51,20 @@ struct SettingsView: View {
             }
           }
           .accessibilityIdentifier("settings.support")
+
+          NavigationLink {
+            StatsView()
+          } label: {
+            Label("Statistik", systemImage: "chart.bar.fill")
+              .labelStyle(.settingsIcon(.indigo))
+          }
+
+          NavigationLink {
+            ClubVoucherView()
+          } label: {
+            Label("Einlösen", systemImage: "ticket.fill")
+              .labelStyle(.settingsIcon(cardStyle.accent))
+          }
         }
 
         Section("Wetter") {
@@ -70,7 +85,7 @@ struct SettingsView: View {
               }
             } label: {
               Label("Vorhersage", systemImage: "calendar")
-                .labelStyle(.settingsIcon(.teal))
+                .labelStyle(.settingsIcon(.blue))
             }
           }
           .accessibilityIdentifier("settings.forecast")
@@ -81,6 +96,13 @@ struct SettingsView: View {
             Label("Einheiten", systemImage: "thermometer.medium")
               .labelStyle(.settingsIcon(.orange))
           }
+
+          NavigationLink {
+            PermissionSettingsView()
+          } label: {
+            Label("Berechtigungen", systemImage: "lock.shield.fill")
+              .labelStyle(.settingsIcon(.green))
+          }
         }
 
         Section("Darstellung") {
@@ -88,7 +110,7 @@ struct SettingsView: View {
             NowLayoutSettingsView()
           } label: {
             Label("Ansicht anpassen", systemImage: "rectangle.stack")
-              .labelStyle(.settingsIcon(.pink))
+              .labelStyle(.settingsIcon(.purple))
           }
           .accessibilityIdentifier("settings.layout")
 
@@ -110,7 +132,7 @@ struct SettingsView: View {
                 Text("Aus")
               }
             } label: {
-              Label("Kater", systemImage: "cat.fill")
+              Label { Text(verbatim: "Oscar") } icon: { Image(systemName: "cat.fill") }
                 .labelStyle(.settingsIcon(.brown))
             }
           }
@@ -134,31 +156,16 @@ struct SettingsView: View {
           }
         }
 
-        Section("Allgemein") {
-          NavigationLink {
-            PermissionSettingsView()
-          } label: {
-            Label("Berechtigungen", systemImage: "lock.shield.fill")
-              .labelStyle(.settingsIcon(.green))
-          }
-
-          NavigationLink {
-            StatsView()
-          } label: {
-            Label("Statistik", systemImage: "chart.bar.fill")
-              .labelStyle(.settingsIcon(.indigo))
-          }
-
+        Section {
           Button {
             dismiss()
             OnboardingCoordinator.shared.replay()
           } label: {
             Label("Einführung erneut ansehen", systemImage: "sparkles")
-              .labelStyle(.settingsIcon(.indigo))
+              .labelStyle(.settingsIcon(.teal))
           }
-        }
+          .tint(.primary)
 
-        Section {
           SettingsExternalLink(destination: URL(string: "https://oscars.love/privacy")!) {
             Label("Datenschutz", systemImage: "hand.raised.fill")
               .labelStyle(.settingsIcon(.blue))
@@ -180,6 +187,12 @@ struct SettingsView: View {
         } footer: {
           aboutFooter
         }
+      }
+      .scrollContentBackground(.hidden)
+      .background {
+        Color(.systemGroupedBackground)
+          .ignoresSafeArea()
+        MemberCardGlow(style: cardStyle)
       }
       .navigationTitle("Einstellungen")
       .toolbarTitleDisplayMode(.inline)

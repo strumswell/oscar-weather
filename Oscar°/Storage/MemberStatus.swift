@@ -2,7 +2,7 @@ import Foundation
 import StoreKit
 
 enum MemberTier: String, CaseIterable, Comparable {
-    case member, supporter, founder, founderSupporter
+    case member, supporter, founder, founderSupporter, atmosphere
 
     static func < (lhs: MemberTier, rhs: MemberTier) -> Bool {
         allCases.firstIndex(of: lhs)! < allCases.firstIndex(of: rhs)!
@@ -16,6 +16,7 @@ enum MemberTier: String, CaseIterable, Comparable {
         case .member: "Member"
         case .supporter: "Supporter"
         case .founder, .founderSupporter: "Founder"
+        case .atmosphere: "ATmosphere"
         }
     }
 
@@ -24,7 +25,7 @@ enum MemberTier: String, CaseIterable, Comparable {
     }
 
     func allows(_ style: MemberTier) -> Bool {
-        (isFounder || !style.isFounder) && (isSupporter || !style.isSupporter)
+        style != .atmosphere && (isFounder || !style.isFounder) && (isSupporter || !style.isSupporter)
     }
 
     var styles: [MemberTier] {
@@ -82,7 +83,7 @@ struct MemberTitle: Identifiable, Sendable {
     }
 
     static func displayName(for id: String) -> String {
-        all.first { $0.id == id }.map { String(localized: $0.name) } ?? id
+        all.first { $0.id == id }.map { String(localized: $0.name) } ?? String(localized: String.LocalizationValue(id))
     }
 
     private static func peakHour(of stats: UsageStats) -> Int? {
@@ -94,9 +95,11 @@ struct MemberTitle: Identifiable, Sendable {
 struct MemberStatus: Equatable {
     static let titleKey = "memberCardTitle"
     static let styleKey = "memberCardStyle"
+    static let handleKey = "memberCardHandle"
 
     var tier: MemberTier
     var style: MemberTier
+    var styles: [MemberTier]
     var since: Date
     var years: Int
     var title: String?
@@ -110,12 +113,17 @@ struct MemberStatus: Equatable {
             supporter ? .supporter : .member
         }
         self.tier = tier
-        style = chosenStyle.flatMap { tier.allows($0) ? $0 : nil } ?? tier
+        styles = tier.styles + (unlocks.styles.contains(MemberTier.atmosphere.rawValue) ? [.atmosphere] : [])
+        style = chosenStyle.flatMap { [styles] in styles.contains($0) ? $0 : nil } ?? tier
         since = [stats.firstLaunch, stats.testFlightSince, stats.supporterSince].compactMap { $0 }.min() ?? now
         let natural = max(0, Calendar.current.dateComponents([.year], from: since, to: now).year ?? 0)
         years = max(unlocks.years ?? 0, natural)
         earnedTitles = MemberTitle.earned(in: stats).map(\.id) + unlocks.titles
-        title = chosenTitle == "" ? nil : (earnedTitles.first { $0 == chosenTitle } ?? earnedTitles.first)
+        title = if let chosenTitle, chosenTitle.hasPrefix("@") {
+            style == .atmosphere ? chosenTitle : earnedTitles.first
+        } else {
+            chosenTitle == "" ? nil : (earnedTitles.first { $0 == chosenTitle } ?? earnedTitles.first)
+        }
     }
 
     @MainActor static func current() -> MemberStatus {

@@ -24,10 +24,11 @@ struct MemberCardEditor: View {
     @State private var strokes = MemberCardSignature.decode(UserDefaults.standard.data(forKey: MemberCard.signatureKey) ?? Data())
     @State private var width: CGFloat = 340
     @State private var showsLab = false
-    @State private var showsVoucher = false
     @State private var titleTaps: [Date] = []
     @AppStorage(MemberStatus.titleKey) private var chosenTitle: String?
     @AppStorage(MemberStatus.styleKey) private var chosenStyle: String?
+    @AppStorage(MemberStatus.handleKey) private var handle = ""
+    @FocusState private var handleFocused: Bool
 
     init(initialTab: Tab, status: MemberStatus, backStats: [MemberCardBackStat]) {
         _tab = State(initialValue: initialTab)
@@ -61,7 +62,7 @@ struct MemberCardEditor: View {
                 .padding(20)
             }
             .scrollDisabled(tab == .stickers || tab == .signature)
-            .background { glow }
+            .background { MemberCardGlow(style: status.style) }
             .navigationTitle(Text("Deine Karte"))
             .toolbarTitleDisplayMode(.inline)
             .toolbar {
@@ -71,23 +72,12 @@ struct MemberCardEditor: View {
                         .contentShape(.rect)
                         .onTapGesture(perform: titleTapped)
                 }
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        showsVoucher = true
-                    } label: {
-                        Image(systemName: "ticket")
-                    }
-                    .accessibilityLabel(Text("Gutschein einlösen"))
-                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(role: .confirm) { dismiss() }
                 }
             }
             .sheet(isPresented: $showsLab) {
                 MemberCardLab()
-            }
-            .navigationDestination(isPresented: $showsVoucher) {
-                ClubVoucherView()
             }
         }
         .preferredColorScheme(.dark)
@@ -97,18 +87,13 @@ struct MemberCardEditor: View {
         .task {
             try? await ShaderLibrary.memberCardPaper().compile(as: .colorEffect)
         }
-        .onChange(of: showsVoucher) {
-            guard !showsVoucher else { return }
-            status = .current()
-            backStats = MemberCardBackStat.all(for: status)
-        }
         .onChange(of: strokes) {
             UserDefaults.standard.set(MemberCardSignature.encode(strokes), forKey: MemberCard.signatureKey)
         }
     }
 
     private var tabs: [Tab] {
-        Tab.allCases.filter { $0 != .style || status.tier.styles.count > 1 }
+        Tab.allCases.filter { $0 != .style || status.styles.count > 1 }
     }
 
     private var card: some View {
@@ -136,17 +121,20 @@ struct MemberCardEditor: View {
         case .style:
             VStack(spacing: 20) {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2), spacing: 12) {
-                    ForEach(status.tier.styles, id: \.self, content: styleChip)
+                    ForEach(status.styles, id: \.self, content: styleChip)
                 }
                 .frame(width: width)
                 hint(Text("Deine Stufe bleibt gleich, nur das Aussehen ändert sich."))
             }
         case .title:
             VStack(spacing: 20) {
+                if status.style == .atmosphere {
+                    handleField
+                }
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
                     titleChip(id: nil, name: Text("Ohne Titel"), rule: Text("Nur Stufe und Datum"), isEarned: true)
                     ForEach(secretTitles, id: \.self) { title in
-                        titleChip(id: title, name: Text(verbatim: title), rule: Text("Mit Code freigeschaltet"), isEarned: true)
+                        titleChip(id: title, name: Text(verbatim: MemberTitle.displayName(for: title)), rule: Text("Mit Code freigeschaltet"), isEarned: true)
                     }
                     ForEach(MemberTitle.all) { title in
                         titleChip(
@@ -168,16 +156,6 @@ struct MemberCardEditor: View {
         }
     }
 
-    private var glow: some View {
-        let color = switch status.style {
-        case .member: Color(hex: 0x6C9DDD)
-        case .supporter: Color(hex: 0xF49A5A)
-        case .founder, .founderSupporter: Color(hex: 0xB69BFF)
-        }
-        return RadialGradient(colors: [color.opacity(0.32), .clear], center: .top, startRadius: 0, endRadius: 460)
-            .ignoresSafeArea()
-    }
-
     private var secretTitles: [String] {
         status.earnedTitles.filter { title in !MemberTitle.all.contains { $0.id == title } }
     }
@@ -197,10 +175,10 @@ struct MemberCardEditor: View {
         preview.style = style
         return chip(isSelected: isSelected) {
             Haptics.tick()
-            withAnimation(.spring(duration: 0.35, bounce: 0.3)) {
-                status.style = style
-            }
             chosenStyle = style.rawValue
+            withAnimation(.spring(duration: 0.35, bounce: 0.3)) {
+                status = .current()
+            }
         } label: {
             VStack(alignment: .leading, spacing: 10) {
                 MemberCardFace(
@@ -216,6 +194,51 @@ struct MemberCardEditor: View {
                 .accessibilityHidden(true)
                 chipName(Text(verbatim: style.styleName), isSelected: isSelected)
             }
+        }
+    }
+
+    private var handleField: some View {
+        let isSelected = !handle.isEmpty && status.title == "@" + handle
+        return HStack(spacing: 2) {
+            Text(verbatim: "@")
+                .foregroundStyle(.secondary)
+            TextField(text: $handle, prompt: Text(verbatim: "name.bsky.social")) {
+                Text("Bluesky-Handle")
+            }
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .keyboardType(.URL)
+            .submitLabel(.done)
+            .focused($handleFocused)
+            if isSelected {
+                Image(systemName: "checkmark.circle.fill")
+                    .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .font(.headline)
+        .fontDesign(.rounded)
+        .modifier(MemberCardChipBackground(isSelected: isSelected))
+        .onChange(of: handle) {
+            let cleaned = String(handle.lowercased().filter { $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "." || $0 == "-") }.prefix(40))
+            if cleaned != handle { handle = cleaned }
+        }
+        .task(id: handle) {
+            guard handleFocused else { return }
+            try? await Task.sleep(for: .milliseconds(500))
+            guard !Task.isCancelled else { return }
+            selectHandle()
+        }
+        .onChange(of: handleFocused) {
+            if handleFocused { selectHandle() }
+        }
+    }
+
+    private func selectHandle() {
+        let id = handle.isEmpty ? nil : "@" + handle
+        guard id != nil || status.title?.hasPrefix("@") == true else { return }
+        chosenTitle = id ?? ""
+        withAnimation(.spring(duration: 0.35, bounce: 0.3)) {
+            status.title = id
         }
     }
 
@@ -247,6 +270,8 @@ struct MemberCardEditor: View {
             name
                 .font(.headline)
                 .fontDesign(.rounded)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
             Spacer(minLength: 4)
             if isSelected {
                 Image(systemName: "checkmark.circle.fill")
@@ -261,16 +286,7 @@ struct MemberCardEditor: View {
             label()
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .topLeading)
-                .padding(14)
-                .background {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(isSelected ? AnyShapeStyle(.white.opacity(0.14)) : AnyShapeStyle(.quaternary.opacity(0.6)))
-                }
-                .overlay {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .strokeBorder(.white.opacity(isSelected ? 0.6 : 0), lineWidth: 1.5)
-                }
-                .scaleEffect(isSelected ? 1.02 : 1)
+                .modifier(MemberCardChipBackground(isSelected: isSelected))
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
@@ -282,5 +298,44 @@ struct MemberCardEditor: View {
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
             .frame(maxWidth: width)
+    }
+}
+
+struct MemberCardChipBackground: ViewModifier {
+    let isSelected: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .padding(14)
+            .background {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(isSelected ? AnyShapeStyle(.white.opacity(0.14)) : AnyShapeStyle(.quaternary.opacity(0.6)))
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .strokeBorder(.white.opacity(isSelected ? 0.6 : 0), lineWidth: 1.5)
+            }
+            .scaleEffect(isSelected ? 1.02 : 1)
+    }
+}
+
+extension MemberTier {
+    var accent: Color {
+        switch self {
+        case .member: Color(hex: 0x6C9DDD)
+        case .supporter: Color(hex: 0xF49A5A)
+        case .founder, .founderSupporter: Color(hex: 0xB69BFF)
+        case .atmosphere: Color(hex: 0x3D9BFF)
+        }
+    }
+}
+
+struct MemberCardGlow: View {
+    let style: MemberTier
+
+    var body: some View {
+        RadialGradient(colors: [style.accent.opacity(0.32), .clear], center: .top, startRadius: 0, endRadius: 460)
+            .ignoresSafeArea()
+            .animation(.smooth, value: style)
     }
 }

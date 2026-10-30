@@ -529,24 +529,24 @@
         }
       }
     },
-    "Code eintippen oder lange drücken zum Einfügen" : {
+    "Code eintippen oder einsetzen" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Code eintippen oder lange drücken zum Einfügen"
+            "value" : "Code eintippen oder einsetzen"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Type your code or touch and hold to paste"
+            "value" : "Type or paste your code"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kodu yazın veya yapıştırmak için basılı tutun"
+            "value" : "Kodu yazın veya yapıştırın"
           }
         }
       }
@@ -701,6 +701,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kullan"
+          }
+        }
+      }
+    },
+    "Bluesky-Handle" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluesky-Handle"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluesky handle"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluesky kullanıcı adı"
+          }
+        }
+      }
+    },
+    "ATmosphere-Karte" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ATmosphere-Karte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ATmosphere card"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ATmosphere kartı"
+          }
+        }
+      }
+    },
+    "Zugvogel" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugvogel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flew the Nest"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Göçmen Kuş"
           }
         }
       }
@@ -935,6 +1001,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hediye kodu"
+          }
+        }
+      }
+    },
+    "Club" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Club"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Club"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kulüp"
           }
         }
       }

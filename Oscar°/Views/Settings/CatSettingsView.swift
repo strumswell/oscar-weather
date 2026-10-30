@@ -51,7 +51,7 @@ struct CatSettingsView: View {
             }
             .disabled(!catEnabled)
         }
-        .navigationTitle("Kater")
+        .navigationTitle(Text(verbatim: "Oscar"))
         .toolbarTitleDisplayMode(.inline)
     }
 

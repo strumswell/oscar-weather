@@ -26,6 +26,7 @@
   }
   body.offline { grid-template-columns: minmax(0, 1fr) 300px; }
   body.offline #sim, body.offline #comps { display: none; }
+  body.phone :is([data-act], #appearance, #launch, #statusbar, #push, label:has(#alpha)) { opacity: .35; pointer-events: none; }
   #comps { display: contents; }
   aside { background: var(--panel); overflow-y: auto; border: 0 solid var(--line); }
   #sim { border-right-width: 1px; } #side { border-left-width: 1px; }
@@ -1239,7 +1240,9 @@ async function start() {
                  ['Serif', 'ui-serif, Georgia, serif'], ['Mono', 'ui-monospace, monospace']];
   try {
     await refresh();
-    $('#udid').replaceChildren(...server.devices.map(d => new Option((d.booted ? '● ' : '') + d.name, d.udid)));
+    $('#udid').replaceChildren(...server.devices.map(d => new Option((d.booted && !d.phone ? '● ' : '') + d.name, d.udid)));
+    $('#udid').onchange = () => document.body.classList.toggle('phone', !!server.devices.find(d => d.udid === $('#udid').value)?.phone);
+    $('#udid').onchange();
     $('[name=scene]').replaceChildren(new Option('live (no fixtures)', ''), ...server.scenes.map(s => new Option(s, s)));
     $('[name=scene]').value = 'nowRain';
     for (const file of server.fonts) {

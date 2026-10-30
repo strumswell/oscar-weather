@@ -13,11 +13,13 @@ struct MemberCard: View {
     @State private var backStats: [MemberCardBackStat]
     @State private var show: MemberCardShow
     @Binding var editorTab: MemberCardEditor.Tab?
+    @Binding var style: MemberTier
     @State private var showsLab = UserDefaults.standard.bool(forKey: "memberCardLab")
     @AppStorage(MemberCard.signatureKey) private var signatureData = Data()
 
-    init(editorTab: Binding<MemberCardEditor.Tab?>) {
+    init(editorTab: Binding<MemberCardEditor.Tab?>, style: Binding<MemberTier>) {
         _editorTab = editorTab
+        _style = style
         let status = MemberStatus.current()
         _status = State(initialValue: status)
         _backStats = State(initialValue: MemberCardBackStat.all(for: status))
@@ -65,7 +67,9 @@ struct MemberCard: View {
             loadPlacements()
             await playPendingMoments()
         }
+        .onChange(of: status.style, initial: true) { style = status.style }
         .onChange(of: SupporterStore.shared.isSupporter) { if editorTab == nil { refresh() } }
+        .onChange(of: ClubRewardStore.shared.redeemed) { if editorTab == nil { refresh() } }
         .sheet(item: $editorTab, onDismiss: refresh) { tab in
             MemberCardEditor(initialTab: tab, status: status, backStats: backStats)
         }

@@ -4,6 +4,7 @@ import Foundation
 
 struct ClubReward: Codable, Equatable {
     var tier: String?
+    var styles: [String]?
     var years: Int?
     var titles: [String]?
     var stickers: [String]?
@@ -15,6 +16,7 @@ struct ClubReward: Codable, Equatable {
 struct ClubUnlocks: Equatable {
     var founder = false
     var supporter = false
+    var styles: Set<String> = []
     var years: Int?
     var titles: [String] = []
     var stickers: Set<String> = []
@@ -29,6 +31,7 @@ struct ClubUnlocks: Equatable {
         for reward in rewards {
             founder = founder || reward.tier == "founder"
             supporter = supporter || reward.tier == "supporter"
+            styles.formUnion(reward.styles ?? [])
             if let years = reward.years {
                 let since = reward.redeemedAt ?? now
                 let elapsed = max(0, Calendar.current.dateComponents([.year], from: since, to: now).year ?? 0)
@@ -66,6 +69,7 @@ enum ClubCodes {
         "6cf23d6ba72661ab5b81c2454787c1c1": "tPsLReNE78dp39gpiucgHTOMurDbBtkSYOYZU3pmPsFQ6GjkXl+1",
         "b086347d27a477c3c8ab7d7de8e3aec6": "FuH/e3izae6WWadTZ2+OZsRxKPi6nFDVk/+zmTi8QZnX4U9FKLStXBVG",
         "6d148ea60e5bd878eb82371524a0d528": "hZTDDbQeoJwkUnEQ+TocVvXh8+95Wj8GLuHymbc+umqrBiPNPDLjMQ==",
+        "c579ea33954cf534193fcce6a118d50e": "2s35mXvjgzVFadLwdEjL4mVHR7eZ9U/qxh9gBFSujtVNmKFo6CNiA50gNCC7TqLFEXom07fg2eePN3B8qe6lcolR0IRaNebsUljk",
     ]
 
     static func normalized(_ input: String) -> String {
@@ -133,9 +137,9 @@ final class ClubRewardStore {
 
     func redeem(_ code: String) async throws -> ClubReward {
         let result = try await Task.detached(priority: .userInitiated) { try ClubCodes.open(code) }.value
-        guard redeemed[result.id] == nil else { throw ClubCodes.Failure.alreadyRedeemed }
         var reward = result.reward
-        reward.redeemedAt = .now
+        reward.redeemedAt = redeemed[result.id]?.redeemedAt ?? .now
+        guard redeemed[result.id] != reward else { throw ClubCodes.Failure.alreadyRedeemed }
         redeemed[result.id] = reward
         guard let data = try? JSONEncoder().encode(redeemed) else { return reward }
         AppGroup.defaults.set(data, forKey: Self.key)

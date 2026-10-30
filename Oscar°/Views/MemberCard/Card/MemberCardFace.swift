@@ -14,6 +14,9 @@ struct MemberCardFace: View {
         let s = width / 428
         ZStack(alignment: .topLeading) {
             MemberCardMaterial(tier: tier)
+            if tier == .atmosphere {
+                MemberCardSky(motion: motion, scale: s)
+            }
             MemberCardSheen(motion: motion, tier: tier)
             wordmark(s)
                 .padding(.leading, 24 * s)
@@ -64,6 +67,9 @@ struct MemberCardFace: View {
             if let title {
                 Text(verbatim: MemberTitle.displayName(for: title))
                     .font(.system(size: 16 * s, weight: .semibold, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .frame(maxWidth: 270 * s, alignment: .leading)
                     .opacity(0.88)
             }
         }
@@ -82,6 +88,10 @@ struct MemberCardFace: View {
         } else if tier == .supporter {
             text.foregroundStyle(.clear).overlay {
                 MemberCardFoil(colors: MemberCardPalette.warm, motion: motion).mask { text }
+            }
+        } else if tier == .atmosphere {
+            text.foregroundStyle(.clear).overlay {
+                MemberCardFoil(colors: MemberCardPalette.pearl, motion: motion).mask { text }
             }
         } else {
             text

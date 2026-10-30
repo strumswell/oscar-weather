@@ -45,6 +45,10 @@ UDID_RE = re.compile(r"^[0-9A-F-]{36}$")
 MEDIA = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".mov", ".mp4", ".m4v")
 FFMPEG = shutil.which("ffmpeg")
 
+RECORDER = STUDIO / "iphone-record.swift"
+SIM_ONLY = {"boot", "launch", "terminate", "statusbar", "appearance", "push", "menu"}
+
+phones = {}  # CoreDevice id -> name of connected real iPhones, capture only
 recording = None  # (Popen, Path)
 progress = {"done": None}  # the running encode, polled by the editor's progress bar
 
@@ -101,6 +105,7 @@ def state(_):
             for d in entries
         ]
     devices.sort(key=lambda d: (not d["booted"], d["name"]))
+    devices[:0] = real_phones()
     OUT.mkdir(exist_ok=True)
     shots = STATIC["shots"]
     return {
@@ -116,6 +121,20 @@ def state(_):
         "ffmpeg": bool(FFMPEG),
         "recording": recording is not None,
     }
+
+
+def real_phones():
+    try:
+        listed = json.loads(run("xcrun", "devicectl", "list", "devices", "--timeout", "5",
+                                "--json-output", "-", timeout=20))["result"]["devices"]
+    except (Fail, subprocess.TimeoutExpired, ValueError, KeyError):
+        return []
+    phones.clear()
+    for d in listed:
+        hw, props = d["hardwareProperties"], d["deviceProperties"]
+        if hw.get("reality") == "physical" and hw.get("platform") == "iOS" and d["connectionProperties"].get("tunnelState") == "connected":
+            phones[d["identifier"]] = props["name"]
+    return [{"udid": i, "name": f"📱 {n} · real device", "booted": True, "phone": True} for i, n in phones.items()]
 
 
 def frames():
@@ -237,6 +256,9 @@ def shot(body):
     if mask not in ("alpha", "black", "ignored"):
         raise Fail("unknown mask")
     path = stamp(".png")
+    if udid(body) in phones:
+        run("xcrun", "devicectl", "device", "capture", "screenshot", "--device", udid(body), "--destination", str(path))
+        return {"name": path.name}
     simctl("io", udid(body), "screenshot", "--type=png", f"--mask={mask}", str(path))
     return {"name": path.name}
 
@@ -247,17 +269,29 @@ def record_start(body):
         raise Fail("already recording")
     codec = "hevc" if body.get("codec") == "hevc" else "h264"
     path = stamp(".mov")
-    process = subprocess.Popen(
-        ["xcrun", "simctl", "io", udid(body), "recordVideo", f"--codec={codec}", "--mask=black", "--force", str(path)],
-        stderr=subprocess.PIPE, text=True,
-    )
-    # simctl announces the first processed frame on stderr.
+    if udid(body) in phones:
+        # devicectl can't record an iPhone; this is QuickTime's USB route.
+        command = [str(recorder()), str(path), phones[udid(body)]]
+    else:
+        command = ["xcrun", "simctl", "io", udid(body), "recordVideo", f"--codec={codec}", "--mask=black", "--force", str(path)]
+    process = subprocess.Popen(command, stderr=subprocess.PIPE, text=True)
+    # Both announce the first processed frame on stderr.
+    lines = []
     for line in process.stderr:
+        lines.append(line)
         if "Recording started" in line:
             break
-    if process.poll() is not None:
-        raise Fail("recordVideo exited right away")
+    else:
+        process.wait()
+        raise Fail("".join(lines).strip() or "recording exited right away")
     recording = (process, path)
+
+
+def recorder():
+    binary = Path(tempfile.gettempdir()) / "social-studio-iphone-record"
+    if not binary.exists() or binary.stat().st_mtime < RECORDER.stat().st_mtime:
+        run("xcrun", "swiftc", "-O", "-o", str(binary), str(RECORDER), timeout=300)
+    return binary
 
 
 def record_stop(_):
@@ -476,7 +510,10 @@ class Handler(SimpleHTTPRequestHandler):
         if not action:
             return self.send_json({"error": "not found"}, 404)
         length = int(self.headers.get("Content-Length", 0))
-        self.respond(action, json.loads(self.rfile.read(length) or b"{}"))
+        body = json.loads(self.rfile.read(length) or b"{}")
+        if action.__name__ in SIM_ONLY and body.get("udid") in phones:
+            return self.send_json({"error": "Simulator only. The real iPhone is capture only, nothing on it is changed."}, 400)
+        self.respond(action, body)
 
     def respond(self, action, body):
         try:

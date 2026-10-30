@@ -12,6 +12,10 @@ enum MemberCardPalette {
         Color(hex: 0xF8C56E), Color(hex: 0xFFE9C2), Color(hex: 0xF49A5A), Color(hex: 0xFFD08A), Color(hex: 0xD2566A)
     ]
 
+    static let pearl: [Color] = [
+        .white, Color(hex: 0xD6E9FF), Color(hex: 0xFFFFFF), Color(hex: 0xC9DCFF), Color(hex: 0xEDE4FF), .white
+    ]
+
     static let aspect: CGFloat = 1.7
 
     static func cornerRadius(for width: CGFloat) -> CGFloat {
@@ -61,12 +65,25 @@ struct MemberCardMaterial: View {
                 startRadius: 0,
                 endRadius: 520
             )
+        case .atmosphere:
+            LinearGradient(
+                stops: [
+                    .init(color: Color(hex: 0x0A3FC2), location: 0),
+                    .init(color: Color(hex: 0x1473F5), location: 0.42),
+                    .init(color: Color(hex: 0x5AAEFF), location: 0.78),
+                    .init(color: Color(hex: 0xB9DDFF), location: 1)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
         }
     }
 
     @ViewBuilder
     private var highlight: some View {
-        if tier == .member {
+        if tier == .atmosphere {
+            RadialGradient(colors: [Color(hex: 0xFFF6D8, alpha: 0.45), .clear], center: mirrored ? .topLeading : .topTrailing, startRadius: 0, endRadius: 220)
+        } else if tier == .member {
             ZStack {
                 RadialGradient(colors: [.white.opacity(0.28), .clear], center: .topTrailing, startRadius: 0, endRadius: 260)
                 RadialGradient(colors: [Color(hex: 0x14285A, alpha: 0.35), .clear], center: .bottomLeading, startRadius: 0, endRadius: 240)
@@ -76,7 +93,7 @@ struct MemberCardMaterial: View {
 
     private var kind: Float {
         switch tier {
-        case .member: 0
+        case .member, .atmosphere: 0
         case .supporter: 1
         case .founder, .founderSupporter: 2
         }
@@ -135,7 +152,7 @@ struct MemberCardSheen: View {
             startPoint: UnitPoint(x: -0.4 + shift, y: -0.2),
             endPoint: UnitPoint(x: 1.0 + shift, y: 1.2)
         )
-        .opacity(tier.isFounder ? 0.22 : tier == .supporter ? 0.14 : 0.07)
+        .opacity(tier.isFounder ? 0.22 : tier == .supporter || tier == .atmosphere ? 0.14 : 0.07)
         .allowsHitTesting(false)
     }
 }
@@ -165,5 +182,49 @@ struct MemberCardHoloCat: View {
                     .scaledToFit()
             }
             .accessibilityHidden(true)
+    }
+}
+
+struct MemberCardSky: View {
+    let motion: MemberCardMotion
+    let scale: CGFloat
+
+    private static let puffs: [(x: CGFloat, y: CGFloat, r: CGFloat)] = [
+        (-10, 262, 46), (52, 270, 40), (110, 266, 34), (170, 276, 38), (240, 282, 44), (320, 276, 40), (400, 268, 46)
+    ]
+
+    var body: some View {
+        let tilt = motion.tilt
+        ZStack {
+            Canvas { context, _ in
+                for puff in Self.puffs {
+                    let rect = CGRect(x: (puff.x - puff.r) * scale, y: (puff.y - puff.r) * scale, width: puff.r * 2 * scale, height: puff.r * 2 * scale)
+                    context.fill(Path(ellipseIn: rect), with: .radialGradient(
+                        Gradient(colors: [.white.opacity(0.75), .white.opacity(0.45), .white.opacity(0)]),
+                        center: CGPoint(x: rect.midX, y: rect.midY - rect.height * 0.12),
+                        startRadius: 0,
+                        endRadius: rect.width / 2
+                    ))
+                }
+            }
+            .offset(x: -tilt.width * 10 * scale, y: -tilt.height * 6 * scale)
+            MemberCardFlightPath()
+                .stroke(.white.opacity(0.45), style: StrokeStyle(lineWidth: 1.4, lineCap: .round, dash: [0.1, 6]))
+                .scaleEffect(scale, anchor: .topLeading)
+                .offset(x: tilt.width * 4 * scale, y: tilt.height * 3 * scale)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+struct MemberCardFlightPath: Shape {
+    func path(in rect: CGRect) -> Path {
+        Path { path in
+            path.move(to: CGPoint(x: 236, y: 170))
+            path.addCurve(to: CGPoint(x: 300, y: 112), control1: CGPoint(x: 262, y: 168), control2: CGPoint(x: 268, y: 124))
+            path.addCurve(to: CGPoint(x: 314, y: 86), control1: CGPoint(x: 336, y: 100), control2: CGPoint(x: 334, y: 70))
+            path.addCurve(to: CGPoint(x: 362, y: 54), control1: CGPoint(x: 296, y: 100), control2: CGPoint(x: 330, y: 52))
+        }
     }
 }

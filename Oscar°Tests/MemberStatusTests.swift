@@ -58,7 +58,7 @@ struct MemberStatusTests {
         #expect(MemberTier.member.styles == [.member])
         #expect(MemberTier.supporter.styles == [.member, .supporter])
         #expect(MemberTier.founder.styles == [.member, .founder])
-        #expect(MemberTier.founderSupporter.styles == MemberTier.allCases)
+        #expect(MemberTier.founderSupporter.styles == [.member, .supporter, .founder, .founderSupporter])
 
         var stats = stats()
         #expect(MemberStatus(stats: stats, isSupporter: false, chosenTitle: nil, chosenStyle: .founder, now: now).style == .member)
@@ -66,6 +66,21 @@ struct MemberStatusTests {
         let founder = MemberStatus(stats: stats, isSupporter: false, chosenTitle: nil, chosenStyle: .member, now: now)
         #expect(founder.tier == .founder)
         #expect(founder.style == .member)
+    }
+
+    @Test func atmosphereStyleNeedsCodeAndCarriesHandle() {
+        let stats = stats()
+        let locked = MemberStatus(stats: stats, isSupporter: false, chosenTitle: "@a.bsky.social", chosenStyle: .atmosphere, now: now)
+        #expect(locked.styles == [.member])
+        #expect(locked.style == .member)
+        #expect(locked.title == nil)
+
+        var unlocks = ClubUnlocks()
+        unlocks.styles = [MemberTier.atmosphere.rawValue]
+        let open = MemberStatus(stats: stats, isSupporter: false, chosenTitle: "@a.bsky.social", chosenStyle: .atmosphere, unlocks: unlocks, now: now)
+        #expect(open.styles == [.member, .atmosphere])
+        #expect(open.style == .atmosphere)
+        #expect(open.title == "@a.bsky.social")
     }
 
     @Test func stampsPerTierAndYears() {
