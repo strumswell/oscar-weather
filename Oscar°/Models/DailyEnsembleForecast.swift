@@ -48,10 +48,15 @@ struct EnsembleDay: Identifiable {
   let high: EnsembleSpread?
   let low: EnsembleSpread?
   let precipitation: EnsembleSpread?
+  let wetShare: Double
   let wind: EnsembleSpread?
   let snowfall: Double?
   let cloudCover: Double?
   let sky: EnsembleSkyMix
+
+  static func wetShare(of precipitation: [Double]) -> Double {
+    precipitation.isEmpty ? 0 : Double(precipitation.count(where: { $0 >= 1 })) / Double(precipitation.count)
+  }
 }
 
 struct EnsembleSpread {
@@ -132,14 +137,20 @@ extension DailyEnsembleForecastResponse {
       guard let midnight = Self.dayFormatter.date(from: daily.time[index]) else { return nil }
       let highs = daily.highs.values(at: index)
       guard !highs.isEmpty else { return nil }
-      let codes = daily.weatherCodes.values(at: index).map { Int($0) }
+      let codes = zip(daily.weatherCodes, daily.precipitation).compactMap { codeRun, mmRun -> Int? in
+        guard codeRun.indices.contains(index), let code = codeRun[index].map({ Int($0) }) else { return nil }
+        let mm = mmRun.indices.contains(index) ? mmRun[index] ?? 1 : 1
+        return mm < 1 && [.rain, .snow].contains(EnsembleSky(weatherCode: code)) ? 3 : code
+      }
+      let precipitation = daily.precipitation.values(at: index).map { max(0, $0) }
       return EnsembleDay(
         id: index,
         noon: midnight.timeIntervalSince1970 + 43_200 - Double(utcOffsetSeconds),
         runs: highs.count,
         high: EnsembleSpread(highs),
         low: EnsembleSpread(daily.lows.values(at: index)),
-        precipitation: EnsembleSpread(daily.precipitation.values(at: index).map { max(0, $0) }),
+        precipitation: EnsembleSpread(precipitation),
+        wetShare: EnsembleDay.wetShare(of: precipitation),
         wind: EnsembleSpread(daily.wind.values(at: index)),
         snowfall: EnsembleSpread(daily.snowfall.values(at: index))?.median,
         cloudCover: EnsembleSpread(daily.cloudCover.values(at: index))?.median,

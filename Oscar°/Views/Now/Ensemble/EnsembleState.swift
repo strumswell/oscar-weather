@@ -106,8 +106,8 @@ final class EnsembleState {
     func rowValue(for lens: EnsembleLens) -> String {
         guard let day = selectedDay else { return "--" }
         if lens == .sky {
-            guard let dominant = day.sky.dominant else { return "--" }
-            return dominant.title + " " + day.sky.share(of: dominant).formatted(.percent.precision(.fractionLength(0)))
+            let wet: EnsembleSky = day.sky.share(of: .snow) > day.sky.share(of: .rain) ? .snow : .rain
+            return wet.title + " " + day.wetShare.formatted(.percent.precision(.fractionLength(0)))
         }
         guard let spread = spread(lens, of: day) else { return "--" }
         return range(spread.low, spread.high, for: lens)
@@ -127,7 +127,11 @@ final class EnsembleState {
 
     var footnote: String {
         guard let day = selectedDay else { return "" }
-        return String(localized: "So einig ist sich die Vorhersage. Bei schmalem Band sagen fast alle Berechnungen dasselbe, bei breitem kann der Tag noch so oder so ausgehen.")
+        let confidence = EnsembleConfidence(day: day)
+        if confidence.level == .sure { return String(localized: "Fast alle Berechnungen sagen dasselbe") }
+        if confidence.rainIsOpen { return String(localized: "Regen offen") }
+        let spread = units.temperature.value(fromCelsius: confidence.temperatureSpread) - units.temperature.value(fromCelsius: 0)
+        return String(localized: "Temperatur streut um \(Int(spread.rounded()))°")
     }
 
     func shortDateLabel(_ day: EnsembleDay) -> String {

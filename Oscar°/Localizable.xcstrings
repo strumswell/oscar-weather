@@ -1,6 +1,38 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "Fast alle Berechnungen sagen dasselbe" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almost every calculation says the same"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hesaplamaların neredeyse hepsi aynı sonucu veriyor"
+          }
+        }
+      }
+    },
+    "Regen offen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain undecided"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur belirsiz"
+          }
+        }
+      }
+    },
     "Stil" : {
       "localizations" : {
         "de" : {
@@ -107,6 +139,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sıcak Hava Dalgası"
+          }
+        }
+      }
+    },
+    "Temperatur streut um %lld°" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature varies by %lld°"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıcaklık %lld° oynuyor"
           }
         }
       }
@@ -21561,22 +21609,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "SO"
-          }
-        }
-      }
-    },
-    "So einig ist sich die Vorhersage. Bei schmalem Band sagen fast alle Berechnungen dasselbe, bei breitem kann der Tag noch so oder so ausgehen." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How much the forecast agrees with itself. With a narrow band almost every calculation says the same, with a wide one the day can still go either way."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tahminin kendi içinde ne kadar tutarlı olduğu. Bant darsa hesaplamaların neredeyse hepsi aynı sonucu verir, genişse gün hâlâ her iki yöne de gidebilir."
           }
         }
       }

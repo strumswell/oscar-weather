@@ -53,7 +53,7 @@ private struct RailSeries: View {
 
         let barWidth = max(2, column * 0.45)
         for (index, day) in days.enumerated() {
-            let share = day.sky.share(of: .rain) + day.sky.share(of: .snow)
+            let share = day.wetShare
             guard share > 0 else { continue }
             let barHeight = max(1.5, CGFloat(share) * height * 0.45)
             context.fill(

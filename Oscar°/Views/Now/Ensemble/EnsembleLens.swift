@@ -56,23 +56,29 @@ extension EnsembleSky {
     }
 }
 
-enum EnsembleConfidence {
-    case sure, fairlySure, fairlyUnsure, unsure
+struct EnsembleConfidence {
+    enum Level { case sure, fairlySure, fairlyUnsure, unsure }
+
+    let level: Level
+    let temperatureSpread: Double
+    let rainIsOpen: Bool
 
     init(day: EnsembleDay) {
         let spreads = [day.high, day.low].compactMap { $0.map { $0.high - $0.low } }
-        let temperatureDoubt = spreads.isEmpty ? 0 : spreads.reduce(0, +) / Double(spreads.count) / 8
-        let skyDoubt = day.sky.dominant.map { (1 - day.sky.share(of: $0)) / 0.8 } ?? 0
-        switch max(temperatureDoubt, skyDoubt) {
-        case ..<0.3: self = .sure
-        case ..<0.55: self = .fairlySure
-        case ..<0.8: self = .fairlyUnsure
-        default: self = .unsure
+        temperatureSpread = spreads.isEmpty ? 0 : spreads.reduce(0, +) / Double(spreads.count)
+        let temperatureDoubt = temperatureSpread / 8
+        let rainDoubt = 1 - abs(2 * day.wetShare - 1)
+        rainIsOpen = rainDoubt > temperatureDoubt
+        switch max(temperatureDoubt, rainDoubt) {
+        case ..<0.3: level = .sure
+        case ..<0.55: level = .fairlySure
+        case ..<0.8: level = .fairlyUnsure
+        default: level = .unsure
         }
     }
 
     var title: String {
-        switch self {
+        switch level {
         case .sure: String(localized: "Sicher")
         case .fairlySure: String(localized: "Ziemlich sicher")
         case .fairlyUnsure: String(localized: "Ziemlich unsicher")

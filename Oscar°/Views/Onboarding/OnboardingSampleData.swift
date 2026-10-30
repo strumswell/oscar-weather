@@ -93,6 +93,7 @@ enum OnboardingSampleData {
                 high: EnsembleSpread(spread(highs[day], width)),
                 low: EnsembleSpread(spread(lows[day], width * 0.8)),
                 precipitation: EnsembleSpread(precipitation),
+                wetShare: EnsembleDay.wetShare(of: precipitation),
                 wind: EnsembleSpread(spread(winds[day], 1.2 + Double(day) * 0.35).map { max(4, $0) }),
                 snowfall: 0,
                 cloudCover: nil,
