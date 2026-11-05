@@ -9,7 +9,7 @@ struct SupportIntro: View {
             if isSupporter {
                 Text("Danke, dass du Oscar unterstützt.")
                     .font(.title.bold())
-                Text("Alle App-Symbole und Sticker sind für dich freigeschaltet.")
+                Text("App-Icons, Sticker, das klassische Design, Möbel für Oscar und die Supporter-Karte sind für dich freigeschaltet.")
                     .foregroundStyle(.secondary)
             } else if isAsking {
                 Text("Oscar ist kostenlos")
@@ -21,7 +21,7 @@ struct SupportIntro: View {
             } else {
                 Text("Oscar unterstützen")
                     .font(.title.bold())
-                Text("Ich entwickle Oscar alleine in meiner Freizeit und trage jegliche Kosten aus eigener Tasche. Durch deine Unterstützung kann ich Oscar betreiben und weiterentwickeln. Zahl was du kannst und erhalte dafür als Dankeschön Zugriff auf eine wachsende Anzahl an App-Icons und Sticker.")
+                Text("Ich entwickle Oscar alleine in meiner Freizeit und trage jegliche Kosten aus eigener Tasche. Durch deine Unterstützung kann ich Oscar betreiben und weiterentwickeln. Zahl was du kannst, einmalig oder regelmäßig mit einem Abo. Als Dankeschön schaltest du App-Icons, Sticker, das klassische Design, Möbel für Oscar und die Supporter-Karte frei.")
                     .foregroundStyle(.secondary)
                 Text(verbatim: "– Philipp")
                     .foregroundStyle(.secondary)

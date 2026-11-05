@@ -27,6 +27,10 @@ struct AlertInfoSheet: View {
                     ForEach(alerts) { alert in
                         AlertInfoCard(alert: alert)
                     }
+                    Text("Warnungen werden automatisch übernommen und können verzögert oder unvollständig sein. Maßgeblich ist der jeweilige Wetterdienst.")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     if alerts.contains(where: { $0.source != "ec" }) {
                         PoweredByOscarServer(lockupHeight: 30)
                             .foregroundStyle(.tertiary)

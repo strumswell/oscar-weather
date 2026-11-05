@@ -234,15 +234,9 @@ struct ClubVoucherView: View {
     static func lines(for reward: ClubReward) -> [String] {
         var lines: [String] = []
         if reward.tier == "founder" { lines.append(String(localized: "Founder-Karte")) }
-        if reward.tier == "supporter" { lines.append(String(localized: "Supporter-Karte")) }
         if reward.styles?.contains(MemberTier.atmosphere.rawValue) == true { lines.append(String(localized: "ATmosphere-Karte")) }
         if let years = reward.years { lines.append(String(localized: "Stempel: \(years) Jahre")) }
         for title in reward.titles ?? [] { lines.append(String(localized: "Titel: \(title)")) }
-        if let stickers = reward.stickers {
-            lines.append(stickers.contains("*") ? String(localized: "Alle Sticker") : String(localized: "\(stickers.count) Sticker"))
-        }
-        if reward.icons == true { lines.append(String(localized: "Alle App-Symbole")) }
-        if reward.pet == true { lines.append(String(localized: "Alles für den Kater")) }
         return lines
     }
 

@@ -4567,28 +4567,6 @@
         }
       }
     },
-    "Abos verlängern sich automatisch, bis du sie in den Einstellungen deiner Apple-ID kündigst." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abos verlängern sich automatisch, bis du sie in den Einstellungen deiner Apple-ID kündigst."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Subscriptions renew automatically until you cancel them in your Apple ID settings."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abonelikler, Apple Kimliği ayarlarınızdan iptal edene kadar otomatik olarak yenilenir."
-          }
-        }
-      }
-    },
     "Abrufe" : {
       "localizations" : {
         "de" : {
@@ -5191,28 +5169,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tüm bölümler sayfada. Gizlemek için birini buraya sürükle."
-          }
-        }
-      }
-    },
-    "Alle App-Symbole und Sticker sind für dich freigeschaltet." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alle App-Symbole und Sticker sind für dich freigeschaltet."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All app icons and stickers are unlocked for you."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tüm uygulama simgeleri ve çıkartmalar sizin için açıldı."
           }
         }
       }
@@ -9417,28 +9373,6 @@
         }
       }
     },
-    "Ein Teil von allem, was hier zusammenkommt, geht an Projekte gegen die Klimakrise." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Teil von allem, was hier zusammenkommt, geht an Projekte gegen die Klimakrise."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A share of everything that comes in goes to projects fighting the climate crisis."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Buraya gelen her şeyin bir kısmı iklim kriziyle mücadele eden projelere gidiyor."
-          }
-        }
-      }
-    },
     "Ein Wetterbericht mit allem, was Du wissen musst." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -12904,28 +12838,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ben Philipp, Oscar'ı tek başıma geliştiriyorum. Sunucuyu ve geliştirici hesabını kendim ödüyorum. Tüm özellikler herkes için ücretsiz kalıyor."
-          }
-        }
-      }
-    },
-    "Ich entwickle Oscar alleine in meiner Freizeit und trage jegliche Kosten aus eigener Tasche. Durch deine Unterstützung kann ich Oscar betreiben und weiterentwickeln. Zahl was du kannst und erhalte dafür als Dankeschön Zugriff auf eine wachsende Anzahl an App-Icons und Sticker." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ich entwickle Oscar alleine in meiner Freizeit und trage jegliche Kosten aus eigener Tasche. Durch deine Unterstützung kann ich Oscar betreiben und weiterentwickeln. Zahl was du kannst und erhalte dafür als Dankeschön Zugriff auf eine wachsende Anzahl an App-Icons und Sticker."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "I build Oscar alone in my spare time and pay every cost out of my own pocket. Your support lets me keep Oscar running and keep developing it. Pay what you can, and as a thank you you get access to a growing set of app icons and stickers."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar'ı boş zamanlarımda tek başıma geliştiriyorum ve tüm masrafları kendi cebimden karşılıyorum. Desteğinizle Oscar'ı çalıştırmaya ve geliştirmeye devam edebiliyorum. Ne kadar verebiliyorsanız verin; teşekkür olarak giderek büyüyen uygulama simgesi ve çıkartma koleksiyonuna erişim kazanırsınız."
           }
         }
       }
@@ -18043,29 +17955,6 @@
       },
       "shouldTranslate" : false
     },
-    "Open-Meteo ist eine Open-Source-Wetter-API, die offene Wetterdaten von verschiedenen internationalen Wetterdiensten sammelt. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu Open-Meteo, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open-Meteo ist eine Open-Source-Wetter-API, die offene Wetterdaten von verschiedenen internationalen Wetterdiensten sammelt. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu Open-Meteo, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open-Meteo is an open source weather API that collects open weather data from various international weather services. Oscar uses the free access to Open-Meteo as a non-commercial app, but supports the project with a monthly donation of five euros."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open-Meteo, çeşitli uluslararası hava durumu hizmetlerinden açık hava durumu verilerini toplayan açık kaynaklı bir hava durumu API'sidir. Oscar, ticari olmayan bir uygulama olarak Open-Meteo'nun ücretsiz erişimini kullanır, ancak projeyi aylık beş avroluk bir bağışla destekler."
-          }
-        }
-      }
-    },
     "Open-Meteo Klimaarchiv" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -18873,29 +18762,6 @@
         }
       }
     },
-    "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas, amtliche Warnmeldungen der europäischen Warnplattform Meteoalarm sowie Messwerte europäischer Wetterstationen aus dem Datenhub E-SOH. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas, amtliche Warnmeldungen der europäischen Warnplattform Meteoalarm sowie Messwerte europäischer Wetterstationen aus dem Datenhub E-SOH. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar uses the European radar composite from EUMETNET's OPERA program, the network of European meteorological services, for the rain radar in Europe outside Central Europe, official warnings from the European alerting platform Meteoalarm, and readings from European weather stations via the E-SOH data hub. Use does not imply endorsement by or official affiliation with EUMETNET."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar, Orta Avrupa dışındaki Avrupa'da yağmur radarı için Avrupa meteoroloji servisleri birliği EUMETNET'in OPERA programının Avrupa radar kompozitini, Avrupa uyarı platformu Meteoalarm'ın resmi uyarılarını ve E-SOH veri merkezindeki Avrupa meteoroloji istasyonlarının ölçümlerini kullanır. Kullanım, EUMETNET ile bir destek veya resmi bağlantı anlamına gelmez."
-          }
-        }
-      }
-    },
     "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -19053,29 +18919,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oscar, Alman Meteoroloji Servisi (DWD) tarafından sağlanan hava durumu ve coğrafi verileri kullanır; buna radar verileri ve ICON-D2 modelinden alınan tahmin verileri de dahildir. Veri kaynağı: Alman Meteoroloji Servisi. Veriler, DWD Açık Veri Kullanım Koşulları kapsamında sağlanmaktadır."
-          }
-        }
-      }
-    },
-    "Oscar verwendet Wetter- und Geodaten des Deutschen Wetterdienstes (DWD), unter anderem Radardaten, Prognosedaten aus dem ICON-Modell sowie amtliche Warnmeldungen. Datenbasis: Deutscher Wetterdienst. Die Daten werden unter den Open-Data-Nutzungsbedingungen des DWD bereitgestellt." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar verwendet Wetter- und Geodaten des Deutschen Wetterdienstes (DWD), unter anderem Radardaten, Prognosedaten aus dem ICON-Modell sowie amtliche Warnmeldungen. Datenbasis: Deutscher Wetterdienst. Die Daten werden unter den Open-Data-Nutzungsbedingungen des DWD bereitgestellt."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar uses weather and geodata from the German Meteorological Service (DWD), including radar data, forecast data from the ICON model, and official warnings. Data basis: Deutscher Wetterdienst. The data is provided under the DWD open data terms of use."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar, Alman Meteoroloji Servisi'nin (DWD) hava durumu ve coğrafi verilerini kullanır; buna radar verileri, ICON modelinden tahmin verileri ve resmi uyarılar dahildir. Veri kaynağı: Deutscher Wetterdienst. Veriler, DWD'nin açık veri kullanım koşulları kapsamında sağlanır."
           }
         }
       }
@@ -26989,6 +26832,336 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dallar hareket eder, gevşek kağıt yerden kalkar."
+          }
+        }
+      }
+    },
+    "Open-Meteo ist eine Open-Source-Wetter-API, die offene Wetterdaten von verschiedenen internationalen Wetterdiensten sammelt. Open-Meteo stellt Oscar als Open-Source-Projekt den Zugang zu seiner API kostenlos zur Verfügung. Oscar unterstützt das Projekt mit einer monatlichen Spende von zehn Euro. Die Daten werden für Oscar bearbeitet." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo ist eine Open-Source-Wetter-API, die offene Wetterdaten von verschiedenen internationalen Wetterdiensten sammelt. Open-Meteo stellt Oscar als Open-Source-Projekt den Zugang zu seiner API kostenlos zur Verfügung. Oscar unterstützt das Projekt mit einer monatlichen Spende von zehn Euro. Die Daten werden für Oscar bearbeitet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo is an open-source weather API that collects open weather data from various international weather services. Open-Meteo gives Oscar, as an open-source project, free access to its API. Oscar supports the project with a monthly donation of ten euros. The data is modified for Oscar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Meteo, çeşitli uluslararası hava durumu hizmetlerinden açık hava durumu verilerini toplayan açık kaynaklı bir hava durumu API'sidir. Open-Meteo, açık kaynaklı bir proje olan Oscar'a API'sine ücretsiz erişim sağlar. Oscar projeyi aylık on avroluk bir bağışla destekler. Veriler Oscar için düzenlenir."
+          }
+        }
+      }
+    },
+    "Oscar verwendet Wetter- und Geodaten des Deutschen Wetterdienstes (DWD), unter anderem Radardaten, Prognosedaten aus dem ICON-Modell sowie amtliche Warnmeldungen. Datenbasis: Deutscher Wetterdienst, eigene Elemente ergänzt. Die Daten werden nach der GeoNutzV bereitgestellt und für Oscar verändert." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet Wetter- und Geodaten des Deutschen Wetterdienstes (DWD), unter anderem Radardaten, Prognosedaten aus dem ICON-Modell sowie amtliche Warnmeldungen. Datenbasis: Deutscher Wetterdienst, eigene Elemente ergänzt. Die Daten werden nach der GeoNutzV bereitgestellt und für Oscar verändert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses weather and geodata from the German Meteorological Service (DWD), including radar data, forecast data from the ICON model, and official warnings. Data basis: Deutscher Wetterdienst, own elements added. The data is provided under the GeoNutzV and modified for Oscar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, Alman Meteoroloji Servisi'nin (DWD) hava durumu ve coğrafi verilerini kullanır; buna radar verileri, ICON modelinden tahmin verileri ve resmi uyarılar dahildir. Veri kaynağı: Deutscher Wetterdienst, kendi öğeleri eklenmiştir. Veriler GeoNutzV kapsamında sağlanır ve Oscar için değiştirilir."
+          }
+        }
+      }
+    },
+    "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas, amtliche Warnmeldungen der europäischen Warnplattform Meteoalarm sowie Messwerte europäischer Wetterstationen aus dem Datenhub E-SOH. Die Daten werden für Oscar bearbeitet. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas, amtliche Warnmeldungen der europäischen Warnplattform Meteoalarm sowie Messwerte europäischer Wetterstationen aus dem Datenhub E-SOH. Die Daten werden für Oscar bearbeitet. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses the European radar composite from EUMETNET's OPERA program, the network of European meteorological services, for the rain radar in Europe outside Central Europe, official warnings from the European alerting platform Meteoalarm, and readings from European weather stations via the E-SOH data hub. The data is modified for Oscar. Use does not imply endorsement by or official affiliation with EUMETNET."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, Orta Avrupa dışındaki Avrupa'da yağmur radarı için Avrupa meteoroloji servisleri birliği EUMETNET'in OPERA programının Avrupa radar kompozitini, Avrupa uyarı platformu Meteoalarm'ın resmi uyarılarını ve E-SOH veri merkezindeki Avrupa meteoroloji istasyonlarının ölçümlerini kullanır. Veriler Oscar için düzenlenir. Kullanım, EUMETNET ile bir destek veya resmi bağlantı anlamına gelmez."
+          }
+        }
+      }
+    },
+    "Oscar verwendet Satellitendaten von EUMETSAT, der europäischen Organisation für die Nutzung meteorologischer Satelliten, für die Wolkenebene auf der Karte. Enthält veränderte EUMETSAT-Meteosat-Daten 2026. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETSAT dar." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar verwendet Satellitendaten von EUMETSAT, der europäischen Organisation für die Nutzung meteorologischer Satelliten, für die Wolkenebene auf der Karte. Enthält veränderte EUMETSAT-Meteosat-Daten 2026. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETSAT dar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar uses satellite data from EUMETSAT, the European Organisation for the Exploitation of Meteorological Satellites, for the cloud layer on the map. Contains modified EUMETSAT Meteosat data 2026. Use does not imply endorsement by or official affiliation with EUMETSAT."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar, haritadaki bulut katmanı için Avrupa Meteorolojik Uydu İşletim Örgütü EUMETSAT'ın uydu verilerini kullanır. Değiştirilmiş EUMETSAT Meteosat verileri içerir, 2026. Kullanım, EUMETSAT ile bir destek veya resmi bağlantı anlamına gelmez."
+          }
+        }
+      }
+    },
+    "Warnungen werden automatisch übernommen und können verzögert oder unvollständig sein. Maßgeblich ist der jeweilige Wetterdienst." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warnungen werden automatisch übernommen und können verzögert oder unvollständig sein. Maßgeblich ist der jeweilige Wetterdienst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warnings are relayed automatically and may be delayed or incomplete. The issuing weather service is authoritative."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uyarılar otomatik olarak aktarılır ve gecikmeli ya da eksik olabilir. Esas olan, uyarıyı yayımlayan meteoroloji servisidir."
+          }
+        }
+      }
+    },
+    "Einen Teil meines Gewinns aus Oscar werde ich an ausgewählte gemeinnützige Organisationen spenden und das öffentlich bekannt geben." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einen Teil meines Gewinns aus Oscar werde ich an ausgewählte gemeinnützige Organisationen spenden und das öffentlich bekannt geben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I will donate part of my profit from Oscar to selected charities and announce it publicly."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar'dan elde ettiğim kârın bir kısmını seçilmiş hayır kurumlarına bağışlayacağım ve bunu herkese açık şekilde duyuracağım."
+          }
+        }
+      }
+    },
+    "Abos verlängern sich automatisch, wenn du sie nicht spätestens 24 Stunden vor Ende des Zeitraums in den Einstellungen deiner Apple-ID kündigst." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abos verlängern sich automatisch, wenn du sie nicht spätestens 24 Stunden vor Ende des Zeitraums in den Einstellungen deiner Apple-ID kündigst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subscriptions renew automatically unless you cancel them in your Apple ID settings at least 24 hours before the end of the period."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abonelikler, dönem bitmeden en az 24 saat önce Apple Kimliği ayarlarınızdan iptal etmezseniz otomatik olarak yenilenir."
+          }
+        }
+      }
+    },
+    "Abo verwalten" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abo verwalten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage Subscription"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aboneliği Yönet"
+          }
+        }
+      }
+    },
+    "%@ / Tag" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / Tag"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / day"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / gün"
+          }
+        }
+      }
+    },
+    "%@ / Woche" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / Woche"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / week"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / hafta"
+          }
+        }
+      }
+    },
+    "%@ / Monat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / Monat"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / month"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / ay"
+          }
+        }
+      }
+    },
+    "%@ / Jahr" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / Jahr"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / year"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ / yıl"
+          }
+        }
+      }
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %@"
+          }
+        }
+      }
+    },
+    "App-Icons, Sticker, das klassische Design, Möbel für Oscar und die Supporter-Karte sind für dich freigeschaltet." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App-Icons, Sticker, das klassische Design, Möbel für Oscar und die Supporter-Karte sind für dich freigeschaltet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App icons, stickers, the classic design, furniture for Oscar and the supporter card are unlocked for you."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulama simgeleri, çıkartmalar, klasik tasarım, Oscar için mobilyalar ve destekçi kartı sizin için açıldı."
+          }
+        }
+      }
+    },
+    "Ich entwickle Oscar alleine in meiner Freizeit und trage jegliche Kosten aus eigener Tasche. Durch deine Unterstützung kann ich Oscar betreiben und weiterentwickeln. Zahl was du kannst, einmalig oder regelmäßig mit einem Abo. Als Dankeschön schaltest du App-Icons, Sticker, das klassische Design, Möbel für Oscar und die Supporter-Karte frei." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ich entwickle Oscar alleine in meiner Freizeit und trage jegliche Kosten aus eigener Tasche. Durch deine Unterstützung kann ich Oscar betreiben und weiterentwickeln. Zahl was du kannst, einmalig oder regelmäßig mit einem Abo. Als Dankeschön schaltest du App-Icons, Sticker, das klassische Design, Möbel für Oscar und die Supporter-Karte frei."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I build Oscar alone in my spare time and pay every cost out of my own pocket. Your support lets me keep Oscar running and keep developing it. Pay what you can, once or regularly with a subscription. As a thank you, you unlock app icons, stickers, the classic design, furniture for Oscar and the supporter card."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oscar'ı boş zamanlarımda tek başıma geliştiriyorum ve tüm masrafları kendi cebimden karşılıyorum. Desteğinizle Oscar'ı çalıştırmaya ve geliştirmeye devam edebiliyorum. Ne kadar verebiliyorsanız verin, tek seferlik ya da abonelikle düzenli olarak. Teşekkür olarak uygulama simgelerinin, çıkartmaların, klasik tasarımın, Oscar için mobilyaların ve destekçi kartının kilidini açarsınız."
           }
         }
       }

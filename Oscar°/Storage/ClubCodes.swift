@@ -7,21 +7,14 @@ struct ClubReward: Codable, Equatable {
     var styles: [String]?
     var years: Int?
     var titles: [String]?
-    var stickers: [String]?
-    var icons: Bool?
-    var pet: Bool?
     var redeemedAt: Date?
 }
 
 struct ClubUnlocks: Equatable {
     var founder = false
-    var supporter = false
     var styles: Set<String> = []
     var years: Int?
     var titles: [String] = []
-    var stickers: Set<String> = []
-    var icons = false
-    var pet = false
 
     static let none = ClubUnlocks()
 
@@ -30,7 +23,6 @@ struct ClubUnlocks: Equatable {
     init(_ rewards: [ClubReward], now: Date = .now) {
         for reward in rewards {
             founder = founder || reward.tier == "founder"
-            supporter = supporter || reward.tier == "supporter"
             styles.formUnion(reward.styles ?? [])
             if let years = reward.years {
                 let since = reward.redeemedAt ?? now
@@ -38,14 +30,7 @@ struct ClubUnlocks: Equatable {
                 self.years = max(self.years ?? 0, years + elapsed)
             }
             titles += (reward.titles ?? []).filter { !titles.contains($0) }
-            stickers.formUnion(reward.stickers ?? [])
-            icons = icons || reward.icons == true
-            pet = pet || reward.pet == true
         }
-    }
-
-    func unlocksSticker(_ asset: String) -> Bool {
-        stickers.contains("*") || stickers.contains(asset)
     }
 }
 
@@ -58,8 +43,7 @@ enum ClubCodes {
 
     private static let table: [String: String] = [
         "9e6ec409fcd1f8e8f4d163a02beaac33": "EXooWYqwXZSKw4E/fL/MvRpAP56/SqWoFTWfZUbRTdSK/whSSNbW+RFcPV2tRw==",
-        "b476da55500c1be6fa64f6015d401ce6": "UZ7YZ8nKYnkICvfVfo6ZYY0XuIjiL5K87R7VYsQMVY36ST84FrH412rFZ/0uDTcOepDQphsEA8gmg3exhQE4ofw=",
-        "a74362085533af472911177c1926aced": "ErpjAuQJmLqOiie1zZY043/Dm/vH8r2l3yhJWOVrM5K19acunkET9rP537MbJnQZOu08cPtQx5RezTW33JL+5E1PGRATYNau",
+        "a74362085533af472911177c1926aced": "fGCMQBpauft+fCrVwS/Yys676BsT71FnApqcNMvJsjeQCwKAXYgB2N2aoRITIwZJeUmUDBl/dA==",
         "b262c50fc98ffbe577f0d92942b0d4c6": "JaP5okHg+UjqlbtRREUXJDDqVEw1YzbPjzz1PAf7TTVeNx+7/0mb",
         "26d3b41cfda35287af070fe2c9594cd1": "PDA5Zey8vHQf1/xr093KIEFpbaP/kdI158TNZPZEdOgc5JIozYEH",
         "ce40558cde4b5d32bde7368e06486497": "q4mvfuJ9L9NieyObIJ/iLfxPo2pOxhaW8QwvvkyMR3utxmDT+ZGj",
@@ -67,8 +51,6 @@ enum ClubCodes {
         "4f0b0d443589d9779220649421260f87": "gMnPrK94AK6H67CmiXj8ysc3Sz1RU3rLmNFVHyCjgtxuZ6wZZcvI",
         "75f529720cbbde9999bb93224bc42355": "7hyCEGIVHqTM9cqWcyP625OD5H8HwYRH7aAeaBdwdDHTQ3IAiQIi",
         "6cf23d6ba72661ab5b81c2454787c1c1": "tPsLReNE78dp39gpiucgHTOMurDbBtkSYOYZU3pmPsFQ6GjkXl+1",
-        "b086347d27a477c3c8ab7d7de8e3aec6": "FuH/e3izae6WWadTZ2+OZsRxKPi6nFDVk/+zmTi8QZnX4U9FKLStXBVG",
-        "6d148ea60e5bd878eb82371524a0d528": "hZTDDbQeoJwkUnEQ+TocVvXh8+95Wj8GLuHymbc+umqrBiPNPDLjMQ==",
         "c579ea33954cf534193fcce6a118d50e": "2s35mXvjgzVFadLwdEjL4mVHR7eZ9U/qxh9gBFSujtVNmKFo6CNiA50gNCC7TqLFEXom07fg2eePN3B8qe6lcolR0IRaNebsUljk",
     ]
 

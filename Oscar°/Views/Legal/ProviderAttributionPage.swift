@@ -10,7 +10,13 @@ struct ProviderAttributionPage: View {
             }
             if let license = provider.license {
                 Section("Lizenz") {
-                    Text(LocalizedStringKey(license))
+                    if let url = provider.licenseURL {
+                        Link(destination: url) {
+                            Text(LocalizedStringKey(license))
+                        }
+                    } else {
+                        Text(LocalizedStringKey(license))
+                    }
                 }
             }
             Section("Webseite") {

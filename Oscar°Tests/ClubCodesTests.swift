@@ -4,7 +4,7 @@ import Testing
 
 struct ClubCodesTests {
     @Test func sealedRewardOpensOnlyWithItsCode() throws {
-        let reward = ClubReward(tier: "founder", years: 3, titles: ["Wetterfrosch"], stickers: ["*"])
+        let reward = ClubReward(tier: "founder", years: 3, titles: ["Wetterfrosch"])
         let sealed = try ClubCodes.seal(reward, code: "1a2b-3c4d-5e6f")
         let table = [sealed.id: sealed.box]
         #expect(try ClubCodes.open("1A2B3C4D5E6F", in: table).reward == reward)
@@ -13,17 +13,15 @@ struct ClubCodesTests {
 
     @Test func unlocksMerge() {
         let unlocks = ClubUnlocks([
-            ClubReward(tier: "supporter", years: 2),
-            ClubReward(tier: "founder", years: 5, titles: ["A"], stickers: ["sticker_pest"])
+            ClubReward(years: 2),
+            ClubReward(tier: "founder", years: 5, titles: ["A"])
         ])
-        #expect(unlocks.founder && unlocks.supporter)
+        #expect(unlocks.founder)
         #expect(unlocks.years == 5)
-        #expect(unlocks.unlocksSticker("sticker_pest"))
-        #expect(!unlocks.unlocksSticker("sticker_qourses"))
         var stats = UsageStats()
         stats.firstLaunch = .now
         let status = MemberStatus(stats: stats, isSupporter: false, chosenTitle: "A", unlocks: unlocks)
-        #expect(status.tier == .founderSupporter)
+        #expect(status.tier == .founder)
         #expect(status.years == 5)
         #expect(status.title == "A")
 

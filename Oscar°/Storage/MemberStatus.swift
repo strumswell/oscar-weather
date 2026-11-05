@@ -106,7 +106,7 @@ struct MemberStatus: Equatable {
     var earnedTitles: [String]
 
     init(stats: UsageStats, isSupporter: Bool, chosenTitle: String?, chosenStyle: MemberTier? = nil, unlocks: ClubUnlocks = .none, now: Date = .now) {
-        let supporter = isSupporter || stats.supporterSince != nil || unlocks.supporter
+        let supporter = isSupporter || stats.supporterSince != nil
         let tier: MemberTier = if stats.testFlightSince != nil || unlocks.founder {
             supporter ? .founderSupporter : .founder
         } else {

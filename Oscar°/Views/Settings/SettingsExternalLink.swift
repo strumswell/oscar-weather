@@ -23,3 +23,9 @@ struct SettingsExternalLink<Label: View>: View {
     .foregroundStyle(.primary)
   }
 }
+
+enum LegalPage {
+  private static let german = Bundle.main.preferredLocalizations.first == "de"
+  static let privacy = URL(string: german ? "https://oscars.love/de/datenschutz/" : "https://oscars.love/en/privacy/")!
+  static let imprint = URL(string: german ? "https://oscars.love/de/impressum/" : "https://oscars.love/en/imprint/")!
+}

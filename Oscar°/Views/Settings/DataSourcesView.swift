@@ -42,6 +42,22 @@ struct DataSourcesView: View {
       }
 
       Section("Open Source") {
+        ForEach(OpenSourceLicense.all) { item in
+          NavigationLink {
+            OpenSourceLicensePage(item: item)
+          } label: {
+            LabeledContent {
+              Text(verbatim: item.license)
+            } label: {
+              Label {
+                Text(verbatim: item.name)
+              } icon: {
+                Image(systemName: "doc.text.fill")
+              }
+              .labelStyle(.settingsIcon(.gray))
+            }
+          }
+        }
         ForEach(Self.openSourceLinks, id: \.title) { link in
           SettingsExternalLink(destination: URL(string: link.url)!) {
             Label {

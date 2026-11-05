@@ -18,9 +18,17 @@ struct SupportTileStyle: ProductViewStyle {
                 if isPending {
                     ProgressView()
                 } else if let product = configuration.product {
-                    Text(product.displayPrice)
+                    Text(product.displayName)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
+                    Self.price(of: product)
                         .font(.headline)
                         .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                 } else if case .loading = configuration.state {
                     ProgressView()
                 } else {
@@ -44,5 +52,16 @@ struct SupportTileStyle: ProductViewStyle {
         }
         .buttonStyle(PressScaleButtonStyle())
         .disabled(configuration.product == nil || isPending)
+        .accessibilityLabel(configuration.product.map { Text("\($0.displayName), \(Self.price(of: $0))") } ?? Text(verbatim: "–"))
+    }
+
+    static func price(of product: Product) -> Text {
+        switch product.subscription?.subscriptionPeriod.unit {
+        case .day: Text("\(product.displayPrice) / Tag")
+        case .week: Text("\(product.displayPrice) / Woche")
+        case .month: Text("\(product.displayPrice) / Monat")
+        case .year: Text("\(product.displayPrice) / Jahr")
+        default: Text(product.displayPrice)
+        }
     }
 }

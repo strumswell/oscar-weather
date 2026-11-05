@@ -166,12 +166,12 @@ struct SettingsView: View {
           }
           .tint(.primary)
 
-          SettingsExternalLink(destination: URL(string: "https://oscars.love/privacy")!) {
+          SettingsExternalLink(destination: LegalPage.privacy) {
             Label("Datenschutz", systemImage: "hand.raised.fill")
               .labelStyle(.settingsIcon(.blue))
           }
 
-          SettingsExternalLink(destination: URL(string: "https://oscars.love/impressum")!) {
+          SettingsExternalLink(destination: LegalPage.imprint) {
             Label("Impressum", systemImage: "figure.wave")
               .labelStyle(.settingsIcon(.gray))
           }

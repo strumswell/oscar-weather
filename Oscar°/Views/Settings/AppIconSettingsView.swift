@@ -21,7 +21,7 @@ struct AppIconSettingsView: View {
                 Section {
                     ForEach(section.icons) { icon in
                         let isSelected = selectedIconName == icon.alternateIconName
-                        if icon.isFree || supporter.unlocksIcons || isSelected {
+                        if icon.isFree || supporter.isSupporter || isSelected {
                             Button {
                                 Task {
                                     await select(icon)
@@ -47,7 +47,7 @@ struct AppIconSettingsView: View {
             }
 
             Section {
-                if !supporter.unlocksIcons {
+                if !supporter.isSupporter {
                     Text("Symbole mit Schloss schaltest du frei, wenn du Oscar unterstützt. Alle Funktionen bleiben kostenlos.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)

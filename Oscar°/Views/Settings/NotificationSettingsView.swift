@@ -60,6 +60,7 @@ struct NotificationSettingsView: View {
             } footer: {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Amtliche Warnungen in Europa (DWD, MeteoAlarm), den USA (NWS) und Taiwan (CWA).")
+                    Text("Warnungen werden automatisch übernommen und können verzögert oder unvollständig sein. Maßgeblich ist der jeweilige Wetterdienst.")
                     if location.name.isEmpty {
                         Text("Gilt für den Ort, der gerade in Oscar° offen ist, auf etwa 100 m gerundet.")
                     } else {

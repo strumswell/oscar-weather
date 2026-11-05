@@ -8,7 +8,7 @@ guard let json = arguments.first, let payload = json.data(using: .utf8),
       (try? JSONSerialization.jsonObject(with: payload)) != nil else {
     print("""
     usage: bin/club-code.swift '<reward json>' [CODE]
-      reward keys: tier ("founder"|"supporter"), years (Int), titles ([String]), stickers ([String] or ["*"]), icons (Bool), pet (Bool)
+      reward keys: tier ("founder"), years (Int), titles ([String]), styles (["atmosphere"]); paid perks (supporter, stickers, icons, pet) stay IAP-only
       example: bin/club-code.swift '{"tier":"founder","titles":["Wetterfrosch"]}'
     """)
     exit(1)

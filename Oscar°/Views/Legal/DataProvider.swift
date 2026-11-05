@@ -16,11 +16,14 @@ struct DataProvider: Identifiable {
     let tint: Color
     let about: String
     var license: String? = nil
+    var licenseURL: URL? = nil
     let links: [DataProviderLink]
     var sources: [DataProviderLink] = []
 
     var nameText: Text { nameIsLocalized ? Text(LocalizedStringKey(name)) : Text(verbatim: name) }
     var titleText: Text { titleIsLocalized ? Text(LocalizedStringKey(title)) : Text(verbatim: title) }
+
+    static let ccBy = URL(string: "https://creativecommons.org/licenses/by/4.0/")
 }
 
 extension DataProvider {
@@ -29,8 +32,9 @@ extension DataProvider {
             id: "open-meteo", name: "Open-Meteo", nameIsLocalized: true,
             title: "Open-Meteo", titleIsLocalized: true,
             systemImage: "sun.max.fill", tint: .orange,
-            about: "Open-Meteo ist eine Open-Source-Wetter-API, die offene Wetterdaten von verschiedenen internationalen Wetterdiensten sammelt. Oscar nutzt als nicht-kommerzielle App den kostenlosen Zugang zu Open-Meteo, unterstützt das Projekt aber mit einer monatlichen Spende von fünf Euro.",
+            about: "Open-Meteo ist eine Open-Source-Wetter-API, die offene Wetterdaten von verschiedenen internationalen Wetterdiensten sammelt. Open-Meteo stellt Oscar als Open-Source-Projekt den Zugang zu seiner API kostenlos zur Verfügung. Oscar unterstützt das Projekt mit einer monatlichen Spende von zehn Euro. Die Daten werden für Oscar bearbeitet.",
             license: "Attribution 4.0 International (CC BY 4.0)",
+            licenseURL: DataProvider.ccBy,
             links: [DataProviderLink(title: "open-meteo.com", url: URL(string: "https://open-meteo.com/")!)],
             sources: [
                 DataProviderLink(title: "ICON - Deutscher Wetterdienst (DWD)", url: URL(string: "https://www.dwd.de/")!),
@@ -51,23 +55,33 @@ extension DataProvider {
             id: "dwd", name: "Deutscher Wetterdienst (DWD)", nameIsLocalized: true,
             title: "DWD", titleIsLocalized: true,
             systemImage: "cloud.rain.fill", tint: .blue,
-            about: "Oscar verwendet Wetter- und Geodaten des Deutschen Wetterdienstes (DWD), unter anderem Radardaten, Prognosedaten aus dem ICON-Modell sowie amtliche Warnmeldungen. Datenbasis: Deutscher Wetterdienst. Die Daten werden unter den Open-Data-Nutzungsbedingungen des DWD bereitgestellt.",
+            about: "Oscar verwendet Wetter- und Geodaten des Deutschen Wetterdienstes (DWD), unter anderem Radardaten, Prognosedaten aus dem ICON-Modell sowie amtliche Warnmeldungen. Datenbasis: Deutscher Wetterdienst, eigene Elemente ergänzt. Die Daten werden nach der GeoNutzV bereitgestellt und für Oscar verändert.",
             links: [
                 DataProviderLink(title: "dwd.de", url: URL(string: "https://www.dwd.de/")!),
                 DataProviderLink(title: "DWD Open Data", url: URL(string: "https://opendata.dwd.de/")!),
+                DataProviderLink(title: "GeoNutzV", url: URL(string: "https://www.gesetze-im-internet.de/geonutzv/")!),
             ]
         ),
         DataProvider(
             id: "eumetnet", name: "EUMETNET (OPERA, Meteoalarm & E-SOH)", title: "EUMETNET",
             systemImage: "globe.europe.africa.fill", tint: .green,
-            about: "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas, amtliche Warnmeldungen der europäischen Warnplattform Meteoalarm sowie Messwerte europäischer Wetterstationen aus dem Datenhub E-SOH. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar.",
+            about: "Oscar verwendet das europäische Radarkomposit des OPERA-Programms von EUMETNET, dem Zusammenschluss der europäischen Wetterdienste, für das Regenradar in Europa außerhalb Zentraleuropas, amtliche Warnmeldungen der europäischen Warnplattform Meteoalarm sowie Messwerte europäischer Wetterstationen aus dem Datenhub E-SOH. Die Daten werden für Oscar bearbeitet. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETNET dar.",
             license: "Attribution 4.0 International (CC BY 4.0)",
+            licenseURL: DataProvider.ccBy,
             links: [
                 DataProviderLink(title: "eumetnet.eu", url: URL(string: "https://www.eumetnet.eu/")!),
                 DataProviderLink(title: "OPERA-Programm", url: URL(string: "https://www.eumetnet.eu/activities/observations-programme/current-activities/opera/")!),
                 DataProviderLink(title: "meteoalarm.org", url: URL(string: "https://meteoalarm.org/")!),
                 DataProviderLink(title: "E-SOH (MeteoGate)", url: URL(string: "https://observations.meteogate.eu/")!),
             ]
+        ),
+        DataProvider(
+            id: "eumetsat", name: "EUMETSAT", title: "EUMETSAT",
+            systemImage: "cloud.fill", tint: .teal,
+            about: "Oscar verwendet Satellitendaten von EUMETSAT, der europäischen Organisation für die Nutzung meteorologischer Satelliten, für die Wolkenebene auf der Karte. Enthält veränderte EUMETSAT-Meteosat-Daten 2026. Die Nutzung stellt keine Unterstützung oder offizielle Verbindung zu EUMETSAT dar.",
+            license: "Attribution 4.0 International (CC BY 4.0)",
+            licenseURL: DataProvider.ccBy,
+            links: [DataProviderLink(title: "eumetsat.int", url: URL(string: "https://www.eumetsat.int/")!)]
         ),
         DataProvider(
             id: "noaa", name: "NOAA & NWS", title: "NOAA",
