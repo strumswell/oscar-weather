@@ -390,7 +390,7 @@ struct HourlyTimelineStrip: View {
             [.year, .month, .day, .hour],
             from: Date(timeIntervalSince1970: windowStart)
         )
-        let tickHours = showsDay ? 3 : 6
+        let tickHours = 3
         components.hour = ((components.hour ?? 0) / tickHours) * tickHours
         components.minute = 0
         var tickDate = calendar.date(from: components) ?? Date(timeIntervalSince1970: windowStart)

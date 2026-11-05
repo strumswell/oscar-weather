@@ -58,7 +58,7 @@ final class HourlyTimelineModel {
     private(set) var dayWindow: ClosedRange<Double>?
 
     var windowSeconds: Double {
-        guard let dayWindow else { return 48 * 3_600 }
+        guard let dayWindow else { return 24 * 3_600 }
         return dayWindow.upperBound - dayWindow.lowerBound
     }
 
