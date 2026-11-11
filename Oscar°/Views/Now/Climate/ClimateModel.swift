@@ -23,7 +23,7 @@ final class ClimateModel {
 
         if (identity == loadedKey && summary != nil) || identity == inFlightKey { return }
 
-        let coordsKey = String(format: "%.2f,%.2f", latitude, longitude)
+        let coordsKey = ClimateArchiveStore.locationKey(latitude: latitude, longitude: longitude)
         if coordsKey != loadedCoordsKey { summary = nil }
         loadedCoordsKey = coordsKey
 

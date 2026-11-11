@@ -10,6 +10,7 @@ struct EnvironmentUVSectionView: View {
     let time: [Double]
     let maxTimeRange: ClosedRange<Date>
     let referenceDate: Date
+    let timeZone: TimeZone
     let initialChartScrollPosition: Date
     let chartScrollSynchronizer: ChartScrollSynchronizer
     let chartTimelineVersion: Int
@@ -21,15 +22,15 @@ struct EnvironmentUVSectionView: View {
                     title: "UV-Index",
                     value: currentUV.map { $0.formatted(.number.precision(.fractionLength(1))) } ?? "--",
                     badge: currentUVBadge,
-                    color: currentUVColor,
-                    subtitle: nil
+                    color: currentUVColor
                 )
 
                 UVChart(
                     points: UVDataPoint.points(time: time, uvIndex: uvIndex),
                     time: time,
                     maxTimeRange: maxTimeRange,
-                    referenceDate: referenceDate
+                    referenceDate: referenceDate,
+                    timeZone: timeZone
                 )
                 .synchronizedChartScroll(
                     initialX: initialChartScrollPosition,

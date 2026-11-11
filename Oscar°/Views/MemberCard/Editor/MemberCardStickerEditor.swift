@@ -228,7 +228,6 @@ struct MemberCardStickerEditor: View {
 
         let center = clampedStickerCenter(for: proposedCenter, scale: finalScale, in: cardSize)
         var updatedPlacements = placements
-        let nextZIndex = (updatedPlacements.map(\.zIndex).max() ?? 0) + 1
         let sticker = MemberCardStickerPlacement(
             assetName: activeDrag.assetName,
             xRatio: center.x / cardSize.width,
@@ -251,7 +250,7 @@ struct MemberCardStickerEditor: View {
             yRatio: 0.5,
             scale: 1,
             rotation: 0,
-            zIndex: (placements.map(\.zIndex).max() ?? 0) + 1
+            zIndex: nextZIndex
         )
         persist(placements + [sticker])
         selectedStickerID = sticker.id
@@ -304,7 +303,7 @@ struct MemberCardStickerEditor: View {
         var updatedPlacements = placements
         updatedPlacements[index].xRatio = center.x / cardSize.width
         updatedPlacements[index].yRatio = center.y / cardSize.height
-        updatedPlacements[index].zIndex = (placements.map(\.zIndex).max() ?? placement.zIndex) + 1
+        updatedPlacements[index].zIndex = nextZIndex
         updatedPlacements[index].scale = finalScale
         updatedPlacements[index].rotation = placement.rotation + inFlightRotationDelta.radians
 
@@ -338,6 +337,10 @@ struct MemberCardStickerEditor: View {
 
         updatedPlacements[index].zIndex = highestZIndex + 1
         persist(updatedPlacements)
+    }
+
+    private var nextZIndex: Double {
+        (placements.map(\.zIndex).max() ?? 0) + 1
     }
 
     private func persist(_ updatedPlacements: [MemberCardStickerPlacement]) {

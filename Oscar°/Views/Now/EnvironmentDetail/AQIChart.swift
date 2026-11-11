@@ -41,6 +41,7 @@ struct AQIChart: View {
     let time: [Double]
     let maxTimeRange: ClosedRange<Date>
     let referenceDate: Date
+    let timeZone: TimeZone
 
     @State private var selectedDate: Date?
 
@@ -80,10 +81,10 @@ struct AQIChart: View {
                 severityBandMarks
                 seriesMarks
                 selectionMark
-                HourlyChartUtilities.daySeparatorMarks(time: time)
+                HourlyChartUtilities.daySeparatorMarks(time: time, timeZone: timeZone)
             }
             .chartLegend(.hidden)
-            .chartXAxis { HourlyChartUtilities.sixHourAxisMarks() }
+            .chartXAxis { HourlyChartUtilities.sixHourAxisMarks(timeZone: timeZone) }
             .chartYAxis {
                 AxisMarks(values: stride(from: 0, through: maxYValue, by: 20).map { $0 }) {
                     AxisGridLine()
@@ -148,7 +149,7 @@ struct AQIChart: View {
                     overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))
                 ) {
                     AQIChartAnnotationView(
-                        time: SettingService.formattedTime(selectedData.time),
+                        time: SettingService.formattedTime(selectedData.time, timeZone: timeZone),
                         rows: annotationRows(for: selectedData)
                     )
                 }

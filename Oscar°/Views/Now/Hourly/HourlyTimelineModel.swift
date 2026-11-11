@@ -75,7 +75,6 @@ final class HourlyTimelineModel {
     var windowStart: Double { dayWindow?.lowerBound ?? scrubTime - windowSeconds / 2 }
 
     var stageDate: Date { Date(timeIntervalSince1970: stageTime) }
-    var isGliding: Bool { glide != nil }
 
     private var panStartTime: Double?
     private var glide: (from: Double, to: Double, start: TimeInterval, duration: TimeInterval, easeOut: Bool)?

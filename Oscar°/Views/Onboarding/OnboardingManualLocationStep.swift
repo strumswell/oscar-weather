@@ -104,11 +104,16 @@ struct OnboardingManualLocationStep: View {
 
     @ViewBuilder private var resultsList: some View {
         if let searchError {
-            ContentUnavailableView(
-                "Suche fehlgeschlagen",
-                systemImage: "wifi.exclamationmark",
-                description: Text(searchError)
-            )
+            ContentUnavailableView {
+                Label("Suche fehlgeschlagen", systemImage: "wifi.exclamationmark")
+            } description: {
+                Text(searchError)
+            } actions: {
+                Button("Erneut versuchen") {
+                    Task { await search() }
+                }
+                .buttonStyle(.borderedProminent)
+            }
         } else if !results.isEmpty {
             VStack(spacing: 0) {
                 ForEach(results.prefix(5).enumerated(), id: \.element.id) { index, result in

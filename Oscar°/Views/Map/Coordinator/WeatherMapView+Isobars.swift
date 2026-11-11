@@ -8,11 +8,23 @@ import UIKit
 
 // MARK: Isobars (Großwetterlage overlay)
 
+extension WeatherMapView {
+    static let isobarBufferCount = 2
+    static func isobarSourceID(_ buffer: Int) -> String { "oscar-isobar-source-\(buffer)" }
+    static func isobarCasingLayerID(_ buffer: Int) -> String { "oscar-isobar-casing-\(buffer)" }
+    static func isobarLineLayerID(_ buffer: Int) -> String { "oscar-isobar-line-\(buffer)" }
+    static func isobarLabelLayerID(_ buffer: Int) -> String { "oscar-isobar-label-\(buffer)" }
+    static func isobarCenterLayerID(_ buffer: Int) -> String { "oscar-isobar-center-\(buffer)" }
+    static func isobarCenterValueLayerID(_ buffer: Int) -> String { "oscar-isobar-center-value-\(buffer)" }
+}
+
 extension WeatherMapView.Coordinator {
     func syncIsobars(style: MLNStyle, active: Bool,
                              selection: WeatherTileLayer?, frameKey: String?) {
         guard active, let selection, let frameKey else {
-            if isobarSyncKey != nil { removeIsobarLayers(from: style) }
+            if style.source(withIdentifier: WeatherMapView.isobarSourceID(0)) != nil {
+                removeIsobarLayers(from: style)
+            }
             return
         }
         let cacheKey = "\(selection.framesEndpoint)/\(frameKey)"

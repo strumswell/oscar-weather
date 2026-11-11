@@ -107,11 +107,11 @@ struct EnvironmentDetailView: View {
 
     private var currentPollen: [PollenSnapshot] {
         [
-            pollenSnapshot(type: .alder, label: String(localized: "Erle"), values: weather.air.hourly?.alder_pollen, accentColor: .pink),
-            pollenSnapshot(type: .birch, label: String(localized: "Birke"), values: weather.air.hourly?.birch_pollen, accentColor: .teal),
-            pollenSnapshot(type: .grass, label: String(localized: "Gräser"), values: weather.air.hourly?.grass_pollen, accentColor: .green),
-            pollenSnapshot(type: .mugwort, label: String(localized: "Beifuß"), values: weather.air.hourly?.mugwort_pollen, accentColor: .indigo),
-            pollenSnapshot(type: .ragweed, label: String(localized: "Ambrosia"), values: weather.air.hourly?.ragweed_pollen, accentColor: .brown),
+            pollenSnapshot(type: .alder, label: String(localized: "Erle"), values: weather.air.hourly?.alder_pollen),
+            pollenSnapshot(type: .birch, label: String(localized: "Birke"), values: weather.air.hourly?.birch_pollen),
+            pollenSnapshot(type: .grass, label: String(localized: "Gräser"), values: weather.air.hourly?.grass_pollen),
+            pollenSnapshot(type: .mugwort, label: String(localized: "Beifuß"), values: weather.air.hourly?.mugwort_pollen),
+            pollenSnapshot(type: .ragweed, label: String(localized: "Ambrosia"), values: weather.air.hourly?.ragweed_pollen),
         ]
         .compactMap { $0 }
         .sorted {
@@ -189,6 +189,7 @@ struct EnvironmentDetailView: View {
                 so2: weather.air.hourly?.european_aqi_so2 ?? [],
                 maxTimeRange: maxTimeRange,
                 referenceDate: referenceDate,
+                timeZone: weather.forecast.locationTimeZone,
                 initialChartScrollPosition: initialChartScrollPosition,
                 chartScrollSynchronizer: chartScrollSynchronizer,
                 chartTimelineVersion: chartTimelineVersion
@@ -204,6 +205,7 @@ struct EnvironmentDetailView: View {
                 time: time,
                 maxTimeRange: maxTimeRange,
                 referenceDate: referenceDate,
+                timeZone: weather.forecast.locationTimeZone,
                 initialChartScrollPosition: initialChartScrollPosition,
                 chartScrollSynchronizer: chartScrollSynchronizer,
                 chartTimelineVersion: chartTimelineVersion
@@ -221,6 +223,7 @@ struct EnvironmentDetailView: View {
                 ragweed: weather.air.hourly?.ragweed_pollen ?? [],
                 maxTimeRange: maxTimeRange,
                 referenceDate: referenceDate,
+                timeZone: weather.forecast.locationTimeZone,
                 initialChartScrollPosition: initialChartScrollPosition,
                 chartScrollSynchronizer: chartScrollSynchronizer,
                 chartTimelineVersion: chartTimelineVersion
@@ -256,8 +259,9 @@ struct EnvironmentDetailView: View {
         )
     }
 
-    private func pollenSnapshot(type: PollenType, label: String, values: [Double?]?, accentColor: Color) -> PollenSnapshot? {
-        guard let value = currentValue(from: values) else { return nil }
+    private func pollenSnapshot(type: PollenType, label: String, values: [Double?]?) -> PollenSnapshot? {
+        guard let value = currentValue(from: values),
+              let metric = EnvironmentMetric.forPollen(type: type, label: label, value: value) else { return nil }
         let tier = type.tier(for: value)
 
         return PollenSnapshot(
@@ -266,7 +270,7 @@ struct EnvironmentDetailView: View {
             value: value,
             tier: tier,
             tierLabel: pollenTierKey(tier),
-            color: EnvironmentMetric.forPollen(type: type, label: label, value: value)?.color ?? accentColor
+            color: metric.color
         )
     }
 

@@ -10,18 +10,14 @@ import Foundation
 class StarField {
     private static let starsPerPoint = 200.0 / 550
 
-    var stars = [Star]()
+    private(set) lazy var stars: [Star] = StarField.makeStars(from: leftEdge, to: 500)
     let leftEdge = -50.0
     private(set) var rightEdge = 500.0
     var lastUpdate = Date.now
 
-    init() {
-        addStars(from: leftEdge, to: rightEdge)
-    }
-
     func update(date: Date, width: Double) {
         if width > rightEdge {
-            addStars(from: rightEdge, to: width)
+            stars += StarField.makeStars(from: rightEdge, to: width)
             rightEdge = width
         }
 
@@ -45,12 +41,14 @@ class StarField {
         lastUpdate = date
     }
 
-    private func addStars(from start: Double, to end: Double) {
-        for _ in 0..<Int((end - start) * Self.starsPerPoint) {
+    private static func makeStars(from start: Double, to end: Double) -> [Star] {
+        var stars = [Star]()
+        for _ in 0..<Int((end - start) * starsPerPoint) {
             let x = Double.random(in: start...end)
             let y = Double.random(in: 0...600)
             let size = Double.random(in: 1...3)
             stars.append(Star(x: x, y: y, size: size))
         }
+        return stars
     }
 }

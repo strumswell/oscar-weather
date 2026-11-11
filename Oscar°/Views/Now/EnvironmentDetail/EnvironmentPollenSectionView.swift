@@ -12,6 +12,7 @@ struct EnvironmentPollenSectionView: View {
     let ragweed: [Double?]
     let maxTimeRange: ClosedRange<Date>
     let referenceDate: Date
+    let timeZone: TimeZone
     let initialChartScrollPosition: Date
     let chartScrollSynchronizer: ChartScrollSynchronizer
     let chartTimelineVersion: Int
@@ -31,15 +32,15 @@ struct EnvironmentPollenSectionView: View {
                         title: "Pollen",
                         value: dominantPollen?.label ?? "--",
                         badge: dominantPollen.map { LocalizedStringKey($0.tierLabel) } ?? "Keine Daten",
-                        color: dominantPollenSeverityColor,
-                        subtitle: nil
+                        color: dominantPollenSeverityColor
                     )
 
                     PollenChart(
                         series: PollenSeries.build(time: time, alder: alder, birch: birch, grass: grass, mugwort: mugwort, ragweed: ragweed),
                         time: time,
                         maxTimeRange: maxTimeRange,
-                        referenceDate: referenceDate
+                        referenceDate: referenceDate,
+                        timeZone: timeZone
                     )
                     .synchronizedChartScroll(
                         initialX: initialChartScrollPosition,

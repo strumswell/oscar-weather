@@ -67,13 +67,6 @@ struct WeatherMapView: UIViewRepresentable {
     static var alertFillLayerIDs: Set<String> {
         Set((0..<alertSourceCount).map(alertFillLayerID))
     }
-    static let isobarBufferCount = 2
-    static func isobarSourceID(_ buffer: Int) -> String { "oscar-isobar-source-\(buffer)" }
-    static func isobarCasingLayerID(_ buffer: Int) -> String { "oscar-isobar-casing-\(buffer)" }
-    static func isobarLineLayerID(_ buffer: Int) -> String { "oscar-isobar-line-\(buffer)" }
-    static func isobarLabelLayerID(_ buffer: Int) -> String { "oscar-isobar-label-\(buffer)" }
-    static func isobarCenterLayerID(_ buffer: Int) -> String { "oscar-isobar-center-\(buffer)" }
-    static func isobarCenterValueLayerID(_ buffer: Int) -> String { "oscar-isobar-center-value-\(buffer)" }
     static let cellPointSourceID = "oscar-cells-points"
     static let cellTrackSourceID = "oscar-cells-tracks"
     static let cellConeSourceID = "oscar-cells-cones"
@@ -486,9 +479,10 @@ struct WeatherMapView: UIViewRepresentable {
                            region: radarRegion)
             syncWindParticles(selection: activeTileLayer, state: modelState)
             syncWebcams(style: style, active: webcamsOn && parent.onWebcamTapped != nil)
-            syncUserLocationDot(style: style)
+            syncUserLocationDot(style: style, raiseLayers: false)
             syncCityChips(style: style)
             syncSelectedCityMarker(style: style)
+            raiseTopLayers(style: style)
         }
 
         var syncRetryScheduled = false

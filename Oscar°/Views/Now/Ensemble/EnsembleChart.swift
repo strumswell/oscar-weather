@@ -131,7 +131,7 @@ struct EnsembleChart: View {
         }
         func x(_ index: Int) -> CGFloat { (CGFloat(index) + 0.5) * column }
 
-        let step = Self.niceStep((upper - lower) / 3)
+        let step = HourlyChartUtilities.niceStep((upper - lower) / 3)
         let gridValues = stride(from: (lower / step).rounded(.up) * step, through: upper, by: step)
             .filter { y($0) > 12 && y($0) < chartHeight - 10 }
         for value in gridValues {
@@ -230,15 +230,6 @@ struct EnsembleChart: View {
             context.fill(dot, with: .color(.white))
             context.stroke(dot, with: .color(lens.color), lineWidth: 2)
         }
-    }
-
-    private static func niceStep(_ raw: Double) -> Double {
-        let magnitude = pow(10, floor(log10(max(raw, 0.0001))))
-        let normalized = raw / magnitude
-        if normalized < 1.5 { return magnitude }
-        if normalized < 3.5 { return 2 * magnitude }
-        if normalized < 7.5 { return 5 * magnitude }
-        return 10 * magnitude
     }
 }
 

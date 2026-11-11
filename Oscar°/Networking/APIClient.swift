@@ -155,7 +155,10 @@ final class APIClient: Sendable {
     }
     else if coordinates.country() == .spain || coordinates.country() == .portugal {
       query.models = .icon_seamless
-      query.forecast_days = ._7
+      let iconOnly = forecastDays == ._1 || forecastDays == ._7
+      if !iconOnly {
+        query.forecast_days = ._7
+      }
 
       let iconResponse = try await openMeteo.getForecast(.init(query: query))
       var iconForecast: Operations.getForecast.Output.Ok.Body.jsonPayload
@@ -168,6 +171,10 @@ final class APIClient: Sendable {
         }
       case .badRequest(_), .undocumented(statusCode: _, _):
         throw URLError(.badServerResponse)
+      }
+
+      if iconOnly {
+        return iconForecast
       }
 
       query.models = .best_match

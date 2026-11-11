@@ -30,7 +30,7 @@ struct GlobalRadarProvider: TimelineProvider {
   func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<GlobalRadarEntry>) -> Void)
   {
     generateMapSnapshot { entry in
-      let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+      let nextUpdateDate = minutesFromNow(15)
       let timeline = Timeline(entries: [entry], policy: .after(nextUpdateDate))
       completion(timeline)
     }
@@ -38,10 +38,7 @@ struct GlobalRadarProvider: TimelineProvider {
 
   private func generateMapSnapshot(completion: @escaping @Sendable (GlobalRadarEntry) -> Void) {
     Task {
-      let coordinate = await MainActor.run {
-        LocationService.shared.update()
-        return LocationService.shared.getCoordinates()
-      }
+      let coordinate = await currentWidgetCoordinates()
 
       let region = MKCoordinateRegion(
         center: coordinate, latitudinalMeters: Self.spanMeters, longitudinalMeters: Self.spanMeters)

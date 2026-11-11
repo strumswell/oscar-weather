@@ -57,6 +57,7 @@ final class Weather {
     var precipSeries: PrecipSeriesResponse?
     var cloudSeries: CloudSeriesResponse?
     var stations: [Components.Schemas.NearbyStation] = []
+    @ObservationIgnored private var heldDataCoordinates: CLLocationCoordinate2D?
     var error: String = ""
     var lastUpdated: Date?
     var debug = false
@@ -108,9 +109,16 @@ extension Weather {
 
     private enum UpdateResponse {
         case forecast(Operations.getForecast.Output.Ok.Body.jsonPayload)
-        case airQuality(Operations.getAirQuality.Output.Ok.Body.jsonPayload)
+        case airQuality(Operations.getAirQuality.Output.Ok.Body.jsonPayload?)
         case precipSeries(RadarOutcome)
         case cloudSeries(CloudOutcome)
+    }
+
+    private struct Fetched {
+        let forecast: Operations.getForecast.Output.Ok.Body.jsonPayload
+        let air: Operations.getAirQuality.Output.Ok.Body.jsonPayload?
+        let radar: RadarOutcome
+        let cloud: CloudOutcome
     }
 
     func refresh(
@@ -139,6 +147,22 @@ extension Weather {
             clearLoadingQueries()
         }
 
+        await resolvePlace(of: location, locationService: locationService)
+        let coordinates = location.coordinates
+
+        do {
+            let fetched = try await fetchAll(coordinates: coordinates, client: client)
+            applyFetched(fetched, coordinates: coordinates, location: location, locationService: locationService)
+            try await loadAlertsAndStations(coordinates: coordinates, location: location, client: client)
+        } catch is CancellationError {
+        } catch let error as URLError where error.code == .cancelled {
+        } catch {
+            self.error = error.localizedDescription
+            if !hasContent { loadState = .failed }
+        }
+    }
+
+    private func resolvePlace(of location: Location, locationService: LocationService) async {
         locationService.update()
         let info = await locationService.getPlacemarkInfo()
         location.coordinates = locationService.getCoordinates()
@@ -146,110 +170,134 @@ extension Weather {
             location.name = info.name
         }
         location.countryCode = info.countryCode
+    }
 
-        let coordinates = location.coordinates
+    private func fetchAll(coordinates: CLLocationCoordinate2D, client: APIClient) async throws -> Fetched {
+        var forecastResponse: Operations.getForecast.Output.Ok.Body.jsonPayload?
+        var airQualityResponse: Operations.getAirQuality.Output.Ok.Body.jsonPayload?
+        var radarOutcome: RadarOutcome = .failed
+        var cloudOutcome: CloudOutcome = .failed
+
+        try await withThrowingTaskGroup(of: UpdateResponse.self) { group in
+            markLoading(.forecast)
+            group.addTask {
+                .forecast(try await client.getForecast(coordinates: coordinates))
+            }
+
+            markLoading(.airQuality)
+            group.addTask {
+                do { return .airQuality(try await client.getAirQuality(coordinates: coordinates)) }
+                catch {
+                    if Task.isCancelled { throw error }
+                    return .airQuality(nil)
+                }
+            }
+
+            markLoading(.rainRadar)
+            group.addTask {
+                do { return .precipSeries(.fetched(try await client.getRadarSeries(coordinates: coordinates))) }
+                catch { return .precipSeries(.failed) }
+            }
+
+            group.addTask {
+                do { return .cloudSeries(.fetched(try await client.getCloudSeries(coordinates: coordinates))) }
+                catch { return .cloudSeries(.failed) }
+            }
+
+            for try await response in group {
+                switch response {
+                case .forecast(let response):
+                    forecastResponse = response
+                    markFinished(.forecast)
+                case .airQuality(let response):
+                    airQualityResponse = response
+                    markFinished(.airQuality)
+                case .precipSeries(let outcome):
+                    radarOutcome = outcome
+                    markFinished(.rainRadar)
+                case .cloudSeries(let outcome):
+                    cloudOutcome = outcome
+                }
+            }
+        }
+
+        guard let forecastResponse else {
+            throw URLError(.badServerResponse)
+        }
+        return Fetched(forecast: forecastResponse, air: airQualityResponse, radar: radarOutcome, cloud: cloudOutcome)
+    }
+
+    private func applyFetched(
+        _ fetched: Fetched,
+        coordinates: CLLocationCoordinate2D,
+        location: Location,
+        locationService: LocationService
+    ) {
+        let samePlace = heldDataCoordinates.map {
+            CLLocation(latitude: $0.latitude, longitude: $0.longitude)
+                .distance(from: CLLocation(latitude: coordinates.latitude, longitude: coordinates.longitude)) < 1_000
+        } ?? false
+        forecast = fetched.forecast
+        if let airQualityResponse = fetched.air {
+            air = airQualityResponse
+        } else if !samePlace {
+            air = Operations.getAirQuality.Output.Ok.Body.jsonPayload.init(latitude: 0, longitude: 0, hourly: nil)
+        }
+        if case .fetched(let value) = fetched.radar {
+            precipSeries = value
+        } else if !samePlace {
+            precipSeries = nil
+        }
+        if case .fetched(let value) = fetched.cloud {
+            cloudSeries = value
+        } else if !samePlace {
+            cloudSeries = nil
+        }
+        heldDataCoordinates = coordinates
+        updateTime()
+        lastUpdated = .now
+        loadState = .loaded
+        isLoading = false
+
+        if let airQualityResponse = fetched.air, locationService.knownCoordinates() != nil {
+            let snapshot = WeatherSnapshot(
+                forecast: fetched.forecast,
+                air: airQualityResponse,
+                precipSeries: precipSeries,
+                coordinates: CodableCoordinate(LocationService.outboundCoordinate(coordinates)),
+                locationName: location.name,
+                savedAt: lastUpdated ?? .now
+            )
+            Task.detached {
+                WeatherSnapshotStore.save(snapshot)
+            }
+        }
+    }
+
+    private func loadAlertsAndStations(
+        coordinates: CLLocationCoordinate2D,
+        location: Location,
+        client: APIClient
+    ) async throws {
+        markLoading(.alerts)
+        do {
+            alerts = try await client.getAlerts(
+                coordinates: coordinates,
+                countryCode: location.countryCode
+            )
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            alerts = .oscar(.empty)
+        }
+        markFinished(.alerts)
 
         do {
-            var forecastResponse: Operations.getForecast.Output.Ok.Body.jsonPayload?
-            var airQualityResponse: Operations.getAirQuality.Output.Ok.Body.jsonPayload?
-            var radarOutcome: RadarOutcome = .failed
-            var cloudOutcome: CloudOutcome = .failed
-
-            try await withThrowingTaskGroup(of: UpdateResponse.self) { group in
-                markLoading(.forecast)
-                group.addTask {
-                    .forecast(try await client.getForecast(coordinates: coordinates))
-                }
-
-                markLoading(.airQuality)
-                group.addTask {
-                    .airQuality(try await client.getAirQuality(coordinates: coordinates))
-                }
-
-                markLoading(.rainRadar)
-                group.addTask {
-                    do { return .precipSeries(.fetched(try await client.getRadarSeries(coordinates: coordinates))) }
-                    catch { return .precipSeries(.failed) }
-                }
-
-                group.addTask {
-                    do { return .cloudSeries(.fetched(try await client.getCloudSeries(coordinates: coordinates))) }
-                    catch { return .cloudSeries(.failed) }
-                }
-
-                for try await response in group {
-                    switch response {
-                    case .forecast(let response):
-                        forecastResponse = response
-                        markFinished(.forecast)
-                    case .airQuality(let response):
-                        airQualityResponse = response
-                        markFinished(.airQuality)
-                    case .precipSeries(let outcome):
-                        radarOutcome = outcome
-                        markFinished(.rainRadar)
-                    case .cloudSeries(let outcome):
-                        cloudOutcome = outcome
-                    }
-                }
-            }
-
-            guard let forecastResponse, let airQualityResponse else {
-                throw URLError(.badServerResponse)
-            }
-
-            forecast = forecastResponse
-            air = airQualityResponse
-            if case .fetched(let value) = radarOutcome {
-                precipSeries = value
-            }
-            if case .fetched(let value) = cloudOutcome {
-                cloudSeries = value
-            }
-            updateTime()
-            lastUpdated = .now
-            loadState = .loaded
-            isLoading = false
-
-            if locationService.knownCoordinates() != nil {
-                let snapshot = WeatherSnapshot(
-                    forecast: forecastResponse,
-                    air: airQualityResponse,
-                    precipSeries: precipSeries,
-                    coordinates: CodableCoordinate(LocationService.outboundCoordinate(coordinates)),
-                    locationName: location.name,
-                    savedAt: lastUpdated ?? .now
-                )
-                Task.detached {
-                    WeatherSnapshotStore.save(snapshot)
-                }
-            }
-
-            markLoading(.alerts)
-            do {
-                alerts = try await client.getAlerts(
-                    coordinates: coordinates,
-                    countryCode: location.countryCode
-                )
-            } catch is CancellationError {
-                throw CancellationError()
-            } catch {
-                alerts = .oscar(.empty)
-            }
-            markFinished(.alerts)
-
-            do {
-                stations = try await client.getNearbyStations(coordinates: coordinates)
-            } catch is CancellationError {
-                throw CancellationError()
-            } catch {
-                stations = []
-            }
+            stations = try await client.getNearbyStations(coordinates: coordinates)
         } catch is CancellationError {
-        } catch let error as URLError where error.code == .cancelled {
+            throw CancellationError()
         } catch {
-            self.error = error.localizedDescription
-            if !hasContent { loadState = .failed }
+            stations = []
         }
     }
 
@@ -260,6 +308,7 @@ extension Weather {
             forecast = snapshot.forecast
             air = snapshot.air
             precipSeries = snapshot.precipSeries
+            heldDataCoordinates = snapshot.coordinates.coordinate
             updateTime()
             lastUpdated = snapshot.savedAt
             location.coordinates = snapshot.coordinates.coordinate

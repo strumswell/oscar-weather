@@ -87,16 +87,6 @@ final class MapLayers {
         }
     }
 
-    func playActiveLayer() {
-        if settings.oscarRadarLayer {
-            timeline.play()
-        } else if settings.cloudLayerActive {
-            clouds.play()
-        } else if settings.activeTileLayer != nil {
-            model.play()
-        }
-    }
-
     func pause() {
         radar.pause()
         model.pause()

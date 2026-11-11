@@ -27,7 +27,7 @@ struct WeatherSimulationView: View, Animatable {
 
     private static var isPowerThrottled: Bool {
         let info = ProcessInfo.processInfo
-        return info.isLowPowerModeEnabled || info.thermalState == .serious || info.thermalState == .critical
+        return info.thermalState == .serious || info.thermalState == .critical
     }
 
     var body: some View {
@@ -40,7 +40,7 @@ struct WeatherSimulationView: View, Animatable {
                 : .twilight)
         let moonPhase = overrides?.moonPhase
             ?? (MoonPhase.phaseFraction(for: Date(timeIntervalSince1970: snapshot.timestamp)) * 512).rounded() / 512
-        let cloudsVisible = snapshot.cloudDensity + snapshot.cloudCoverage > 0.02
+        let cloudsVisible = snapshot.showsClouds
         let pacing: SimulationPacing = reduceMotion || isOffTab ? .still : (powerThrottled ? .background : .active)
 
         GeometryReader { proxy in
@@ -70,8 +70,7 @@ struct WeatherSimulationView: View, Animatable {
                         pacing: pacing
                     )
 
-                    let starOpacity = Double(snapshot.nightAmount)
-                        * Double(1 - snapshot.cloudCoverage * 0.85)
+                    let starOpacity = snapshot.starOpacity
                     let presenceFade: Animation = .easeInOut(duration: 0.4)
                     ZStack {
                         if starOpacity > 0.02 {
@@ -115,7 +114,7 @@ struct WeatherSimulationView: View, Animatable {
                     ZStack {
                         if snapshot.showsSunDisc {
                             SunView(progress: Double(snapshot.timeOfDay))
-                                .opacity(Double((1 - snapshot.cloudDensity * 0.45) * snapshot.phase * snapshot.sunDiscVisibility))
+                                .opacity(snapshot.sunDiscOpacity)
                                 .transition(.opacity)
                         }
                     }
@@ -184,9 +183,6 @@ struct WeatherSimulationView: View, Animatable {
             }
             .preferredColorScheme(.dark)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange).receive(on: DispatchQueue.main)) { _ in
-            powerThrottled = Self.isPowerThrottled
         }
         .onReceive(NotificationCenter.default.publisher(for: ProcessInfo.thermalStateDidChangeNotification).receive(on: DispatchQueue.main)) { _ in
             powerThrottled = Self.isPowerThrottled

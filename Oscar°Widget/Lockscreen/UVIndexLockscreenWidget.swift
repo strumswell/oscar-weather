@@ -23,7 +23,7 @@ struct UVIndexProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping @Sendable (UVIndexLockScreenEntry) -> ()) {
-        completion(UVIndexLockScreenEntry(date: Date(), uvIndex: 6))
+        completion(placeholder(in: context))
     }
 
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<UVIndexLockScreenEntry>) -> ()) {

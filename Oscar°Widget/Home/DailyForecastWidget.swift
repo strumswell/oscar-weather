@@ -10,12 +10,6 @@ import CoreLocation
 import SwiftUI
 import WidgetKit
 
-// MARK: - Timeline entry
-
-// MARK: - Provider
-
-// MARK: - Views
-
 // MARK: - Widget
 
 struct DailyForecastWidget: Widget {

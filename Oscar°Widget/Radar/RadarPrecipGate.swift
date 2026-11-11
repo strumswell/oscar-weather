@@ -56,15 +56,25 @@ extension RadarSnapshotRenderer {
             let y1 = WebMercator.tileY(latitude: box.south, zoom: gateZoom)
             guard (x1 - x0 + 1) * (y1 - y0 + 1) <= 6 else { return nil }
 
-            var tiles: [Int: [UInt8]] = [:]
-            for x in x0...x1 {
-                for y in y0...y1 {
-                    guard let data = try? await APIClient.shared.radarTile(
-                        region: region.pathComponent, key: frameKey, z: gateZoom, x: x, y: y,
-                        profile: .snapshot),
-                        let alpha = alphaPlane(from: data) else { continue }
-                    tiles[x << 16 | y] = alpha
+            let path = region.pathComponent
+            let zoom = gateZoom
+            let tiles: [Int: [UInt8]] = await withTaskGroup(of: (key: Int, data: Data?).self) { group in
+                for x in x0...x1 {
+                    for y in y0...y1 {
+                        group.addTask {
+                            let data = try? await APIClient.shared.radarTile(
+                                region: path, key: frameKey, z: zoom, x: x, y: y,
+                                profile: .snapshot)
+                            return (x << 16 | y, data)
+                        }
+                    }
                 }
+                var tiles: [Int: [UInt8]] = [:]
+                for await tile in group {
+                    guard let data = tile.data, let alpha = alphaPlane(from: data) else { continue }
+                    tiles[tile.key] = alpha
+                }
+                return tiles
             }
             return tiles.isEmpty ? nil : PrecipGate(zoom: gateZoom, tiles: tiles)
         }

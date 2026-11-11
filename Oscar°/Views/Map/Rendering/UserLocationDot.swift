@@ -22,7 +22,7 @@ enum UserLocationDot {
     private static let haloRadius: Double = 12
     private static let pulseMaxRadius: Double = 18
 
-    static func sync(style: MLNStyle, coordinate: CLLocationCoordinate2D?) {
+    static func sync(style: MLNStyle, coordinate: CLLocationCoordinate2D?, raiseLayers: Bool = true) {
         var shape: MLNShape?
         if let coordinate, CLLocationCoordinate2DIsValid(coordinate),
            coordinate.latitude != 0 || coordinate.longitude != 0 {
@@ -57,7 +57,7 @@ enum UserLocationDot {
             style.addLayer(dot)
         }
 
-        if style.layers.last?.identifier != dotLayerID {
+        if raiseLayers, style.layers.last?.identifier != dotLayerID {
             for id in [haloLayerID, pulseLayerID, dotLayerID] {
                 if let layer = style.layer(withIdentifier: id) {
                     style.removeLayer(layer)

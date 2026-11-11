@@ -271,11 +271,6 @@ struct Units: Equatable {
         return "\(precipitationNumber(millimetersPerHour)) \(precipitation.rateSymbol)"
     }
 
-    func snowString(_ centimeters: Double?) -> String {
-        guard let centimeters else { return "–" }
-        return "\(number(precipitation.snow(fromCentimeters: centimeters), digits: precipitation.fractionDigits)) \(precipitation.snowSymbol)"
-    }
-
     func pressureNumber(_ hectopascals: Double) -> String {
         number(pressure.value(fromHectopascals: hectopascals), digits: pressure.fractionDigits)
     }

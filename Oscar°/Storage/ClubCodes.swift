@@ -110,15 +110,29 @@ final class ClubRewardStore {
     }
 
     private init() {
-        let decoder = JSONDecoder()
-        for data in [AppGroup.defaults.data(forKey: Self.key), cloud.data(forKey: Self.key)].compactMap({ $0 }) {
-            let stored = (try? decoder.decode([String: ClubReward].self, from: data)) ?? [:]
-            redeemed.merge(stored) { mine, _ in mine }
+        merge(AppGroup.defaults.data(forKey: Self.key))
+        mergeCloud()
+        NotificationCenter.default.addObserver(
+            forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
+            object: cloud,
+            queue: .main
+        ) { _ in
+            Task { @MainActor in ClubRewardStore.shared.mergeCloud() }
         }
+    }
+
+    private func mergeCloud() {
+        merge(cloud.data(forKey: Self.key))
+    }
+
+    private func merge(_ data: Data?) {
+        guard let data, let stored = try? JSONDecoder().decode([String: ClubReward].self, from: data) else { return }
+        redeemed.merge(stored) { mine, _ in mine }
     }
 
     func redeem(_ code: String) async throws -> ClubReward {
         let result = try await Task.detached(priority: .userInitiated) { try ClubCodes.open(code) }.value
+        mergeCloud()
         var reward = result.reward
         reward.redeemedAt = redeemed[result.id]?.redeemedAt ?? .now
         guard redeemed[result.id] != reward else { throw ClubCodes.Failure.alreadyRedeemed }

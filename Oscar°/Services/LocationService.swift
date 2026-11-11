@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreLocation
-import Combine
 import SwiftUI
 import OSLog
 #if os(watchOS)

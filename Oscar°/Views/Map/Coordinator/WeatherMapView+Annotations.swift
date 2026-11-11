@@ -23,9 +23,9 @@ extension WeatherMapView.Coordinator {
         syncUserLocationDot(style: style)
     }
 
-    func syncUserLocationDot(style: MLNStyle) {
+    func syncUserLocationDot(style: MLNStyle, raiseLayers: Bool = true) {
         guard !isTornDown else { return }
-        UserLocationDot.sync(style: style, coordinate: mapView?.userLocation?.coordinate)
+        UserLocationDot.sync(style: style, coordinate: mapView?.userLocation?.coordinate, raiseLayers: raiseLayers)
 
         let wantsPulse = !UIAccessibility.isReduceMotionEnabled
         if wantsPulse, userDotPulseTimer == nil {
@@ -52,12 +52,8 @@ extension WeatherMapView.Coordinator {
 
         guard let selectedCity else {
             if selectedCityMarkerIdentity != nil {
-                if let layer = style.layer(withIdentifier: Self.cityMarkerLayerID) {
-                    style.removeLayer(layer)
-                }
-                if let source = style.source(withIdentifier: Self.cityMarkerSourceID) {
-                    style.removeSource(source)
-                }
+                style.removeLayers(withIdentifiers: [Self.cityMarkerLayerID])
+                style.removeSources(withIdentifiers: [Self.cityMarkerSourceID])
                 selectedCityMarkerIdentity = nil
             }
             return
@@ -85,9 +81,14 @@ extension WeatherMapView.Coordinator {
             style.addLayer(layer)
             selectedCityMarkerIdentity = "\(selectedCity.lat)|\(selectedCity.lon)"
         }
+    }
 
-        if style.layers.last?.identifier != Self.cityMarkerLayerID,
-           let layer = style.layer(withIdentifier: Self.cityMarkerLayerID) {
+    func raiseTopLayers(style: MLNStyle) {
+        let ids = [UserLocationDot.haloLayerID, UserLocationDot.pulseLayerID, UserLocationDot.dotLayerID,
+                   Self.cityChipLayerID, Self.cityMarkerLayerID]
+        let layers = ids.compactMap { style.layer(withIdentifier: $0) }
+        guard style.layers.suffix(layers.count).map(\.identifier) != layers.map(\.identifier) else { return }
+        for layer in layers {
             style.removeLayer(layer)
             style.addLayer(layer)
         }

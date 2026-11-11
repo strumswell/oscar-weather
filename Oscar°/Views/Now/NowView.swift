@@ -36,23 +36,13 @@ struct NowView: View {
         weather.isLoading && weather.hasContent && !manualRefreshInFlight && scenePhase == .active
     }
 
-    private var arrangement: SectionArrangement {
-        settingsService.arrangement(for: LayoutForm.of(stageSize ?? .zero))
-    }
-
-    private var sections: [NowSection] {
-        isTwoColumn ? stageSections + feedSections : arrangement.pageSections
-    }
-
-    private var firstPageCount: Int { sections.first == .radar ? 2 : 1 }
-
     private var isTwoColumn: Bool { presentation.forecastIsWide }
 
-    private var stageSections: [NowSection] { arrangement.stageSections }
-
-    private var feedSections: [NowSection] { arrangement.feedSections }
-
     var body: some View {
+        let arrangement = settingsService.arrangement(for: LayoutForm.of(stageSize ?? .zero))
+        let stageSections = arrangement.stageSections
+        let feedSections = arrangement.feedSections
+        let sections = isTwoColumn ? stageSections + feedSections : arrangement.pageSections
         let atmosphere = weather.forecast.hourly != nil
             ? snapshotCache.snapshot(from: weather, at: location.coordinates)
             : .twilight
@@ -65,14 +55,14 @@ struct NowView: View {
                 Group {
                     if isTwoColumn {
                         HStack(spacing: 0) {
-                            forecastScroll { stage }
+                            forecastScroll { stage(stageSections) }
                                 .scrollBounceBehavior(.basedOnSize)
                                 .frame(maxWidth: WideForecast.maxColumnWidth)
-                            forecastScroll { feed }
+                            forecastScroll { feed(feedSections, allSections: sections) }
                                 .frame(maxWidth: WideForecast.maxColumnWidth)
                         }
                     } else {
-                        forecastScroll { page }
+                        forecastScroll { page(sections) }
                             .padding(.top, Self.scrollTopPadding)
                     }
                 }
@@ -119,8 +109,9 @@ struct NowView: View {
         }
     }
 
-    private var page: some View {
-        VStack(alignment: .leading, spacing: 0) {
+    private func page(_ sections: [NowSection]) -> some View {
+        let firstPageCount = sections.first == .radar ? 2 : 1
+        return VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
                 refreshIndicator
                 HeadView()
@@ -131,13 +122,13 @@ struct NowView: View {
             }
             .frame(minHeight: firstPageMinHeight, alignment: .topLeading)
             sectionList(sections.dropFirst(firstPageCount))
-            pageEnd
+            pageEnd(sections)
         }
         .animation(.easeInOut(duration: 0.3), value: showRefreshIndicator)
         .animation(.snappy, value: sections)
     }
 
-    private var stage: some View {
+    private func stage(_ stageSections: [NowSection]) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HeadView(compact: true)
                 .fixedSize(horizontal: false, vertical: true)
@@ -150,11 +141,11 @@ struct NowView: View {
         .animation(.snappy, value: stageSections)
     }
 
-    private var feed: some View {
+    private func feed(_ feedSections: [NowSection], allSections: [NowSection]) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             refreshIndicator
             sectionList(feedSections[...], isWide: true)
-            pageEnd
+            pageEnd(allSections)
         }
         .animation(.easeInOut(duration: 0.3), value: showRefreshIndicator)
         .animation(.snappy, value: feedSections)
@@ -173,7 +164,7 @@ struct NowView: View {
     }
 
     @ViewBuilder
-    private var pageEnd: some View {
+    private func pageEnd(_ sections: [NowSection]) -> some View {
         if sections.isEmpty {
             Button("Abschnitte hinzufügen", systemImage: "plus") {
                 Haptics.impact()

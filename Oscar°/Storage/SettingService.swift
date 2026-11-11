@@ -1,16 +1,11 @@
 import CoreData
 import SwiftUI
-import OSLog
 import WidgetKit
 
 @MainActor
 @Observable
 final class SettingService {
     static let shared = SettingService()
-    private static let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Oscar",
-        category: "Storage"
-    )
     var temperatureUnit: TemperatureUnit {
         didSet { unitDidChange(key: Self.temperatureUnitKey, value: temperatureUnit.rawValue) }
     }

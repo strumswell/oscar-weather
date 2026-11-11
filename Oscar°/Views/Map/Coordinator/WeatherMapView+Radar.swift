@@ -95,19 +95,28 @@ extension WeatherMapView.Coordinator {
         let textureB = next.flatMap { layer.texture(for: $0) }
         var flowFieldIndex: Int?
         var flowScale: Float = 0
-        if let motion, let next {
-            let pair = motion.pairs["\(frame.key)|\(next.key)"] ?? motion.pairsByFrom[frame.key]
-            if let pair,
-               let gap = OscarRadarState.minutesBetween(frame.timestamp, next.timestamp),
-               gap > 0, gap <= 60 {
-                flowFieldIndex = pair.fieldIndex
-                flowScale = Float(gap) / Float(motion.stepMinutes)
-            }
+        if let motion, let next,
+           let flow = flowField(motion: motion, from: frame.key, to: next.key,
+                                fromTimestamp: frame.timestamp, toTimestamp: next.timestamp) {
+            flowFieldIndex = flow.index
+            flowScale = flow.scale
         }
         layer.display(frameA: textureA, frameB: textureB,
                       flowFieldIndex: flowFieldIndex, flowScale: flowScale)
         lastFrameKey = frame.key
         lastRenderIndex = renderedIndex
+    }
+
+    func flowField(motion: RadarMotionData, from: String, to: String,
+                   fromTimestamp: @autoclosure () -> String?,
+                   toTimestamp: @autoclosure () -> String?) -> (index: Int, scale: Float)? {
+        let pair = motion.pairs["\(from)|\(to)"] ?? motion.pairsByFrom[from]
+        guard let pair,
+              let fromTime = fromTimestamp(),
+              let toTime = toTimestamp(),
+              let gap = OscarRadarState.minutesBetween(fromTime, toTime),
+              gap > 0, gap <= 60 else { return nil }
+        return (pair.fieldIndex, Float(gap) / Float(motion.stepMinutes))
     }
 
     private static let arrowSourceIdentifier = "oscar-motion-arrows"
@@ -154,8 +163,8 @@ extension WeatherMapView.Coordinator {
 
     private func removeArrowLayer(from style: MLNStyle) {
         guard arrowSourceID != nil else { return }
-        if let layer = style.layer(withIdentifier: Self.arrowSourceIdentifier) { style.removeLayer(layer) }
-        if let source = style.source(withIdentifier: Self.arrowSourceIdentifier) { style.removeSource(source) }
+        style.removeLayers(withIdentifiers: [Self.arrowSourceIdentifier])
+        style.removeSources(withIdentifiers: [Self.arrowSourceIdentifier])
         arrowSourceID = nil
     }
 }

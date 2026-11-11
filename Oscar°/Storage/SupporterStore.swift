@@ -2,7 +2,7 @@
 //  SupporterStore.swift
 //  Oscar°
 //
-//  "Has ever paid" flag that unlocks cosmetics. StoreKit's transaction history
+//  "Paid and not refunded" flag that unlocks cosmetics. StoreKit's transaction history
 //  is the cross-device source of truth (per Apple ID); the flag is cached
 //  locally so cosmetics unlock offline and before the first history fetch.
 //
@@ -36,14 +36,37 @@ final class SupporterStore {
         Task {
             for await result in Transaction.updates {
                 guard case .verified(let transaction) = result else { continue }
-                markSupporter(since: transaction.originalPurchaseDate)
+                if transaction.revocationDate == nil {
+                    markSupporter(since: transaction.originalPurchaseDate)
+                } else {
+                    await refresh()
+                }
                 await transaction.finish()
             }
         }
+        await refresh()
+    }
+
+    private func refresh() async {
+        var sawValid = false
+        var sawRevoked = false
         for await result in Transaction.all {
             guard case .verified(let transaction) = result else { continue }
-            markSupporter(since: transaction.originalPurchaseDate)
+            if transaction.revocationDate == nil {
+                sawValid = true
+                markSupporter(since: transaction.originalPurchaseDate)
+            } else {
+                sawRevoked = true
+            }
         }
+        if sawRevoked && !sawValid { revokeSupporter() }
+    }
+
+    private func revokeSupporter() {
+        isSupporter = false
+        AppGroup.defaults.set(false, forKey: Self.key)
+        UsageStatsStore.shared.record { $0.supporterSince = nil }
+        UsageStatsStore.shared.flush()
     }
 
     func markSupporter(since: Date) {

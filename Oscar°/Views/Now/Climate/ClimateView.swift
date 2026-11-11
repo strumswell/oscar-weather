@@ -16,7 +16,7 @@ struct ClimateView: View {
     }
 
     private var loadIdentity: String {
-        let coords = String(format: "%.2f,%.2f", latitude, longitude)
+        let coords = ClimateArchiveStore.locationKey(latitude: latitude, longitude: longitude)
         let day = Calendar.current.dateComponents([.year, .month, .day], from: .now)
         let high = todayHighCelsius.map { String(Int($0.rounded())) } ?? "nil"
         return "\(coords)|\(day.year ?? 0)-\(day.month ?? 0)-\(day.day ?? 0)|\(high)"

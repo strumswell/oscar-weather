@@ -146,13 +146,6 @@ actor CacheStore {
     return (metadata.timestamp, response, data)
   }
   
-  func clearCache() {
-    cache.removeAll()
-    try? fileManager.removeItem(at: cacheDirectory)
-    try? fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
-    Self.logger.debug("Cache cleared")
-  }
-  
   private func cleanOldEntries() {
     let now = Date()
     let oldKeys = cache.compactMap { (key, value) in
@@ -243,10 +236,6 @@ nonisolated final class CachingMiddleware: ClientMiddleware {
     self.cacheTime = cacheTime
     self.cacheStore = cacheStore
   }
-  
-  func clearCache() async {
-    await cacheStore.clearCache()
-  }
 
   private func cacheKey(for request: HTTPRequest, baseURL: URL) -> String {
     return "\(request.method.rawValue) \(canonicalURL(for: request, baseURL: baseURL))"
@@ -314,14 +303,10 @@ nonisolated final class CachingMiddleware: ClientMiddleware {
       let (response, responseBody) = try await next(request, body, baseURL)
 
       if (200...299).contains(response.status.code), let responseBody = responseBody {
-        do {
-          let data = try await Data(collecting: responseBody, upTo: 10 * 1024 * 1024)
-          await cacheStore.set(key, value: (Date(), response, data))
-          Self.logger.debug("Create cache for \(baseURL, privacy: .public)")
-          return (response, HTTPBody(data))
-        } catch {
-          throw error
-        }
+        let data = try await Data(collecting: responseBody, upTo: 10 * 1024 * 1024)
+        await cacheStore.set(key, value: (Date(), response, data))
+        Self.logger.debug("Create cache for \(baseURL, privacy: .public)")
+        return (response, HTTPBody(data))
       }
 
       if response.status.code == 429 || response.status.code >= 500,

@@ -70,13 +70,13 @@ struct ClassicMapChrome: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, 14)
                         .frame(height: 34)
-                        .background(classicBarButton(top: Color(red: 0.45, green: 0.62, blue: 0.9), bottom: Color(red: 0.1, green: 0.35, blue: 0.8)))
+                        .background(classicDoneButton())
                 }
             }
         }
         .padding(.horizontal, 10)
         .frame(height: 48)
-        .background(barGradient.ignoresSafeArea(edges: .top))
+        .background(classicBarGradient().ignoresSafeArea(edges: .top))
     }
 
     private var toolbar: some View {
@@ -107,7 +107,7 @@ struct ClassicMapChrome: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .background(barGradient.ignoresSafeArea(edges: .bottom))
+        .background(classicBarGradient().ignoresSafeArea(edges: .bottom))
     }
 
     private var timeSlider: some View {
@@ -131,17 +131,13 @@ struct ClassicMapChrome: View {
         }
     }
 
-    private var barGradient: some View {
-        LinearGradient(colors: [Color(white: 0.32), Color(white: 0.12)], startPoint: .top, endPoint: .bottom)
-    }
-
     private func barButton(symbol: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
                 .font(.system(size: 17, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 44, height: 34)
-                .background(classicBarButton(top: Color(white: 0.3), bottom: Color(white: 0.05)))
+                .background(classicDarkBarButton())
         }
     }
 
@@ -155,11 +151,7 @@ struct ClassicMapChrome: View {
                 .foregroundStyle(selected ? .white : Color(white: 0.3))
                 .padding(.horizontal, 12)
                 .frame(height: 34)
-                .background(
-                    selected
-                        ? LinearGradient(colors: [Color(red: 0.55, green: 0.7, blue: 0.95), Color(red: 0.2, green: 0.45, blue: 0.9)], startPoint: .top, endPoint: .bottom)
-                        : LinearGradient(colors: [Color(white: 0.98), Color(white: 0.85)], startPoint: .top, endPoint: .bottom)
-                )
+                .background(classicSegmentFill(selected: selected))
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])

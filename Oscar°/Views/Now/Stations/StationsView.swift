@@ -163,6 +163,6 @@ extension Weather {
 }
 
 func stationSubtitle(_ station: Components.Schemas.NearbyStation, timeZone: TimeZone, units: Units) -> String {
-    let time = station.last_report_at.formatted(Date.FormatStyle(date: .omitted, time: .shortened, timeZone: timeZone))
+    let time = SettingService.formattedTime(station.last_report_at, timeZone: timeZone)
     return "\(units.distanceString(station.distance_km)) \(compassDirection(station.bearing_deg)) · \(time)"
 }

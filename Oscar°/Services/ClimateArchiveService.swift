@@ -174,7 +174,7 @@ actor ClimateArchiveStore {
         cacheDirectory.appendingPathComponent("\(key.sha256Hex).json")
     }
 
-    private static func locationKey(latitude: Double, longitude: Double) -> String {
+    static func locationKey(latitude: Double, longitude: Double) -> String {
         String(format: "%.2f,%.2f", latitude, longitude)
     }
 

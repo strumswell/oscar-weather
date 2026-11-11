@@ -21,6 +21,5 @@ extension Color {
     static let midnightStart = Color(hue: 0.66, saturation: 0.8, brightness: 0.1)
     static let midnightEnd = Color(hue: 0.62, saturation: 0.5, brightness: 0.33)
     static let sunriseStart = Color(hue: 0.62, saturation: 0.6, brightness: 0.42)
-    static let sunnyDayStart = Color(hue: 0.6, saturation: 0.6, brightness: 0.6)
     static let sunnyDayEnd = Color(hue: 0.6, saturation: 0.4, brightness: 0.85)
 }

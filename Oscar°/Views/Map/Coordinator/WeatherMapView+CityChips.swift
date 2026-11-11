@@ -10,7 +10,7 @@ import UIKit
 
 extension WeatherMapView.Coordinator {
     private static let cityChipSourceID = "oscar-city-chips"
-    private static let cityChipLayerID = "oscar-city-chips-layer"
+    static let cityChipLayerID = "oscar-city-chips-layer"
 
     func syncCityChips(style: MLNStyle) {
         let store = CityConditionsStore.shared
@@ -58,11 +58,6 @@ extension WeatherMapView.Coordinator {
         }
 
         ensureCityChipLayer(in: style)
-        if style.layers.last?.identifier != Self.cityChipLayerID,
-           let layer = style.layer(withIdentifier: Self.cityChipLayerID) {
-            style.removeLayer(layer)
-            style.addLayer(layer)
-        }
 
         guard signature != cityChipSignature else { return }
         cityChipSignature = signature

@@ -30,9 +30,7 @@ final class HomeProvider: TimelineProvider, Sendable {
     }
 
     func getSnapshot(in context: Context, completion: @escaping @Sendable (HomeEntry) -> ()) {
-        let placeholderGradient = LinearGradient(colors: [.sunriseStart, .sunnyDayEnd], startPoint: .top, endPoint: .bottom)
-        let entry = HomeEntry(date: Date(), location: "Berlin", temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", backgroundGradient: placeholderGradient)
-        completion(entry)
+        completion(placeholder(in: context))
     }
     
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<HomeEntry>) -> ()) {

@@ -19,12 +19,7 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
     case ecmwfWind = "ecmwf_wind"
     case ecmwfPressure = "ecmwf_pressure"
 
-    var framesEndpoint: String {
-        switch self {
-        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "models/icon/frames"
-        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: return "models/ecmwf/frames"
-        }
-    }
+    var framesEndpoint: String { isGlobalModel ? "models/ecmwf/frames" : "models/icon/frames" }
 
     var variableSegment: String {
         switch self {
@@ -44,12 +39,7 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
         }
     }
 
-    var sourceLabel: String {
-        switch self {
-        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "DWD ICON-D2"
-        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: return "ECMWF IFS"
-        }
-    }
+    var sourceLabel: String { isGlobalModel ? "ECMWF IFS" : "DWD ICON-D2" }
 
     var colormapId: String {
         switch self {
@@ -60,12 +50,7 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
         }
     }
 
-    var shortSourceLabel: String {
-        switch self {
-        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: return "ICON-D2"
-        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: return "ECMWF"
-        }
-    }
+    var shortSourceLabel: String { isGlobalModel ? "ECMWF" : "ICON-D2" }
 
     var horizonHours: Int { isGlobalModel ? 84 : 36 }
 
@@ -73,19 +58,14 @@ enum WeatherTileLayer: String, CaseIterable, Hashable {
         switch self {
         case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure:
             true
-        default:
+        case .iconPrecip, .iconTemp, .iconWind, .iconPressure:
             false
         }
     }
 }
 
 extension WeatherTileLayer {
-    var windFieldPrefix: String {
-        switch self {
-        case .iconPrecip, .iconTemp, .iconWind, .iconPressure: "icon"
-        case .ecmwfPrecip, .ecmwfTemp, .ecmwfWind, .ecmwfPressure: "ecmwf"
-        }
-    }
+    var windFieldPrefix: String { isGlobalModel ? "ecmwf" : "icon" }
 
     var windFieldSamples: Int { isGlobalModel ? 24 : 32 }
 }

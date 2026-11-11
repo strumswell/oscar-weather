@@ -47,7 +47,7 @@ struct WatchSimulationView: View {
         let pacing: SimulationPacing = isStill ? .still : .background
         let stormPacing: SimulationPacing = isStill ? .still : .active
         let moonPhase = MoonPhase.phaseFraction()
-        let cloudsVisible = snapshot.cloudDensity + snapshot.cloudCoverage > 0.02
+        let cloudsVisible = snapshot.showsClouds
 
         return GeometryReader { proxy in
             ZStack {
@@ -64,8 +64,7 @@ struct WatchSimulationView: View {
                         * Float(sin(.pi * $0))
                 } ?? 0
 
-                let starOpacity = Double(snapshot.nightAmount)
-                    * Double(1 - snapshot.cloudCoverage * 0.85)
+                let starOpacity = snapshot.starOpacity
                 if starOpacity > 0.02 {
                     StarsView(
                         pacing: pacing,
@@ -99,7 +98,7 @@ struct WatchSimulationView: View {
 
                 if snapshot.showsSunDisc {
                     SunView(progress: Double(snapshot.timeOfDay))
-                        .opacity(Double((1 - snapshot.cloudDensity * 0.45) * snapshot.phase * snapshot.sunDiscVisibility))
+                        .opacity(snapshot.sunDiscOpacity)
                 }
 
                 if cloudsVisible {

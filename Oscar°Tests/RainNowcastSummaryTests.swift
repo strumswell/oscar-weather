@@ -27,27 +27,17 @@ struct RainNowcastSummaryTests {
     func rainEndingSoonNamesTheRemainingMinutes() {
         let points = [point(minutes: 0, rain: 1.2), point(minutes: 5, rain: 0.8), point(minutes: 10, rain: 0)]
         let headline = RainNowcastSummary.headline(for: points, now: now)
-        #expect(headline.contains("10"))
+        let minutes = 10
+        #expect(headline == String(localized: "Regen · noch ~\(minutes) min"))
     }
 
     @Test
     func dryWindowAndLaterRainDiffer() {
         let dry = RainNowcastSummary.headline(for: [point(minutes: 0, rain: 0), point(minutes: 5, rain: 0)], now: now)
         let later = RainNowcastSummary.headline(for: [point(minutes: 0, rain: 0), point(minutes: 15, rain: 0.6)], now: now)
-        #expect(!dry.isEmpty)
+        let start = SettingService.formattedTime(now.addingTimeInterval(15 * 60))
+        #expect(dry == String(localized: "Kein Regen in Sicht"))
+        #expect(later == String(localized: "Regen ab \(start)"))
         #expect(dry != later)
-    }
-}
-
-struct SyntheticRadarTests {
-    @Test
-    func fastGridMatchesPerPixelSampling() {
-        for minutes in [0.0, 45, 120] {
-            let slow = SyntheticRadar.valueGrid(minutes: minutes) { lat, lon, t in
-                let v = SyntheticRadar.intensity(lat: lat, lon: lon, minutes: t)
-                return v >= 0.02 ? UInt8(1 + min(219, v * 219)) : 0
-            }
-            #expect(SyntheticRadar.radarGrid(minutes: minutes) == slow)
-        }
     }
 }

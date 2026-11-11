@@ -61,7 +61,6 @@ struct HourlyLensLayout {
     let lines: [Line]
     let domain: ClosedRange<Double>
     let showsBars: Bool
-    let barsAlpha: Double
     let extremes: [HourlyTimelineModel.ExtremeMark]
     let extremeFormat: (Double) -> String
     let primaryColor: Color

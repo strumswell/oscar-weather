@@ -48,7 +48,7 @@ struct ClassicCardBack: View {
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: 46, height: 36)
-                    .background(classicBarButton(top: Color(white: 0.3), bottom: Color(white: 0.05)))
+                    .background(classicDarkBarButton())
             }
             .accessibilityLabel(Text("Ort hinzufügen"))
             Spacer()
@@ -63,7 +63,7 @@ struct ClassicCardBack: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 14)
                     .frame(height: 36)
-                    .background(classicBarButton(top: Color(red: 0.45, green: 0.62, blue: 0.9), bottom: Color(red: 0.1, green: 0.35, blue: 0.8)))
+                    .background(classicDoneButton())
             }
         }
         .frame(height: 48)
@@ -116,11 +116,7 @@ struct ClassicCardBack: View {
                 .font(.custom("HelveticaNeue-Bold", fixedSize: 22))
                 .foregroundStyle(selected ? .white : Color(white: 0.45))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(
-                    selected
-                        ? LinearGradient(colors: [Color(red: 0.55, green: 0.7, blue: 0.95), Color(red: 0.2, green: 0.45, blue: 0.9)], startPoint: .top, endPoint: .bottom)
-                        : LinearGradient(colors: [Color(white: 0.98), Color(white: 0.85)], startPoint: .top, endPoint: .bottom)
-                )
+                .background(classicSegmentFill(selected: selected))
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -147,4 +143,22 @@ func classicBarButton(top: Color, bottom: Color) -> some View {
     RoundedRectangle(cornerRadius: 7)
         .fill(LinearGradient(colors: [top, bottom], startPoint: .top, endPoint: .bottom))
         .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(.white.opacity(0.25), lineWidth: 1))
+}
+
+func classicDoneButton() -> some View {
+    classicBarButton(top: Color(red: 0.45, green: 0.62, blue: 0.9), bottom: Color(red: 0.1, green: 0.35, blue: 0.8))
+}
+
+func classicDarkBarButton() -> some View {
+    classicBarButton(top: Color(white: 0.3), bottom: Color(white: 0.05))
+}
+
+func classicSegmentFill(selected: Bool) -> LinearGradient {
+    selected
+        ? LinearGradient(colors: [Color(red: 0.55, green: 0.7, blue: 0.95), Color(red: 0.2, green: 0.45, blue: 0.9)], startPoint: .top, endPoint: .bottom)
+        : LinearGradient(colors: [Color(white: 0.98), Color(white: 0.85)], startPoint: .top, endPoint: .bottom)
+}
+
+func classicBarGradient() -> LinearGradient {
+    LinearGradient(colors: [Color(white: 0.32), Color(white: 0.12)], startPoint: .top, endPoint: .bottom)
 }

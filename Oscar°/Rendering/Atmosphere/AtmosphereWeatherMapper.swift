@@ -30,8 +30,8 @@ enum AtmosphereWeatherMapper {
         let weatherCode = Int(weather.forecast.current?.weathercode
             ?? value(at: hourlyIndex, in: weather.forecast.hourly?.weathercode)
             ?? 0)
-        var condition = conditionFamily(for: weatherCode)
-        var cloudCoverage = normalized(
+        let condition = conditionFamily(for: weatherCode)
+        let cloudCoverage = normalized(
             Float(weather.forecast.current?.cloudcover
                   ?? value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover)
                   ?? 0),
@@ -45,7 +45,7 @@ enum AtmosphereWeatherMapper {
         let lowCover: Double = current?.cloudcover_low ?? value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover_low) ?? 0
         let midCover: Double = current?.cloudcover_mid ?? value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover_mid) ?? 0
         let highCover: Double = current?.cloudcover_high ?? value(at: hourlyIndex, in: weather.forecast.hourly?.cloudcover_high) ?? 0
-        var deck = CloudDeck(
+        let deck = CloudDeck(
             low: normalized(Float(lowCover), max: 100),
             mid: normalized(Float(midCover), max: 100),
             high: normalized(Float(highCover), max: 100)
@@ -54,16 +54,7 @@ enum AtmosphereWeatherMapper {
         let modelPrecipitation = Float(value(at: accumulationIndex, in: weather.forecast.hourly?.precipitation)
             ?? weather.forecast.current?.precipitation
             ?? 0)
-        let precipitation = radarRate ?? modelPrecipitation
-        let snowfall = radarRate.map { $0 * 0.7 }
-            ?? Float(value(at: accumulationIndex, in: weather.forecast.hourly?.snowfall) ?? 0)
-        let precipitationIntensity = radarRate.map { clamp($0 / 6, 0, 1) }
-            ?? clamp(modelPrecipitation / 8, 0, 1)
-        if let radarRate, radarRate >= 0.1, condition == .clear || condition == .partlyCloudy || condition == .overcast {
-            condition = .rain
-            cloudCoverage = max(cloudCoverage, clamp(0.55 + precipitationIntensity * 0.45, 0, 1))
-        }
-        reconcile(&deck, total: cloudCoverage, condition: condition)
+        let modelSnowfall = Float(value(at: accumulationIndex, in: weather.forecast.hourly?.snowfall) ?? 0)
         let windSpeed = Float(weather.forecast.current?.windspeed
             ?? value(at: hourlyIndex, in: weather.forecast.hourly?.windspeed_10m)
             ?? 0)
@@ -71,7 +62,7 @@ enum AtmosphereWeatherMapper {
             ?? value(at: hourlyIndex, in: weather.forecast.hourly?.winddirection_10m)
             ?? 0) * .pi / 180
 
-        return finalize(
+        return precipitationAdjusted(
             utcOffsetSeconds: weather.forecast.utc_offset_seconds ?? 0,
             aqiHaze: airQualityHaze(weather: weather, timestamp: currentTimestamp),
             location: location,
@@ -79,12 +70,12 @@ enum AtmosphereWeatherMapper {
             condition: condition,
             cloudCoverage: cloudCoverage,
             humidity: humidity,
-            precipitation: precipitation,
-            snowfall: snowfall,
-            precipitationIntensity: precipitationIntensity,
+            deck: deck,
+            radarRate: radarRate,
+            modelPrecipitation: modelPrecipitation,
+            modelSnowfall: modelSnowfall,
             windSpeed: windSpeed,
-            windDirection: windDirection,
-            deck: deck
+            windDirection: windDirection
         )
     }
 
@@ -102,8 +93,8 @@ enum AtmosphereWeatherMapper {
 
         let nearest = nearestIndex(to: timestamp, in: times)
         let weatherCode = Int(value(at: nearest, in: hourly?.weathercode) ?? 0)
-        var condition = conditionFamily(for: weatherCode)
-        var cloudCoverage = normalized(
+        let condition = conditionFamily(for: weatherCode)
+        let cloudCoverage = normalized(
             Float(interpolatedValue(at: timestamp, times: times, values: hourly?.cloudcover) ?? 0),
             max: 100
         )
@@ -114,7 +105,7 @@ enum AtmosphereWeatherMapper {
         let lowCover: Double = interpolatedValue(at: timestamp, times: times, values: hourly?.cloudcover_low) ?? 0
         let midCover: Double = interpolatedValue(at: timestamp, times: times, values: hourly?.cloudcover_mid) ?? 0
         let highCover: Double = interpolatedValue(at: timestamp, times: times, values: hourly?.cloudcover_high) ?? 0
-        var deck = CloudDeck(
+        let deck = CloudDeck(
             low: normalized(Float(lowCover), max: 100),
             mid: normalized(Float(midCover), max: 100),
             high: normalized(Float(highCover), max: 100)
@@ -122,9 +113,47 @@ enum AtmosphereWeatherMapper {
 
         let radarRate = radarRate(from: weather.precipSeries, at: timestamp)
         let modelPrecipitation = Float(interpolatedValue(at: timestamp, times: times, values: hourly?.precipitation) ?? 0)
+        let modelSnowfall = Float(interpolatedValue(at: timestamp, times: times, values: hourly?.snowfall) ?? 0)
+        let windSpeed = Float(interpolatedValue(at: timestamp, times: times, values: hourly?.windspeed_10m) ?? 0)
+        let windDirection = Float(value(at: nearest, in: hourly?.winddirection_10m) ?? 0) * .pi / 180
+
+        return precipitationAdjusted(
+            utcOffsetSeconds: weather.forecast.utc_offset_seconds ?? 0,
+            aqiHaze: airQualityHaze(weather: weather, timestamp: timestamp),
+            location: location,
+            timestamp: timestamp,
+            condition: condition,
+            cloudCoverage: cloudCoverage,
+            humidity: humidity,
+            deck: deck,
+            radarRate: radarRate,
+            modelPrecipitation: modelPrecipitation,
+            modelSnowfall: modelSnowfall,
+            windSpeed: windSpeed,
+            windDirection: windDirection
+        )
+    }
+
+    private static func precipitationAdjusted(
+        utcOffsetSeconds: Int,
+        aqiHaze: Float,
+        location: CLLocationCoordinate2D,
+        timestamp: Double,
+        condition: AtmosphereConditionFamily,
+        cloudCoverage: Float,
+        humidity: Float,
+        deck: CloudDeck,
+        radarRate: Float?,
+        modelPrecipitation: Float,
+        modelSnowfall: Float,
+        windSpeed: Float,
+        windDirection: Float
+    ) -> AtmosphereSnapshot {
+        var condition = condition
+        var cloudCoverage = cloudCoverage
+        var deck = deck
         let precipitation = radarRate ?? modelPrecipitation
-        let snowfall = radarRate.map { $0 * 0.7 }
-            ?? Float(interpolatedValue(at: timestamp, times: times, values: hourly?.snowfall) ?? 0)
+        let snowfall = radarRate.map { $0 * 0.7 } ?? modelSnowfall
         let precipitationIntensity = radarRate.map { clamp($0 / 6, 0, 1) }
             ?? clamp(modelPrecipitation / 8, 0, 1)
         if let radarRate, radarRate >= 0.1, condition == .clear || condition == .partlyCloudy || condition == .overcast {
@@ -132,12 +161,10 @@ enum AtmosphereWeatherMapper {
             cloudCoverage = max(cloudCoverage, clamp(0.55 + precipitationIntensity * 0.45, 0, 1))
         }
         reconcile(&deck, total: cloudCoverage, condition: condition)
-        let windSpeed = Float(interpolatedValue(at: timestamp, times: times, values: hourly?.windspeed_10m) ?? 0)
-        let windDirection = Float(value(at: nearest, in: hourly?.winddirection_10m) ?? 0) * .pi / 180
 
         return finalize(
-            utcOffsetSeconds: weather.forecast.utc_offset_seconds ?? 0,
-            aqiHaze: airQualityHaze(weather: weather, timestamp: timestamp),
+            utcOffsetSeconds: utcOffsetSeconds,
+            aqiHaze: aqiHaze,
             location: location,
             timestamp: timestamp,
             condition: condition,

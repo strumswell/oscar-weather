@@ -15,6 +15,7 @@ struct EnvironmentAirQualitySectionView: View {
     let so2: [Double]
     let maxTimeRange: ClosedRange<Date>
     let referenceDate: Date
+    let timeZone: TimeZone
     let initialChartScrollPosition: Date
     let chartScrollSynchronizer: ChartScrollSynchronizer
     let chartTimelineVersion: Int
@@ -26,15 +27,15 @@ struct EnvironmentAirQualitySectionView: View {
                     title: "Luftqualität",
                     value: currentAQI.map { String(Int($0)) } ?? "--",
                     badge: currentAQIBadge,
-                    color: currentAQIColor,
-                    subtitle: nil
+                    color: currentAQIColor
                 )
 
                 AQIChart(
                     points: AQIDataPoint.points(time: time, aqi: aqi, pm25: pm25, pm10: pm10, no2: no2, o3: o3, so2: so2),
                     time: time,
                     maxTimeRange: maxTimeRange,
-                    referenceDate: referenceDate
+                    referenceDate: referenceDate,
+                    timeZone: timeZone
                 )
                 .synchronizedChartScroll(
                     initialX: initialChartScrollPosition,

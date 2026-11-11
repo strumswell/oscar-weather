@@ -79,16 +79,12 @@ extension WeatherMapView.Coordinator {
         let textureB = next.flatMap { layer.texture(key: $0.key, payload: $0.payload) }
         var flowFieldIndex: Int?
         var flowScale: Float = 0
-        if selection.morphsAlongMotion, let motion, let next {
-            let pair = motion.pairs["\(frameKey)|\(next.key)"] ?? motion.pairsByFrom[frameKey]
-            if let pair,
-               let from = state.timestamp(forKey: frameKey),
-               let to = state.timestamp(forKey: next.key),
-               let gap = OscarRadarState.minutesBetween(from, to),
-               gap > 0, gap <= 60 {
-                flowFieldIndex = pair.fieldIndex
-                flowScale = Float(gap) / Float(motion.stepMinutes)
-            }
+        if selection.morphsAlongMotion, let motion, let next,
+           let flow = flowField(motion: motion, from: frameKey, to: next.key,
+                                fromTimestamp: state.timestamp(forKey: frameKey),
+                                toTimestamp: state.timestamp(forKey: next.key)) {
+            flowFieldIndex = flow.index
+            flowScale = flow.scale
         }
         layer.display(frameA: textureA, frameB: textureB,
                       flowFieldIndex: flowFieldIndex, flowScale: flowScale)

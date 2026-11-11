@@ -125,6 +125,7 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         instances.allObjects.reduce(0) { $0 + $1.textureBytes }
     }
     @MainActor private static let instances = NSHashTable<RadarCustomStyleLayer>.weakObjects()
+    @MainActor private static var shaderLibrary: (device: MTLDevice, library: MTLLibrary)?
 
     private var motionData: RadarMotionData?
     private var flowTextures: [Int: MTLTexture] = [:]
@@ -187,7 +188,13 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
                 mtkView.depthStencilPixelFormat == .invalid ? .depth32Float_stencil8
                                                             : mtkView.depthStencilPixelFormat
             do {
-                let library = try device.makeLibrary(source: Self.shaderSource, options: nil)
+                let library: MTLLibrary
+                if let cached = Self.shaderLibrary, cached.device === device {
+                    library = cached.library
+                } else {
+                    library = try device.makeLibrary(source: Self.shaderSource, options: nil)
+                    Self.shaderLibrary = (device, library)
+                }
                 let descriptor = MTLRenderPipelineDescriptor()
                 descriptor.label = "oscar-radar-layer"
                 descriptor.vertexFunction = library.makeFunction(name: "radar_style_vs")

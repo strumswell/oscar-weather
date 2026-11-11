@@ -99,9 +99,7 @@ final class NotificationSettingsManager: NSObject {
     func setRainAlertsEnabled(_ enabled: Bool) async -> Bool {
         notificationLogger.info("Lifecycle: setRainAlertsEnabled requested -> \(enabled, privacy: .public)")
         if enabled {
-            let granted = hasNotificationAuthorization ? true : await requestNotificationPermission()
-            await refreshAuthorizationStatus()
-            guard granted || hasNotificationAuthorization else {
+            guard await ensureNotificationAuthorization() else {
                 notificationLogger.info("Lifecycle: rain alerts enable rejected; authorization=\(self.authorizationStatus.debugName, privacy: .public)")
                 setRainAlertsEnabledLocally(false)
                 refreshEnabledState()
@@ -127,9 +125,7 @@ final class NotificationSettingsManager: NSObject {
     func setWeatherAlertsEnabled(_ enabled: Bool) async -> Bool {
         notificationLogger.info("Lifecycle: setWeatherAlertsEnabled requested -> \(enabled, privacy: .public)")
         if enabled {
-            let granted = hasNotificationAuthorization ? true : await requestNotificationPermission()
-            await refreshAuthorizationStatus()
-            guard granted || hasNotificationAuthorization else {
+            guard await ensureNotificationAuthorization() else {
                 notificationLogger.info("Lifecycle: weather alerts enable rejected; authorization=\(self.authorizationStatus.debugName, privacy: .public)")
                 setWeatherAlertsEnabledLocally(false)
                 refreshEnabledState()
@@ -266,6 +262,12 @@ final class NotificationSettingsManager: NSObject {
                 continuation.resume(returning: granted)
             }
         }
+    }
+
+    private func ensureNotificationAuthorization() async -> Bool {
+        let granted = hasNotificationAuthorization ? true : await requestNotificationPermission()
+        await refreshAuthorizationStatus()
+        return granted || hasNotificationAuthorization
     }
 
     private func refreshAuthorizationStatus() async {

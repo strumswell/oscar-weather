@@ -86,10 +86,6 @@ final class ModelGridLayerState {
         frame(at: renderFrameIndex ?? currentFrameIndex)
     }
 
-    var nextFrame: RadarGridPayload? {
-        nextFrameKeyed?.payload
-    }
-
     var nextFrameKeyed: (key: String, payload: RadarGridPayload)? {
         guard let anchor = renderFrameIndex ?? (isSelectedFrameReady ? currentFrameIndex : nil) else { return nil }
         let loaded = frames.map { $0 != nil }

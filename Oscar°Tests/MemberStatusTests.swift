@@ -18,7 +18,7 @@ struct MemberStatusTests {
         plain.testFlightSince = now.addingTimeInterval(-86_400)
         #expect(MemberStatus(stats: plain, isSupporter: false, chosenTitle: nil, now: now).tier == .founder)
         plain.supporterSince = now
-        #expect(MemberStatus(stats: plain, isSupporter: false, chosenTitle: nil, now: now).tier == .founderSupporter)
+        #expect(MemberStatus(stats: plain, isSupporter: true, chosenTitle: nil, now: now).tier == .founderSupporter)
     }
 
     @Test func yearsCountFromEarliestDate() {

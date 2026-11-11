@@ -26,7 +26,7 @@ struct RainTimelineProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping @Sendable (RainTimelineEntry) -> ()) {
-        completion(Self.makeEntry(from: Self.placeholderSeries(), now: Date()))
+        completion(placeholder(in: context))
     }
 
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<RainTimelineEntry>) -> ()) {

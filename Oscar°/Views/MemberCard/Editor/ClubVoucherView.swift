@@ -258,6 +258,7 @@ struct ClubVoucherView: View {
             Haptics.error()
             phase = .invalid
             shake += 1
+            AccessibilityNotification.Announcement(String(localized: "Ungültiger Code")).post()
             return
         }
         phase = .checking
@@ -279,10 +280,12 @@ struct ClubVoucherView: View {
                 Haptics.error()
                 phase = .duplicate
                 shake += 1
+                AccessibilityNotification.Announcement(String(localized: "Schon eingelöst")).post()
             case .failure:
                 Haptics.error()
                 phase = .invalid
                 shake += 1
+                AccessibilityNotification.Announcement(String(localized: "Ungültiger Code")).post()
             }
         }
     }
@@ -294,6 +297,7 @@ struct ClubVoucherView: View {
         withAnimation(.spring(duration: 0.5, bounce: 0.25)) { phase = .redeemed }
         try? await Task.sleep(for: .milliseconds(450))
         showsStamp = true
+        AccessibilityNotification.Announcement(String(localized: "Eingelöst")).post()
         guard !reduceMotion else {
             Haptics.success()
             return

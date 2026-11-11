@@ -149,17 +149,17 @@ struct LocationSimBackdrop: View {
             ZStack {
                 AtmosphereSkyShaderView(snapshot: snap, size: proxy.size, pacing: .still)
 
-                let starOpacity = Double(snap.nightAmount) * Double(1 - snap.cloudCoverage * 0.85)
+                let starOpacity = snap.starOpacity
                 if starOpacity > 0.05 {
                     StarsView(pacing: .still, opacityOverride: starOpacity)
                 }
 
                 if snap.showsSunDisc {
                     SunView(progress: Double(snap.timeOfDay))
-                        .opacity(Double((1 - snap.cloudDensity * 0.45) * snap.phase * snap.sunDiscVisibility))
+                        .opacity(snap.sunDiscOpacity)
                 }
 
-                if snap.cloudDensity + snap.cloudCoverage > 0.02 {
+                if snap.showsClouds {
                     CloudsView(
                         deck: snap.cloudDeck,
                         lightDirection: snap.cloudLightDirection,

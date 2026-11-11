@@ -160,7 +160,7 @@ private struct EnsembleStage: View {
         ForEach(OnboardingTourPage.allCases, id: \.self) { page in
             OnboardingFeatureStage(page: page)
                 .frame(height: 420)
-                .background(OnboardingSceneView(scene: .day))
+                .background(OnboardingSceneView())
                 .clipShape(.rect(cornerRadius: 28))
                 .padding()
         }

@@ -115,13 +115,9 @@ final class WindParticleView: UIView {
     // MARK: - Reduce Motion
 
     private func applyReduceMotionState() {
-        if UIAccessibility.isReduceMotionEnabled {
-            isHidden = true
-            stopDisplayLink()
-        } else {
-            isHidden = false
-            startDisplayLinkIfNeeded()
-        }
+        guard UIAccessibility.isReduceMotionEnabled else { return }
+        isHidden = true
+        stopDisplayLink()
     }
 
     override func didMoveToWindow() {

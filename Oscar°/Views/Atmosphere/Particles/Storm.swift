@@ -12,22 +12,24 @@ class Storm {
         case none, rain, snow
     }
 
-    var drops = [StormDrop]()
+    private(set) lazy var drops: [StormDrop] = (0..<initialStrength).map { _ in
+        StormDrop(type: self.type, direction: self.initialDirection + .degrees(90))
+    }
     var lastUpdate = Date.now
     var image: Image
     private let type: Contents
+    private let initialDirection: Angle
+    private let initialStrength: Int
 
     init(type: Contents, direction: Angle, strength: Int) {
         self.type = type
+        initialDirection = direction
+        initialStrength = strength
         switch type {
         case .snow:
             image = Image("snowParticle")
         default:
             image = Image("rainParticle")
-        }
-
-        for _ in 0..<strength {
-            drops.append(StormDrop(type: type, direction: direction + .degrees(90)))
         }
     }
 

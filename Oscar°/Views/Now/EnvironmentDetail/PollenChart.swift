@@ -58,6 +58,7 @@ struct PollenChart: View {
     let time: [Double]
     let maxTimeRange: ClosedRange<Date>
     let referenceDate: Date
+    let timeZone: TimeZone
 
     @State private var selectedDate: Date?
 
@@ -148,7 +149,7 @@ struct PollenChart: View {
 
                             if !selectedRows.isEmpty {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(SettingService.formattedTime(selectedRows[0].time))
+                                    Text(SettingService.formattedTime(selectedRows[0].time, timeZone: timeZone))
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
 
@@ -171,10 +172,10 @@ struct PollenChart: View {
                         }
                 }
 
-                HourlyChartUtilities.daySeparatorMarks(time: time)
+                HourlyChartUtilities.daySeparatorMarks(time: time, timeZone: timeZone)
             }
             .chartLegend(.hidden)
-            .chartXAxis { HourlyChartUtilities.sixHourAxisMarks() }
+            .chartXAxis { HourlyChartUtilities.sixHourAxisMarks(timeZone: timeZone) }
             .chartYAxis {
                 AxisMarks(values: [0.0, 0.25, 0.5, 0.75, 1.0]) { value in
                     AxisGridLine()

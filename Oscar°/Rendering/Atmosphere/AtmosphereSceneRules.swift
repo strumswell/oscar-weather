@@ -30,6 +30,18 @@ extension AtmosphereSnapshot {
         sunDiscVisibility > 0.01 && cloudDensity < 0.82 && precipitationIntensity < 0.55
     }
 
+    var sunDiscOpacity: Double {
+        Double((1 - cloudDensity * 0.45) * phase * sunDiscVisibility)
+    }
+
+    var starOpacity: Double {
+        Double(nightAmount) * Double(1 - cloudCoverage * 0.85)
+    }
+
+    var showsClouds: Bool {
+        cloudDensity + cloudCoverage > 0.02
+    }
+
     var showsPrecipitation: Bool {
         max(precipitationIntensity, snowfallIntensity) > 0.001
     }

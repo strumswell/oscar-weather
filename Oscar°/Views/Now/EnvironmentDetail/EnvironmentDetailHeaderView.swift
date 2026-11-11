@@ -5,7 +5,6 @@ struct EnvironmentDetailHeaderView: View {
     let value: String
     let badge: LocalizedStringKey?
     let color: Color
-    let subtitle: LocalizedStringKey?
 
     var body: some View {
         Text(title)
@@ -25,12 +24,6 @@ struct EnvironmentDetailHeaderView: View {
                     .background(color.opacity(0.18), in: .capsule)
                     .foregroundStyle(color)
             }
-        }
-
-        if let subtitle {
-            Text(subtitle)
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
     }
 }

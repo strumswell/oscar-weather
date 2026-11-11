@@ -21,7 +21,6 @@ extension HourlyTimelineModel {
                         line(temperature, .orange, label: String(localized: "Temperatur"))],
                 domain: paddedDomain([temperature, apparentTemperature]),
                 showsBars: true,
-                barsAlpha: 0.75,
                 extremes: extremeMarks(for: temperature),
                 extremeFormat: temperatureFormat,
                 primaryColor: .orange,
@@ -42,7 +41,6 @@ extension HourlyTimelineModel {
                 } + [line(speeds, .teal, label: "10 m")],
                 domain: paddedDomain(heights + [speeds], from: 0),
                 showsBars: false,
-                barsAlpha: 0,
                 extremes: [],
                 extremeFormat: { "\(Int($0.rounded())) \(windUnit)" },
                 primaryColor: .teal,
@@ -55,7 +53,6 @@ extension HourlyTimelineModel {
                 lines: [line(pressure, .purple)],
                 domain: paddedDomain([pressure], minimumPad: pressureUnit.value(fromHectopascals: 2)),
                 showsBars: false,
-                barsAlpha: 0,
                 extremes: extremeMarks(for: pressure),
                 extremeFormat: { "\($0.formatted(.number.grouping(.never).precision(.fractionLength(pressureUnit.fractionDigits)))) \(pressureUnit.symbol)" },
                 primaryColor: .purple
@@ -65,7 +62,6 @@ extension HourlyTimelineModel {
                 lines: [line(humidity, .mint)],
                 domain: 0...105,
                 showsBars: false,
-                barsAlpha: 0,
                 extremes: extremeMarks(for: humidity),
                 extremeFormat: percentFormat,
                 primaryColor: .mint
@@ -75,7 +71,6 @@ extension HourlyTimelineModel {
                 lines: [],
                 domain: 0...1,
                 showsBars: false,
-                barsAlpha: 0,
                 extremes: [],
                 extremeFormat: percentFormat,
                 primaryColor: .hourlyCloud,
@@ -95,7 +90,6 @@ extension HourlyTimelineModel {
                         line(soilTemperature0, .brown, label: "\(depth(0)) \(depthSymbol)")],
                 domain: paddedDomain([soilTemperature0, soilTemperature6, soilTemperature18, soilTemperature54]),
                 showsBars: false,
-                barsAlpha: 0,
                 extremes: [],
                 extremeFormat: temperatureFormat,
                 primaryColor: .brown
@@ -114,7 +108,6 @@ extension HourlyTimelineModel {
                 lines: secondaries + [line(depths.last ?? [], .blue, label: "\(depth(0))–\(depth(1)) \(depthSymbol)")],
                 domain: paddedDomain(depths, minimumPad: 0.02),
                 showsBars: false,
-                barsAlpha: 0,
                 extremes: [],
                 extremeFormat: { "\($0.formatted(.number.precision(.fractionLength(2)))) m³⁄m³" },
                 primaryColor: .blue
@@ -127,7 +120,6 @@ extension HourlyTimelineModel {
                 lines: [line(et0, .hourlyRain)],
                 domain: paddedDomain([et0], from: 0, minimumPad: floor),
                 showsBars: false,
-                barsAlpha: 0,
                 extremes: extremeMarks(for: et0, highsOnly: true, atLeast: floor),
                 extremeFormat: { "\($0.formatted(.number.precision(.fractionLength(precipitationUnit.fractionDigits + 1)))) \(precipitationUnit.symbol)" },
                 primaryColor: .hourlyRain

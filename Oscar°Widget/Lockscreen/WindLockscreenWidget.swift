@@ -25,7 +25,7 @@ struct WindProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping @Sendable (WindLockScreenEntry) -> ()) {
-        completion(WindLockScreenEntry(date: Date(), speed: 12, directionDegrees: 45, compass: Self.compassDirection(45)))
+        completion(placeholder(in: context))
     }
 
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<WindLockScreenEntry>) -> ()) {

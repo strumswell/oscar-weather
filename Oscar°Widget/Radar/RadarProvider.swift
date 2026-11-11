@@ -19,24 +19,22 @@ struct RadarProvider: AppIntentTimelineProvider {
 
     func snapshot(for configuration: RadarWidgetConfigIntent, in context: Context) async -> RadarEntry {
         if context.isPreview { return placeholder(in: context) }
-        return await buildWidgetEntry(configuration: configuration, displaySize: context.displaySize,
-                                      family: context.family)
+        return await buildWidgetEntry(configuration: configuration, family: context.family)
     }
 
     func timeline(for configuration: RadarWidgetConfigIntent, in context: Context) async -> Timeline<RadarEntry> {
-        let entry = await buildWidgetEntry(configuration: configuration, displaySize: context.displaySize,
-                                           family: context.family)
-        let next = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+        let entry = await buildWidgetEntry(configuration: configuration, family: context.family)
+        let next = minutesFromNow(15)
         return Timeline(entries: [entry], policy: .after(next))
     }
 
     private func buildWidgetEntry(
-        configuration: RadarWidgetConfigIntent, displaySize: CGSize, family: WidgetFamily
+        configuration: RadarWidgetConfigIntent, family: WidgetFamily
     ) async -> RadarEntry {
         WidgetBasemapStore.registerRequestedStyle(configuration.style.rawValue)
 
-        let location = await MainActor.run { LocationService.shared.update(); return LocationService.shared.getCoordinates() }
-        let renderSize = snapshotSize(for: displaySize, family: family)
+        let location = await currentWidgetCoordinates()
+        let renderSize = snapshotSize(for: family)
         let options = RadarWidgetRenderOptions(
             style: configuration.style.rawValue,
             smoothing: configuration.smoothing,
@@ -56,7 +54,7 @@ struct RadarProvider: AppIntentTimelineProvider {
         )
     }
 
-    private func snapshotSize(for displaySize: CGSize, family: WidgetFamily) -> CGSize {
+    private func snapshotSize(for family: WidgetFamily) -> CGSize {
         switch family {
         case .systemLarge:
             return WidgetBasemapStore.largeCompositeSize

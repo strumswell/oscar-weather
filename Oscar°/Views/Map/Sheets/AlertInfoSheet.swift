@@ -5,14 +5,7 @@
 //  Warning sheet for tapped alert polygons (models: WeatherAlertInfo).
 //
 
-import CoreLocation
 import SwiftUI
-import UIKit
-import simd
-
-// MARK: - Models
-
-// MARK: - DWD severity styling
 
 // MARK: - Warning sheet
 
@@ -130,5 +123,3 @@ private struct AlertInfoCard: View {
         }
     }
 }
-
-// MARK: - Storm cell sheet

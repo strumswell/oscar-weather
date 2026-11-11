@@ -41,44 +41,25 @@ enum HourlyFormatting {
   }
 
   static func weatherIconName(weatherCode: Double, isDay: Double) -> String {
-    if isDay > 0 {
-      switch weatherCode {
-      case 0, 1:
-        return "01d"
-      case 2:
-        return "02d"
-      case 3:
-        return "04d"
-      case 45, 48:
-        return "50d"
-      case 51:
-        return "10d"
-      case 71, 73, 75, 77, 85, 86:
-        return "13d"
-      case 95, 96, 99:
-        return "11d"
-      default:
-        return "09d"
-      }
-    } else {
-      switch weatherCode {
-      case 0, 1:
-        return "01n"
-      case 2:
-        return "02n"
-      case 3:
-        return "04n"
-      case 45, 48:
-        return "50n"
-      case 51:
-        return "10n"
-      case 71, 73, 75, 77, 85, 86:
-        return "13n"
-      case 95, 96, 99:
-        return "11n"
-      default:
-        return "09n"
-      }
+    let base: String
+    switch weatherCode {
+    case 0, 1:
+      base = "01"
+    case 2:
+      base = "02"
+    case 3:
+      base = "04"
+    case 45, 48:
+      base = "50"
+    case 51:
+      base = "10"
+    case 71, 73, 75, 77, 85, 86:
+      base = "13"
+    case 95, 96, 99:
+      base = "11"
+    default:
+      base = "09"
     }
+    return base + (isDay > 0 ? "d" : "n")
   }
 }

@@ -28,6 +28,7 @@ struct UVChart: View {
     let time: [Double]
     let maxTimeRange: ClosedRange<Date>
     let referenceDate: Date
+    let timeZone: TimeZone
 
     @State private var selectedDate: Date?
 
@@ -100,7 +101,7 @@ struct UVChart: View {
                         overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))
                     ) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(SettingService.formattedTime(selectedData.time))
+                            Text(SettingService.formattedTime(selectedData.time, timeZone: timeZone))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
 
@@ -120,10 +121,10 @@ struct UVChart: View {
                     }
             }
 
-            HourlyChartUtilities.daySeparatorMarks(time: time)
+            HourlyChartUtilities.daySeparatorMarks(time: time, timeZone: timeZone)
         }
         .chartLegend(.hidden)
-        .chartXAxis { HourlyChartUtilities.sixHourAxisMarks() }
+        .chartXAxis { HourlyChartUtilities.sixHourAxisMarks(timeZone: timeZone) }
         .chartYAxis {
             AxisMarks(values: [0.0, 3.0, 6.0, 8.0, 11.0]) { value in
                 AxisGridLine()

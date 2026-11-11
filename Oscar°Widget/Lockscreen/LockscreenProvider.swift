@@ -24,6 +24,17 @@ func nowcastEntryDates(refreshMinutes: Int, now: Date = Date()) -> [Date] {
     stride(from: 0, to: refreshMinutes, by: 5).map { now.addingTimeInterval(Double($0) * 60) }
 }
 
+func currentWidgetCoordinates() async -> CLLocationCoordinate2D {
+    await MainActor.run {
+        LocationService.shared.update()
+        return LocationService.shared.getCoordinates()
+    }
+}
+
+func minutesFromNow(_ minutes: Int) -> Date {
+    Calendar.current.date(byAdding: .minute, value: minutes, to: Date())!
+}
+
 func runWidgetTimeline<Entry: TimelineEntry>(
     refreshMinutes: Int,
     retryMinutes: Int = 15,
@@ -32,15 +43,12 @@ func runWidgetTimeline<Entry: TimelineEntry>(
 ) {
     Task {
         do {
-            let coordinates = await MainActor.run {
-                LocationService.shared.update()
-                return LocationService.shared.getCoordinates()
-            }
+            let coordinates = await currentWidgetCoordinates()
             let entries = try await make(coordinates)
-            let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: refreshMinutes, to: Date())!
+            let nextUpdateDate = minutesFromNow(refreshMinutes)
             completion(Timeline(entries: entries, policy: .after(nextUpdateDate)))
         } catch {
-            let retryDate = Calendar.current.date(byAdding: .minute, value: retryMinutes, to: Date())!
+            let retryDate = minutesFromNow(retryMinutes)
             completion(Timeline(entries: [], policy: .after(retryDate)))
         }
     }
@@ -54,8 +62,7 @@ struct LockscreenProvider: TimelineProvider {
     }
     
     func getSnapshot(in context: Context, completion: @escaping @Sendable (TemperatureLockScreenEntry) -> ()) {
-        let entry = TemperatureLockScreenEntry(date: Date(), temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", precipitation: 2.5, precipitationProbability: 72)
-        completion(entry)
+        completion(placeholder(in: context))
     }
     
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<TemperatureLockScreenEntry>) -> ()) {

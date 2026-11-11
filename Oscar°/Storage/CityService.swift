@@ -43,12 +43,14 @@ public final class CityService {
         }
     }
     
-    private func save() {
+    private func save(refreshWeather: Bool = true) {
         do {
             try self.context.save()
             update()
             nc.post(name: .cityToggle, object: nil)
-            nc.post(name: .weatherRefreshNeeded, object: nil)
+            if refreshWeather {
+                nc.post(name: .weatherRefreshNeeded, object: nil)
+            }
             WidgetCenter.shared.reloadAllTimelines()
         } catch {
             Self.logger.error("City save failed: \(error.localizedDescription, privacy: .public)")
@@ -99,6 +101,7 @@ public final class CityService {
     }
     
     func deleteCity(offsets: IndexSet) {
+        let deletesSelected = offsets.contains { cities[$0].selected }
         offsets.map { cities[$0] }.forEach(context.delete)
         let remainingCities = cities.enumerated()
             .filter { !offsets.contains($0.offset) }
@@ -106,7 +109,7 @@ public final class CityService {
         for (index, city) in remainingCities.enumerated() {
             city.orderIndex = Int64(index)
         }
-        save()
+        save(refreshWeather: deletesSelected)
     }
     
     func disableAllCities() {
@@ -132,7 +135,7 @@ public final class CityService {
             city.orderIndex = Int64(index)
         }
 
-        save()
+        save(refreshWeather: false)
     }
 
 

@@ -104,7 +104,7 @@ private struct OnboardingSky<Stage: View>: View {
 
         ZStack {
             ZStack {
-                OnboardingSceneView(scene: .day)
+                OnboardingSceneView()
                 if !layout.isPad {
                     stage
                 }
@@ -128,7 +128,7 @@ private struct OnboardingSky<Stage: View>: View {
             if layout.isPad, isWindowed {
                 let window = layout.heroFrame
                 ZStack(alignment: .top) {
-                    OnboardingSceneView(scene: .day)
+                    OnboardingSceneView()
                     stage
                 }
                 .frame(width: window.width, height: window.height, alignment: .top)

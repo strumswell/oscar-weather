@@ -48,19 +48,12 @@ struct ClassicSearchView: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, 12)
                         .frame(height: 34)
-                        .background(
-                            RoundedRectangle(cornerRadius: 7)
-                                .fill(LinearGradient(colors: [Color(white: 0.4), Color(white: 0.15)], startPoint: .top, endPoint: .bottom))
-                                .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(.white.opacity(0.25), lineWidth: 1))
-                        )
+                        .background(classicBarButton(top: Color(white: 0.4), bottom: Color(white: 0.15)))
                 }
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 12)
-            .background(
-                LinearGradient(colors: [Color(white: 0.32), Color(white: 0.12)], startPoint: .top, endPoint: .bottom)
-                    .ignoresSafeArea(edges: .top)
-            )
+            .background(classicBarGradient().ignoresSafeArea(edges: .top))
 
             List(results, id: \.id) { result in
                 Button {

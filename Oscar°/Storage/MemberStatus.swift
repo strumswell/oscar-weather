@@ -106,11 +106,10 @@ struct MemberStatus: Equatable {
     var earnedTitles: [String]
 
     init(stats: UsageStats, isSupporter: Bool, chosenTitle: String?, chosenStyle: MemberTier? = nil, unlocks: ClubUnlocks = .none, now: Date = .now) {
-        let supporter = isSupporter || stats.supporterSince != nil
         let tier: MemberTier = if stats.testFlightSince != nil || unlocks.founder {
-            supporter ? .founderSupporter : .founder
+            isSupporter ? .founderSupporter : .founder
         } else {
-            supporter ? .supporter : .member
+            isSupporter ? .supporter : .member
         }
         self.tier = tier
         styles = tier.styles + (unlocks.styles.contains(MemberTier.atmosphere.rawValue) ? [.atmosphere] : [])

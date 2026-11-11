@@ -212,6 +212,8 @@ final class CloudLayerState {
         guard metadataTask == nil else { return }
         let sessionID = UUID()
         loadSessionID = sessionID
+        prefetchTask?.cancel()
+        prefetchTask = nil
         metadataTask = Task { [weak self] in
             await self?.loadMetadata(sessionID: sessionID)
             if self?.loadSessionID == sessionID { self?.metadataTask = nil }
