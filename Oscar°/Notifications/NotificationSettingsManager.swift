@@ -6,6 +6,7 @@
 //
 
 import ActivityKit
+import CoreLocation
 import Foundation
 import OSLog
 import OpenAPIRuntime
@@ -26,6 +27,7 @@ final class NotificationSettingsManager: NSObject {
     private(set) var weatherAlertsEnabled: Bool
     private(set) var liveRainStatusEnabled: Bool
     private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
+    private(set) var notificationPlace: CLLocationCoordinate2D? = nil
 
     private let baseURL = URL(string: radarBaseURL)!
     let keychain = KeychainStore(service: (Bundle.main.bundleIdentifier ?? "Oscar") + ".notifications")
@@ -54,6 +56,8 @@ final class NotificationSettingsManager: NSObject {
     let syncedLiveActivityPushToStartTokenKey = "notificationSyncedLiveActivityPushToStartToken"
     let pendingLiveActivityReportsKey = "notificationPendingLiveActivityReports"
     let legacyDeregistrationCompletedKey = "notificationDidDeregisterLegacyRadarSubscription"
+    let notificationPlaceLatitudeKey = "notificationPlaceLatitude"
+    let notificationPlaceLongitudeKey = "notificationPlaceLongitude"
     @ObservationIgnored private var subscriptionSyncTask: Task<Void, Never>?
     @ObservationIgnored private var pendingSyncRequested = false
     @ObservationIgnored private var pendingSyncForceRegister = false
@@ -70,6 +74,10 @@ final class NotificationSettingsManager: NSObject {
         liveRainStatusEnabled = defaults.bool(forKey: liveRainStatusEnabledKey) && storedRainAlertsEnabled
         enabled = storedRainAlertsEnabled || storedWeatherAlertsEnabled
         super.init()
+        if let latitude = defaults.object(forKey: notificationPlaceLatitudeKey) as? Double,
+           let longitude = defaults.object(forKey: notificationPlaceLongitudeKey) as? Double {
+            notificationPlace = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        }
     }
 
     func configureOnLaunch() async {
@@ -193,6 +201,83 @@ final class NotificationSettingsManager: NSObject {
         }
         notificationLogger.info("Lifecycle: location changed; syncing subscription")
         await syncSubscriptionForCurrentState(forceRegister: false)
+    }
+
+    enum NotificationPlaceChoice: Equatable {
+        case city(Int)
+        case currentLocation
+    }
+
+    nonisolated static func resolveNotificationPlace(
+        stored: CLLocationCoordinate2D?,
+        cities: [CLLocationCoordinate2D],
+        gpsAuthorized: Bool,
+        selectedIndex: Int?
+    ) -> NotificationPlaceChoice? {
+        if let stored, let index = cities.firstIndex(where: { $0.latitude == stored.latitude && $0.longitude == stored.longitude }) {
+            return .city(index)
+        }
+        if gpsAuthorized { return .currentLocation }
+        return selectedIndex.map { .city($0) }
+    }
+
+    private var resolvedNotificationPlace: NotificationPlaceChoice? {
+        let cities = CityService.shared.cities
+        return Self.resolveNotificationPlace(
+            stored: notificationPlace,
+            cities: cities.map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) },
+            gpsAuthorized: locationService.gpsAuthorized,
+            selectedIndex: cities.firstIndex { $0.selected }
+        )
+    }
+
+    var notificationCity: City? {
+        guard case .city(let index) = resolvedNotificationPlace else { return nil }
+        return CityService.shared.cities[index]
+    }
+
+    func isNotificationPlace(_ city: City?) -> Bool {
+        guard enabled, let place = resolvedNotificationPlace else { return false }
+        switch place {
+        case .currentLocation: return city == nil
+        case .city(let index): return city?.objectID == CityService.shared.cities[index].objectID
+        }
+    }
+
+    func setNotificationPlace(_ city: City?) {
+        storeNotificationPlace(city)
+        Task { await syncLocationUpdate() }
+    }
+
+    func resolveNotificationLocation() async -> (coordinates: CLLocationCoordinate2D, name: String)? {
+        let cities = CityService.shared.cities
+        if let stored = notificationPlace, !cities.contains(where: { $0.lat == stored.latitude && $0.lon == stored.longitude }) {
+            storeNotificationPlace(nil)
+        }
+        switch resolvedNotificationPlace {
+        case .city(let index):
+            let city = cities[index]
+            if notificationPlace == nil { storeNotificationPlace(city) }
+            return (CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon), city.label ?? "")
+        case .currentLocation:
+            guard let coordinates = await locationService.awaitGPSCoordinates(timeout: .seconds(10)) else { return nil }
+            return (coordinates, await locationService.getGPSPlacemarkInfo().name)
+        case nil:
+            return nil
+        }
+    }
+
+    private func storeNotificationPlace(_ city: City?) {
+        let defaults = UserDefaults.standard
+        if let city {
+            notificationPlace = CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
+            defaults.set(city.lat, forKey: notificationPlaceLatitudeKey)
+            defaults.set(city.lon, forKey: notificationPlaceLongitudeKey)
+        } else {
+            notificationPlace = nil
+            defaults.removeObject(forKey: notificationPlaceLatitudeKey)
+            defaults.removeObject(forKey: notificationPlaceLongitudeKey)
+        }
     }
 
     func reloadNotificationStatus() async {

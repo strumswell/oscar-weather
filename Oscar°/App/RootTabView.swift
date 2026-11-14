@@ -108,7 +108,7 @@ struct RootTabView: View {
         withAnimation(.easeInOut(duration: 0.3)) { modelFallbackToast = nil }
         Task {
             await weather.refresh(location: location)
-            await NotificationSettingsManager.shared.syncLocationUpdate()
+            Task { await NotificationSettingsManager.shared.syncLocationUpdate() }
             await WidgetBasemapRenderer.refreshIfNeeded()
             if isForeground {
                 WidgetCenter.shared.reloadAllTimelines()

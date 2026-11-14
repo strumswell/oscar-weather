@@ -5,6 +5,7 @@
 //  Created by Philipp Bolte on 07.04.26.
 //
 
+import CoreData
 import SwiftUI
 import UIKit
 
@@ -12,7 +13,6 @@ import UIKit
 struct NotificationSettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
-    @Environment(Location.self) private var location
     private let manager = NotificationSettingsManager.shared
     @State private var isUpdating = false
     @State private var refusal: Refusal?
@@ -21,6 +21,9 @@ struct NotificationSettingsView: View {
         let rainAlertsEnabled = manager.rainAlertsEnabled
         let weatherAlertsEnabled = manager.weatherAlertsEnabled
         let liveRainStatusEnabled = manager.liveRainStatusEnabled
+        let notificationCityID = manager.notificationCity?.objectID
+        let gpsAuthorized = LocationService.shared.gpsAuthorized
+        let cities = CityService.shared.cities
 
         Form {
             if manager.authorizationStatus == .denied {
@@ -28,6 +31,31 @@ struct NotificationSettingsView: View {
                     Button("Systemeinstellungen öffnen") { openSettings(for: .notifications) }
                 } footer: {
                     Text("Mitteilungen sind in den iOS-Einstellungen ausgeschaltet.")
+                }
+            }
+
+            if gpsAuthorized || !cities.isEmpty {
+                Section {
+                    Picker(selection: Binding(get: { notificationCityID }, set: { id in
+                        manager.setNotificationPlace(cities.first { $0.objectID == id })
+                    })) {
+                        if gpsAuthorized {
+                            Text("Aktueller Standort").tag(NSManagedObjectID?.none)
+                        }
+                        ForEach(cities, id: \.objectID) { city in
+                            Text(city.displayName).tag(Optional(city.objectID))
+                        }
+                    } label: {
+                        Label("Ort", systemImage: "bell.fill")
+                            .labelStyle(.settingsIcon(.red))
+                    }
+                } footer: {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Warnungen und die Regen-Live-Aktivität gelten für diesen Ort, auf etwa 100 m gerundet.")
+                        if gpsAuthorized && notificationCityID == nil {
+                            Text("Der aktuelle Standort wird aktualisiert, wenn du Oscar° öffnest.")
+                        }
+                    }
                 }
             }
 
@@ -61,11 +89,6 @@ struct NotificationSettingsView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Amtliche Warnungen in Europa (DWD, MeteoAlarm), den USA (NWS) und Taiwan (CWA).")
                     Text("Warnungen werden automatisch übernommen und können verzögert oder unvollständig sein. Maßgeblich ist der jeweilige Wetterdienst.")
-                    if location.name.isEmpty {
-                        Text("Gilt für den Ort, der gerade in Oscar° offen ist, auf etwa 100 m gerundet.")
-                    } else {
-                        Text("Gilt für \(location.name), den Ort, der gerade in Oscar° offen ist, auf etwa 100 m gerundet.")
-                    }
                 }
             }
             .disabled(isUpdating)
@@ -141,5 +164,4 @@ struct NotificationSettingsView: View {
     NavigationStack {
         NotificationSettingsView()
     }
-    .environment(Location())
 }

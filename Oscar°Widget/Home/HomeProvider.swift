@@ -21,56 +21,52 @@ struct HomeEntry: TimelineEntry {
     let backgroundGradient: LinearGradient
 }
 
-final class HomeProvider: TimelineProvider, Sendable {
+final class HomeProvider: PlaceTimelineSource {
     let client = APIClient.shared
+    let refreshMinutes = 30
 
     func placeholder(in context: Context) -> HomeEntry {
         let placeholderGradient = LinearGradient(colors: [.sunriseStart, .sunnyDayEnd], startPoint: .top, endPoint: .bottom)
         return HomeEntry(date: Date(), location: "Berlin", temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", backgroundGradient: placeholderGradient)
     }
 
-    func getSnapshot(in context: Context, completion: @escaping @Sendable (HomeEntry) -> ()) {
-        completion(placeholder(in: context))
-    }
-    
-    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<HomeEntry>) -> ()) {
-        runWidgetTimeline(refreshMinutes: 30, completion: completion) { coordinates in
-            let locationName = await LocationService.shared.getLocationName()
+    func entries(for place: WidgetPlace) async throws -> [HomeEntry] {
+        let coordinates = place.coordinates
+        let locationName = await place.locationName()
 
-            async let weatherRequest = self.client.getForecast(
-                coordinates: coordinates,
-                forecastDays: ._1,
-                hourly: [
-                    .weathercode, .cloudcover, .relativehumidity_2m,
-                    .precipitation, .snowfall, .windspeed_10m, .winddirection_10m,
-                ]
+        async let weatherRequest = client.getForecast(
+            coordinates: coordinates,
+            forecastDays: ._1,
+            hourly: [
+                .weathercode, .cloudcover, .relativehumidity_2m,
+                .precipitation, .snowfall, .windspeed_10m, .winddirection_10m,
+            ]
+        )
+        async let radarRequest = client.getRadarSeries(coordinates: coordinates)
+        let weather = try await weatherRequest
+        let precipSeries = try? await radarRequest
+
+        let temperatureMin = weather.daily?.temperature_2m_min?.first ?? 0
+        let temperatureMax = weather.daily?.temperature_2m_max?.first ?? 0
+        let temperatureNow = weather.current?.temperature ?? 0
+        let weathercode = weather.current?.weathercode ?? 0
+        let isDay = weather.current?.is_day ?? 0
+        let modelPrecipitation = weather.current?.precipitation ?? 0
+        let gradient = await WeatherAtmosphericAdapter.widgetGradient(
+            weather: weather, precipSeries: precipSeries, coordinates: coordinates
+        )
+
+        return nowcastEntryDates(refreshMinutes: refreshMinutes).map { date in
+            let precipitation = precipSeries?.rate(at: date) ?? modelPrecipitation
+            return HomeEntry(
+                date: date,
+                location: locationName,
+                temperatureMin: temperatureMin,
+                temperatureMax: temperatureMax,
+                temperatureNow: temperatureNow,
+                icon: WeatherSymbol.sfSymbol(weathercode: weathercode, isDay: isDay, isRaining: precipitation > 0, precipitation: precipitation),
+                backgroundGradient: gradient
             )
-            async let radarRequest = self.client.getRadarSeries(coordinates: coordinates)
-            let weather = try await weatherRequest
-            let precipSeries = try? await radarRequest
-
-            let temperatureMin = weather.daily?.temperature_2m_min?.first ?? 0
-            let temperatureMax = weather.daily?.temperature_2m_max?.first ?? 0
-            let temperatureNow = weather.current?.temperature ?? 0
-            let weathercode = weather.current?.weathercode ?? 0
-            let isDay = weather.current?.is_day ?? 0
-            let modelPrecipitation = weather.current?.precipitation ?? 0
-            let gradient = await WeatherAtmosphericAdapter.widgetGradient(
-                weather: weather, precipSeries: precipSeries, coordinates: coordinates
-            )
-
-            return nowcastEntryDates(refreshMinutes: 30).map { date in
-                let precipitation = precipSeries?.rate(at: date) ?? modelPrecipitation
-                return HomeEntry(
-                    date: date,
-                    location: locationName,
-                    temperatureMin: temperatureMin,
-                    temperatureMax: temperatureMax,
-                    temperatureNow: temperatureNow,
-                    icon: WeatherSymbol.sfSymbol(weathercode: weathercode, isDay: isDay, isRaining: precipitation > 0, precipitation: precipitation),
-                    backgroundGradient: gradient
-                )
-            }
         }
     }
 }

@@ -18,22 +18,18 @@ struct RainTimelineEntry: TimelineEntry {
     let hasRadarCoverage: Bool
 }
 
-struct RainTimelineProvider: TimelineProvider {
+struct RainTimelineProvider: PlaceTimelineSource {
     let client = APIClient.shared
+    let refreshMinutes = 15
+    let retryMinutes = 10
 
     func placeholder(in context: Context) -> RainTimelineEntry {
         Self.makeEntry(from: Self.placeholderSeries(), now: Date())
     }
 
-    func getSnapshot(in context: Context, completion: @escaping @Sendable (RainTimelineEntry) -> ()) {
-        completion(placeholder(in: context))
-    }
-
-    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<RainTimelineEntry>) -> ()) {
-        runWidgetTimeline(refreshMinutes: 15, retryMinutes: 10, completion: completion) { coordinates in
-            let precipSeries = try await client.getRadarSeries(coordinates: coordinates)
-            return nowcastEntryDates(refreshMinutes: 15).map { Self.makeEntry(from: precipSeries, now: $0) }
-        }
+    func entries(for place: WidgetPlace) async throws -> [RainTimelineEntry] {
+        let precipSeries = try await client.getRadarSeries(coordinates: place.coordinates)
+        return nowcastEntryDates(refreshMinutes: refreshMinutes).map { Self.makeEntry(from: precipSeries, now: $0) }
     }
 
     static func makeEntry(from series: PrecipSeriesResponse?, now: Date) -> RainTimelineEntry {
@@ -200,7 +196,7 @@ struct RainTimelineLockScreenWidget: Widget {
     let kind: String = "RainTimelineLockScreenWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: RainTimelineProvider()) { entry in
+        placeConfiguration(kind: kind, source: RainTimelineProvider()) { entry in
             RainTimelineLockScreenView(entry: entry)
         }
         .configurationDisplayName(String(localized: "Regenverlauf", comment: "LS Widget Regenverlauf"))

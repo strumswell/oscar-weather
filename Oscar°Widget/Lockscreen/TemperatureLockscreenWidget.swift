@@ -62,7 +62,7 @@ struct TemperatureLockScreenView: View {
 struct TemperatureLockScreenWidget: Widget {
     let kind: String = "TemperatureLockScreenWidget"
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: LockscreenProvider()) { entry in
+        placeConfiguration(kind: kind, source: LockscreenProvider()) { entry in
             TemperatureLockScreenView(entry: entry)
         }
         .configurationDisplayName(String(localized: "Temperatur", comment: "LS Temperatur"))

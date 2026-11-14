@@ -56,6 +56,10 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
             || manager.authorizationStatus == .authorizedWhenInUse
     }
 
+    var gpsAuthorized: Bool {
+        authStatus == .authorizedWhenInUse || authStatus == .authorizedAlways
+    }
+
     nonisolated private static var sharedDefaults: UserDefaults { AppGroup.defaults }
     nonisolated private static let cachedGPSLatitudeKey = "lastKnownGPSLatitude"
     nonisolated private static let cachedGPSLongitudeKey = "lastKnownGPSLongitude"
@@ -101,7 +105,31 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
         }
         return nil
     }
-    
+
+    func knownGPSCoordinates() -> CLLocationCoordinate2D? {
+        if let coordinates = getGPSCoordinates() { return coordinates }
+        return gpsAuthorized ? Self.cachedGPSLocation() : nil
+    }
+
+    func awaitGPSCoordinates(timeout: Duration) async -> CLLocationCoordinate2D? {
+        if let known = knownGPSCoordinates() { return known }
+        guard gpsAuthorized else { return nil }
+        let deadline = ContinuousClock.now + timeout
+        while ContinuousClock.now < deadline {
+            do {
+                try await Task.sleep(for: .milliseconds(500))
+            } catch {
+                return nil
+            }
+            if let coordinates = getGPSCoordinates() {
+                updateGPSCoordinates()
+                notificationCenter.post(name: .weatherRefreshNeeded, object: nil)
+                return coordinates
+            }
+        }
+        return nil
+    }
+
     func getCoordinates() -> CLLocationCoordinate2D {
         if let selectedCity = city.getSelectedCity() {
             return CLLocationCoordinate2D(latitude: selectedCity.lat, longitude: selectedCity.lon)
@@ -129,12 +157,13 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
     }
 
     func getPlacemarkInfo() async -> (name: String, countryCode: String?) {
-        let selectedCity = city.getSelectedCity()
-
-        if let selectedCity {
+        if let selectedCity = city.getSelectedCity() {
             return (selectedCity.label ?? "", nil)
         }
+        return await getGPSPlacemarkInfo()
+    }
 
+    func getGPSPlacemarkInfo() async -> (name: String, countryCode: String?) {
         let coordinates = gpsLocation
         if let lastGeocoded {
             let currentLocation = CLLocation(

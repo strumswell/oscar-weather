@@ -5,6 +5,7 @@ import SwiftUI
 struct CityCard: View {
     let personalization: PlacePersonalization
     let isDefault: Bool
+    let isNotificationPlace: Bool
     let conditions: CityConditions?
     let isSelected: Bool
     let backdropPaused: Bool
@@ -18,6 +19,7 @@ struct CityCard: View {
             snapshot: conditions?.snapshot,
             isSelected: isSelected,
             isDefault: isDefault,
+            isNotificationPlace: isNotificationPlace,
             backdropPaused: backdropPaused
         )
     }
@@ -26,6 +28,7 @@ struct CityCard: View {
 struct CurrentLocationCard: View {
     let conditions: CityConditions?
     let isSelected: Bool
+    let isNotificationPlace: Bool
     let backdropPaused: Bool
     let cityService = CityService.shared
 
@@ -39,6 +42,7 @@ struct CurrentLocationCard: View {
             snapshot: conditions?.snapshot,
             isSelected: isSelected,
             isDefault: cityService.defaultIsCurrentLocation,
+            isNotificationPlace: isNotificationPlace,
             backdropPaused: backdropPaused
         )
     }
@@ -56,6 +60,7 @@ extension View {
         isDefault: Bool,
         onEdit: @escaping () -> Void,
         onToggleDefault: @escaping () -> Void,
+        onNotifyHere: (() -> Void)? = nil,
         onDelete: (() -> Void)? = nil
     ) -> some View {
         let editButton = Button(action: onEdit) {
@@ -72,6 +77,11 @@ extension View {
             .contextMenu {
                 editButton
                 defaultButton
+                if let onNotifyHere {
+                    Button(action: onNotifyHere) {
+                        Label("Benachrichtigungen hier", systemImage: "bell")
+                    }
+                }
                 if let onDelete {
                     Button(role: .destructive, action: onDelete) {
                         Label("Löschen", systemImage: "trash")

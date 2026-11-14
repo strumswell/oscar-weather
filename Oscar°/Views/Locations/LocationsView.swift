@@ -24,6 +24,7 @@ struct LocationsView: View {
     private let client = APIClient.shared
     private var locationService = LocationService.shared
     private var conditionsStore = CityConditionsStore.shared
+    private let notifications = NotificationSettingsManager.shared
 
     private var gpsAuthorized: Bool {
         locationService.authStatus == .authorizedWhenInUse
@@ -175,10 +176,12 @@ struct LocationsView: View {
     }
 
     private var currentLocationRow: some View {
-        CurrentLocationRow(
+        let isNotificationPlace = notifications.isNotificationPlace(nil)
+        return CurrentLocationRow(
             conditions: currentLocationConditions,
             isSelected: selectedCityURI == nil,
             isDefault: locationService.city.defaultIsCurrentLocation,
+            isNotificationPlace: isNotificationPlace,
             backdropPaused: cardBackdropsPaused,
             onSelect: selectCurrentLocation,
             onEdit: { editTarget = .currentLocation },
@@ -187,14 +190,17 @@ struct LocationsView: View {
                     city: nil,
                     asCurrentLocation: !locationService.city.defaultIsCurrentLocation
                 )
-            }
+            },
+            onNotifyHere: notifications.enabled && !isNotificationPlace ? { notifications.setNotificationPlace(nil) } : nil
         )
     }
 
     private func cityRow(_ city: City) -> some View {
-        LocationCityRow(
+        let isNotificationPlace = notifications.isNotificationPlace(city)
+        return LocationCityRow(
             personalization: city.personalization,
             isDefault: city.isDefault,
+            isNotificationPlace: isNotificationPlace,
             conditions: conditionsStore.conditions(
                 for: CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
             ),
@@ -203,7 +209,8 @@ struct LocationsView: View {
             onSelect: { select(city) },
             onEdit: { editTarget = .city(city) },
             onDelete: { delete(city) },
-            onToggleDefault: { locationService.city.setDefault(city: city.isDefault ? nil : city) }
+            onToggleDefault: { locationService.city.setDefault(city: city.isDefault ? nil : city) },
+            onNotifyHere: notifications.enabled && !isNotificationPlace ? { notifications.setNotificationPlace(city) } : nil
         )
     }
 

@@ -15,22 +15,17 @@ struct UVIndexLockScreenEntry: TimelineEntry {
     let uvIndex: Double?
 }
 
-struct UVIndexProvider: TimelineProvider {
+struct UVIndexProvider: PlaceTimelineSource {
     let client = APIClient.shared
+    let refreshMinutes = 30
 
     func placeholder(in context: Context) -> UVIndexLockScreenEntry {
         UVIndexLockScreenEntry(date: Date(), uvIndex: 6)
     }
 
-    func getSnapshot(in context: Context, completion: @escaping @Sendable (UVIndexLockScreenEntry) -> ()) {
-        completion(placeholder(in: context))
-    }
-
-    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<UVIndexLockScreenEntry>) -> ()) {
-        runWidgetTimeline(refreshMinutes: 30, completion: completion) { coordinates in
-            let air = try await client.getAirQuality(coordinates: coordinates)
-            return [UVIndexLockScreenEntry(date: Date(), uvIndex: Self.currentUVIndex(from: air, now: Date()))]
-        }
+    func entries(for place: WidgetPlace) async throws -> [UVIndexLockScreenEntry] {
+        let air = try await client.getAirQuality(coordinates: place.coordinates)
+        return [UVIndexLockScreenEntry(date: Date(), uvIndex: Self.currentUVIndex(from: air, now: Date()))]
     }
 
     static func currentUVIndex(
@@ -110,7 +105,7 @@ struct UVIndexLockScreenWidget: Widget {
     let kind: String = "UVIndexLockScreenWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: UVIndexProvider()) { entry in
+        placeConfiguration(kind: kind, source: UVIndexProvider()) { entry in
             UVIndexLockScreenView(entry: entry)
         }
         .configurationDisplayName(String(localized: "UV-Index", comment: "LS Widget UV-Index"))

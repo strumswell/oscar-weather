@@ -31,10 +31,9 @@ enum WidgetBasemapRenderer {
 
         LocationService.shared.update()
         let center = LocationService.shared.getCoordinates()
-        guard CLLocationCoordinate2DIsValid(center) else { return }
 
         var rendered = false
-        for styleRaw in WidgetBasemapStore.requestedStyles() {
+        for styleRaw in WidgetBasemapStore.requestedStyles() where CLLocationCoordinate2DIsValid(center) {
             guard let style = MapBasemapStyle(rawValue: styleRaw) else { continue }
             for size in sizes {
                 if let (record, _) = WidgetBasemapStore.load(size: size, style: styleRaw),
@@ -50,6 +49,22 @@ enum WidgetBasemapRenderer {
                 rendered = true
             }
         }
+        let fixedKeys = WidgetBasemapStore.fixedKeys()
+        for fixedKey in fixedKeys {
+            guard let (styleRaw, coordinate) = WidgetBasemapStore.parseFixedKey(fixedKey),
+                  let style = MapBasemapStyle(rawValue: styleRaw) else { continue }
+            for size in sizes {
+                if let (record, _) = WidgetBasemapStore.load(size: size, style: styleRaw, fixed: coordinate),
+                   Date().timeIntervalSince(record.renderedAt) < maxAge {
+                    continue
+                }
+                guard let result = try? await snapshot(
+                    center: coordinate, size: size, style: style) else { continue }
+                WidgetBasemapStore.save(result.record, image: result.image, fixed: coordinate)
+                rendered = true
+            }
+        }
+        WidgetBasemapStore.removeFixedBasemaps(except: fixedKeys)
         if rendered {
             WidgetCenter.shared.reloadTimelines(ofKind: "WeatherWidget")
         }

@@ -16,7 +16,6 @@ struct OscarWidgetsBundle: WidgetBundle {
         RadarWidget()
         NowTodayWidget()
         DailyForecastWidget()
-        GlobalRadarWidget()
         RainRadarLiveActivityWidget()
         #endif
         TemperatureLockScreenWidget()

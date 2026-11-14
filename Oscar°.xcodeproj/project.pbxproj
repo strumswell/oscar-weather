@@ -111,8 +111,6 @@
 		2546516A29E4935600D8C13D /* LockscreenProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2546516929E4935600D8C13D /* LockscreenProvider.swift */; };
 		255BDD9E2BD9B2E40061E4EB /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
 		255BDD9F2BD9B2E40061E4EB /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 4EBF1FE0D46648989064EF72 /* Sentry */; };
-		256FDAC92BCB164C00E18655 /* GlobalRadarWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256FDAC42BCB14D000E18655 /* GlobalRadarWidget.swift */; };
-		256FDACA2BCB164F00E18655 /* GlobalRadarProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256FDAC62BCB14DA00E18655 /* GlobalRadarProvider.swift */; };
 		2576B2032B586E6C004E288A /* GlobalViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25CB17E72B47043A001D973A /* GlobalViewExtensions.swift */; };
 		257EB34E2BD830F300E46468 /* openapi.yml in Resources */ = {isa = PBXBuildFile; fileRef = 257D07DC2AC355EC005EBD16 /* openapi.yml */; };
 		257EB34F2BD830F300E46468 /* openapi-generator-config.yml in Resources */ = {isa = PBXBuildFile; fileRef = 257D07DE2AC3561C005EBD16 /* openapi-generator-config.yml */; };
@@ -805,8 +803,6 @@
 		2546516329E4905E00D8C13D /* TemperatureLockscreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureLockscreenWidget.swift; sourceTree = "<group>"; };
 		2546516629E492E500D8C13D /* RadarProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadarProvider.swift; sourceTree = "<group>"; };
 		2546516929E4935600D8C13D /* LockscreenProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockscreenProvider.swift; sourceTree = "<group>"; };
-		256FDAC42BCB14D000E18655 /* GlobalRadarWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalRadarWidget.swift; sourceTree = "<group>"; };
-		256FDAC62BCB14DA00E18655 /* GlobalRadarProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalRadarProvider.swift; sourceTree = "<group>"; };
 		2575652B308D669A00068A1E /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		2575A1D32B53519E006005FC /* Oscar°.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Oscar°.entitlements"; sourceTree = "<group>"; };
 		2575A1D42B5351B3006005FC /* Oscar°WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Oscar°WidgetExtension.entitlements"; sourceTree = "<group>"; };
@@ -1409,15 +1405,6 @@
 			path = Daily;
 			sourceTree = "<group>";
 		};
-		256FDAC12BCB14B200E18655 /* GlobalRadarWidget */ = {
-			isa = PBXGroup;
-			children = (
-				256FDAC62BCB14DA00E18655 /* GlobalRadarProvider.swift */,
-				256FDAC42BCB14D000E18655 /* GlobalRadarWidget.swift */,
-			);
-			path = GlobalRadarWidget;
-			sourceTree = "<group>";
-		};
 		259187C42C715A7C00611B0F /* Charts */ = {
 			isa = PBXGroup;
 			children = (
@@ -1634,7 +1621,6 @@
 				259623CE2A2BD6A000BA75F6 /* Home */,
 				2546516829E4933800D8C13D /* Lockscreen */,
 				2546516529E492D200D8C13D /* Radar */,
-				256FDAC12BCB14B200E18655 /* GlobalRadarWidget */,
 				3ED4AEAF254551DD0057DF2F /* OscarWidgetsBundle.swift */,
 				2575A1D42B5351B3006005FC /* Oscar°WidgetExtension.entitlements */,
 				3EB89031251A55980028FED0 /* Assets.xcassets */,
@@ -3098,7 +3084,6 @@
 				2576B2032B586E6C004E288A /* GlobalViewExtensions.swift in Sources */,
 				2546516429E4905E00D8C13D /* TemperatureLockscreenWidget.swift in Sources */,
 				253BA17F2B093CE30070BD5E /* DataModels.xcdatamodeld in Sources */,
-				256FDACA2BCB164F00E18655 /* GlobalRadarProvider.swift in Sources */,
 				2502F6F92D2F3D2600636DC9 /* WeatherObservable.swift in Sources */,
 				253F70892950FA0F000BD4C0 /* RadarWidget.swift in Sources */,
 				2512E9592C398CCA004670E4 /* SettingService.swift in Sources */,
@@ -3113,7 +3098,6 @@
 				3ED4AEB0254551DE0057DF2F /* OscarWidgetsBundle.swift in Sources */,
 				AC1000042FAA200000000001 /* RainRadarActivityAttributes.swift in Sources */,
 				AC1000062FAA200000000001 /* RainRadarLiveActivityWidget.swift in Sources */,
-				256FDAC92BCB164C00E18655 /* GlobalRadarWidget.swift in Sources */,
 				2505C94D29E5F0D200BDB0A8 /* PrecipitationLockscreenWidget.swift in Sources */,
 				BB1000112FF1000000000001 /* RainTimelineLockscreenWidget.swift in Sources */,
 				BB1000122FF1000000000001 /* UVIndexLockscreenWidget.swift in Sources */,

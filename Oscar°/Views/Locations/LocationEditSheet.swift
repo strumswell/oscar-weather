@@ -30,8 +30,11 @@ struct LocationEditSheet: View {
     @State private var customLabel: String
     @State private var mark: PlacePersonalization.Mark
     @State private var isDefault: Bool
+    @State private var notifies: Bool
     @FocusState private var emojiFieldFocused: Bool
     private let cityService = CityService.shared
+    private let notifications = NotificationSettingsManager.shared
+    private let wasNotificationPlace: Bool
 
     private static let emojiChoices = [
         "🏠", "🏢", "💼", "🏫", "👵", "👴", "👨‍👩‍👧", "❤️",
@@ -51,15 +54,18 @@ struct LocationEditSheet: View {
         self.target = target
         switch target {
         case .city(let city):
+            wasNotificationPlace = NotificationSettingsManager.shared.isNotificationPlace(city)
             _customLabel = State(initialValue: city.customLabel ?? "")
             _mark = State(initialValue: city.personalization.mark)
             _isDefault = State(initialValue: city.isDefault)
         case .currentLocation:
+            wasNotificationPlace = NotificationSettingsManager.shared.isNotificationPlace(nil)
             let service = CityService.shared
             _customLabel = State(initialValue: service.currentLocationCustomLabel ?? "")
             _mark = State(initialValue: service.currentLocationPersonalization.mark)
             _isDefault = State(initialValue: service.defaultIsCurrentLocation)
         }
+        _notifies = State(initialValue: wasNotificationPlace)
     }
 
     private var isCurrentLocationTarget: Bool {
@@ -149,6 +155,20 @@ struct LocationEditSheet: View {
                         .tint(.green)
                 } footer: {
                     Text("Oscar° startet mit diesem Ort.")
+                }
+
+                if notifications.enabled {
+                    Section {
+                        Toggle("Benachrichtigungen", isOn: $notifies)
+                            .tint(.green)
+                            .disabled(wasNotificationPlace)
+                    } footer: {
+                        if wasNotificationPlace {
+                            Text("Regen- und Wetterwarnungen kommen für diesen Ort. Wähle einen anderen Ort, um das zu ändern.")
+                        } else {
+                            Text("Regen- und Wetterwarnungen kommen für diesen Ort.")
+                        }
+                    }
                 }
             }
             .navigationTitle(placeName)
@@ -261,10 +281,16 @@ struct LocationEditSheet: View {
             if isDefault != city.isDefault {
                 cityService.setDefault(city: isDefault ? city : nil)
             }
+            if notifies && !wasNotificationPlace {
+                notifications.setNotificationPlace(city)
+            }
         case .currentLocation:
             cityService.updateCurrentLocation(mark: mark, customLabel: customLabel)
             if isDefault != cityService.defaultIsCurrentLocation {
                 cityService.setDefault(city: nil, asCurrentLocation: isDefault)
+            }
+            if notifies && !wasNotificationPlace {
+                notifications.setNotificationPlace(nil)
             }
         }
         Haptics.impact()

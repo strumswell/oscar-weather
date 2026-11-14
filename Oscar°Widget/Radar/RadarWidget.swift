@@ -25,7 +25,10 @@ enum RadarWidgetStyle: String, AppEnum {
 
 struct RadarWidgetConfigIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Regenradar"
-    static let description = IntentDescription("Regenradar für aktuellen Standort")
+    static let description = IntentDescription("Regenradar für deinen Ort")
+
+    @Parameter(title: "Ort", optionsProvider: WidgetCityOptionsProvider())
+    var city: String?
 
     @Parameter(title: "Kartenstil", default: .fiord)
     var style: RadarWidgetStyle
@@ -89,7 +92,7 @@ struct RadarWidget: Widget {
         }
         .contentMarginsDisabled()
         .configurationDisplayName(String(localized: "Regenradar"))
-        .description(String(localized: "Regenradar für aktuellen Standort"))
+        .description(String(localized: "Regenradar für deinen Ort"))
         .supportedFamilies([.systemSmall, .systemLarge])
     }
 }

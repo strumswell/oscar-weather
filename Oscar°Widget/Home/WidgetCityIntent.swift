@@ -2,7 +2,7 @@
 //  WidgetCityIntent.swift
 //  Oscar°
 //
-//  The configurable-city options and intent for the DailyForecastWidget.
+//  The configurable-city options and intent shared by the iOS widgets.
 //
 
 import AppIntents
@@ -50,7 +50,7 @@ struct WidgetCityOptionsProvider: DynamicOptionsProvider {
 
 struct SelectCityIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Ort wählen"
-    static let description = IntentDescription("Wähle den Ort für die Tagesvorhersage.")
+    static let description = IntentDescription("Wähle den Ort für dieses Widget.")
 
     @Parameter(title: "Ort", optionsProvider: WidgetCityOptionsProvider())
     var city: String?

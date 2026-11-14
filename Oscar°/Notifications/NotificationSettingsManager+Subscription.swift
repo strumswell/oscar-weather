@@ -37,9 +37,12 @@ extension NotificationSettingsManager {
         notificationLogger.info("Lifecycle: subscription sync started; forceRegister=\(forceRegister, privacy: .public) apnsEnvironment=\(apnsEnvironment.rawValue, privacy: .public) enabled=\(self.enabled, privacy: .public) rainAlerts=\(self.rainAlertsEnabled, privacy: .public) weatherAlerts=\(self.weatherAlertsEnabled, privacy: .public)")
 
         locationService.update()
-        let currentLocation = await locationService.getLocation()
-        let outboundCoordinates = LocationService.outboundCoordinate(currentLocation.coordinates)
-        let cityName = currentLocation.name.isEmpty ? "Current Location" : currentLocation.name
+        guard let place = await resolveNotificationLocation() else {
+            notificationLogger.info("Lifecycle: subscription sync skipped; no notification place resolved")
+            return
+        }
+        let outboundCoordinates = LocationService.outboundCoordinate(place.coordinates)
+        let cityName = place.name.isEmpty ? "Current Location" : place.name
 
         let languageCode = Locale.current.language.languageCode?.identifier ?? "en"
         let language = languageCode.lowercased().hasPrefix("de") ? "de" : "en"

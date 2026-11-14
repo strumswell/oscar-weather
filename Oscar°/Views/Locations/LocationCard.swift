@@ -16,6 +16,7 @@ struct LocationCard: View {
     var snapshot: AtmosphereSnapshot?
     var isSelected = false
     var isDefault = false
+    var isNotificationPlace = false
     var backdropPaused = false
 
     @ScaledMetric(relativeTo: .headline) private var cardHeight: CGFloat = 102
@@ -45,6 +46,12 @@ struct LocationCard: View {
                             Image(systemName: "star.fill")
                                 .font(.caption2)
                                 .foregroundStyle(.yellow.opacity(0.95))
+                                .accessibilityHidden(true)
+                        }
+                        if isNotificationPlace {
+                            Image(systemName: "bell.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.white.opacity(0.9))
                                 .accessibilityHidden(true)
                         }
                     }
@@ -133,6 +140,7 @@ struct LocationCard: View {
         if let detail { parts.append(detail) }
         if let temperature { parts.append(SettingService.shared.units.temperature.string(temperature)) }
         if isDefault { parts.append(String(localized: "Standardort")) }
+        if isNotificationPlace { parts.append(String(localized: "Benachrichtigungen")) }
         return Text(parts.joined(separator: ", "))
     }
 }

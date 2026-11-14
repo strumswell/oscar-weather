@@ -17,34 +17,29 @@ struct WindLockScreenEntry: TimelineEntry {
     let compass: String
 }
 
-struct WindProvider: TimelineProvider {
+struct WindProvider: PlaceTimelineSource {
     let client = APIClient.shared
+    let refreshMinutes = 30
 
     func placeholder(in context: Context) -> WindLockScreenEntry {
         WindLockScreenEntry(date: Date(), speed: 12, directionDegrees: 45, compass: Self.compassDirection(45))
     }
 
-    func getSnapshot(in context: Context, completion: @escaping @Sendable (WindLockScreenEntry) -> ()) {
-        completion(placeholder(in: context))
-    }
+    func entries(for place: WidgetPlace) async throws -> [WindLockScreenEntry] {
+        let weather = try await client.getForecast(
+            coordinates: place.coordinates,
+            forecastDays: ._1,
+            hourly: [.windspeed_10m]
+        )
 
-    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<WindLockScreenEntry>) -> ()) {
-        runWidgetTimeline(refreshMinutes: 30, completion: completion) { coordinates in
-            let weather = try await client.getForecast(
-                coordinates: coordinates,
-                forecastDays: ._1,
-                hourly: [.windspeed_10m]
-            )
+        let direction = weather.current?.wind_direction_10m
 
-            let direction = weather.current?.wind_direction_10m
-
-            return [WindLockScreenEntry(
-                date: Date(),
-                speed: weather.current?.windspeed,
-                directionDegrees: direction,
-                compass: direction.map(Self.compassDirection) ?? ""
-            )]
-        }
+        return [WindLockScreenEntry(
+            date: Date(),
+            speed: weather.current?.windspeed,
+            directionDegrees: direction,
+            compass: direction.map(Self.compassDirection) ?? ""
+        )]
     }
 
     static func compassDirection(_ degrees: Double) -> String {
@@ -116,7 +111,7 @@ struct WindLockScreenWidget: Widget {
     let kind: String = "WindLockScreenWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: WindProvider()) { entry in
+        placeConfiguration(kind: kind, source: WindProvider()) { entry in
             WindLockScreenView(entry: entry)
         }
         .configurationDisplayName(String(localized: "Wind", comment: "LS Widget Wind"))

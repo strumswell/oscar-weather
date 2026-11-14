@@ -31,19 +31,25 @@ struct RadarProvider: AppIntentTimelineProvider {
     private func buildWidgetEntry(
         configuration: RadarWidgetConfigIntent, family: WidgetFamily
     ) async -> RadarEntry {
-        WidgetBasemapStore.registerRequestedStyle(configuration.style.rawValue)
+        let style = configuration.style.rawValue
+        let place = await widgetPlace(for: configuration.city)
+        if place.isFixed {
+            WidgetBasemapStore.registerFixedBasemap(style: style, at: place.coordinates)
+        } else {
+            WidgetBasemapStore.registerRequestedStyle(style)
+        }
 
-        let location = await currentWidgetCoordinates()
         let renderSize = snapshotSize(for: family)
         let options = RadarWidgetRenderOptions(
-            style: configuration.style.rawValue,
+            style: style,
             smoothing: configuration.smoothing,
             motionArrows: configuration.motionArrows,
-            stormCells: configuration.stormCells
+            stormCells: configuration.stormCells,
+            fixedPlace: place.isFixed
         )
 
         guard let rendered = await RadarSnapshotRenderer.render(
-            center: location, size: renderSize, options: options) else {
+            center: place.coordinates, size: renderSize, options: options) else {
             let fallback = UIImage(systemName: "wifi.exclamationmark") ?? UIImage()
             return RadarEntry(date: Date(), frameDate: Date(), image: fallback)
         }

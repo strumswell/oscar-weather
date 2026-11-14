@@ -388,28 +388,6 @@
         }
       }
     },
-    "Aktueller Standort" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aktueller Standort"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Current Location"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mevcut Konum"
-          }
-        }
-      }
-    },
     "Aktueller UV-Index mit WHO-Farbskala" : {
       "comment" : "LS Widget UV-Index Beschreibung",
       "localizations" : {
@@ -1497,68 +1475,24 @@
         }
       }
     },
-    "Regenradar (Global)" : {
+    "Regenradar für deinen Ort" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Regenradar (Global)"
+            "value" : "Regenradar für deinen Ort"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rain Radar (Global)"
+            "value" : "Rain radar for your location"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yağmur Radarı (Küresel)"
-          }
-        }
-      }
-    },
-    "Regenradar für aktuellen Standort" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Regenradar für aktuellen Standort"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rain radar for the current location"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Güncel konum için yağmur radarı"
-          }
-        }
-      }
-    },
-    "Regenradar für aktuellen Standort mit globaler Reichweite" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Regenradar für aktuellen Standort mit globaler Reichweite"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rain radar for the current location with global coverage"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Güncel konum için küresel kapsamlı yağmur radarı"
+            "value" : "Konumunuz için yağmur radarı"
           }
         }
       }
@@ -2064,24 +1998,24 @@
     "W_compass" : {
       "comment" : "West"
     },
-    "Wähle den Ort für die Tagesvorhersage." : {
+    "Wähle den Ort für dieses Widget." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wähle den Ort für die Tagesvorhersage."
+            "value" : "Wähle den Ort für dieses Widget."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choose the location for the daily forecast."
+            "value" : "Choose the location for this widget."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Günlük tahmin için konumu seçin."
+            "value" : "Bu widget için konumu seçin."
           }
         }
       }
@@ -2107,6 +2041,28 @@
     },
     "Werte ersetzen" : {
 
+    },
+    "Wie in der App" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie in der App"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Same as in the app"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamadaki gibi"
+          }
+        }
+      }
     },
     "Wind" : {
       "comment" : "LS Widget Wind",

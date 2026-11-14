@@ -1,3 +1,4 @@
+import CoreLocation
 import Foundation
 import Testing
 @testable import Oscar_
@@ -64,5 +65,23 @@ struct WidgetCityTests {
     @Test(arguments: ["", "Berlin", "52.52", "52.52;13.405", "abc,13.405", "city_x1_p1_QQ", "city_p1_p1_%%%", "city_p1_p1", "CURRENT"])
     func garbageIsRejected(id: String) {
         #expect(WidgetCity(id: id) == nil)
+    }
+
+    @Test
+    func fixedBasemapKeyRoundTripsAndRegistryKeepsTwelveNewest() throws {
+        let key = WidgetBasemapStore.fixedKey(style: "dark", at: CLLocationCoordinate2D(latitude: -33.86882, longitude: 151.20929))
+        #expect(key == "dark@-33.869,151.209")
+        let parsed = try #require(WidgetBasemapStore.parseFixedKey(key))
+        #expect(parsed.style == "dark")
+        #expect(WidgetBasemapStore.fixedKey(style: parsed.style, at: parsed.coordinate) == key)
+
+        let keys = (0..<12).map { "fiord@\($0).000,0.000" }
+        let moved = WidgetBasemapStore.movedToEnd(keys[3], in: keys)
+        #expect(moved.count == 12)
+        #expect(moved.last == keys[3])
+        let capped = WidgetBasemapStore.movedToEnd(key, in: keys)
+        #expect(capped.count == 12)
+        #expect(capped.first == keys[1])
+        #expect(capped.last == key)
     }
 }

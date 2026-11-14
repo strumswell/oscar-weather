@@ -29,6 +29,7 @@ struct RadarWidgetRenderOptions {
     var smoothing = true
     var motionArrows = true
     var stormCells = false
+    var fixedPlace = false
 }
 
 @MainActor
@@ -69,7 +70,7 @@ enum RadarSnapshotRenderer {
             cells = await stormCells(region: region, around: center)
         }
 
-        let basemap = loadBasemap(center: center, size: size, style: options.style)
+        let basemap = loadBasemap(center: center, size: size, style: options.style, fixed: options.fixedPlace)
         guard basemap != nil || plan.tileSource != nil else { return nil }
 
         let bounds = basemap?.bounds ?? fittedBounds(around: center, spanMeters: mapSpanMeters, size: size)
@@ -108,37 +109,13 @@ enum RadarSnapshotRenderer {
         return Rendered(image: image, frameDate: plan.frameDate)
     }
 
-    static func overlayImage(
-        center: CLLocationCoordinate2D, spanMeters: Double, size: CGSize
-    ) async -> Rendered? {
-        let plan: RadarOverlayPlan
-        if let region = RadarRegion.bestSource(latitude: center.latitude, longitude: center.longitude) {
-            plan = await radarPlan(region: region, around: center, includeArrows: false)
-        } else {
-            plan = await ecmwfPlan()
-        }
-        guard plan.tileSource != nil else { return nil }
-        let bounds = fittedBounds(around: center, spanMeters: spanMeters, size: size)
-        let frame = MercatorFrame(bounds: bounds, size: size)
-        let tiles = await fetchOverlayTiles(plan: plan, frame: frame)
-        guard !tiles.isEmpty else { return nil }
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = compositeScale
-        format.opaque = false
-        let image = UIGraphicsImageRenderer(size: size, format: format).image { _ in
-            for tile in tiles {
-                tile.image.draw(in: tile.rect)
-            }
-        }
-        return Rendered(image: image, frameDate: plan.frameDate)
-    }
-
     // MARK: - Basemap
 
     private static func loadBasemap(
-        center: CLLocationCoordinate2D, size: CGSize, style: String
+        center: CLLocationCoordinate2D, size: CGSize, style: String, fixed: Bool
     ) -> (image: UIImage, bounds: OscarRadarBounds)? {
-        guard let (record, image) = WidgetBasemapStore.load(size: size, style: style) else { return nil }
+        guard let (record, image) = WidgetBasemapStore.load(
+            size: size, style: style, fixed: fixed ? center : nil) else { return nil }
         let bounds = OscarRadarBounds(north: record.north, south: record.south, west: record.west, east: record.east)
         guard bounds.contains(center) else { return nil }
         return (image, bounds)

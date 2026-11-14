@@ -59,7 +59,7 @@ struct NowTodayWidget: Widget {
     
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: HomeProvider()) { entry in
+        placeConfiguration(kind: kind, source: HomeProvider()) { entry in
             NowTodayEntryView(entry: entry)
         }
         .contentMarginsDisabled()

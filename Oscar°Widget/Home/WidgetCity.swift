@@ -17,7 +17,7 @@ struct WidgetCity: Identifiable {
     static var currentLocation: WidgetCity {
         WidgetCity(
             id: currentLocationID,
-            name: String(localized: "Aktueller Standort"),
+            name: String(localized: "Wie in der App"),
             latitude: .nan,
             longitude: .nan
         )

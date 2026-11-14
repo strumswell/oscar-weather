@@ -20,11 +20,12 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
     }
 
     private func makeEntry(for configuration: SelectCityIntent) async -> DailyForecastEntry {
-        let resolved = await resolveLocation(configuration.city)
+        let place = await widgetPlace(for: configuration.city)
+        let name = await place.locationName()
         do {
-            return try await forecastEntry(coordinates: resolved.coordinates, locationName: resolved.name)
+            return try await forecastEntry(coordinates: place.coordinates, locationName: name)
         } catch {
-            return .unavailable(location: resolved.name)
+            return .unavailable(location: name)
         }
     }
 
@@ -96,30 +97,6 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
             maxTemp: highs.max() ?? 40,
             backgroundGradient: gradient
         )
-    }
-
-    private func resolveLocation(_ cityID: String?) async
-        -> (coordinates: CLLocationCoordinate2D, name: String)
-    {
-        if let cityID,
-           let city = WidgetCity(id: cityID),
-           !city.isCurrentLocation,
-           city.latitude.isFinite,
-           city.longitude.isFinite {
-            return (
-                CLLocationCoordinate2D(
-                    latitude: city.latitude,
-                    longitude: city.longitude
-                ),
-                city.name
-            )
-        }
-        return await Task { @MainActor in
-            LocationService.shared.update()
-            let coordinate = LocationService.shared.getCoordinates()
-            let name = await LocationService.shared.getLocationName()
-            return (coordinates: coordinate, name: name)
-        }.value
     }
 
     private func value(_ array: [Double]?, _ index: Int) -> Double? {

@@ -35,67 +35,137 @@ func minutesFromNow(_ minutes: Int) -> Date {
     Calendar.current.date(byAdding: .minute, value: minutes, to: Date())!
 }
 
-func runWidgetTimeline<Entry: TimelineEntry>(
-    refreshMinutes: Int,
-    retryMinutes: Int = 15,
-    completion: @escaping @Sendable (Timeline<Entry>) -> (),
-    make: @escaping @Sendable (CLLocationCoordinate2D) async throws -> [Entry]
-) {
-    Task {
+struct WidgetPlace {
+    let coordinates: CLLocationCoordinate2D
+    var name: String? = nil
+
+    var isFixed: Bool { name != nil }
+
+    func locationName() async -> String {
+        if let name { return name }
+        return await LocationService.shared.getLocationName()
+    }
+}
+
+#if os(iOS)
+func widgetPlace(for cityID: String?) async -> WidgetPlace {
+    if let cityID,
+       let city = WidgetCity(id: cityID),
+       !city.isCurrentLocation,
+       city.latitude.isFinite,
+       city.longitude.isFinite {
+        return WidgetPlace(
+            coordinates: CLLocationCoordinate2D(latitude: city.latitude, longitude: city.longitude),
+            name: city.name
+        )
+    }
+    return WidgetPlace(coordinates: await currentWidgetCoordinates())
+}
+#endif
+
+protocol PlaceTimelineSource: TimelineProvider, Sendable {
+    var refreshMinutes: Int { get }
+    var retryMinutes: Int { get }
+    func entries(for place: WidgetPlace) async throws -> [Entry]
+}
+
+extension PlaceTimelineSource {
+    var retryMinutes: Int { 15 }
+
+    func getSnapshot(in context: Context, completion: @escaping @Sendable (Entry) -> ()) {
+        completion(placeholder(in: context))
+    }
+
+    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<Entry>) -> ()) {
+        Task {
+            let place = WidgetPlace(coordinates: await currentWidgetCoordinates())
+            completion(await timeline(for: place))
+        }
+    }
+
+    func timeline(for place: WidgetPlace) async -> Timeline<Entry> {
         do {
-            let coordinates = await currentWidgetCoordinates()
-            let entries = try await make(coordinates)
-            let nextUpdateDate = minutesFromNow(refreshMinutes)
-            completion(Timeline(entries: entries, policy: .after(nextUpdateDate)))
+            return Timeline(entries: try await entries(for: place), policy: .after(minutesFromNow(refreshMinutes)))
         } catch {
-            let retryDate = minutesFromNow(retryMinutes)
-            completion(Timeline(entries: [], policy: .after(retryDate)))
+            return Timeline(entries: [], policy: .after(minutesFromNow(retryMinutes)))
         }
     }
 }
 
-struct LockscreenProvider: TimelineProvider {
+#if os(iOS)
+struct PlaceIntentProvider<Source: PlaceTimelineSource>: AppIntentTimelineProvider {
+    let source: Source
+
+    func placeholder(in context: Context) -> Source.Entry {
+        source.placeholder(in: context)
+    }
+
+    func snapshot(for configuration: SelectCityIntent, in context: Context) async -> Source.Entry {
+        source.placeholder(in: context)
+    }
+
+    func timeline(for configuration: SelectCityIntent, in context: Context) async -> Timeline<Source.Entry> {
+        await source.timeline(for: widgetPlace(for: configuration.city))
+    }
+}
+#endif
+
+@MainActor
+func placeConfiguration<Source: PlaceTimelineSource, Content: View>(
+    kind: String,
+    source: Source,
+    @ViewBuilder content: @escaping (Source.Entry) -> Content
+) -> some WidgetConfiguration {
+    #if os(iOS)
+    return AppIntentConfiguration(
+        kind: kind,
+        intent: SelectCityIntent.self,
+        provider: PlaceIntentProvider(source: source),
+        content: content
+    )
+    #else
+    return StaticConfiguration(kind: kind, provider: source, content: content)
+    #endif
+}
+
+struct LockscreenProvider: PlaceTimelineSource {
     let client = APIClient.shared
+    let refreshMinutes = 30
 
     func placeholder(in context: Context) -> TemperatureLockScreenEntry {
         TemperatureLockScreenEntry(date: Date(), temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", precipitation: 2.5, precipitationProbability: 72)
     }
-    
-    func getSnapshot(in context: Context, completion: @escaping @Sendable (TemperatureLockScreenEntry) -> ()) {
-        completion(placeholder(in: context))
-    }
-    
-    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<TemperatureLockScreenEntry>) -> ()) {
-        runWidgetTimeline(refreshMinutes: 30, completion: completion) { coordinates in
-            async let weatherRequest = client.getForecast(
-                coordinates: coordinates,
-                forecastDays: ._1,
-                hourly: [.precipitation_probability]
-            )
-            async let radarRequest = client.getRadarSeries(coordinates: coordinates)
-            let weather = try await weatherRequest
-            let precipSeries = try? await radarRequest
 
-            let reportedMin = weather.daily?.temperature_2m_min?.first
-            let reportedMax = weather.daily?.temperature_2m_max?.first
-            let temperatureNow = weather.current?.temperature ?? 0
-            let lowerTemperature = min(reportedMin ?? temperatureNow, reportedMax ?? temperatureNow)
-            let upperTemperature = max(reportedMin ?? temperatureNow, reportedMax ?? temperatureNow)
-            let temperatureMin = lowerTemperature < upperTemperature ? lowerTemperature : lowerTemperature - 0.5
-            let temperatureMax = lowerTemperature < upperTemperature ? upperTemperature : upperTemperature + 0.5
-            let weathercode = weather.current?.weathercode ?? 0
-            let isDay = weather.current?.is_day ?? 0
+    func entries(for place: WidgetPlace) async throws -> [TemperatureLockScreenEntry] {
+        let coordinates = place.coordinates
+        async let weatherRequest = client.getForecast(
+            coordinates: coordinates,
+            forecastDays: ._1,
+            hourly: [.precipitation_probability]
+        )
+        async let radarRequest = client.getRadarSeries(coordinates: coordinates)
+        let weather = try await weatherRequest
+        let precipSeries = try? await radarRequest
 
-            let modelPrecipitation = weather.current?.precipitation ?? 0
-            let probabilities = weather.hourly?.precipitation_probability ?? []
-            let hourIndex = getLocalizedHourIndex(weather: weather)
-            let precipitationProbability = probabilities.indices.contains(hourIndex) ? probabilities[hourIndex] : nil
+        let reportedMin = weather.daily?.temperature_2m_min?.first
+        let reportedMax = weather.daily?.temperature_2m_max?.first
+        let temperatureNow = weather.current?.temperature ?? 0
+        let lowerTemperature = min(reportedMin ?? temperatureNow, reportedMax ?? temperatureNow)
+        let upperTemperature = max(reportedMin ?? temperatureNow, reportedMax ?? temperatureNow)
+        let temperatureMin = lowerTemperature < upperTemperature ? lowerTemperature : lowerTemperature - 0.5
+        let temperatureMax = lowerTemperature < upperTemperature ? upperTemperature : upperTemperature + 0.5
+        let weathercode = weather.current?.weathercode ?? 0
+        let isDay = weather.current?.is_day ?? 0
 
-            return nowcastEntryDates(refreshMinutes: 30).map { date in
-                let precipitation = precipSeries?.rate(at: date) ?? modelPrecipitation
-                let icon = WeatherSymbol.sfSymbol(weathercode: weathercode, isDay: isDay, isRaining: precipitation > 0, precipitation: precipitation)
-                return TemperatureLockScreenEntry(date: date, temperatureMin: temperatureMin, temperatureMax: temperatureMax, temperatureNow: temperatureNow, icon: icon, precipitation: precipitation, precipitationProbability: Int(precipitationProbability ?? 0))
-            }
+        let modelPrecipitation = weather.current?.precipitation ?? 0
+        let probabilities = weather.hourly?.precipitation_probability ?? []
+        let hourIndex = getLocalizedHourIndex(weather: weather)
+        let precipitationProbability = probabilities.indices.contains(hourIndex) ? probabilities[hourIndex] : nil
+
+        return nowcastEntryDates(refreshMinutes: refreshMinutes).map { date in
+            let precipitation = precipSeries?.rate(at: date) ?? modelPrecipitation
+            let icon = WeatherSymbol.sfSymbol(weathercode: weathercode, isDay: isDay, isRaining: precipitation > 0, precipitation: precipitation)
+            return TemperatureLockScreenEntry(date: date, temperatureMin: temperatureMin, temperatureMax: temperatureMax, temperatureNow: temperatureNow, icon: icon, precipitation: precipitation, precipitationProbability: Int(precipitationProbability ?? 0))
         }
     }
 

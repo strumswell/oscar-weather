@@ -6761,6 +6761,22 @@
         }
       }
     },
+    "Benachrichtigungen hier" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications here"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirimleri buraya al"
+          }
+        }
+      }
+    },
     "Benachrichtigungsstatus unbekannt." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8495,6 +8511,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%2$@ yılından bu yana en soğuk %1$@."
+          }
+        }
+      }
+    },
+    "Der aktuelle Standort wird aktualisiert, wenn du Oscar° öffnest." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The current location updates when you open Oscar°."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mevcut konum, Oscar°'ı açtığınızda güncellenir."
           }
         }
       }
@@ -11813,28 +11845,6 @@
       },
       "shouldTranslate" : false
     },
-    "Gilt für %@, den Ort, der gerade in Oscar° offen ist, auf etwa 100 m gerundet." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gilt für %@, den Ort, der gerade in Oscar° offen ist, auf etwa 100 m gerundet."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Applies to %@, the place currently open in Oscar°, rounded to about 100 m."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar°'da şu an açık olan konum için geçerlidir: %@, yaklaşık 100 m'ye yuvarlanır."
-          }
-        }
-      }
-    },
     "Gilt für deinen aktuellen Standort, auf etwa 100 m gerundet. Schaltest du alles aus, wird er gelöscht." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -11848,28 +11858,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mevcut konumunuz yaklaşık 100 m'ye yuvarlanarak kullanılır. Hepsini kapatırsanız silinir."
-          }
-        }
-      }
-    },
-    "Gilt für den Ort, der gerade in Oscar° offen ist, auf etwa 100 m gerundet." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gilt für den Ort, der gerade in Oscar° offen ist, auf etwa 100 m gerundet."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Applies to the place currently open in Oscar°, rounded to about 100 m."
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oscar°'da şu an açık olan konum için geçerlidir, yaklaşık 100 m'ye yuvarlanır."
           }
         }
       }
@@ -20316,6 +20304,38 @@
         }
       }
     },
+    "Regen- und Wetterwarnungen kommen für diesen Ort." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain and weather alerts are sent for this place."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur ve hava durumu uyarıları bu konum için gönderilir."
+          }
+        }
+      }
+    },
+    "Regen- und Wetterwarnungen kommen für diesen Ort. Wähle einen anderen Ort, um das zu ändern." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain and weather alerts are sent for this place. Choose another place to change this."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur ve hava durumu uyarıları bu konum için gönderilir. Bunu değiştirmek için başka bir konum seçin."
+          }
+        }
+      }
+    },
     "Regenradar" : {
       "localizations" : {
         "de" : {
@@ -24800,7 +24820,7 @@
         }
       }
     },
-    "Wähle den Ort für die Tagesvorhersage." : {
+    "Wähle den Ort für dieses Widget." : {
 
     },
     "Wähle, ob die Tageswerte ersetzt oder im 24-Stunden-Bereich markiert werden." : {
@@ -25043,6 +25063,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uyarılar açılma"
+          }
+        }
+      }
+    },
+    "Warnungen und die Regen-Live-Aktivität gelten für diesen Ort, auf etwa 100 m gerundet." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alerts and the rain Live Activity apply to this place, rounded to about 100 m."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uyarılar ve Yağmur Canlı Etkinliği bu konum için geçerlidir, yaklaşık 100 m'ye yuvarlanır."
           }
         }
       }
@@ -25799,6 +25835,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hava Durumu Uyarıları"
+          }
+        }
+      }
+    },
+    "Wie in der App" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Same as in the app"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uygulamadaki gibi"
           }
         }
       }

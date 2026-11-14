@@ -11,6 +11,7 @@ struct OnboardingLocationStep: View {
 
     private let locationService = LocationService.shared
     @State private var requested = false
+    @State private var waitingForFix = false
 
     var body: some View {
         OnboardingQuestionStep(
@@ -27,11 +28,12 @@ struct OnboardingLocationStep: View {
                 .font(.footnote)
                 .foregroundStyle(.tertiary)
         }
+        .disabled(waitingForFix)
         .onChange(of: locationService.authStatus) { _, status in
             guard requested, let status else { return }
             switch status {
             case .authorizedAlways, .authorizedWhenInUse:
-                onResolved(true)
+                resolveGranted()
             case .denied, .restricted:
                 onResolved(false)
             default:
@@ -43,12 +45,21 @@ struct OnboardingLocationStep: View {
     private func requestPermission() {
         switch locationService.authStatus {
         case .authorizedAlways, .authorizedWhenInUse:
-            onResolved(true)
+            resolveGranted()
         case .denied, .restricted:
             onResolved(false)
         default:
             requested = true
             locationService.requestAuthorization()
+        }
+    }
+
+    private func resolveGranted() {
+        guard !waitingForFix else { return }
+        waitingForFix = true
+        Task {
+            _ = await locationService.awaitGPSCoordinates(timeout: .seconds(5))
+            onResolved(true)
         }
     }
 }

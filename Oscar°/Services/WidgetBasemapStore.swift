@@ -7,6 +7,7 @@
 //  submit GPU work on device, so it composites radar data over these PNGs on the CPU.
 //
 
+import CoreLocation
 import UIKit
 
 struct WidgetBasemapRecord: Codable {
@@ -55,10 +56,42 @@ enum WidgetBasemapStore {
         defaults.set(styles, forKey: requestedStylesKey)
     }
 
+    private static let fixedBasemapsKey = "radarWidgetFixedBasemaps"
+
+    static func fixedKey(style: String, at coordinate: CLLocationCoordinate2D) -> String {
+        "\(style)@" + String(format: "%.3f,%.3f", coordinate.latitude, coordinate.longitude)
+    }
+
+    static func parseFixedKey(_ key: String) -> (style: String, coordinate: CLLocationCoordinate2D)? {
+        let parts = key.split(separator: "@")
+        guard parts.count == 2 else { return nil }
+        let numbers = parts[1].split(separator: ",").compactMap { Double($0) }
+        guard numbers.count == 2 else { return nil }
+        return (String(parts[0]), CLLocationCoordinate2D(latitude: numbers[0], longitude: numbers[1]))
+    }
+
+    static func fixedKeys() -> [String] {
+        UserDefaults(suiteName: appGroupID)?.stringArray(forKey: fixedBasemapsKey) ?? []
+    }
+
+    static func registerFixedBasemap(style: String, at coordinate: CLLocationCoordinate2D) {
+        guard let defaults = UserDefaults(suiteName: appGroupID) else { return }
+        let keys = defaults.stringArray(forKey: fixedBasemapsKey) ?? []
+        defaults.set(movedToEnd(fixedKey(style: style, at: coordinate), in: keys), forKey: fixedBasemapsKey)
+    }
+
+    static func movedToEnd(_ key: String, in keys: [String]) -> [String] {
+        Array((keys.filter { $0 != key } + [key]).suffix(12))
+    }
+
     // MARK: - Records
 
-    private static func key(_ size: CGSize, style: String) -> String {
-        "\(Int(size.width.rounded()))x\(Int(size.height.rounded()))-\(style)"
+    private static func key(_ size: CGSize, style: String, fixed: CLLocationCoordinate2D? = nil) -> String {
+        key(size, name: fixed.map { fixedKey(style: style, at: $0) } ?? style)
+    }
+
+    private static func key(_ size: CGSize, name: String) -> String {
+        "\(Int(size.width.rounded()))x\(Int(size.height.rounded()))-\(name)"
     }
 
     private struct BasemapFile: Codable {
@@ -66,9 +99,11 @@ enum WidgetBasemapStore {
         let png: Data
     }
 
-    static func load(size: CGSize, style: String) -> (record: WidgetBasemapRecord, image: UIImage)? {
+    static func load(
+        size: CGSize, style: String, fixed: CLLocationCoordinate2D? = nil
+    ) -> (record: WidgetBasemapRecord, image: UIImage)? {
         guard let directory else { return nil }
-        let key = key(size, style: style)
+        let key = key(size, style: style, fixed: fixed)
         guard let data = try? Data(contentsOf: directory.appendingPathComponent("\(key).basemap")),
               let file = try? JSONDecoder().decode(BasemapFile.self, from: data),
               let image = UIImage(data: file.png, scale: file.record.scale)
@@ -76,17 +111,27 @@ enum WidgetBasemapStore {
         return (file.record, image)
     }
 
-    static func save(_ record: WidgetBasemapRecord, image: UIImage) {
+    static func save(_ record: WidgetBasemapRecord, image: UIImage, fixed: CLLocationCoordinate2D? = nil) {
         guard let directory,
               let png = image.pngData(),
               let data = try? JSONEncoder().encode(BasemapFile(record: record, png: png))
         else { return }
         let key = key(CGSize(width: record.width, height: record.height),
-                      style: record.style ?? defaultStyle)
+                      style: record.style ?? defaultStyle, fixed: fixed)
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try? data.write(to: directory.appendingPathComponent("\(key).basemap"), options: .atomic)
         for legacy in ["png", "json"] {
             try? FileManager.default.removeItem(at: directory.appendingPathComponent("\(key).\(legacy)"))
+        }
+    }
+
+    static func removeFixedBasemaps(except keys: [String]) {
+        guard let directory,
+              let files = try? FileManager.default.contentsOfDirectory(atPath: directory.path)
+        else { return }
+        let kept = Set(keys.flatMap { name in compositeSizes.map { "\(key($0, name: name)).basemap" } })
+        for file in files where file.contains("@") && !kept.contains(file) {
+            try? FileManager.default.removeItem(at: directory.appendingPathComponent(file))
         }
     }
 }

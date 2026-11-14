@@ -42,7 +42,7 @@ struct PrecipitationLockScreenWidget: Widget {
     
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: LockscreenProvider()) { entry in
+        placeConfiguration(kind: kind, source: LockscreenProvider()) { entry in
             PrecipitationLockScreenView(entry: entry)
         }
         .configurationDisplayName(String(localized: "Regen", comment: "LS Widget Regen"))
