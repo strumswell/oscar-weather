@@ -14,6 +14,7 @@ struct RadarEntry: TimelineEntry {
     var bars: [Double] = []
     var forecastStart: String?
     var timeZone: TimeZone = .current
+    var sky: LinearGradient?
 }
 
 struct RadarProvider: AppIntentTimelineProvider {
@@ -82,6 +83,11 @@ struct RadarProvider: AppIntentTimelineProvider {
         let series = try? await seriesRequest
         let forecast = (try? await forecastRequest)?.value
         entry.timeZone = forecast?.locationTimeZone ?? .current
+        if let forecast {
+            entry.sky = await WeatherAtmosphericAdapter.widgetGradient(
+                weather: forecast, precipSeries: series, coordinates: place.coordinates
+            )
+        }
 
         return nowcastEntryDates(refreshMinutes: 15, now: now).map { date in
             var dated = entry

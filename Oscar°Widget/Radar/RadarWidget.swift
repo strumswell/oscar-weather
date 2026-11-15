@@ -64,7 +64,7 @@ struct RadarWidgetEntryView: View {
             }
         }
         .environment(\.colorScheme, .dark)
-        .containerBackground(entry.style.mapTone, for: .widget)
+        .containerBackground(entry.sky ?? entry.style.mapTone, for: .widget)
         .widgetURL(.oscarRadar(entry.cityID))
     }
 }
