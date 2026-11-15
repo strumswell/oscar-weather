@@ -30,7 +30,7 @@ struct StationWidgetView: View {
             case .accessoryCircular:
                 StationCircularView(station: entry.head)
             case .accessoryRectangular:
-                StationRectangularView(station: entry.head, timeZone: entry.timeZone)
+                StationRectangularView(station: entry.head)
             #if os(iOS)
             case .systemMedium:
                 StationHomeView(station: entry.head, isDay: entry.isDay, isMedium: true, timeZone: entry.timeZone)
@@ -231,7 +231,6 @@ private func pressureTrend(_ history: [Components.Schemas.StationReading], unit:
 
 private struct StationRectangularView: View {
     let station: Components.Schemas.NearbyStation?
-    let timeZone: TimeZone
 
     var body: some View {
         Group {
@@ -249,14 +248,6 @@ private struct StationRectangularView: View {
                     .font(.headline)
                     StationSparkline(history: station.history, unit: units.temperature)
                         .frame(maxHeight: .infinity)
-                    HStack {
-                        Text("gemessen \(SettingService.formattedTime(station.last_report_at, timeZone: timeZone))")
-                        Spacer()
-                        Text("24 h")
-                    }
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
                 }
             } else {
                 Text("Keine Messstation in der Nähe")

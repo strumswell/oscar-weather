@@ -62,7 +62,8 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
 
     static func days(
         from weather: Operations.getForecast.Output.Ok.Body.jsonPayload,
-        count: Int
+        count: Int,
+        labelsToday: Bool = true
     ) -> [DayForecast] {
         let daily = weather.daily
         let timeZone = weather.locationTimeZone
@@ -81,7 +82,7 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
             let weekday = Self.weekdayLabel(
                 timestamp: Self.value(times, index) ?? 0,
                 timeZone: timeZone,
-                isToday: index == firstDay
+                isToday: labelsToday && index == firstDay
             )
             let icon = WeatherSymbol.sfSymbol(weathercode: Self.value(codes, index) ?? 0)
             var probability: Double?

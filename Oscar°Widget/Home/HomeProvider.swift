@@ -58,7 +58,7 @@ final class HomeProvider: PlaceTimelineSource {
         let temperatureNow = weather.current?.temperature ?? 0
         let weathercode = weather.current?.weathercode ?? 0
         let isDay = weather.current?.is_day ?? 0
-        let days = DailyForecastProvider.days(from: weather, count: 5)
+        let days = DailyForecastProvider.days(from: weather, count: 5, labelsToday: false)
         let gradient = await WeatherAtmosphericAdapter.widgetGradient(
             weather: weather, precipSeries: precipSeries, coordinates: coordinates
         )
@@ -157,9 +157,7 @@ extension HomeEntry {
         let days = dayIcons.indices.map { index in
             DayForecast(
                 id: index,
-                weekday: index == 0
-                    ? String(localized: "Heute")
-                    : SettingService.formattedShortWeekday(now.addingTimeInterval(Double(index) * 86_400), timeZone: .current),
+                weekday: SettingService.formattedShortWeekday(now.addingTimeInterval(Double(index) * 86_400), timeZone: .current),
                 icon: dayIcons[index],
                 precipProbability: nil,
                 precipSum: nil,
