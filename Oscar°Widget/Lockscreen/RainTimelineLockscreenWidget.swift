@@ -160,7 +160,10 @@ struct RainTimelineWidgetView: View {
                 .containerBackground(for: .widget) { sky }
         #endif
         case .accessoryInline:
-            Label(entry.headline, systemImage: entry.hasRadarCoverage ? "umbrella.fill" : "cloud.slash")
+            Label(
+                entry.points.isEmpty ? "–" : RainNowcastSummary.shortHeadline(for: entry.points, timeZone: entry.timeZone),
+                systemImage: entry.hasRadarCoverage ? "umbrella.fill" : "cloud.slash"
+            )
                 .containerBackground(.clear, for: .widget)
         default:
             RainTimelineRectangularView(entry: entry)

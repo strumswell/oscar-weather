@@ -33,6 +33,21 @@ extension SettingService {
         }
     }
 
+    nonisolated static func formattedHour(_ date: Date, timeZone: TimeZone? = nil) -> String {
+        let mode = resolvedTimeFormatPreference
+        let uses12h = switch mode {
+        case .h24: false
+        case .h12: true
+        case .system: DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: .autoupdatingCurrent)?.contains("a") ?? false
+        }
+        let key = "hour|\(uses12h)|\(timeZone?.identifier ?? "local")"
+        return format(date, key: key) {
+            $0.locale = .autoupdatingCurrent
+            $0.timeZone = timeZone
+            $0.dateFormat = uses12h ? "ha" : "HH"
+        }
+    }
+
     nonisolated static func formattedDateTime(_ date: Date, timeZone: TimeZone? = nil) -> String {
         let key = "date|\(timeZone?.identifier ?? "local")"
         let dateString = format(date, key: key) {

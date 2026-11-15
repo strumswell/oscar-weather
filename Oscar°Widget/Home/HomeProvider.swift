@@ -104,10 +104,9 @@ final class HomeProvider: PlaceTimelineSource {
         return (start..<end).map { index in
             ForecastHour(
                 id: index,
-                label: SettingService.formattedTime(
+                label: SettingService.formattedHour(
                     Date(timeIntervalSince1970: times[index]),
-                    timeZone: weather.locationTimeZone,
-                    showsMinutes: false
+                    timeZone: weather.locationTimeZone
                 ),
                 icon: WeatherSymbol.sfSymbol(weathercode: codes[index], isDay: isDay[index] > 0),
                 temperature: temperatures[index]
@@ -147,7 +146,7 @@ extension HomeEntry {
         let hours = hourIcons.indices.map { index in
             ForecastHour(
                 id: index,
-                label: SettingService.formattedTime(now.addingTimeInterval(Double(index + 1) * 3600), showsMinutes: false),
+                label: SettingService.formattedHour(now.addingTimeInterval(Double(index + 1) * 3600)),
                 icon: hourIcons[index],
                 temperature: hourTemperatures[index]
             )

@@ -57,27 +57,28 @@ struct DailyForecastRow: View {
     let day: DayForecast
     let minTemp: Double
     let maxTemp: Double
+    var compact = false
     private var units: Units { SettingService.resolvedUnits }
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: compact ? 6 : 10) {
             Text(day.weekday)
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
-                .frame(width: 48, alignment: .leading)
+                .frame(width: compact ? 30 : 48, alignment: .leading)
 
             Image(systemName: day.icon)
                 .symbolRenderingMode(.multicolor)
-                .font(.body)
-                .frame(width: 30, height: 22)
+                .font(compact ? .subheadline : .body)
+                .frame(width: compact ? 24 : 30, height: compact ? 18 : 22)
 
             Text(units.temperatureString(day.low))
                 .font(.subheadline)
                 .monospacedDigit()
                 .foregroundStyle(.white.opacity(0.75))
-                .frame(width: 34, alignment: .trailing)
+                .frame(width: compact ? 28 : 34, alignment: .trailing)
 
             TemperatureRangeView(
                 low: day.low,
@@ -94,7 +95,7 @@ struct DailyForecastRow: View {
                 .font(.subheadline)
                 .fontWeight(.semibold)
                 .monospacedDigit()
-                .frame(width: 34, alignment: .leading)
+                .frame(width: compact ? 28 : 34, alignment: .leading)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(

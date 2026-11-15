@@ -50,7 +50,7 @@ struct RadarProvider: AppIntentTimelineProvider {
         configuration: RadarWidgetConfigIntent, family: WidgetFamily
     ) async -> [RadarEntry] {
         let style = configuration.style.rawValue
-        let place = await widgetPlace(for: configuration.city)
+        let place = await widgetPlace(for: configuration.city?.id)
         if place.isFixed {
             WidgetBasemapStore.registerFixedBasemap(style: style, at: place.coordinates)
         } else {

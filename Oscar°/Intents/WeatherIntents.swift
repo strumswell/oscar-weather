@@ -9,11 +9,11 @@ struct RainNowcastIntent: AppIntent {
     static let description = IntentDescription("Sagt dir, ob in den nächsten 90 Minuten Regen kommt.")
     static let supportedModes: IntentModes = .background
 
-    @Parameter(title: "Ort", optionsProvider: WidgetCityOptionsProvider())
-    var city: String?
+    @Parameter(title: "Ort")
+    var city: WidgetPlaceEntity?
 
     func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
-        let place = await widgetPlace(for: city)
+        let place = await widgetPlace(for: city?.id)
         let name = await place.locationName()
         async let forecast = place.isFixed ? try? siriForecast(place.coordinates) : nil
         guard let series = try await APIClient.shared.getRadarSeries(coordinates: place.coordinates) else {
@@ -40,11 +40,11 @@ struct CurrentWeatherIntent: AppIntent {
     static let description = IntentDescription("Sagt dir Temperatur, Wetterlage und die Werte für heute.")
     static let supportedModes: IntentModes = .background
 
-    @Parameter(title: "Ort", optionsProvider: WidgetCityOptionsProvider())
-    var city: String?
+    @Parameter(title: "Ort")
+    var city: WidgetPlaceEntity?
 
     func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
-        let place = await widgetPlace(for: city)
+        let place = await widgetPlace(for: city?.id)
         let name = await place.locationName()
         async let radar = try? APIClient.shared.getRadarSeries(coordinates: place.coordinates)
         let weather = try await siriForecast(place.coordinates)

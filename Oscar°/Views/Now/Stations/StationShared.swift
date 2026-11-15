@@ -4,10 +4,9 @@ import SwiftUI
 struct StationSparkline: View {
     let history: [Components.Schemas.StationReading]
     let unit: TemperatureUnit
-    var showsExtremes = true
 
     var body: some View {
-        let labelBand: CGFloat = showsExtremes ? 11 : 3
+        let labelBand: CGFloat = 11
         Canvas { context, size in
             let points = history.compactMap { reading in
                 reading.temperature_c.map { (reading.time.timeIntervalSince1970, $0) }
@@ -33,7 +32,7 @@ struct StationSparkline: View {
             let end = position(last)
             context.fill(Path(ellipseIn: CGRect(x: end.x - 2.5, y: end.y - 2.5, width: 5, height: 5)), with: .foreground)
 
-            guard showsExtremes, highPoint.1 > low else { return }
+            guard highPoint.1 > low else { return }
             for (point, isHigh) in [(highPoint, true), (lowPoint, false)] {
                 let label = context.resolve(
                     Text(verbatim: unit.string(point.1))

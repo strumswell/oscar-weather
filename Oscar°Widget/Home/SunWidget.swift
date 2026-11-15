@@ -89,10 +89,11 @@ struct SunWidgetView: View {
                 .containerBackground(.clear, for: .widget)
         case .accessoryInline:
             Label {
-                Text(verbatim: "\(entry.eventLabel) \(entry.time(entry.nextEvent))")
+                Text(verbatim: entry.time(entry.nextEvent))
             } icon: {
                 Image(systemName: entry.eventSymbol)
             }
+            .accessibilityLabel(Text(verbatim: "\(entry.eventLabel) \(entry.time(entry.nextEvent))"))
             .containerBackground(.clear, for: .widget)
         default:
             SunSmallView(entry: entry)

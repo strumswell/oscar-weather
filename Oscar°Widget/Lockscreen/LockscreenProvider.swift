@@ -97,7 +97,7 @@ struct PlaceIntentProvider<Source: PlaceTimelineSource>: AppIntentTimelineProvid
     }
 
     func timeline(for configuration: SelectCityIntent, in context: Context) async -> Timeline<Source.Entry> {
-        await source.timeline(for: widgetPlace(for: configuration.city), family: context.family)
+        await source.timeline(for: widgetPlace(for: configuration.city?.id), family: context.family)
     }
 }
 #endif

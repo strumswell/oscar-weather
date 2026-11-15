@@ -27,8 +27,8 @@ struct RadarWidgetConfigIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Regenradar"
     static let description = IntentDescription("Regenradar für deinen Ort")
 
-    @Parameter(title: "Ort", optionsProvider: WidgetCityOptionsProvider())
-    var city: String?
+    @Parameter(title: "Ort")
+    var city: WidgetPlaceEntity?
 
     @Parameter(title: "Kartenstil", default: .fiord)
     var style: RadarWidgetStyle

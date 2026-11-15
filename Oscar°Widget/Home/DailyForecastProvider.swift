@@ -18,7 +18,7 @@ struct DailyForecastProvider: AppIntentTimelineProvider {
     }
 
     private func makeEntry(for configuration: SelectCityIntent, family: WidgetFamily) async -> DailyForecastEntry {
-        let place = await widgetPlace(for: configuration.city)
+        let place = await widgetPlace(for: configuration.city?.id)
         let name = await place.locationName()
         do {
             return try await forecastEntry(coordinates: place.coordinates, locationName: name, cityID: place.cityID, family: family)

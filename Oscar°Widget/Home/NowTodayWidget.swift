@@ -66,7 +66,7 @@ private struct ForecastSmallView: View {
                 HStack(alignment: .top, spacing: 4) {
                     ForecastPlaceTitle(entry: entry, font: .subheadline)
                     Spacer(minLength: 0)
-                    ForecastConditionIcon(name: entry.icon, size: 20)
+                    ForecastConditionIcon(name: entry.icon, size: 16)
                 }
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(units.temperatureString(entry.temperatureNow))
@@ -118,21 +118,7 @@ private struct ForecastMediumView: View {
                     ForecastRainBlock(entry: entry, isLarge: false)
                 }
             } else {
-                VStack(spacing: 0) {
-                    if let headline = entry.rainHeadline {
-                        Text(headline)
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.white.opacity(0.75))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                            .frame(maxWidth: .infinity, alignment: .trailing)
-                            .padding(.top, 2)
-                    }
-                    ForecastHourStrip(hours: entry.hours, isCompact: false)
-                        .padding(.top, 14)
-                        .padding(.bottom, 2)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                ForecastDayList(days: entry.days, count: 5, compact: true)
             }
         }
         .padding(16)
@@ -154,7 +140,7 @@ private struct ForecastLargeView: View {
                 separator
                 days(4)
             } else {
-                ForecastHourStrip(hours: entry.hours, isCompact: true)
+                ForecastHourStrip(hours: entry.hours)
                     .fixedSize(horizontal: false, vertical: true)
                 separator
                 days(5)
@@ -175,7 +161,7 @@ private struct ForecastLargeView: View {
             }
             Spacer(minLength: 8)
             VStack(alignment: .trailing, spacing: 3) {
-                ForecastConditionIcon(name: entry.icon, size: 22)
+                ForecastConditionIcon(name: entry.icon, size: 17)
                 Text(entry.condition)
                     .font(.footnote.weight(.semibold))
                     .lineLimit(1)
@@ -194,12 +180,22 @@ private struct ForecastLargeView: View {
     }
 
     private func days(_ count: Int) -> some View {
-        let shown = Array(entry.days.prefix(count))
+        ForecastDayList(days: entry.days, count: count, compact: false)
+    }
+}
+
+private struct ForecastDayList: View {
+    let days: [DayForecast]
+    let count: Int
+    let compact: Bool
+
+    var body: some View {
+        let shown = Array(days.prefix(count))
         let minTemp = shown.map(\.low).min() ?? 0
         let maxTemp = shown.map(\.high).max() ?? 0
-        return VStack(spacing: 0) {
+        VStack(spacing: 0) {
             ForEach(shown) { day in
-                DailyForecastRow(day: day, minTemp: minTemp, maxTemp: maxTemp)
+                DailyForecastRow(day: day, minTemp: minTemp, maxTemp: maxTemp, compact: compact)
                     .frame(maxHeight: .infinity)
             }
         }
@@ -232,7 +228,7 @@ private struct ForecastCurrentColumn: View {
             Spacer(minLength: 0)
             if inlineIcon {
                 HStack(spacing: 5) {
-                    ForecastConditionIcon(name: entry.icon, size: 16)
+                    ForecastConditionIcon(name: entry.icon, size: 14)
                     if showsCondition {
                         condition
                     } else {
@@ -243,7 +239,7 @@ private struct ForecastCurrentColumn: View {
                     ForecastHighLow(entry: entry)
                 }
             } else {
-                ForecastConditionIcon(name: entry.icon, size: 22)
+                ForecastConditionIcon(name: entry.icon, size: 17)
                     .padding(.bottom, 4)
                 if showsCondition {
                     condition
@@ -312,27 +308,24 @@ private struct ForecastHighLow: View {
 
 private struct ForecastHourStrip: View {
     let hours: [ForecastHour]
-    let isCompact: Bool
     private var units: Units { SettingService.resolvedUnits }
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(hours) { hour in
-                VStack(spacing: 0) {
+                VStack(spacing: 6) {
                     Text(hour.label)
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.white.opacity(0.75))
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
-                    Spacer(minLength: 7)
                     Image(systemName: hour.icon)
                         .symbolRenderingMode(.multicolor)
-                        .font(.system(size: isCompact ? 22 : 26))
-                        .frame(height: isCompact ? 22 : 26)
+                        .font(.system(size: 16))
+                        .frame(height: 16)
                         .accessibilityHidden(true)
-                    Spacer(minLength: 7)
                     Text(units.temperatureString(hour.temperature))
-                        .font(isCompact ? .subheadline.weight(.semibold) : .headline)
+                        .font(.subheadline.weight(.semibold))
                         .monospacedDigit()
                         .lineLimit(1)
                 }

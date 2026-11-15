@@ -63,8 +63,8 @@ private struct StationsListRow: View {
             .lineLimit(1)
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            StationSparkline(history: station.history, unit: units.temperature, showsExtremes: false)
-                .frame(width: 64, height: 26)
+            StationSparkline(history: station.history, unit: units.temperature)
+                .frame(width: 76, height: 42)
 
             Text(verbatim: temperature)
                 .font(.title3.weight(.medium))

@@ -81,8 +81,8 @@ private struct StationHomeView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             StationHeadline(station: station, isDay: isDay, timeZone: timeZone, temperatureSize: 34)
                             Spacer(minLength: 4)
-                            StationSparkline(history: station.history, unit: SettingService.resolvedUnits.temperature, showsExtremes: false)
-                                .frame(height: 40)
+                            StationSparkline(history: station.history, unit: SettingService.resolvedUnits.temperature)
+                                .frame(height: 44)
                         }
                         .frame(width: 140)
                         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12, alignment: .leading), GridItem(.flexible(), alignment: .leading)],
@@ -152,7 +152,7 @@ private struct StationHeadline: View {
                     .widgetAccentable()
                 if let code = station.current.weather_code {
                     Image(systemName: WeatherSymbol.sfSymbol(weathercode: Double(code), isDay: isDay))
-                        .font(.system(size: temperatureSize * 0.55))
+                        .font(.system(size: temperatureSize * 0.45))
                         .accessibilityHidden(true)
                 }
             }
@@ -247,7 +247,7 @@ private struct StationRectangularView: View {
                             .layoutPriority(1)
                     }
                     .font(.headline)
-                    StationSparkline(history: station.history, unit: units.temperature, showsExtremes: false)
+                    StationSparkline(history: station.history, unit: units.temperature)
                         .frame(maxHeight: .infinity)
                     HStack {
                         Text("gemessen \(SettingService.formattedTime(station.last_report_at, timeZone: timeZone))")

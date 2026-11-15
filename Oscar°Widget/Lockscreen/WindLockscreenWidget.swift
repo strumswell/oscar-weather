@@ -200,34 +200,26 @@ private struct WindDialView: View {
             .lineLimit(1)
 
             ZStack {
-                Circle()
-                    .stroke(.white.opacity(0.25), lineWidth: 1)
-                ForEach(0..<4) { quarter in
-                    Capsule()
-                        .fill(.white.opacity(0.55))
-                        .frame(width: 1.5, height: 6)
-                        .offset(y: -49)
-                        .rotationEffect(.degrees(Double(quarter) * 90))
+                WindDialTicks()
+                ForEach([0.0, 90, 180, 270], id: \.self) { degrees in
+                    Text(compassDirection(degrees))
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .offset(dialOffset(radius: 41, degrees: degrees))
                 }
-                Text(verbatim: "N")
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.7))
-                    .offset(y: -37)
                 if let degrees = entry.directionDegrees {
-                    WindNeedle()
-                        .fill(.white)
-                        .rotationEffect(.degrees(degrees + 180))
+                    WindDialArrow(towardDegrees: degrees + 180)
                         .widgetAccentable()
                 }
                 VStack(spacing: 0) {
                     Text(entry.speed.map(units.windNumber) ?? "–")
-                        .font(.system(size: 24, weight: .semibold))
+                        .font(.system(size: 22, weight: .semibold))
                     Text(units.wind.symbol)
                         .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(.white.opacity(0.75))
                 }
             }
-            .frame(width: 104, height: 104)
+            .frame(width: 112, height: 112)
 
             if let staleNote = entry.staleNote {
                 Text(staleNote)
@@ -252,21 +244,64 @@ private struct WindDialView: View {
     }
 }
 
-private struct WindNeedle: Shape {
-    func path(in rect: CGRect) -> Path {
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        let radius = min(rect.width, rect.height) / 2
-        var path = Path()
-        path.move(to: CGPoint(x: center.x, y: center.y - radius * 0.74))
-        path.addLine(to: CGPoint(x: center.x + 6, y: center.y - radius * 0.48))
-        path.addLine(to: CGPoint(x: center.x, y: center.y - radius * 0.54))
-        path.addLine(to: CGPoint(x: center.x - 6, y: center.y - radius * 0.48))
-        path.closeSubpath()
-        path.addRoundedRect(
-            in: CGRect(x: center.x - 1, y: center.y + radius * 0.56, width: 2, height: radius * 0.2),
-            cornerSize: CGSize(width: 1, height: 1)
-        )
-        return path
+private func dialOffset(radius: CGFloat, degrees: Double) -> CGSize {
+    let angle = degrees * .pi / 180
+    return CGSize(width: radius * sin(angle), height: -radius * cos(angle))
+}
+
+private func dialPoint(_ center: CGPoint, radius: CGFloat, degrees: Double) -> CGPoint {
+    let offset = dialOffset(radius: radius, degrees: degrees)
+    return CGPoint(x: center.x + offset.width, y: center.y + offset.height)
+}
+
+private struct WindDialTicks: View {
+    var body: some View {
+        Canvas { context, size in
+            let center = CGPoint(x: size.width / 2, y: size.height / 2)
+            let radius = min(size.width, size.height) / 2
+            for index in 0..<72 {
+                let isMajor = index % 6 == 0
+                let degrees = Double(index) * 5
+                var tick = Path()
+                tick.move(to: dialPoint(center, radius: radius - (isMajor ? 7 : 4), degrees: degrees))
+                tick.addLine(to: dialPoint(center, radius: radius, degrees: degrees))
+                context.stroke(tick, with: .color(.white.opacity(isMajor ? 0.7 : 0.3)), lineWidth: isMajor ? 1.5 : 1)
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+private struct WindDialArrow: View {
+    let towardDegrees: Double
+
+    var body: some View {
+        Canvas { context, size in
+            let center = CGPoint(x: size.width / 2, y: size.height / 2)
+            let radius = min(size.width, size.height) / 2
+            let reach = radius - 10
+            let gap = radius * 0.42
+            let fromDegrees = towardDegrees + 180
+            var shaft = Path()
+            shaft.move(to: dialPoint(center, radius: gap, degrees: towardDegrees))
+            shaft.addLine(to: dialPoint(center, radius: reach - 4, degrees: towardDegrees))
+            shaft.move(to: dialPoint(center, radius: gap, degrees: fromDegrees))
+            shaft.addLine(to: dialPoint(center, radius: reach, degrees: fromDegrees))
+            context.stroke(shaft, with: .foreground, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+            let tip = dialPoint(center, radius: reach + 2, degrees: towardDegrees)
+            let base = dialPoint(center, radius: reach - 7, degrees: towardDegrees)
+            let side = dialOffset(radius: 5, degrees: towardDegrees + 90)
+            var head = Path()
+            head.move(to: tip)
+            head.addLine(to: CGPoint(x: base.x + side.width, y: base.y + side.height))
+            head.addLine(to: CGPoint(x: base.x - side.width, y: base.y - side.height))
+            head.closeSubpath()
+            context.fill(head, with: .foreground)
+            let tail = dialPoint(center, radius: reach, degrees: fromDegrees)
+            context.fill(Path(ellipseIn: CGRect(x: tail.x - 4, y: tail.y - 4, width: 8, height: 8)), with: .foreground)
+        }
+        .foregroundStyle(.white)
+        .accessibilityHidden(true)
     }
 }
 #endif

@@ -45,6 +45,28 @@
         }
       }
     },
+    "ab %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ab %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "from %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ itibarıyla"
+          }
+        }
+      }
+    },
     "Ab %@ regnet es." : {
       "localizations" : {
         "de" : {
@@ -85,6 +107,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "En yoğun yağış saat %1$@ civarında: %2$@."
+          }
+        }
+      }
+    },
+    "bis %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bis %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "until %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bitiş %@"
           }
         }
       }

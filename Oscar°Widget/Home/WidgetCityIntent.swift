@@ -12,16 +12,36 @@ import WidgetKit
 
 // MARK: - Configurable city
 
-struct WidgetCityOptionsProvider: DynamicOptionsProvider {
-    func results() async throws -> IntentItemCollection<String> {
-        let cities = [WidgetCity.currentLocation] + savedCities()
-        let items = cities.map { city in
-            IntentItem(city.id, title: "\(city.name)")
-        }
+struct WidgetPlaceEntity: AppEntity {
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Ort")
+    static let defaultQuery = WidgetPlaceQuery()
 
-        return IntentItemCollection {
-            IntentItemSection(items: items)
+    let id: String
+    let name: String
+
+    var displayRepresentation: DisplayRepresentation {
+        DisplayRepresentation(title: "\(name)")
+    }
+}
+
+struct WidgetPlaceQuery: EntityQuery {
+    func entities(for identifiers: [String]) async throws -> [WidgetPlaceEntity] {
+        let places = allPlaces()
+        return identifiers.compactMap { id in
+            places.first { $0.id == id } ?? WidgetCity(id: id).map { WidgetPlaceEntity(id: id, name: $0.name) }
         }
+    }
+
+    func suggestedEntities() async throws -> [WidgetPlaceEntity] {
+        allPlaces()
+    }
+
+    func defaultResult() async -> WidgetPlaceEntity? {
+        allPlaces().first
+    }
+
+    private func allPlaces() -> [WidgetPlaceEntity] {
+        ([WidgetCity.currentLocation] + savedCities()).map { WidgetPlaceEntity(id: $0.id, name: $0.name) }
     }
 
     private func savedCities() -> [WidgetCity] {
@@ -42,16 +62,12 @@ struct WidgetCityOptionsProvider: DynamicOptionsProvider {
             }
         }
     }
-
-    func defaultResult() async -> String? {
-        WidgetCity.currentLocationID
-    }
 }
 
 struct SelectCityIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Ort wählen"
     static let description = IntentDescription("Wähle den Ort für dieses Widget.")
 
-    @Parameter(title: "Ort", optionsProvider: WidgetCityOptionsProvider())
-    var city: String?
+    @Parameter(title: "Ort")
+    var city: WidgetPlaceEntity?
 }

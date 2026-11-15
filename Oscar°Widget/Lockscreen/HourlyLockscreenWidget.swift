@@ -71,7 +71,7 @@ struct HourlyLockScreenView: View {
             HStack(spacing: 0) {
                 ForEach(entry.hours, id: \.time) { hour in
                     VStack(spacing: 0) {
-                        Text(hourLabel(hour.time))
+                        Text(SettingService.formattedHour(hour.time, timeZone: entry.timeZone))
                             .font(.system(size: 9, weight: .semibold))
                         Text(units.temperatureString(hour.temperature))
                             .font(.system(size: 9))

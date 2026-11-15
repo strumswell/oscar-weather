@@ -34,6 +34,17 @@ enum RainNowcastSummary {
         return String(localized: "Kein Regen in Sicht")
     }
 
+    static func shortHeadline(for points: [PrecipPoint], timeZone: TimeZone = .current) -> String {
+        if (points.first?.precipitation ?? 0) > 0 {
+            guard let end = points.first(where: { $0.precipitation <= 0 }) else { return String(localized: "Regen") }
+            return String(localized: "bis \(SettingService.formattedTime(end.timestamp, timeZone: timeZone))")
+        }
+        if let start = points.first(where: { $0.precipitation > 0 }) {
+            return String(localized: "ab \(SettingService.formattedTime(start.timestamp, timeZone: timeZone))")
+        }
+        return String(localized: "Trocken")
+    }
+
     static func spokenHeadline(for points: [PrecipPoint], now: Date, timeZone: TimeZone = .current) -> String {
         let isRainingNow = (points.first?.precipitation ?? 0) > 0
 
