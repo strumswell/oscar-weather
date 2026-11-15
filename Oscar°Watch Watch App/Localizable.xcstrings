@@ -527,6 +527,28 @@
         }
       }
     },
+    "Regenverlauf" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenverlauf"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain Timeline"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur Zaman Çizelgesi"
+          }
+        }
+      }
+    },
     "S_compass" : {
       "comment" : "South"
     },

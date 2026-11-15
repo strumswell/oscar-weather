@@ -106,7 +106,7 @@ final class CityConditionsStore {
         return "\(rounded.latitude),\(rounded.longitude)"
     }
 
-    private static func makeConditions(
+    static func makeConditions(
         entry: BatchCurrentEntry,
         coordinate: CLLocationCoordinate2D,
         radar: PrecipSeriesResponse?
@@ -147,7 +147,7 @@ final class CityConditionsStore {
         )
     }
 
-    private static func fetchBatch(
+    static func fetchBatch(
         coordinates: [CLLocationCoordinate2D]
     ) async throws -> [BatchCurrentEntry] {
         var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast")!
@@ -177,8 +177,8 @@ final class CityConditionsStore {
     }
 }
 
-private struct BatchCurrentEntry: Decodable {
-    struct Current: Decodable {
+struct BatchCurrentEntry: Codable, Sendable {
+    struct Current: Codable, Sendable {
         let time: Double
         let temperature: Double?
         let weathercode: Double?

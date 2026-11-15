@@ -1,6 +1,14 @@
 import Foundation
 
 enum WeatherConditionLabel {
+    static func code(weathercode: Double, radarRate: Double?) -> Int {
+        let code = Int(weathercode)
+        guard let radarRate else { return code }
+        if radarRate > 0, code < 51 { return radarRate >= 2.5 ? 61 : 51 }
+        if radarRate <= 0, code >= 51 { return 3 }
+        return code
+    }
+
     static func text(for code: Int) -> String {
         switch code {
         case 0, 1:

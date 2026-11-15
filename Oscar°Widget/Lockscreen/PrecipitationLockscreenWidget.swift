@@ -16,6 +16,22 @@ struct PrecipitationLockScreenView: View {
     var body: some View {
         Group {
             switch family {
+            case .accessoryCircular:
+                Gauge(value: Double(min(max(entry.precipitationProbability, 0), 100)), in: 0...100) {
+                } currentValueLabel: {
+                    VStack(spacing: 0) {
+                        Text(entry.precipitationProbability, format: .number)
+                            .font(.system(size: 18, weight: .semibold))
+                        Text(verbatim: "%")
+                            .font(.system(size: 9))
+                            .foregroundStyle(.secondary)
+                    }
+                    .monospacedDigit()
+                }
+                .gaugeStyle(.accessoryCircularCapacity)
+                .widgetAccentable()
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(String(localized: "Regenwahrscheinlichkeit \(entry.precipitationProbability) %", comment: "Widget Regen %: Bedienungshilfe"))
             case .accessoryInline:
                 HStack {
                     Image(systemName: "umbrella.fill")
@@ -34,6 +50,7 @@ struct PrecipitationLockScreenView: View {
             }
         }
         .containerBackground(.clear, for: .widget)
+        .widgetURL(.oscarPlace(entry.cityID))
     }
 }
 
@@ -48,9 +65,16 @@ struct PrecipitationLockScreenWidget: Widget {
         .configurationDisplayName(String(localized: "Regen", comment: "LS Widget Regen"))
         .description(String(localized: "Regenmenge und -wahrscheinlichkeit für die aktuelle Stunde", comment: "LS Widget Regenmenge und -wahrscheinlichkeit"))
         #if os(iOS)
-        .supportedFamilies([.accessoryInline])
+        .supportedFamilies([.accessoryCircular, .accessoryInline])
         #elseif os(watchOS)
-        .supportedFamilies([.accessoryCorner])
+        .supportedFamilies([.accessoryCircular, .accessoryCorner])
         #endif
     }
+}
+
+#Preview("Regen %", as: .accessoryCircular) {
+    PrecipitationLockScreenWidget()
+} timeline: {
+    TemperatureLockScreenEntry(date: .now, temperatureMin: 3, temperatureMax: 9, temperatureNow: 7, icon: "cloud.rain.fill", precipitation: 0.4, precipitationProbability: 70)
+    TemperatureLockScreenEntry(date: .now, temperatureMin: 3, temperatureMax: 9, temperatureNow: 7, icon: "sun.max.fill", precipitation: 0, precipitationProbability: 0)
 }

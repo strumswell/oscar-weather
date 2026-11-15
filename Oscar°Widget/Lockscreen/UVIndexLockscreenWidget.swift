@@ -13,6 +13,7 @@ import WidgetKit
 struct UVIndexLockScreenEntry: TimelineEntry {
     let date: Date
     let uvIndex: Double?
+    var cityID: String? = nil
 }
 
 struct UVIndexProvider: PlaceTimelineSource {
@@ -23,9 +24,11 @@ struct UVIndexProvider: PlaceTimelineSource {
         UVIndexLockScreenEntry(date: Date(), uvIndex: 6)
     }
 
-    func entries(for place: WidgetPlace) async throws -> [UVIndexLockScreenEntry] {
-        let air = try await client.getAirQuality(coordinates: place.coordinates)
-        return [UVIndexLockScreenEntry(date: Date(), uvIndex: Self.currentUVIndex(from: air, now: Date()))]
+    func entries(for place: WidgetPlace, family: WidgetFamily) async throws -> [UVIndexLockScreenEntry] {
+        let (air, _) = try await WidgetCache.fetch(WidgetCache.key("air", place.coordinates), maxAge: 600) {
+            try await client.getAirQuality(coordinates: place.coordinates)
+        }
+        return [UVIndexLockScreenEntry(date: Date(), uvIndex: Self.currentUVIndex(from: air, now: Date()), cityID: place.cityID)]
     }
 
     static func currentUVIndex(
@@ -82,6 +85,7 @@ struct UVIndexLockScreenView: View {
             }
         }
         .containerBackground(.clear, for: .widget)
+        .widgetURL(.oscarPlace(entry.cityID))
     }
 
     private var valueText: String {

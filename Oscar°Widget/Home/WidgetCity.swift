@@ -108,3 +108,27 @@ struct WidgetCity: Identifiable {
         return String(data: data, encoding: .utf8)
     }
 }
+
+extension URL {
+    static func oscarPlace(_ cityID: String?) -> URL {
+        oscarLink("place", cityID)
+    }
+
+    static func oscarRadar(_ cityID: String?) -> URL {
+        oscarLink("radar", cityID)
+    }
+
+    var oscarCityID: String? {
+        URLComponents(url: self, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "id" }?.value
+    }
+
+    private static func oscarLink(_ host: String, _ cityID: String?) -> URL {
+        var components = URLComponents()
+        components.scheme = "oscar"
+        components.host = host
+        if let cityID {
+            components.queryItems = [URLQueryItem(name: "id", value: cityID)]
+        }
+        return components.url!
+    }
+}

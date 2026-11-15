@@ -1,6 +1,160 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "%@: %@, %@. Heute %@ bis %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@, %3$@. Heute %4$@ bis %5$@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@, %3$@. Today %4$@ to %5$@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@, %3$@. Bugün %4$@ ile %5$@ arası."
+          }
+        }
+      }
+    },
+    "+%lld min" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld min"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld min"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld dk"
+          }
+        }
+      }
+    },
+    "Ab %@ regnet es." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ab %@ regnet es."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain starts at %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saat %@ itibarıyla yağmur başlıyor."
+          }
+        }
+      }
+    },
+    "Am stärksten um %@ mit %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Am stärksten um %1$@ mit %2$@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heaviest at %1$@ with %2$@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En yoğun yağış saat %1$@ civarında: %2$@."
+          }
+        }
+      }
+    },
+    "Es regnet bis %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es regnet bis %@."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain continues until %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur %@ saatine kadar sürüyor."
+          }
+        }
+      }
+    },
+    "Es regnet noch etwa %lld Minuten." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es regnet noch etwa %lld Minuten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain for about %lld more minutes."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur yaklaşık %lld dakika daha sürüyor."
+          }
+        }
+      }
+    },
+    "Es regnet noch mindestens %lld Minuten." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es regnet noch mindestens %lld Minuten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain for at least %lld more minutes."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur en az %lld dakika daha sürüyor."
+          }
+        }
+      }
+    },
     "Fast alle Berechnungen sagen dasselbe" : {
       "localizations" : {
         "en" : {
@@ -17,6 +171,139 @@
         }
       }
     },
+    "Für %@ gibt es gerade keine Wetterdaten." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für %@ gibt es gerade keine Wetterdaten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No weather data for %@ right now."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ için şu anda hava durumu verisi yok."
+          }
+        }
+      }
+    },
+    "Für %@ gibt es keine Radardaten." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für %@ gibt es keine Radardaten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No radar data for %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ için radar verisi yok."
+          }
+        }
+      }
+    },
+    "H: %@" : {
+      "comment" : "Höchste Temperatur",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "H: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "H: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Y: %@"
+          }
+        }
+      }
+    },
+    "Kein Regen in Sicht." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Regen in Sicht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No rain in sight."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ufukta yağmur yok."
+          }
+        }
+      }
+    },
+    "Öffnet die Karten mit dem Regenradar." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet die Karten mit dem Regenradar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the maps with the rain radar."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haritaları yağmur radarıyla açar."
+          }
+        }
+      }
+    },
+    "Öffnet die Vorhersage für deinen Ort." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet die Vorhersage für deinen Ort."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the forecast for your location."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konumunuzun tahminini açar."
+          }
+        }
+      }
+    },
     "Regen offen" : {
       "localizations" : {
         "en" : {
@@ -29,6 +316,94 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yağmur belirsiz"
+          }
+        }
+      }
+    },
+    "Regenradar öffnen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenradar öffnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Rain Radar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur Radarını Aç"
+          }
+        }
+      }
+    },
+    "Regnet es bald?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regnet es bald?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Will It Rain Soon?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakında Yağmur Var mı?"
+          }
+        }
+      }
+    },
+    "Sagt dir Temperatur, Wetterlage und die Werte für heute." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sagt dir Temperatur, Wetterlage und die Werte für heute."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tells you the temperature, conditions and today's values."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sıcaklığı, hava durumunu ve bugünün değerlerini söyler."
+          }
+        }
+      }
+    },
+    "Sagt dir, ob in den nächsten 90 Minuten Regen kommt." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sagt dir, ob in den nächsten 90 Minuten Regen kommt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tells you if rain is coming in the next 90 minutes."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önümüzdeki 90 dakika içinde yağmur gelip gelmeyeceğini söyler."
           }
         }
       }
@@ -143,6 +518,29 @@
         }
       }
     },
+    "T: %@" : {
+      "comment" : "Niedrigste Temperatur",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "T: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L: %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D: %@"
+          }
+        }
+      }
+    },
     "Temperatur streut um %lld°" : {
       "localizations" : {
         "en" : {
@@ -155,6 +553,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sıcaklık %lld° oynuyor"
+          }
+        }
+      }
+    },
+    "Wetter jetzt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetter jetzt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather Now"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu Anki Hava"
+          }
+        }
+      }
+    },
+    "Wetter öffnen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetter öffnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Weather"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava Durumunu Aç"
+          }
+        }
+      }
+    },
+    "Wie ist das Wetter?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie ist das Wetter?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's the Weather?"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hava Nasıl?"
           }
         }
       }
@@ -2355,8 +2819,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%1$@ · bis ca. %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · until about %2$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · bitiş yaklaşık %2$@"
           }
         }
       }
@@ -2365,8 +2841,20 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "%1$@ · mindestens bis %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · at least until %2$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · en erken bitiş %2$@"
           }
         }
       }
@@ -6272,7 +6760,26 @@
       }
     },
     "Ausgewählter Ort" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgewählter Ort"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected Location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçili Konum"
+          }
+        }
+      }
     },
     "Australien" : {
       "localizations" : {
@@ -9273,7 +9780,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "E"
+            "value" : "O"
           }
         },
         "en" : {
@@ -13727,7 +14234,26 @@
       }
     },
     "Kein Regen in Sicht" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Regen in Sicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Rain in Sight"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ufukta Yağmur Yok"
+          }
+        }
+      }
     },
     "Kein Spam, versprochen" : {
       "extractionState" : "stale",
@@ -13821,7 +14347,26 @@
       }
     },
     "Keine aktuellen Radardaten · Stand %@" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine aktuellen Radardaten · Stand %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No current radar data · as of %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Güncel radar verisi yok · %@ itibarıyla"
+          }
+        }
+      }
     },
     "Keine Belastung" : {
       "localizations" : {
@@ -14504,7 +15049,26 @@
       }
     },
     "Lässt bald nach" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lässt bald nach"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Easing soon"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakında hafifliyor"
+          }
+        }
+      }
     },
     "Leicht" : {
       "localizations" : {
@@ -14551,7 +15115,26 @@
       }
     },
     "Leichter Regen" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leichter Regen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light rain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hafif yağmur"
+          }
+        }
+      }
     },
     "Leichter Regen ab %@" : {
       "extractionState" : "stale",
@@ -15376,7 +15959,26 @@
       }
     },
     "max." : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "max."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "max"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "maks."
+          }
+        }
+      }
     },
     "Maximum" : {
       "extractionState" : "stale",
@@ -16842,7 +17444,26 @@
       }
     },
     "Neuer Regen gegen %@" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neuer Regen gegen %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More rain around %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ civarında yeni yağmur"
+          }
+        }
+      }
     },
     "Nicht auf der Seite" : {
       "localizations" : {
@@ -18343,7 +18964,26 @@
       }
     },
     "Ort wählen" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ort wählen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose Location"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konum Seç"
+          }
+        }
+      }
     },
     "Orte" : {
       "extractionState" : "manual",
@@ -19738,7 +20378,26 @@
       }
     },
     "Radar %@" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radar %@"
+          }
+        }
+      }
     },
     "Radarbild der 48 zusammenhängenden US-Bundesstaaten, alle 2 Minuten neu." : {
       "localizations" : {
@@ -20105,13 +20764,70 @@
       }
     },
     "Regen · noch >%lld min" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen · noch >%lld min"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain · >%lld min left"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur · >%lld dk kaldı"
+          }
+        }
+      }
     },
     "Regen · noch ~%lld min" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen · noch ~%lld min"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain · ~%lld min left"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur · ~%lld dk kaldı"
+          }
+        }
+      }
     },
     "Regen ab %@" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen ab %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain from %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ saatinden itibaren yağmur"
+          }
+        }
+      }
     },
     "Regen auf dem Sperrbildschirm" : {
       "localizations" : {
@@ -20136,7 +20852,26 @@
       }
     },
     "Regen bis %@" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen bis %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain until %@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ saatine kadar yağmur"
+          }
+        }
+      }
     },
     "Regen im Anmarsch" : {
       "extractionState" : "stale",
@@ -20162,7 +20897,26 @@
       }
     },
     "Regen in Kürze" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen in Kürze"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain soon"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakında yağmur"
+          }
+        }
+      }
     },
     "Regen und Schnee pro Stunde" : {
       "extractionState" : "stale",
@@ -20188,7 +20942,26 @@
       }
     },
     "Regen vorbei" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regen vorbei"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain ended"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur bitti"
+          }
+        }
+      }
     },
     "Regen zieht auf" : {
       "extractionState" : "stale",
@@ -20359,7 +21132,26 @@
       }
     },
     "Regenverlauf" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regenverlauf"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain Timeline"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağmur Zaman Çizelgesi"
+          }
+        }
+      }
     },
     "Regenwahrscheinlichkeit" : {
       "localizations" : {
@@ -20513,7 +21305,26 @@
       }
     },
     "Regnet gerade" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regnet gerade"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raining now"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu anda yağmur yağıyor"
+          }
+        }
+      }
     },
     "Reihe" : {
 
@@ -22124,7 +22935,26 @@
       }
     },
     "Starker Regen" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starker Regen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heavy rain"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şiddetli yağmur"
+          }
+        }
+      }
     },
     "Starker Schauer" : {
       "localizations" : {
@@ -24680,10 +25510,48 @@
       }
     },
     "Vorbei" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorbei"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Over"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bitti"
+          }
+        }
+      }
     },
     "Vorerst trocken" : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorerst trocken"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dry for now"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şimdilik kuru"
+          }
+        }
+      }
     },
     "Vorhersage" : {
       "localizations" : {
@@ -24821,7 +25689,26 @@
       }
     },
     "Wähle den Ort für dieses Widget." : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle den Ort für dieses Widget."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the location for this widget."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu widget için konumu seçin."
+          }
+        }
+      }
     },
     "Wähle, ob die Tageswerte ersetzt oder im 24-Stunden-Bereich markiert werden." : {
       "localizations" : {

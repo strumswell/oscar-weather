@@ -94,7 +94,11 @@ final class SettingService {
         didSet { UserDefaults.standard.set(hiddenHeadMetricsRaw, forKey: "hiddenHeadMetrics") }
     }
     var favoriteStationIDs: [String] {
-        didSet { UserDefaults.standard.set(favoriteStationIDs, forKey: "favoriteStationIDs") }
+        didSet {
+            Self.defaults.set(favoriteStationIDs, forKey: "favoriteStationIDs")
+            WidgetCenter.shared.reloadTimelines(ofKind: "StationWidget")
+            nc.post(name: .watchSettingsDidChange, object: nil)
+        }
     }
     var mapBasemapStyleRaw: String {
         didSet { Self.defaults.set(mapBasemapStyleRaw, forKey: "mapBasemapStyle") }
@@ -210,7 +214,10 @@ final class SettingService {
         stageNowSectionsRaw = UserDefaults.standard.stringArray(forKey: "stageNowSections")
         headMetricOrderRaw = UserDefaults.standard.stringArray(forKey: "headMetricOrder")
         hiddenHeadMetricsRaw = UserDefaults.standard.stringArray(forKey: "hiddenHeadMetrics")
-        favoriteStationIDs = UserDefaults.standard.stringArray(forKey: "favoriteStationIDs") ?? []
+        let favoriteStations = Self.defaults.stringArray(forKey: "favoriteStationIDs")
+            ?? UserDefaults.standard.stringArray(forKey: "favoriteStationIDs") ?? []
+        Self.defaults.set(favoriteStations, forKey: "favoriteStationIDs")
+        favoriteStationIDs = favoriteStations
         mapBasemapStyleRaw = Self.defaults.string(forKey: "mapBasemapStyle") ?? MapBasemapStyle.fiord.rawValue
         timeFormatPreference = TimeFormatPreference(
             rawValue: Self.defaults.string(forKey: Self.timeFormatPreferenceKey) ?? ""
@@ -249,7 +256,7 @@ final class SettingService {
 
     private func unitDidChange(key: String, value: String) {
         Self.defaults.set(value, forKey: key)
-        nc.post(name: .unitsDidChange, object: nil)
+        nc.post(name: .watchSettingsDidChange, object: nil)
         WidgetCenter.shared.reloadAllTimelines()
     }
 

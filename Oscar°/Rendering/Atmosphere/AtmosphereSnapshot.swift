@@ -100,8 +100,4 @@ extension AtmosphereSnapshot {
             cloudLow: v.17, cloudMid: v.18, cloudHigh: v.19
         )
     }
-
-    var sunDiscVisibility: Float {
-        AtmosphereWeatherMapper.smoothstep(0, 4, sunElevation * 180 / .pi)
-    }
 }

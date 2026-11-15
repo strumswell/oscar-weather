@@ -23,3 +23,8 @@ extension Color {
     static let sunriseStart = Color(hue: 0.62, saturation: 0.6, brightness: 0.42)
     static let sunnyDayEnd = Color(hue: 0.6, saturation: 0.4, brightness: 0.85)
 }
+
+extension LinearGradient {
+    static let calmDay = LinearGradient(colors: [Color(hex: 0x2B3D6B), Color(hex: 0x82A5D9)], startPoint: .top, endPoint: .bottom)
+    static let rainyDay = LinearGradient(colors: [Color(hex: 0x3B4558), Color(hex: 0x7A889C)], startPoint: .top, endPoint: .bottom)
+}

@@ -449,3 +449,9 @@ enum AtmosphereWeatherMapper {
         min(max(value, lower), upper)
     }
 }
+
+extension AtmosphereSnapshot {
+    var sunDiscVisibility: Float {
+        AtmosphereWeatherMapper.smoothstep(0, 4, sunElevation * 180 / .pi)
+    }
+}

@@ -69,10 +69,7 @@ struct RootTabView: View {
             }
         }
         .sheet(item: $presentation.sheet, content: NowSheetView.init)
-        .onOpenURL { url in
-            guard url.scheme == "oscar", url.host == "radar" else { return }
-            presentation.selectedTab = .maps
-        }
+        .onOpenURL(perform: openDeepLink)
         .environment(presentation)
         .focusedSceneValue(presentation)
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
@@ -88,6 +85,30 @@ struct RootTabView: View {
             withAnimation(.spring(duration: 0.4)) {
                 modelFallbackToast = String(localized: "Außerhalb des Modells – Automatik aktiv.")
             }
+        }
+    }
+
+    private func openDeepLink(_ url: URL) {
+        guard url.scheme == "oscar" else { return }
+        switch url.host {
+        case "place": presentation.selectedTab = .forecast
+        case "radar": presentation.selectedTab = .maps
+        default: return
+        }
+        guard let id = url.oscarCityID,
+              let target = WidgetCity(id: id) else { return }
+        let cityService = CityService.shared
+        if target.isCurrentLocation {
+            if cityService.getSelectedCity() != nil {
+                cityService.disableAllCities()
+            }
+            return
+        }
+        let city = cityService.cities.first {
+            abs($0.lat - target.latitude) < 0.0001 && abs($0.lon - target.longitude) < 0.0001
+        }
+        if let city, !city.selected {
+            cityService.toggleActiveCity(city: city)
         }
     }
 
@@ -113,6 +134,7 @@ struct RootTabView: View {
             if isForeground {
                 WidgetCenter.shared.reloadAllTimelines()
             }
+            ControlCenter.shared.reloadControls(ofKind: "WeatherControl")
         }
     }
 }

@@ -5,7 +5,7 @@
 //  Persisted, unlimited cache of a location's raw daily-high history plus the in-process rate
 //  limiter that protects the (very expensive) cold archive fetch. A cold location pulls ~85 years
 //  of daily data in one request; thereafter we only ever fetch the missing recent days and merge
-//  them in. App target only — the widget/watch targets never touch the climate timeline.
+//  them in. The home-screen widget only reads the cache, it never fetches.
 //
 
 import Foundation
@@ -38,10 +38,58 @@ actor ClimateArchiveStore {
     private let maxFullCallsPerMinute = 2
     private let window: TimeInterval = 60
 
+    private static let sandboxDirectory = (FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+        ?? FileManager.default.temporaryDirectory)
+        .appendingPathComponent("ClimateArchiveCache", isDirectory: true)
+
+    private static let sharedDirectory = FileManager.default
+        .containerURL(forSecurityApplicationGroupIdentifier: AppGroup.identifier)?
+        .appendingPathComponent("Library/Caches/ClimateArchiveCache", isDirectory: true)
+
     private init() {
-        let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
-            ?? FileManager.default.temporaryDirectory
-        cacheDirectory = caches.appendingPathComponent("ClimateArchiveCache", isDirectory: true)
+        cacheDirectory = Self.sharedDirectory ?? Self.sandboxDirectory
+        if let sharedDirectory = Self.sharedDirectory, !Bundle.main.bundlePath.hasSuffix(".appex") {
+            Self.migrate(from: Self.sandboxDirectory, to: sharedDirectory)
+        }
+    }
+
+    private static func migrate(from old: URL, to new: URL) {
+        let fileManager = FileManager.default
+        guard fileManager.fileExists(atPath: old.path) else { return }
+        if !fileManager.fileExists(atPath: new.path) {
+            try? fileManager.createDirectory(at: new.deletingLastPathComponent(), withIntermediateDirectories: true)
+            if (try? fileManager.moveItem(at: old, to: new)) != nil { return }
+            try? fileManager.createDirectory(at: new, withIntermediateDirectories: true)
+        }
+        guard let files = try? fileManager.contentsOfDirectory(at: old, includingPropertiesForKeys: nil) else { return }
+        var allMoved = true
+        for file in files {
+            let target = new.appendingPathComponent(file.lastPathComponent)
+            if fileManager.fileExists(atPath: target.path) { continue }
+            if (try? fileManager.moveItem(at: file, to: target)) == nil
+                && (try? fileManager.copyItem(at: file, to: target)) == nil {
+                allMoved = false
+            }
+        }
+        if allMoved {
+            try? fileManager.removeItem(at: old)
+        }
+    }
+
+    static func cachedSummary(
+        latitude: Double,
+        longitude: Double,
+        today: Date,
+        todayHigh: Double?
+    ) -> ClimateSummary? {
+        guard let directory = sharedDirectory else { return nil }
+        let key = locationKey(latitude: latitude, longitude: longitude)
+        guard let data = try? Data(contentsOf: fileURL(key, in: directory)),
+              let entry = try? JSONDecoder().decode(CacheEntry.self, from: data),
+              !entry.time.isEmpty
+        else { return nil }
+        return ClimateSummary.make(
+            time: entry.time, tmax: entry.tmax, referenceDate: today, todayOverride: todayHigh)
     }
 
     func summary(
@@ -171,7 +219,11 @@ actor ClimateArchiveStore {
     }
 
     private func fileURL(_ key: String) -> URL {
-        cacheDirectory.appendingPathComponent("\(key.sha256Hex).json")
+        Self.fileURL(key, in: cacheDirectory)
+    }
+
+    private static func fileURL(_ key: String, in directory: URL) -> URL {
+        directory.appendingPathComponent("\(key.sha256Hex).json")
     }
 
     static func locationKey(latitude: Double, longitude: Double) -> String {

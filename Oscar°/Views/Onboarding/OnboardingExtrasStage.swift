@@ -314,7 +314,6 @@ private struct WatchTile: View {
 
     private var radarPage: some View {
         let points = Self.rainPoints
-        let reference = RainNowcastSummary.reference(for: points.map(\.precipitation))
 
         return VStack(alignment: .leading, spacing: 4) {
             Text("Radar")
@@ -325,17 +324,7 @@ private struct WatchTile: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             GeometryReader { proxy in
-                HStack(alignment: .bottom, spacing: 3) {
-                    ForEach(points, id: \.timestamp) { point in
-                        RainNowcastBar(
-                            value: point.precipitation,
-                            reference: reference,
-                            areaHeight: proxy.size.height,
-                            fill: AnyShapeStyle(.linearGradient(colors: [.cyan, .blue], startPoint: .top, endPoint: .bottom))
-                        )
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                RainBarsChart(values: RainNowcastSummary.values(points), height: proxy.size.height, axis: .none)
             }
             .padding(.vertical, 4)
             HStack {

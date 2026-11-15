@@ -210,45 +210,6 @@ private struct RainActivityModel {
     }
 }
 
-private enum RainIntensity {
-    static let ceiling = 20.0
-
-    static var isInch: Bool { SettingService.resolvedUnits.precipitation == .inch }
-    static var unit: String { SettingService.resolvedUnits.precipitation.rateSymbol }
-
-    static var gridlines: [Double] { isInch ? [1.27, 5.08] : [1, 5] }
-
-    static func fraction(_ mmPerHour: Double) -> Double {
-        guard mmPerHour > 0 else { return 0 }
-        let knee = 0.1
-        return min(1, log1p(mmPerHour / knee) / log1p(ceiling / knee))
-    }
-
-    static func format(_ mmPerHour: Double) -> String {
-        if isInch {
-            return SettingService.resolvedUnits.precipitationNumber(mmPerHour)
-        }
-        return mmPerHour.formatted(.number.precision(.fractionLength(mmPerHour < 10 ? 1 : 0)))
-    }
-
-    static func scaleLabel(_ mmPerHour: Double) -> String {
-        let value = isInch ? mmPerHour / 25.4 : mmPerHour
-        return value.formatted(.number.precision(.fractionLength(0...2)))
-    }
-
-    static func color(_ mmPerHour: Double) -> Color {
-        let stops = ServerColormapStops.radar
-        let dbz: Double = 10 * log10(200 * pow(max(mmPerHour, 0.01), 1.6))
-        guard let upper = stops.firstIndex(where: { $0.dbz >= dbz }) else {
-            return Color(hex: stops[stops.count - 1].hex)
-        }
-        guard upper > 0 else { return Color(hex: stops[0].hex) }
-        let low = stops[upper - 1], high = stops[upper]
-        let progress: Double = (dbz - low.dbz) / (high.dbz - low.dbz)
-        return Color(hex: low.hex).mix(with: Color(hex: high.hex), by: progress)
-    }
-}
-
 private enum RainActivityStyle {
     static func sky(for phase: RainRadarActivityAttributes.ContentState.Phase) -> LinearGradient {
         LinearGradient(colors: [skyTop(for: phase), skyBottom(for: phase)], startPoint: .top, endPoint: .bottom)
@@ -272,7 +233,7 @@ private enum RainActivityStyle {
 
     static let dry = Color.white.opacity(0.2)
     static let past = Color.white.opacity(0.28)
-    static let openURL = URL(string: "oscar://radar")
+    static let openURL = URL.oscarRadar(nil)
 }
 
 // MARK: - Lock Screen and watch

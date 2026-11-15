@@ -18,55 +18,46 @@ struct TemperatureLockScreenEntry: TimelineEntry {
     let icon: String
     let precipitation: Double
     let precipitationProbability: Int
+    var condition = ""
+    var rainHeadline: String? = nil
+    var cityID: String? = nil
+    var staleNote: String? = nil
 }
 
 func nowcastEntryDates(refreshMinutes: Int, now: Date = Date()) -> [Date] {
     stride(from: 0, to: refreshMinutes, by: 5).map { now.addingTimeInterval(Double($0) * 60) }
 }
 
-func currentWidgetCoordinates() async -> CLLocationCoordinate2D {
-    await MainActor.run {
-        LocationService.shared.update()
-        return LocationService.shared.getCoordinates()
-    }
-}
-
 func minutesFromNow(_ minutes: Int) -> Date {
     Calendar.current.date(byAdding: .minute, value: minutes, to: Date())!
 }
 
-struct WidgetPlace {
-    let coordinates: CLLocationCoordinate2D
-    var name: String? = nil
-
-    var isFixed: Bool { name != nil }
-
-    func locationName() async -> String {
-        if let name { return name }
-        return await LocationService.shared.getLocationName()
+func staleText(_ fetchedAt: Date, at date: Date, timeZone: TimeZone = .current) -> String? {
+    guard date.timeIntervalSince(fetchedAt) > 3600 else { return nil }
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = timeZone
+    var time = SettingService.formattedTime(fetchedAt, timeZone: timeZone)
+    if !calendar.isDate(fetchedAt, inSameDayAs: date) {
+        time = SettingService.formattedShortWeekday(fetchedAt, timeZone: timeZone) + " " + time
     }
+    return String(localized: "Stand \(time)", comment: "Widget: Daten von HH:MM")
 }
 
-#if os(iOS)
-func widgetPlace(for cityID: String?) async -> WidgetPlace {
-    if let cityID,
-       let city = WidgetCity(id: cityID),
-       !city.isCurrentLocation,
-       city.latitude.isFinite,
-       city.longitude.isFinite {
-        return WidgetPlace(
-            coordinates: CLLocationCoordinate2D(latitude: city.latitude, longitude: city.longitude),
-            name: city.name
-        )
+extension RainNowcastSummary {
+    static func peakText(in points: [PrecipPoint], withTime: Bool, timeZone: TimeZone = .current) -> String? {
+        guard let peak = peak(in: points) else { return nil }
+        let rate = "\(RainIntensity.format(peak.precipitation)) \(RainIntensity.unit)"
+        guard withTime else {
+            return String(localized: "Bis zu \(rate)", comment: "Widget Regenverlauf: stärkster Regen der nächsten 90 Minuten")
+        }
+        return String(localized: "Bis zu \(rate) gegen \(SettingService.formattedTime(peak.timestamp, timeZone: timeZone))")
     }
-    return WidgetPlace(coordinates: await currentWidgetCoordinates())
 }
-#endif
 
 protocol PlaceTimelineSource: TimelineProvider, Sendable {
     var refreshMinutes: Int { get }
     var retryMinutes: Int { get }
-    func entries(for place: WidgetPlace) async throws -> [Entry]
+    func entries(for place: WidgetPlace, family: WidgetFamily) async throws -> [Entry]
 }
 
 extension PlaceTimelineSource {
@@ -77,15 +68,16 @@ extension PlaceTimelineSource {
     }
 
     func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<Entry>) -> ()) {
+        let family = context.family
         Task {
             let place = WidgetPlace(coordinates: await currentWidgetCoordinates())
-            completion(await timeline(for: place))
+            completion(await timeline(for: place, family: family))
         }
     }
 
-    func timeline(for place: WidgetPlace) async -> Timeline<Entry> {
+    func timeline(for place: WidgetPlace, family: WidgetFamily) async -> Timeline<Entry> {
         do {
-            return Timeline(entries: try await entries(for: place), policy: .after(minutesFromNow(refreshMinutes)))
+            return Timeline(entries: try await entries(for: place, family: family), policy: .after(minutesFromNow(refreshMinutes)))
         } catch {
             return Timeline(entries: [], policy: .after(minutesFromNow(retryMinutes)))
         }
@@ -105,7 +97,7 @@ struct PlaceIntentProvider<Source: PlaceTimelineSource>: AppIntentTimelineProvid
     }
 
     func timeline(for configuration: SelectCityIntent, in context: Context) async -> Timeline<Source.Entry> {
-        await source.timeline(for: widgetPlace(for: configuration.city))
+        await source.timeline(for: widgetPlace(for: configuration.city), family: context.family)
     }
 }
 #endif
@@ -129,26 +121,22 @@ func placeConfiguration<Source: PlaceTimelineSource, Content: View>(
 }
 
 struct LockscreenProvider: PlaceTimelineSource {
-    let client = APIClient.shared
     let refreshMinutes = 30
 
     func placeholder(in context: Context) -> TemperatureLockScreenEntry {
-        TemperatureLockScreenEntry(date: Date(), temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", precipitation: 2.5, precipitationProbability: 72)
+        TemperatureLockScreenEntry(date: Date(), temperatureMin: 0, temperatureMax: 22, temperatureNow: 10, icon: "cloud.fill", precipitation: 2.5, precipitationProbability: 72, condition: WeatherConditionLabel.text(for: 2))
     }
 
-    func entries(for place: WidgetPlace) async throws -> [TemperatureLockScreenEntry] {
+    func entries(for place: WidgetPlace, family: WidgetFamily) async throws -> [TemperatureLockScreenEntry] {
         let coordinates = place.coordinates
-        async let weatherRequest = client.getForecast(
-            coordinates: coordinates,
-            forecastDays: ._1,
-            hourly: [.precipitation_probability]
-        )
-        async let radarRequest = client.getRadarSeries(coordinates: coordinates)
-        let weather = try await weatherRequest
+        async let radarRequest = WidgetForecast.radar(coordinates)
+        let (weather, fetchedAt) = try await WidgetForecast.forecast(coordinates)
         let precipSeries = try? await radarRequest
+        let timeZone = weather.locationTimeZone
 
-        let reportedMin = weather.daily?.temperature_2m_min?.first
-        let reportedMax = weather.daily?.temperature_2m_max?.first
+        let today = weather.dayIndex(at: Date())
+        let reportedMin = weather.daily?.temperature_2m_min?[safe: today]
+        let reportedMax = weather.daily?.temperature_2m_max?[safe: today]
         let temperatureNow = weather.current?.temperature ?? 0
         let lowerTemperature = min(reportedMin ?? temperatureNow, reportedMax ?? temperatureNow)
         let upperTemperature = max(reportedMin ?? temperatureNow, reportedMax ?? temperatureNow)
@@ -156,22 +144,29 @@ struct LockscreenProvider: PlaceTimelineSource {
         let temperatureMax = lowerTemperature < upperTemperature ? upperTemperature : upperTemperature + 0.5
         let weathercode = weather.current?.weathercode ?? 0
         let isDay = weather.current?.is_day ?? 0
-
         let modelPrecipitation = weather.current?.precipitation ?? 0
         let probabilities = weather.hourly?.precipitation_probability ?? []
-        let hourIndex = getLocalizedHourIndex(weather: weather)
-        let precipitationProbability = probabilities.indices.contains(hourIndex) ? probabilities[hourIndex] : nil
 
         return nowcastEntryDates(refreshMinutes: refreshMinutes).map { date in
-            let precipitation = precipSeries?.rate(at: date) ?? modelPrecipitation
-            let icon = WeatherSymbol.sfSymbol(weathercode: weathercode, isDay: isDay, isRaining: precipitation > 0, precipitation: precipitation)
-            return TemperatureLockScreenEntry(date: date, temperatureMin: temperatureMin, temperatureMax: temperatureMax, temperatureNow: temperatureNow, icon: icon, precipitation: precipitation, precipitationProbability: Int(precipitationProbability ?? 0))
+            let radarRate = precipSeries?.rate(at: date)
+            let code = WeatherConditionLabel.code(weathercode: weathercode, radarRate: radarRate)
+            let icon = WeatherSymbol.sfSymbol(weathercode: Double(code), isDay: isDay, isRaining: code >= 51, precipitation: radarRate ?? 0)
+            let points = RainNowcastSummary.points(from: precipSeries, now: date)
+            let rainHeadline = points.contains { $0.precipitation > 0 } ? RainNowcastSummary.headline(for: points, now: date, timeZone: timeZone) : nil
+            let probability = probabilities[safe: weather.hourIndex(at: date)] ?? nil
+            return TemperatureLockScreenEntry(
+                date: date,
+                temperatureMin: temperatureMin,
+                temperatureMax: temperatureMax,
+                temperatureNow: temperatureNow,
+                icon: icon,
+                precipitation: radarRate ?? modelPrecipitation,
+                precipitationProbability: Int(probability ?? 0),
+                condition: WeatherConditionLabel.text(for: code),
+                rainHeadline: rainHeadline,
+                cityID: place.cityID,
+                staleNote: staleText(fetchedAt, at: date, timeZone: timeZone)
+            )
         }
-    }
-
-    public func getLocalizedHourIndex(weather: Operations.getForecast.Output.Ok.Body.jsonPayload) -> Int {
-        let currentUnixTime = weather.current?.time ?? 0
-        let hours = weather.hourly?.time ?? []
-        return hours.indices.min { abs(currentUnixTime - hours[$0]) < abs(currentUnixTime - hours[$1]) } ?? 0
     }
 }

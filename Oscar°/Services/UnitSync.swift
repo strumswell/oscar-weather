@@ -10,7 +10,7 @@ final class UnitSync: NSObject, WCSessionDelegate {
         WCSession.default.delegate = self
         WCSession.default.activate()
         #if os(iOS)
-        NotificationCenter.default.addObserver(forName: .unitsDidChange, object: nil, queue: .main) { _ in
+        NotificationCenter.default.addObserver(forName: .watchSettingsDidChange, object: nil, queue: .main) { _ in
             Task { @MainActor in UnitSync.shared.push() }
         }
         #endif
@@ -28,7 +28,9 @@ final class UnitSync: NSObject, WCSessionDelegate {
     private func push() {
         let session = WCSession.default
         guard session.activationState == .activated, session.isPaired, session.isWatchAppInstalled else { return }
-        try? session.updateApplicationContext(SettingService.unitStorageValues)
+        var context: [String: Any] = SettingService.unitStorageValues
+        context["favoriteStationIDs"] = SettingService.shared.favoriteStationIDs
+        try? session.updateApplicationContext(context)
     }
 
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
@@ -43,7 +45,13 @@ final class UnitSync: NSObject, WCSessionDelegate {
 
     nonisolated private func apply(_ context: [String: Any]) {
         let values = context.compactMapValues { $0 as? String }
-        Task { @MainActor in SettingService.shared.apply(unitValues: values) }
+        let favorites = context["favoriteStationIDs"] as? [String]
+        Task { @MainActor in
+            SettingService.shared.apply(unitValues: values)
+            if let favorites, favorites != SettingService.shared.favoriteStationIDs {
+                SettingService.shared.favoriteStationIDs = favorites
+            }
+        }
     }
     #endif
 }

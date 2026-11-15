@@ -32,9 +32,11 @@ struct WatchRainView: View {
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
 
-                chart(bars: bars)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding(.vertical, 4)
+                GeometryReader { proxy in
+                    RainBarsChart(values: RainNowcastSummary.values(bars), height: proxy.size.height, axis: .none)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.vertical, 4)
 
                 HStack {
                     Text("Jetzt")
@@ -53,28 +55,6 @@ struct WatchRainView: View {
         }
         .padding(.horizontal, 4)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-
-    private func chart(bars: [PrecipPoint]) -> some View {
-        let reference = RainNowcastSummary.reference(for: bars.map(\.precipitation))
-
-        return GeometryReader { proxy in
-            HStack(alignment: .bottom, spacing: 3) {
-                ForEach(bars, id: \.timestamp) { bar in
-                    RainNowcastBar(
-                        value: bar.precipitation, reference: reference, areaHeight: proxy.size.height,
-                        fill: bar.precipitation > 0
-                            ? AnyShapeStyle(.linearGradient(
-                                colors: [.cyan, .blue],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ))
-                            : AnyShapeStyle(.white.opacity(0.25))
-                    )
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-        }
     }
 }
 

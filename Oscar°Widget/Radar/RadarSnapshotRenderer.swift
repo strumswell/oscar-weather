@@ -40,7 +40,7 @@ enum RadarSnapshotRenderer {
     }
 
     static let mapSpanMeters = 65_000.0
-    static let compositeScale: CGFloat = 2
+    nonisolated static let compositeScale: CGFloat = 2
     private static let radarOverlayAlpha: CGFloat = 0.7
 
     private static func fallbackBackground(style: String) -> UIColor {
@@ -64,6 +64,7 @@ enum RadarSnapshotRenderer {
         } else {
             plan = await ecmwfPlan()
         }
+        guard plan.tileSource != nil else { return nil }
 
         var cells: [WidgetStormCell] = []
         if options.stormCells, let region {
@@ -71,7 +72,6 @@ enum RadarSnapshotRenderer {
         }
 
         let basemap = loadBasemap(center: center, size: size, style: options.style, fixed: options.fixedPlace)
-        guard basemap != nil || plan.tileSource != nil else { return nil }
 
         let bounds = basemap?.bounds ?? fittedBounds(around: center, spanMeters: mapSpanMeters, size: size)
         let frame = MercatorFrame(bounds: bounds, size: size)

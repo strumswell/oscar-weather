@@ -10,17 +10,21 @@ struct RainNowcastSummaryTests {
     }
 
     @Test
-    func barFractionEmphasizesLightRainAndCapsAtOne() {
-        #expect(RainNowcastSummary.barFraction(value: 0, reference: 2) == 0)
-        #expect(RainNowcastSummary.barFraction(value: 0.5, reference: 2) == 0.5)
-        #expect(RainNowcastSummary.barFraction(value: 8, reference: 2) == 1)
+    func radarDecidesTheConditionBothWays() {
+        #expect(WeatherConditionLabel.code(weathercode: 2, radarRate: nil) == 2)
+        #expect(WeatherConditionLabel.code(weathercode: 61, radarRate: nil) == 61)
+        #expect(WeatherConditionLabel.code(weathercode: 2, radarRate: 0.4) == 51)
+        #expect(WeatherConditionLabel.code(weathercode: 3, radarRate: 3) == 61)
+        #expect(WeatherConditionLabel.code(weathercode: 61, radarRate: 0) == 3)
+        #expect(WeatherConditionLabel.code(weathercode: 73, radarRate: 1) == 73)
     }
 
     @Test
-    func referenceHasADrizzleFloor() {
-        #expect(RainNowcastSummary.reference(for: [0.1, 0.4]) == 2)
-        #expect(RainNowcastSummary.reference(for: [3.5, 1]) == 3.5)
-        #expect(RainNowcastSummary.reference(for: []) == 2)
+    func headlineUsesThePlaceTimeZone() {
+        let tokyo = TimeZone(identifier: "Asia/Tokyo")!
+        let points = [point(minutes: 0, rain: 0), point(minutes: 15, rain: 0.6)]
+        let start = SettingService.formattedTime(now.addingTimeInterval(15 * 60), timeZone: tokyo)
+        #expect(RainNowcastSummary.headline(for: points, now: now, timeZone: tokyo) == String(localized: "Regen ab \(start)"))
     }
 
     @Test

@@ -13,14 +13,23 @@ struct OscarWidgetsBundle: WidgetBundle {
     @WidgetBundleBuilder
     var body: some Widget {
         #if os(iOS)
-        RadarWidget()
         NowTodayWidget()
+        RadarWidget()
         DailyForecastWidget()
+        PlacesWidget()
+        StationsListWidget()
+        AirWidget()
+        SunWidget()
+        ClimateWidget()
         RainRadarLiveActivityWidget()
+        RadarControl()
+        WeatherControl()
         #endif
-        TemperatureLockScreenWidget()
-        PrecipitationLockScreenWidget()
         RainTimelineLockScreenWidget()
+        StationWidget()
+        TemperatureLockScreenWidget()
+        HourlyLockScreenWidget()
+        PrecipitationLockScreenWidget()
         UVIndexLockScreenWidget()
         WindLockScreenWidget()
     }

@@ -43,39 +43,141 @@ struct RadarWidgetConfigIntent: WidgetConfigurationIntent {
     var stormCells: Bool
 }
 
-// MARK: - Entry view
-
 struct RadarWidgetEntryView: View {
-    @Environment(\.widgetRenderingMode) var widgetRenderingMode
+    @Environment(\.widgetFamily) private var family
 
     var entry: RadarProvider.Entry
 
     var body: some View {
-        Color.clear
-            .overlay {
-                mapImage
-                    .widgetAccentedRenderingMode(.accentedDesaturated)
-                    .aspectRatio(contentMode: .fill)
-                    .contrast(widgetRenderingMode == .accented ? 1.5 : 1)
+        HStack(spacing: 0) {
+            let map = RadarMapTile(image: entry.image, frameDate: entry.frameDate, isOffline: entry.isOffline, timeZone: entry.timeZone)
+            if family == .systemMedium {
+                map.aspectRatio(1, contentMode: .fit)
+                RadarNowcastPanel(
+                    placeName: entry.placeName,
+                    headline: entry.headline,
+                    bars: entry.bars,
+                    forecastStart: entry.forecastStart
+                )
+            } else {
+                map
             }
-            .clipped()
-            .overlay(alignment: .topLeading) {
-                Text(SettingService.formattedTime(entry.frameDate))
-                    .font(.footnote)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 5)
-                    .padding(.vertical, 2)
-                    .background(widgetRenderingMode == .accented ? .gray.opacity(0.3) : .gray.opacity(0.6))
-                    .clipShape(.rect(cornerRadius: 5))
-                    .widgetAccentable()
-                    .padding(15)
-            }
-            .containerBackground(.clear, for: .widget)
+        }
+        .environment(\.colorScheme, .dark)
+        .containerBackground(entry.style.mapTone, for: .widget)
+        .widgetURL(.oscarRadar(entry.cityID))
     }
+}
 
-    private var mapImage: Image {
-        Image(uiImage: entry.image)
-            .resizable()
+struct RadarMapTile: View {
+    let image: UIImage?
+    let frameDate: Date
+    let isOffline: Bool
+    var timeZone: TimeZone = .current
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
+    var body: some View {
+        if let image {
+            Color.clear
+                .overlay {
+                    Image(uiImage: image)
+                        .resizable()
+                        .widgetAccentedRenderingMode(.accentedDesaturated)
+                        .aspectRatio(contentMode: .fill)
+                        .contrast(renderingMode == .accented ? 1.5 : 1)
+                }
+                .overlay(Color.black.opacity(isOffline ? 0.3 : 0))
+                .clipped()
+                .overlay(alignment: .topLeading) {
+                    RadarTimeBadge(frameDate: frameDate, isOffline: isOffline, timeZone: timeZone)
+                }
+        } else {
+            Text("Radar nicht erreichbar")
+                .font(.footnote.weight(.medium))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+}
+
+struct RadarTimeBadge: View {
+    let frameDate: Date
+    let isOffline: Bool
+    var timeZone: TimeZone = .current
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
+    var body: some View {
+        HStack(spacing: 3) {
+            if isOffline {
+                Image(systemName: "wifi.slash")
+                    .accessibilityLabel(Text("Offline"))
+            }
+            Text(SettingService.formattedTime(frameDate, timeZone: timeZone))
+        }
+        .font(.footnote)
+        .foregroundStyle(.white)
+        .padding(.horizontal, 5)
+        .padding(.vertical, 2)
+        .background(renderingMode == .accented ? .gray.opacity(0.3) : .gray.opacity(0.6))
+        .clipShape(.rect(cornerRadius: 5))
+        .widgetAccentable()
+        .padding(15)
+    }
+}
+
+struct RadarNowcastPanel: View {
+    let placeName: String
+    let headline: String
+    let bars: [Double]
+    let forecastStart: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(placeName)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+            Text(headline)
+                .font(.subheadline.weight(.semibold))
+                .padding(.top, 1)
+            if let rate = bars.first, rate > 0 {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(RainIntensity.format(rate))
+                        .font(.title2)
+                        .monospacedDigit()
+                    Text("\(RainIntensity.unit) jetzt")
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.top, 4)
+            }
+            Spacer(minLength: 0)
+            if bars.contains(where: { $0 > 0 }) {
+                RainBarsChart(values: bars, height: 40, axis: .span)
+            } else if let forecastStart {
+                Text("Laut Vorhersage")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(forecastStart)
+                    .font(.headline)
+                    .padding(.top, 2)
+            }
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.75)
+        .padding(EdgeInsets(top: 14, leading: 14, bottom: 12, trailing: 16))
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+    }
+}
+
+extension RadarWidgetStyle {
+    var mapTone: LinearGradient {
+        let colors: [Color] = switch self {
+        case .fiord: [Color(hex: 0x3A4062), Color(hex: 0x23284A)]
+        case .dark, .positron: [Color(hex: 0x2A2A2E), Color(hex: 0x161618)]
+        }
+        return LinearGradient(colors: colors, startPoint: .top, endPoint: .bottom)
     }
 }
 
@@ -93,10 +195,28 @@ struct RadarWidget: Widget {
         .contentMarginsDisabled()
         .configurationDisplayName(String(localized: "Regenradar"))
         .description(String(localized: "Regenradar für deinen Ort"))
-        .supportedFamilies([.systemSmall, .systemLarge])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 
-#Preview {
-    RadarWidgetEntryView(entry: RadarEntry(date: Date(), frameDate: Date(), image: UIImage(named: "rain") ?? UIImage()))
+#Preview(as: .systemSmall) {
+    RadarWidget()
+} timeline: {
+    RadarProvider.sample()
+    RadarEntry(date: .now, frameDate: .now.addingTimeInterval(-3_600), image: UIImage(named: "rain"), isOffline: true)
+    RadarEntry(date: .now, frameDate: .now)
+}
+
+#Preview("Mittel", as: .systemMedium) {
+    RadarWidget()
+} timeline: {
+    RadarProvider.sample()
+    RadarEntry(
+        date: .now,
+        frameDate: .now,
+        image: UIImage(named: "rain"),
+        placeName: "Leipzig",
+        headline: String(localized: "Kein Regen in Sicht"),
+        forecastStart: "Morgen ab 09:00"
+    )
 }

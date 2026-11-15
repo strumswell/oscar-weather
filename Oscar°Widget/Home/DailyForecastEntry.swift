@@ -19,6 +19,8 @@ struct DailyForecastEntry: TimelineEntry {
     let minTemp: Double
     let maxTemp: Double
     let backgroundGradient: LinearGradient
+    var cityID: String? = nil
+    var staleNote: String? = nil
 
     static var placeholder: DailyForecastEntry {
         let samples: [(String, String, Double, Double, Double?)] = [
@@ -52,7 +54,7 @@ struct DailyForecastEntry: TimelineEntry {
         )
     }
 
-    static func unavailable(location: String) -> DailyForecastEntry {
+    static func unavailable(location: String, cityID: String?) -> DailyForecastEntry {
         DailyForecastEntry(
             date: .now,
             location: location,
@@ -60,7 +62,8 @@ struct DailyForecastEntry: TimelineEntry {
             minTemp: 0,
             maxTemp: 40,
             backgroundGradient: LinearGradient(
-                colors: [.sunriseStart, .sunnyDayEnd], startPoint: .top, endPoint: .bottom)
+                colors: [.sunriseStart, .sunnyDayEnd], startPoint: .top, endPoint: .bottom),
+            cityID: cityID
         )
     }
 }

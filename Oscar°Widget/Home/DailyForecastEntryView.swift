@@ -12,12 +12,21 @@ struct DailyForecastEntryView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: rowSpacing) {
-            Text(entry.location)
-                .font(isCompact ? .subheadline : .headline)
-                .fontWeight(.semibold)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .padding(.bottom, family == .systemLarge ? 4 : 2)
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(entry.location)
+                    .font(isCompact ? .subheadline : .headline)
+                    .fontWeight(.semibold)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Spacer(minLength: 0)
+                if let staleNote = entry.staleNote {
+                    Text(staleNote)
+                        .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.6))
+                        .lineLimit(1)
+                }
+            }
+            .padding(.bottom, family == .systemLarge ? 4 : 2)
 
             ForEach(entry.days.prefix(dayCount)) { day in
                 if isCompact {
@@ -40,6 +49,7 @@ struct DailyForecastEntryView: View {
             entry.backgroundGradient
                 .opacity(renderingMode == .accented ? 0 : 1)
         }
+        .widgetURL(.oscarPlace(entry.cityID))
     }
 }
 
