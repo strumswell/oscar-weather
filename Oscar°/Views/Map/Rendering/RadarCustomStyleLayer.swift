@@ -58,11 +58,19 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
                      + g1.x * tex.sample(s, float2(p1.x, p1.y)).r);
     }
 
+    static half4 lookup(texture2d<half> palette, float v, bool soft) {
+        constexpr sampler lutNearest(filter::nearest, address::clamp_to_edge);
+        constexpr sampler lutLinear(filter::linear, address::clamp_to_edge);
+        float2 lut = float2(v * (255.0 / 256.0) + (0.5 / 256.0), 0.5);
+        return soft ? palette.sample(lutLinear, lut) : palette.sample(lutNearest, lut);
+    }
+
     // Two-sided backward warp (Klemen Lozar / rainymotion "Dense" / pySTEPS
-    // semilagrangian): sample A along the flow at -t·f and B at +(1-t)·f, then blend
-    // in DATA (dBZ-linear index) space and colormap the result. flow rg = uv
-    // displacement per pair gap; a zero texture + scale 0 degrades to a plain
-    // data-space cross-fade, phase 0 to the exact frame.
+    // semilagrangian): sample A along the flow at -t·f and B at +(1-t)·f. Where both
+    // frames have echo, blend in DATA (dBZ-linear index) space; where only one does,
+    // cross-fade the premultiplied colours so echo edges fade instead of popping.
+    // flow rg = uv displacement per pair gap; a zero texture + scale 0 degrades to a
+    // plain cross-fade, phase 0 to the exact frame.
     //
     // Soft mode (p.w): B-spline data sampling + LINEAR palette sampling. The palette
     // rgb is PREMULTIPLIED (setPalette), so filtering through transparent entries
@@ -74,8 +82,6 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
                                   texture2d<float> flow    [[texture(3)]],
                                   constant RadarParams& p [[buffer(0)]]) {
         constexpr sampler dataSampler(filter::linear, address::clamp_to_edge);
-        constexpr sampler lutNearest(filter::nearest, address::clamp_to_edge);
-        constexpr sampler lutLinear(filter::linear, address::clamp_to_edge);
         float t = p.p.x;
         bool soft = p.p.w > 0.5;
         float2 f = flow.sample(dataSampler, in.uv).rg * p.p.z;
@@ -83,9 +89,9 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         float2 uvB = in.uv + (1.0 - t) * f;
         float a = soft ? sample_bspline(frameA, dataSampler, uvA) : frameA.sample(dataSampler, uvA).r;
         float b = soft ? sample_bspline(frameB, dataSampler, uvB) : frameB.sample(dataSampler, uvB).r;
-        float v = mix(a, b, t);                                // blend in data (dBZ) space
-        float2 lut = float2(v * (255.0 / 256.0) + (0.5 / 256.0), 0.5);
-        half4 c = soft ? palette.sample(lutLinear, lut) : palette.sample(lutNearest, lut);
+        half4 cA = lookup(palette, a, soft);
+        half4 cB = lookup(palette, b, soft);
+        half4 c = mix(mix(cA, cB, half(t)), lookup(palette, mix(a, b, t), soft), min(cA.a, cB.a));
         if (p.wipe.y != 0.0) {                                 // radar ↔ model handover sweep
             float kept = (p.wipe.x - in.ndcX) * p.wipe.y;
             c *= half(smoothstep(-p.wipe.z, p.wipe.z, kept));
