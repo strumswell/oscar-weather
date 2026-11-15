@@ -17,6 +17,12 @@ final class MapLayers {
     var radar: OscarRadarState { timeline.radar }
     var model: ModelGridLayerState { timeline.model }
 
+    init(preloadsWide: Bool = true) {
+        timeline.radar.preloadsWide = preloadsWide
+        timeline.model.preloadsWide = preloadsWide
+        clouds.preloadsWide = preloadsWide
+    }
+
     struct Continuation: Equatable {
         let layer: WeatherTileLayer
         let cutoff: Date

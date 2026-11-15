@@ -11,7 +11,7 @@ import SwiftUI
 struct MapPreview: View {
     @Environment(Location.self) private var location
     @Environment(NowPresentationCoordinator.self) private var presentation
-    @State private var layers = MapLayers()
+    @State private var layers = MapLayers(preloadsWide: false)
     private let settingsService = SettingService.shared
 
     var body: some View {

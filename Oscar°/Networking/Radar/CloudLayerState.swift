@@ -51,6 +51,7 @@ final class CloudLayerState {
     @ObservationIgnored private var failedKeys: Set<String> = []
     @ObservationIgnored private var loadsHeld = false
     @ObservationIgnored private var isMapInteracting = false
+    @ObservationIgnored var preloadsWide = true
     @ObservationIgnored private var lastMetadataLoad: Date?
     @ObservationIgnored private var loadSessionID = UUID()
 
@@ -294,7 +295,7 @@ final class CloudLayerState {
     private func pumpLoads() {
         let thermal = ProcessInfo.processInfo.thermalState
         guard isActive, !loadsHeld, !frameKeys.isEmpty, thermal != .critical else { return }
-        let wide = thermal == .nominal && !isMapInteracting
+        let wide = preloadsWide && thermal == .nominal && !isMapInteracting
         let focus = Set(prioritizedFrameIndices(count: frameKeys.count, around: currentFrameIndex)
             .prefix(Self.focusedCount))
         let picks = loadsToStart(count: frameKeys.count, center: currentFrameIndex,

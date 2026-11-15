@@ -15,27 +15,17 @@ import UIKit
 
 final class AppDelegate: NSObject, UIApplicationDelegate {
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Oscar", category: "Notifications")
-    nonisolated(unsafe) private var memoryWarningObserver: NSObjectProtocol?
+    nonisolated(unsafe) private var purgeObservers: [NSObjectProtocol] = []
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        memoryWarningObserver = NotificationCenter.default.addObserver(
-            forName: UIApplication.didReceiveMemoryWarningNotification,
-            object: nil,
-            queue: .main
-        ) { _ in
-            Task { @MainActor in
-                ModelGridLayerState.purgeDecodedCaches()
-                OscarRadarState.purgeDecodedGrids()
-                CloudLayerState.purgeDecodedCaches()
-                RadarCustomStyleLayer.purgeCachedTextures()
-                await WindFieldCache.shared.evict(retaining: [])
-                await CacheStore.shared.dropMemory()
-                await ClimateArchiveStore.shared.dropMemory()
-                await DailyEnsembleForecastCache.shared.dropMemory()
+        for name in [UIApplication.didReceiveMemoryWarningNotification, UIApplication.didEnterBackgroundNotification] {
+            let observer = NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { _ in
+                Task { await Self.purgeCaches() }
             }
+            purgeObservers.append(observer)
         }
         MainActor.assumeIsolated {
             UNUserNotificationCenter.current().delegate = NotificationSettingsManager.shared
@@ -61,9 +51,21 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         logger.error("Lifecycle: UIApplication didFailToRegisterForRemoteNotificationsWithError=\(error.localizedDescription, privacy: .public)")
     }
 
+    @MainActor
+    private static func purgeCaches() async {
+        ModelGridLayerState.purgeDecodedCaches()
+        OscarRadarState.purgeDecodedGrids()
+        CloudLayerState.purgeDecodedCaches()
+        RadarCustomStyleLayer.purgeCachedTextures()
+        await WindFieldCache.shared.evict(retaining: [])
+        await CacheStore.shared.dropMemory()
+        await ClimateArchiveStore.shared.dropMemory()
+        await DailyEnsembleForecastCache.shared.dropMemory()
+    }
+
     deinit {
-        if let memoryWarningObserver {
-            NotificationCenter.default.removeObserver(memoryWarningObserver)
+        for observer in purgeObservers {
+            NotificationCenter.default.removeObserver(observer)
         }
     }
 }

@@ -35,6 +35,7 @@ final class ModelGridLayerState {
     private(set) var loadedFrameIndices: Set<Int> = []
     private(set) var renderFrameIndex: Int?
     private(set) var isMapInteracting = false
+    @ObservationIgnored var preloadsWide = true
 
     @ObservationIgnored private var loadTask: Task<Void, Never>?
     @ObservationIgnored private var loadTasks: [Int: Task<Void, Never>] = [:]
@@ -296,7 +297,7 @@ final class ModelGridLayerState {
 
     private func pumpLoads() {
         guard !loadsHeld, currentLayer != nil, !frameInfos.isEmpty else { return }
-        let wide = allowsBackgroundPreload() && !isMapInteracting
+        let wide = preloadsWide && allowsBackgroundPreload() && !isMapInteracting
         let focus = Set(prioritizedFrameIndices(count: frames.count, around: currentFrameIndex).prefix(5))
         let resident = residentFrameIndices(around: currentFrameIndex)
         let picks = loadsToStart(count: frames.count, center: currentFrameIndex,
