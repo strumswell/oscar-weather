@@ -78,10 +78,10 @@ extension APIClient {
 
   func radarGrid(region: String, key: String) async throws -> Data? {
     let output = try await oscarServer.getRadarGrid(
-      .init(path: .init(region: region, key: key)))
+      .init(path: .init(region: region, key: key), query: .init(format: .raw)))
     switch output {
     case .ok(let ok):
-      return try await Data(collecting: ok.body.image_webp, upTo: Self.assetByteLimit)
+      return try await Data(collecting: ok.body.binary, upTo: Self.assetByteLimit)
     case .undocumented(let statusCode, _):
       if statusCode == 404 { return nil }
       throw URLError(.badServerResponse)
@@ -89,9 +89,9 @@ extension APIClient {
   }
 
   func cloudGrid(key: String) async throws -> Data {
-    switch try await oscarServer.getCloudGrid(.init(path: .init(key: key))) {
+    switch try await oscarServer.getCloudGrid(.init(path: .init(key: key), query: .init(format: .raw))) {
     case .ok(let ok):
-      return try await Data(collecting: ok.body.image_webp, upTo: Self.assetByteLimit)
+      return try await Data(collecting: ok.body.binary, upTo: Self.assetByteLimit)
     case .undocumented: throw URLError(.badServerResponse)
     }
   }

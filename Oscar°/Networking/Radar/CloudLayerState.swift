@@ -47,10 +47,12 @@ final class CloudLayerState {
     @ObservationIgnored private var payloads: [String: RadarGridPayload] = [:]
     @ObservationIgnored private var loadingKeys: Set<String> = []
     @ObservationIgnored private var metadataTask: Task<Void, Never>?
-    @ObservationIgnored private var prefetchTask: Task<Void, Never>?
+    @ObservationIgnored private var loadTasks: [String: Task<Void, Never>] = [:]
+    @ObservationIgnored private var failedKeys: Set<String> = []
+    @ObservationIgnored private var loadsHeld = false
+    @ObservationIgnored private var isMapInteracting = false
     @ObservationIgnored private var lastMetadataLoad: Date?
     @ObservationIgnored private var loadSessionID = UUID()
-    @ObservationIgnored private var lastAnchorIndex = 0
 
     private static let metadataStaleAfter: TimeInterval = 10 * 60
     private static let residencyBudget = adaptiveCacheBudget(
@@ -87,8 +89,8 @@ final class CloudLayerState {
 
     static func purgeDecodedCaches() {
         for state in instances.allObjects {
-            state.prefetchTask?.cancel()
-            let anchor = state.lastAnchorIndex
+            state.loadsHeld = true
+            let anchor = state.renderFrameIndex ?? state.currentFrameIndex
             state.payloads = state.payloads.filter { key, _ in
                 guard let index = state.indexByKey[key] else { return false }
                 return abs(index - anchor) <= 1
@@ -99,7 +101,7 @@ final class CloudLayerState {
 
     deinit {
         metadataTask?.cancel()
-        prefetchTask?.cancel()
+        loadTasks.values.forEach { $0.cancel() }
     }
 
     // MARK: - Activation
@@ -110,14 +112,13 @@ final class CloudLayerState {
         if active {
             isLoading = frameKeys.isEmpty
             loadMetadataIfStale()
+            handleSelectionChanged()
         } else {
             pause()
             metadataTask?.cancel()
             metadataTask = nil
-            prefetchTask?.cancel()
-            prefetchTask = nil
-            loadingKeys.removeAll()
-            loadingFrameIndices.removeAll()
+            loadSessionID = UUID()
+            cancelFrameLoads()
             payloads.removeAll()
             loadedFrameIndices.removeAll()
             renderFrameIndex = nil
@@ -140,7 +141,7 @@ final class CloudLayerState {
     }
 
     func advanceFrame() {
-        guard !frameKeys.isEmpty else { return }
+        guard isPlaying, !frameKeys.isEmpty else { return }
         var loaded = [Bool](repeating: false, count: frameKeys.count)
         for index in loadedFrameIndices where loaded.indices.contains(index) { loaded[index] = true }
         guard let next = nextLoadedIndex(in: loaded, after: currentFrameIndex) else { return }
@@ -152,22 +153,18 @@ final class CloudLayerState {
     }
 
     func beginScrubbing() {
-        prefetchTask?.cancel()
-        prefetchTask = nil
+        pause()
     }
 
-    func endScrubbing() {
-        handleSelectionChanged()
-    }
+    func endScrubbing() {}
 
     func beginMapInteraction() {
-        prefetchTask?.cancel()
-        prefetchTask = nil
+        isMapInteracting = true
     }
 
     func endMapInteraction() {
-        guard isActive else { return }
-        handleSelectionChanged()
+        isMapInteracting = false
+        pumpLoads()
     }
 
     var currentFrameKeyed: (key: String, payload: RadarGridPayload)? {
@@ -193,10 +190,18 @@ final class CloudLayerState {
 
     private func handleSelectionChanged() {
         guard !suppressSelectionSideEffects, frameKeys.indices.contains(currentFrameIndex) else { return }
-        if loadedFrameIndices.contains(currentFrameIndex) {
-            renderFrameIndex = currentFrameIndex
-        }
-        prefetch(aroundKey: frameKeys[currentFrameIndex])
+        evict(around: currentFrameIndex)
+        showNearestLoadedFrame()
+        if !isPlaying { failedKeys.removeAll() }
+        loadsHeld = false
+        pumpLoads()
+    }
+
+    private func showNearestLoadedFrame() {
+        guard let nearest = nearestLoadedIndex(in: frameKeys.map { payloads[$0] != nil }, around: currentFrameIndex),
+              nearest != renderFrameIndex else { return }
+        if let renderFrameIndex, abs(renderFrameIndex - currentFrameIndex) <= abs(nearest - currentFrameIndex) { return }
+        renderFrameIndex = nearest
     }
 
     func refreshIfStale() {
@@ -212,8 +217,7 @@ final class CloudLayerState {
         guard metadataTask == nil else { return }
         let sessionID = UUID()
         loadSessionID = sessionID
-        prefetchTask?.cancel()
-        prefetchTask = nil
+        cancelFrameLoads()
         metadataTask = Task { [weak self] in
             await self?.loadMetadata(sessionID: sessionID)
             if self?.loadSessionID == sessionID { self?.metadataTask = nil }
@@ -285,72 +289,74 @@ final class CloudLayerState {
         return frameTimestamps[index]
     }
 
-    // MARK: - Prefetch
+    // MARK: - Loading
 
-    func prefetch(aroundKey key: String) {
-        guard isActive, !frameKeys.isEmpty else { return }
-        let anchor = indexByKey[key] ?? nearestIndex(to: key)
-        if anchor == lastAnchorIndex, prefetchTask != nil { return }
-        lastAnchorIndex = anchor
-        prefetchTask?.cancel()
-
+    private func pumpLoads() {
         let thermal = ProcessInfo.processInfo.thermalState
-        guard thermal != .critical else { return }
-        let wanted = prioritizedFrameIndices(count: frameKeys.count, around: anchor)
-        let count = thermal == .nominal ? wanted.count : Self.focusedCount
-        let indices = Array(wanted.prefix(count)).filter { index in
-            let frameKey = frameKeys[index]
-            return payloads[frameKey] == nil && !loadingKeys.contains(frameKey)
+        guard isActive, !loadsHeld, !frameKeys.isEmpty, thermal != .critical else { return }
+        let wide = thermal == .nominal && !isMapInteracting
+        let focus = Set(prioritizedFrameIndices(count: frameKeys.count, around: currentFrameIndex)
+            .prefix(Self.focusedCount))
+        let picks = loadsToStart(count: frameKeys.count, center: currentFrameIndex,
+                                 inFlight: loadingKeys.count, limit: frameLoadLimit()) { index in
+            let key = frameKeys[index]
+            return payloads[key] == nil && !loadingKeys.contains(key) && !failedKeys.contains(key)
+                && abs(index - currentFrameIndex) <= Self.residencyRadius && (wide || focus.contains(index))
         }
-        guard !indices.isEmpty else { return }
-
-        let sessionID = loadSessionID
-        prefetchTask = Task { [weak self] in
-            guard let self else { return }
-            for index in indices.prefix(Self.focusedCount * 4) {
-                guard !Task.isCancelled, self.loadSessionID == sessionID else { break }
-                await self.loadFrame(at: index, sessionID: sessionID)
-            }
-            if self.loadSessionID == sessionID { self.prefetchTask = nil }
-            self.evict(around: self.lastAnchorIndex)
-        }
+        for index in picks { startLoad(at: index) }
     }
 
-    private func nearestIndex(to key: String) -> Int {
-        var best = 0
-        for (index, frameKey) in frameKeys.enumerated() where frameKey <= key {
-            best = index
-        }
-        return best
-    }
-
-    private func loadFrame(at index: Int, sessionID: UUID) async {
-        guard frameKeys.indices.contains(index) else { return }
+    private func startLoad(at index: Int) {
         let key = frameKeys[index]
-        guard payloads[key] == nil, !loadingKeys.contains(key) else { return }
+        let sessionID = loadSessionID
         loadingKeys.insert(key)
         loadingFrameIndices.insert(index)
-        defer {
-            loadingKeys.remove(key)
-            loadingFrameIndices.remove(index)
+        loadTasks[key] = Task { [weak self] in
+            var payload: RadarGridPayload?
+            if let data = try? await APIClient.shared.cloudGrid(key: key) {
+                payload = await RadarFrameDecodeLane.shared.decodeRawGrid(data)
+            }
+            self?.finishLoad(key: key, payload: payload, sessionID: sessionID)
+        }
+    }
+
+    private func finishLoad(key: String, payload: RadarGridPayload?, sessionID: UUID) {
+        guard isActive, loadSessionID == sessionID else { return }
+        loadingKeys.remove(key)
+        loadTasks[key] = nil
+        let index = indexByKey[key]
+        if let index { loadingFrameIndices.remove(index) }
+
+        if let payload {
+            if let index, abs(index - currentFrameIndex) <= Self.residencyRadius {
+                payloads[key] = payload
+                loadedFrameIndices.insert(index)
+                showNearestLoadedFrame()
+                loadRevision += 1
+            }
+        } else {
+            failedKeys.insert(key)
         }
 
-        guard let data = try? await APIClient.shared.cloudGrid(key: key) else { return }
-        guard let payload = await RadarFrameDecodeLane.shared.decodeGrid(data) else { return }
-        guard loadSessionID == sessionID, indexByKey[key] == index else { return }
-        payloads[key] = payload
-        loadedFrameIndices.insert(index)
-        if renderFrameIndex == nil || currentFrameIndex == index {
-            renderFrameIndex = index
+        pumpLoads()
+        if isLoading, hasAnyLoadedFrame || loadingKeys.isEmpty {
+            isLoading = false
         }
-        isLoading = false
-        loadRevision += 1
+    }
+
+    private func cancelFrameLoads() {
+        loadTasks.values.forEach { $0.cancel() }
+        loadTasks.removeAll()
+        loadingKeys.removeAll()
+        loadingFrameIndices.removeAll()
+        failedKeys.removeAll()
+        loadsHeld = false
     }
 
     private func evict(around anchor: Int) {
         payloads = payloads.filter { key, _ in
             guard let index = indexByKey[key] else { return false }
-            return abs(index - anchor) <= Self.residencyRadius
+            return abs(index - anchor) <= Self.residencyRadius || index == renderFrameIndex
         }
         loadedFrameIndices = Set(payloads.keys.compactMap { indexByKey[$0] })
     }

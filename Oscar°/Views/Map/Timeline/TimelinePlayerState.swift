@@ -89,6 +89,7 @@ final class CombinedTimelineState: TimelinePlayerState {
     func play() { isShowingModel ? model.play() : radar.play() }
 
     func advanceFrame() {
+        guard isPlaying else { return }
         guard modelStartIndex != nil else { return radar.advanceFrame() }
         let loaded = loadedFrameIndices
         guard let next = nextLoadedIndex(in: frameTimestamps.indices.map(loaded.contains),

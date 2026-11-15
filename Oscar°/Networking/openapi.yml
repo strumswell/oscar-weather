@@ -855,7 +855,7 @@ paths:
       operationId: getRadarGrid
       tags:
         - Oscar Server
-      summary: 8-bit value grid for a radar frame (lossless WebP)
+      summary: 8-bit value grid for a radar frame (raw DEFLATE)
       parameters:
         - name: region
           in: path
@@ -867,11 +867,18 @@ paths:
           required: true
           schema:
             type: string
+        - name: format
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - raw
       responses:
         "200":
-          description: Value grid image
+          description: "Value grid: width and height as little-endian UInt32, then raw DEFLATE (RFC 1951) of width × height 8-bit indices, row 0 north"
           content:
-            image/webp:
+            application/octet-stream:
               schema:
                 type: string
                 format: binary
@@ -1007,18 +1014,25 @@ paths:
       operationId: getCloudGrid
       tags:
         - Oscar Server
-      summary: 8-bit value grid for a cloud frame (lossless WebP)
+      summary: 8-bit value grid for a cloud frame (raw DEFLATE)
       parameters:
         - name: key
           in: path
           required: true
           schema:
             type: string
+        - name: format
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - raw
       responses:
         "200":
-          description: Value grid image
+          description: "Value grid: width and height as little-endian UInt32, then raw DEFLATE (RFC 1951) of width × height 8-bit indices, row 0 north"
           content:
-            image/webp:
+            application/octet-stream:
               schema:
                 type: string
                 format: binary

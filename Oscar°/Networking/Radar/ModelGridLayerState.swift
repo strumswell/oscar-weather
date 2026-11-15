@@ -34,12 +34,12 @@ final class ModelGridLayerState {
     private(set) var loadingFrameIndices: Set<Int> = []
     private(set) var loadedFrameIndices: Set<Int> = []
     private(set) var renderFrameIndex: Int?
-    private(set) var interactionState: MapInteractionState = .idle
     private(set) var isMapInteracting = false
 
     @ObservationIgnored private var loadTask: Task<Void, Never>?
-    @ObservationIgnored private var backgroundPreloadTask: Task<Void, Never>?
-    @ObservationIgnored private var focusedLoadTask: Task<Void, Never>?
+    @ObservationIgnored private var loadTasks: [Int: Task<Void, Never>] = [:]
+    @ObservationIgnored private var failedFrameIndices: Set<Int> = []
+    @ObservationIgnored private var loadsHeld = false
     @ObservationIgnored private let playback = PlaybackTicker()
     @ObservationIgnored private var frameInfos: [ModelFrameInfo] = []
     @ObservationIgnored private var frameDates: [Date?] = []
@@ -62,7 +62,7 @@ final class ModelGridLayerState {
     static func purgeDecodedCaches() {
         gridCache.removeAllObjects()
         for state in instances.allObjects {
-            state.backgroundPreloadTask?.cancel()
+            state.loadsHeld = true
             let anchor = state.renderFrameIndex ?? state.currentFrameIndex
             var keep: Set<Int> = [anchor]
             if let next = nextLoadedIndex(in: state.frames.map { $0 != nil }, after: anchor) {
@@ -126,19 +126,18 @@ final class ModelGridLayerState {
     func play() {
         guard !frames.isEmpty else { return }
         isPlaying = true
-        interactionState = .playing
-        restartBackgroundPreloadIfNeeded()
+        loadsHeld = false
+        pumpLoads()
         playback.start(interval: .milliseconds(800)) { [weak self] in self?.advanceFrame() }
     }
 
     func pause() {
         isPlaying = false
-        interactionState = .idle
         playback.stop()
     }
 
     func advanceFrame() {
-        guard !frames.isEmpty else { return }
+        guard isPlaying, !frames.isEmpty else { return }
         let loaded = frames.map { $0 != nil }
         guard let nextIndex = nextLoadedIndex(in: loaded, after: currentFrameIndex) else {
             return
@@ -151,33 +150,27 @@ final class ModelGridLayerState {
     }
 
     func beginScrubbing() {
-        interactionState = .scrubbing
-        backgroundPreloadTask?.cancel()
+        pause()
     }
 
-    func endScrubbing() {
-        interactionState = isPlaying ? .playing : .idle
-        restartBackgroundPreloadIfNeeded()
-    }
+    func endScrubbing() {}
 
     func beginMapInteraction() {
         guard !isMapInteracting else { return }
         isMapInteracting = true
-        backgroundPreloadTask?.cancel()
     }
 
     func endMapInteraction() {
         guard isMapInteracting else { return }
         isMapInteracting = false
-        restartBackgroundPreloadIfNeeded()
+        pumpLoads()
     }
 
     // MARK: - Load
 
     func loadLayer(_ layer: WeatherTileLayer, after cutoff: Date? = nil) async {
         loadTask?.cancel()
-        focusedLoadTask?.cancel()
-        backgroundPreloadTask?.cancel()
+        cancelFrameLoads()
 
         let sessionID = UUID()
         loadSessionID = sessionID
@@ -193,7 +186,6 @@ final class ModelGridLayerState {
         frameInfos = []
         bounds = OscarRadarBounds(north: 85.051, south: -85.051, west: -180, east: 180)
         motion = nil
-        loadingFrameIndices.removeAll()
         loadedFrameIndices.removeAll()
         renderFrameIndex = nil
 
@@ -236,15 +228,9 @@ final class ModelGridLayerState {
                     }
                 }
 
-                await self.loadFrameBatch(
-                    indices: self.focusedFrameIndices(around: closest),
-                    sessionID: sessionID,
-                    layer: layer
-                )
-
-                guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
-                self.isLoading = false
-                self.restartBackgroundPreloadIfNeeded()
+                self.loadsHeld = false
+                self.pumpLoads()
+                if self.loadingFrameIndices.isEmpty { self.isLoading = false }
             } catch {
                 guard self.loadSessionID == sessionID else { return }
                 self.isLoading = false
@@ -277,51 +263,18 @@ final class ModelGridLayerState {
               currentLayer != nil,
               frameInfos.indices.contains(currentFrameIndex) else { return }
 
-        if isSelectedFrameReady {
-            renderFrameIndex = currentFrameIndex
-        }
-
         evictFrames(outside: residentFrameIndices(around: currentFrameIndex))
-
-        focusedLoadTask?.cancel()
-        guard let layer = currentLayer else { return }
-        let sessionID = loadSessionID
-        let focusIndices = focusedFrameIndices(around: currentFrameIndex)
-
-        focusedLoadTask = Task { [weak self] in
-            guard let self else { return }
-            await self.loadFrameBatch(
-                indices: focusIndices,
-                sessionID: sessionID,
-                layer: layer
-            )
-            guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
-            self.restartBackgroundPreloadIfNeeded()
-        }
+        showNearestLoadedFrame()
+        if !isPlaying { failedFrameIndices.removeAll() }
+        loadsHeld = false
+        pumpLoads()
     }
 
-    private func restartBackgroundPreloadIfNeeded() {
-        backgroundPreloadTask?.cancel()
-        guard allowsBackgroundPreload(),
-              interactionState != .scrubbing,
-              !isMapInteracting,
-              let layer = currentLayer,
-              !frameInfos.isEmpty else { return }
-
-        let sessionID = loadSessionID
-        let focused = Set(focusedFrameIndices(around: currentFrameIndex))
-        let resident = residentFrameIndices(around: currentFrameIndex)
-        let ordered = prioritizedFrameIndices(count: frameInfos.count, around: currentFrameIndex)
-            .filter { resident.contains($0) && !focused.contains($0) }
-
-        backgroundPreloadTask = Task { [weak self] in
-            guard let self else { return }
-            await self.loadFrameBatch(
-                indices: ordered,
-                sessionID: sessionID,
-                layer: layer
-            )
-        }
+    private func showNearestLoadedFrame() {
+        guard let nearest = nearestLoadedIndex(in: frames.map { $0 != nil }, around: currentFrameIndex),
+              nearest != renderFrameIndex else { return }
+        if let renderFrameIndex, abs(renderFrameIndex - currentFrameIndex) <= abs(nearest - currentFrameIndex) { return }
+        renderFrameIndex = nearest
     }
 
     private func residentFrameIndices(around center: Int) -> Set<Int> {
@@ -341,100 +294,80 @@ final class ModelGridLayerState {
         }
     }
 
-    private func focusedFrameIndices(around center: Int) -> [Int] {
-        Array(prioritizedFrameIndices(count: frameInfos.count, around: center).prefix(5))
+    private func pumpLoads() {
+        guard !loadsHeld, currentLayer != nil, !frameInfos.isEmpty else { return }
+        let wide = allowsBackgroundPreload() && !isMapInteracting
+        let focus = Set(prioritizedFrameIndices(count: frames.count, around: currentFrameIndex).prefix(5))
+        let resident = residentFrameIndices(around: currentFrameIndex)
+        let picks = loadsToStart(count: frames.count, center: currentFrameIndex,
+                                 inFlight: loadingFrameIndices.count, limit: frameLoadLimit()) { index in
+            frames[index] == nil && !loadingFrameIndices.contains(index) && !failedFrameIndices.contains(index)
+                && resident.contains(index) && (wide || focus.contains(index))
+        }
+        for index in picks { startLoad(at: index) }
     }
 
-    private func loadFrameBatch(
-        indices: [Int],
-        sessionID: UUID,
-        layer: WeatherTileLayer
-    ) async {
-        for index in indices {
-            guard !Task.isCancelled else { return }
-            _ = await loadFrameIfNeeded(
-                at: index,
-                sessionID: sessionID,
-                layer: layer
-            )
-        }
-    }
-
-    private func loadFrameIfNeeded(
-        at index: Int,
-        sessionID: UUID,
-        layer: WeatherTileLayer
-    ) async -> Bool {
-        guard loadSessionID == sessionID,
-              currentLayer == layer,
-              frameInfos.indices.contains(index),
-              frames.indices.contains(index) else {
-            return false
-        }
-
-        if frames[index] != nil {
-            if renderFrameIndex == nil {
-                renderFrameIndex = index
-            }
-            return true
-        }
-
-        if loadingFrameIndices.contains(index) {
-            return false
-        }
-
+    private func startLoad(at index: Int) {
+        guard let layer = currentLayer else { return }
+        let sessionID = loadSessionID
+        let key = frameInfos[index].key
+        let cacheKey = "\(layer.rawValue)/\(key)"
+        let model = layer.windFieldPrefix, variable = layer.variableSegment
         loadingFrameIndices.insert(index)
-        defer { loadingFrameIndices.remove(index) }
-
-        let info = frameInfos[index]
-        let cacheKey = "\(layer.rawValue)/\(info.key)"
-
-        let payload: RadarGridPayload?
-        if let cached = Self.gridCache.object(forKey: cacheKey as NSString) {
-            payload = cached.payload
-        } else {
-            guard !Task.isCancelled else { return false }
-            let fetched: Data?
-            do {
-                fetched = try await APIClient.shared.modelGrid(
-                    model: layer.windFieldPrefix, key: info.key, variable: layer.variableSegment)
-            } catch {
-                return false
-            }
-            let decoded: RadarGridPayload?
-            if let data = fetched {
-                decoded = await RadarFrameDecodeLane.shared.decodeGrid(data)
+        loadTasks[index] = Task { [weak self] in
+            let payload: RadarGridPayload?
+            if let cached = Self.gridCache.object(forKey: cacheKey as NSString) {
+                payload = cached.payload
             } else {
-                decoded = RadarGridPayload(indices: [0], width: 1, height: 1)
+                payload = await Self.fetchGrid(model: model, key: key, variable: variable)
+                if let payload {
+                    Self.gridCache.setObject(GridPayloadBox(payload: payload), forKey: cacheKey as NSString,
+                                             cost: payload.width * payload.height)
+                }
             }
-            guard let decoded else { return false }
-            Self.gridCache.setObject(
-                GridPayloadBox(payload: decoded),
-                forKey: cacheKey as NSString,
-                cost: decoded.width * decoded.height
-            )
-            payload = decoded
+            self?.finishLoad(at: index, key: key, payload: payload, sessionID: sessionID)
+        }
+    }
+
+    private static func fetchGrid(model: String, key: String, variable: String) async -> RadarGridPayload? {
+        let fetched: Data?
+        do {
+            fetched = try await APIClient.shared.modelGrid(model: model, key: key, variable: variable)
+        } catch {
+            return nil
+        }
+        guard let data = fetched else { return RadarGridPayload(indices: [0], width: 1, height: 1) }
+        return await RadarFrameDecodeLane.shared.decodeGrid(data)
+    }
+
+    private func finishLoad(at index: Int, key: String, payload: RadarGridPayload?, sessionID: UUID) {
+        guard loadSessionID == sessionID else { return }
+        loadingFrameIndices.remove(index)
+        loadTasks[index] = nil
+
+        if let payload {
+            if frameInfos.indices.contains(index), frameInfos[index].key == key, frames.indices.contains(index),
+               residentFrameIndices(around: currentFrameIndex).contains(index) {
+                frames[index] = payload
+                loadedFrameIndices.insert(index)
+                showNearestLoadedFrame()
+            }
+        } else {
+            failedFrameIndices.insert(index)
         }
 
-        guard let payload,
-              loadSessionID == sessionID,
-              currentLayer == layer,
-              frames.indices.contains(index) else {
-            return false
-        }
-
-        frames[index] = payload
-        loadedFrameIndices.insert(index)
-
-        if renderFrameIndex == nil || currentFrameIndex == index {
-            renderFrameIndex = index
-        }
-
-        if isLoading, hasAnyLoadedFrame {
+        pumpLoads()
+        if isLoading, hasAnyLoadedFrame || loadingFrameIndices.isEmpty {
             isLoading = false
         }
+    }
 
-        return true
+    private func cancelFrameLoads() {
+        loadTasks.values.forEach { $0.cancel() }
+        loadTasks.removeAll()
+        loadingFrameIndices.removeAll()
+        failedFrameIndices.removeAll()
+        loadsHeld = false
     }
 
     private func frame(at index: Int?) -> RadarGridPayload? {
@@ -444,8 +377,7 @@ final class ModelGridLayerState {
 
     deinit {
         loadTask?.cancel()
-        backgroundPreloadTask?.cancel()
-        focusedLoadTask?.cancel()
+        loadTasks.values.forEach { $0.cancel() }
     }
 }
 

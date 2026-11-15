@@ -467,6 +467,10 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         let t = (link.timestamp - playbackStart) / playbackInterval
         if t >= 1 {
             stateLock.withLock { phase = 1 }
+            if awaitingAdvance, t >= 2 {
+                playbackStart += playbackInterval
+                awaitingAdvance = false
+            }
             if !awaitingAdvance {
                 awaitingAdvance = true
                 playbackAdvance?()

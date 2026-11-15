@@ -55,6 +55,10 @@ final class ScreenshotFixtureServer: URLProtocol {
         { url in (make(url), "image/webp") }
     }
 
+    private static func rawGrid(_ make: @escaping (URL) -> Data) -> Route {
+        { url in (make(url), "application/octet-stream") }
+    }
+
     private static func isBatchForecast(_ url: URL) -> Bool {
         URLComponents(url: url, resolvingAgainstBaseURL: false)?
             .queryItems?.first { $0.name == "latitude" }?.value?.contains(",") == true
@@ -119,9 +123,9 @@ final class ScreenshotFixtureServer: URLProtocol {
         case (5, "frames") where parts[4] == "grid":
             let key = parts[3]
             if isClouds {
-                return radarImage { _ in SyntheticRadar.cloudGridPNG(frameKey: key) }
+                return rawGrid { _ in SyntheticRadar.cloudRawGrid(frameKey: key) }
             }
-                return radarImage { _ in SyntheticRadar.gridPNG(frameKey: key) }
+            return rawGrid { _ in SyntheticRadar.rawGrid(frameKey: key) }
         case (8, "frames") where parts[4] == "tiles":
             let key = parts[3]
             guard let z = Int(parts[5]), let x = Int(parts[6]), let y = Int(parts[7]) else { return nil }

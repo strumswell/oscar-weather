@@ -1,3 +1,4 @@
+import Compression
 import Foundation
 import ImageIO
 import UIKit
@@ -189,28 +190,27 @@ enum SyntheticRadar {
         return data
     }
 
-    static func gridPNG(frameKey: String) -> Data {
+    static func rawGrid(frameKey: String) -> Data {
         cached("grid|\(frameKey)") {
-            let grid = radarGrid(minutes: offsetMinutes(fromKey: frameKey) ?? 0)
-            return grayPNG(pixels: grid, width: gridWidth, height: gridHeight)
+            rawValueGrid(radarGrid(minutes: offsetMinutes(fromKey: frameKey) ?? 0))
         }
     }
 
-    static func cloudGridPNG(frameKey: String) -> Data {
-        valueGridPNG(cacheKey: "clouds|\(frameKey)", frameKey: frameKey) { lat, lon, t in
+    static func cloudRawGrid(frameKey: String) -> Data {
+        cachedValueGrid(cacheKey: "clouds|\(frameKey)", frameKey: frameKey) { lat, lon, t in
             let v = cloudOpacity(lat: lat, lon: lon, minutes: t)
             return v >= 0.03 ? UInt8(min(255, 40 + v * 215)) : 0
         }
     }
 
-    private static func valueGridPNG(
+    private static func cachedValueGrid(
         cacheKey: String,
         frameKey: String,
         pixel: (_ lat: Double, _ lon: Double, _ minutes: Double) -> UInt8
     ) -> Data {
         cached(cacheKey) {
             let t = offsetMinutes(fromKey: frameKey) ?? 0
-            return grayPNG(pixels: valueGrid(minutes: t, pixel: pixel), width: gridWidth, height: gridHeight)
+            return rawValueGrid(valueGrid(minutes: t, pixel: pixel))
         }
     }
 
@@ -275,19 +275,14 @@ enum SyntheticRadar {
         return pixels
     }
 
-    private static func grayPNG(pixels: [UInt8], width: Int, height: Int) -> Data {
-        var pixels = pixels
-        let image = pixels.withUnsafeMutableBytes { raw -> CGImage? in
-            let context = CGContext(
-                data: raw.baseAddress, width: width, height: height,
-                bitsPerComponent: 8, bytesPerRow: width,
-                space: CGColorSpaceCreateDeviceGray(),
-                bitmapInfo: CGImageAlphaInfo.none.rawValue
-            )
-            return context?.makeImage()
-        }
-        guard let image else { return Data() }
-        return UIImage(cgImage: image).pngData() ?? Data()
+    private static func rawValueGrid(_ pixels: [UInt8]) -> Data {
+        var compressed = [UInt8](repeating: 0, count: pixels.count + 4096)
+        let size = compression_encode_buffer(&compressed, compressed.count, pixels, pixels.count, nil, COMPRESSION_ZLIB)
+        var data = Data()
+        withUnsafeBytes(of: UInt32(gridWidth).littleEndian) { data.append(contentsOf: $0) }
+        withUnsafeBytes(of: UInt32(gridHeight).littleEndian) { data.append(contentsOf: $0) }
+        data.append(contentsOf: compressed.prefix(size))
+        return data
     }
 
     // MARK: Raster tiles (widget composite + precip gate)

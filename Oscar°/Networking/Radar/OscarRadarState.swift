@@ -33,7 +33,6 @@ final class OscarRadarState {
     private(set) var loadingFrameIndices: Set<Int> = []
     private(set) var loadedFrameIndices: Set<Int> = []
     private(set) var renderFrameIndex: Int?
-    private(set) var interactionState: MapInteractionState = .idle
     private(set) var isMapInteracting = false
 
     @ObservationIgnored private let playback = PlaybackTicker()
@@ -42,8 +41,10 @@ final class OscarRadarState {
     @ObservationIgnored private var loadSessionID = UUID()
     @ObservationIgnored private var suppressSelectionSideEffects = false
     @ObservationIgnored private var bootstrapTask: Task<Void, Never>?
-    @ObservationIgnored private var backgroundPreloadTask: Task<Void, Never>?
-    @ObservationIgnored private var focusedLoadTask: Task<Void, Never>?
+    @ObservationIgnored private var loadTasks: [Int: Task<Void, Never>] = [:]
+    @ObservationIgnored private var failedFrameIndices: Set<Int> = []
+    @ObservationIgnored private var loadsHeld = false
+    @ObservationIgnored private var loadWaiters: [CheckedContinuation<Void, Never>] = []
     @ObservationIgnored private var lastMetadataLoad: Date?
     private static let metadataStaleAfter: TimeInterval = 10 * 60
     private static let instances = NSHashTable<OscarRadarState>.weakObjects()
@@ -112,7 +113,7 @@ final class OscarRadarState {
 
     static func purgeDecodedGrids() {
         for state in instances.allObjects {
-            state.backgroundPreloadTask?.cancel()
+            state.loadsHeld = true
             let anchor = state.renderFrameIndex ?? state.currentFrameIndex
             var keep: Set<Int> = [anchor]
             if let next = nextLoadedIndex(in: state.frames.map { $0 != nil }, after: anchor) {
@@ -132,8 +133,7 @@ final class OscarRadarState {
 
     private func resetForSourceChange() {
         bootstrapTask?.cancel()
-        focusedLoadTask?.cancel()
-        backgroundPreloadTask?.cancel()
+        cancelFrameLoads()
         pause()
 
         loadSessionID = UUID()
@@ -145,7 +145,6 @@ final class OscarRadarState {
         frameDates = []
         bounds = nil
         motion = nil
-        loadingFrameIndices.removeAll()
         loadedFrameIndices.removeAll()
         renderFrameIndex = nil
         currentFrameIndex = 0
@@ -184,12 +183,12 @@ final class OscarRadarState {
     // MARK: - Loading
 
     func loadAllFrames() async {
-        await loadFrames(allowBackgroundPreload: allowsBackgroundPreload())
+        await loadFrames()
     }
 
     func waitForFrames() async {
         await bootstrapTask?.value
-        await backgroundPreloadTask?.value
+        while !loadingFrameIndices.isEmpty { await nextLoadCompletion() }
     }
 
     // MARK: - Playback
@@ -197,14 +196,13 @@ final class OscarRadarState {
     func play() {
         guard hasAnyLoadedFrame else { return }
         isPlaying = true
-        interactionState = .playing
-        restartBackgroundPreloadIfNeeded()
+        loadsHeld = false
+        pumpLoads()
         playback.start(interval: .milliseconds(500)) { [weak self] in self?.advanceFrame() }
     }
 
     func pause() {
         isPlaying = false
-        interactionState = .idle
         playback.stop()
     }
 
@@ -213,7 +211,7 @@ final class OscarRadarState {
     }
 
     func advanceFrame() {
-        guard !frames.isEmpty else { return }
+        guard isPlaying, !frames.isEmpty else { return }
         let loaded = frames.map { $0 != nil }
         guard let next = nextLoadedIndex(in: loaded, after: currentFrameIndex) else {
             return
@@ -222,39 +220,32 @@ final class OscarRadarState {
     }
 
     func beginScrubbing() {
-        interactionState = .scrubbing
-        backgroundPreloadTask?.cancel()
+        pause()
     }
 
-    func endScrubbing() {
-        interactionState = isPlaying ? .playing : .idle
-        restartBackgroundPreloadIfNeeded()
-    }
+    func endScrubbing() {}
 
     func beginMapInteraction() {
         guard !isMapInteracting else { return }
         isMapInteracting = true
-        backgroundPreloadTask?.cancel()
     }
 
     func endMapInteraction() {
         guard isMapInteracting else { return }
         isMapInteracting = false
-        restartBackgroundPreloadIfNeeded()
+        pumpLoads()
     }
 
     // MARK: - Private Helpers
 
-    private func loadFrames(allowBackgroundPreload: Bool) async {
+    private func loadFrames() async {
         bootstrapTask?.cancel()
-        focusedLoadTask?.cancel()
-        backgroundPreloadTask?.cancel()
+        cancelFrameLoads()
 
         let sessionID = UUID()
         loadSessionID = sessionID
         isLoading = true
         error = nil
-        loadingFrameIndices.removeAll()
         renderFrameIndex = nil
 
         bootstrapTask = Task { [weak self] in
@@ -295,14 +286,13 @@ final class OscarRadarState {
                     self.motion = data
                 }
 
-                await self.loadFocusedFrames(around: closest, sessionID: sessionID)
-
-                guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
-                self.isLoading = false
-
-                if allowBackgroundPreload {
-                    self.restartBackgroundPreloadIfNeeded()
+                self.loadsHeld = false
+                self.pumpLoads()
+                while !self.hasAnyLoadedFrame, !self.loadingFrameIndices.isEmpty, self.loadSessionID == sessionID {
+                    await self.nextLoadCompletion()
                 }
+                guard self.loadSessionID == sessionID else { return }
+                self.isLoading = false
             } catch {
                 guard self.loadSessionID == sessionID else { return }
                 self.error = String(localized: "Fehler beim Laden: \(error.localizedDescription)")
@@ -317,114 +307,85 @@ final class OscarRadarState {
         guard !suppressSelectionSideEffects else { return }
         guard !frameInfos.isEmpty, frameInfos.indices.contains(currentFrameIndex) else { return }
 
-        if isSelectedFrameReady {
-            renderFrameIndex = currentFrameIndex
-        }
-
         evictFrames(outside: residentFrameIndices(around: currentFrameIndex))
-
-        focusedLoadTask?.cancel()
-        let sessionID = loadSessionID
-        let focusIndices = focusedFrameIndices(around: currentFrameIndex)
-        focusedLoadTask = Task { [weak self] in
-            guard let self else { return }
-            await self.loadFrameBatch(indices: focusIndices, sessionID: sessionID)
-            guard !Task.isCancelled, self.loadSessionID == sessionID else { return }
-            self.restartBackgroundPreloadIfNeeded()
-        }
+        showNearestLoadedFrame()
+        if !isPlaying { failedFrameIndices.removeAll() }
+        loadsHeld = false
+        pumpLoads()
     }
 
-    private func restartBackgroundPreloadIfNeeded() {
-        backgroundPreloadTask?.cancel()
-        guard allowsBackgroundPreload(),
-              interactionState != .scrubbing,
-              !isMapInteracting,
-              !frameInfos.isEmpty else { return }
+    private func showNearestLoadedFrame() {
+        guard let nearest = nearestLoadedIndex(in: frames.map { $0 != nil }, around: currentFrameIndex),
+              nearest != renderFrameIndex else { return }
+        if let renderFrameIndex, abs(renderFrameIndex - currentFrameIndex) <= abs(nearest - currentFrameIndex) { return }
+        renderFrameIndex = nearest
+    }
 
-        let sessionID = loadSessionID
-        let focused = Set(focusedFrameIndices(around: currentFrameIndex))
+    private func pumpLoads() {
+        guard !loadsHeld, !frameInfos.isEmpty else { return }
+        let wide = allowsBackgroundPreload() && !isMapInteracting
+        let focus = Set(prioritizedFrameIndices(count: frames.count, around: currentFrameIndex).prefix(5))
         let resident = residentFrameIndices(around: currentFrameIndex)
-        let ordered = prioritizedFrameIndices(count: frameInfos.count, around: currentFrameIndex)
-            .filter { resident.contains($0) && !focused.contains($0) }
-
-        backgroundPreloadTask = Task { [weak self] in
-            guard let self else { return }
-            await self.loadFrameBatch(indices: ordered, sessionID: sessionID)
+        let picks = loadsToStart(count: frames.count, center: currentFrameIndex,
+                                 inFlight: loadingFrameIndices.count, limit: frameLoadLimit()) { index in
+            frames[index] == nil && !loadingFrameIndices.contains(index) && !failedFrameIndices.contains(index)
+                && resident.contains(index) && (wide || focus.contains(index))
         }
+        for index in picks { startLoad(at: index) }
     }
 
-    private func focusedFrameIndices(around center: Int) -> [Int] {
-        Array(prioritizedFrameIndices(count: frameInfos.count, around: center).prefix(5))
-    }
-
-    private func loadFocusedFrames(around center: Int, sessionID: UUID) async {
-        await loadFrameBatch(indices: focusedFrameIndices(around: center), sessionID: sessionID)
-    }
-
-    private func loadFrameBatch(indices: [Int], sessionID: UUID) async {
-        let width = ProcessInfo.processInfo.thermalState == .nominal ? 3 : 1
-        var iterator = indices.makeIterator()
-        await withTaskGroup(of: Void.self) { group in
-            var inFlight = 0
-            @discardableResult
-            func startNext() -> Bool {
-                guard !Task.isCancelled, let index = iterator.next() else { return false }
-                group.addTask { [weak self] in
-                    _ = await self?.loadFrameIfNeeded(at: index, sessionID: sessionID)
-                }
-                return true
-            }
-            while inFlight < width, startNext() { inFlight += 1 }
-            for await _ in group {
-                startNext()
-            }
-        }
-    }
-
-    private func loadFrameIfNeeded(at index: Int, sessionID: UUID) async -> Bool {
-        guard loadSessionID == sessionID,
-              frameInfos.indices.contains(index),
-              frames.indices.contains(index) else {
-            return false
-        }
-
-        if frames[index] != nil {
-            if renderFrameIndex == nil {
-                renderFrameIndex = index
-            }
-            return true
-        }
-
-        if loadingFrameIndices.contains(index) {
-            return false
-        }
-
-        loadingFrameIndices.insert(index)
-        defer { loadingFrameIndices.remove(index) }
-
+    private func startLoad(at index: Int) {
+        let sessionID = loadSessionID
         let info = frameInfos[index]
-        guard let grid = await Self.loadGridIndices(for: info, region: region) else { return false }
-        let loadedFrame = OscarRadarFrame(key: info.key, timestamp: info.timestamp,
-                                          gridIndices: grid.indices, width: grid.width, height: grid.height)
+        let region = self.region
+        loadingFrameIndices.insert(index)
+        loadTasks[index] = Task { [weak self] in
+            let grid = await Self.loadGridIndices(for: info, region: region)
+            self?.finishLoad(at: index, info: info, grid: grid, sessionID: sessionID)
+        }
+    }
 
-        guard loadSessionID == sessionID,
-              frameInfos.indices.contains(index),
-              frames.indices.contains(index) else {
-            return false
+    private func finishLoad(at index: Int, info: RadarFrameInfo, grid: RadarGridPayload?, sessionID: UUID) {
+        guard loadSessionID == sessionID else { return }
+        loadingFrameIndices.remove(index)
+        loadTasks[index] = nil
+
+        if let grid {
+            if frameInfos.indices.contains(index), frameInfos[index].key == info.key, frames.indices.contains(index),
+               residentFrameIndices(around: currentFrameIndex).contains(index) {
+                frames[index] = OscarRadarFrame(key: info.key, timestamp: info.timestamp,
+                                                gridIndices: grid.indices, width: grid.width, height: grid.height)
+                loadedFrameIndices.insert(index)
+                showNearestLoadedFrame()
+            }
+        } else {
+            failedFrameIndices.insert(index)
         }
 
-        frames[index] = loadedFrame
-        loadedFrameIndices.insert(index)
-
-        if renderFrameIndex == nil || currentFrameIndex == index {
-            renderFrameIndex = index
-        }
-
-        if isLoading, hasAnyLoadedFrame {
+        pumpLoads()
+        if isLoading, hasAnyLoadedFrame || loadingFrameIndices.isEmpty {
             isLoading = false
         }
+        resumeLoadWaiters()
+    }
 
-        return true
+    private func cancelFrameLoads() {
+        loadTasks.values.forEach { $0.cancel() }
+        loadTasks.removeAll()
+        loadingFrameIndices.removeAll()
+        failedFrameIndices.removeAll()
+        loadsHeld = false
+        resumeLoadWaiters()
+    }
+
+    private func nextLoadCompletion() async {
+        await withCheckedContinuation { loadWaiters.append($0) }
+    }
+
+    private func resumeLoadWaiters() {
+        let waiters = loadWaiters
+        loadWaiters.removeAll()
+        waiters.forEach { $0.resume() }
     }
 
     private func frame(at index: Int?) -> OscarRadarFrame? {
@@ -449,7 +410,7 @@ final class OscarRadarState {
         guard let data = fetched else {
             return RadarGridPayload(indices: [0], width: 1, height: 1)
         }
-        return await RadarFrameDecodeLane.shared.decodeGrid(data)
+        return await RadarFrameDecodeLane.shared.decodeRawGrid(data)
     }
 
     nonisolated static func minutesBetween(_ from: String, _ to: String) -> Int? {
@@ -464,7 +425,6 @@ final class OscarRadarState {
 
     deinit {
         bootstrapTask?.cancel()
-        focusedLoadTask?.cancel()
-        backgroundPreloadTask?.cancel()
+        loadTasks.values.forEach { $0.cancel() }
     }
 }
