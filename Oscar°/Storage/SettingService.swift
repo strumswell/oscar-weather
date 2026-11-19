@@ -48,6 +48,9 @@ final class SettingService {
     var radarMotionArrows: Bool {
         didSet { UserDefaults.standard.set(radarMotionArrows, forKey: "radarMotionArrows") }
     }
+    var radarSnowOverlay: Bool {
+        didSet { UserDefaults.standard.set(radarSnowOverlay, forKey: "radarSnowOverlay") }
+    }
     var radarModelContinuation: Bool {
         didSet { UserDefaults.standard.set(radarModelContinuation, forKey: "radarModelContinuation") }
     }
@@ -198,6 +201,7 @@ final class SettingService {
         radarSmoothMotion = (UserDefaults.standard.object(forKey: "radarSmoothMotion") as? Bool) ?? true
         radarSoftRendering = (UserDefaults.standard.object(forKey: "radarSoftRendering") as? Bool) ?? true
         radarMotionArrows = (UserDefaults.standard.object(forKey: "radarMotionArrows") as? Bool) ?? true
+        radarSnowOverlay = (UserDefaults.standard.object(forKey: "radarSnowOverlay") as? Bool) ?? true
         radarModelContinuation = UserDefaults.standard.bool(forKey: "radarModelContinuation")
         mapValueBubbles = (UserDefaults.standard.object(forKey: "mapValueBubbles") as? Bool) ?? true
         mapWebcams = UserDefaults.standard.bool(forKey: "mapWebcams")

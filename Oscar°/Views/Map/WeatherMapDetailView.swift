@@ -259,6 +259,16 @@ struct WeatherMapDetailView: View {
                     .modifier(SlashedWhenOff(isOn: settingsService.radarMotionArrows))
             }
             .accessibilityLabel(Text("Bewegungspfeile"))
+            if radarState.snowAvailable {
+                Divider()
+                    .frame(width: 26)
+                Toggle(isOn: $settings.radarSnowOverlay) {
+                    Image(systemName: "snowflake")
+                        .font(.system(size: 17, weight: .semibold))
+                        .modifier(SlashedWhenOff(isOn: settingsService.radarSnowOverlay))
+                }
+                .accessibilityLabel(Text("Schnee"))
+            }
             Divider()
                 .frame(width: 26)
             Toggle(isOn: $settings.radarModelContinuation) {

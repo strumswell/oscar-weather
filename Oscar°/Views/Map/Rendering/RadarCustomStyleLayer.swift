@@ -23,7 +23,12 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     struct RadarVOut { float4 position [[position]]; float2 uv; float ndcX [[center_no_perspective]]; };
     // p — x: phase, y: opacity, z: flow scale (per-gap), w: sampling mode (0 hard / 1 soft)
     // wipe — x: edge (NDC x), y: kept side (+1 left of the edge, -1 right, 0 no clip), z: feather
-    struct RadarParams { float4 p; float4 wipe; };
+    // snow — x/y: hourly-step blend at frame A / frame B, z: strength (0 = overlay off)
+    // snowRamp — x: °C per field texel unit, y: field offset °C, z: °C per terrain texel unit,
+    //            w: 1 / (rain_above − snow_below)
+    // pattern — xy: flake tiles per uv unit at the coarser zoom octave, z: blend to the finer
+    //           octave, w: rain_above °C
+    struct RadarParams { float4 p; float4 wipe; float4 snow; float4 snowRamp; float4 pattern; };
 
     vertex RadarVOut radar_style_vs(uint vid [[vertex_id]],
                                     constant float4* clip [[buffer(0)]],
@@ -65,6 +70,18 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         return soft ? palette.sample(lutLinear, lut) : palette.sample(lutNearest, lut);
     }
 
+    // Snowflake lattice, fixed to the map: one flake on every tile corner and centre.
+    // Each flake fades in at its own mask level, so the rain–snow boundary thins out
+    // flake by flake instead of dimming, and nothing pops while the mask drifts.
+    static half2 flakes(texture2d<half> tile, float2 q, float2 qdx, float2 qdy, float mask) {
+        constexpr sampler tileSampler(filter::linear, mip_filter::linear, address::repeat);
+        float2 corner = round(q), centre = floor(q) + 0.5;
+        float2 d0 = q - corner, d1 = q - centre;
+        float2 cell = dot(d0, d0) < dot(d1, d1) ? corner : centre;
+        float level = 0.18 + 0.64 * fract(sin(dot(cell, float2(127.1, 311.7))) * 43758.5453);
+        return tile.sample(tileSampler, q, gradient2d(qdx, qdy)).rg * half(smoothstep(level - 0.09, level + 0.09, mask));
+    }
+
     // Two-sided backward warp (Klemen Lozar / rainymotion "Dense" / pySTEPS
     // semilagrangian): sample A along the flow at -t·f and B at +(1-t)·f. Where both
     // frames have echo, blend in DATA (dBZ-linear index) space; where only one does,
@@ -80,8 +97,15 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
                                   texture2d<float> frameB [[texture(1)]],
                                   texture2d<half>  palette [[texture(2)]],
                                   texture2d<float> flow    [[texture(3)]],
+                                  texture2d<float> snowA   [[texture(4)]],
+                                  texture2d<float> snowB   [[texture(5)]],
+                                  texture2d<float> terrain [[texture(6)]],
+                                  texture2d<half>  flakeTile [[texture(7)]],
                                   constant RadarParams& p [[buffer(0)]]) {
         constexpr sampler dataSampler(filter::linear, address::clamp_to_edge);
+        // Derivatives must come from uniform control flow; the flake samples sit in branches.
+        float2 q = in.uv * p.pattern.xy;
+        float2 qdx = dfdx(q), qdy = dfdy(q);
         float t = p.p.x;
         bool soft = p.p.w > 0.5;
         float2 f = flow.sample(dataSampler, in.uv).rg * p.p.z;
@@ -92,6 +116,22 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         half4 cA = lookup(palette, a, soft);
         half4 cB = lookup(palette, b, soft);
         half4 c = mix(mix(cA, cB, half(t)), lookup(palette, mix(a, b, t), soft), min(cA.a, cB.a));
+        if (p.snow.z > 0.0 && c.a > 0.0h) {
+            // Wet-bulb at the real ground: hourly sea-level field minus the terrain's share.
+            // A model field, so it is not flow-warped; it only drifts with time.
+            float seaLevel = mix(snowA.sample(dataSampler, in.uv).r, snowB.sample(dataSampler, in.uv).r,
+                                 mix(p.snow.x, p.snow.y, t)) * p.snowRamp.x + p.snowRamp.y;
+            float wetBulb = seaLevel - terrain.sample(dataSampler, in.uv).r * p.snowRamp.z;
+            float mask = saturate((p.pattern.w - wetBulb) * p.snowRamp.w);
+            if (mask > 0.0) {
+                // Two zoom octaves cross-faded: flakes keep a steady screen size while zooming.
+                half2 mark = mix(flakes(flakeTile, q, qdx, qdy, mask),
+                                 flakes(flakeTile, q * 2.0, qdx * 2.0, qdy * 2.0, mask), half(p.pattern.z))
+                    * c.a * half(p.snow.z);
+                c.rgb = mix(c.rgb, half3(0.05h, 0.12h, 0.24h) * c.a, mark.g * 0.6h);   // dark edge
+                c.rgb = mix(c.rgb, half3(c.a), mark.r);                                // white flake
+            }
+        }
         if (p.wipe.y != 0.0) {                                 // radar ↔ model handover sweep
             float kept = (p.wipe.x - in.ndcX) * p.wipe.y;
             c *= half(smoothstep(-p.wipe.z, p.wipe.z, kept));
@@ -117,6 +157,18 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
     nonisolated(unsafe) private var wipe = SIMD4<Float>.zero
     nonisolated(unsafe) private var paletteTexture: MTLTexture?
     nonisolated(unsafe) private var zeroFlowTexture: MTLTexture?
+    nonisolated(unsafe) private var snowTextures: (a: MTLTexture, b: MTLTexture, terrain: MTLTexture, tile: MTLTexture)?
+    nonisolated(unsafe) private var snowBlend = SIMD2<Float>.zero
+    nonisolated(unsafe) private var snowRamp = SIMD4<Float>.zero
+    nonisolated(unsafe) private var snowRainAbove: Float = 0
+    private var snowTerrain: (id: String, texture: MTLTexture)?
+    /// Terrain id being inflated off the main actor, and the latest `setSnow` call waiting for it.
+    private var snowInflatingID: String?
+    private var snowPending: (overlay: RadarSnowOverlay, frameDate: Date, nextDate: Date?)?
+    private var snowStepTextures: [String: MTLTexture] = [:]
+    private var flakeTile: MTLTexture?
+    /// On-screen size of one flake tile (two flakes) in points; the zoom octaves keep it within ×0.7…1.4.
+    private static let flakeTilePoints = 24.0
 
     nonisolated(unsafe) private var device: MTLDevice?
     nonisolated(unsafe) private var pipelineState: MTLRenderPipelineState?
@@ -285,6 +337,156 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         stateLock.withLock { paletteTexture = texture }
     }
 
+    /// Snow overlay for the frame pair about to be displayed; nil switches it off.
+    /// Returns false only when an overlay could not be applied because Metal is not set up yet.
+    @MainActor @discardableResult
+    func setSnow(_ overlay: RadarSnowOverlay?, frameDate: Date?, nextDate: Date?) -> Bool {
+        let device = stateLock.withLock { self.device }
+        guard let overlay else {
+            snowTerrain = nil
+            snowStepTextures.removeAll()
+            snowPending = nil
+            snowInflatingID = nil
+            hideSnow()
+            return true
+        }
+        guard let frameDate, let device, !overlay.steps.isEmpty else {
+            hideSnow()
+            return device != nil
+        }
+        if snowTerrain?.id != overlay.terrainID {
+            snowTerrain = nil
+            snowStepTextures.removeAll()
+            stateLock.withLock { snowTextures = nil }
+            snowPending = (overlay, frameDate, nextDate)
+            guard snowInflatingID != overlay.terrainID else { return true }
+            snowInflatingID = overlay.terrainID
+            let id = overlay.terrainID, data = overlay.terrainData
+            Task { [weak self] in
+                let payload = await RadarFrameDecodeLane.shared.decodeRawGrid(data)
+                self?.terrainInflated(id: id, payload: payload)
+            }
+            return true
+        }
+        let liveKeys = Set(overlay.steps.map(\.key))
+        snowStepTextures = snowStepTextures.filter { liveKeys.contains($0.key) }
+        if flakeTile == nil { flakeTile = Self.makeFlakeTile(device: device) }
+        guard let terrain = snowTerrain?.texture, let tile = flakeTile else { return true }
+        // Steps bracketing frame A; frame B reuses the pair.
+        let after = overlay.steps.firstIndex { $0.date > frameDate } ?? overlay.steps.count - 1
+        let stepA = overlay.steps[max(0, after - 1)], stepB = overlay.steps[after]
+        func texture(_ step: RadarSnowOverlay.Step) -> MTLTexture? {
+            if let cached = snowStepTextures[step.key] { return cached }
+            let made = Self.r8Texture(step.payload, device: device)
+            snowStepTextures[step.key] = made
+            return made
+        }
+        guard let a = texture(stepA), let b = texture(stepB) else { return true }
+        let span = stepB.date.timeIntervalSince(stepA.date)
+        func blend(_ date: Date) -> Float {
+            span > 0 ? Float(min(1, max(0, date.timeIntervalSince(stepA.date) / span))) : 0
+        }
+        stateLock.withLock {
+            snowTextures = (a, b, terrain, tile)
+            snowBlend = SIMD2(blend(frameDate), blend(nextDate ?? frameDate))
+            snowRamp = SIMD4(Float(overlay.fieldScale * 255), Float(overlay.fieldOffset),
+                             Float(overlay.lapsePerMeter * overlay.terrainScale * 255),
+                             Float(1 / (overlay.rainAbove - overlay.snowBelow)))
+            snowRainAbove = Float(overlay.rainAbove)
+        }
+        setNeedsDisplay()
+        return true
+    }
+
+    @MainActor
+    private func hideSnow() {
+        let wasOn = stateLock.withLock {
+            let wasOn = snowTextures != nil
+            snowTextures = nil
+            return wasOn
+        }
+        if wasOn { setNeedsDisplay() }
+    }
+
+    @MainActor
+    private func terrainInflated(id: String, payload: RadarGridPayload?) {
+        guard snowInflatingID == id else { return }
+        snowInflatingID = nil
+        guard let pending = snowPending, pending.overlay.terrainID == id,
+              let device = stateLock.withLock({ self.device }),
+              let texture = payload.flatMap({ Self.r8Texture($0, device: device) }) else { return }
+        snowPending = nil
+        snowTerrain = (id, texture)
+        setSnow(pending.overlay, frameDate: pending.frameDate, nextDate: pending.nextDate)
+    }
+
+    private static func r8Texture(_ payload: RadarGridPayload, device: MTLDevice) -> MTLTexture? {
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .r8Unorm, width: payload.width, height: payload.height, mipmapped: false)
+        descriptor.usage = .shaderRead
+        guard let texture = device.makeTexture(descriptor: descriptor) else { return nil }
+        payload.indices.withUnsafeBufferPointer { buffer in
+            texture.replace(region: MTLRegionMake2D(0, 0, payload.width, payload.height),
+                            mipmapLevel: 0, withBytes: buffer.baseAddress!, bytesPerRow: payload.width)
+        }
+        return texture
+    }
+
+    /// Flake tile, red = flake, green = the dark edge around it; one flake on the corners and
+    /// one (turned) in the centre, drawn at every mip level so small flakes stay crisp.
+    private static func makeFlakeTile(device: MTLDevice) -> MTLTexture? {
+        let side = 128
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .rg8Unorm, width: side, height: side, mipmapped: true)
+        descriptor.usage = .shaderRead
+        guard let texture = device.makeTexture(descriptor: descriptor) else { return nil }
+        for level in 0..<texture.mipmapLevelCount {
+            let size = max(1, side >> level)
+            func coverage(lineWidth: CGFloat) -> [UInt8] {
+                var pixels = [UInt8](repeating: 0, count: size * size)
+                pixels.withUnsafeMutableBytes { raw in
+                    guard let context = CGContext(
+                        data: raw.baseAddress, width: size, height: size, bitsPerComponent: 8, bytesPerRow: size,
+                        space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue) else { return }
+                    let unit = CGFloat(size)
+                    context.setStrokeColor(gray: 1, alpha: 1)
+                    context.setLineCap(.round)
+                    context.setLineWidth(lineWidth * unit)
+                    let radius = 0.16 * unit
+                    let spots: [(CGFloat, CGFloat, CGFloat)] =
+                        [(0, 0, 0), (1, 0, 0), (0, 1, 0), (1, 1, 0), (0.5, 0.5, .pi / 6)]
+                    for (x, y, turn) in spots {
+                        let cx = x * unit, cy = y * unit
+                        for arm in 0..<6 {
+                            let angle = turn + CGFloat(arm) * .pi / 3
+                            let ux = cos(angle), uy = sin(angle)
+                            context.move(to: CGPoint(x: cx, y: cy))
+                            context.addLine(to: CGPoint(x: cx + ux * radius, y: cy + uy * radius))
+                            for side in [-1.0, 1.0] {
+                                let branch = angle + side * .pi / 3
+                                let bx = cx + ux * radius * 0.58, by = cy + uy * radius * 0.58
+                                context.move(to: CGPoint(x: bx, y: by))
+                                context.addLine(to: CGPoint(x: bx + cos(branch) * radius * 0.32,
+                                                            y: by + sin(branch) * radius * 0.32))
+                            }
+                        }
+                    }
+                    context.strokePath()
+                }
+                return pixels
+            }
+            let flake = coverage(lineWidth: 0.032), edge = coverage(lineWidth: 0.075)
+            var texels = [UInt8](repeating: 0, count: size * size * 2)
+            for i in 0..<(size * size) {
+                texels[i * 2] = flake[i]
+                texels[i * 2 + 1] = UInt8(max(0, Int(edge[i]) - Int(flake[i])))
+            }
+            texture.replace(region: MTLRegionMake2D(0, 0, size, size), mipmapLevel: level,
+                            withBytes: texels, bytesPerRow: size * 2)
+        }
+        return texture
+    }
+
     @MainActor
     func setMotion(_ data: RadarMotionData?) {
         guard motionData?.id != data?.id else { return }
@@ -311,16 +513,7 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
             return cached
         }
         let device = stateLock.withLock { self.device }
-        guard let device else { return nil }
-        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
-            pixelFormat: .r8Unorm, width: payload.width, height: payload.height, mipmapped: false)
-        descriptor.usage = .shaderRead
-        guard let texture = device.makeTexture(descriptor: descriptor) else { return nil }
-        payload.indices.withUnsafeBufferPointer { buffer in
-            texture.replace(region: MTLRegionMake2D(0, 0, payload.width, payload.height),
-                            mipmapLevel: 0, withBytes: buffer.baseAddress!,
-                            bytesPerRow: payload.width)
-        }
+        guard let device, let texture = Self.r8Texture(payload, device: device) else { return nil }
         textures[key] = texture
         textureLRU.append(key)
         textureBytes += payload.width * payload.height
@@ -399,11 +592,14 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         textureLRU.removeAll()
         textureBytes = 0
         flowTextures.removeAll()
+        snowTerrain = nil
+        snowStepTextures.removeAll()
         stateLock.withLock {
             textureA = nil
             textureB = nil
             flowTexture = nil
             flowScale = 0
+            snowTextures = nil
         }
     }
 
@@ -497,7 +693,9 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
              texA: self.textureA, texB: self.textureB, palette: self.paletteTexture,
              flow: self.flowTexture ?? self.zeroFlowTexture, flowScale: self.flowScale,
              bounds: self.overlayBounds, phase: self.phase, opacity: self.opacity,
-             sampling: self.samplingMode, wipe: self.wipe)
+             sampling: self.samplingMode, wipe: self.wipe,
+             snow: self.snowTextures, snowBlend: self.snowBlend, snowRamp: self.snowRamp,
+             snowRainAbove: self.snowRainAbove)
         }
         let shouldLogFirstDraw = stateLock.withLock {
             guard !didLogFirstDraw else { return false }
@@ -544,18 +742,37 @@ final class RadarCustomStyleLayer: MLNCustomStyleLayer, @unchecked Sendable {
         let uvs: [SIMD2<Float>] = [
             SIMD2(0, 0), SIMD2(1, 0), SIMD2(0, 1), SIMD2(1, 1),
         ]
+        // Flake lattice in map space: tile size is fixed per power-of-two zoom level and the
+        // shader cross-fades to the next level over the upper half of each octave.
+        let zoom = context.zoomLevel + 0.5
+        // Capped: past z14 the lattice coordinate outgrows float precision; flakes then scale with the map.
+        let octave = min(14, zoom.rounded(.down))
+        let fraction = zoom - octave
+        let tiles = 512.0 * pow(2.0, octave) / Self.flakeTilePoints
+        let spanX = WebMercator.unitX(longitude: bounds.east) - WebMercator.unitX(longitude: bounds.west)
+        let spanY = WebMercator.unitY(latitude: bounds.south) - WebMercator.unitY(latitude: bounds.north)
+        let octaveBlend = min(1, max(0, (fraction - 0.5) * 2))
         let params = [SIMD4<Float>(snapshot.phase, snapshot.opacity, snapshot.flowScale, snapshot.sampling),
-                      snapshot.wipe]
+                      snapshot.wipe,
+                      SIMD4<Float>(snapshot.snowBlend.x, snapshot.snowBlend.y, snapshot.snow == nil ? 0 : 1, 0),
+                      snapshot.snowRamp,
+                      SIMD4<Float>(Float(spanX * tiles), Float(spanY * tiles),
+                                   Float(octaveBlend * octaveBlend * (3 - 2 * octaveBlend)), snapshot.snowRainAbove)]
 
         renderEncoder.setRenderPipelineState(pipelineState)
         renderEncoder.setDepthStencilState(depthStencilState)
         renderEncoder.setVertexBytes(clipPositions, length: MemoryLayout<SIMD4<Float>>.stride * 4, index: 0)
         renderEncoder.setVertexBytes(uvs, length: MemoryLayout<SIMD2<Float>>.stride * 4, index: 1)
-        renderEncoder.setFragmentBytes(params, length: MemoryLayout<SIMD4<Float>>.stride * 2, index: 0)
+        renderEncoder.setFragmentBytes(params, length: MemoryLayout<SIMD4<Float>>.stride * 5, index: 0)
         renderEncoder.setFragmentTexture(textureA, index: 0)
         renderEncoder.setFragmentTexture(textureB ?? textureA, index: 1)
         renderEncoder.setFragmentTexture(paletteTexture, index: 2)
         renderEncoder.setFragmentTexture(flowTexture, index: 3)
+        // Unused slots still need a texture; the shader skips them while snow.z is 0.
+        renderEncoder.setFragmentTexture(snapshot.snow?.a ?? textureA, index: 4)
+        renderEncoder.setFragmentTexture(snapshot.snow?.b ?? textureA, index: 5)
+        renderEncoder.setFragmentTexture(snapshot.snow?.terrain ?? textureA, index: 6)
+        renderEncoder.setFragmentTexture(snapshot.snow?.tile ?? paletteTexture, index: 7)
         renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
     }
 }

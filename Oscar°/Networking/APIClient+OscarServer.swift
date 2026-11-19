@@ -88,6 +88,30 @@ extension APIClient {
     }
   }
 
+  func radarSnowTerrain(region: String) async throws -> Data {
+    switch try await oscarServer.getRadarSnowTerrain(.init(path: .init(region: region))) {
+    case .ok(let ok):
+      return try await Data(collecting: ok.body.binary, upTo: Self.assetByteLimit)
+    case .undocumented: throw URLError(.badServerResponse)
+    }
+  }
+
+  func radarSnowRelief(region: String) async throws -> Data {
+    switch try await oscarServer.getRadarSnowRelief(.init(path: .init(region: region))) {
+    case .ok(let ok):
+      return try await Data(collecting: ok.body.binary, upTo: Self.assetByteLimit)
+    case .undocumented: throw URLError(.badServerResponse)
+    }
+  }
+
+  func radarSnowField(region: String, key: String) async throws -> Data {
+    switch try await oscarServer.getRadarSnowField(.init(path: .init(region: region, key: key))) {
+    case .ok(let ok):
+      return try await Data(collecting: ok.body.binary, upTo: Self.assetByteLimit)
+    case .undocumented: throw URLError(.badServerResponse)
+    }
+  }
+
   func cloudGrid(key: String) async throws -> Data {
     switch try await oscarServer.getCloudGrid(.init(path: .init(key: key), query: .init(format: .raw))) {
     case .ok(let ok):

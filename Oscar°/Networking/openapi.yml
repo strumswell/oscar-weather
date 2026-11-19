@@ -882,6 +882,77 @@ paths:
               schema:
                 type: string
                 format: binary
+  /radar/{region}/snow/terrain:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getRadarSnowTerrain
+      tags:
+        - Oscar Server
+      summary: Terrain raster for the snow overlay (raw DEFLATE)
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Same container as the value grid: one byte per pixel, metres = byte × terrain_scale, 0 = sea"
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  /radar/{region}/snow/relief:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getRadarSnowRelief
+      tags:
+        - Oscar Server
+      summary: Highest ground per snow field cell (raw DEFLATE)
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Same container and dimensions as the hourly field rasters: one byte per pixel, metres = byte × terrain_scale"
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  /radar/{region}/snow/field/{key}:
+    servers:
+      - url: https://server.oscars.love
+    get:
+      operationId: getRadarSnowField
+      tags:
+        - Oscar Server
+      summary: Hourly sea-level wet-bulb raster for the snow overlay (raw DEFLATE)
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Same container as the value grid: one byte per pixel, °C = byte × field_scale + field_offset"
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
   /radar/{region}/frames/{key}/tiles/{z}/{x}/{y}:
     servers:
       - url: https://server.oscars.love
@@ -1934,6 +2005,37 @@ components:
           $ref: "#/components/schemas/RadarBounds"
         image_bounds:
           $ref: "#/components/schemas/RadarBounds"
+        snow:
+          $ref: "#/components/schemas/RadarSnow"
+    RadarSnow:
+      type: object
+      description: "Snow overlay constants. wet_bulb = field_byte × field_scale + field_offset − lapse_per_m × terrain_byte × terrain_scale; mask 1 at or below snow_below, 0 at or above rain_above."
+      required: [snow_below, rain_above, lapse_per_m, field_scale, field_offset, terrain_scale, steps]
+      properties:
+        snow_below:
+          type: number
+        rain_above:
+          type: number
+        lapse_per_m:
+          type: number
+        field_scale:
+          type: number
+        field_offset:
+          type: number
+        terrain_scale:
+          type: number
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/RadarSnowStep"
+    RadarSnowStep:
+      type: object
+      required: [key, timestamp]
+      properties:
+        key:
+          type: string
+        timestamp:
+          type: string
     ModelFrameInfo:
       type: object
       required: [key, validTime]
@@ -1964,6 +2066,9 @@ components:
           type: number
         is_forecast:
           type: boolean
+        kind:
+          type: string
+          description: "rain | sleet | snow: what would fall here at this time, dry samples included"
     PrecipSeriesResponse:
       type: object
       required: [source, unit, latitude, longitude, series]

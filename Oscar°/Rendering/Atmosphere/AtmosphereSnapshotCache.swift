@@ -23,7 +23,7 @@ final class AtmosphereSnapshotCache {
             return cached
         }
 
-        let snapshot = AtmosphereWeatherMapper.snapshot(from: weather, at: location)
+        let snapshot = AtmosphereWeatherMapper.snapshot(from: weather, at: location, usesRadarKind: true)
         self.key = key
         self.cached = snapshot
         return snapshot

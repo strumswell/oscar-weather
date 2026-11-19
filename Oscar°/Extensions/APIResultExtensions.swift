@@ -33,18 +33,23 @@ extension Operations.getForecast.Output.Ok.Body.jsonPayload {
 extension PrecipSeriesResponse {
     private static let freshnessWindow: TimeInterval = 20 * 60
 
-    func rate(at date: Date) -> Double? {
+    private func nearest(to date: Date) -> PrecipPoint? {
         guard let nearest = series.min(by: {
             abs($0.timestamp.timeIntervalSince(date)) < abs($1.timestamp.timeIntervalSince(date))
         }), abs(nearest.timestamp.timeIntervalSince(date)) <= Self.freshnessWindow else {
             return nil
         }
-        return nearest.precipitation
+        return nearest
     }
+
+    func rate(at date: Date) -> Double? { nearest(to: date)?.precipitation }
 
     var currentRate: Double? {
         rate(at: Date())
     }
+
+    /// "rain" | "sleet" | "snow" at the nearest sample, when the server sent it.
+    func kind(at date: Date) -> String? { nearest(to: date)?.kind }
 
     var currentPrecipitation: Double {
         currentRate ?? 0

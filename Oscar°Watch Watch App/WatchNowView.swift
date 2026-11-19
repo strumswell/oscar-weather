@@ -27,6 +27,7 @@ struct WatchNowView: View {
         let forecastPrecipitation = current?.precipitation ?? 0
         let isRaining = (radarRate ?? forecastPrecipitation) > 0
         let rainRate = radarRate ?? forecastPrecipitation
+        let radarSnow = weather.precipSeries?.kind(at: .now) == "snow"
 
         return VStack(spacing: 0) {
             Text(location.name.isEmpty ? String(localized: "Mein Standort") : location.name)
@@ -40,7 +41,7 @@ struct WatchNowView: View {
                 .font(.system(size: 64, weight: .thin, design: .rounded))
                 .contentTransition(.numericText())
 
-            Text(conditionDescription(weathercode: current?.weathercode, isRaining: isRaining, rate: rainRate))
+            Text(conditionDescription(weathercode: current?.weathercode, isRaining: isRaining, rate: rainRate, snow: radarSnow))
                 .font(.system(size: 16, weight: .medium, design: .rounded))
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
@@ -60,7 +61,7 @@ struct WatchNowView: View {
                 if rainRate > 0 {
                     Label(
                         units.rateString(rainRate),
-                        systemImage: "cloud.rain.fill"
+                        systemImage: radarSnow ? "cloud.snow.fill" : "cloud.rain.fill"
                     )
                 }
             }
@@ -86,10 +87,13 @@ struct WatchNowView: View {
         }
     }
 
-    private func conditionDescription(weathercode: Double?, isRaining: Bool, rate: Double) -> String {
+    private func conditionDescription(weathercode: Double?, isRaining: Bool, rate: Double, snow: Bool) -> String {
         var code = Int(weathercode ?? 0)
         if isRaining, code < 51 {
             code = rate >= 2.5 ? 61 : 51
+        }
+        if isRaining, snow, (51...65).contains(code) || (80...82).contains(code) {
+            code = 71
         }
 
         return WeatherConditionLabel.text(for: code)

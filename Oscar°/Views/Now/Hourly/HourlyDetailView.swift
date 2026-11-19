@@ -78,7 +78,8 @@ private struct HourlyContent: View {
         let snapshot = AtmosphereWeatherMapper.snapshot(
             from: weather,
             at: location.coordinates,
-            for: model.stageDate
+            for: model.stageDate,
+            usesRadarKind: true
         )
         ZStack {
             HourlyStage(model: model, snapshot: snapshot, isCovered: isCovered)

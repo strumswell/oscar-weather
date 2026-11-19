@@ -129,8 +129,9 @@ final class RainRadarLiveActivityManager {
     }
 
     #if DEBUG
-    func startPreview(phase: RainRadarActivityAttributes.ContentState.Phase) throws {
-        let content = RainRadarActivityAttributes.ContentState.sample(phase: phase)
+    func startPreview(phase: RainRadarActivityAttributes.ContentState.Phase, precipKind: String? = nil) throws {
+        var content = RainRadarActivityAttributes.ContentState.sample(phase: phase)
+        content.precipKind = precipKind
         _ = try Activity.request(
             attributes: RainRadarActivityAttributes(locationName: "Leipzig", subscriptionId: Self.previewSubscriptionId),
             content: .init(state: content, staleDate: Date().addingTimeInterval(30 * 60)),

@@ -120,6 +120,13 @@ final class ScreenshotFixtureServer: URLProtocol {
             return json { _ in SyntheticRadar.motionJSON() }
         case (3, "cells"):
             return json { _ in SyntheticRadar.cellsJSON() }
+        case (4, "snow") where parts[3] == "terrain" && !isClouds:
+            return rawGrid { _ in SyntheticRadar.snowTerrain() }
+        case (4, "snow") where parts[3] == "relief" && !isClouds:
+            return rawGrid { _ in SyntheticRadar.snowRelief() }
+        case (5, "snow") where parts[3] == "field" && !isClouds:
+            let key = parts[4]
+            return rawGrid { _ in SyntheticRadar.snowField(key: key) }
         case (5, "frames") where parts[4] == "grid":
             let key = parts[3]
             if isClouds {

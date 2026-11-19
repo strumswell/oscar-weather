@@ -36,7 +36,75 @@ enum SyntheticRadar {
             },
             "bounds": bounds,
             "image_bounds": bounds,
+        ].merging(snowEnabled ? ["snow": snowJSON()] : [:]) { a, _ in a }
+    }
+
+    // MARK: Snow overlay (opt-in: launch with -fixtureSnow YES)
+
+    static var snowEnabled: Bool { UserDefaults.standard.bool(forKey: "fixtureSnow") }
+    private static let snowHours = Array(-1...3)
+
+    static func snowJSON() -> [String: Any] {
+        let formatter = ISO8601DateFormatter()
+        let now = ScreenshotFixtures.storyNow
+        return [
+            "snow_below": -1.5, "rain_above": 2.25, "lapse_per_m": 0.0065,
+            "field_scale": 0.16, "field_offset": -4.0, "terrain_scale": 20.0,
+            "steps": snowHours.map {
+                ["key": "sn\($0)", "timestamp": formatter.string(from: now.addingTimeInterval(Double($0) * 3600))]
+            },
         ]
+    }
+
+    /// Sea-level wet-bulb: mild in the west, cold in the east, cooling by 0.8 °C per hour.
+    /// `-fixtureSnowWarm YES` adds 30 °C so no cell qualifies for the overlay.
+    static func snowField(key: String) -> Data {
+        let hour = Double(key.dropFirst(2)) ?? 0
+        let warm = UserDefaults.standard.bool(forKey: "fixtureSnowWarm") ? 30.0 : 0
+        let w = snowFieldWidth, h = snowFieldHeight
+        var pixels = [UInt8](repeating: 0, count: w * h)
+        for y in 0..<h {
+            for x in 0..<w {
+                let wetBulb = warm + 5.0 - 9.0 * Double(x) / Double(w) - 0.8 * hour + 0.6 * sin(Double(y) / 9)
+                pixels[y * w + x] = UInt8(max(0, min(255, ((wetBulb + 4) / 0.16).rounded())))
+            }
+        }
+        return rawValueGrid(pixels, width: w, height: h)
+    }
+
+    private static let snowFieldWidth = 142, snowFieldHeight = 100
+
+    /// Highest terrain byte per field cell.
+    static func snowRelief() -> Data {
+        let terrain = snowTerrainPixels()
+        let w = snowFieldWidth, h = snowFieldHeight
+        var pixels = [UInt8](repeating: 0, count: w * h)
+        for y in 0..<gridHeight {
+            for x in 0..<gridWidth {
+                let i = (y * h / gridHeight) * w + x * w / gridWidth
+                pixels[i] = max(pixels[i], terrain[y * gridWidth + x])
+            }
+        }
+        return rawValueGrid(pixels, width: w, height: h)
+    }
+
+    static func snowTerrain() -> Data { rawValueGrid(snowTerrainPixels(), width: gridWidth, height: gridHeight) }
+
+    /// Lowlands in the north, ridges rising to ~2500 m towards the southern edge.
+    private static func snowTerrainPixels() -> [UInt8] {
+        let w = gridWidth, h = gridHeight
+        var pixels = [UInt8](repeating: 0, count: w * h)
+        for y in 0..<h {
+            let lat = north - (north - south) * (Double(y) + 0.5) / Double(h)
+            for x in 0..<w {
+                let lon = west + (east - west) * (Double(x) + 0.5) / Double(w)
+                let alpine = max(0, 49.5 - lat) / 3.5
+                let ridge = 0.5 + 0.5 * sin(lon * 4.2) * cos(lat * 5.1)
+                let metres = 40 + 2500 * alpine * alpine * ridge + 250 * max(0, sin(lon * 1.3 + lat))
+                pixels[y * w + x] = UInt8(max(1, min(255, (metres / 20).rounded())))
+            }
+        }
+        return pixels
     }
     #endif
 
@@ -276,11 +344,15 @@ enum SyntheticRadar {
     }
 
     private static func rawValueGrid(_ pixels: [UInt8]) -> Data {
+        rawValueGrid(pixels, width: gridWidth, height: gridHeight)
+    }
+
+    private static func rawValueGrid(_ pixels: [UInt8], width: Int, height: Int) -> Data {
         var compressed = [UInt8](repeating: 0, count: pixels.count + 4096)
         let size = compression_encode_buffer(&compressed, compressed.count, pixels, pixels.count, nil, COMPRESSION_ZLIB)
         var data = Data()
-        withUnsafeBytes(of: UInt32(gridWidth).littleEndian) { data.append(contentsOf: $0) }
-        withUnsafeBytes(of: UInt32(gridHeight).littleEndian) { data.append(contentsOf: $0) }
+        withUnsafeBytes(of: UInt32(width).littleEndian) { data.append(contentsOf: $0) }
+        withUnsafeBytes(of: UInt32(height).littleEndian) { data.append(contentsOf: $0) }
         data.append(contentsOf: compressed.prefix(size))
         return data
     }

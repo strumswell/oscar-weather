@@ -14,7 +14,8 @@ extension WeatherMapView.Coordinator {
         bounds: OscarRadarBounds?, frame: OscarRadarFrame?, next: OscarRadarFrame?,
         renderedIndex: Int, loadedCount: Int, frameCount: Int,
         isPlaying: Bool, motion: RadarMotionData?, smoothMotion: Bool,
-        softRendering: Bool, arrowsEnabled: Bool, visible: Bool, player: (any TimelinePlayerState)?
+        softRendering: Bool, arrowsEnabled: Bool, visible: Bool, player: (any TimelinePlayerState)?,
+        snow: RadarSnowOverlay? = nil
     ) {
         guard active, let state else {
             removeArrowLayer(from: style)
@@ -27,6 +28,7 @@ extension WeatherMapView.Coordinator {
                 lastRenderIndex = -1
                 lastBounds = nil
                 radarPaletteId = nil
+                lastSnowKey = nil
             }
             return
         }
@@ -51,6 +53,7 @@ extension WeatherMapView.Coordinator {
             layer.clearPalette()
             layer.purgeTextures()
             lastFrameKey = nil
+            lastSnowKey = nil
             lastRenderIndex = -1
         }
         if !layer.hasPalette, !isFetchingPalette {
@@ -69,6 +72,7 @@ extension WeatherMapView.Coordinator {
             layer.purgeTextures()
             lastBounds = bounds
             lastFrameKey = nil
+            lastSnowKey = nil
             lastRenderIndex = -1
             recenterIntoRadarBoundsIfNeeded(animated: true)
         }
@@ -84,6 +88,15 @@ extension WeatherMapView.Coordinator {
 
         guard let frame else {
             return blocked("no current radar frame (loaded=\(loadedCount)/\(frameCount))")
+        }
+        let snowKey = "\(snow?.id ?? "-")|\(frame.key)|\(next?.key ?? "-")"
+        if lastSnowKey != snowKey {
+            if layer.setSnow(snow, frameDate: parseFrameDate(frame.timestamp),
+                             nextDate: next.flatMap { parseFrameDate($0.timestamp) }) {
+                lastSnowKey = snowKey
+            } else {
+                scheduleSyncRetry()
+            }
         }
         guard lastFrameKey != frame.key || lastRenderIndex != renderedIndex else { return }
         blocked(nil)

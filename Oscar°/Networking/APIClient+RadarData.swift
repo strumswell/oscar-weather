@@ -59,7 +59,8 @@ extension PrecipSeriesResponse {
         return PrecipPoint(
           timestamp: date,
           precipitation: point.precipitation,
-          isForecast: point.is_forecast ?? false)
+          isForecast: point.is_forecast ?? false,
+          kind: point.kind)
       },
       generatedAt: payload.generated_at,
       lastObservedAt: payload.last_observed_at,

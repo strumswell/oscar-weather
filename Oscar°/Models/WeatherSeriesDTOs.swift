@@ -25,16 +25,19 @@ struct PrecipPoint: Codable, Equatable {
     let timestamp: Date
     let precipitation: Double  // mm/h
     let isForecast: Bool
+    /// "rain" | "sleet" | "snow": what would fall here at this time, dry samples included.
+    let kind: String?
 
     enum CodingKeys: String, CodingKey {
-        case timestamp, precipitation
+        case timestamp, precipitation, kind
         case isForecast = "is_forecast"
     }
 
-    init(timestamp: Date, precipitation: Double, isForecast: Bool) {
+    init(timestamp: Date, precipitation: Double, isForecast: Bool, kind: String? = nil) {
         self.timestamp = timestamp
         self.precipitation = precipitation
         self.isForecast = isForecast
+        self.kind = kind
     }
 
     init(from decoder: Decoder) throws {
@@ -49,6 +52,7 @@ struct PrecipPoint: Codable, Equatable {
         timestamp = date
         precipitation = try container.decode(Double.self, forKey: .precipitation)
         isForecast = try container.decodeIfPresent(Bool.self, forKey: .isForecast) ?? false
+        kind = try container.decodeIfPresent(String.self, forKey: .kind)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -56,6 +60,7 @@ struct PrecipPoint: Codable, Equatable {
         try container.encode(PrecipSeriesDate.string(from: timestamp), forKey: .timestamp)
         try container.encode(precipitation, forKey: .precipitation)
         try container.encode(isForecast, forKey: .isForecast)
+        try container.encodeIfPresent(kind, forKey: .kind)
     }
 }
 

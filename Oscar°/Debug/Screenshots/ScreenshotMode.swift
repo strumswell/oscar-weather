@@ -121,7 +121,9 @@ enum ScreenshotMode {
         case .lockLiveActivity:
             let phase = UserDefaults.standard.string(forKey: "screenshotLiveActivityPhase")
                 .flatMap(RainRadarActivityAttributes.ContentState.Phase.init) ?? .raining
-            try? RainRadarLiveActivityManager.shared.startPreview(phase: phase)
+            // -screenshotLiveActivityKind snow | sleet previews the winter wording.
+            try? RainRadarLiveActivityManager.shared.startPreview(
+                phase: phase, precipKind: UserDefaults.standard.string(forKey: "screenshotLiveActivityKind"))
         case .lockNotifications:
             await ScreenshotLockScreenNotifications.schedule()
         default:

@@ -90,6 +90,8 @@ private struct RainActivityModel {
     }
 
     var phase: ContentState.Phase { state.phase }
+    var isSnow: Bool { state.precipKind == "snow" }
+    var isSleet: Bool { state.precipKind == "sleet" }
     var buckets: [Bucket] { state.timeline }
 
     var pastCount: Int { buckets.filter { $0.t < state.observedAt }.count }
@@ -148,14 +150,22 @@ private struct RainActivityModel {
         switch phase {
         case .upcoming:
             if let start = state.startDate, start.timeIntervalSince(now) > -120 {
+                if isSnow { return String(localized: "Schneefall ab \(time(start))") }
+                if isSleet { return String(localized: "Schneeregen ab \(time(start))") }
                 return String(localized: "Regen ab \(time(start))")
             }
+            if isSnow { return String(localized: "Schneefall in Kürze") }
+            if isSleet { return String(localized: "Schneeregen in Kürze") }
             return String(localized: "Regen in Kürze")
         case .raining:
+            if isSnow { return String(localized: "Schneit gerade") }
+            if isSleet { return String(localized: "Gerade Schneeregen") }
             return String(localized: "Regnet gerade")
         case .ending:
             return String(localized: "Lässt bald nach")
         case .ended:
+            if isSnow { return String(localized: "Schneefall vorbei") }
+            if isSleet { return String(localized: "Schneeregen vorbei") }
             return String(localized: "Regen vorbei")
         }
     }
@@ -163,6 +173,7 @@ private struct RainActivityModel {
     var subline: String {
         if phase == .ended {
             if let next = state.nextStartDate {
+                if isSnow || isSleet { return String(localized: "Neuer Niederschlag gegen \(time(next))") }
                 return String(localized: "Neuer Regen gegen \(time(next))")
             }
             return String(localized: "Vorerst trocken")
@@ -193,6 +204,16 @@ private struct RainActivityModel {
 
     var intensityLabel: String {
         let peak = state.peakMmPerHour
+        if isSnow {
+            if peak >= 5.04 { return String(localized: "Starker Schneefall") }
+            if peak >= 0.96 { return String(localized: "Schneefall") }
+            return String(localized: "Leichter Schneefall")
+        }
+        if isSleet {
+            if peak >= 24 { return String(localized: "Starker Schneeregen") }
+            if peak >= 6 { return String(localized: "Schneeregen") }
+            return String(localized: "Leichter Schneeregen")
+        }
         if peak >= 24 { return String(localized: "Starker Regen") }
         if peak >= 6 { return String(localized: "Regen") }
         if peak >= 0.6 { return String(localized: "Leichter Regen") }
@@ -402,7 +423,7 @@ private struct RainTimelineChart: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("Regenverlauf"))
+        .accessibilityLabel(Text("Niederschlagsverlauf"))
         .accessibilityValue(Text(verbatim: model.accessibilityValue))
     }
 
@@ -557,7 +578,9 @@ private struct RainActivityIcon: View {
     }
 
     private var symbolName: String {
-        switch model.phase {
+        if model.phase != .ended, model.isSnow { return model.phase == .upcoming ? "cloud.snow" : "cloud.snow.fill" }
+        if model.phase != .ended, model.isSleet { return model.phase == .upcoming ? "cloud.sleet" : "cloud.sleet.fill" }
+        return switch model.phase {
         case .upcoming: "cloud.rain"
         case .raining: "cloud.rain.fill"
         case .ending: "cloud.drizzle.fill"

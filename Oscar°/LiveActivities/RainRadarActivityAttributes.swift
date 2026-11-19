@@ -32,6 +32,8 @@ struct RainRadarActivityAttributes: ActivityAttributes {
         let observedAt: Int
         let timeline: [Bucket]
         let dismissAt: Int?
+        /// "sleet" or "snow"; absent for rain and from older servers.
+        var precipKind: String? = nil
     }
 
     let locationName: String

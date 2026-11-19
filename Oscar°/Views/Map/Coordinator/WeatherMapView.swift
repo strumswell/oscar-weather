@@ -171,6 +171,7 @@ struct WeatherMapView: UIViewRepresentable {
 
         var radarLayer: RadarCustomStyleLayer?
         var lastFrameKey: String?
+        var lastSnowKey: String?
         var lastRenderIndex = -1
         var lastBounds: OscarRadarBounds?
         var radarPaletteId: String?
@@ -319,6 +320,7 @@ struct WeatherMapView: UIViewRepresentable {
             radarLayer?.purgeTextures()
             radarLayer = nil
             lastFrameKey = nil
+            lastSnowKey = nil
             lastRenderIndex = -1
             lastBounds = nil
             radarPaletteId = nil
@@ -386,6 +388,7 @@ struct WeatherMapView: UIViewRepresentable {
             let smoothMotion = settings.radarSmoothMotion
             let softRendering = settings.radarSoftRendering
             let motionArrows = settings.radarMotionArrows
+            let snowOverlay = usesSettings && settings.radarSnowOverlay
             let valueBubbles = settings.mapValueBubbles
             let activeTileLayer = usesSettings ? settings.activeTileLayer : fixedLayers?.tileLayer
             let alertPolygons = usesSettings && settings.showAlertPolygons
@@ -397,6 +400,12 @@ struct WeatherMapView: UIViewRepresentable {
             let basemapStyle = settings.mapBasemapStyle
 
             let radarState = parent.oscarRadarState
+            radarState?.snowWanted = radarActive && snowOverlay
+            if radarActive && snowOverlay, !isMapInteractionActive, let view = mapView?.visibleCoordinateBounds {
+                radarState?.setSnowView(OscarRadarBounds(north: view.ne.latitude, south: view.sw.latitude,
+                                                         west: view.sw.longitude, east: view.ne.longitude))
+            }
+            let radarSnow = radarState?.snow
             let radarBounds = radarState?.bounds
             let radarFrame = radarState?.currentFrame
             let radarRenderedIndex = radarState?.renderFrameIndex ?? radarState?.currentFrameIndex ?? 0
@@ -463,7 +472,7 @@ struct WeatherMapView: UIViewRepresentable {
                       loadedCount: radarLoadedCount, frameCount: radarFrameCount,
                       isPlaying: radarIsPlaying, motion: radarMotion, smoothMotion: smoothMotion,
                       softRendering: softRendering, arrowsEnabled: motionArrows && !showsModelPart,
-                      visible: !showsModelPart || sweeping, player: radarPlayer)
+                      visible: !showsModelPart || sweeping, player: radarPlayer, snow: radarSnow)
             syncModelLayer(style: style,
                            selection: activeTileLayer ?? (continuationActive ? modelState?.currentLayer : nil),
                            visible: activeTileLayer != nil || showsModelPart || sweeping, state: modelState,

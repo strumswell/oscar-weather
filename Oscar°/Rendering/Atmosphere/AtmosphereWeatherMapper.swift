@@ -6,7 +6,8 @@ enum AtmosphereWeatherMapper {
     @MainActor static func snapshot(
         from weather: Weather,
         at location: CLLocationCoordinate2D,
-        for date: Date? = nil
+        for date: Date? = nil,
+        usesRadarKind: Bool = false
     ) -> AtmosphereSnapshot {
         guard location.latitude != 0 || location.longitude != 0 else {
             return .fallback
@@ -14,7 +15,7 @@ enum AtmosphereWeatherMapper {
 
         let now = Date.now.timeIntervalSince1970
         if let date, abs(date.timeIntervalSince1970 - now) > 900 {
-            return scrubbedSnapshot(from: weather, at: location, for: date)
+            return scrubbedSnapshot(from: weather, at: location, for: date, usesRadarKind: usesRadarKind)
         }
         let forecastTimes = weather.forecast.hourly?.time ?? []
         let currentTimestamp: Double
@@ -72,6 +73,7 @@ enum AtmosphereWeatherMapper {
             humidity: humidity,
             deck: deck,
             radarRate: radarRate,
+            radarKind: usesRadarKind ? weather.precipSeries?.kind(at: Date()) : nil,
             modelPrecipitation: modelPrecipitation,
             modelSnowfall: modelSnowfall,
             windSpeed: windSpeed,
@@ -82,7 +84,8 @@ enum AtmosphereWeatherMapper {
     @MainActor private static func scrubbedSnapshot(
         from weather: Weather,
         at location: CLLocationCoordinate2D,
-        for date: Date
+        for date: Date,
+        usesRadarKind: Bool
     ) -> AtmosphereSnapshot {
         let hourly = weather.forecast.hourly
         let times = hourly?.time ?? []
@@ -127,6 +130,7 @@ enum AtmosphereWeatherMapper {
             humidity: humidity,
             deck: deck,
             radarRate: radarRate,
+            radarKind: usesRadarKind ? weather.precipSeries?.kind(at: Date(timeIntervalSince1970: timestamp)) : nil,
             modelPrecipitation: modelPrecipitation,
             modelSnowfall: modelSnowfall,
             windSpeed: windSpeed,
@@ -144,6 +148,7 @@ enum AtmosphereWeatherMapper {
         humidity: Float,
         deck: CloudDeck,
         radarRate: Float?,
+        radarKind: String?,
         modelPrecipitation: Float,
         modelSnowfall: Float,
         windSpeed: Float,
@@ -156,9 +161,20 @@ enum AtmosphereWeatherMapper {
         let snowfall = radarRate.map { $0 * 0.7 } ?? modelSnowfall
         let precipitationIntensity = radarRate.map { clamp($0 / 6, 0, 1) }
             ?? clamp(modelPrecipitation / 8, 0, 1)
-        if let radarRate, radarRate >= 0.1, condition == .clear || condition == .partlyCloudy || condition == .overcast {
-            condition = .rain
-            cloudCoverage = max(cloudCoverage, clamp(0.55 + precipitationIntensity * 0.45, 0, 1))
+        if let radarRate, radarRate >= 0.1 {
+            let dry = condition == .clear || condition == .partlyCloudy || condition == .overcast
+            // The server's rain/sleet/snow call for this spot settles what the echo is;
+            // "sleet" is the uncertain band, so the forecast's own word stands there.
+            if radarKind == "snow", dry || condition == .rain || condition == .drizzle || condition == .showers {
+                condition = .snow
+            } else if radarKind == "rain", condition == .snow {
+                condition = .rain
+            } else if dry {
+                condition = .rain
+            }
+            if dry {
+                cloudCoverage = max(cloudCoverage, clamp(0.55 + precipitationIntensity * 0.45, 0, 1))
+            }
         }
         reconcile(&deck, total: cloudCoverage, condition: condition)
 
