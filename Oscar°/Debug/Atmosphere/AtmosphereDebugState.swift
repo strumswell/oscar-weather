@@ -46,6 +46,7 @@ extension AtmosphereConditionFamily {
         case .drizzle: return "Drizzle"
         case .rain: return "Rain"
         case .freezingRain: return "Freezing Rain"
+        case .sleet: return "Sleet"
         case .snow: return "Snow"
         case .showers: return "Showers"
         case .thunderstorm: return "Thunderstorm"

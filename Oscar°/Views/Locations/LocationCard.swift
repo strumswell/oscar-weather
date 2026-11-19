@@ -180,14 +180,16 @@ struct LocationSimBackdrop: View {
             .drawingGroup()
             .overlay {
                 if snap.showsPrecipitation {
-                    StormView(
-                        type: snap.stormContents,
-                        direction: .degrees(0),
-                        strength: snap.stormStrength(rainBase: 25, snowBase: 25, weight: 80, floor: 10, cap: 90, ramped: false),
-                        pacing: reduceMotion || paused ? .still : .active,
-                        speedMultiplier: 3
-                    )
-                    .opacity(0.75)
+                    ForEach(snap.stormContents, id: \.self) { type in
+                        StormView(
+                            type: type,
+                            direction: .degrees(0),
+                            strength: snap.stormStrength(type, rainBase: 25, snowBase: 25, weight: 80, floor: 10, cap: 90, ramped: false),
+                            pacing: reduceMotion || paused ? .still : .active,
+                            speedMultiplier: 3
+                        )
+                        .opacity(0.75)
+                    }
                 }
             }
         }

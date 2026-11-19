@@ -381,17 +381,21 @@ enum ScreenshotFixtures {
         let peak: Double = ScreenshotMode.scene == .places
             ? (url.map { isNear($0, place: essen) } == true ? 3.4 : 0)
             : byStory(rain: 7.4, sunny: 0, showers: 0)
+        // -fixtureSeriesKind snow | sleet | rain previews the server's call for the echo.
+        let kind = UserDefaults.standard.string(forKey: "fixtureSeriesKind")
         let series = stride(from: -30, through: 105, by: 5).map { minutes -> [String: Any] in
             let t = Double(minutes)
             let value = approachingStory
                 ? (minutes < 15 ? 0 : peak * exp(-pow((t - 60) / 30, 2)))
                 : peak * exp(-pow((t - 10) / 48, 2))
                     + (peak > 0 ? 1.9 : 0) * exp(-pow((t - 90) / 22, 2))
-            return [
+            var sample: [String: Any] = [
                 "timestamp": formatter.string(from: now.addingTimeInterval(t * 60)),
                 "precipitation": (value * 10).rounded() / 10,
                 "is_forecast": minutes > 0,
             ]
+            if let kind { sample["kind"] = kind }
+            return sample
         }
         return [
             "source": "dwd",

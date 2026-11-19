@@ -155,15 +155,16 @@ struct WeatherSimulationView: View, Animatable {
                     let stormVisible = snapshot.showsPrecipitation
                     ZStack {
                         if stormVisible {
-                            StormView(
-                                type: snapshot.stormContents,
-                                direction: snapshot.stormSlant,
-                                strength: snapshot.stormStrength(rainBase: 45, snowBase: 90, weight: 170, floor: 12, cap: 220),
-                                pacing: pacing
-                            )
-                            .id(String(describing: snapshot.stormContents))
-                            .transition(.opacity)
-                            .opacity(reduceMotion ? 0.55 : 1)
+                            ForEach(snapshot.stormContents, id: \.self) { type in
+                                StormView(
+                                    type: type,
+                                    direction: snapshot.stormSlant,
+                                    strength: snapshot.stormStrength(type, rainBase: 45, snowBase: 90, weight: 170, floor: 12, cap: 220),
+                                    pacing: pacing
+                                )
+                                .transition(.opacity)
+                                .opacity(reduceMotion ? 0.55 : 1)
+                            }
                         }
                     }
                     .animation(.easeInOut(duration: snapshotOverride == nil ? 0.8 : 0.25), value: stormVisible)

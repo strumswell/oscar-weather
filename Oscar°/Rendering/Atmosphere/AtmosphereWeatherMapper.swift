@@ -163,10 +163,12 @@ enum AtmosphereWeatherMapper {
             ?? clamp(modelPrecipitation / 8, 0, 1)
         if let radarRate, radarRate >= 0.1 {
             let dry = condition == .clear || condition == .partlyCloudy || condition == .overcast
-            // The server's rain/sleet/snow call for this spot settles what the echo is;
-            // "sleet" is the uncertain band, so the forecast's own word stands there.
-            if radarKind == "snow", dry || condition == .rain || condition == .drizzle || condition == .showers {
+            let rainy = condition == .rain || condition == .drizzle || condition == .showers
+            // The server's rain/sleet/snow call for this spot settles what the echo is.
+            if radarKind == "snow", dry || rainy {
                 condition = .snow
+            } else if radarKind == "sleet", dry || rainy || condition == .snow {
+                condition = .sleet
             } else if radarKind == "rain", condition == .snow {
                 condition = .rain
             } else if dry {
@@ -197,7 +199,7 @@ enum AtmosphereWeatherMapper {
 
     static func reconcile(_ deck: inout CloudDeck, total: Float, condition: AtmosphereConditionFamily) {
         switch condition {
-        case .drizzle, .rain, .freezingRain, .showers, .snow, .thunderstorm:
+        case .drizzle, .rain, .freezingRain, .showers, .sleet, .snow, .thunderstorm:
             deck.low = max(deck.low, total)
         case .clear, .partlyCloudy, .overcast, .fog:
             break
@@ -226,7 +228,7 @@ enum AtmosphereWeatherMapper {
         windDirection: Float,
         deck: CloudDeck
     ) -> AtmosphereSnapshot {
-        let snowfallIntensity = condition == .snow ? max(clamp(snowfall / 6, 0, 1), precipitationIntensity * 0.6) : 0
+        let snowfallIntensity = condition == .snow || condition == .sleet ? max(clamp(snowfall / 6, 0, 1), precipitationIntensity * 0.6) : 0
         let thunderIntensity = condition == .thunderstorm ? max(0.55, precipitationIntensity) : 0
         let sunElevation = solarElevation(
             date: Date(timeIntervalSince1970: timestamp),
@@ -408,7 +410,7 @@ enum AtmosphereWeatherMapper {
             conditionBoost = 0.38
         case .fog:
             conditionBoost = 0.62
-        case .drizzle, .rain, .freezingRain, .showers:
+        case .drizzle, .rain, .freezingRain, .showers, .sleet:
             conditionBoost = 0.45
         case .snow:
             conditionBoost = 0.36

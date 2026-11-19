@@ -21803,7 +21803,6 @@
       }
     },
     "Schneeregen" : {
-      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -21814,13 +21813,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sleet"
+            "value" : "Wintry mix"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sulu kar"
+            "value" : "Karla karışık yağmur"
           }
         }
       }

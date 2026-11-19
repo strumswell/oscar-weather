@@ -53,7 +53,7 @@ enum HourlyFormatting {
       base = "50"
     case 51:
       base = "10"
-    case 71, 73, 75, 77, 85, 86:
+    case 68, 69, 71, 73, 75, 77, 85, 86:
       base = "13"
     case 95, 96, 99:
       base = "11"

@@ -10,7 +10,7 @@ enum WeatherSymbol {
         case 51, 53, 55, 56, 57: return "cloud.drizzle.fill"
         case 61, 63, 80, 81: return "cloud.rain.fill"
         case 65, 82: return "cloud.heavyrain.fill"
-        case 66, 67: return "cloud.sleet.fill"
+        case 66, 67, 68, 69: return "cloud.sleet.fill"
         case 71, 73, 75, 77, 85, 86: return "cloud.snow.fill"
         case 95, 96, 99: return "cloud.bolt.rain.fill"
         default: return "cloud.fill"

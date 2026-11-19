@@ -20,6 +20,17 @@ struct RainNowcastSummaryTests {
     }
 
     @Test
+    func radarKindReplacesTheForecastWord() {
+        #expect(WeatherConditionLabel.code(61, radarKind: "sleet") == 68)
+        #expect(WeatherConditionLabel.code(73, radarKind: "sleet") == 68)
+        #expect(WeatherConditionLabel.code(51, radarKind: "snow") == 71)
+        #expect(WeatherConditionLabel.code(73, radarKind: "rain") == 61)
+        #expect(WeatherConditionLabel.code(63, radarKind: "rain") == 63)
+        #expect(WeatherConditionLabel.code(63, radarKind: nil) == 63)
+        #expect(WeatherConditionLabel.code(95, radarKind: "snow") == 95)
+    }
+
+    @Test
     func headlineUsesThePlaceTimeZone() {
         let tokyo = TimeZone(identifier: "Asia/Tokyo")!
         let points = [point(minutes: 0, rain: 0), point(minutes: 15, rain: 0.6)]

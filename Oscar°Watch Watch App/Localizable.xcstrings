@@ -584,6 +584,22 @@
         }
       }
     },
+    "Schneeregen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wintry mix"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karla karışık yağmur"
+          }
+        }
+      }
+    },
     "Schwache Brise" : {
 
     },

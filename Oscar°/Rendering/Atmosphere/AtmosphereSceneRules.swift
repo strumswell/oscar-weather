@@ -46,19 +46,25 @@ extension AtmosphereSnapshot {
         max(precipitationIntensity, snowfallIntensity) > 0.001
     }
 
-    var stormContents: Storm.Contents {
-        condition == .snow ? .snow : .rain
+    /// Sleet is rain and snow falling together.
+    var stormContents: [Storm.Contents] {
+        switch condition {
+        case .snow: [.snow]
+        case .sleet: [.rain, .snow]
+        default: [.rain]
+        }
     }
 
     var stormSlant: Angle {
         .degrees(min(35, max(-35, Double(sin(windDirection)) * Double(windSpeed) * 55)))
     }
 
-    func stormStrength(rainBase: Double, snowBase: Double, weight: Double, floor: Int, cap: Int, ramped: Bool = true) -> Int {
-        let isSnow = condition == .snow
+    /// Particle count for one layer; the layers of a mix share the budget.
+    func stormStrength(_ type: Storm.Contents, rainBase: Double, snowBase: Double, weight: Double, floor: Int, cap: Int, ramped: Bool = true) -> Int {
+        let isSnow = type == .snow
         let intensity = Double(isSnow ? snowfallIntensity : precipitationIntensity)
         let base = isSnow ? snowBase : rainBase
         let ramp = ramped ? min(1, intensity / 0.05) : 1
-        return max(floor, min(cap, Int(base * ramp + intensity * weight)))
+        return max(floor, min(cap, Int(base * ramp + intensity * weight))) / stormContents.count
     }
 }

@@ -26,12 +26,12 @@ extension AtmosphereWeatherMapper {
         switch condition {
         case .drizzle, .rain, .freezingRain, .showers, .thunderstorm:
             precipitationIntensity = intensity
-        case .snow:
+        case .sleet, .snow:
             precipitationIntensity = intensity * 0.5
         case .clear, .partlyCloudy, .overcast, .fog:
             precipitationIntensity = 0
         }
-        let snowfallIntensity: Float = condition == .snow ? intensity : 0
+        let snowfallIntensity: Float = condition == .snow || condition == .sleet ? intensity : 0
         let thunderIntensity: Float = condition == .thunderstorm ? max(0.55, intensity) : 0
 
         let humidity = clamp(0.4 + cloudCoverage * 0.25 + intensity * 0.3, 0, 1)

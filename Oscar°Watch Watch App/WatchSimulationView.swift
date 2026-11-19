@@ -114,13 +114,15 @@ struct WatchSimulationView: View {
                 }
 
                 if snapshot.showsPrecipitation {
-                    StormView(
-                        type: snapshot.condition == .snow ? .snow : .rain,
-                        direction: snapshot.stormSlant,
-                        strength: snapshot.stormStrength(rainBase: 22, snowBase: 45, weight: 85, floor: 8, cap: 110),
-                        pacing: stormPacing
-                    )
-                    .opacity(reduceMotion ? 0.55 : 1)
+                    ForEach(snapshot.stormContents, id: \.self) { type in
+                        StormView(
+                            type: type,
+                            direction: snapshot.stormSlant,
+                            strength: snapshot.stormStrength(type, rainBase: 22, snowBase: 45, weight: 85, floor: 8, cap: 110),
+                            pacing: stormPacing
+                        )
+                        .opacity(reduceMotion ? 0.55 : 1)
+                    }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

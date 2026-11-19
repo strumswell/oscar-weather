@@ -9,6 +9,20 @@ enum WeatherConditionLabel {
         return code
     }
 
+    /// The server's rain / sleet / snow call for a falling echo replaces the forecast's own
+    /// word. 68 is the WMO code for rain and snow mixed.
+    static func code(_ code: Int, radarKind: String?) -> Int {
+        let snowy = (71...77).contains(code) || code == 85 || code == 86
+        let rainy = (51...55).contains(code) || (61...65).contains(code) || (80...82).contains(code)
+        guard snowy || rainy else { return code }
+        switch radarKind {
+        case "snow": return snowy ? code : 71
+        case "sleet": return 68
+        case "rain": return rainy ? code : 61
+        default: return code
+        }
+    }
+
     static func text(for code: Int) -> String {
         switch code {
         case 0, 1:
@@ -25,6 +39,8 @@ enum WeatherConditionLabel {
             return String(localized: "Regen")
         case 66, 67:
             return String(localized: "Gefrierender Regen")
+        case 68, 69:
+            return String(localized: "Schneeregen")
         case 71...77, 85, 86:
             return String(localized: "Schneefall")
         case 80...82:
@@ -52,6 +68,8 @@ enum WeatherConditionLabel {
             String(localized: "Regen")
         case .freezingRain:
             String(localized: "Gefrierender Regen")
+        case .sleet:
+            String(localized: "Schneeregen")
         case .snow:
             String(localized: "Schneefall")
         case .showers:

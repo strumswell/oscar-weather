@@ -27,7 +27,7 @@ struct WatchNowView: View {
         let forecastPrecipitation = current?.precipitation ?? 0
         let isRaining = (radarRate ?? forecastPrecipitation) > 0
         let rainRate = radarRate ?? forecastPrecipitation
-        let radarSnow = weather.precipSeries?.kind(at: .now) == "snow"
+        let radarKind = (radarRate ?? 0) > 0 ? weather.precipSeries?.kind(at: .now) : nil
 
         return VStack(spacing: 0) {
             Text(location.name.isEmpty ? String(localized: "Mein Standort") : location.name)
@@ -41,7 +41,7 @@ struct WatchNowView: View {
                 .font(.system(size: 64, weight: .thin, design: .rounded))
                 .contentTransition(.numericText())
 
-            Text(conditionDescription(weathercode: current?.weathercode, isRaining: isRaining, rate: rainRate, snow: radarSnow))
+            Text(conditionDescription(weathercode: current?.weathercode, isRaining: isRaining, rate: rainRate, radarKind: radarKind))
                 .font(.system(size: 16, weight: .medium, design: .rounded))
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
@@ -61,7 +61,8 @@ struct WatchNowView: View {
                 if rainRate > 0 {
                     Label(
                         units.rateString(rainRate),
-                        systemImage: radarSnow ? "cloud.snow.fill" : "cloud.rain.fill"
+                        systemImage: radarKind == "snow" ? "cloud.snow.fill"
+                            : radarKind == "sleet" ? "cloud.sleet.fill" : "cloud.rain.fill"
                     )
                 }
             }
@@ -87,16 +88,12 @@ struct WatchNowView: View {
         }
     }
 
-    private func conditionDescription(weathercode: Double?, isRaining: Bool, rate: Double, snow: Bool) -> String {
+    private func conditionDescription(weathercode: Double?, isRaining: Bool, rate: Double, radarKind: String?) -> String {
         var code = Int(weathercode ?? 0)
         if isRaining, code < 51 {
             code = rate >= 2.5 ? 61 : 51
         }
-        if isRaining, snow, (51...65).contains(code) || (80...82).contains(code) {
-            code = 71
-        }
-
-        return WeatherConditionLabel.text(for: code)
+        return WeatherConditionLabel.text(for: WeatherConditionLabel.code(code, radarKind: radarKind))
     }
 }
 

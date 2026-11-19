@@ -4,7 +4,7 @@ import simd
 import SwiftUI
 
 enum AtmosphereConditionFamily: CaseIterable {
-    case clear, partlyCloudy, overcast, fog, drizzle, rain, freezingRain, snow, showers, thunderstorm
+    case clear, partlyCloudy, overcast, fog, drizzle, rain, freezingRain, sleet, snow, showers, thunderstorm
 }
 
 struct AtmosphereSnapshot: Equatable {

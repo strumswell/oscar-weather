@@ -105,6 +105,9 @@ enum HourlyForecastBuilder {
     if precipitation > 0, weatherCode < 51 {
       weatherCode = precipitation >= 2.5 ? 61 : 51
     }
+    if let radarRate = precipSeries?.currentRate, radarRate > 0 {
+      weatherCode = Double(WeatherConditionLabel.code(Int(weatherCode), radarKind: precipSeries?.kind(at: .now)))
+    }
 
     return HourlyForecastItem(
       timestamp: current.time,
