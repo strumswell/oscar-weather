@@ -17,8 +17,8 @@
 //  exact frames.
 //
 //  Other layers: radar motion arrows (client-side symbol layer), ICON-D2/ECMWF
-//  model grids and satellite clouds (custom layers), wind particles (sibling CPU
-//  overlay view), city chips, storm cells, isobars, warning polygons, user location.
+//  model grids, satellite clouds and wind particles (custom layers), city chips,
+//  storm cells, isobars, warning polygons, user location.
 //
 //  Basemap: OpenFreeMap (no API key). MapLibre's own attribution control is hidden;
 //  MapAttributionLabel carries the OpenFreeMap/OSM (ODbL) credit.
@@ -60,6 +60,7 @@ struct WeatherMapView: UIViewRepresentable {
     static let radarLayerID = "oscar-radar-layer"
     static let modelLayerID = "oscar-model-image"
     static let cloudsLayerID = "oscar-clouds-layer"
+    static let windLayerID = "oscar-wind-particles"
     static let alertSourceCount = 8
     static func alertSourceID(_ index: Int) -> String { "oscar-alert-polygons-\(index)" }
     static func alertFillLayerID(_ index: Int) -> String { "oscar-alert-fill-\(index)" }
@@ -113,7 +114,7 @@ struct WeatherMapView: UIViewRepresentable {
         mapView.attributionButton.isHidden = true
         mapView.compassView.compassVisibility = .adaptive
         mapView.compassViewPosition = .topRight
-        mapView.compassViewMargins = Self.compassMargins(radarControls: false)
+        mapView.compassViewMargins = Self.compassMargins(radarControls: false, snowButton: false)
 
         let tap = UITapGestureRecognizer(
             target: context.coordinator, action: #selector(Coordinator.handleMapTap(_:)))
@@ -123,20 +124,17 @@ struct WeatherMapView: UIViewRepresentable {
         }
         mapView.addGestureRecognizer(tap)
 
-        let particleView = WindParticleView(frame: mapView.bounds)
-        particleView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        particleView.mapView = mapView
-        particleView.isHidden = true
-        mapView.addSubview(particleView)
-        context.coordinator.windParticleView = particleView
-
         context.coordinator.mapView = mapView
+        context.coordinator.windLoader.mapView = mapView
         context.coordinator.startObservingAppState()
         return mapView
     }
 
-    static func compassMargins(radarControls: Bool) -> CGPoint {
-        CGPoint(x: 19, y: radarControls ? 273 : 168)
+    static func compassMargins(radarControls: Bool, snowButton: Bool) -> CGPoint {
+        var y = 168.0
+        if radarControls { y += 105 }
+        if radarControls && snowButton { y += 47 }
+        return CGPoint(x: 19, y: y)
     }
 
     @MainActor static var locationAuthorized: Bool {
@@ -167,7 +165,6 @@ struct WeatherMapView: UIViewRepresentable {
     final class Coordinator: NSObject, @preconcurrency MLNMapViewDelegate {
         var parent: WeatherMapView
         weak var mapView: MLNMapView?
-        weak var windParticleView: WindParticleView?
 
         var radarLayer: RadarCustomStyleLayer?
         var lastFrameKey: String?
@@ -229,6 +226,8 @@ struct WeatherMapView: UIViewRepresentable {
         var cityChipSignature: String?
         var registeredCityChipImages: Set<String> = []
 
+        var windLayer: WindParticleLayer?
+        let windLoader = WindFieldLoader()
         var lastWindFrameKey: String?
 
         var isTornDown = false
@@ -290,6 +289,7 @@ struct WeatherMapView: UIViewRepresentable {
             modelLayer?.stopPlayback()
             modelLayer?.purgeTextures()
             cloudsLayer?.purgeTextures()
+            windLayer?.stop()
             handoverSweep.stop()
             userDotPulseTimer?.invalidate()
             userDotPulseTimer = nil
@@ -336,6 +336,9 @@ struct WeatherMapView: UIViewRepresentable {
             cloudsLayer = nil
             lastCloudsPairKey = nil
             lastCloudsBounds = nil
+            windLayer?.stop()
+            windLayer = nil
+            lastWindFrameKey = nil
             arrowSourceID = nil
             bubbleSyncKey = nil
             lastBubbleSignature = nil
@@ -361,7 +364,7 @@ struct WeatherMapView: UIViewRepresentable {
         }
 
         func mapView(_ mapView: MLNMapView, regionDidChangeAnimated animated: Bool) {
-            windParticleView?.onMapRegionChanged()
+            windLoader.onMapRegionChanged()
             interactionEndWorkItem?.cancel()
             let workItem = DispatchWorkItem { [weak self] in
                 guard let self else { return }
@@ -454,7 +457,9 @@ struct WeatherMapView: UIViewRepresentable {
             guard let style = mapView?.style else { return blocked("style not loaded") }
             blocked(nil)
 
-            let compassMargins = WeatherMapView.compassMargins(radarControls: radarActive && continuation != nil)
+            let compassMargins = WeatherMapView.compassMargins(
+                radarControls: radarActive && continuation != nil,
+                snowButton: radarState?.snowAvailable ?? false)
             if let mapView, mapView.compassViewMargins != compassMargins {
                 mapView.compassViewMargins = compassMargins
             }
@@ -486,7 +491,7 @@ struct WeatherMapView: UIViewRepresentable {
             syncAlertPolygons(style: style, active: alertPolygons)
             syncStormCells(style: style, active: stormCells && radarActive && !showsModelPart,
                            region: radarRegion)
-            syncWindParticles(selection: activeTileLayer, state: modelState)
+            syncWindParticles(style: style, selection: activeTileLayer, state: modelState)
             syncWebcams(style: style, active: webcamsOn && parent.onWebcamTapped != nil)
             syncUserLocationDot(style: style, raiseLayers: false)
             syncCityChips(style: style)
