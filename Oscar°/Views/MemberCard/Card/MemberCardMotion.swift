@@ -21,13 +21,9 @@ final class MemberCardMotion {
             glint = -1
             return
         }
-        let motion = CMMotionManager()
-        let hasGyro = motion.isDeviceMotionAvailable
-        if hasGyro {
-            motion.deviceMotionUpdateInterval = 1.0 / 60
-            motion.startDeviceMotionUpdates()
-        }
-        defer { motion.stopDeviceMotionUpdates() }
+        let hasGyro = DeviceMotion.isAvailable
+        DeviceMotion.start()
+        defer { DeviceMotion.stop() }
         let start = Date.now
         var baseline: CGPoint?
         while (try? await Task.sleep(for: .milliseconds(16))) != nil {
@@ -35,7 +31,7 @@ final class MemberCardMotion {
             let target: CGSize
             if let manualTilt {
                 target = manualTilt
-            } else if hasGyro, !forcesFloat, let gravity = motion.deviceMotion?.gravity {
+            } else if hasGyro, !forcesFloat, let gravity = DeviceMotion.deviceMotion?.gravity {
                 let now = CGPoint(x: gravity.screenX, y: gravity.screenY)
                 var base = baseline ?? now
                 base.x += (now.x - base.x) * 0.02

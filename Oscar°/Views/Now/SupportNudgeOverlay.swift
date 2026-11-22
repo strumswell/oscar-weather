@@ -251,19 +251,45 @@ private struct GravityTilt: ViewModifier {
             .rotationEffect(.degrees(degrees), anchor: anchor)
             .task(id: isActive) {
                 guard isActive else { return }
-                let motion = CMMotionManager()
-                guard motion.isDeviceMotionAvailable else { return }
-                motion.deviceMotionUpdateInterval = 1.0 / 60
-                motion.startDeviceMotionUpdates()
-                defer { motion.stopDeviceMotionUpdates() }
+                guard DeviceMotion.isAvailable else { return }
+                DeviceMotion.start()
+                defer { DeviceMotion.stop() }
                 while (try? await Task.sleep(for: .milliseconds(16))) != nil {
-                    guard let gravity = motion.deviceMotion?.gravity else { continue }
+                    guard let gravity = DeviceMotion.deviceMotion?.gravity else { continue }
                     let target = min(max(-gravity.screenX * Self.gain, -Self.maxDegrees), Self.maxDegrees)
                     degrees += (target - degrees) * Self.smoothing
                 }
             }
     }
 
+}
+
+@MainActor
+enum DeviceMotion {
+    static let isAvailable = !ProcessInfo.processInfo.isiOSAppOnMac
+        && !ProcessInfo.processInfo.isMacCatalystApp
+        && manager.isDeviceMotionAvailable
+
+    private static let manager = CMMotionManager()
+    private static var users = 0
+
+    static var deviceMotion: CMDeviceMotion? {
+        isAvailable ? manager.deviceMotion : nil
+    }
+
+    static func start() {
+        guard isAvailable else { return }
+        users += 1
+        guard users == 1 else { return }
+        manager.deviceMotionUpdateInterval = 1.0 / 60
+        manager.startDeviceMotionUpdates()
+    }
+
+    static func stop() {
+        guard isAvailable, users > 0 else { return }
+        users -= 1
+        if users == 0 { manager.stopDeviceMotionUpdates() }
+    }
 }
 
 extension CMAcceleration {

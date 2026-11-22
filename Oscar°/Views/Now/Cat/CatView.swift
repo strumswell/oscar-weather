@@ -118,13 +118,11 @@ struct CatView: View {
     }
 
     private func feelTheDevice() async {
-        let motion = CMMotionManager()
-        guard motion.isDeviceMotionAvailable else { return }
-        motion.deviceMotionUpdateInterval = 1.0 / 30
-        motion.startDeviceMotionUpdates()
-        defer { motion.stopDeviceMotionUpdates() }
+        guard DeviceMotion.isAvailable else { return }
+        DeviceMotion.start()
+        defer { DeviceMotion.stop() }
         while (try? await Task.sleep(for: .milliseconds(33))) != nil {
-            guard let data = motion.deviceMotion else { continue }
+            guard let data = DeviceMotion.deviceMotion else { continue }
             let a = data.userAcceleration
             cat.feel(tilt: data.gravity.screenX, shake: (a.x * a.x + a.y * a.y + a.z * a.z).squareRoot())
         }

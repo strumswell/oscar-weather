@@ -23,6 +23,7 @@ public final class CityService {
     private let context: NSManagedObjectContext
     private let pc = PersistenceController.shared
     private let nc = NotificationCenter.default
+    @ObservationIgnored private var readBeforeStore = false
 
     private init() {
         self.cities = []
@@ -33,8 +34,9 @@ public final class CityService {
         let hasExplicitDefaultChoice = UserDefaults.standard.object(forKey: Self.defaultIsCurrentLocationKey) != nil
         UserDefaults.standard.register(defaults: [Self.defaultIsCurrentLocationKey: true])
         self.defaultIsCurrentLocation = UserDefaults.standard.bool(forKey: Self.defaultIsCurrentLocationKey)
+        self.readBeforeStore = !pc.isLoaded
         self.update()
-        if !UserDefaults.standard.bool(forKey: Self.defaultSelectionMigratedKey) {
+        if pc.isLoaded, !UserDefaults.standard.bool(forKey: Self.defaultSelectionMigratedKey) {
             UserDefaults.standard.set(true, forKey: Self.defaultSelectionMigratedKey)
             if !hasExplicitDefaultChoice, getSelectedCity() != nil {
                 defaultIsCurrentLocation = false
@@ -44,6 +46,10 @@ public final class CityService {
     }
     
     private func save(refreshWeather: Bool = true) {
+        guard pc.isLoaded else {
+            context.rollback()
+            return
+        }
         do {
             try self.context.save()
             update()
@@ -59,6 +65,14 @@ public final class CityService {
     }
     
     func update() {
+        guard pc.load() else { return }
+        if readBeforeStore {
+            readBeforeStore = false
+            currentLocationEmoji = UserDefaults.standard.string(forKey: Self.currentLocationEmojiKey)
+            currentLocationCustomLabel = UserDefaults.standard.string(forKey: Self.currentLocationLabelKey)
+            currentLocationIconHidden = UserDefaults.standard.bool(forKey: Self.currentLocationIconHiddenKey)
+            defaultIsCurrentLocation = UserDefaults.standard.bool(forKey: Self.defaultIsCurrentLocationKey)
+        }
         do {
             self.context.refreshAllObjects()
             let fetchRequest: NSFetchRequest<City> = City.fetchRequest()
@@ -202,6 +216,7 @@ public final class CityService {
     }
 
     func applyDefaultSelectionOnLaunch() {
+        if readBeforeStore { update() }
         if defaultIsCurrentLocation {
             let status = LocationService.shared.authStatus
             let gpsAvailable = status == .authorizedWhenInUse || status == .authorizedAlways

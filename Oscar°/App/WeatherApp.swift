@@ -27,9 +27,15 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
             }
             purgeObservers.append(observer)
         }
+        let unlockObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.protectedDataDidBecomeAvailableNotification, object: nil, queue: .main
+        ) { _ in
+            MainActor.assumeIsolated { _ = AppLaunch.startIfReady() }
+        }
+        purgeObservers.append(unlockObserver)
         MainActor.assumeIsolated {
-            UNUserNotificationCenter.current().delegate = NotificationSettingsManager.shared
-            RainRadarLiveActivityManager.shared.startMonitoring()
+            AppLaunch.didFinishLaunching = true
+            AppLaunch.startAppServicesIfReady()
         }
         return true
     }
@@ -70,6 +76,61 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
+@MainActor
+enum AppLaunch {
+    static var didFinishLaunching = false
+    private static var started = false
+    private static var servicesStarted = false
+    private static var notedLoadError = false
+    private static let loadErrorURL = URL.cachesDirectory.appending(path: "store-load-error.txt")
+
+    @discardableResult
+    static func startIfReady() -> Bool {
+        if started { return true }
+        if ScreenshotMode.active {
+            started = true
+            startAppServicesIfReady()
+            return true
+        }
+        let persistence = PersistenceController.shared
+        let loaded = persistence.load()
+        if !loaded, !notedLoadError, let note = PersistenceController.loadErrorNote {
+            notedLoadError = true
+            let text = "\(note)\n\(Date.now) uptime \(ProcessInfo.processInfo.systemUptime)"
+            try? Data(text.utf8).write(to: loadErrorURL, options: .noFileProtection)
+        }
+        if loaded || persistence.isFileReadable {
+            if CrashReporting.isEnabled {
+                CrashReporting.start()
+            }
+            if SentrySDK.isEnabled, let note = try? String(contentsOf: loadErrorURL, encoding: .utf8) {
+                SentrySDK.capture(message: "Persistent store load failed: \(note.prefix { $0 != "\n" })") { scope in
+                    scope.setContext(value: ["note": note], key: "store")
+                }
+                try? FileManager.default.removeItem(at: loadErrorURL)
+            }
+        }
+        guard loaded else { return false }
+        started = true
+        UsageCountingMiddleware.onRequest = { host in
+            Task { @MainActor in
+                UsageStatsStore.shared.record { $0.apiCalls[host, default: 0] += 1 }
+            }
+        }
+        LocationService.shared.city.applyDefaultSelectionOnLaunch()
+        UnitSync.shared.start()
+        startAppServicesIfReady()
+        return true
+    }
+
+    static func startAppServicesIfReady() {
+        guard started, didFinishLaunching, !servicesStarted else { return }
+        servicesStarted = true
+        UNUserNotificationCenter.current().delegate = NotificationSettingsManager.shared
+        RainRadarLiveActivityManager.shared.startMonitoring()
+    }
+}
+
 @main
 struct WeatherApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
@@ -92,78 +153,85 @@ struct WeatherApp: App {
         }
         #endif
 
-        if CrashReporting.isEnabled {
-            CrashReporting.start()
+        if AppLaunch.startIfReady() {
+            hydrateFromCache()
         }
-
-        UsageCountingMiddleware.onRequest = { host in
-            Task { @MainActor in
-                UsageStatsStore.shared.record { $0.apiCalls[host, default: 0] += 1 }
-            }
-        }
-
-        locationService.city.applyDefaultSelectionOnLaunch()
-        hydrateFromCache()
-        UnitSync.shared.start()
     }
     
     @State private var weather = Weather()
     @State private var location = Location()
-    private let locationService = LocationService.shared
-    private let persistenceController = PersistenceController.shared
-    private let notificationSettingsManager = NotificationSettingsManager.shared
+    @State private var isReady = false
     
     var body: some Scene {
         WindowGroup {
-            ZStack {
-                #if DEBUG
-                if ScreenshotMode.scene == .widgets {
-                    ScreenshotWidgetGallery()
-                } else {
-                    RootTabView()
-                    OnboardingGate()
-                }
-                #else
-                RootTabView()
-                OnboardingGate()
-                #endif
+            if isReady || AppLaunch.startIfReady() {
+                content
+            } else {
+                WeatherSimulationView(isOffTab: false)
+                    .ignoresSafeArea()
+                    .environment(weather)
+                    .environment(location)
+                    .preferredColorScheme(.dark)
+                    .task {
+                        while !AppLaunch.startIfReady() {
+                            guard (try? await Task.sleep(for: .seconds(1))) != nil else { return }
+                        }
+                        isReady = true
+                    }
             }
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
-                .environment(weather)
-                .environment(location)
-                .preferredColorScheme(.dark)
-                .task {
-                    #if DEBUG
-                    await ScreenshotMode.stageOnAppear()
-                    #endif
-                    hydrateFromCache()
-                    await weather.refresh(location: location)
-                    await notificationSettingsManager.configureOnLaunch()
-                    await WidgetBasemapRenderer.refreshIfNeeded()
-                }
-                .task {
-                    await TestFlightMembership.stampIfNeeded()
-                }
-                .task {
-                    await SupporterStore.shared.start()
-                }
-                .onChange(of: scenePhase) { _, phase in
-                    #if DEBUG
-                    ScreenshotMode.scenePhaseDidChange(phase)
-                    #endif
-                    if phase == .background { UsageStatsStore.shared.sceneDidEnterBackground() }
-                    guard phase == .active else { return }
-                    UsageStatsStore.shared.sceneDidActivate()
-                    Task { await notificationSettingsManager.handleForeground() }
-                }
-                .sentryTrace("RootTabView")
         }
         .commands { OscarCommands() }
+    }
+
+    private var content: some View {
+        ZStack {
+            #if DEBUG
+            if ScreenshotMode.scene == .widgets {
+                ScreenshotWidgetGallery()
+            } else {
+                RootTabView()
+                OnboardingGate()
+            }
+            #else
+            RootTabView()
+            OnboardingGate()
+            #endif
+        }
+            .environment(weather)
+            .environment(location)
+            .preferredColorScheme(.dark)
+            .task {
+                if scenePhase == .active { UsageStatsStore.shared.sceneDidActivate() }
+                #if DEBUG
+                await ScreenshotMode.stageOnAppear()
+                #endif
+                hydrateFromCache()
+                await weather.refresh(location: location)
+                await NotificationSettingsManager.shared.configureOnLaunch()
+                await WidgetBasemapRenderer.refreshIfNeeded()
+            }
+            .task {
+                await TestFlightMembership.stampIfNeeded()
+            }
+            .task {
+                await SupporterStore.shared.start()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                #if DEBUG
+                ScreenshotMode.scenePhaseDidChange(phase)
+                #endif
+                if phase == .background { UsageStatsStore.shared.sceneDidEnterBackground() }
+                guard phase == .active else { return }
+                UsageStatsStore.shared.sceneDidActivate()
+                Task { await NotificationSettingsManager.shared.handleForeground() }
+            }
+            .sentryTrace("RootTabView")
     }
 
     private func hydrateFromCache() {
         guard !ScreenshotMode.active, weather.lastUpdated == nil else { return }
         guard let snapshot = WeatherSnapshotStore.load() else { return }
+        let locationService = LocationService.shared
         locationService.update()
         if let current = locationService.knownCoordinates(),
            !WeatherSnapshotStore.coordinatesMatch(snapshot: snapshot.coordinates, current: current) {

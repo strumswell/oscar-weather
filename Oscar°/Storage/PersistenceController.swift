@@ -15,32 +15,69 @@ struct PersistenceController {
         category: "Storage"
     )
     
+    nonisolated(unsafe) static var loadErrorNote: String?
+    private static let lock = NSLock()
+
     let container: NSPersistentContainer
+    let url: URL
 
-    init(inMemory: Bool = false) {
+    init() {
         let container = NSPersistentContainer(name: "DataModels")
-        let url = inMemory
-            ? URL(fileURLWithPath: "/dev/null")
-            : URL.storeURL(for: AppGroup.identifier, dbName: "DataModels")
+        let url = URL.storeURL(for: AppGroup.identifier, dbName: "DataModels")
         container.persistentStoreDescriptions = [NSPersistentStoreDescription(url: url)]
-
-        container.loadPersistentStores { _, error in
-            guard let error = error as NSError? else { return }
-            Self.logger.fault(
-                "Persistent store load failed: \(error.localizedDescription, privacy: .public)"
-            )
-            guard !inMemory, Self.isAppProcess, Self.isUnrecoverable(error) else {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
-            }
-            Self.moveAside(storeAt: url)
-            container.loadPersistentStores { _, retryError in
-                if let retryError = retryError as NSError? {
-                    fatalError("Unresolved error \(retryError), \(retryError.userInfo)")
-                }
-            }
-        }
         container.viewContext.automaticallyMergesChangesFromParent = true
         self.container = container
+        self.url = url
+        load()
+    }
+
+    var isLoaded: Bool {
+        !container.persistentStoreCoordinator.persistentStores.isEmpty
+    }
+
+    var isFileReadable: Bool {
+        guard let handle = try? FileHandle(forReadingFrom: url) else { return false }
+        defer { try? handle.close() }
+        return (try? handle.read(upToCount: 1))?.count == 1
+    }
+
+    @discardableResult
+    func load() -> Bool {
+        Self.lock.lock()
+        defer { Self.lock.unlock() }
+        if isLoaded { return true }
+        var error = loadStore()
+        if let first = error, first.code == NSPersistentStoreIncompatibleVersionHashError, canMoveAside(first) {
+            Thread.sleep(forTimeInterval: 1)
+            error = loadStore()
+        }
+        if let failed = error, canMoveAside(failed) {
+            Self.moveAside(storeAt: url)
+            error = loadStore()
+        }
+        guard let error else { return true }
+        let sqlite = error.userInfo[NSSQLiteErrorDomain].map { "\($0)" } ?? "-"
+        let note = "\(error.domain) \(error.code) sqlite \(sqlite)\n\(error.userInfo)"
+        Self.logger.fault("Persistent store load failed: \(note, privacy: .public)")
+        guard Self.isAppProcess else {
+            fatalError("Unresolved error \(error), \(error.userInfo)")
+        }
+        if Self.loadErrorNote == nil {
+            Self.loadErrorNote = note
+        }
+        return false
+    }
+
+    private func loadStore() -> NSError? {
+        var loadError: NSError?
+        container.loadPersistentStores { _, error in
+            loadError = error as NSError?
+        }
+        return loadError
+    }
+
+    private func canMoveAside(_ error: NSError) -> Bool {
+        Self.isAppProcess && Self.isUnrecoverable(error) && isFileReadable
     }
 
     private static var isAppProcess: Bool {
