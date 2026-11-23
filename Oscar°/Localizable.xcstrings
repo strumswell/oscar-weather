@@ -1,6 +1,50 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "%@ Millimeter pro Stunde" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Millimeter pro Stunde"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ millimeters per hour"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saatte %@ milimetre"
+          }
+        }
+      }
+    },
+    "%@ Zoll pro Stunde" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Zoll pro Stunde"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ inches per hour"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saatte %@ inç"
+          }
+        }
+      }
+    },
     "%@: %@, %@. Heute %@ bis %@." : {
       "localizations" : {
         "de" : {
@@ -85,6 +129,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saat %@ itibarıyla yağmur başlıyor."
+          }
+        }
+      }
+    },
+    "Ab %@ voraussichtlich Schnee." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ab %@ voraussichtlich Schnee."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snow likely from %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saat %@ itibarıyla muhtemelen kar."
+          }
+        }
+      }
+    },
+    "Ab %@ voraussichtlich Schneeregen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ab %@ voraussichtlich Schneeregen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wintry mix likely from %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saat %@ itibarıyla muhtemelen karla karışık yağmur."
+          }
+        }
+      }
+    },
+    "Ab %@ voraussichtlich Regen." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ab %@ voraussichtlich Regen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain likely from %@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saat %@ itibarıyla muhtemelen yağmur."
           }
         }
       }
@@ -215,6 +325,28 @@
         }
       }
     },
+    "Feuchttemperatur am Boden" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feuchttemperatur am Boden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wet-bulb temperature at the ground"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yerde yaş termometre sıcaklığı"
+          }
+        }
+      }
+    },
     "Für %@ gibt es gerade keine Wetterdaten." : {
       "localizations" : {
         "de" : {
@@ -259,6 +391,28 @@
         }
       }
     },
+    "Geländehöhe" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geländehöhe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elevation"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arazi yüksekliği"
+          }
+        }
+      }
+    },
     "H: %@" : {
       "comment" : "Höchste Temperatur",
       "localizations" : {
@@ -282,6 +436,28 @@
         }
       }
     },
+    "Intensität" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intensität"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intensity"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yoğunluk"
+          }
+        }
+      }
+    },
     "Kein Regen in Sicht." : {
       "localizations" : {
         "de" : {
@@ -300,6 +476,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ufukta yağmur yok."
+          }
+        }
+      }
+    },
+    "Schneefall und Schneeregen auf dem Radar" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schneefall und Schneeregen auf dem Radar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snow and wintry mix on the radar"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Radarda kar ve karla karışık yağmur"
+          }
+        }
+      }
+    },
+    "Zeigt, wie kalt die Luft wird, wenn Niederschlag in ihr verdunstet, und damit, ob Schnee bis zum Boden kommt." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigt, wie kalt die Luft wird, wenn Niederschlag in ihr verdunstet, und damit, ob Schnee bis zum Boden kommt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows how cold the air gets when precipitation evaporates in it, and so whether snow makes it to the ground."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yağış havada buharlaştığında havanın ne kadar soğuduğunu ve böylece karın yere kadar ulaşıp ulaşmadığını gösterir."
           }
         }
       }

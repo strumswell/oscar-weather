@@ -88,12 +88,9 @@ struct StormCellInfoSheet: View {
     }
 
     private var intensity: (label: LocalizedStringKey, color: Color) {
-        switch cell.peakMmh {
-        case ..<2: ("Leichter Schauer", Color(hex: 0x00CACA))
-        case ..<10: ("Mäßiger Schauer", Color(hex: 0xFFFF00))
-        case ..<50: ("Starker Schauer", Color(hex: 0xFF0000))
-        default: ("Extremer Schauer", Color(hex: 0xFE33FF))
-        }
+        let step = ServerColormapStops.stormCellStep(cell.peakMmh)
+        let labels: [LocalizedStringKey] = ["Leichter Schauer", "Mäßiger Schauer", "Starker Schauer", "Extremer Schauer"]
+        return (labels[step], Color(hex: ServerColormapStops.stormCellSteps[step].hex))
     }
 
     private var movement: String {

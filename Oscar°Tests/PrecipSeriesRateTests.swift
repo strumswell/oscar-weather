@@ -60,4 +60,22 @@ struct PrecipSeriesRateTests {
         #expect(series([(0, 0.7)], around: Date()).currentRate == 0.7)
         #expect(series([(-60, 0.7)], around: Date()).currentRate == nil)
     }
+
+    @Test
+    func nextKindChangeSkipsDrySamples() {
+        let points: [(minutes: Double, rain: Double, kind: String)] = [
+            (0, 0.6, "sleet"), (5, 0.4, "sleet"), (10, 0, "snow"), (15, 0.8, "snow"), (20, 1, "rain"),
+        ]
+        let response = PrecipSeriesResponse(
+            source: "test", unit: "mm/h", latitude: 51.34, longitude: 12.37,
+            series: points.map {
+                PrecipPoint(timestamp: now.addingTimeInterval($0.minutes * 60), precipitation: $0.rain,
+                            isForecast: $0.minutes > 0, kind: $0.kind)
+            },
+            generatedAt: nil, lastObservedAt: nil, forecastHorizon: nil)
+        let change = response.nextKindChange(after: now)
+        #expect(change?.kind == "snow")
+        #expect(change?.timestamp == now.addingTimeInterval(15 * 60))
+        #expect(series([(0, 1)], around: now).nextKindChange(after: now) == nil)
+    }
 }

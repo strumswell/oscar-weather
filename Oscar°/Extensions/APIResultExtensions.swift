@@ -51,6 +51,14 @@ extension PrecipSeriesResponse {
     /// "rain" | "sleet" | "snow" at the nearest sample, when the server sent it.
     func kind(at date: Date) -> String? { nearest(to: date)?.kind }
 
+    func nextKindChange(after date: Date) -> PrecipPoint? {
+        guard let current = kind(at: date) else { return nil }
+        return series
+            .filter { $0.timestamp > date && $0.precipitation > 0 && $0.kind != nil }
+            .sorted { $0.timestamp < $1.timestamp }
+            .first { $0.kind != current }
+    }
+
     var currentPrecipitation: Double {
         currentRate ?? 0
     }

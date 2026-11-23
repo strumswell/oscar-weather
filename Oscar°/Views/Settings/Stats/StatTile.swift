@@ -9,7 +9,10 @@ struct StatTile: View {
             Text(title)
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.secondary)
-            value
+            ZStack(alignment: .leading) {
+                Text(verbatim: "0").hidden()
+                value
+            }
                 .font(.title.weight(.bold))
                 .fontDesign(.rounded)
                 .monospacedDigit()

@@ -6,6 +6,7 @@
 //  playback and scrubbing.
 //
 
+import CoreLocation
 import Foundation
 import Observation
 import UIKit
@@ -33,6 +34,14 @@ struct RadarSnowOverlay {
     let terrainScale: Double
 }
 
+struct PrecipTap: Identifiable {
+    let id = UUID()
+    let coordinate: CLLocationCoordinate2D
+    let date: Date
+    var wetBulb: Double?
+    var groundHeight: Double?
+}
+
 @MainActor
 @Observable
 final class OscarRadarState {
@@ -42,11 +51,7 @@ final class OscarRadarState {
     @ObservationIgnored var snowWanted = false {
         didSet { if snowWanted != oldValue { refreshSnow() } }
     }
-    /// Whether the last frames response carried snow data; drives the toggle's visibility.
-    private(set) var snowAvailable = false
-    @ObservationIgnored private var snowInfo: Components.Schemas.RadarSnow? {
-        didSet { if snowAvailable != (snowInfo != nil) { snowAvailable = snowInfo != nil } }
-    }
+    @ObservationIgnored private var snowInfo: Components.Schemas.RadarSnow?
     @ObservationIgnored private var snowTask: Task<Void, Never>?
     @ObservationIgnored private var snowTerrainTask: Task<Void, Never>?
     /// Hourly fields + coarse relief load while the toggle is on; the terrain only once snow is possible in view.
@@ -511,6 +516,59 @@ final class OscarRadarState {
     func setSnowView(_ view: OscarRadarBounds?) {
         snowView = view
         evaluateSnow()
+    }
+
+    func precipTap(at coordinate: CLLocationCoordinate2D) async -> PrecipTap? {
+        guard let frame = currentFrame, let bounds, let date = parseFrameDate(frame.timestamp),
+              let point = Self.unitPoint(coordinate, in: bounds) else { return nil }
+        let grid = frame.gridPayload
+        guard grid.indices.count == grid.width * grid.height else { return nil }
+        let column = min(grid.width - 1, Int(point.x * Double(grid.width)))
+        let row = min(grid.height - 1, Int(point.y * Double(grid.height)))
+        let index = Int(grid.indices[row * grid.width + column])
+        guard index > 0 else { return nil }
+        let palette = await ServerPalettes.resolve(id: RadarPlasma.colormapId)
+        let alpha = palette.flatMap { $0.indices.contains(index) ? $0[index].a : nil } ?? 255
+        guard alpha > 0 else { return nil }
+
+        var tap = PrecipTap(coordinate: coordinate, date: date)
+        guard let snow, !snow.steps.isEmpty,
+              let terrain = await RadarFrameDecodeLane.shared.decodeRawGrid(snow.terrainData),
+              terrain.indices.count == terrain.width * terrain.height else { return tap }
+        let after = snow.steps.firstIndex { $0.date > date } ?? snow.steps.count - 1
+        let stepA = snow.steps[max(0, after - 1)], stepB = snow.steps[after]
+        guard [stepA, stepB].allSatisfy({ $0.payload.indices.count == $0.payload.width * $0.payload.height })
+        else { return tap }
+        let span = stepB.date.timeIntervalSince(stepA.date)
+        let blend = span > 0 ? min(1, max(0, date.timeIntervalSince(stepA.date) / span)) : 0
+        let fieldByte = Self.bilinear(stepA.payload, at: point) * (1 - blend)
+            + Self.bilinear(stepB.payload, at: point) * blend
+        let height = Self.bilinear(terrain, at: point) * snow.terrainScale
+        tap.groundHeight = height
+        tap.wetBulb = fieldByte * snow.fieldScale + snow.fieldOffset - snow.lapsePerMeter * height
+        return tap
+    }
+
+    private nonisolated static func unitPoint(_ coordinate: CLLocationCoordinate2D,
+                                              in bounds: OscarRadarBounds) -> (x: Double, y: Double)? {
+        let top = WebMercator.unitY(latitude: bounds.north)
+        let x = (coordinate.longitude - bounds.west) / (bounds.east - bounds.west)
+        let y = (WebMercator.unitY(latitude: coordinate.latitude) - top)
+            / (WebMercator.unitY(latitude: bounds.south) - top)
+        guard (0..<1).contains(x), (0..<1).contains(y) else { return nil }
+        return (x, y)
+    }
+
+    private nonisolated static func bilinear(_ grid: RadarGridPayload, at point: (x: Double, y: Double)) -> Double {
+        let fx = min(max(point.x * Double(grid.width) - 0.5, 0), Double(grid.width - 1))
+        let fy = min(max(point.y * Double(grid.height) - 0.5, 0), Double(grid.height - 1))
+        let x0 = Int(fx), y0 = Int(fy)
+        let x1 = min(x0 + 1, grid.width - 1), y1 = min(y0 + 1, grid.height - 1)
+        let tx = fx - Double(x0), ty = fy - Double(y0)
+        func value(_ x: Int, _ y: Int) -> Double { Double(grid.indices[y * grid.width + x]) }
+        let top = value(x0, y0) * (1 - tx) + value(x1, y0) * tx
+        let bottom = value(x0, y1) * (1 - tx) + value(x1, y1) * tx
+        return top * (1 - ty) + bottom * ty
     }
 
     private func evaluateSnow() {

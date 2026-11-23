@@ -50,6 +50,7 @@
 		18A686917B2A850FE184591B /* CatNeeds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66DCA011A92E9A4DD937B784 /* CatNeeds.swift */; };
 		19FC7A4E079FE61E119881FC /* Color-Custom.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91533016F01F5E16D887773 /* Color-Custom.swift */; };
 		1A9549C284CE56F4073EA801 /* ScreenshotFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8E13CE76082B4E17FA53BE /* ScreenshotFixtures.swift */; };
+		1C7BFCE15B3EAC71147E0772 /* PrecipInfoSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581BB0D8CD3A20A709195164 /* PrecipInfoSheet.swift */; };
 		1C7CB7C571034CB8B433A801 /* HourlyPlaceholderCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 734BBABC1E39450CA3239943 /* HourlyPlaceholderCard.swift */; };
 		1C9D14C7FB95F2A1A742C863 /* MemberCardEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BC2AE7808401B9482F622D /* MemberCardEditor.swift */; };
 		1DB2E5F4430BD9756BDD2DDB /* WebcamSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6FB747B80DB45D5A8F22D1F /* WebcamSheet.swift */; };
@@ -959,6 +960,7 @@
 		5207E06B93297531B3BDDEDE /* WindParticleSimulationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WindParticleSimulationTests.swift; sourceTree = "<group>"; };
 		545EB514E2377954FDBC1029 /* SunView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SunView.swift; sourceTree = "<group>"; };
 		5773194CAF5D2B7FFB5B4726 /* AtmosphereDebugPanel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AtmosphereDebugPanel.swift; sourceTree = "<group>"; };
+		581BB0D8CD3A20A709195164 /* PrecipInfoSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrecipInfoSheet.swift; sourceTree = "<group>"; };
 		5922E2B87A81241A6D0932F3 /* RadarSnapshotSmoothing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RadarSnapshotSmoothing.swift; sourceTree = "<group>"; };
 		5A7C00292FAB000000000001 /* WatchRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchRootView.swift; sourceTree = "<group>"; };
 		5A7C002B2FAB000000000001 /* WatchSimulationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSimulationView.swift; sourceTree = "<group>"; };
@@ -1931,6 +1933,7 @@
 			children = (
 				B43EA5EFCFFE6B22B08E7C1F /* StormCellInfoSheet.swift */,
 				8BEEDB94D05BA9FC794640C2 /* AlertInfoSheet.swift */,
+				581BB0D8CD3A20A709195164 /* PrecipInfoSheet.swift */,
 			);
 			path = Sheets;
 			sourceTree = "<group>";
@@ -3211,6 +3214,7 @@
 				73DC4C38755CA4E28C137B27 /* WindParticleLayer.swift in Sources */,
 				E43B025617825C4C934C45C9 /* WindParticleShaders.metal in Sources */,
 				36F78B7C472B373670BA5E7E /* WindFieldLoader.swift in Sources */,
+				1C7BFCE15B3EAC71147E0772 /* PrecipInfoSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

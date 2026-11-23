@@ -194,6 +194,10 @@ struct MapLayerPickerSheet: View {
                                subtitle: "Zugbahnen kräftiger Schauer",
                                isOn: $settingsService.showStormCells)
                 Divider().padding(.leading, 16)
+                LayerToggleRow(title: "Schnee",
+                               subtitle: "Schneefall und Schneeregen auf dem Radar",
+                               isOn: $settingsService.radarSnowOverlay)
+                Divider().padding(.leading, 16)
                 LayerToggleRow(title: "Isobaren",
                                subtitle: isobarsAvailable
                                    ? "Luftdrucklinien mit Hoch- und Tiefzentren"

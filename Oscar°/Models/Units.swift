@@ -219,6 +219,8 @@ enum DistanceUnit: String, CaseIterable, Identifiable {
     private static let miles = localizedSymbol(UnitLength.miles)
     private static let squareKilometers = localizedSymbol(UnitArea.squareKilometers)
     private static let squareMiles = localizedSymbol(UnitArea.squareMiles)
+    fileprivate static let meters = localizedSymbol(UnitLength.meters)
+    fileprivate static let feet = localizedSymbol(UnitLength.feet)
 }
 
 struct Units: Equatable {
@@ -266,6 +268,11 @@ struct Units: Equatable {
         return "\(precipitationNumber(millimeters)) \(precipitation.symbol)"
     }
 
+    func precipitationString(_ millimeters: Double?, weatherCode: Double?) -> String {
+        let trace = millimeters == 0 && (weatherCode ?? 0) >= 51
+        return precipitationString(trace ? 0.01 : millimeters)
+    }
+
     func rateString(_ millimetersPerHour: Double?) -> String {
         guard let millimetersPerHour else { return "–" }
         return "\(precipitationNumber(millimetersPerHour)) \(precipitation.rateSymbol)"
@@ -283,6 +290,13 @@ struct Units: Equatable {
     func distanceString(_ kilometers: Double?) -> String {
         guard let kilometers else { return "–" }
         return "\(number(distance.value(fromKilometers: kilometers), digits: 1)) \(distance.symbol)"
+    }
+
+    func heightString(_ meters: Double?) -> String {
+        guard let meters else { return "–" }
+        return distance == .mi
+            ? "\(number(meters / 0.3048, digits: 0)) \(DistanceUnit.feet)"
+            : "\(number(meters, digits: 0)) \(DistanceUnit.meters)"
     }
 
     func areaString(_ squareKilometers: Double?) -> String {

@@ -54,6 +54,8 @@ struct WeatherMapView: UIViewRepresentable {
     var onAlertsTapped: (([WeatherAlertInfo]) -> Void)? = nil
     var onCellTapped: ((StormCellInfo) -> Void)? = nil
     var onWebcamTapped: ((Components.Schemas.Webcam) -> Void)? = nil
+    var onPrecipTapped: ((PrecipTap) -> Void)? = nil
+    var precipRing: CLLocationCoordinate2D? = nil
     var layerOverride: MapLayerOverride? = nil
     var startZoom: Double? = nil
 
@@ -85,6 +87,9 @@ struct WeatherMapView: UIViewRepresentable {
     static let cellArrowImageName = "oscar-cell-arrow"
     static let webcamSourceID = "oscar-webcams"
     static let webcamLayerID = "oscar-webcams-layer"
+    static let precipRingSourceID = "oscar-precip-ring"
+    static let precipRingHaloLayerID = "oscar-precip-ring-halo"
+    static let precipRingLayerID = "oscar-precip-ring-layer"
 
     private static var initialZoom: Double {
         let override = UserDefaults.standard.double(forKey: "mapInitialZoom")
@@ -114,7 +119,7 @@ struct WeatherMapView: UIViewRepresentable {
         mapView.attributionButton.isHidden = true
         mapView.compassView.compassVisibility = .adaptive
         mapView.compassViewPosition = .topRight
-        mapView.compassViewMargins = Self.compassMargins(radarControls: false, snowButton: false)
+        mapView.compassViewMargins = Self.compassMargins(radarControls: false)
 
         let tap = UITapGestureRecognizer(
             target: context.coordinator, action: #selector(Coordinator.handleMapTap(_:)))
@@ -130,11 +135,8 @@ struct WeatherMapView: UIViewRepresentable {
         return mapView
     }
 
-    static func compassMargins(radarControls: Bool, snowButton: Bool) -> CGPoint {
-        var y = 168.0
-        if radarControls { y += 105 }
-        if radarControls && snowButton { y += 47 }
-        return CGPoint(x: 19, y: y)
+    static func compassMargins(radarControls: Bool) -> CGPoint {
+        CGPoint(x: 19, y: radarControls ? 273 : 179)
     }
 
     @MainActor static var locationAuthorized: Bool {
@@ -212,6 +214,8 @@ struct WeatherMapView: UIViewRepresentable {
         var webcamBox: WebcamBox?
         var webcamsFetchedAt: Date?
         var isLoadingWebcams = false
+
+        var precipRingCoordinate: CLLocationCoordinate2D?
 
         var isobarShapes: [String: MLNShape] = [:]
         var isobarFetchesInFlight: Set<String> = []
@@ -458,8 +462,7 @@ struct WeatherMapView: UIViewRepresentable {
             blocked(nil)
 
             let compassMargins = WeatherMapView.compassMargins(
-                radarControls: radarActive && continuation != nil,
-                snowButton: radarState?.snowAvailable ?? false)
+                radarControls: radarActive && continuation != nil)
             if let mapView, mapView.compassViewMargins != compassMargins {
                 mapView.compassViewMargins = compassMargins
             }
@@ -493,6 +496,7 @@ struct WeatherMapView: UIViewRepresentable {
                            region: radarRegion)
             syncWindParticles(style: style, selection: activeTileLayer, state: modelState)
             syncWebcams(style: style, active: webcamsOn && parent.onWebcamTapped != nil)
+            syncPrecipRing(style: style)
             syncUserLocationDot(style: style, raiseLayers: false)
             syncCityChips(style: style)
             syncSelectedCityMarker(style: style)

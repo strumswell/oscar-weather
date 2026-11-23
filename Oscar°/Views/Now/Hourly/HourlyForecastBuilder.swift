@@ -75,7 +75,7 @@ enum HourlyForecastBuilder {
       let forecastItem = HourlyForecastItem(
         timestamp: timestamp,
         hour: HourlyFormatting.hourString(timestamp: timestamp, timeZone: timeZone),
-        precipitation: units.precipitationString(hourly.precipitation?[index] ?? 0),
+        precipitation: units.precipitationString(hourly.precipitation?[index] ?? 0, weatherCode: hourly.weathercode?[index]),
         iconName: HourlyFormatting.weatherIconName(
           weatherCode: hourly.weathercode?[index] ?? 0,
           isDay: hourly.is_day?[index] ?? 0

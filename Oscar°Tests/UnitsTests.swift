@@ -70,6 +70,16 @@ struct UnitsTests {
     }
 
     @Test
+    func wetCodeAtZeroReadsAsTrace() {
+        var units = Units.metric
+        #expect(units.precipitationString(0, weatherCode: 61).hasPrefix("<"))
+        #expect(!units.precipitationString(0, weatherCode: 3).hasPrefix("<"))
+        #expect(!units.precipitationString(0.4, weatherCode: 61).hasPrefix("<"))
+        units.precipitation = .inch
+        #expect(units.precipitationString(0, weatherCode: 51).hasPrefix("<"))
+    }
+
+    @Test
     func symbolsAreNeverEmpty() {
         #expect(WindSpeedUnit.allCases.allSatisfy { !$0.symbol.isEmpty })
         #expect(PrecipitationUnit.allCases.allSatisfy { !$0.symbol.isEmpty && !$0.snowSymbol.isEmpty })

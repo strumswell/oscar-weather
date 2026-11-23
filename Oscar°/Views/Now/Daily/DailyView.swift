@@ -11,7 +11,6 @@ struct DailyView: View {
   @State private var expandedDay: Int? = 0
 
   @ScaledMetric private var weekdayColumnWidth: CGFloat = 45
-  @ScaledMetric private var precipitationColumnWidth: CGFloat = 50
   @ScaledMetric private var temperatureColumnWidth: CGFloat = 37
   @ScaledMetric private var dayIconSize: CGFloat = 30
 
@@ -101,10 +100,17 @@ extension DailyView {
         .resizable()
         .scaledToFit()
         .frame(width: dayIconSize, height: dayIconSize)
-      Text(units.precipitationString(weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0))
-        .font(.caption)
-        .foregroundStyle(Color(uiColor: .label))
-        .frame(width: precipitationColumnWidth)
+      ZStack(alignment: .trailing) {
+        Text(units.precipitationString(88.8)).hidden()
+        Text(units.precipitationString(
+          weather.forecast.daily?.precipitation_sum?[dayPos] ?? 0,
+          weatherCode: weather.forecast.daily?.weathercode?[dayPos]
+        ))
+      }
+      .font(.caption.monospacedDigit())
+      .lineLimit(1)
+      .fixedSize()
+      .foregroundStyle(Color(uiColor: .label))
       Text(units.temperatureString(rowTemperatures.labelLow))
         .frame(width: temperatureColumnWidth, alignment: .trailing)
       TemperatureRangeView(

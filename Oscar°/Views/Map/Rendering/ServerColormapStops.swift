@@ -35,4 +35,8 @@ enum ServerColormapStops {
         (0xFF0000, "Stark"),
         (0xFE33FF, "Extrem"),
     ]
+
+    static func stormCellStep(_ millimetersPerHour: Double) -> Int {
+        [2.0, 10, 50].firstIndex { millimetersPerHour < $0 } ?? 3
+    }
 }

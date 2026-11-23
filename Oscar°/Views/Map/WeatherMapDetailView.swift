@@ -25,6 +25,7 @@ struct WeatherMapDetailView: View {
     @State private var tappedAlerts: TappedAlerts?
     @State private var tappedCell: StormCellInfo?
     @State private var tappedWebcam: Components.Schemas.Webcam?
+    @State private var tappedPrecip: PrecipTap?
     @Namespace private var controlsNamespace
 
     private var timeline: CombinedTimelineState { layers.timeline }
@@ -56,7 +57,12 @@ struct WeatherMapDetailView: View {
                 },
                 onWebcamTapped: { webcam in
                     tappedWebcam = webcam
-                }
+                },
+                onPrecipTapped: { tap in
+                    guard tappedAlerts == nil, tappedCell == nil, tappedWebcam == nil else { return }
+                    tappedPrecip = tap
+                },
+                precipRing: tappedPrecip?.coordinate
             )
             .ignoresSafeArea()
 
@@ -187,6 +193,13 @@ struct WeatherMapDetailView: View {
             .presentationBackgroundInteraction(.enabled(upThrough: .medium))
             .presentationDragIndicator(.hidden)
         }
+        .sheet(item: $tappedPrecip) { tap in
+            PrecipInfoSheet(tap: tap)
+                .id(tap.id)
+                .presentationDetents([.medium])
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                .presentationDragIndicator(.hidden)
+        }
         .sheet(item: $tappedWebcam) { webcam in
             WebcamSheet(webcam: webcam)
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
@@ -204,18 +217,15 @@ struct WeatherMapDetailView: View {
             VStack(spacing: 12) {
                 mainControls
                     .glassEffectID("main", in: controlsNamespace)
-                if settingsService.oscarRadarLayer {
-                    radarControls
-                        .glassEffectID("radar", in: controlsNamespace)
-                }
+                overlayControls
+                    .glassEffectID("radar", in: controlsNamespace)
             }
         }
         .animation(.smooth(duration: 0.35), value: settingsService.oscarRadarLayer)
     }
 
     private var mainControls: some View {
-        @Bindable var settings = settingsService
-        return VStack(spacing: 0) {
+        VStack(spacing: 0) {
             Button(action: presentLayerPicker) {
                 Image(systemName: "map.fill")
                     .font(.title3.weight(.semibold))
@@ -235,48 +245,39 @@ struct WeatherMapDetailView: View {
                     .contentShape(.rect)
             }
             .accessibilityLabel(Text("Auf meinen Standort zentrieren"))
-            Divider()
-                .frame(width: 26)
-            Toggle(isOn: $settings.mapWebcams) {
-                Image(systemName: "web.camera")
-                    .font(.system(size: 17, weight: .semibold))
-                    .modifier(SlashedWhenOff(isOn: settingsService.mapWebcams))
-            }
-            .toggleStyle(MapControlToggleStyle())
-            .accessibilityLabel(Text("Webcams"))
         }
         .buttonStyle(.plain)
         .glassEffect(.regular, in: Capsule())
     }
 
-    private var radarControls: some View {
+    private var overlayControls: some View {
         @Bindable var settings = settingsService
         let model = settingsService.oscarRadarRegion.continuationLayer
         return VStack(spacing: 0) {
-            Toggle(isOn: $settings.radarMotionArrows) {
-                Image(systemName: "arrow.up.right")
+            Toggle(isOn: $settings.mapWebcams) {
+                Image(systemName: "web.camera")
                     .font(.system(size: 17, weight: .semibold))
-                    .modifier(SlashedWhenOff(isOn: settingsService.radarMotionArrows))
+                    .modifier(SlashedWhenOff(isOn: settingsService.mapWebcams))
             }
-            .accessibilityLabel(Text("Bewegungspfeile"))
-            if radarState.snowAvailable {
+            .accessibilityLabel(Text("Webcams"))
+            if settingsService.oscarRadarLayer {
                 Divider()
                     .frame(width: 26)
-                Toggle(isOn: $settings.radarSnowOverlay) {
-                    Image(systemName: "snowflake")
+                Toggle(isOn: $settings.radarMotionArrows) {
+                    Image(systemName: "arrow.up.right")
                         .font(.system(size: 17, weight: .semibold))
-                        .modifier(SlashedWhenOff(isOn: settingsService.radarSnowOverlay))
+                        .modifier(SlashedWhenOff(isOn: settingsService.radarMotionArrows))
                 }
-                .accessibilityLabel(Text("Schnee"))
+                .accessibilityLabel(Text("Bewegungspfeile"))
+                Divider()
+                    .frame(width: 26)
+                Toggle(isOn: $settings.radarModelContinuation) {
+                    Text("+\(model.horizonHours)h")
+                        .font(.system(size: 13, weight: .semibold).monospacedDigit())
+                        .modifier(SlashedWhenOff(isOn: settingsService.radarModelContinuation))
+                }
+                .accessibilityLabel(Text("Mit \(model.shortSourceLabel) fortsetzen"))
             }
-            Divider()
-                .frame(width: 26)
-            Toggle(isOn: $settings.radarModelContinuation) {
-                Text("+\(model.horizonHours)h")
-                    .font(.system(size: 13, weight: .semibold).monospacedDigit())
-                    .modifier(SlashedWhenOff(isOn: settingsService.radarModelContinuation))
-            }
-            .accessibilityLabel(Text("Mit \(model.shortSourceLabel) fortsetzen"))
         }
         .toggleStyle(MapControlToggleStyle())
         .glassEffect(.regular, in: Capsule())

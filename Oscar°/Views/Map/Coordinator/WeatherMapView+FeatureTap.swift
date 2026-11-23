@@ -39,13 +39,15 @@ extension WeatherMapView.Coordinator {
             return
         }
 
-        guard parent.onAlertsTapped != nil else { return }
-        let warningFeatures = mapView.visibleFeatures(
+        let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
+        let warningFeatures = parent.onAlertsTapped == nil ? [] : mapView.visibleFeatures(
             at: point, styleLayerIdentifiers: WeatherMapView.alertFillLayerIDs)
-        guard !warningFeatures.isEmpty else { return }
+        guard !warningFeatures.isEmpty else {
+            precipTapped(at: coordinate)
+            return
+        }
         Haptics.impact()
 
-        let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
         var seen = Set<String>()
         var attributeAlerts: [WeatherAlertInfo] = []
         for feature in warningFeatures {
@@ -69,5 +71,51 @@ extension WeatherMapView.Coordinator {
             alerts = alerts.sortedForDisplay()
             onAlertsTapped(alerts)
         }
+    }
+
+    private func precipTapped(at coordinate: CLLocationCoordinate2D) {
+        let radarActive = parent.layerOverride?.radar ?? parent.settingsService.oscarRadarLayer
+        guard radarActive, parent.combinedTimeline?.isShowingModel != true,
+              let state = parent.oscarRadarState, parent.onPrecipTapped != nil else { return }
+        Task { @MainActor [weak self] in
+            guard let tap = await state.precipTap(at: coordinate),
+                  let onPrecipTapped = self?.parent.onPrecipTapped else { return }
+            Haptics.impact()
+            onPrecipTapped(tap)
+        }
+    }
+
+    func syncPrecipRing(style: MLNStyle) {
+        guard let coordinate = parent.precipRing else {
+            style.removeLayers(withIdentifiers: [WeatherMapView.precipRingLayerID, WeatherMapView.precipRingHaloLayerID])
+            style.removeSources(withIdentifiers: [WeatherMapView.precipRingSourceID])
+            precipRingCoordinate = nil
+            return
+        }
+        let point = MLNPointFeature()
+        point.coordinate = coordinate
+        if let source = style.source(withIdentifier: WeatherMapView.precipRingSourceID) as? MLNShapeSource {
+            if precipRingCoordinate?.latitude != coordinate.latitude
+                || precipRingCoordinate?.longitude != coordinate.longitude {
+                source.shape = point
+            }
+        } else {
+            let source = MLNShapeSource(identifier: WeatherMapView.precipRingSourceID, shape: point)
+            style.addSource(source)
+            let halo = MLNCircleStyleLayer(identifier: WeatherMapView.precipRingHaloLayerID, source: source)
+            halo.circleRadius = NSExpression(forConstantValue: 7.5)
+            halo.circleOpacity = NSExpression(forConstantValue: 0)
+            halo.circleStrokeWidth = NSExpression(forConstantValue: 3.5)
+            halo.circleStrokeColor = NSExpression(forConstantValue: UIColor(red: 0.04, green: 0.08, blue: 0.16, alpha: 1))
+            halo.circleStrokeOpacity = NSExpression(forConstantValue: 0.5)
+            insertOverlayLayer(halo, in: style)
+            let ring = MLNCircleStyleLayer(identifier: WeatherMapView.precipRingLayerID, source: source)
+            ring.circleRadius = NSExpression(forConstantValue: 7.5)
+            ring.circleOpacity = NSExpression(forConstantValue: 0)
+            ring.circleStrokeWidth = NSExpression(forConstantValue: 2.5)
+            ring.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+            style.insertLayer(ring, above: halo)
+        }
+        precipRingCoordinate = coordinate
     }
 }
